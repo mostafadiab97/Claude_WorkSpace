@@ -1,0 +1,62 @@
+{
+  "brand": {
+    "name": "ReqMan",
+    "logo": "logo.svg"
+  },
+  "typography": {
+    "fontFamily": "'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif",
+    "fontFamilyMono": "'Cascadia Mono', Consolas, monospace",
+    "fontSizeBase": "14px",
+    "fontSizeSmall": "12px",
+    "fontSizeLarge": "18px",
+    "fontSizeTitle": "24px",
+    "fontWeightNormal": "400",
+    "fontWeightStrong": "600"
+  },
+  "shape": {
+    "radiusSmall": "4px",
+    "radiusMedium": "8px",
+    "radiusLarge": "12px",
+    "buttonRadius": "6px",
+    "borderWidth": "1px"
+  },
+  "spacing": {
+    "xs": "4px",
+    "sm": "8px",
+    "md": "12px",
+    "lg": "20px",
+    "xl": "32px"
+  },
+  "modes": {
+    "light": {
+      "background": "#f6f7f9",
+      "surface": "#ffffff",
+      "surfaceAlt": "#eef0f4",
+      "text": "#1b1f27",
+      "textMuted": "#5d6676",
+      "border": "#d9dde5",
+      "primary": "#2f5bd3",
+      "primaryHover": "#2449b0",
+      "primaryText": "#ffffff",
+      "success": "#1f8a4c",
+      "warning": "#b26b00",
+      "danger": "#c23934",
+      "focus": "#7aa2ff"
+    },
+    "dark": {
+      "background": "#14171c",
+      "surface": "#1c2027",
+      "surfaceAlt": "#252a33",
+      "text": "#e7eaf0",
+      "textMuted": "#9aa3b2",
+      "border": "#323844",
+      "primary": "#6f93ff",
+      "primaryHover": "#8aa8ff",
+      "primaryText": "#0e1220",
+      "success": "#4cc57f",
+      "warning": "#f0a73a",
+      "danger": "#ff6b65",
+      "focus": "#9db8ff"
+    }
+  }
+}

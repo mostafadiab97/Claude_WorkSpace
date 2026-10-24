@@ -1,0 +1,27 @@
+# Packaging configuration (electron-builder).
+appId: com.reqman.app
+productName: ReqMan
+directories:
+  output: dist
+files:
+  - out/**
+  - package.json
+# User-editable configuration and assets are shipped as plain files next to the app,
+# so the theme (and later the default schema and export templates) can be changed without rebuilding.
+extraResources:
+  - from: config
+    to: config
+  - from: resources
+    to: resources
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+nsis:
+  # One-click, per-user install: no administrator rights needed.
+  oneClick: true
+  perMachine: false
+  artifactName: ReqMan-Setup-${version}.exe
+  shortcutName: ReqMan
+linux:
+  target: [dir]

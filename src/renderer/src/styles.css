@@ -1,0 +1,207 @@
+/*
+  ReqMan UI styles.
+  RULE (NFR-11): no literal colours, fonts or radii here — only var(--rm-...) tokens from config/theme.json.
+  A test (tests/theme-tokens.test.ts) fails the build if a hex/rgb colour appears in UI code.
+*/
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--rm-color-background);
+  color: var(--rm-color-text);
+  font-family: var(--rm-font-family);
+  font-size: var(--rm-font-size-base);
+  font-weight: var(--rm-font-weight-normal);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--rm-color-primary);
+}
+
+:focus-visible {
+  outline: 2px solid var(--rm-color-focus);
+  outline-offset: 2px;
+}
+
+.splash {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--rm-color-text-muted);
+}
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rm-space-md);
+  padding: var(--rm-space-sm) var(--rm-space-lg);
+  background: var(--rm-color-surface);
+  border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--rm-space-sm);
+}
+
+.brand__logo {
+  width: 28px;
+  height: 28px;
+}
+
+.brand__name {
+  font-size: var(--rm-font-size-large);
+  font-weight: var(--rm-font-weight-strong);
+}
+
+.content {
+  flex: 1;
+  overflow: auto;
+  padding: var(--rm-space-xl) var(--rm-space-lg);
+  display: grid;
+  gap: var(--rm-space-lg);
+  align-content: start;
+  max-width: 880px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.hero h1 {
+  font-size: var(--rm-font-size-title);
+  font-weight: var(--rm-font-weight-strong);
+  margin: 0 0 var(--rm-space-sm);
+}
+
+.muted {
+  color: var(--rm-color-text-muted);
+  margin: 0 0 var(--rm-space-lg);
+}
+
+.hint {
+  color: var(--rm-color-text-muted);
+  font-size: var(--rm-font-size-small);
+  margin: var(--rm-space-sm) 0 0;
+}
+
+.card {
+  background: var(--rm-color-surface);
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius-large);
+  padding: var(--rm-space-lg);
+}
+
+.card h2 {
+  font-size: var(--rm-font-size-base);
+  font-weight: var(--rm-font-weight-strong);
+  margin: 0 0 var(--rm-space-md);
+}
+
+.btn {
+  font: inherit;
+  border-radius: var(--rm-shape-button-radius);
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  padding: var(--rm-space-sm) var(--rm-space-lg);
+  background: var(--rm-color-surface-alt);
+  color: var(--rm-color-text);
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: var(--rm-color-primary);
+  border-color: var(--rm-color-primary);
+  color: var(--rm-color-primary-text);
+  font-weight: var(--rm-font-weight-strong);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--rm-color-primary-hover);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  background: var(--rm-color-surface-alt);
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius-medium);
+}
+
+.segmented__item {
+  font: inherit;
+  font-size: var(--rm-font-size-small);
+  border: 0;
+  border-radius: var(--rm-shape-radius-small);
+  padding: var(--rm-space-xs) var(--rm-space-md);
+  background: transparent;
+  color: var(--rm-color-text-muted);
+  cursor: pointer;
+}
+
+.segmented__item--active {
+  background: var(--rm-color-surface);
+  color: var(--rm-color-text);
+  font-weight: var(--rm-font-weight-strong);
+}
+
+.status-row {
+  display: grid;
+  grid-template-columns: 12px 80px 1fr;
+  align-items: baseline;
+  gap: var(--rm-space-sm);
+  padding: var(--rm-space-xs) 0;
+}
+
+.status-row__label {
+  color: var(--rm-color-text-muted);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--rm-color-text-muted);
+}
+
+.status-dot--ok {
+  background: var(--rm-color-success);
+}
+
+.status-dot--warn {
+  background: var(--rm-color-warning);
+}
+
+.status-dot--error {
+  background: var(--rm-color-danger);
+}
+
+.warnings {
+  margin: var(--rm-space-sm) 0 0;
+  padding-left: var(--rm-space-lg);
+  color: var(--rm-color-warning);
+  font-size: var(--rm-font-size-small);
+}

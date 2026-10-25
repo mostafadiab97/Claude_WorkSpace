@@ -3,6 +3,7 @@ import type { AppInfo, GitInfo, LoadedTheme } from '../../../shared/api'
 import { applyTheme, loadSavedMode, saveMode, type ThemeMode } from '../theme/applyTheme'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { StatusRow } from '../components/StatusRow'
+import { DiagnosticsCard } from '../components/DiagnosticsCard'
 
 export function App() {
   const [theme, setTheme] = useState<LoadedTheme | null>(null)
@@ -87,6 +88,8 @@ export function App() {
             </ul>
           )}
         </section>
+
+        <DiagnosticsCard appInfo={appInfo} />
       </main>
     </div>
   )

@@ -1,19 +1,24 @@
 // Core (main) process entry: creates the window, wires services, registers the UI API.
 import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'node:path'
-import { createServices } from './composition'
+import { createServices, type Paths } from './composition'
 import { registerIpc } from './ipc'
 
 app.setName('ReqMan')
 
-function resolvePaths(): { configDir: string; resourceDir: string } {
+function resolvePaths(): Paths {
   // Installed app: config/ and resources/ are copied next to the app (electron-builder extraResources),
   // so the theme can be edited without rebuilding. During development they are read from the repo.
   const base = app.isPackaged ? process.resourcesPath : app.getAppPath()
-  return { configDir: join(base, 'config'), resourceDir: join(base, 'resources') }
+  return {
+    configDir: join(base, 'config'),
+    resourceDir: join(base, 'resources'),
+    // Windows: %APPDATA%\ReqMan\logs
+    logDir: app.getPath('logs')
+  }
 }
 
-function createWindow(): void {
+function createWindow(services: ReturnType<typeof createServices>): void {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -37,6 +42,13 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
+  win.webContents.on('render-process-gone', (_e, details) => {
+    services.log.error(`UI process stopped: ${details.reason} (exit code ${details.exitCode})`)
+  })
+  win.webContents.on('did-fail-load', (_e, code, description) => {
+    services.log.error(`UI failed to load: ${description} (${code})`)
+  })
+
   if (process.env['ELECTRON_RENDERER_URL']) {
     void win.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -45,11 +57,24 @@ function createWindow(): void {
 }
 
 void app.whenReady().then(() => {
-  registerIpc(createServices(resolvePaths()))
-  createWindow()
+  const paths = resolvePaths()
+  const services = createServices(paths)
+  const { log } = services
+
+  log.info(
+    `ReqMan ${app.getVersion()} starting — ${process.platform} ${process.getSystemVersion()} ${process.arch}, ` +
+      `Electron ${process.versions.electron}, packaged=${app.isPackaged}`
+  )
+  log.info(`Config folder: ${paths.configDir}`)
+  process.on('uncaughtException', (e) => log.error('Unexpected error in core', e))
+  process.on('unhandledRejection', (e) => log.error('Unhandled promise rejection in core', e))
+
+  registerIpc(services, paths)
+  createWindow(services)
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) createWindow(services)
   })
+  app.on('will-quit', () => log.info('ReqMan closed normally'))
 })
 
 app.on('window-all-closed', () => {

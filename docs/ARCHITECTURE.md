@@ -34,6 +34,7 @@ The UI ↔ core contract is **one file**: `src/shared/api.ts`. Adding a capabili
 | Module | Interface (`index.ts`) | Implementation | Used by |
 | --- | --- | --- | --- |
 | `git-adapter` | `GitAdapter` — `getGitInfo()` | `systemGit.ts`: calls the installed Git | `main/ipc.ts` |
+| `logger` | `Logger` — `info/warn/error`, `filePath` | `fileLogger.ts`: appends to `%APPDATA%\ReqMan\logs\reqman.log`, rotates at 1 MB, never throws | `main/index.ts`, `main/ipc.ts` |
 | `theme` | `ThemeService` — `load()` | `fileTheme.ts`: reads `config/theme.json` + logo, validates, falls back to `defaults.ts` | `main/ipc.ts` |
 
 Planned (see milestones): `repository-store`, `domain-core`, `index-cache`, `diff-merge`, `import-export`, `git-host`.

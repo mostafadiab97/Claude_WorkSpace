@@ -10,6 +10,7 @@ desktop GUI to view, edit, link, compare and export them. No server, no accounts
 1. Install [Git for Windows](https://git-scm.com/downloads/win) if you don't have it.
 2. Open the repository's **Actions** tab → latest **Build** run → download **ReqMan-Windows-Installer**.
 3. Unzip and run `ReqMan-Setup-<version>.exe`. It installs for your user only — no admin rights needed.
+4. Follow the checklist in `docs/TESTING.md`; it also explains where the log file is and how to report a problem.
 
 ## Status
 
@@ -33,6 +34,7 @@ npm run dist:win   # build the Windows installer (on Windows)
 ## Docs
 
 - `docs/ARCHITECTURE.md` — modules, rules, module map
+- `docs/TESTING.md` — manual test checklist, log file location, bug reporting
 - `docs/THEMING.md` — customising colours, fonts, shapes, logo, light/dark
 - `samples/sample-requirements.xlsx` — fictional smart-thermostat requirements (59 items) for testing
 - `tools/make_sample_xlsx.py` — regenerates the sample file

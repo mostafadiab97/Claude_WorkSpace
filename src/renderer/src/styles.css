@@ -205,3 +205,30 @@ a {
   color: var(--rm-color-warning);
   font-size: var(--rm-font-size-small);
 }
+
+.paths {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: var(--rm-space-xs) var(--rm-space-sm);
+  margin: 0 0 var(--rm-space-md);
+}
+
+.paths dt {
+  color: var(--rm-color-text-muted);
+}
+
+.paths dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+code {
+  font-family: var(--rm-font-family-mono);
+  font-size: var(--rm-font-size-small);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rm-space-sm);
+}

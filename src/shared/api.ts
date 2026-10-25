@@ -7,6 +7,10 @@ export interface AppInfo {
   version: string
   platform: string
   electronVersion: string
+  /** Full path of the log file, shown in the Diagnostics panel. */
+  logFile: string
+  /** Full path of the theme file the app is using. */
+  themeFile: string
 }
 
 export type GitInfo =
@@ -35,11 +39,23 @@ export interface ReqManApi {
   getAppInfo(): Promise<AppInfo>
   getGitInfo(): Promise<GitInfo>
   getTheme(): Promise<LoadedTheme>
+  /** Opens the folder containing the log file in Windows Explorer. */
+  openLogFolder(): Promise<void>
+  /** Opens the folder containing theme.json in Windows Explorer, with the file selected. */
+  openThemeFolder(): Promise<void>
+  /** Records an error that happened in the UI in the log file. */
+  reportUiError(message: string): void
+  /** A plain-text summary (versions, paths, checks) to paste into a bug report. */
+  getDiagnostics(): Promise<string>
 }
 
 /** IPC channel names, shared so main and preload can never drift apart. */
 export const Channels = {
   getAppInfo: 'app:getInfo',
   getGitInfo: 'git:getInfo',
-  getTheme: 'theme:get'
+  getTheme: 'theme:get',
+  openLogFolder: 'diag:openLogFolder',
+  openThemeFolder: 'diag:openThemeFolder',
+  reportUiError: 'diag:reportUiError',
+  getDiagnostics: 'diag:get'
 } as const

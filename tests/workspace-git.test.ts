@@ -55,7 +55,8 @@ const edit = async (ws: WorkspaceService, id: string, change: (i: import('../src
   if (!r.ok) throw new Error(r.message)
 }
 
-describe('Git in the workspace (two PCs)', () => {
+// Git on Windows runners is slow to start (antivirus); each test runs many git commands.
+describe('Git in the workspace (two PCs)', { timeout: 120_000 }, () => {
   it('A commits and pushes, B pulls, edits and pushes, A pulls and sees the history', async () => {
     const { base, a, create } = await setup()
     const sys = await create(a.ws, 'system-requirement', 'Temperature accuracy', 'Within 0.5 °C.')

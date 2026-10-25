@@ -53,12 +53,14 @@ async function twoPcs(): Promise<{ remote: string; a: string; b: string }> {
   return { remote, a, b }
 }
 
+const lf = (t: string): string => t.replace(/\r\n/g, '\n')
 const put = async (root: string, path: string, text: string): Promise<void> => {
   await mkdir(join(root, path, '..'), { recursive: true })
   await writeFile(join(root, path), text)
 }
 
-describe('git-adapter with real repositories', () => {
+// Git on Windows runners is slow to start (antivirus); each test runs dozens of git commands.
+describe('git-adapter with real repositories', { timeout: 90_000 }, () => {
   const git = createSystemGitAdapter()
 
   it('commits only the requirements folder, pushes, and the other PC pulls (fast-forward)', async () => {
@@ -93,7 +95,7 @@ describe('git-adapter with real repositories', () => {
     expect(st.behind).toBe(1)
     expect(await git.checkMerge(b, 'origin/main')).toEqual({ clean: true, conflicts: [] })
     await git.merge(b, 'origin/main', true)
-    expect(await readFile(join(b, 'requirements/items/SYS-1.md'), 'utf8')).toBe('one, edited\n')
+    expect(lf(await readFile(join(b, 'requirements/items/SYS-1.md'), 'utf8'))).toBe('one, edited\n')
   })
 
   it('detects conflicts in memory, merges different items, and never forces a push', async () => {
@@ -127,8 +129,8 @@ describe('git-adapter with real repositories', () => {
     await git.commit(b, 'requirements', 'Bob edits SYS-2')
     expect((await git.checkMerge(b, 'origin/main')).clean).toBe(true)
     await git.merge(b, 'origin/main', false)
-    expect(await readFile(join(b, 'requirements/items/SYS-1.md'), 'utf8')).toBe('one (Alice)\n')
-    expect(await readFile(join(b, 'requirements/items/SYS-2.md'), 'utf8')).toBe('two (Bob)\n')
+    expect(lf(await readFile(join(b, 'requirements/items/SYS-1.md'), 'utf8'))).toBe('one (Alice)\n')
+    expect(lf(await readFile(join(b, 'requirements/items/SYS-2.md'), 'utf8'))).toBe('two (Bob)\n')
     await git.push(b)
   })
 
@@ -143,7 +145,7 @@ describe('git-adapter with real repositories', () => {
       ['Second: with "quotes" and ünïcode', 'Alice'],
       ['First', 'Alice']
     ])
-    expect(await git.show(a, log[1]!.hash, log[1]!.path)).toBe('v1\n')
+    expect(lf((await git.show(a, log[1]!.hash, log[1]!.path)) ?? '')).toBe('v1\n')
     expect(await git.show(a, log[1]!.hash, 'requirements/items/NOPE.md')).toBeNull()
 
     await put(a, 'requirements/items/SYS-1.md', 'v3 (not wanted)\n')
@@ -151,7 +153,7 @@ describe('git-adapter with real repositories', () => {
     sh(a, 'add', 'requirements/items/NEW-1.md')
     await put(a, 'requirements/items/NEW-2.md', 'new, never added\n')
     await git.discard(a, ['requirements/items/SYS-1.md', 'requirements/items/NEW-1.md', 'requirements/items/NEW-2.md'])
-    expect(await readFile(join(a, 'requirements/items/SYS-1.md'), 'utf8')).toBe('v2\n')
+    expect(lf(await readFile(join(a, 'requirements/items/SYS-1.md'), 'utf8'))).toBe('v2\n')
     expect((await git.status(a, 'requirements')).changes).toEqual([])
     expect(await git.identity(a)).toEqual({ name: 'Alice', email: 'alice@example.com' })
   })

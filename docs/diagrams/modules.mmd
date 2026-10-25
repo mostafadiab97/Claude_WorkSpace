@@ -1,0 +1,49 @@
+flowchart TB
+  subgraph R["Renderer process — the window (React, no file or Git access)"]
+    direction TB
+    APPX["app/App.tsx<br/>top bar, routing, theme"]
+    SCR["screens/<br/>Start · Workspace · Settings"]
+    WSC["workspace/ components<br/>ItemTable (tree) · ItemEditor · LinksSection<br/>GitPanels · CompareView · HistoryView<br/>FieldsPanel · ExportDialog · ParentPicker"]
+    APPX --> SCR --> WSC
+  end
+
+  BR{{"preload/index.ts → window.reqman<br/>contract: shared/api.ts + shared/domain.ts"}}
+  WSC -- "window.reqman.*()" --> BR
+
+  subgraph M["Main process — Node/Electron core"]
+    direction TB
+    IPC["main/ipc.ts<br/>channels, input checks, dialogs"]
+    COMP["main/composition.ts<br/>creates and wires every module (one place)"]
+    WS["workspace<br/>the open repository: items, links, moves, schema fields<br/>gitOps.ts (commit/pull/push/history) · compare.ts"]
+    RS["repository-store<br/>files in requirements/, atomic writes,<br/>conflict check by revision"]
+    IC["index-cache<br/>SQLite + full-text search,<br/>counts, suspect links, problems"]
+    GA["git-adapter<br/>runs the installed git<br/>(no shell, timeouts)"]
+    IE["import-export<br/>CSV / Markdown (M7: Excel)"]
+    IT["items (domain core)<br/>file format, IDs, validation,<br/>fingerprint, diffItems"]
+    SC["schema<br/>parse schema.yaml"]
+    LOG["logger"]
+    TH["theme"]
+    UPD["updater"]
+    SD["sample-data<br/>(tests, self-test)"]
+    IPC --> WS
+    IPC --> TH
+    IPC --> UPD
+    IPC --> LOG
+    IPC --> SD
+    COMP -. creates .-> WS
+    WS --> RS
+    WS --> IC
+    WS --> GA
+    WS --> IE
+    WS --> IT
+    RS --> IT
+    RS --> SC
+    IC --> IT
+    IT --> SC
+  end
+
+  BR -- "IPC (invoke / events)" --> IPC
+  RS --> FILES[("requirements/ folder")]
+  GA --> GITX["git.exe"]
+  IC --> DB[("cache .sqlite")]
+  UPD --> GHR[("GitHub Releases")]

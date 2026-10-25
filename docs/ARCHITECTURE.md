@@ -3,6 +3,8 @@
 ReqMan is a **modular monolith**: one desktop application (Electron) split into modules with narrow,
 documented interfaces. Full rationale, requirements and decisions live in the project analysis document.
 
+> New here? Start with `docs/ONBOARDING.md` — it has diagrams of the system, the modules and the main flows.
+
 ## Processes
 
 | Process | Code | Can do |

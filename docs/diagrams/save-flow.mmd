@@ -1,0 +1,18 @@
+sequenceDiagram
+  autonumber
+  actor E as Engineer
+  participant UI as ItemEditor (renderer)
+  participant B as window.reqman (preload)
+  participant W as workspace (main)
+  participant S as repository-store
+  participant X as index-cache
+  E->>UI: edits fields, presses Ctrl+S
+  UI->>B: saveItem(item, revision it was read at)
+  B->>W: IPC ws:saveItem
+  W->>W: validate against schema, parent exists, no loop
+  W->>S: writeItem(item, expectedRevision)
+  S->>S: file changed since read? → ConflictError
+  S->>S: write temp file, rename over (atomic)
+  W->>X: syncPaths(that file)
+  W-->>UI: saved item + new revision + issues
+  UI->>UI: table and Git bar refresh (Changes (n))

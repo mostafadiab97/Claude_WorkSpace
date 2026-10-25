@@ -21,6 +21,8 @@ cloud session from v0.5.0. Nothing lives outside this repository and `Claude_San
 
 | What | Where |
 | --- | --- |
+| **Onboarding for new engineers** (system diagrams, module roles, data flow, first change end to end) | `docs/ONBOARDING.md` (diagram sources `docs/diagrams/*.mmd`, rendered `docs/images/`) |
+| Project reviews (defects, structure, performance, risks — proposals awaiting the owner's decision) | `docs/reviews/2026-10-25-project-review.md` |
 | Domain analysis of 5 RM tools, every product question with the owner's answer, product definition, FR/NFR list, journey, scope by stage, architecture, technology choices, milestone plan | `docs/design/DESIGN.md` (**source of truth for decisions**; tags C = confirmed by owner, R = recommendation, I = inference) |
 | Module map, rules, data format, UI structure, decisions changed during build | `docs/ARCHITECTURE.md` |
 | Manual test checklist per version (the owner tests with it), log/data locations, bug reporting | `docs/TESTING.md` |
@@ -148,6 +150,20 @@ scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 5
   `readBlobs()` (one `git cat-file --batch`). Naming objects `<rev>:<path>` instead was 40× slower with 10k files in
   one folder (tree lookups). Files that differ only in `confirmed:` lines are skipped before parsing.
 
+## Where we are right now (25 Oct 2026, after v0.7.0) — read this first
+
+The owner asked to **pause new features**. Done in this step (docs only, no code changes):
+1. Roadmap, gap analysis vs. the analysed tools and preferred-feature backlog → `docs/design/DESIGN.md`,
+   section "Roadmap after the prototype".
+2. Whole-project review → `docs/reviews/2026-10-25-project-review.md` (1 confirmed defect D-01: items whose file
+   name ≠ ID cannot be opened; likely defects D-02–D-04; P-01 full refresh per save; S-04 order keys before M8…).
+   **Do not change code for these until the owner confirms which to do.**
+3. Onboarding guide with diagrams → `docs/ONBOARDING.md`.
+
+Next: the owner sends his test results (combined checklist v0.7.0 + two-PC trial); then we discuss the review and
+roadmap point by point and decide the next milestones. Proposed order (not yet confirmed): fix release 0.7.x →
+refactor (S-01, S-02) → M7 Excel (0.8.0) → M8 branches + merge with order keys (0.9.0).
+
 ## M6 decisions (owner, 25 Oct 2026) — already built
 
 - CSV separator: **comma** (his Excel). Files: UTF-8 with BOM, CRLF; cells starting with `= + @` get a leading `'`.
@@ -172,9 +188,7 @@ scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 5
 4. **Round trip test:** export the sandbox to xlsx/CSV, import into an empty repository → same items, hierarchy and
    links. The fictional sheet `samples/sample-requirements.xlsx` (59 items) is the first real-world-like import test.
 
-Questions for the owner: when importing a sheet whose IDs already exist, **update** those items (show what will
-change first) or only **add** new ones? Should links be imported (from a "Links" column like our export), or only
-items and hierarchy at first?
+Owner's answers (25 Oct 2026): **update** existing items by ID (with a preview of what changes); **read links too**.
 
 Later milestones and backlog are in DESIGN.md ("Scope by stage"): after M8 — schema editor for item and link
 types (fields part done), tags as baselines, Word/PDF export, coverage rules (open question: report-only by

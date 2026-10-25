@@ -45,7 +45,9 @@ builds the installer and publishes it as a GitHub Release; installed copies pick
 
 ## Docs
 
-- `CLAUDE.md` — hand-over and working agreement for Claude Code (start here)
+- `CLAUDE.md` — project memory and working agreement (start here)
+- `docs/ONBOARDING.md` — onboarding guide for engineers, with system diagrams
+- `docs/reviews/` — project reviews (known risks, proposed improvements)
 - `docs/design/DESIGN.md` — domain analysis, product decisions, requirements, architecture, milestone plan
 - `CHANGELOG.md` — what each version changed and what testing found
 - `docs/DEVELOPING.md` — setting up a Windows PC for development

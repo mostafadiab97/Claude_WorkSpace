@@ -305,6 +305,7 @@ The five questions marked ★ shape the architecture most; the rest refine scope
 | Confirmed scope decision (25 Oct 2026) | M4 Git: when a pull finds items changed on both sides, ReqMan stops without changing anything and lists them (choosing per item comes with FR-13); M4 shows the current branch only (creating/switching branches stays FR-12, MVP); ReqMan commits only the `requirements/` folder, never other project files. |
 | Confirmed scope decision (25 Oct 2026) | M5 Compare: the default comparison is "since my last pull" (what the last pull brought in); ReqMan pulls right before any comparison; exporting the comparison list comes with the M6 exports. |
 | Confirmed decision (25 Oct 2026) | CSV exports use a comma separator (the owner's Excel setting). After the prototype (M6), the order is: Excel export and import (M7), then branches and per-requirement conflict resolution (M8); Word/PDF export, PR view and coverage rules later. |
+| Confirmed decision (25 Oct 2026) | M7 import: rows whose ID already exists **update** those items (with a preview of what changes); links are **read too** (from a Links column like the export writes). |
 | Confirmed requirement | Collaboration works like GitHub: no real-time co-editing. Each person edits in their own local copy/branch, shares by push/pull, and conflicts are resolved per requirement in the tool; formal review happens through pull requests. Inference (I): this removes the need for any collaboration server, consistent with the no-server requirement. |
 | Confirmed scope decision | No AI features in the first version (no quality checks, drafting, test generation or agent access); possibly in a later version. Markdown export covers manual use of external AI tools. |
 | Confirmed requirement | Deployment: the tool runs locally on each user's PC; data lives in a Git repository hosted like any other repo (GitHub or similar). Confirmed: the tool must work fully offline (all viewing, editing, linking, comparing, exporting and local commits); only push, pull and PR actions need a connection. How the local tool is built (desktop app, locally served web UI, etc.) is a product-form decision for the architecture stage, not yet decided. Confirmed: Windows is the primary OS; some teams use Linux. Inference (I): this argues for cross-platform technology and against Windows-only UI frameworks, unless Linux support is explicitly postponed. Confirmed: Windows only for the first releases; Linux later. Recommendation (R): treat "Linux possible without a rewrite" as a selection criterion in the technology stage. |
@@ -628,6 +629,90 @@ The prototype is built in seven milestones, each ending with a Windows build you
 - [x] A working name for the tool (can change later)
 
   Working name: **ReqMan**. Sample data: a fictional smart-thermostat requirements sheet (59 items: needs, system/software/hardware requirements, tests, risks, change requests) is in the repo at `samples/sample-requirements.xlsx`.
+
+## Roadmap after the prototype (proposal, 25 Oct 2026 — to discuss with the owner)
+
+The prototype scope (FR-01 to FR-10) is built (v0.7.0). This section plans the next versions: where each
+requirement stands, what is still missing compared with the five analysed products, the preferred new features, and
+a proposed version sequence. Everything here is a recommendation (R) unless marked C; the owner decides the order
+after his test round and the project review (`docs/reviews/2026-10-25-project-review.md`).
+
+### Where each requirement stands
+
+| ID | Requirement | Status (v0.7.0) |
+| --- | --- | --- |
+| FR-01 – FR-06 | Open repo, default schema, items with stable IDs, hierarchy, typed links, table/filter/search | Done |
+| FR-07 | Item history from Git | Done (History tab with field-level comparison) |
+| FR-08 | Commit, pull, push | Done (only `requirements/`, never forced, stops on clashes) |
+| FR-09 | Compare two versions per requirement and link | Done (basic and most of full; pulls first) |
+| FR-10 | Export to CSV | Done (+ Markdown; Compare export) |
+| FR-11 | Schema editor | Partly — fields done; item types and link types still in `schema.yaml` |
+| FR-12 | Branches and tag baselines | Branch shown only → M8 |
+| FR-13 | Merge and resolve conflicts per requirement | Pull stops safely → M8 |
+| FR-14 | Word, PDF, Excel and Markdown export | Markdown done; Excel → M7; Word/PDF → later |
+| FR-15 | Excel/CSV import with column mapping | → M7 |
+| FR-16 | Coverage view and rule warnings | Not started |
+| FR-17 | Suspect links | Done (v0.4.0) |
+| FR-18 | GitHub pull-request view per requirement (stage 1) | Not started |
+| FR-19, FR-20 | PR create/approve/merge in the tool; Word import, ReqIF | Later |
+
+### What is still missing compared with the analysed tools
+
+| Feature (from "B. Common features") | In ReqMan today | Proposal |
+| --- | --- | --- |
+| Word and Excel import/export, round trip | CSV + Markdown export | **M7**: Excel export + import (update existing items by ID, read links — C, 25 Oct 2026); Word/PDF export M10 |
+| Baselines | Any commit can be compared | **M8**: tags as named baselines ("Release 1.0"), compare against them |
+| Branches / parallel versions | Shown only | **M8**: create, switch, compare branches |
+| Merge and conflict resolution per requirement | Pull stops and lists clashes | **M8**: field-level 3-way merge, choose mine/theirs/edit only for real conflicts |
+| Traceability matrix and coverage views | Link filters ("without links", "suspect") | **M9**: coverage view (e.g. which system requirements have no verifying test) and a matrix (rows × columns by link type) |
+| Configurable types and workflows | Fields editable in the GUI | **M9**: item types and link types editable in the GUI; status stays a field (no workflow engine) |
+| Query language / advanced filters | Search + type/field/link filters | **M9**: saved filters ("views"); later a small query syntax (`status:Draft type:SYS`) |
+| Rich text with tables and images | Markdown text, plain editor | **M10**: Markdown preview in the editor; later images as attachments |
+| Formal review with sign-off | GitHub pull requests outside the tool | **M11**: PR stage 1 (view a PR's changes per requirement) |
+| Dashboards and reports | Export only | **M10**: one printable report (PDF) of a filtered set; later a simple project overview |
+| Reuse across projects | Copy by hand (C: no cross-repo links) | Later: "copy from another repository" with a `copied-from` note |
+| Jira / Azure DevOps, REST API, MCP server, AI checks | Not planned now (C) | Commercial stage |
+| Risk management (FMEA) | Risk item type | Later, only if a safety-critical customer needs it |
+
+### Preferred new features (candidate backlog)
+
+**Must (MVP):** Excel export + import with preview and update by ID (M7) · branches, tags as baselines, per-requirement
+merge (M8) · item types and link types in the GUI, coverage view, saved views (M9) · Word/PDF export, Markdown
+preview (M10) · PR stage 1 (M11).
+
+**Should:** bulk edit (select several items → set status/owner/tags, move, delete) · item templates per type
+(pre-filled text, e.g. "The system shall…", acceptance-criteria section) · "find items linking to …" impact view (all
+items affected by a change, following links several levels) · keyboard shortcuts list · recent changes panel ("what
+changed this week") · Windows 10 build (commercial need, C) · single-instance app and other fixes from the review.
+
+**Could:** traceability graph view · copy items to another repository with provenance · duplicate-ID repair ·
+requirement quality hints without AI (vague words like "fast", "user-friendly", missing "shall") · Linux build ·
+English/Arabic UI (if wanted; see review S-06) · several requirement sets per repository (review S-07).
+
+**Later / commercial:** PR create/approve/merge in the tool and comments per requirement (FR-19), Word import,
+ReqIF, GitLab/Bitbucket/Azure DevOps adapters, compliance features (signatures, tamper-proof audit, standards
+templates), AI features and governed AI access, licensing, private update channel and code signing (review S-08,
+X-02).
+
+### Proposed versions
+
+| Version | Milestone | Contents | Why in this order |
+| --- | --- | --- | --- |
+| 0.7.x | Fixes | Owner's test findings for 0.5–0.7; review fixes D-01–D-04, D-06, D-07, D-10, P-01, P-02, T-03 | Stabilise before adding more |
+| 0.7.x | Refactor (no visible change) | Review S-01, S-02, X-01, T-04, T-05, X-03 | M7/M8 add many calls and screens; cheaper on a clean base |
+| 0.8.0 | **M7 Excel** | .xlsx export (same options as CSV), import wizard for .xlsx/.csv: sheet, header row, column → field mapping (guessed), type per row, hierarchy from Level/Parent, links from a Links column, **update existing items by ID** with a preview of what changes, new IDs + `source-id` for foreign IDs; result = uncommitted changes to review in Compare | Owner's order (C); the main migration path from Excel |
+| 0.9.0 | **M8 Branches and merge** | Order keys that never need renumbering (review S-04, data format); create/switch branches; tags as baselines; compare branches/tags; pull/merge with field-level 3-way merge and a per-requirement conflict screen; duplicate-ID repair | Owner's order (C); needs S-04 first |
+| 0.10.0 | M9 Schema, coverage, views | Item types and link types in the GUI; coverage view + matrix; saved views; bulk edit | Completes "configurable like an Excel column" and traceability |
+| 0.11.0 | M10 Documents | Word (.docx) and PDF export (document order, headings, fields table), Markdown preview, item templates | Stakeholder communication outside the repository |
+| 1.0.0 | M11 MVP | GitHub PR stage 1 (view per requirement), Windows 10 build, hardening, docs for a team hand-over | MVP scope (FR-11 – FR-18) complete |
+
+### Decisions needed from the owner
+
+1. Order of M9 / M10 / M11 after M8 (above is a proposal).
+2. Translation of the UI ever needed? (review S-06)
+3. Several requirement sets per repository / configurable folder? (review S-07)
+4. Commercial preparation timing: private update channel and code signing (review S-08, X-02).
+5. Which "Should" features matter most to the teams (bulk edit, templates, impact view, quality hints…)?
 
 ## Sources
 

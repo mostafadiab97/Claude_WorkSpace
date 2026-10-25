@@ -33,6 +33,21 @@ Each tested version is published on the repository's **Releases** page
 the release's **Assets** and run it — there is no zip and no GitHub sign-in needed. From v0.0.3 onwards,
 an installed ReqMan also finds newer releases by itself and offers **Restart and update**.
 
+### If the browser blocks the download
+
+ReqMan is not yet code-signed (signing certificates cost money and are planned for the commercial version),
+so browsers treat the installer as unknown:
+
+- **Chrome:** press **Ctrl+J** to open Downloads, find `ReqMan-Setup-….exe`, click **Download suspicious file**
+  (or **⋮ → Keep**), then **Download anyway**.
+- **Edge:** open Downloads (**Ctrl+J**), hover the file, **⋯ → Keep**, then **Show more → Keep anyway**.
+- From v0.0.4, each release also has a **.zip** of the installer, which browsers block less often:
+  download it, right-click → **Extract All**, run the `.exe`.
+- If there is no "keep" option at all, your company manages the browser: ask IT to allow downloads from
+  `github.com/mostafadiab97/Claude_WorkSpace/releases`.
+
+After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
+
 ## Manual test checklist — v0.0.3
 
 Tick each step; any "No" is a bug to report.

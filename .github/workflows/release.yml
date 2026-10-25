@@ -55,6 +55,12 @@ jobs:
         shell: bash
         run: ls -la dist
 
+      # A zipped copy of the installer, for browsers or company filters that block .exe downloads.
+      - name: Zip installer
+        if: steps.version.outputs.exists == 'false'
+        shell: pwsh
+        run: Get-ChildItem dist/ReqMan-Setup-*.exe | ForEach-Object { Compress-Archive -Path $_.FullName -DestinationPath ($_.FullName -replace '\.exe$', '.zip') }
+
       # latest.yml + the installer + its .blockmap are what installed copies read to update themselves.
       - name: Publish GitHub Release
         if: steps.version.outputs.exists == 'false'
@@ -66,5 +72,5 @@ jobs:
           gh release create "$tag" \
             --target "$GITHUB_SHA" \
             --title "ReqMan ${tag#v}" \
-            --notes "Install: download ReqMan-Setup-${tag#v}.exe below and run it. Installed copies update automatically." \
-            dist/ReqMan-Setup-*.exe dist/ReqMan-Setup-*.exe.blockmap dist/latest.yml
+            --notes "Install: download ReqMan-Setup-${tag#v}.exe below and run it (or the .zip if your browser blocks the .exe). Installed copies update automatically." \
+            dist/ReqMan-Setup-*.exe dist/ReqMan-Setup-*.exe.blockmap dist/ReqMan-Setup-*.zip dist/latest.yml

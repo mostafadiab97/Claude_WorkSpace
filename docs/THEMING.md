@@ -7,8 +7,9 @@ fonts or radii — they reference named tokens, so restyling or rebranding is a 
 
 Themes are layered: **built-in defaults ← the app's theme ← your theme**.
 
-- **Your theme:** `%APPDATA%\ReqMan\theme.json`. Click **Edit my theme…** in ReqMan to create it (it starts as a
-  copy of the app's theme) and open its folder. Updates never touch this file. A custom logo file can be put
+- **Your theme:** `%APPDATA%\ReqMan\theme.json`. Click **Edit my theme…** in ReqMan to create it and open its folder.
+  It starts almost empty: add only the values you want to change, so later improvements to the app theme
+  still reach every value you haven't changed. Updates never touch this file. A custom logo file can be put
   in the same folder.
 - The app's theme: `%LOCALAPPDATA%\Programs\ReqMan\resources\config\theme.json` (source: `config/theme.json`).
   It is replaced by every update, so don't edit it on a user PC.

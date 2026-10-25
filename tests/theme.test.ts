@@ -60,11 +60,14 @@ describe('theme module', () => {
     expect(t.config).toEqual(DEFAULT_THEME)
   })
 
-  it('creates the user theme from the shipped one, and never overwrites it afterwards', async () => {
+  it('creates a starter user theme that changes nothing, and never overwrites it afterwards', async () => {
     const user = join(await tempDir(), 'ReqMan')
     const svc = createFileThemeService(shippedConfig, shippedResources, user)
     const file = await svc.ensureUserThemeFile()
-    expect(JSON.parse(await readFile(file, 'utf8'))).toEqual(DEFAULT_THEME)
+    const loaded = await svc.load()
+    expect(loaded.source).toBe('user')
+    expect(loaded.config).toEqual(DEFAULT_THEME)
+    expect(loaded.warnings).toEqual([])
     await writeFile(file, '{"brand":{"name":"Mine"}}')
     await svc.ensureUserThemeFile()
     expect(await readFile(file, 'utf8')).toBe('{"brand":{"name":"Mine"}}')

@@ -35,7 +35,7 @@ export const DEFAULT_THEME: ThemeConfig = {
       primary: '#2f5bd3',
       primaryHover: '#2449b0',
       primaryText: '#ffffff',
-      success: '#1f8a4c',
+      success: '#22c55e',
       warning: '#b26b00',
       danger: '#c23934',
       focus: '#7aa2ff'

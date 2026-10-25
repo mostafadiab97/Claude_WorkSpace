@@ -48,7 +48,7 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.0.3
+## Manual test checklist — v0.0.3 / v0.0.4
 
 Tick each step; any "No" is a bug to report.
 

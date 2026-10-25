@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, extname, join } from 'node:path'
 import type { LoadedTheme, ThemeConfig } from '../../shared/api'
 import type { ThemeService } from './index'
@@ -82,9 +82,16 @@ export function createFileThemeService(configDir: string, resourceDir: string, u
 
     async ensureUserThemeFile(): Promise<string> {
       await mkdir(userDir, { recursive: true })
+      // The user's file holds ONLY their changes, so improvements to the app theme in later updates
+      // still reach them for every value they have not changed themselves.
+      const starter = {
+        _help:
+          'Add only the values you want to change; everything else comes from the app theme. ' +
+          `All available keys and their current values: ${shippedFile}. Save, then restart ReqMan.`,
+        modes: { light: {}, dark: {} }
+      }
       try {
-        // Start the user's copy from the shipped theme so every key is visible and editable.
-        await copyFile(shippedFile, userFile, 1 /* COPYFILE_EXCL: never overwrite an existing user file */)
+        await writeFile(userFile, JSON.stringify(starter, null, 2) + '\n', { flag: 'wx' /* never overwrite */ })
       } catch (e) {
         if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e
       }

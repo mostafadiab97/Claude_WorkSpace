@@ -46,8 +46,25 @@ jobs:
       - if: steps.version.outputs.exists == 'false'
         run: npm run build
 
-      - name: Build installer and publish GitHub Release
+      - name: Build installer
         if: steps.version.outputs.exists == 'false'
-        run: npx electron-builder --win --publish always -c.publish.releaseType=release
+        run: npx electron-builder --win --publish never
+
+      - name: List build output
+        if: steps.version.outputs.exists == 'false'
+        shell: bash
+        run: ls -la dist
+
+      # latest.yml + the installer + its .blockmap are what installed copies read to update themselves.
+      - name: Publish GitHub Release
+        if: steps.version.outputs.exists == 'false'
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          gh release create "$tag" \
+            --target "$GITHUB_SHA" \
+            --title "ReqMan ${tag#v}" \
+            --notes "Install: download ReqMan-Setup-${tag#v}.exe below and run it. Installed copies update automatically." \
+            dist/ReqMan-Setup-*.exe dist/ReqMan-Setup-*.exe.blockmap dist/latest.yml

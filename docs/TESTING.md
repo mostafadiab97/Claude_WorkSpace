@@ -48,7 +48,33 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.1.0 (milestone M1)
+## Manual test checklist — v0.2.0 (milestone M2)
+
+You need a Git repository to try it in: any project clone, or a new empty folder where you run
+`git init`. ReqMan only adds a `requirements` folder; nothing else in the repository is touched.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let ReqMan update itself to 0.2.0 (or install it from Releases) | Start screen with **Open repository…** and **Recent repositories**; diagnostics moved behind the **⚙** button (top right) |
+| 2 | **Open repository…** → choose your test repository (or a sub-folder of it) | "No requirements folder yet" with the repository's top folder shown → **Create requirements folder**. A `requirements` folder appears in the repository |
+| 3 | **+ New item… → Stakeholder Need**, type a title and text, **Save** (or Ctrl+S) | ID like `STK-K7Q3XM` appears; the item shows in the tree and the table; a file `requirements/items/STK-….md` exists |
+| 4 | Select the stakeholder need, **+ Child… → System Requirement**, fill in, set Priority, Save. Add a second child | Both appear under the parent in the tree (▸ to expand), in creation order |
+| 5 | Select the second child, click **↑** | It moves above the first one in the tree |
+| 6 | In a child, click **Parent**, search for another item, pick it, Save | The item moves under the new parent in the tree. Choosing the item's own child as parent is refused with a message |
+| 7 | Type in **Search**; pick a **Type**, **Status** or **Priority** filter; click column headers | The table narrows as you type; "N of M items" in the status bar; clicking a header sorts (again = reverse) |
+| 8 | Change a title without saving, then click another row | "You have unsaved changes. Discard them?" — **Keep editing** returns to your edit |
+| 9 | With unsaved changes, close the ReqMan window | Windows asks "You have unsaved changes" before closing |
+| 10 | Open one item file in Notepad, change its title, save; switch back to ReqMan | The table and tree show the new title |
+| 11 | Open an item in ReqMan, change it in Notepad as well, then Save in ReqMan | ReqMan refuses: "…was changed outside ReqMan…", with a link to reload the current version. Your Notepad change is kept |
+| 12 | Delete a test item (**Delete** → **Delete**) | It disappears. Deleting an item that still has children is refused |
+| 13 | Close the repository and reopen it from **Recent repositories** | Opens straight away with everything as you left it |
+| 14 | Resize / maximise the window; open **⚙ Settings** in a maximised window | Scrollbars sit at the right edge of their area, thumb only; the table header scrolls with the rows; the ID column stays visible when the table scrolls sideways |
+| 15 | Switch Light / Dark | Everything readable in both, including selected rows and scrollbars |
+| 16 | *(Optional)* `git status` in the repository | Only files under `requirements/` are new or changed |
+
+Links between items are shown but cannot be created yet — that is M3.
+
+## Previous checklist — v0.1.0 (milestone M1)
 
 M1 is the data layer underneath the coming screens, so it is mostly covered by automated tests
 (58 on every build, plus 10,000- and 50,000-item performance tests on Windows). What a person checks:

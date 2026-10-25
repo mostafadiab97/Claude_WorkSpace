@@ -1,9 +1,10 @@
-import { randomBytes } from 'node:crypto'
+import { createHash, randomBytes } from 'node:crypto'
 import { mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import { generateId, ITEM_FILE_EXTENSION, parseItemFile, serializeItem, type FieldValue, type Item } from '../items'
 import { parseSchema } from '../schema'
 import { checkRepository } from './checks'
+import { ConflictError } from './errors'
 import {
   REQUIREMENTS_FOLDER,
   type FolderState,
@@ -18,6 +19,8 @@ const META_DIR = '.reqman'
 const SCHEMA_FILE = 'schema.yaml'
 const GITATTRIBUTES = '# Written by ReqMan: identical line endings on every PC keep diffs clean.\n* text=auto eol=lf\n'
 const READ_CONCURRENCY = 64
+
+const revisionOf = (content: string): string => createHash('sha1').update(content).digest('hex').slice(0, 16)
 
 const exists = async (p: string): Promise<boolean> => (await stat(p).catch(() => null)) !== null
 
@@ -89,6 +92,20 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
         }
       },
 
+      itemPath: (id) => `${ITEMS_DIR}/${id}${ITEM_FILE_EXTENSION}`,
+
+      async readItem(id) {
+        let content: string
+        try {
+          content = await readFile(fileFor(id), 'utf8')
+        } catch (e) {
+          if ((e as NodeJS.ErrnoException).code === 'ENOENT') return null
+          return { ok: false, error: `Could not read the file: ${(e as Error).message}`, revision: '' }
+        }
+        const r = parseItemFile(content, fieldIds)
+        return r.ok ? { ok: true, item: r.item, revision: revisionOf(content) } : { ok: false, error: r.error, revision: revisionOf(content) }
+      },
+
       async loadAll(): Promise<LoadResult> {
         const files = await repo.listItemFiles()
         const results = await mapLimit(files, READ_CONCURRENCY, (f) => repo.readItemFile(f.path))
@@ -124,18 +141,36 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
         return item
       },
 
-      async writeItem(item) {
+      async writeItem(item, options = {}) {
         const file = fileFor(item.id)
-        // Never overwrite a file a person edited into a state ReqMan cannot read: their text would be lost.
-        if (await exists(file)) {
-          const current = await repo.readItemFile(`${ITEMS_DIR}/${basename(file)}`)
-          if (!current.ok) throw new Error(`${basename(file)} cannot be read (${current.error}); fix it before saving over it.`)
+        const current = await repo.readItem(item.id)
+        if (options.expectedRevision !== undefined) {
+          const actual = current ? current.revision : null
+          if (actual !== options.expectedRevision) {
+            throw new ConflictError(
+              options.expectedRevision === null
+                ? `${item.id} already exists.`
+                : current
+                  ? `${item.id} was changed outside ReqMan since you opened it.`
+                  : `${item.id} was deleted outside ReqMan since you opened it.`
+            )
+          }
         }
+        // Never overwrite a file a person edited into a state ReqMan cannot read: their text would be lost.
+        if (current && !current.ok) throw new Error(`${basename(file)} cannot be read (${current.error}); fix it before saving over it.`)
         await mkdir(itemsDir, { recursive: true })
-        await atomicWrite(file, serializeItem(item, schema))
+        const content = serializeItem(item, schema)
+        await atomicWrite(file, content)
+        return revisionOf(content)
       },
 
-      async deleteItem(id) {
+      async deleteItem(id, options = {}) {
+        if (options.expectedRevision !== undefined) {
+          const current = await repo.readItem(id)
+          if ((current?.revision ?? null) !== options.expectedRevision) {
+            throw new ConflictError(`${id} was changed outside ReqMan since you opened it.`)
+          }
+        }
         await rm(fileFor(id), { force: true })
       }
     }

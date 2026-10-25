@@ -45,6 +45,9 @@ jobs:
         run: npm run check
       - if: steps.version.outputs.exists == 'false'
         run: npm run build
+      - name: End-to-end journey (drives the real app)
+        if: steps.version.outputs.exists == 'false'
+        run: npm run test:e2e
 
       - name: Build installer
         if: steps.version.outputs.exists == 'false'

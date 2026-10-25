@@ -26,6 +26,11 @@ export default tseslint.config(
     }
   },
   {
+    // End-to-end tests run in Node and send small snippets into the app window.
+    files: ['e2e/**/*.mjs', 'tools/**/*.mts'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } }
+  },
+  {
     // Inside a module, its own files may import each other freely.
     files: ['src/modules/**/*.ts'],
     rules: { 'no-restricted-imports': 'off' }

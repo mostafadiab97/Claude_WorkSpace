@@ -48,7 +48,7 @@ describe('index cache', () => {
   it('returns full items by ID', () => {
     const expected: Partial<Item> = { ...ctx.items.sys! }
     delete expected.extra
-    expect(ctx.cache.get(ctx.items.sys!.id)).toEqual({ ...expected, path: `items/${ctx.items.sys!.id}.md` })
+    expect(ctx.cache.get(ctx.items.sys!.id)).toEqual({ ...expected, path: `items/${ctx.items.sys!.id}.md`, childCount: 0 })
   })
 
   it('finds words in title and text, with prefix matching and without accents', () => {

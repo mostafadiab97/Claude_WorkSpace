@@ -38,7 +38,11 @@ export const DEFAULT_THEME: ThemeConfig = {
       success: '#22c55e',
       warning: '#b26b00',
       danger: '#c23934',
-      focus: '#7aa2ff'
+      focus: '#7aa2ff',
+      rowHover: '#f1f3f7',
+      selection: '#e3ebff',
+      scrollbarThumb: '#c3c9d3',
+      scrollbarThumbHover: '#9aa3b2'
     },
     dark: {
       background: '#14171c',
@@ -53,7 +57,11 @@ export const DEFAULT_THEME: ThemeConfig = {
       success: '#4cc57f',
       warning: '#f0a73a',
       danger: '#ff6b65',
-      focus: '#9db8ff'
+      focus: '#9db8ff',
+      rowHover: '#20252d',
+      selection: '#263352',
+      scrollbarThumb: '#3a414e',
+      scrollbarThumbHover: '#566070'
     }
   }
 }

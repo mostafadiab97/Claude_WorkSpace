@@ -8,6 +8,8 @@ import { createSystemGitAdapter } from './systemGit'
 export interface GitAdapter {
   /** Is Git installed, and which version? */
   getGitInfo(): Promise<GitInfo>
+  /** The top folder of the Git repository containing `path`, or null if `path` is not inside one. */
+  findRepositoryRoot(path: string): Promise<string | null>
 }
 
 export { createSystemGitAdapter }

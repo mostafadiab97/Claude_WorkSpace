@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
-import type { AppInfo, GitInfo, LoadedTheme, UpdateStatus } from '../../../shared/api'
+import { useCallback, useEffect, useState } from 'react'
+import type { AppInfo, GitInfo, LoadedTheme, RepoInfo, UpdateStatus } from '../../../shared/api'
 import { applyTheme, loadSavedMode, saveMode, type ThemeMode } from '../theme/applyTheme'
 import { ThemeToggle } from '../components/ThemeToggle'
-import { StatusRow } from '../components/StatusRow'
-import { DiagnosticsCard } from '../components/DiagnosticsCard'
-import { UpdateBanner, describeUpdate } from '../components/UpdateBanner'
-import { SelfTestCard } from '../components/SelfTestCard'
+import { UpdateBanner } from '../components/UpdateBanner'
+import { StartScreen } from '../screens/StartScreen'
+import { SettingsScreen } from '../screens/SettingsScreen'
+import { WorkspaceScreen } from '../screens/WorkspaceScreen'
 
 export function App() {
   const [theme, setTheme] = useState<LoadedTheme | null>(null)
@@ -13,6 +13,8 @@ export function App() {
   const [appInfo, setAppInfo] = useState<AppInfo | null>(null)
   const [git, setGit] = useState<GitInfo | null>(null)
   const [update, setUpdate] = useState<UpdateStatus | null>(null)
+  const [repo, setRepo] = useState<RepoInfo | null>(null)
+  const [showSettings, setShowSettings] = useState(false)
 
   useEffect(() => {
     void window.reqman.getTheme().then(setTheme)
@@ -33,9 +35,18 @@ export function App() {
     return () => mq.removeEventListener('change', onChange)
   }, [theme, mode])
 
+  useEffect(() => {
+    document.title = repo ? `${repo.name} — ${theme?.config.brand.name ?? 'ReqMan'}` : (theme?.config.brand.name ?? 'ReqMan')
+  }, [repo, theme])
+
   const changeMode = (m: ThemeMode): void => {
     setMode(m)
     saveMode(m)
+  }
+  const onInfo = useCallback((i: RepoInfo) => setRepo(i), [])
+  const close = async (): Promise<void> => {
+    await window.reqman.closeRepository()
+    setRepo(null)
   }
 
   if (!theme) return <div className="splash">Loading…</div>
@@ -47,62 +58,40 @@ export function App() {
         <div className="brand">
           {theme.logoDataUrl && <img className="brand__logo" src={theme.logoDataUrl} alt="" />}
           <span className="brand__name">{brand}</span>
+          {repo && !showSettings && (
+            <>
+              <span className="topbar__sep" aria-hidden="true">/</span>
+              <span className="topbar__repo" title={repo.root}>{repo.name}</span>
+              <button type="button" className="btn btn--small" onClick={() => void close()}>
+                Close repository
+              </button>
+            </>
+          )}
         </div>
-        <ThemeToggle mode={mode} onChange={changeMode} />
+        <div className="topbar__right">
+          <ThemeToggle mode={mode} onChange={changeMode} />
+          <button
+            type="button"
+            className={showSettings ? 'icon-btn icon-btn--active' : 'icon-btn'}
+            aria-label="Settings and diagnostics"
+            title="Settings & diagnostics"
+            onClick={() => setShowSettings((s) => !s)}
+          >
+            ⚙
+          </button>
+        </div>
       </header>
       <UpdateBanner status={update} />
 
-      <main className="content">
-        <section className="hero">
-          <h1>Requirements, versioned like code.</h1>
-          <p className="muted">
-            {brand} turns a folder in your project&apos;s Git repository into a structured, linkable requirements
-            database — no server, no accounts.
-          </p>
-          <button type="button" className="btn btn--primary" disabled title="Arrives in milestone M2">
-            Open requirements repository…
-          </button>
-          <p className="hint">Opening a repository arrives in milestone M2.</p>
-        </section>
-
-        <section className="card" aria-labelledby="env-title">
-          <h2 id="env-title">Environment</h2>
-          {git === null ? (
-            <StatusRow label="Git" tone="neutral">Checking…</StatusRow>
-          ) : git.installed ? (
-            <StatusRow label="Git" tone="ok">Installed — version {git.version}</StatusRow>
-          ) : (
-            <StatusRow label="Git" tone="error">
-              {git.reason}{' '}
-              <a href={git.downloadUrl} target="_blank" rel="noreferrer">
-                Download Git for Windows
-              </a>
-            </StatusRow>
-          )}
-          <StatusRow label="Theme" tone={theme.warnings.length ? 'warn' : 'ok'}>
-            {{ user: 'Your theme.json', file: 'App theme', default: 'Built-in default' }[theme.source]}
-            {theme.warnings.length ? ` — ${theme.warnings.length} warning(s)` : ''}
-          </StatusRow>
-          <StatusRow
-            label="Updates"
-            tone={update?.state === 'error' ? 'warn' : update?.state === 'ready' || update?.state === 'up-to-date' ? 'ok' : 'neutral'}
-          >
-            {describeUpdate(update)}
-          </StatusRow>
-          <StatusRow label="App" tone="neutral">
-            {appInfo ? `${brand} ${appInfo.version} · Electron ${appInfo.electronVersion} · ${appInfo.platform}` : '…'}
-          </StatusRow>
-          {theme.warnings.length > 0 && (
-            <ul className="warnings">
-              {theme.warnings.map((w) => (
-                <li key={w}>{w}</li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <DiagnosticsCard appInfo={appInfo} />
-        <SelfTestCard />
+      <main className="main">
+        {/* The workspace stays mounted while settings are shown, so unsaved edits are not lost. */}
+        {repo && (
+          <div className="main__view" hidden={showSettings}>
+            <WorkspaceScreen key={repo.root} info={repo} onInfo={onInfo} />
+          </div>
+        )}
+        {showSettings && <SettingsScreen theme={theme} git={git} update={update} appInfo={appInfo} onBack={() => setShowSettings(false)} />}
+        {!repo && !showSettings && <StartScreen brand={brand} git={git} onOpened={setRepo} />}
       </main>
     </div>
   )

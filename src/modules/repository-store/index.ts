@@ -42,13 +42,24 @@ export interface RequirementsRepo {
   readonly schemaProblems: SchemaProblem[]
   listItemFiles(): Promise<ItemFileInfo[]>
   readItemFile(path: string): Promise<{ ok: true; item: Item } | { ok: false; error: string }>
+  /** Path of an item's file relative to the requirements folder. */
+  itemPath(id: string): string
+  /**
+   * Reads one item by ID, with a revision (hash of the file content) for conflict-safe saving.
+   * `null` if no file exists.
+   */
+  readItem(id: string): Promise<({ ok: true; item: Item } | { ok: false; error: string }) & { revision: string } | null>
   /** Reads every item and runs all checks. */
   loadAll(): Promise<LoadResult>
   /** A new item with a fresh unique ID and the schema's default values. Not saved yet. */
   createItem(typeId: string, takenIds: ReadonlySet<string>, init?: Partial<Pick<Item, 'title' | 'text' | 'parent' | 'order'>>): Item
-  /** Saves an item atomically (a crash never leaves a half-written file). */
-  writeItem(item: Item): Promise<void>
-  deleteItem(id: string): Promise<void>
+  /**
+   * Saves an item atomically (a crash never leaves a half-written file) and returns its new revision.
+   * With `expectedRevision`, refuses with a ConflictError if the file changed since it was read
+   * (`null` = the file must not exist yet).
+   */
+  writeItem(item: Item, options?: { expectedRevision?: string | null }): Promise<string>
+  deleteItem(id: string, options?: { expectedRevision?: string }): Promise<void>
 }
 
 export type FolderState = 'ready' | 'not-initialized' | 'missing'
@@ -62,4 +73,5 @@ export interface RepositoryStore {
 }
 
 export { createFileRepositoryStore }
+export { ConflictError } from './errors'
 export { checkRepository } from './checks'

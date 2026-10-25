@@ -18,8 +18,9 @@ desktop GUI to view, edit, link, compare and export them. No server, no accounts
 | --- | --- |
 | M0 Foundations — skeleton, module boundaries, theme file, Windows installer | Done |
 | M1 Data layer — schema, item files, repository store, index/search, performance, auto-update | Done |
-| M2 Core UI — open a repository, item table, editor, hierarchy | Next |
-| M3–M6 | Planned |
+| M2 Core UI — open/create a requirements folder, item table, editor, hierarchy | Done |
+| M3 Links — create and remove typed links | Next |
+| M4–M6 | Planned |
 
 ## Develop
 
@@ -30,6 +31,7 @@ npm install
 npm run dev        # run the app with live reload
 npm run check      # type-check + lint (incl. module-boundary rules) + tests
 npm run test:perf  # performance tests with 10,000 and 50,000 items
+npm run build && npm run test:e2e   # drive the real app through the prototype journey (screenshots in e2e/out/)
 npm run gen:repo -- <folder> [count]   # create a test repository with generated items
 npm run dist:win   # build the Windows installer (on Windows)
 ```

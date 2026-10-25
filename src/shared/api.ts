@@ -1,4 +1,7 @@
 // The ONE contract between the UI (renderer) and the core (main process).
+import type { Item, ItemIssue, ItemQuery, LinkRef, QueryResult, Schema, SchemaProblem } from './domain'
+export type * from './domain'
+
 // The UI can do exactly what is listed here and nothing else. Adding a capability = adding it here,
 // implementing it in src/main/ipc.ts, and exposing it in src/preload/index.ts.
 
@@ -54,6 +57,51 @@ export interface DataSelfTestResult {
   queries: { name: string; ms: number; total: number }[]
 }
 
+// ---------- workspace (an opened requirements repository)
+
+export interface FolderCheck {
+  /** The folder ReqMan will use: the top of the Git repository if the chosen folder is inside one. */
+  root: string
+  isGitRepository: boolean
+  /** 'ready' = has a requirements folder; 'not-initialized' = can create one; 'missing' = folder not found. */
+  state: 'ready' | 'not-initialized' | 'missing'
+}
+
+export interface RepoInfo {
+  root: string
+  /** Folder name, shown in the title bar. */
+  name: string
+  isGitRepository: boolean
+  schema: Schema
+  schemaProblems: SchemaProblem[]
+  itemCount: number
+  /** Whole-repository problems: duplicate IDs, broken links, missing parents, unreadable files. */
+  issues: ItemIssue[]
+  /** How long opening took and how much had to be re-read. */
+  lastSync: { durationMs: number; full: boolean; changedFiles: number }
+}
+
+export interface ItemDetails {
+  item: Item
+  /** Hash of the file as read; saving with an outdated revision is refused (someone else changed it). */
+  revision: string
+  /** Links from other items to this one. */
+  incoming: LinkRef[]
+  childCount: number
+  /** Schema problems in this item. */
+  issues: ItemIssue[]
+}
+
+export type SaveResult =
+  | { ok: true; details: ItemDetails }
+  | { ok: false; reason: 'conflict' | 'invalid' | 'error'; message: string; issues?: ItemIssue[] }
+
+export interface RecentRepository {
+  root: string
+  name: string
+  openedAt: string
+}
+
 export interface ReqManApi {
   getAppInfo(): Promise<AppInfo>
   getGitInfo(): Promise<GitInfo>
@@ -68,6 +116,28 @@ export interface ReqManApi {
   installUpdate(): Promise<void>
   /** Subscribes to update status changes; returns an unsubscribe function. */
   onUpdateStatus(listener: (status: UpdateStatus) => void): () => void
+
+  // workspace
+  /** Shows the Windows folder picker; null if cancelled. */
+  pickFolder(): Promise<string | null>
+  checkFolder(path: string): Promise<FolderCheck>
+  /** Creates the requirements folder (default schema) in a repository that has none, then opens it. */
+  initializeRepository(root: string): Promise<RepoInfo>
+  openRepository(root: string): Promise<RepoInfo>
+  closeRepository(): Promise<void>
+  /** Re-reads files changed outside ReqMan (e.g. after a Git pull or a hand edit). */
+  refreshRepository(): Promise<RepoInfo>
+  getRecentRepositories(): Promise<RecentRepository[]>
+  forgetRecentRepository(root: string): Promise<void>
+  queryItems(query: ItemQuery): Promise<QueryResult>
+  getItem(id: string): Promise<ItemDetails | null>
+  /** A new, unsaved item of `type` with a fresh ID, placed last under `parent`. */
+  newItem(type: string, parent?: string): Promise<Item>
+  /** `revision` null = a new item. */
+  saveItem(item: Item, revision: string | null): Promise<SaveResult>
+  deleteItem(id: string, revision: string): Promise<{ ok: true } | { ok: false; message: string }>
+  /** Moves an item one place up or down among its siblings. */
+  moveItem(id: string, direction: 'up' | 'down'): Promise<{ ok: true } | { ok: false; message: string }>
   /** Records an error that happened in the UI in the log file. */
   reportUiError(message: string): void
   /** A plain-text summary (versions, paths, checks) to paste into a bug report. */
@@ -89,5 +159,19 @@ export const Channels = {
   getUpdateStatus: 'update:getStatus',
   checkForUpdates: 'update:check',
   installUpdate: 'update:install',
-  updateStatusChanged: 'update:statusChanged'
+  updateStatusChanged: 'update:statusChanged',
+  pickFolder: 'ws:pickFolder',
+  checkFolder: 'ws:checkFolder',
+  initializeRepository: 'ws:initialize',
+  openRepository: 'ws:open',
+  closeRepository: 'ws:close',
+  refreshRepository: 'ws:refresh',
+  getRecentRepositories: 'ws:recent',
+  forgetRecentRepository: 'ws:forgetRecent',
+  queryItems: 'ws:query',
+  getItem: 'ws:getItem',
+  newItem: 'ws:newItem',
+  saveItem: 'ws:saveItem',
+  deleteItem: 'ws:deleteItem',
+  moveItem: 'ws:moveItem'
 } as const

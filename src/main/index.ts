@@ -1,5 +1,5 @@
 // Core (main) process entry: creates the window, wires services, registers the UI API.
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, dialog, shell } from 'electron'
 import { join } from 'node:path'
 import { createServices, type Paths } from './composition'
 import { registerIpc } from './ipc'
@@ -43,6 +43,20 @@ function createWindow(services: ReturnType<typeof createServices>): void {
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('https://')) void shell.openExternal(url)
     return { action: 'deny' }
+  })
+
+  // The UI blocks closing while it has unsaved changes; ask the user instead of silently refusing.
+  win.webContents.on('will-prevent-unload', (event) => {
+    const choice = dialog.showMessageBoxSync(win, {
+      type: 'warning',
+      buttons: ['Discard changes and close', 'Keep editing'],
+      defaultId: 1,
+      cancelId: 1,
+      title: 'Unsaved changes',
+      message: 'You have unsaved changes.',
+      detail: 'If you close ReqMan now, they are lost.'
+    })
+    if (choice === 0) event.preventDefault() // preventDefault here means: allow the window to close
   })
 
   win.webContents.on('render-process-gone', (_e, details) => {

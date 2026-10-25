@@ -1,7 +1,7 @@
 // Exposes the core services to the UI over IPC, one handler per entry in src/shared/api.ts.
-import { app, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { dirname, join } from 'node:path'
-import { Channels, type AppInfo } from '../shared/api'
+import { Channels, type AppInfo, type Item, type ItemQuery } from '../shared/api'
 import { runDataBenchmark } from '../modules/sample-data'
 import type { Paths, Services } from './composition'
 
@@ -75,6 +75,37 @@ export function registerIpc(services: Services, paths: Paths): void {
       selfTestRunning = false
     }
   })
+
+  // ---------- workspace
+  const ws = services.workspace
+  const str = (v: unknown, name: string): string => {
+    if (typeof v !== 'string' || v.length === 0 || v.length > 4096) throw new Error(`Invalid ${name}.`)
+    return v
+  }
+
+  ipcMain.handle(Channels.pickFolder, async (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender)
+    const opts = { title: 'Choose the Git repository folder', properties: ['openDirectory' as const] }
+    const r = win ? await dialog.showOpenDialog(win, opts) : await dialog.showOpenDialog(opts)
+    return r.canceled ? null : (r.filePaths[0] ?? null)
+  })
+  ipcMain.handle(Channels.checkFolder, (_e, path: unknown) => ws.checkFolder(str(path, 'folder')))
+  ipcMain.handle(Channels.initializeRepository, (_e, root: unknown) => ws.initialize(str(root, 'folder')))
+  ipcMain.handle(Channels.openRepository, (_e, root: unknown) => ws.open(str(root, 'folder')))
+  ipcMain.handle(Channels.closeRepository, () => ws.close())
+  ipcMain.handle(Channels.refreshRepository, () => ws.refresh())
+  ipcMain.handle(Channels.getRecentRepositories, () => ws.recent())
+  ipcMain.handle(Channels.forgetRecentRepository, (_e, root: unknown) => ws.forgetRecent(str(root, 'folder')))
+  ipcMain.handle(Channels.queryItems, (_e, q: unknown) => ws.query((q ?? {}) as ItemQuery))
+  ipcMain.handle(Channels.getItem, (_e, id: unknown) => ws.getItem(str(id, 'ID')))
+  ipcMain.handle(Channels.newItem, (_e, type: unknown, parent: unknown) =>
+    ws.newItem(str(type, 'type'), typeof parent === 'string' && parent ? parent : undefined)
+  )
+  ipcMain.handle(Channels.saveItem, (_e, item: unknown, revision: unknown) =>
+    ws.saveItem(item as Item, typeof revision === 'string' ? revision : null)
+  )
+  ipcMain.handle(Channels.deleteItem, (_e, id: unknown, revision: unknown) => ws.deleteItem(str(id, 'ID'), str(revision, 'revision')))
+  ipcMain.handle(Channels.moveItem, (_e, id: unknown, dir: unknown) => ws.moveItem(str(id, 'ID'), dir === 'up' ? 'up' : 'down'))
 
   ipcMain.on(Channels.reportUiError, (_e, message: unknown) => {
     log.error(`UI error: ${String(message).slice(0, 4000)}`)

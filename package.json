@@ -1,7 +1,7 @@
 {
   "name": "reqman",
   "productName": "ReqMan",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Local, Git-based requirements management tool (proof of concept)",
   "main": "./out/main/index.js",
   "author": "ReqMan",
@@ -17,10 +17,12 @@
     "dist:win": "npm run build && electron-builder --win --publish never",
     "dist:dir": "npm run build && electron-builder --dir --publish never",
     "test:perf": "node -e \"process.env.PERF='1';require('child_process').execSync('npx vitest run tests/perf.test.ts',{stdio:'inherit',env:process.env})\"",
-    "gen:repo": "tsx tools/generate-test-repo.mts"
+    "gen:repo": "tsx tools/generate-test-repo.mts",
+    "test:e2e": "node e2e/journey.e2e.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@tanstack/react-virtual": "^3.14.22",
     "@types/node": "^22.20.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
@@ -31,6 +33,7 @@
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
+    "playwright-core": "^1.63.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsx": "^4.23.15",

@@ -1,9 +1,11 @@
 import { createHash } from 'node:crypto'
 import { mkdirSync } from 'node:fs'
-import { dirname } from 'node:path'
+import { stat } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import type { FieldValue, Item } from '../items'
 import type { RequirementsRepo } from '../repository-store'
+import type { ItemIssue } from '../../shared/domain'
 import type { IndexCache, IndexedItem, ItemQuery, LinkRef, QueryResult, SyncStats } from './index'
 
 /** Bump when the table layout changes; an old cache file is then rebuilt automatically. */
@@ -47,6 +49,7 @@ interface ItemRow {
   text: string
   fields_json: string
   links_json: string
+  child_count: number
 }
 
 function rowToItem(r: ItemRow): IndexedItem {
@@ -57,7 +60,8 @@ function rowToItem(r: ItemRow): IndexedItem {
     fields: JSON.parse(r.fields_json) as Record<string, FieldValue>,
     links: JSON.parse(r.links_json) as IndexedItem['links'],
     text: r.text,
-    path: r.path
+    path: r.path,
+    childCount: r.child_count
   }
   if (r.parent !== null) item.parent = r.parent
   if (r.ord !== null) item.order = r.ord
@@ -108,7 +112,7 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     deleteLinks: db.prepare('DELETE FROM links WHERE rid = ?'),
     insertFts: db.prepare('INSERT INTO items_fts(rowid, id, title, text) VALUES(?, ?, ?, ?)'),
     deleteFts: db.prepare('DELETE FROM items_fts WHERE rowid = ?'),
-    getById: db.prepare('SELECT * FROM items WHERE id = ? ORDER BY path LIMIT 1'),
+    getById: db.prepare('SELECT i.*, (SELECT COUNT(*) FROM items c WHERE c.parent = i.id) AS child_count FROM items i WHERE i.id = ? ORDER BY i.path LIMIT 1'),
     incoming: db.prepare('SELECT source AS id, type FROM links WHERE target = ? ORDER BY type, source'),
     count: db.prepare('SELECT COUNT(*) AS n FROM items')
   }
@@ -216,6 +220,48 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
 
   return {
     sync: (repo) => doSync(repo, false),
+
+    async syncPaths(repo, paths) {
+      const unique = [...new Set(paths)]
+      const results = await mapLimit(unique, 16, async (path) => {
+        const s = await stat(join(repo.folder, path)).catch(() => null)
+        return { path, s, r: s ? await repo.readItemFile(path) : null }
+      })
+      transaction(() => {
+        for (const { path, s, r } of results) {
+          removePath(path)
+          if (!s || !r) {
+            stmt.deleteFile.run(path)
+            continue
+          }
+          if (r.ok) insertItem(path, r.item)
+          stmt.upsertFile.run(path, s.mtimeMs, s.size, r.ok ? 1 : 0)
+        }
+      })
+    },
+
+    repositoryIssues(): ItemIssue[] {
+      const issues: ItemIssue[] = []
+      for (const r of db.prepare('SELECT id, COUNT(*) AS n FROM items GROUP BY id HAVING n > 1').all() as { id: string; n: number }[]) {
+        issues.push({ itemId: r.id, path: 'id', message: `${r.n} files have the ID ${r.id}.`, severity: 'error' })
+      }
+      const broken = db
+        .prepare('SELECT l.source, l.type, l.target FROM links l WHERE l.target <> l.source AND NOT EXISTS (SELECT 1 FROM items t WHERE t.id = l.target) ORDER BY l.source')
+        .all() as { source: string; type: string; target: string }[]
+      for (const r of broken) {
+        issues.push({ itemId: r.source, path: 'links', message: `"${r.type}" link to ${r.target}, which does not exist.`, severity: 'error' })
+      }
+      const orphans = db
+        .prepare('SELECT i.id, i.parent FROM items i WHERE i.parent IS NOT NULL AND i.parent <> i.id AND NOT EXISTS (SELECT 1 FROM items p WHERE p.id = i.parent) ORDER BY i.id')
+        .all() as { id: string; parent: string }[]
+      for (const r of orphans) {
+        issues.push({ itemId: r.id, path: 'parent', message: `Parent ${r.parent} does not exist.`, severity: 'error' })
+      }
+      for (const r of db.prepare('SELECT path FROM files WHERE ok = 0 ORDER BY path').all() as { path: string }[]) {
+        issues.push({ itemId: r.path, path: 'file', message: 'This file could not be read.', severity: 'error' })
+      }
+      return issues
+    },
     rebuild: (repo) => doSync(repo, true),
 
     query(q: ItemQuery): QueryResult {
@@ -268,7 +314,7 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       const limit = Math.max(0, Math.min(q.limit ?? 200, 10_000))
       const offset = Math.max(0, q.offset ?? 0)
       const rows = db
-        .prepare(`SELECT i.* FROM items i ${whereSql} ORDER BY ${orderSql} LIMIT ? OFFSET ?`)
+        .prepare(`SELECT i.*, (SELECT COUNT(*) FROM items c WHERE c.parent = i.id) AS child_count FROM items i ${whereSql} ORDER BY ${orderSql} LIMIT ? OFFSET ?`)
         .all(...params, ...orderParams, limit, offset) as unknown as ItemRow[]
       return { total, items: rows.map(rowToItem) }
     },

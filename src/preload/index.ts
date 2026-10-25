@@ -18,7 +18,21 @@ const api: ReqManApi = {
     const handler = (_e: Electron.IpcRendererEvent, status: UpdateStatus): void => listener(status)
     ipcRenderer.on(Channels.updateStatusChanged, handler)
     return () => ipcRenderer.removeListener(Channels.updateStatusChanged, handler)
-  }
+  },
+  pickFolder: () => ipcRenderer.invoke(Channels.pickFolder),
+  checkFolder: (path) => ipcRenderer.invoke(Channels.checkFolder, path),
+  initializeRepository: (root) => ipcRenderer.invoke(Channels.initializeRepository, root),
+  openRepository: (root) => ipcRenderer.invoke(Channels.openRepository, root),
+  closeRepository: () => ipcRenderer.invoke(Channels.closeRepository),
+  refreshRepository: () => ipcRenderer.invoke(Channels.refreshRepository),
+  getRecentRepositories: () => ipcRenderer.invoke(Channels.getRecentRepositories),
+  forgetRecentRepository: (root) => ipcRenderer.invoke(Channels.forgetRecentRepository, root),
+  queryItems: (query) => ipcRenderer.invoke(Channels.queryItems, query),
+  getItem: (id) => ipcRenderer.invoke(Channels.getItem, id),
+  newItem: (type, parent) => ipcRenderer.invoke(Channels.newItem, type, parent),
+  saveItem: (item, revision) => ipcRenderer.invoke(Channels.saveItem, item, revision),
+  deleteItem: (id, revision) => ipcRenderer.invoke(Channels.deleteItem, id, revision),
+  moveItem: (id, direction) => ipcRenderer.invoke(Channels.moveItem, id, direction)
 }
 
 contextBridge.exposeInMainWorld('reqman', api)

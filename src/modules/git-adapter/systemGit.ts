@@ -1,6 +1,7 @@
 // Implementation: uses the Git installed on the user's PC (Git for Windows), so ReqMan works
 // with exactly the credentials, SSH keys and configuration the user already has.
 import { execFile } from 'node:child_process'
+import { normalize } from 'node:path'
 import type { GitInfo } from '../../shared/api'
 import type { GitAdapter } from './index'
 
@@ -35,6 +36,16 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
         return { installed: true, version }
       } catch {
         return { installed: false, reason: 'Git was not found on this PC.', downloadUrl: GIT_DOWNLOAD_URL }
+      }
+    },
+
+    async findRepositoryRoot(path: string): Promise<string | null> {
+      try {
+        const out = (await run('git', ['-C', path, 'rev-parse', '--show-toplevel'])).trim()
+        // Git prints forward slashes on Windows; normalise to the platform's form.
+        return out ? normalize(out) : null
+      } catch {
+        return null
       }
     }
   }

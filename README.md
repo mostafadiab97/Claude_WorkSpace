@@ -31,8 +31,8 @@ npm run check      # type-check + lint (incl. module-boundary rules) + tests
 npm run dist:win   # build the Windows installer (on Windows)
 ```
 
-To publish a release: set `version` in `package.json`, commit, then push a matching tag (`git tag v0.0.4 && git push --tags`).
-The **Release** workflow builds the installer and publishes it; installed copies pick it up automatically.
+To publish a release: change `version` in `package.json` and push to `main`. The **Release** workflow
+builds the installer and publishes it as a GitHub Release; installed copies pick it up automatically.
 
 ## Docs
 

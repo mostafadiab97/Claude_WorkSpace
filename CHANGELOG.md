@@ -3,6 +3,22 @@
 Each version was installed and tried by the product owner on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.5.0 — 25 Oct 2026 — M4 Git
+- Git bar: branch, commits to push ↑ / pull ↓, **Changes**, **Pull**, **Push**; results with the affected items.
+- Changes panel: uncommitted changes per item (new / changed / deleted / renamed), **Discard** per item,
+  commit message + **Commit** (only `requirements/` is ever committed), name/e-mail form when Git doesn't know
+  the user, **Undo last commit** for commits not pushed yet.
+- Pull: fetch, then an in-memory check; if items were changed on both sides it **stops without changing anything**
+  and names them; otherwise fast-forward or merge commit, then the table updates. Uncommitted changes the pull
+  would overwrite are named too. Push never forces; a rejected push says "Pull first".
+- History tab in the editor: commits of the item (author, date, message) plus "Not committed yet", and a
+  field-by-field comparison of what each one changed (text before/after, links added/removed).
+- Clear messages for sign-in, network, timeouts and hooks; sign-in happens through Git's own credential window.
+- Owner's decisions (25 Oct 2026): stop on conflicts (resolve per item later), show the branch only (no
+  create/switch yet), commit only `requirements/`.
+- Owner could not install Node.js (no admin rights) — development continues in the cloud; see
+  `docs/DEVELOPING.md` for the no-admin Node.js option.
+
 ## 0.4.1 — 25 Oct 2026
 - Fix: opening a repository failed with "table items has no column named fp" when its index cache had been
   created by 0.3.x. The cache now stores its format version and is dropped and rebuilt when it changes.

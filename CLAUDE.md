@@ -9,8 +9,13 @@ Internal proof of concept first; likely a commercial product later.
 release on his Windows 11 PC and reports back. A team may take the code over later, so it must stay conventional,
 tested and documented (NFR-10).
 
-This file is the hand-over from the cloud phase (24–25 Oct 2026, releases v0.0.1–v0.4.1) to local work in
-VS Code. Read it fully before starting; then read the documents it points to when a task touches them.
+This file is the project memory and hand-over note: whoever continues (a cloud session, Claude Code in VS Code on
+the owner's PC, or a future team) reads it fully first, then the documents it points to when a task touches them.
+**Keep it current with every release** (status, next step, decisions, pitfalls).
+
+Where development happens: planned to move to Claude Code in VS Code on the owner's PC (25 Oct 2026), but he could
+not install Node.js (no admin rights; the no-admin zip route is in `docs/DEVELOPING.md`), so work continued in the
+cloud session from v0.5.0. Nothing lives outside this repository and `Claude_SandBox`.
 
 ## Where everything is
 
@@ -95,7 +100,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status at hand-over (v0.4.1)
+## Status (v0.5.0, 25 Oct 2026)
 
 | Milestone | State |
 | --- | --- |
@@ -103,43 +108,52 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | M1 Data layer — schema, item files, store, SQLite index, perf, auto-update, data self-test | Done (v0.1.0) |
 | M2 Core UI — open/create folder, table, hierarchy, editor; then owner feedback: tree inside the table, drag & drop, parent picker, fields dialog, columns menu | Done (v0.2.0, v0.3.0) |
 | M3 Links — add/remove both directions, suspect links + confirm, Text/Links columns, link filters, built-in fields protected, column order | Done (v0.4.0, fix v0.4.1) |
-| **M4 Git** — status of changed items, commit, pull, push, per-item history | **Next** |
-| M5 Compare — two refs, per-item and per-link differences | Planned |
+| M4 Git — Git bar, per-item changes, commit (requirements/ only), pull that stops safely on items changed on both sides, push (never forced), discard, undo unpushed commit, name/e-mail form, per-item history with field-level comparison | Done (v0.5.0) |
+| **M5 Compare** — two refs, per-item and per-link differences | **Next** |
 | M6 Export (CSV) and hardening; full journey on two PCs | Planned |
 
-Owner's last report (25 Oct 2026): "all works fine" on v0.4.1.
+Owner's last report (25 Oct 2026): "all works fine" on v0.4.1. v0.5.0 is released and waiting for his test
+(checklist "v0.5.0" in `docs/TESTING.md`).
 
-Automated tests at hand-over: 71 unit tests (+2 perf skipped by default), e2e journey with ~55 checks.
+Automated tests: 79 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
+repository and two clones ("PC A", "PC B"); e2e journey with ~75 checks, incl. commit → push → colleague pushes →
+pull → history → conflict stop → undo commit + discard → pull.
 Measured on the sandbox (10,005 items, Linux container): open incl. first indexing 5–8 s, expand all 0.4–0.6 s,
 scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 50k first index 18–73 s (Defender).
 
-## Next step: M4 Git (draft plan — confirm the open questions with the owner first)
+## M4 decisions (owner, 25 Oct 2026) — already built
 
-Goal (journey steps 4, 5, 7): commit and push from ReqMan; the other engineer pulls; per-item history.
+- Pull that finds items changed on both sides **stops without changing anything** and lists them; per-item
+  resolution is FR-13 (MVP). Until then: Undo last commit (if unpushed) + Discard = take their version.
+- Branch is **shown only**; creating/switching branches is FR-12 (MVP).
+- ReqMan commits **only `requirements/`** (`git add --all -- requirements` + `git commit --only -- requirements`).
+- Implementation notes: `src/modules/workspace/gitOps.ts` (rules + messages), `src/modules/git-adapter/systemGit.ts`
+  (commands). In-memory conflict check = `git merge-tree --write-tree` (Git ≥ 2.38; owner has 2.47); if it is
+  unavailable the merge runs and is aborted on conflicts (safety net). Sign-in only via Git Credential Manager
+  (`GIT_TERMINAL_PROMPT=0` so nothing hangs on an invisible prompt).
+
+## Next step: M5 Compare (draft plan — confirm with the owner)
+
+Goal (journey step 6): "A pulls and opens Compare between the previous commit and now: the tool lists 'REQ-12 text
+changed', 'TC-4 → REQ-7 link added' rather than file lines."
 
 Proposed scope:
-1. **git-adapter** grows: `status(root)`, `commit(paths, message)`, `pull()`, `push()`, `log(path)`,
-   `show(ref, path)`, `currentBranch()`, `aheadBehind()` — all via the installed `git` (no libgit2), argument
-   arrays only (no shell), timeouts, clear errors. Authentication = the user's Git (Git Credential Manager ships
-   with Git for Windows); ReqMan stores no tokens.
-2. **Changes panel:** items changed vs HEAD (added / modified / deleted / renamed), per item, from
-   `git status --porcelain=v2 -- requirements/`; schema changes listed separately; "discard changes" per item
-   (with confirmation).
-3. **Commit:** message box; commits only `requirements/` paths (never other project files); refuses with unsaved
-   editor changes; shows author from `git config` and asks to set name/email if missing.
-4. **Pull / Push:** pull = fetch + fast-forward when possible; push never forces; rejected push → explain "pull
-   first". Ahead/behind counter in the top bar with the branch name. After pull: index sync (already fast).
-5. **Per-item history:** `git log --follow` on the item file → list (author, date, message); selecting an entry
-   shows that version's fields/text/links side by side with the current one (field-level, not line diff) —
-   reuse the item parser on `git show <commit>:<path>`.
-6. **Tests:** a bare repo as "remote" + two clones in temp folders ("PC A" and "PC B") in unit and e2e tests:
-   A commits & pushes, B pulls, edits, pushes, A pulls, history shows both authors.
+1. **Pick two versions:** "from" and "to", each a commit (from a list of recent commits of the requirements folder:
+   message, author, date), a branch or tag, or "my working folder". Shortcuts: "since my last pull" (ORIG_HEAD /
+   previous HEAD), "uncommitted changes".
+2. **Summary list:** per item: added / deleted / changed / moved, with what changed in one line ("text, status",
+   "link added: verifies SYS-…"); filters by kind and type; counts. Built from `git diff --name-status -M` between the
+   two refs under `requirements/` + `diffItems()` on both versions (already in `items`), computed in the main process.
+3. **Detail:** clicking an item shows the same field/text/link comparison as the History tab (reuse `HistoryView`'s
+   `ChangeView`, move it to a shared component).
+4. **Link view:** links added/removed across the whole set, listed both ways ("TC-4 verifies SYS-7 — added").
+5. **Performance:** 10k items, many changes — stream/paginate the list; reading both versions via one
+   `git cat-file --batch` process instead of one `git show` per file.
+6. **Tests:** two refs with every kind of change (incl. rename of a file, schema change, broken file), e2e on the
+   two-PC setup used for M4.
 
-Open questions for the owner (ask before building):
-- When a pull hits a conflict (both changed the same item): in M4 just stop safely and list the conflicting
-  items (recommended; resolution per item is FR-13, MVP), or already resolve per item (mine / theirs)?
-- Branch switching/creation in M4 too, or only show the current branch (FR-12 is MVP)?
-- Commit scope: only `requirements/` (recommended) — confirm.
+Questions for the owner: is "since my last pull" the main use (then make it the default)? Should Compare also export
+the list (CSV/Markdown) now, or with M6 exports?
 
 Later milestones and backlog are in DESIGN.md ("Scope by stage") — notable MVP items: schema editor for item and
 link types (fields part done), branches and tags, per-requirement merge, Word/PDF/Excel/Markdown export,
@@ -177,3 +191,8 @@ report-only by default), GitHub PR view.
   README, tell the owner to `git pull` / `git reset --hard origin/main` there.
 - Release via tag push is not used; the version change in `package.json` triggers the release.
 - `electron-builder --publish always` failed in CI before; publishing uses `gh release create` instead.
+- The Changes panel replaces the editor column but the editor stays **mounted** (hidden) so unsaved edits survive;
+  opening any item closes the panel. In e2e, open the panel only if it is not visible (the button toggles).
+- Git tests that need "no identity" must isolate `HOME` and `GIT_CONFIG_GLOBAL` (see `tests/workspace-git.test.ts`).
+- A clone of an empty remote has an upstream configured but no remote branch: treat that as "no upstream" (status
+  has no `branch.ab` line) so the first push publishes with `-u`.

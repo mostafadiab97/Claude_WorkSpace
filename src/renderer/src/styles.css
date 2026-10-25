@@ -1301,3 +1301,294 @@ code {
 .guard p {
   margin: 0 0 var(--rm-space-sm);
 }
+
+/* Git bar (M4) */
+
+.gitbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rm-space-sm) var(--rm-space-md);
+  padding: var(--rm-space-xs) var(--rm-space-md);
+  border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
+  background: var(--rm-color-surface-alt);
+  font-size: var(--rm-font-size-small);
+}
+
+.gitbar .btn {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.gitbar--off {
+  min-height: 32px;
+}
+
+.gitbar__branch {
+  font-family: var(--rm-font-family-mono);
+  font-weight: var(--rm-font-weight-strong);
+}
+
+.gitbar__sync {
+  font-family: var(--rm-font-family-mono);
+  color: var(--rm-color-text-muted);
+}
+
+.gitbar__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rm-space-md);
+  padding: var(--rm-space-sm) var(--rm-space-md);
+  border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
+  background: var(--rm-color-surface);
+  border-left: 3px solid var(--rm-color-success);
+  font-size: var(--rm-font-size-small);
+}
+
+.gitbar__notice--error {
+  color: var(--rm-color-danger);
+  border-left-color: var(--rm-color-danger);
+}
+
+.gitbar__notice-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.gitbar__items {
+  margin: var(--rm-space-xs) 0 0;
+  padding-left: var(--rm-space-lg);
+  color: var(--rm-color-text);
+}
+
+/* Changes panel */
+
+.changes__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.changes__item {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: var(--rm-space-sm);
+  align-items: center;
+  min-height: 30px;
+  padding: 0 var(--rm-space-xs);
+  border-radius: var(--rm-shape-radius-small);
+}
+
+.changes__item:hover {
+  background: var(--rm-color-row-hover);
+}
+
+.changes__kind {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--rm-shape-radius-small);
+  font-family: var(--rm-font-family-mono);
+  font-size: var(--rm-font-size-small);
+  font-weight: var(--rm-font-weight-strong);
+  color: var(--rm-color-primary-text);
+  background: var(--rm-color-primary);
+}
+
+.changes__kind--added {
+  background: var(--rm-color-success);
+}
+
+.changes__kind--deleted,
+.changes__kind--conflict {
+  background: var(--rm-color-danger);
+}
+
+.changes__kind--renamed {
+  background: var(--rm-color-warning);
+}
+
+.changes__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.changes__commit,
+.changes__identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-sm);
+  align-items: flex-start;
+  padding-top: var(--rm-space-md);
+  border-top: var(--rm-shape-border-width) solid var(--rm-color-border);
+}
+
+.changes__commit .field,
+.changes__identity .field {
+  width: 100%;
+}
+
+.is-hidden {
+  display: none;
+}
+
+.contents {
+  display: contents;
+}
+
+/* editor tabs + history */
+
+.tabs {
+  display: flex;
+  gap: var(--rm-space-xs);
+  padding: 0 var(--rm-space-lg);
+  border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
+}
+
+.tabs__tab {
+  font: inherit;
+  padding: var(--rm-space-sm) var(--rm-space-md);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--rm-color-text-muted);
+  cursor: pointer;
+}
+
+.tabs__tab--active {
+  color: var(--rm-color-text);
+  border-bottom-color: var(--rm-color-primary);
+}
+
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-md);
+}
+
+.history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.history__entry {
+  font: inherit;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: var(--rm-space-xs) var(--rm-space-sm);
+  border: 0;
+  border-radius: var(--rm-shape-radius-small);
+  background: transparent;
+  color: var(--rm-color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.history__entry:hover {
+  background: var(--rm-color-row-hover);
+}
+
+.history__entry--selected,
+.history__entry--selected:hover {
+  background: var(--rm-color-selection);
+}
+
+.history__message {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.history__meta {
+  font-size: var(--rm-font-size-small);
+  color: var(--rm-color-text-muted);
+}
+
+.change {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-sm);
+}
+
+.change__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--rm-font-size-small);
+}
+
+.change__table th,
+.change__table td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--rm-space-xs) var(--rm-space-sm);
+  border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
+  overflow-wrap: anywhere;
+}
+
+.change__table thead th {
+  color: var(--rm-color-text-muted);
+  font-weight: var(--rm-font-weight-strong);
+}
+
+.change__before {
+  color: var(--rm-color-text-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.change__after {
+  font-weight: var(--rm-font-weight-strong);
+}
+
+.change__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-xs);
+}
+
+.change__text pre {
+  margin: 0;
+  padding: var(--rm-space-sm);
+  border-radius: var(--rm-shape-radius-small);
+  background: var(--rm-color-surface-alt);
+  font-family: var(--rm-font-family);
+  font-size: var(--rm-font-size-small);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.change__text pre.change__before {
+  text-decoration: none;
+  border-left: 3px solid var(--rm-color-danger);
+}
+
+.change__text pre.change__after {
+  font-weight: var(--rm-font-weight-normal);
+  border-left: 3px solid var(--rm-color-success);
+}
+
+.change__links {
+  margin: 0;
+  padding-left: var(--rm-space-lg);
+  font-size: var(--rm-font-size-small);
+}
+
+.changes__undo {
+  padding-top: var(--rm-space-sm);
+  border-top: var(--rm-shape-border-width) solid var(--rm-color-border);
+  font-size: var(--rm-font-size-small);
+}

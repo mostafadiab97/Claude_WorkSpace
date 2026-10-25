@@ -33,16 +33,16 @@ The UI ↔ core contract is **one file**: `src/shared/api.ts`. Adding a capabili
 
 | Module | Interface (`index.ts`) | Implementation | Used by |
 | --- | --- | --- | --- |
-| `git-adapter` | `GitAdapter` — `getGitInfo()` | `systemGit.ts`: calls the installed Git | `main/ipc.ts` |
+| `git-adapter` | `GitAdapter` — `getGitInfo()`, `findRepositoryRoot()`, `status()`, `remotes()`, `identity()`, `commit()`, `fetch()`, `checkMerge()`, `merge()`, `push()`, `log()`, `show()`, `discard()`, `undoLastCommit()`… | `systemGit.ts`: calls the installed Git with argument arrays (no shell), `GIT_TERMINAL_PROMPT=0` (sign-in only through Git Credential Manager's window), timeouts (30 s local, 180 s network); `GitError` carries exit code and Git's output | `workspace`, `main/ipc.ts` |
 | `logger` | `Logger` — `info/warn/error`, `filePath` | `fileLogger.ts`: appends to `%APPDATA%\ReqMan\logs\reqman.log`, rotates at 1 MB, never throws | `main/index.ts`, `main/ipc.ts` |
 | `theme` | `ThemeService` — `load()`, `userThemeFile`, `ensureUserThemeFile()` | `fileTheme.ts`: layers defaults ← `config/theme.json` ← `%APPDATA%\ReqMan\theme.json`, validates each, loads logo | `main/ipc.ts` |
 | `updater` | `UpdateService` — `start()`, `checkNow()`, `installAndRestart()`, `current()` | `githubUpdater.ts`: electron-updater against GitHub Releases; background download, user-chosen restart | `main/index.ts`, `main/ipc.ts` |
 
 | `schema` | `parseSchema(text)` → `{ schema, problems }`; types `Schema`, `ItemTypeDef`, `FieldDef`, `LinkTypeDef` | `parse.ts`: reads `requirements/.reqman/schema.yaml`, skips invalid entries with a message | `items`, `repository-store` |
-| `items` (domain core) | `Item`, `Link`; `parseItemFile`, `serializeItem`, `generateId`, `validateItem`, `contentFingerprint` | Pure logic, no I/O: file format, IDs, per-item validation, suspect-link fingerprint | `repository-store`, `index-cache`, `sample-data` |
+| `items` (domain core) | `Item`, `Link`; `parseItemFile`, `serializeItem`, `generateId`, `validateItem`, `contentFingerprint`, `diffItems` | Pure logic, no I/O: file format, IDs, per-item validation, suspect-link fingerprint | `repository-store`, `index-cache`, `sample-data` |
 | `repository-store` | `RepositoryStore` — `inspect()`, `initialize()`, `open()`; `RequirementsRepo` — `loadAll()`, `createItem()`, `writeItem()`, `deleteItem()`… | `fileStore.ts`: files in `requirements/`, atomic writes, never overwrites unreadable files; `checks.ts`: duplicate IDs, broken links, parent loops | `main/composition.ts`, `index-cache`, `sample-data` |
 | `index-cache` | `IndexCache` — `sync()`, `syncPaths()`, `rebuild()`, `query()` (incl. link filters/counts), `get()`, `incomingLinks()`, `fingerprint()`, `repositoryIssues()` | `sqliteIndex.ts`: SQLite (built into Electron) with full-text search, outside the repo, re-reads only changed files; whole-repository checks as SQL | `workspace` |
-| `workspace` | `WorkspaceService` — `checkFolder()`, `initialize()`, `open()`, `refresh()`, `query()`, `getItem()`, `newItem()`, `saveItem()`, `deleteItem()`, `moveItem()`, `recent()` | `workspace.ts`: the open repository; conflict-safe saving (file revision check), no parent loops, delete only leaf items, reordering by swapping two files; recent list in `%APPDATA%\\ReqMan\\recent-repositories.json` | `main/ipc.ts` |
+| `workspace` | `WorkspaceService` — `checkFolder()`, `initialize()`, `open()`, `refresh()`, `query()`, `getItem()`, `newItem()`, `saveItem()`, `deleteItem()`, `moveItem()`, `recent()` | `workspace.ts`: the open repository; conflict-safe saving (file revision check), no parent loops, delete only leaf items, reordering by swapping two files; recent list in `%APPDATA%\\ReqMan\\recent-repositories.json`. `gitOps.ts`: changes per item, commit (requirements folder only), pull (fetch, in-memory merge check, stop on items changed on both sides), push (never forced), discard, undo unpushed commit, per-item history and field-level comparison | `main/ipc.ts` |
 | `sample-data` | `generateItems()`, `runDataBenchmark()` | Fictional thermostat requirements; used by tests, `npm run gen:repo` and the in-app self-test | `main/ipc.ts`, tests |
 
 Planned (see milestones): `diff-merge`, `import-export`, `git-host`.
@@ -79,6 +79,8 @@ requirements/
 | `better-sqlite3` for the index | Node's built-in `node:sqlite` (in Electron 45) | No native module to compile for Windows; same SQL and full-text search. Hidden behind `IndexCache`, so swappable in one place |
 | Metadata folder `.reqtool/` | `.reqman/` | Matches the product name |
 | Requirement text in field `description` | Built-in property `text` (the Markdown body) | The body of the file is the text; keeps the header small |
+| Suspect links in the MVP (FR-17) | Built in M3 (v0.4.0) | Cheap once links existed; the format already had `confirmed` |
+| Per-requirement merge in the MVP (FR-13) | M4 pull stops on items changed on both sides and names them; "Undo last commit" + "Discard" lets the user take the other version | Owner's decision 25 Oct 2026: stop safely now, choose per item later |
 
 ## Folder layout
 
@@ -95,7 +97,7 @@ tests/             unit tests (Vitest)
 samples/, tools/   sample data and its generator
 ```
 
-## UI structure (M2)
+## UI structure
 
 | Area | Component | Notes |
 | --- | --- | --- |
@@ -107,4 +109,7 @@ samples/, tools/   sample data and its generator
 | Item search | `workspace/ItemSearch.tsx` | Shared search-and-pick list for the parent picker and link targets |
 | Parent picker | `workspace/ParentPicker.tsx` | Empty = top-level items; typed = relevance search; loops greyed out via `getAncestors` |
 | Editor | `workspace/ItemEditor.tsx` | Fields generated from the schema; Ctrl+S; conflict message if the file changed outside ReqMan |
+| Git bar | `workspace/GitPanels.tsx` (`GitBar`) | Branch, ↑ahead ↓behind, Changes / Pull / Push; result message with the affected items (clickable) |
+| Changes panel | `workspace/GitPanels.tsx` (`ChangesPanel`) | Replaces the editor column while open (the editor stays mounted, so unsaved edits survive); per-item Discard, commit message, name/e-mail form, Undo last commit |
+| History | `workspace/HistoryView.tsx` | Editor tab: commits of the item (plus "Not committed yet"), and for the selected one a field/text/link comparison |
 | Settings | `screens/SettingsScreen.tsx` | Environment, diagnostics, data self-test; the workspace stays mounted behind it |

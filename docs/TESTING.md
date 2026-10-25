@@ -48,7 +48,34 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.4.0 (milestone M3: links)
+## Manual test checklist — v0.5.0 (milestone M4: Git)
+
+You need a repository on GitHub you may push to — the sandbox is ideal: your `Claude_SandBox` clone (run
+`git pull` there first). To play "the colleague", either edit a file on GitHub's website (open
+`requirements/items/<ID>.md` → pencil icon → Commit changes) or make a second clone in another folder and open it in
+ReqMan with **Close repository → Open repository…**.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to 0.5.0 and open the sandbox clone | A Git bar above the table: `⎇ main  ↑0 ↓0`, buttons **Changes**, **Pull**, **Push** |
+| 2 | Edit an item's title, Save | **Changes (1)** |
+| 3 | Click **Changes** | The panel (in place of the editor) lists the item with **M** (changed). "As <your name> <e-mail>" — if Git doesn't know you yet, a small form asks once for name and e-mail |
+| 4 | Write a commit message → **Commit 1 change** | "Committed 1 change." Changes is empty; the bar shows `↑1` |
+| 5 | Put any file outside `requirements/` into the repository folder (e.g. `test.txt`), change an item, commit | Only the item is committed — `git status` still shows `test.txt` as untracked |
+| 6 | **Push** | "Pushed." `↑0`. On GitHub the commit shows up with your message and only `requirements/` files |
+| 7 | As the colleague: change the **text** of another item on GitHub (or in the second clone + Push) | — |
+| 8 | **Pull** in ReqMan | "Pulled: 1 item changed." The table shows the new text without reopening anything |
+| 9 | Open that item → **History** tab | The colleague's commit first (name, date, message), then older ones. Selecting it shows **What changed**: a field table and the text before (struck through) / after |
+| 10 | Edit the item, Save, look at History again | A first entry "Not committed yet" comparing your saved version with the last commit |
+| 11 | **Changes → Discard → Undo change** on that item | Back to the last committed version, in the table and editor |
+| 12 | Conflict: change the **same** item on GitHub and in ReqMan; commit in ReqMan; **Pull** | Red message "Pull stopped — nothing was changed…" naming the item (click opens it). Nothing in your folder changed |
+| 13 | **Push** now | "The remote has changes you do not have yet. Pull first…" — never forced |
+| 14 | Take the colleague's version: **Changes → Undo last commit → Undo commit**, then **Discard → Undo change** on the item, then **Pull** | "Took back…", "Discarded…", then "Pulled: 1 item changed."; the item shows the colleague's version |
+| 15 | Start typing in an item without saving | **Pull** is disabled ("Save or discard your edit first") |
+| 16 | Unplug the network / Wi-Fi off, click **Pull** | "The remote repository could not be reached…" — everything else keeps working |
+| 17 | Open a folder that is not a Git repository | The Git bar says it is not a Git repository; nothing else changes |
+
+## Previous checklist — v0.4.0 (milestone M3: links)
 
 Use the sandbox data again: `git pull` in your `Claude_SandBox` clone (or `git reset --hard origin/main`). The update
 adds a confirmation to every link and makes 175 of them *suspect*, so there is something to review.

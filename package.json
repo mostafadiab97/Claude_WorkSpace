@@ -1,7 +1,7 @@
 {
   "name": "reqman",
   "productName": "ReqMan",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Local, Git-based requirements management tool (proof of concept)",
   "main": "./out/main/index.js",
   "author": "ReqMan",

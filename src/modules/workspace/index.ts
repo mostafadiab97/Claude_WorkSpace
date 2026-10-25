@@ -5,6 +5,10 @@
 import type {
   FieldDef,
   FolderCheck,
+  GitResult,
+  GitState,
+  HistoryEntry,
+  ItemVersionCompare,
   Item,
   ItemDetails,
   ItemQuery,
@@ -39,6 +43,16 @@ export interface WorkspaceService {
   reparentItem(id: string, parent: string | null, before?: string | null): Promise<OpResult>
   ancestors(id: string): string[]
   saveSchemaFields(fields: FieldDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  // Git (M4) — see gitOps.ts for the rules
+  gitState(): Promise<GitState>
+  commit(message: string): Promise<GitResult>
+  pull(): Promise<GitResult>
+  push(): Promise<GitResult>
+  discardChanges(paths: string[]): Promise<GitResult>
+  setGitIdentity(name: string, email: string): Promise<GitResult>
+  undoLastCommit(): Promise<GitResult>
+  itemHistory(id: string): Promise<HistoryEntry[]>
+  compareItemVersion(id: string, hash: string): Promise<ItemVersionCompare>
 }
 
 export { createWorkspace, cacheFileName, type WorkspaceDeps }

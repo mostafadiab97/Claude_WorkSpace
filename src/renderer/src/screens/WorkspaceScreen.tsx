@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { RepoInfo } from '../../../shared/api'
+import type { GitResult, GitState, RepoInfo } from '../../../shared/api'
 import type { ItemQuery, SortKey } from '../../../shared/domain'
 import { errorMessage, useDebounced } from '../lib/hooks'
 import { ItemEditor, type EditorTarget } from '../workspace/ItemEditor'
 import { ColumnsMenu, FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
+import { ChangesPanel, GitBar, type GitNotice } from '../workspace/GitPanels'
 import { ItemTable, type TreeControls } from '../workspace/ItemTable'
 
 /**
@@ -25,6 +26,10 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   const [busy, setBusy] = useState(false)
   const tree = useRef<TreeControls | null>(null)
   const [revealNonce, setRevealNonce] = useState(0)
+  const [gitState, setGitState] = useState<GitState | null>(null)
+  const [gitBusy, setGitBusy] = useState<string | null>(null)
+  const [gitNotice, setGitNotice] = useState<GitNotice | null>(null)
+  const [showChanges, setShowChanges] = useState(false)
   const [target, setTarget] = useState<EditorTarget | null>(null)
   const [pending, setPending] = useState<EditorTarget | null | undefined>(undefined)
   const [dirty, setDirty] = useState(false)
@@ -44,11 +49,14 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   }
 
   // Switching items with unsaved changes asks first.
+  // Opening an item (or a new one) shows the editor again in place of the Changes panel.
   const request = (next: EditorTarget | null): void => {
+    if (next) setShowChanges(false)
     if (dirty) setPending(next)
     else setTarget(next)
   }
   const select = (id: string): void => {
+    setShowChanges(false)
     if (target?.kind === 'item' && target.id === id) return
     request({ kind: 'item', id })
   }
@@ -80,6 +88,45 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
     window.addEventListener('beforeunload', onUnload)
     return () => window.removeEventListener('beforeunload', onUnload)
   }, [dirty])
+
+  // Git status follows every change of the data (saves, moves, links, refresh on window focus).
+  useEffect(() => {
+    let live = true
+    const t = window.setTimeout(() => {
+      void window.reqman
+        .getGitState()
+        .then((st) => live && setGitState(st))
+        .catch(() => {})
+    }, 250)
+    return () => {
+      live = false
+      window.clearTimeout(t)
+    }
+  }, [dataVersion])
+
+  const gitBlocked = dirty ? 'Save or discard your edit first.' : null
+  const runGit = async (action: 'pull' | 'push'): Promise<void> => {
+    setGitBusy(action === 'pull' ? 'Pulling' : 'Pushing')
+    setGitNotice(null)
+    try {
+      const r = await window.reqman[action]()
+      setGitState(r.state)
+      setGitNotice({ ok: r.ok, message: r.message, ...(!r.ok && r.items ? { items: r.items } : {}) })
+      if (action === 'pull' && r.ok) await afterChange()
+    } catch (e) {
+      setGitNotice({ ok: false, message: errorMessage(e) })
+    } finally {
+      setGitBusy(null)
+    }
+  }
+  const onPanelResult = (r: GitResult): void => {
+    setGitState(r.state)
+    if (r.ok) {
+      setGitNotice({ ok: true, message: r.message })
+      void afterChange()
+    }
+  }
+  const openFromGit = (id: string): void => select(id)
 
   const afterChange = async (): Promise<void> => {
     setDataVersion((v) => v + 1)
@@ -130,6 +177,20 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   return (
     <div className="workspace">
       <section className="workspace__main" aria-label="Items">
+        <GitBar
+          state={gitState}
+          busy={gitBusy}
+          blockedReason={gitBlocked}
+          changesOpen={showChanges}
+          onToggleChanges={() => {
+            if (!showChanges) void window.reqman.getGitState().then(setGitState)
+            setShowChanges((v) => !v)
+          }}
+          onRun={(a) => void runGit(a)}
+          notice={gitNotice}
+          onDismiss={() => setGitNotice(null)}
+          onOpenItem={openFromGit}
+        />
         <div className="toolbar">
           <input className="input toolbar__search" type="search" placeholder="Search ID, title, text…" value={text} onChange={(e) => setText(e.target.value)} aria-label="Search" />
           <select className="input toolbar__filter" value={types} onChange={(e) => setTypes(e.target.value)} aria-label="Type filter">
@@ -235,7 +296,12 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
         </footer>
       </section>
 
+      {showChanges && gitState?.available && (
+        <ChangesPanel state={gitState} blockedReason={gitBlocked} onResult={onPanelResult} onOpenItem={openFromGit} onClose={() => setShowChanges(false)} />
+      )}
+
       {target && (
+        <div className={showChanges && gitState?.available ? 'is-hidden' : 'contents'}>
         <ItemEditor
           // Same key for a draft and the saved item, so the editor stays in place when a new item is saved.
           key={target.kind === 'item' ? target.id : target.item.id}
@@ -258,6 +324,7 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
           onOpen={select}
           onClose={() => request(null)}
         />
+        </div>
       )}
 
       {editFields && (

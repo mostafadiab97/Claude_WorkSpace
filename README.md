@@ -20,8 +20,9 @@ desktop GUI to view, edit, link, compare and export them. No server, no accounts
 | M1 Data layer — schema, item files, repository store, index/search, performance, auto-update | Done |
 | M2 Core UI — open/create a requirements folder, item table, editor, hierarchy | Done (v0.3.0: hierarchy in the table, drag & drop, field editor) |
 | M3 Links — create, remove and confirm typed links; suspect links | Done (v0.4.0) |
-| M4 Git — status, commit, pull/push, branches inside ReqMan | Next |
-| M5–M6 | Planned |
+| M4 Git — changes per item, commit, pull/push (stops safely on conflicts), per-item history | Done (v0.5.0) |
+| M5 Compare — two versions of the whole set, per requirement and per link | Next |
+| M6 Export and hardening | Planned |
 
 ## Develop
 

@@ -137,3 +137,23 @@ export interface LinkRef {
   /** The target changed since this link was confirmed. */
   suspect: boolean
 }
+
+// ---------- differences between two versions of an item
+
+export interface DiffRow {
+  /** "title", "type", "parent", "order", "field:<id>", "extra:<key>" */
+  key: string
+  label: string
+  before: string
+  after: string
+}
+
+export interface ItemDiff {
+  kind: 'added' | 'deleted' | 'modified' | 'unchanged'
+  /** Changed values only. */
+  rows: DiffRow[]
+  /** Set when the text changed. */
+  text: { before: string; after: string } | null
+  linksAdded: Link[]
+  linksRemoved: Link[]
+}

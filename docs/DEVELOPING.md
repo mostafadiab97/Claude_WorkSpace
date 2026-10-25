@@ -5,7 +5,11 @@
 1. **Git for Windows** — https://git-scm.com/download/win (includes Git Credential Manager, which ReqMan's Git
    features will rely on). Then:
    `git config --global user.name "Your Name"` and `git config --global user.email "you@example.com"`.
-2. **Node.js 22 LTS** — https://nodejs.org (the version CI uses). Check with `node -v`.
+2. **Node.js 22 LTS** — https://nodejs.org (the version CI uses). Check with `node -v` in a **new** terminal.
+   *Without admin rights:* download the **Windows Binary (.zip)** for 22.x LTS (x64) from https://nodejs.org/en/download
+   instead of the installer, extract it to e.g. `%USERPROFILE%\tools\node`, then Start → "Edit environment variables
+   for your account" → `Path` → **New** → that folder → OK. Open a new terminal: `node -v` and `npm -v` work, no
+   admin needed. (Updating Node = extracting a newer zip over it.)
 3. **GitHub CLI** (optional but used to watch builds and releases) — https://cli.github.com, then `gh auth login`.
 4. **VS Code** with the **Claude Code** extension.
 5. Clone into an empty folder (note the `.` at the end), and the test data next to it — not inside:

@@ -8,11 +8,12 @@ import type { IndexCache } from '../index-cache'
 import { validateItem } from '../items'
 import type { Logger } from '../logger'
 import { ConflictError, type RepositoryStore, type RequirementsRepo } from '../repository-store'
+import { createGitOps } from './gitOps'
 import type { OpResult, WorkspaceService } from './index'
 
 export interface WorkspaceDeps {
   store: RepositoryStore
-  git: Pick<GitAdapter, 'findRepositoryRoot'>
+  git: GitAdapter
   /** Creates (or reopens) the index cache for a repository root. */
   openIndex(root: string): IndexCache
   /** Folder for per-user state (recent repositories list). */
@@ -41,6 +42,18 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   const { store, git, log } = deps
   const recentFile = join(deps.userDir, 'recent-repositories.json')
   let session: Session | null = null
+
+  const gitOps = createGitOps({
+    git,
+    log,
+    resync: async () => {
+      const s = need()
+      const repo = await store.open(s.repo.root)
+      const stats = await s.index.sync(repo)
+      s.repo = repo
+      s.lastSync = { durationMs: stats.durationMs, full: stats.full, changedFiles: stats.added + stats.updated + stats.removed }
+    }
+  })
 
   const need = (): Session => {
     if (!session) throw new Error('No repository is open.')
@@ -326,6 +339,16 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
         return { ok: false, message: (e as Error).message }
       }
     },
+
+    gitState: () => gitOps.state(need()),
+    commit: (message) => gitOps.commit(need(), message),
+    pull: () => gitOps.pull(need()),
+    push: () => gitOps.push(need()),
+    discardChanges: (paths) => gitOps.discard(need(), paths),
+    setGitIdentity: (name, email) => gitOps.setIdentity(need(), name, email),
+    undoLastCommit: () => gitOps.undoLastCommit(need()),
+    itemHistory: (id) => gitOps.history(need(), id),
+    compareItemVersion: (id, hash) => gitOps.compare(need(), id, hash),
 
     async addLink(source, type, target): Promise<OpResult> {
       const s = need()

@@ -1,5 +1,5 @@
 // The ONE contract between the UI (renderer) and the core (main process).
-import type { FieldDef, Item, ItemIssue, ItemQuery, QueryResult, Schema, SchemaProblem } from './domain'
+import type { FieldDef, Item, ItemDiff, ItemIssue, ItemQuery, QueryResult, Schema, SchemaProblem } from './domain'
 export type * from './domain'
 
 // The UI can do exactly what is listed here and nothing else. Adding a capability = adding it here,
@@ -95,6 +95,72 @@ export interface LinkInfo {
   suspect: boolean
 }
 
+// ---------- Git (M4)
+
+/** One changed file under requirements/, as an item where possible. */
+export interface ItemChange {
+  /** Path relative to the repository top folder, forward slashes. */
+  path: string
+  kind: 'added' | 'modified' | 'deleted' | 'renamed' | 'conflict'
+  /** Item ID when the file is an item file. */
+  id?: string
+  title?: string
+  /** What to show: "SYS-K7Q3XM Temperature accuracy", "Schema (schema.yaml)", or the file path. */
+  label: string
+}
+
+export interface GitState {
+  /** False when the folder is not a Git repository or Git is missing; `reason` says which. */
+  available: boolean
+  reason?: string
+  branch: string | null
+  detached: boolean
+  /** e.g. "origin/main"; null when the branch is not on the remote yet. */
+  upstream: string | null
+  /** Commits to push / to pull, as of the last pull or fetch. */
+  ahead: number
+  behind: number
+  hasRemote: boolean
+  identity: { name: string | null; email: string | null }
+  /** Uncommitted changes under requirements/. */
+  changes: ItemChange[]
+  /** The last commit can be taken back: it is not on the remote yet (and is not the first commit). */
+  canUndoCommit: boolean
+  lastCommitMessage: string | null
+  /** The repository is in the middle of a merge with conflicts (started outside ReqMan). */
+  mergeInProgress: boolean
+}
+
+export type GitResult =
+  | { ok: true; message: string; state: GitState }
+  | {
+      ok: false
+      message: string
+      /** The items the message is about (e.g. changed on both sides). */
+      items?: ItemChange[]
+      state: GitState
+    }
+
+export interface HistoryEntry {
+  /** Full commit hash; "working" for the uncommitted version. */
+  hash: string
+  author: string
+  email: string
+  /** ISO 8601; empty for "working". */
+  date: string
+  message: string
+}
+
+export interface ItemVersionCompare {
+  /** The version before this change (null: the item was created here). */
+  before: Item | null
+  /** The version after it (null: deleted). */
+  after: Item | null
+  diff: ItemDiff
+  /** A version that exists but could not be read (e.g. hand-broken file in an old commit). */
+  unreadable?: string
+}
+
 export interface ItemDetails {
   item: Item
   /** Hash of the file as read; saving with an outdated revision is refused (someone else changed it). */
@@ -166,6 +232,23 @@ export interface ReqManApi {
   removeLink(source: string, type: string, target: string): Promise<{ ok: true } | { ok: false; message: string }>
   /** Marks suspect links of `source` as reviewed (all of them, or only the one to `target`). */
   confirmLinks(source: string, target?: string): Promise<{ ok: true } | { ok: false; message: string }>
+  // --- Git (all operate on the open repository; only requirements/ is committed)
+  getGitState(): Promise<GitState>
+  /** Commits all changes under requirements/. */
+  commit(message: string): Promise<GitResult>
+  /** Fetches and merges the remote branch; stops without changing anything if items changed on both sides. */
+  pull(): Promise<GitResult>
+  /** Never forces. Publishes the branch if it is not on the remote yet. */
+  push(): Promise<GitResult>
+  /** Undoes uncommitted changes of these files (paths from GitState.changes). */
+  discardChanges(paths: string[]): Promise<GitResult>
+  setGitIdentity(name: string, email: string): Promise<GitResult>
+  /** Takes back the last commit if it was not pushed; its changes become uncommitted again. */
+  undoLastCommit(): Promise<GitResult>
+  /** Commits that changed this item, newest first; first entry "working" if it has uncommitted changes. */
+  getItemHistory(id: string): Promise<HistoryEntry[]>
+  /** What one history entry changed in the item. */
+  compareItemVersion(id: string, hash: string): Promise<ItemVersionCompare>
   /** Moves an item one place up or down among its siblings. */
   moveItem(id: string, direction: 'up' | 'down'): Promise<{ ok: true } | { ok: false; message: string }>
   /** Records an error that happened in the UI in the log file. */
@@ -209,5 +292,14 @@ export const Channels = {
   saveSchemaFields: 'ws:saveSchemaFields',
   addLink: 'ws:addLink',
   removeLink: 'ws:removeLink',
-  confirmLinks: 'ws:confirmLinks'
+  confirmLinks: 'ws:confirmLinks',
+  getGitState: 'git:state',
+  commit: 'git:commit',
+  pull: 'git:pull',
+  push: 'git:push',
+  discardChanges: 'git:discard',
+  setGitIdentity: 'git:setIdentity',
+  undoLastCommit: 'git:undoLastCommit',
+  getItemHistory: 'git:itemHistory',
+  compareItemVersion: 'git:compareItemVersion'
 } as const

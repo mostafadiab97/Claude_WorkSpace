@@ -3,6 +3,7 @@ import type { ItemDetails } from '../../../shared/api'
 import type { FieldDef, FieldValue, Item, ItemIssue, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { typeName } from '../lib/schema'
+import { HistoryView } from './HistoryView'
 import { LinksSection } from './LinksSection'
 import { ParentPicker } from './ParentPicker'
 
@@ -36,6 +37,7 @@ export function ItemEditor(props: {
   const [status, setStatus] = useState<Status>({ kind: 'idle' })
   const [issues, setIssues] = useState<ItemIssue[]>([])
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [tab, setTab] = useState<'details' | 'history'>('details')
   const [removeIncoming, setRemoveIncoming] = useState(true)
   const isNew = target.kind === 'draft'
 
@@ -176,6 +178,22 @@ export function ItemEditor(props: {
         </button>
       </header>
 
+      {!isNew && (
+        <div className="tabs" role="tablist" aria-label="Item view">
+          <button type="button" role="tab" aria-selected={tab === 'details'} className={tab === 'details' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('details')}>
+            Details
+          </button>
+          <button type="button" role="tab" aria-selected={tab === 'history'} className={tab === 'history' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('history')}>
+            History
+          </button>
+        </div>
+      )}
+
+      {tab === 'history' && !isNew ? (
+        <div className="editor__body">
+          <HistoryView schema={schema} itemId={form.id} reloadToken={reloadToken} />
+        </div>
+      ) : (
       <div className="editor__body">
         <label className="field">
           <span className="field__label">Title</span>
@@ -221,6 +239,7 @@ export function ItemEditor(props: {
           </p>
         ))}
       </div>
+      )}
 
       <footer className="editor__footer">
         {status.kind === 'error' && (

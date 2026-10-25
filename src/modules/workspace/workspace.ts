@@ -8,6 +8,7 @@ import type { IndexCache } from '../index-cache'
 import { validateItem } from '../items'
 import type { Logger } from '../logger'
 import { ConflictError, type RepositoryStore, type RequirementsRepo } from '../repository-store'
+import { compareToCsv, compareToMarkdown, itemsToCsv, itemsToMarkdown, type ExportItem } from '../import-export'
 import { createCompare } from './compare'
 import { createGitOps } from './gitOps'
 import type { OpResult, WorkspaceService } from './index'
@@ -118,6 +119,39 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     s.index
       .query({ parent: parent ?? null, sort: { by: 'order' }, limit: 10_000 })
       .items.map((i) => ({ id: i.id, type: i.type, title: i.title, fields: i.fields, links: i.links, text: i.text, extra: {}, ...(i.parent ? { parent: i.parent } : {}), ...(i.order !== undefined ? { order: i.order } : {}) }))
+
+  /** Every item in document order: depth-first through the hierarchy, siblings by `order`; items whose parent
+   *  is missing come last (they are listed as problems too). */
+  function documentOrder(s: Session): ExportItem[] {
+    const all = []
+    for (let offset = 0; ; offset += 10_000) {
+      const r = s.index.query({ sort: { by: 'order' }, limit: 10_000, offset })
+      all.push(...r.items)
+      if (r.items.length === 0 || all.length >= r.total) break
+    }
+    const ids = new Set(all.map((i) => i.id))
+    const children = new Map<string, typeof all>()
+    for (const it of all) {
+      const key = it.parent && ids.has(it.parent) && it.parent !== it.id ? it.parent : ''
+      const list = children.get(key)
+      if (list) list.push(it)
+      else children.set(key, [it])
+    }
+    const out: ExportItem[] = []
+    const seen = new Set<string>()
+    const walk = (key: string, depth: number): void => {
+      for (const it of children.get(key) ?? []) {
+        if (seen.has(it.id)) continue
+        seen.add(it.id)
+        out.push({ item: it, depth, incoming: [] })
+        walk(it.id, depth + 1)
+      }
+    }
+    walk('', 0)
+    // items in a parent loop are not reachable from the top level
+    for (const it of all) if (!seen.has(it.id)) out.push({ item: it, depth: 0, incoming: [] })
+    return out
+  }
 
   /** Would making `newParent` the parent of `id` create a loop (newParent is id itself or below it)? */
   function createsLoop(s: Session, id: string, newParent: string): boolean {
@@ -352,6 +386,45 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     undoLastCommit: () => gitOps.undoLastCommit(need()),
     itemHistory: (id) => gitOps.history(need(), id),
     compareItemVersion: (id, hash) => gitOps.compare(need(), id, hash),
+    async exportItems(request) {
+      const s = need()
+      let rows: ExportItem[]
+      if (request.scope === 'filtered' && request.query) {
+        const all = []
+        for (let offset = 0; ; offset += 10_000) {
+          const r = s.index.query({ ...request.query, limit: 10_000, offset })
+          all.push(...r.items)
+          if (r.items.length === 0 || all.length >= r.total) break
+        }
+        const depth = (id: string): number => {
+          let d = 0
+          const seen = new Set<string>([id])
+          for (let p = s.index.get(id)?.parent; p && !seen.has(p); p = s.index.get(p)?.parent) {
+            seen.add(p)
+            d++
+          }
+          return d
+        }
+        // Markdown of a search result: flat list of headings; CSV keeps the real level
+        rows = all.map((item) => ({ item, depth: request.format === 'markdown' ? 0 : depth(item.id), incoming: [] }))
+      } else {
+        rows = documentOrder(s)
+      }
+      // Markdown lists both directions under "links"
+      if (request.columns.includes('linkedFrom') || (request.format === 'markdown' && request.columns.includes('links'))) for (const r of rows) r.incoming = s.index.incomingLinks(r.item.id)
+      const content =
+        request.format === 'markdown'
+          ? itemsToMarkdown(s.repo.schema, rows, request.columns, `${basename(s.repo.root)} — requirements`)
+          : itemsToCsv(s.repo.schema, rows, request.columns)
+      return { content, count: rows.length }
+    },
+
+    async exportCompare(from, to, format) {
+      const s = need()
+      const r = await compare.compare(s, from, to)
+      return { content: format === 'markdown' ? compareToMarkdown(s.repo.schema, r) : compareToCsv(s.repo.schema, r), count: r.entries.length }
+    },
+
     compareOptions: () => compare.options(need()),
     compareVersions: (from, to) => compare.compare(need(), from, to),
 

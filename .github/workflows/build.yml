@@ -27,6 +27,13 @@ jobs:
         run: |
           npm run build
           npm run test:e2e
+      - name: Large repository smoke test (10,000 generated items in the real app)
+        shell: bash
+        run: |
+          repo="$RUNNER_TEMP/scenario-10k"
+          git init -q "$repo"
+          npm run gen:scenario -- "$repo" 10000
+          npm run measure:ui -- "$repo"
       - name: Upload end-to-end screenshots
         if: always()
         uses: actions/upload-artifact@v4

@@ -124,6 +124,8 @@ export interface GitState {
   identity: { name: string | null; email: string | null }
   /** Uncommitted changes under requirements/. */
   changes: ItemChange[]
+  /** e.g. Git too old for some checks; shown in the Git bar. */
+  warning?: string
   /** The last commit can be taken back: it is not on the remote yet (and is not the first commit). */
   canUndoCommit: boolean
   lastCommitMessage: string | null
@@ -231,6 +233,20 @@ export interface CompareResult {
   durationMs: number
 }
 
+// ---------- Export (M6)
+
+export interface ExportItemsRequest {
+  /** "all" = every item in document order (hierarchy); "filtered" = the current search/filter result. */
+  scope: 'all' | 'filtered'
+  /** For "filtered": the table's query (search, filters, sort). */
+  query?: Omit<ItemQuery, 'limit' | 'offset' | 'brief'>
+  /** Column keys in order: id, title, type, parent, level, text, links, linkedFrom, field:<id>. */
+  columns: string[]
+  format: 'csv' | 'markdown'
+}
+
+export type ExportResult = { ok: true; path: string; count: number } | { ok: false; canceled: true } | { ok: false; canceled?: false; message: string }
+
 export interface ItemDetails {
   item: Item
   /** Hash of the file as read; saving with an outdated revision is refused (someone else changed it). */
@@ -323,6 +339,11 @@ export interface ReqManApi {
   getCompareOptions(): Promise<CompareOptions>
   /** Requirement-level differences between two versions; `to` may be "WORKING". */
   compareVersions(from: string, to: string): Promise<CompareResult>
+  // --- Export (M6): each asks where to save, then writes the file
+  exportItems(request: ExportItemsRequest): Promise<ExportResult>
+  exportCompare(from: string, to: string, format: 'csv' | 'markdown'): Promise<ExportResult>
+  /** Opens Explorer with the file selected. */
+  showInFolder(path: string): Promise<void>
   /** Moves an item one place up or down among its siblings. */
   moveItem(id: string, direction: 'up' | 'down'): Promise<{ ok: true } | { ok: false; message: string }>
   /** Records an error that happened in the UI in the log file. */
@@ -377,5 +398,8 @@ export const Channels = {
   getItemHistory: 'git:itemHistory',
   compareItemVersion: 'git:compareItemVersion',
   getCompareOptions: 'compare:options',
-  compareVersions: 'compare:versions'
+  compareVersions: 'compare:versions',
+  exportItems: 'export:items',
+  exportCompare: 'export:compare',
+  showInFolder: 'app:showInFolder'
 } as const

@@ -5,6 +5,7 @@
 import type {
   CompareOptions,
   CompareResult,
+  ExportItemsRequest,
   FieldDef,
   FolderCheck,
   GitResult,
@@ -58,6 +59,9 @@ export interface WorkspaceService {
   // Compare (M5) — see compare.ts
   compareOptions(): Promise<CompareOptions>
   compareVersions(from: string, to: string): Promise<CompareResult>
+  // Export (M6): builds the file content; the main process asks where to save it
+  exportItems(request: ExportItemsRequest): Promise<{ content: string; count: number }>
+  exportCompare(from: string, to: string, format: 'csv' | 'markdown'): Promise<{ content: string; count: number }>
 }
 
 export { createWorkspace, cacheFileName, type WorkspaceDeps }

@@ -132,6 +132,18 @@ export function CompareView(props: {
     if (e) props.onSelect(e)
   }
 
+  const [exported, setExported] = useState<string | null>(null)
+  const exportAs = async (format: 'csv' | 'markdown'): Promise<void> => {
+    if (!data) return
+    try {
+      const r = await window.reqman.exportCompare(data.from.ref, data.to.ref, format)
+      if (r.ok) setExported(r.path)
+      else if (!r.canceled) setError(r.message)
+    } catch (e) {
+      setError(errorMessage(e))
+    }
+  }
+
   const commitLabel = (c: CompareOptions['commits'][number]): string => `${c.hash.slice(0, 7)} ${c.message} — ${c.author}, ${when(c.date)}`
   const refOptions = (withWorking: boolean) => (
     <>
@@ -184,6 +196,16 @@ export function CompareView(props: {
           <option value="custom">Choose two versions…</option>
         </select>
         <span className="toolbar__spacer" />
+        {data && (
+          <>
+            <button type="button" className="btn" onClick={() => void exportAs('csv')} title="One row per changed item and per change — opens in Excel">
+              Export CSV
+            </button>
+            <button type="button" className="btn" onClick={() => void exportAs('markdown')} title="A readable report, e.g. for an AI tool or a pull request">
+              Export Markdown
+            </button>
+          </>
+        )}
         <button type="button" className="btn" onClick={props.onPullAgain} disabled={props.pulling}>
           {props.pulling ? 'Pulling…' : 'Pull and refresh'}
         </button>
@@ -218,6 +240,14 @@ export function CompareView(props: {
       )}
 
       {error && <p className="notice notice--error" role="alert">{error}</p>}
+      {exported && (
+        <p className="compare__pull" role="status">
+          Exported to {exported}{' '}
+          <button type="button" className="link-btn" onClick={() => void window.reqman.showInFolder(exported)}>
+            Show in folder
+          </button>
+        </p>
+      )}
       {!range && options && <p className="muted compare__empty">Nothing to compare yet — choose two versions.</p>}
       {loading && <p className="muted compare__empty" role="status">Comparing…</p>}
 

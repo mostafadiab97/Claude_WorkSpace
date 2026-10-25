@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { AppInfo, GitInfo, LoadedTheme, RepoInfo, UpdateStatus } from '../../../shared/api'
 import { applyTheme, loadSavedMode, saveMode, type ThemeMode } from '../theme/applyTheme'
+import { ErrorBoundary } from '../components/ErrorBoundary'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { UpdateBanner } from '../components/UpdateBanner'
 import { StartScreen } from '../screens/StartScreen'
@@ -87,10 +88,16 @@ export function App() {
         {/* The workspace stays mounted while settings are shown, so unsaved edits are not lost. */}
         {repo && (
           <div className="main__view" hidden={showSettings}>
-            <WorkspaceScreen key={repo.root} info={repo} onInfo={onInfo} />
+            <ErrorBoundary area="the workspace" key={repo.root}>
+              <WorkspaceScreen info={repo} onInfo={onInfo} />
+            </ErrorBoundary>
           </div>
         )}
-        {showSettings && <SettingsScreen theme={theme} git={git} update={update} appInfo={appInfo} onBack={() => setShowSettings(false)} />}
+        {showSettings && (
+          <ErrorBoundary area="settings">
+            <SettingsScreen theme={theme} git={git} update={update} appInfo={appInfo} onBack={() => setShowSettings(false)} />
+          </ErrorBoundary>
+        )}
         {!repo && !showSettings && <StartScreen brand={brand} git={git} onOpened={setRepo} />}
       </main>
     </div>

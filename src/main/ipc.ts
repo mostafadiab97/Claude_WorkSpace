@@ -1,7 +1,8 @@
 // Exposes the core services to the UI over IPC, one handler per entry in src/shared/api.ts.
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
+import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { Channels, type AppInfo, type FieldDef, type Item, type ItemQuery } from '../shared/api'
+import { Channels, type AppInfo, type ExportItemsRequest, type ExportResult, type FieldDef, type Item, type ItemQuery } from '../shared/api'
 import { runDataBenchmark } from '../modules/sample-data'
 import type { Paths, Services } from './composition'
 
@@ -110,6 +111,55 @@ export function registerIpc(services: Services, paths: Paths): void {
   ipcMain.handle(Channels.getGitState, () => ws.gitState())
   ipcMain.handle(Channels.commit, (_e, message: unknown) => ws.commit(typeof message === 'string' ? message : ''))
   ipcMain.handle(Channels.pull, () => ws.pull())
+  // Export: build the content, ask where to save (remembering the last folder), write it.
+  const exportSettings = join(paths.userDir, 'export-settings.json')
+  const lastFolder = async (): Promise<string> => {
+    try {
+      return (JSON.parse(await readFile(exportSettings, 'utf8')) as { folder?: string }).folder ?? app.getPath('documents')
+    } catch {
+      return app.getPath('documents')
+    }
+  }
+  const saveExport = async (e: Electron.IpcMainInvokeEvent, name: string, format: 'csv' | 'markdown', build: () => Promise<{ content: string; count: number }>): Promise<ExportResult> => {
+    try {
+      const { content, count } = await build()
+      const win = BrowserWindow.fromWebContents(e.sender)
+      const ext = format === 'markdown' ? 'md' : 'csv'
+      const opts = {
+        title: 'Export',
+        defaultPath: join(await lastFolder(), `${name}.${ext}`),
+        filters: format === 'markdown' ? [{ name: 'Markdown', extensions: ['md'] }] : [{ name: 'CSV (Excel)', extensions: ['csv'] }]
+      }
+      const r = win ? await dialog.showSaveDialog(win, opts) : await dialog.showSaveDialog(opts)
+      if (r.canceled || !r.filePath) return { ok: false, canceled: true }
+      await writeFile(r.filePath, content, 'utf8')
+      await writeFile(exportSettings, JSON.stringify({ folder: dirname(r.filePath) }), 'utf8').catch(() => {})
+      log.info(`Exported ${count} entries to ${r.filePath}`)
+      return { ok: true, path: r.filePath, count }
+    } catch (err) {
+      const message = err instanceof Error && /EBUSY|EPERM/.test(err.message) ? 'The file is open in another program (e.g. Excel). Close it there and export again.' : (err as Error).message
+      log.error('Export failed', err)
+      return { ok: false, message }
+    }
+  }
+  const today = (): string => new Date().toISOString().slice(0, 10)
+  ipcMain.handle(Channels.exportItems, (e, request: unknown) => {
+    const r = request as ExportItemsRequest
+    const req: ExportItemsRequest = {
+      scope: r?.scope === 'filtered' ? 'filtered' : 'all',
+      columns: Array.isArray(r?.columns) ? r.columns.filter((c): c is string => typeof c === 'string') : ['id', 'title'],
+      format: r?.format === 'markdown' ? 'markdown' : 'csv',
+      ...(r?.query && typeof r.query === 'object' ? { query: r.query } : {})
+    }
+    return saveExport(e, `requirements-${today()}`, req.format, () => ws.exportItems(req))
+  })
+  ipcMain.handle(Channels.exportCompare, (e, from: unknown, to: unknown, format: unknown) => {
+    const f = format === 'markdown' ? 'markdown' : 'csv'
+    return saveExport(e, `requirement-changes-${today()}`, f, () => ws.exportCompare(str(from, 'from'), str(to, 'to'), f))
+  })
+  ipcMain.handle(Channels.showInFolder, (_e, path: unknown) => {
+    if (typeof path === 'string' && path) shell.showItemInFolder(path)
+  })
   ipcMain.handle(Channels.getCompareOptions, () => ws.compareOptions())
   ipcMain.handle(Channels.compareVersions, (_e, from: unknown, to: unknown) => ws.compareVersions(str(from, 'from'), str(to, 'to')))
   ipcMain.handle(Channels.undoLastCommit, () => ws.undoLastCommit())

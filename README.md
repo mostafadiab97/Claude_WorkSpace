@@ -22,7 +22,9 @@ desktop GUI to view, edit, link, compare and export them. No server, no accounts
 | M3 Links — create, remove and confirm typed links; suspect links | Done (v0.4.0) |
 | M4 Git — changes per item, commit, pull/push (stops safely on conflicts), per-item history | Done (v0.5.0) |
 | M5 Compare — two versions of the whole set, per requirement and per link (pulls first) | Done (v0.6.0) |
-| M6 Export and hardening | Next |
+| M6 Export (CSV, Markdown) and hardening — prototype complete | Done (v0.7.0) |
+| M7 Excel export and import | Next |
+| M8 Branches and per-requirement conflict resolution | Planned |
 
 ## Develop
 

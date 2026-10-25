@@ -57,6 +57,7 @@ export function GitBar(props: {
           </span>
         )}
         {!state.hasRemote && <span className="muted-inline">No remote (e.g. GitHub) — commits stay on this PC</span>}
+        {state.warning && <span className="statusbar__warn" title={state.warning}>Old Git version</span>}
         {state.mergeInProgress && <span className="statusbar__warn">Merge with conflicts in progress (outside ReqMan)</span>}
         <span className="toolbar__spacer" />
         {busy && <span className="muted-inline" role="status">{busy}…</span>}

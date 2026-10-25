@@ -6,7 +6,8 @@ import { ItemEditor, type EditorTarget } from '../workspace/ItemEditor'
 import { ColumnsMenu, FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
 import { CompareDetail, CompareView } from '../workspace/CompareView'
 import { ChangesPanel, GitBar, type GitNotice } from '../workspace/GitPanels'
-import { ItemTable, type TreeControls } from '../workspace/ItemTable'
+import { ExportDialog } from '../workspace/ExportDialog'
+import { ItemTable, optionalColumns, orderColumns, type TreeControls } from '../workspace/ItemTable'
 
 /**
  * The open repository: the item table (document hierarchy, or a flat list while searching/filtering)
@@ -31,6 +32,8 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   const [gitBusy, setGitBusy] = useState<string | null>(null)
   const [gitNotice, setGitNotice] = useState<GitNotice | null>(null)
   const [showChanges, setShowChanges] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
+  const [exported, setExported] = useState<{ path: string; count: number } | null>(null)
   const [compareOpen, setCompareOpen] = useState(false)
   const [compareEntry, setCompareEntry] = useState<CompareEntry | null>(null)
   const [comparePulling, setComparePulling] = useState(false)
@@ -278,6 +281,9 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
             </button>
           )}
           <ColumnsMenu schema={schema} prefs={columnPrefs} onChange={setColumnPrefs} onEditFields={() => setEditFields(true)} />
+          <button type="button" className="btn" onClick={() => setExportOpen(true)} disabled={info.itemCount === 0} title="Save as CSV (Excel) or Markdown">
+            Export…
+          </button>
           <span className="toolbar__spacer" />
           {!filtered && (
             <>
@@ -311,6 +317,13 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
           revealNonce={revealNonce}
           emptyText={info.itemCount === 0 ? 'No items yet. Use “New item” to add the first one.' : 'No items match the filters.'}
         />
+        {exported && (
+          <div className="notice table-notice table-notice--ok" role="status">
+            Exported {exported.count.toLocaleString('en')} items to {exported.path}{' '}
+            <button type="button" className="link-btn" onClick={() => void window.reqman.showInFolder(exported.path)}>Show in folder</button>{' '}
+            <button type="button" className="link-btn" onClick={() => setExported(null)}>Dismiss</button>
+          </div>
+        )}
         {notice && (
           <div className="notice notice--warn table-notice" role="alert">
             {notice}{' '}
@@ -394,6 +407,21 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
           onClose={() => request(null)}
         />
         </div>
+      )}
+
+      {exportOpen && (
+        <ExportDialog
+          shownColumns={orderColumns(optionalColumns(schema), columnPrefs.order).filter((c) => !columnPrefs.hidden.has(c.key)).map((c) => c.key)}
+          filtered={filtered}
+          filteredCount={total}
+          totalCount={info.itemCount}
+          query={query}
+          onClose={() => setExportOpen(false)}
+          onDone={(r) => {
+            setExportOpen(false)
+            setExported({ path: r.path, count: r.count })
+          }}
+        />
       )}
 
       {editFields && (

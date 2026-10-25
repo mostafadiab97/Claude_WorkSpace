@@ -43,9 +43,10 @@ The UI ↔ core contract is **one file**: `src/shared/api.ts`. Adding a capabili
 | `repository-store` | `RepositoryStore` — `inspect()`, `initialize()`, `open()`; `RequirementsRepo` — `loadAll()`, `createItem()`, `writeItem()`, `deleteItem()`… | `fileStore.ts`: files in `requirements/`, atomic writes, never overwrites unreadable files; `checks.ts`: duplicate IDs, broken links, parent loops | `main/composition.ts`, `index-cache`, `sample-data` |
 | `index-cache` | `IndexCache` — `sync()`, `syncPaths()`, `rebuild()`, `query()` (incl. link filters/counts), `get()`, `incomingLinks()`, `fingerprint()`, `repositoryIssues()` | `sqliteIndex.ts`: SQLite (built into Electron) with full-text search, outside the repo, re-reads only changed files; whole-repository checks as SQL | `workspace` |
 | `workspace` | `WorkspaceService` — `checkFolder()`, `initialize()`, `open()`, `refresh()`, `query()`, `getItem()`, `newItem()`, `saveItem()`, `deleteItem()`, `moveItem()`, `recent()` | `workspace.ts`: the open repository; conflict-safe saving (file revision check), no parent loops, delete only leaf items, reordering by swapping two files; recent list in `%APPDATA%\\ReqMan\\recent-repositories.json`. `gitOps.ts`: changes per item, commit (requirements folder only), pull (fetch, in-memory merge check, stop on items changed on both sides), push (never forced), discard, undo unpushed commit, per-item history and field-level comparison. `compare.ts`: two versions of the whole set (last pull from the reflog, any commit/branch/tag, or the working folder), paired by item ID, summarised per item and per link, schema changes | `main/ipc.ts` |
+| `import-export` | `toCsv()`, `parseCsv()`, `itemsToCsv()`, `itemsToMarkdown()`, `compareToCsv()`, `compareToMarkdown()` | Pure functions: CSV for Excel (comma, UTF-8 BOM, CRLF, formula guard), Markdown for AI tools; M7 adds Excel read/write and import mapping. The workspace collects the rows (document order), `main/ipc.ts` asks where to save and writes | `workspace` |
 | `sample-data` | `generateItems()`, `runDataBenchmark()` | Fictional thermostat requirements; used by tests, `npm run gen:repo` and the in-app self-test | `main/ipc.ts`, tests |
 
-Planned (see milestones): `diff-merge`, `import-export`, `git-host`.
+Planned (see milestones): `diff-merge` (per-item merge, M8), `git-host` (GitHub pull requests).
 Keep this table up to date with every change.
 
 ## Data format (in the project's Git repository)
@@ -112,6 +113,8 @@ samples/, tools/   sample data and its generator
 | Git bar | `workspace/GitPanels.tsx` (`GitBar`) | Branch, ↑ahead ↓behind, Changes / Pull / Push; result message with the affected items (clickable) |
 | Changes panel | `workspace/GitPanels.tsx` (`ChangesPanel`) | Replaces the editor column while open (the editor stays mounted, so unsaved edits survive); per-item Discard, commit message, name/e-mail form, Undo last commit |
 | Compare | `workspace/CompareView.tsx` | Replaces the table while open (the table stays mounted); preset / custom range, count chips as filters, Items and Links tabs; `CompareDetail` on the right; pulls first (in `WorkspaceScreen`) |
+| Export | `workspace/ExportDialog.tsx` | Scope (all in document order / current result), extra columns, CSV or Markdown; Compare has its own Export buttons |
+| Error boundary | `components/ErrorBoundary.tsx` | Around the workspace and settings: logs, offers Try again / Copy diagnostics / Reload |
 | Change view | `workspace/ChangeView.tsx` | Shared by History and Compare: changed fields before/after, text before/after, links added/removed |
 | History | `workspace/HistoryView.tsx` | Editor tab: commits of the item (plus "Not committed yet"), and for the selected one a field/text/link comparison |
 | Settings | `screens/SettingsScreen.tsx` | Environment, diagnostics, data self-test; the workspace stays mounted behind it |

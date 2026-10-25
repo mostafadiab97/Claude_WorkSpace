@@ -3,6 +3,23 @@
 Each version was installed and tried by the product owner on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.7.0 — 25 Oct 2026 — M6 Export and hardening (prototype complete)
+- **Export…** in the table toolbar: all items in document order, or only the current search/filter result;
+  columns = ID, Title and the table's visible columns, plus optional Level + Parent, full text, links in both
+  directions. **CSV** for Excel (comma — the owner's Excel setting —, UTF-8 with BOM, CRLF, multi-line cells
+  quoted, formula-like cells prefixed with `'`) or **Markdown** (one document, headings follow the hierarchy —
+  the agreed format for AI tools). 10,005 items export in about half a second.
+- **Compare → Export CSV / Export Markdown**: one row per changed item and per change (field, before, after),
+  or a readable report.
+- Save dialog remembers the last folder; "Show in folder" after exporting; clear message when the file is open in
+  Excel.
+- Hardening: error boundary (a broken view shows "Try again / Copy diagnostics / Reload" instead of a blank
+  window, and logs the error); warning in the Git bar for Git older than 2.38; CI now also opens a generated
+  10,000-item repository in the real app on every build.
+- Testing: one combined checklist for 0.5.0–0.7.0 and a two-PC trial script (journey steps 1–8).
+- Owner's decisions (25 Oct 2026): CSV with commas; after M6 → Excel export/import (M7), then branches and
+  per-requirement conflict resolution (M8).
+
 ## 0.6.0 — 25 Oct 2026 — M5 Compare
 - **Compare** button in the Git bar: pulls first (owner's decision), then shows by default **what the last pull
   brought in** (taken from Git's own record of where the branch was before and after the pull, so pulls made outside

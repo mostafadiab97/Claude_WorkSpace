@@ -111,7 +111,10 @@ export function createGitOps(deps: GitOpsDeps) {
       }
     }
     changes.sort((a, b) => a.label.localeCompare(b.label))
+    const [major = 0, minor = 0] = info.version.split('.').map(Number)
+    const old = major < 2 || (major === 2 && minor < 38)
     return {
+      ...(old ? { warning: `Git ${info.version} is old: Pull can only detect clashes by trying the merge (then undoing it). Git 2.38 or newer is recommended.` } : {}),
       available: true,
       branch: st.branch,
       detached: st.detached,

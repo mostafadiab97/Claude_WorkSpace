@@ -27,6 +27,7 @@ await app.evaluate(({ dialog }, p) => {
 }, repo)
 const win = await app.firstWindow()
 await win.setViewportSize({ width: 1400, height: 860 })
+let failed = false
 const time = async (label, fn) => {
   const s = Date.now()
   await fn()
@@ -70,6 +71,7 @@ try {
 } catch (e) {
   console.error(e)
   await win.screenshot({ path: join(outDir, 'measure-failure.png') })
+  failed = true
 }
 await app.evaluate(({ app: a }) => a.exit(0)).catch(() => {})
-process.exit(0)
+process.exit(failed ? 1 : 0)

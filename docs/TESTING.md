@@ -48,7 +48,71 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.6.0 (milestone M5: Compare)
+## Manual test checklist — v0.7.0 (covers everything since 0.4.1: Git, Compare, Export)
+
+One pass tests versions 0.5.0, 0.6.0 and 0.7.0 together. Use your `Claude_SandBox` clone (`git pull` there first) and
+GitHub's website as "the colleague" (open a file under `requirements/items/` → pencil icon → **Commit changes**).
+Report by step number.
+
+**Git (0.5.0)**
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to 0.7.0, open the sandbox clone | Git bar above the table: `⎇ main  ↑0 ↓0` and **Compare**, **Changes**, **Pull**, **Push** |
+| 2 | Edit an item's title, Save, click **Changes** | The panel lists the item with **M**; "As <your name> <e-mail>" (if Git doesn't know you, a form asks once) |
+| 3 | Put a file `test.txt` in the sandbox folder. Write a message → **Commit 1 change** | "Committed 1 change."; `↑1`. `test.txt` is not committed (`git status` still lists it) |
+| 4 | **Push** | "Pushed."; on GitHub the commit shows your message and only `requirements/` files |
+| 5 | As the colleague: change the text of another item on GitHub. In ReqMan **Pull** | "Pulled: 1 item changed."; the table shows the new text |
+| 6 | Open that item → **History** tab | The colleague's commit first (name, date, message); **What changed** shows the text before (struck) / after |
+| 7 | Edit any item, Save → History | First entry "Not committed yet" with your change |
+| 8 | **Changes → Discard → Undo change** | Back to the committed version in table and editor |
+| 9 | Conflict: change the same item on GitHub and in ReqMan, commit in ReqMan, **Pull** | Red "Pull stopped — nothing was changed…" naming the item (clickable); your folder unchanged |
+| 10 | **Push** | "…Pull first…" — never forced |
+| 11 | **Changes → Undo last commit → Undo commit**, then **Discard → Undo change** on the item, then **Pull** | "Took back…", "Discarded…", "Pulled: 1 item changed." — the colleague's version is there |
+| 12 | Type in an item without saving | **Pull** disabled ("Save or discard your edit first") |
+| 13 | Wi-Fi off → **Pull** | "The remote repository could not be reached…"; everything else works |
+
+**Compare (0.6.0)**
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 14 | As the colleague: change the text of one item and the status of another on GitHub. Click **Compare** | "Pulled first: 2 items changed." and **What the last pull brought in** lists exactly those two ("Text", "Status") |
+| 15 | Click one | Right side: field table (before struck, after bold), text before/after; a warning if other items link to it |
+| 16 | **Open the item** | Compare closes, the item is open, the table as you left it |
+| 17 | **Compare** again (nothing new on GitHub) | "Pulled first: Already up to date."; the list still shows what the *last* pull brought in |
+| 18 | Edit + save an item, drag another to a new parent; **Compare → Uncommitted changes** | Your edit as **Changed**, the dragged one as **Moved** ("Parent, Position") |
+| 19 | **Choose two versions…**: From "Add fictional 10,005-item requirements set…", To "Record link confirmations…" | Finishes within a few seconds; only items with visible changes (re-confirmed links alone don't count) |
+| 20 | Chips (**Changed**, …) and the filter box; **Links** tab | Filters the list; the Links tab lists links added/removed |
+
+**Export (0.7.0)**
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 21 | **Export…** (table toolbar) → All items, CSV → **Export…** → save | "Exported 10,005 items to … — Show in folder". Double-click the file: Excel opens it in columns (comma), Arabic text and `°`/`±` look right, multi-line texts stay in one cell |
+| 22 | In Excel: columns ID, Level, Title, the table's visible columns, Parent, Text, Links, Linked from; rows in document order (chapter, then its children) | — |
+| 23 | Hide a column (**Columns**), set a filter (e.g. Status = Approved), **Export…** → "Only the … items of the current search / filters" | The file has only those rows and not the hidden column |
+| 24 | **Export…** → Markdown | A readable document: one heading per item (levels follow the hierarchy), fields, text, links |
+| 25 | In **Compare**: **Export CSV** and **Export Markdown** | CSV: one row per changed item plus one per change (field, before, after); Markdown: a report with tables and quoted texts |
+| 26 | Export while the CSV is open in Excel (same file name) | "The file is open in another program (e.g. Excel)…" — nothing crashes |
+
+## Two-PC trial (prototype journey, with a colleague)
+
+The prototype's goal: two engineers replace an Excel sheet with ReqMan and find the comparison better than GitHub's
+diffs. Use a real project repository (or a new one on GitHub) that both of you can push to.
+
+1. **You:** open the cloned repository in ReqMan → **Create requirements folder**.
+2. **You:** create a few stakeholder needs, system requirements and test cases; arrange them (drag rows), link them
+   (refines, verifies).
+3. **You:** filter (e.g. System Requirement + Status Draft); open an item and look at its links.
+4. **You:** **Changes → Commit**, then **Push**.
+5. **Colleague:** clones the repository, opens it in ReqMan, edits two requirements, adds a link, commits, pushes.
+6. **You:** **Compare** (it pulls first) — it lists "<ID> Text…", "1 link added" rather than file lines.
+7. **You:** open one of the changed requirements → **History**: who changed it and when.
+8. **You:** **Export…** → CSV, open it in Excel and send it to someone outside the repository.
+
+Tell me: did each step work without help? Was Compare clearer than GitHub's diff of the same commit?
+
+## Previous checklist — v0.6.0 (milestone M5: Compare)
 
 Same setup as for v0.5.0: your `Claude_SandBox` clone, and GitHub's website (or a second clone) as "the colleague".
 

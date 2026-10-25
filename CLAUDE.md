@@ -100,7 +100,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.6.0, 25 Oct 2026)
+## Status (v0.7.0, 25 Oct 2026) — prototype scope complete
 
 | Milestone | State |
 | --- | --- |
@@ -110,16 +110,19 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | M3 Links — add/remove both directions, suspect links + confirm, Text/Links columns, link filters, built-in fields protected, column order | Done (v0.4.0, fix v0.4.1) |
 | M4 Git — Git bar, per-item changes, commit (requirements/ only), pull that stops safely on items changed on both sides, push (never forced), discard, undo unpushed commit, name/e-mail form, per-item history with field-level comparison | Done (v0.5.0) |
 | M5 Compare — pulls first; default "what the last pull brought in" (reflog); uncommitted / last commit / any two versions; per item (added/changed/moved/deleted + summary + suspect-impact warning) and per link; schema changes; fast via `cat-file --batch` by blob ID | Done (v0.6.0) |
-| **M6 Export (CSV) and hardening**; full journey on two PCs | **Next** |
+| M6 Export and hardening — table and Compare export to CSV (comma, UTF-8 BOM) and Markdown; error boundary; old-Git warning; CI smoke test with 10k generated items; combined checklist + two-PC trial script | Done (v0.7.0) |
+| **M7 Excel export and import** (FR-14 part, FR-15) | **Next** |
+| M8 Branches (create/switch) and per-requirement conflict resolution (FR-12, FR-13) | Planned |
 
-Owner's last report (25 Oct 2026): "all works fine" on v0.4.1; he answered the M5 questions after v0.5.0 was
-released (test feedback on 0.5.0 not received yet). v0.6.0 is released and waiting for his test (checklists
-"v0.6.0" and "v0.5.0" in `docs/TESTING.md`).
+Owner's last report (25 Oct 2026): "all works fine" on v0.4.1. He has not tested 0.5.0–0.7.0 yet; at his request
+`docs/TESTING.md` has **one combined checklist** ("v0.7.0 — covers everything since 0.4.1", 26 steps) plus the
+"Two-PC trial" script. Expect feedback by step number from that list.
 
-Automated tests: 82 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
+Automated tests: 87 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
 repository and two clones ("PC A", "PC B"); e2e journey with ~75 checks, incl. commit → push → colleague pushes →
 pull → history → conflict stop → undo commit + discard → pull → compare (pull first, last pull, custom range, links).
 Compare on the sandbox: 9,118 changed files (confirmations only) 0.4 s; 3,000 real edits 1.8 s (engine).
+Export of all 10,005 sandbox items: CSV 0.46 s (3.1 MB), Markdown 0.43 s. CI runs `measure:ui` on a generated 10k repo.
 Measured on the sandbox (10,005 items, Linux container): open incl. first indexing 5–8 s, expand all 0.4–0.6 s,
 scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 50k first index 18–73 s (Defender).
 
@@ -145,29 +148,37 @@ scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 5
   `readBlobs()` (one `git cat-file --batch`). Naming objects `<rev>:<path>` instead was 40× slower with 10k files in
   one folder (tree lookups). Files that differ only in `confirmed:` lines are skipped before parsing.
 
-## Next step: M6 Export and hardening (draft — confirm with the owner)
+## M6 decisions (owner, 25 Oct 2026) — already built
 
-From the plan: CSV export; end-to-end tests of the whole journey; bug fixes from trials; "the full 8-step journey
-passes on two Windows PCs". Owner added: export of the Compare list (decided 25 Oct 2026).
+- CSV separator: **comma** (his Excel). Files: UTF-8 with BOM, CRLF; cells starting with `= + @` get a leading `'`.
+- Next milestones in this order: **M7 Excel export + import**, then **M8 branches + per-requirement conflict
+  resolution**.
+- Export lives in `src/modules/import-export` (pure); `workspace.exportItems/exportCompare` build the content;
+  `main/ipc.ts` shows the save dialog (last folder in `%APPDATA%\ReqMan\export-settings.json`). E2E mocks
+  `dialog.showSaveDialog` (`saveAs()` helper in the journey).
 
-Proposed scope:
-1. **Export the table** (what is shown: current filter/search, visible columns, document order or sort) to CSV
-   (UTF-8 with BOM so Excel opens Arabic/ümlauts correctly; `;` vs `,` question) — plus the item text and links
-   as columns. Save dialog; remember the last folder.
-2. **Export the Compare list** to CSV and Markdown (Markdown is the agreed format for sharing with AI tools).
-3. **Hardening:** React error boundary with "copy diagnostics"; clear message and recovery when the requirements
-   folder disappears or a Git command hangs; startup check for Git ≥ 2.38; log rotation already exists; review all
-   `catch` paths; large-repo smoke test in CI with the scenario generator (10k).
-4. **Two-PC trial:** a written script in `docs/TESTING.md` for the owner and a colleague, journey steps 1–8.
+## Next step: M7 Excel export and import (draft — confirm with the owner)
 
-Questions for the owner: CSV separator for his Excel (comma or semicolon — depends on Windows region settings);
-should Word/PDF/Excel (.xlsx) exports (FR-14, MVP) come right after M6 or something else first (import from Excel,
-branches, per-item merge)?
+1. **Excel export (.xlsx):** same choices as the CSV export, real columns, header row frozen, column widths, text
+   cells wrapped, one sheet "Requirements" (+ optional "Links" sheet). Library: **ExcelJS** (MIT, reads and writes
+   .xlsx, no native code) — check licence and size before adding.
+2. **Import from Excel (.xlsx) and CSV** (FR-15), a wizard: choose file → sheet → header row; **map columns** to ID,
+   Title, Type, Text, Parent / Level, Status and other fields (guessed from header names; unknown columns can become
+   new fields); type per row from a column or one fixed type; **preview** with problems (unknown status values,
+   missing titles, duplicate IDs) before anything is written; import writes item files as **uncommitted changes**
+   (the user reviews them in Compare → Uncommitted changes and commits).
+3. **IDs:** keep IDs that already look like ReqMan IDs (round trip of our own export); otherwise generate new ones
+   and keep the original in an extra header key (e.g. `source-id`) so a later re-import can find them.
+4. **Round trip test:** export the sandbox to xlsx/CSV, import into an empty repository → same items, hierarchy and
+   links. The fictional sheet `samples/sample-requirements.xlsx` (59 items) is the first real-world-like import test.
 
-Later milestones and backlog are in DESIGN.md ("Scope by stage") — notable MVP items: schema editor for item and
-link types (fields part done), branches and tags, per-requirement merge, Word/PDF/Excel/Markdown export,
-Excel/CSV import (`samples/sample-requirements.xlsx` is the test file), coverage rules (open question:
-report-only by default), GitHub PR view.
+Questions for the owner: when importing a sheet whose IDs already exist, **update** those items (show what will
+change first) or only **add** new ones? Should links be imported (from a "Links" column like our export), or only
+items and hierarchy at first?
+
+Later milestones and backlog are in DESIGN.md ("Scope by stage"): after M8 — schema editor for item and link
+types (fields part done), tags as baselines, Word/PDF export, coverage rules (open question: report-only by
+default), GitHub PR view, Word import, ReqIF.
 
 ## Small things the owner has asked for or accepted along the way
 

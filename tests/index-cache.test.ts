@@ -128,6 +128,26 @@ describe('index cache', () => {
     expect(c2.count()).toBe(3)
     c2.close()
   })
+  it('rebuilds a cache file written by an older version with a different table layout', async () => {
+    const { DatabaseSync } = await import('node:sqlite')
+    const dir = await mkdtemp(join(tmpdir(), 'reqman-oldcache-'))
+    const file = join(dir, 'old.sqlite')
+    // the v0.3.0 layout: no fingerprint column, no link confirmations
+    const old = new DatabaseSync(file)
+    old.exec(`CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+      CREATE TABLE items (rid INTEGER PRIMARY KEY, path TEXT NOT NULL UNIQUE, id TEXT NOT NULL, type TEXT NOT NULL, title TEXT NOT NULL,
+        parent TEXT, ord REAL, text TEXT NOT NULL, fields_json TEXT NOT NULL, links_json TEXT NOT NULL);
+      CREATE TABLE links (rid INTEGER NOT NULL, source TEXT NOT NULL, type TEXT NOT NULL, target TEXT NOT NULL);
+      INSERT INTO meta VALUES ('signature', 'old');`)
+    old.close()
+    const cache = createSqliteIndexCache(file)
+    const stats = await cache.sync(ctx.repo)
+    expect(stats.full).toBe(true)
+    expect(cache.get(ctx.items.sys!.id)?.suspectCount).toBe(0)
+    expect(cache.query({ links: 'suspect' }).total).toBe(0)
+    cache.close()
+    await rm(dir, { recursive: true, force: true })
+  })
 })
 
 describe('relevance ranking', () => {

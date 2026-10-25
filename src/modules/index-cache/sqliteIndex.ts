@@ -113,11 +113,29 @@ async function mapLimit<T, R>(inputs: T[], limit: number, fn: (t: T) => Promise<
   return out
 }
 
+/**
+ * Creates the tables, or re-creates them when the cache file was written by a version with a different table
+ * layout (`CREATE TABLE IF NOT EXISTS` alone would keep the old columns). The cache holds nothing that is not
+ * in the item files, so dropping it is always safe; the next sync re-reads everything.
+ */
+function prepareTables(db: DatabaseSync): void {
+  const tables = (db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as { name: string }[]).map((r) => r.name)
+  let format: string | undefined
+  if (tables.includes('meta')) {
+    format = (db.prepare("SELECT value FROM meta WHERE key = 'format'").get() as { value: string } | undefined)?.value
+  }
+  if (tables.length > 0 && format !== FORMAT_VERSION) {
+    for (const t of ['items_fts', 'items', 'item_fields', 'links', 'files', 'meta']) db.exec(`DROP TABLE IF EXISTS ${t}`)
+  }
+  db.exec(DDL)
+  db.prepare("INSERT INTO meta(key, value) VALUES('format', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(FORMAT_VERSION)
+}
+
 export function createSqliteIndexCache(dbFile: string): IndexCache {
   if (dbFile !== ':memory:') mkdirSync(dirname(dbFile), { recursive: true })
   const db = new DatabaseSync(dbFile)
   db.exec('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY;')
-  db.exec(DDL)
+  prepareTables(db)
 
   const stmt = {
     getMeta: db.prepare('SELECT value FROM meta WHERE key = ?'),

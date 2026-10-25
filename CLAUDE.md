@@ -193,6 +193,11 @@ report-only by default), GitHub PR view.
 - `electron-builder --publish always` failed in CI before; publishing uses `gh release create` instead.
 - The Changes panel replaces the editor column but the editor stays **mounted** (hidden) so unsaved edits survive;
   opening any item closes the panel. In e2e, open the panel only if it is not visible (the button toggles).
+- Real-Git tests are slow on the Windows runner (antivirus): give those `describe` blocks a long timeout. The runner
+  has `core.autocrlf=true`, so files Git checks out may have CRLF — compare with line endings normalised (item files
+  in real repositories are protected by `requirements/.gitattributes`).
+- If a release run fails after the version bump, fix, push, then start it by hand: `gh workflow run release.yml`
+  (a push without a `package.json` change does not trigger it).
 - Git tests that need "no identity" must isolate `HOME` and `GIT_CONFIG_GLOBAL` (see `tests/workspace-git.test.ts`).
 - A clone of an empty remote has an upstream configured but no remote branch: treat that as "no upstream" (status
   has no `branch.ab` line) so the first push publishes with `-u`.

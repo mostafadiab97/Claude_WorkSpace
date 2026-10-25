@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process'
+import { realpathSync } from 'node:fs'
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -31,7 +32,8 @@ describe('workspace', () => {
     await mkdir(join(root, 'docs', 'specs'), { recursive: true })
     const check = await ws.checkFolder(join(root, 'docs', 'specs'))
     expect(check.isGitRepository).toBe(true)
-    expect(check.root.toLowerCase()).toBe(root.toLowerCase())
+    // Windows may report the same folder as a short (RUNNER~1) or long name; compare the real paths.
+    expect(realpathSync.native(check.root).toLowerCase()).toBe(realpathSync.native(root).toLowerCase())
     expect(check.state).toBe('not-initialized')
 
     const plain = await setup()

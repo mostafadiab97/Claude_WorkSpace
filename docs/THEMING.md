@@ -5,10 +5,15 @@ fonts or radii — they reference named tokens, so restyling or rebranding is a 
 
 ## Where the file is
 
-- Installed app: `%LOCALAPPDATA%\Programs\ReqMan\resources\config\theme.json`
-- Source repository: `config/theme.json`
+Themes are layered: **built-in defaults ← the app's theme ← your theme**.
 
-Edit it, save, and restart ReqMan. No rebuild needed.
+- **Your theme:** `%APPDATA%\ReqMan\theme.json`. Click **Edit my theme…** in ReqMan to create it (it starts as a
+  copy of the app's theme) and open its folder. Updates never touch this file. A custom logo file can be put
+  in the same folder.
+- The app's theme: `%LOCALAPPDATA%\Programs\ReqMan\resources\config\theme.json` (source: `config/theme.json`).
+  It is replaced by every update, so don't edit it on a user PC.
+
+Edit your file, save, and restart ReqMan. No rebuild needed.
 
 ## What you can change
 

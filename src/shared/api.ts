@@ -9,7 +9,7 @@ export interface AppInfo {
   electronVersion: string
   /** Full path of the log file, shown in the Diagnostics panel. */
   logFile: string
-  /** Full path of the theme file the app is using. */
+  /** Full path of the user's own theme.json (in %APPDATA%\\ReqMan; survives updates). */
   themeFile: string
 }
 
@@ -30,10 +30,19 @@ export interface LoadedTheme {
   config: ThemeConfig
   /** Logo as a data: URL, ready for an <img src>. */
   logoDataUrl: string
-  /** Where the theme came from: the user-editable file, or the built-in fallback. */
-  source: 'file' | 'default'
+  /** Top layer in use: the user's own theme.json, the app's shipped theme, or the built-in fallback. */
+  source: 'user' | 'file' | 'default'
   warnings: string[]
 }
+
+export type UpdateStatus =
+  | { state: 'disabled'; reason: string }
+  | { state: 'idle' }
+  | { state: 'checking' }
+  | { state: 'up-to-date'; checkedAt: string }
+  | { state: 'downloading'; version: string; percent: number }
+  | { state: 'ready'; version: string }
+  | { state: 'error'; message: string }
 
 export interface ReqManApi {
   getAppInfo(): Promise<AppInfo>
@@ -41,8 +50,14 @@ export interface ReqManApi {
   getTheme(): Promise<LoadedTheme>
   /** Opens the folder containing the log file in Windows Explorer. */
   openLogFolder(): Promise<void>
-  /** Opens the folder containing theme.json in Windows Explorer, with the file selected. */
+  /** Creates the user's theme.json if needed, then shows it in Windows Explorer. */
   openThemeFolder(): Promise<void>
+  getUpdateStatus(): Promise<UpdateStatus>
+  checkForUpdates(): Promise<void>
+  /** Restarts ReqMan to install a downloaded update. */
+  installUpdate(): Promise<void>
+  /** Subscribes to update status changes; returns an unsubscribe function. */
+  onUpdateStatus(listener: (status: UpdateStatus) => void): () => void
   /** Records an error that happened in the UI in the log file. */
   reportUiError(message: string): void
   /** A plain-text summary (versions, paths, checks) to paste into a bug report. */
@@ -57,5 +72,9 @@ export const Channels = {
   openLogFolder: 'diag:openLogFolder',
   openThemeFolder: 'diag:openThemeFolder',
   reportUiError: 'diag:reportUiError',
-  getDiagnostics: 'diag:get'
+  getDiagnostics: 'diag:get',
+  getUpdateStatus: 'update:getStatus',
+  checkForUpdates: 'update:check',
+  installUpdate: 'update:install',
+  updateStatusChanged: 'update:statusChanged'
 } as const

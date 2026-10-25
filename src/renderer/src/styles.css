@@ -232,3 +232,18 @@ code {
   flex-wrap: wrap;
   gap: var(--rm-space-sm);
 }
+
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rm-space-md);
+  padding: var(--rm-space-sm) var(--rm-space-lg);
+  background: var(--rm-color-surface-alt);
+  border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
+  font-size: var(--rm-font-size-small);
+}
+
+.banner--ready {
+  font-weight: var(--rm-font-weight-strong);
+}

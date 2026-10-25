@@ -5,15 +5,18 @@ import { describe, expect, it } from 'vitest'
 import { createFileThemeService, DEFAULT_THEME, validateTheme } from '../src/modules/theme'
 
 const repoRoot = join(__dirname, '..')
+const shippedConfig = join(repoRoot, 'config')
+const shippedResources = join(repoRoot, 'resources')
+const tempDir = (): Promise<string> => mkdtemp(join(tmpdir(), 'reqman-theme-'))
 
 describe('theme module', () => {
   it('shipped config/theme.json matches the built-in default exactly', async () => {
-    const shipped = JSON.parse(await readFile(join(repoRoot, 'config', 'theme.json'), 'utf8'))
+    const shipped = JSON.parse(await readFile(join(shippedConfig, 'theme.json'), 'utf8'))
     expect(shipped).toEqual(DEFAULT_THEME)
   })
 
-  it('loads the shipped theme and logo without warnings', async () => {
-    const t = await createFileThemeService(join(repoRoot, 'config'), join(repoRoot, 'resources')).load()
+  it('loads the shipped theme and logo without warnings when the user has no theme', async () => {
+    const t = await createFileThemeService(shippedConfig, shippedResources, await tempDir()).load()
     expect(t.source).toBe('file')
     expect(t.warnings).toEqual([])
     expect(t.logoDataUrl.startsWith('data:image/svg+xml;base64,')).toBe(true)
@@ -32,20 +35,53 @@ describe('theme module', () => {
     expect(warnings).toHaveLength(2)
   })
 
-  it('falls back to defaults when theme.json is missing or corrupt', async () => {
-    const dir = await mkdtemp(join(tmpdir(), 'reqman-theme-'))
-    const missing = await createFileThemeService(dir, dir).load()
-    expect(missing.source).toBe('default')
-    await writeFile(join(dir, 'theme.json'), '{ not json')
-    const corrupt = await createFileThemeService(dir, dir).load()
-    expect(corrupt.config).toEqual(DEFAULT_THEME)
-    expect(corrupt.warnings.length).toBeGreaterThan(0)
+  it('layers the user theme over the shipped theme', async () => {
+    const user = await tempDir()
+    await writeFile(join(user, 'theme.json'), JSON.stringify({ modes: { light: { primary: '#d32f2f' } } }))
+    const t = await createFileThemeService(shippedConfig, shippedResources, user).load()
+    expect(t.source).toBe('user')
+    expect(t.config.modes.light.primary).toBe('#d32f2f')
+    expect(t.config.modes.dark.primary).toBe(DEFAULT_THEME.modes.dark.primary)
   })
 
-  it('never reads a logo outside the resources folder', async () => {
-    const dir = await mkdtemp(join(tmpdir(), 'reqman-theme-'))
-    await writeFile(join(dir, 'theme.json'), JSON.stringify({ brand: { logo: '../../secret.svg' } }))
-    const t = await createFileThemeService(dir, dir).load()
+  it('ignores a broken user theme and keeps the shipped one', async () => {
+    const user = await tempDir()
+    await writeFile(join(user, 'theme.json'), '{ broken')
+    const t = await createFileThemeService(shippedConfig, shippedResources, user).load()
+    expect(t.source).toBe('file')
+    expect(t.config).toEqual(DEFAULT_THEME)
+    expect(t.warnings.some((w) => w.startsWith('Your theme.json could not be read'))).toBe(true)
+  })
+
+  it('falls back to built-in defaults when no theme file can be read', async () => {
+    const dir = await tempDir()
+    const t = await createFileThemeService(dir, dir, dir).load()
+    expect(t.source).toBe('default')
+    expect(t.config).toEqual(DEFAULT_THEME)
+  })
+
+  it('creates the user theme from the shipped one, and never overwrites it afterwards', async () => {
+    const user = join(await tempDir(), 'ReqMan')
+    const svc = createFileThemeService(shippedConfig, shippedResources, user)
+    const file = await svc.ensureUserThemeFile()
+    expect(JSON.parse(await readFile(file, 'utf8'))).toEqual(DEFAULT_THEME)
+    await writeFile(file, '{"brand":{"name":"Mine"}}')
+    await svc.ensureUserThemeFile()
+    expect(await readFile(file, 'utf8')).toBe('{"brand":{"name":"Mine"}}')
+  })
+
+  it('uses a custom logo from the user folder when present', async () => {
+    const user = await tempDir()
+    await writeFile(join(user, 'theme.json'), JSON.stringify({ brand: { logo: 'company.png' } }))
+    await writeFile(join(user, 'company.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]))
+    const t = await createFileThemeService(shippedConfig, shippedResources, user).load()
+    expect(t.logoDataUrl.startsWith('data:image/png;base64,')).toBe(true)
+  })
+
+  it('never reads a logo outside the allowed folders', async () => {
+    const user = await tempDir()
+    await writeFile(join(user, 'theme.json'), JSON.stringify({ brand: { logo: '../../secret.svg' } }))
+    const t = await createFileThemeService(shippedConfig, await tempDir(), user).load()
     expect(t.logoDataUrl).toBe('')
   })
 })

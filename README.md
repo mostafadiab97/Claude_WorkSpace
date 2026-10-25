@@ -8,8 +8,8 @@ desktop GUI to view, edit, link, compare and export them. No server, no accounts
 ## Try it (Windows 11)
 
 1. Install [Git for Windows](https://git-scm.com/downloads/win) if you don't have it.
-2. Open the repository's **Actions** tab → latest **Build** run → download **ReqMan-Windows-Installer**.
-3. Unzip and run `ReqMan-Setup-<version>.exe`. It installs for your user only — no admin rights needed.
+2. Open the repository's **Releases** page → latest release → **Assets** → download `ReqMan-Setup-<version>.exe`.
+3. Run it. It installs for your user only — no admin rights needed. Installed copies update themselves from new releases.
 4. Follow the checklist in `docs/TESTING.md`; it also explains where the log file is and how to report a problem.
 
 ## Status
@@ -30,6 +30,9 @@ npm run dev        # run the app with live reload
 npm run check      # type-check + lint (incl. module-boundary rules) + tests
 npm run dist:win   # build the Windows installer (on Windows)
 ```
+
+To publish a release: set `version` in `package.json`, commit, then push a matching tag (`git tag v0.0.4 && git push --tags`).
+The **Release** workflow builds the installer and publishes it; installed copies pick it up automatically.
 
 ## Docs
 

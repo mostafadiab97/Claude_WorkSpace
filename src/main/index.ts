@@ -3,6 +3,7 @@ import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'node:path'
 import { createServices, type Paths } from './composition'
 import { registerIpc } from './ipc'
+import { Channels } from '../shared/api'
 
 app.setName('ReqMan')
 
@@ -13,8 +14,10 @@ function resolvePaths(): Paths {
   return {
     configDir: join(base, 'config'),
     resourceDir: join(base, 'resources'),
-    // Windows: %APPDATA%\ReqMan\logs
-    logDir: app.getPath('logs')
+    // Windows: %APPDATA%\ReqMan\logs and %APPDATA%\ReqMan
+    logDir: app.getPath('logs'),
+    userDir: app.getPath('userData'),
+    packaged: app.isPackaged
   }
 }
 
@@ -71,6 +74,10 @@ void app.whenReady().then(() => {
 
   registerIpc(services, paths)
   createWindow(services)
+  services.updater.start((status) => {
+    log.info(`Update status: ${JSON.stringify(status)}`)
+    for (const w of BrowserWindow.getAllWindows()) w.webContents.send(Channels.updateStatusChanged, status)
+  })
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow(services)
   })

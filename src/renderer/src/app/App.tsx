@@ -1,20 +1,24 @@
 import { useEffect, useState } from 'react'
-import type { AppInfo, GitInfo, LoadedTheme } from '../../../shared/api'
+import type { AppInfo, GitInfo, LoadedTheme, UpdateStatus } from '../../../shared/api'
 import { applyTheme, loadSavedMode, saveMode, type ThemeMode } from '../theme/applyTheme'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { StatusRow } from '../components/StatusRow'
 import { DiagnosticsCard } from '../components/DiagnosticsCard'
+import { UpdateBanner, describeUpdate } from '../components/UpdateBanner'
 
 export function App() {
   const [theme, setTheme] = useState<LoadedTheme | null>(null)
   const [mode, setMode] = useState<ThemeMode>(loadSavedMode)
   const [appInfo, setAppInfo] = useState<AppInfo | null>(null)
   const [git, setGit] = useState<GitInfo | null>(null)
+  const [update, setUpdate] = useState<UpdateStatus | null>(null)
 
   useEffect(() => {
     void window.reqman.getTheme().then(setTheme)
     void window.reqman.getAppInfo().then(setAppInfo)
     void window.reqman.getGitInfo().then(setGit)
+    void window.reqman.getUpdateStatus().then(setUpdate)
+    return window.reqman.onUpdateStatus(setUpdate)
   }, [])
 
   // Re-apply tokens when the theme loads, the mode changes, or (in System mode) Windows switches light/dark.
@@ -45,6 +49,7 @@ export function App() {
         </div>
         <ThemeToggle mode={mode} onChange={changeMode} />
       </header>
+      <UpdateBanner status={update} />
 
       <main className="content">
         <section className="hero">
@@ -74,8 +79,14 @@ export function App() {
             </StatusRow>
           )}
           <StatusRow label="Theme" tone={theme.warnings.length ? 'warn' : 'ok'}>
-            {theme.source === 'file' ? 'Loaded from config/theme.json' : 'Built-in default'}
+            {{ user: 'Your theme.json', file: 'App theme', default: 'Built-in default' }[theme.source]}
             {theme.warnings.length ? ` — ${theme.warnings.length} warning(s)` : ''}
+          </StatusRow>
+          <StatusRow
+            label="Updates"
+            tone={update?.state === 'error' ? 'warn' : update?.state === 'ready' || update?.state === 'up-to-date' ? 'ok' : 'neutral'}
+          >
+            {describeUpdate(update)}
           </StatusRow>
           <StatusRow label="App" tone="neutral">
             {appInfo ? `${brand} ${appInfo.version} · Electron ${appInfo.electronVersion} · ${appInfo.platform}` : '…'}

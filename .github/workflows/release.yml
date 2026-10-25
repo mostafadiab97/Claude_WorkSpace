@@ -1,0 +1,37 @@
+# Publishing a release: push a tag like v0.1.0 (it must match "version" in package.json).
+# This builds the Windows installer and publishes it as a GitHub Release, which is the feed
+# installed copies of ReqMan check for automatic updates.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Check tag matches package.json version
+        shell: bash
+        run: |
+          v="v$(node -p "require('./package.json').version")"
+          if [ "$v" != "$GITHUB_REF_NAME" ]; then echo "Tag $GITHUB_REF_NAME does not match package.json $v"; exit 1; fi
+
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+
+      - name: Build installer and publish GitHub Release
+        run: npx electron-builder --win --publish always -c.publish.releaseType=release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

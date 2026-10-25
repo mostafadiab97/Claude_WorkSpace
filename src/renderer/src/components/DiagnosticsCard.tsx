@@ -23,7 +23,7 @@ export function DiagnosticsCard({ appInfo }: { appInfo: AppInfo | null }) {
         <dd>
           <code>{appInfo?.logFile ?? '…'}</code>
         </dd>
-        <dt>Theme file</dt>
+        <dt>Your theme</dt>
         <dd>
           <code>{appInfo?.themeFile ?? '…'}</code>
         </dd>
@@ -33,7 +33,10 @@ export function DiagnosticsCard({ appInfo }: { appInfo: AppInfo | null }) {
           Open log folder
         </button>
         <button type="button" className="btn" onClick={() => void window.reqman.openThemeFolder()}>
-          Open theme file location
+          Edit my theme…
+        </button>
+        <button type="button" className="btn" onClick={() => void window.reqman.checkForUpdates()}>
+          Check for updates
         </button>
         <button type="button" className="btn" onClick={() => void copy()}>
           {copied === 'done' ? 'Copied ✓' : copied === 'failed' ? 'Copy failed' : 'Copy diagnostics'}

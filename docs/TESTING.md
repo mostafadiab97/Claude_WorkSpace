@@ -13,7 +13,8 @@ Two kinds of checks protect each build:
 | What | Location |
 | --- | --- |
 | Installed app | `%LOCALAPPDATA%\Programs\ReqMan\` |
-| Theme file | `%LOCALAPPDATA%\Programs\ReqMan\resources\config\theme.json` |
+| Your theme file (survives updates) | `%APPDATA%\ReqMan\theme.json` — created by **Edit my theme…** |
+| App's built-in theme (replaced by updates — don't edit) | `%LOCALAPPDATA%\Programs\ReqMan\resources\config\theme.json` |
 | Log file | `%APPDATA%\ReqMan\logs\reqman.log` (older entries in `reqman.old.log`) |
 
 Paste a location into the Explorer address bar to open it. The app's **Diagnostics** panel also shows
@@ -25,26 +26,35 @@ the paths and has buttons to open them.
 2. Click **Open log folder** and attach `reqman.log`.
 3. Describe what you did, what you expected and what happened (a screenshot helps).
 
-## Manual test checklist — v0.0.2 (milestone M0)
+## Getting a version to test
+
+Each tested version is published on the repository's **Releases** page
+(`https://github.com/mostafadiab97/Claude_WorkSpace/releases`). Download `ReqMan-Setup-<version>.exe` from
+the release's **Assets** and run it — there is no zip and no GitHub sign-in needed. From v0.0.3 onwards,
+an installed ReqMan also finds newer releases by itself and offers **Restart and update**.
+
+## Manual test checklist — v0.0.3
 
 Tick each step; any "No" is a bug to report.
 
 | # | Do this | Expected result |
 | --- | --- | --- |
-| 1 | Download **ReqMan-Windows-Installer** from the latest Build run, unzip, run `ReqMan-Setup-0.0.2.exe` | Windows may show "Windows protected your PC" (the proof of concept is not code-signed): click **More info → Run anyway**. Installs without asking for admin rights; ReqMan opens |
+| 1 | From **Releases → v0.0.3 → Assets**, download and run `ReqMan-Setup-0.0.3.exe` (over an older install is fine) | Windows may show "Windows protected your PC" (the proof of concept is not code-signed): click **More info → Run anyway**. Installs without admin rights; ReqMan opens |
 | 2 | Look at the Start menu and desktop | A **ReqMan** shortcut exists |
-| 3 | Look at the start screen | Logo and "ReqMan" in the top bar; Environment shows Git ● green with a version, Theme ● green "Loaded from config/theme.json" |
+| 3 | Look at the start screen | Logo and "ReqMan" in the top bar; Environment: Git ● green with a version, Theme ● green "App theme", Updates "Up to date" |
 | 4 | Click **Dark**, then **Light** | The whole window switches colours instantly; text stays readable in both |
 | 5 | Choose **Dark**, close ReqMan, reopen it | It reopens in Dark |
 | 6 | Choose **System**; in Windows Settings → Personalisation → Colours, switch app mode Light ↔ Dark | ReqMan follows Windows without restarting |
 | 7 | Click **Open log folder** | Explorer opens `%APPDATA%\ReqMan\logs` containing `reqman.log` |
-| 8 | Open `reqman.log` in Notepad | Lines for "starting", "Git check: installed", "Theme loaded" with times |
-| 9 | Click **Copy diagnostics**, paste into Notepad | Version, Windows version, Git version, theme status and log path |
-| 10 | Click **Open theme file location** | Explorer opens with `theme.json` selected |
-| 11 | Close ReqMan. In `theme.json`, change `"primary"` under `"light"` to `"#d32f2f"`, save, reopen ReqMan in Light | The primary button turns red. Undo the change afterwards |
-| 12 | Close ReqMan. Break `theme.json` on purpose (e.g. delete a `}`), save, reopen | ReqMan still opens with the normal look; Theme ● shows "Built-in default" with a warning, also written in the log. Undo afterwards |
+| 8 | Open `reqman.log` in Notepad | Lines for "starting", "Git check: installed", "Theme loaded", "Update status" with times |
+| 9 | Click **Copy diagnostics**, paste into Notepad | Version, Windows version, Git version, theme, update status and log path |
+| 10 | Click **Edit my theme…** | Explorer opens `%APPDATA%\ReqMan` with a new `theme.json` selected |
+| 11 | Close ReqMan. In that `theme.json`, change `"primary"` under `"light"` to `"#d32f2f"`, save, reopen in Light | The primary button turns red; Theme shows "Your theme.json" |
+| 12 | Close ReqMan. Break your `theme.json` on purpose (delete a `}`), save, reopen | ReqMan opens with the normal look; Theme ● shows a warning (also in the log). Undo afterwards |
 | 13 | Resize the window small and large; maximise it | Layout stays usable; nothing overlaps |
-| 14 | *(Optional, only if you can)* Temporarily rename Git's folder or test on a PC without Git | Git ● red with "Download Git for Windows" link that opens the browser |
-| 15 | Windows Settings → Apps → Installed apps → ReqMan → Uninstall | Uninstalls without admin rights |
+| 14 | **Update test** — tell Claude you have v0.0.3 installed; Claude publishes v0.0.4. Open ReqMan (or click **Check for updates**) | A bar shows "Downloading ReqMan 0.0.4…", then "ReqMan 0.0.4 is ready to install" with **Restart and update**. Click it: ReqMan closes, updates and reopens showing 0.0.4 — and your red theme from step 11 is still there |
+| 15 | Disconnect from the network, click **Check for updates** | Updates shows "Could not check for updates…"; nothing else breaks |
+| 16 | *(Optional)* Test on a PC without Git | Git ● red with a "Download Git for Windows" link that opens the browser |
+| 17 | Windows Settings → Apps → Installed apps → ReqMan → Uninstall | Uninstalls without admin rights |
 
-Not yet testable in M0: opening a repository, requirements, links, Git actions (arrive in M1–M6).
+Not yet testable: opening a repository, requirements, links, Git actions (arrive with M1–M6).

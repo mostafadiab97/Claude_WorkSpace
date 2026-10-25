@@ -61,14 +61,17 @@ export const DEFAULT_THEME: ThemeConfig = {
 const GROUPS = ['typography', 'shape', 'spacing'] as const
 
 /**
- * Merges a user theme over the defaults. Unknown or wrongly-typed values are ignored with a warning,
- * so a typo in theme.json can never break the app.
+ * Merges a theme file over a base theme (by default the built-in one). Unknown or wrongly-typed values
+ * are ignored with a warning, so a typo in theme.json can never break the app.
  */
-export function validateTheme(input: unknown): { theme: ThemeConfig; warnings: string[] } {
+export function validateTheme(
+  input: unknown,
+  base: ThemeConfig = DEFAULT_THEME
+): { theme: ThemeConfig; warnings: string[] } {
   const warnings: string[] = []
-  const theme: ThemeConfig = structuredClone(DEFAULT_THEME)
-  if (typeof input !== 'object' || input === null) {
-    return { theme, warnings: ['theme.json is not a JSON object; using defaults.'] }
+  const theme: ThemeConfig = structuredClone(base)
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    return { theme, warnings: ['theme.json is not a JSON object; ignored.'] }
   }
   const src = input as Record<string, unknown>
 

@@ -25,3 +25,8 @@ nsis:
   shortcutName: ReqMan
 linux:
   target: [dir]
+# Release feed for automatic updates: GitHub Releases of this repository.
+publish:
+  provider: github
+  owner: mostafadiab97
+  repo: Claude_WorkSpace

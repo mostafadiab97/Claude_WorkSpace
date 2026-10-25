@@ -1,8 +1,8 @@
-import { readFile } from 'node:fs/promises'
+import { copyFile, mkdir, readFile } from 'node:fs/promises'
 import { basename, extname, join } from 'node:path'
-import type { LoadedTheme } from '../../shared/api'
+import type { LoadedTheme, ThemeConfig } from '../../shared/api'
 import type { ThemeService } from './index'
-import { validateTheme } from './defaults'
+import { DEFAULT_THEME, validateTheme } from './defaults'
 
 const MIME: Record<string, string> = {
   '.svg': 'image/svg+xml',
@@ -12,35 +12,83 @@ const MIME: Record<string, string> = {
 }
 
 /**
- * @param configDir   folder holding theme.json (shipped next to the app, user-editable)
- * @param resourceDir folder holding the logo file named in theme.json
+ * Themes are layered:  built-in defaults  ←  shipped config/theme.json  ←  user theme.json.
+ * The shipped file is replaced by every update; the user file (in the user's own folder) never is.
+ *
+ * @param configDir   folder with the shipped theme.json (part of the installed app)
+ * @param resourceDir folder with the shipped logo
+ * @param userDir     per-user folder for the user's own theme.json and custom logo (%APPDATA%\ReqMan)
  */
-export function createFileThemeService(configDir: string, resourceDir: string): ThemeService {
-  return {
-    async load(): Promise<LoadedTheme> {
-      let raw: unknown
-      let source: LoadedTheme['source'] = 'file'
-      const warnings: string[] = []
-      try {
-        raw = JSON.parse(await readFile(join(configDir, 'theme.json'), 'utf8'))
-      } catch (e) {
-        source = 'default'
-        warnings.push(`Could not read theme.json (${(e as Error).message}); using built-in theme.`)
-      }
-      const result = validateTheme(raw ?? {})
-      if (source === 'file') warnings.push(...result.warnings)
+export function createFileThemeService(configDir: string, resourceDir: string, userDir: string): ThemeService {
+  const shippedFile = join(configDir, 'theme.json')
+  const userFile = join(userDir, 'theme.json')
 
-      // basename() stops a theme file from pointing outside the resources folder.
-      const logoFile = basename(result.theme.brand.logo)
-      let logoDataUrl = ''
+  const readJson = async (file: string): Promise<{ ok: true; value: unknown } | { ok: false; error: string }> => {
+    try {
+      return { ok: true, value: JSON.parse(await readFile(file, 'utf8')) }
+    } catch (e) {
+      const err = e as NodeJS.ErrnoException
+      return { ok: false, error: err.code === 'ENOENT' ? 'ENOENT' : err.message }
+    }
+  }
+
+  const loadLogo = async (config: ThemeConfig, warnings: string[]): Promise<string> => {
+    // basename() stops a theme file from pointing outside the allowed folders.
+    const logoFile = basename(config.brand.logo)
+    for (const dir of [userDir, resourceDir]) {
       try {
-        const bytes = await readFile(join(resourceDir, logoFile))
+        const bytes = await readFile(join(dir, logoFile))
         const mime = MIME[extname(logoFile).toLowerCase()] ?? 'application/octet-stream'
-        logoDataUrl = `data:${mime};base64,${bytes.toString('base64')}`
+        return `data:${mime};base64,${bytes.toString('base64')}`
       } catch {
-        warnings.push(`Logo "${logoFile}" not found in resources; showing the name only.`)
+        /* try next folder */
       }
-      return { config: result.theme, logoDataUrl, source, warnings }
+    }
+    warnings.push(`Logo "${logoFile}" not found in your ReqMan folder or the app; showing the name only.`)
+    return ''
+  }
+
+  return {
+    userThemeFile: userFile,
+
+    async load(): Promise<LoadedTheme> {
+      const warnings: string[] = []
+      let theme = DEFAULT_THEME
+      let source: LoadedTheme['source'] = 'default'
+
+      const shipped = await readJson(shippedFile)
+      if (shipped.ok) {
+        const r = validateTheme(shipped.value, theme)
+        theme = r.theme
+        source = 'file'
+        warnings.push(...r.warnings.map((w) => `App theme: ${w}`))
+      } else {
+        warnings.push(`App theme file could not be read (${shipped.error}); using built-in theme.`)
+      }
+
+      const user = await readJson(userFile)
+      if (user.ok) {
+        const r = validateTheme(user.value, theme)
+        theme = r.theme
+        source = 'user'
+        warnings.push(...r.warnings.map((w) => `Your theme: ${w}`))
+      } else if (user.error !== 'ENOENT') {
+        warnings.push(`Your theme.json could not be read (${user.error}); it was ignored.`)
+      }
+
+      const logoDataUrl = await loadLogo(theme, warnings)
+      return { config: theme, logoDataUrl, source, warnings }
+    },
+
+    async ensureUserThemeFile(): Promise<string> {
+      await mkdir(userDir, { recursive: true })
+      try {
+        // Start the user's copy from the shipped theme so every key is visible and editable.
+        await copyFile(shippedFile, userFile, 1 /* COPYFILE_EXCL: never overwrite an existing user file */)
+      } catch (e) {
+        if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e
+      }
+      return userFile
     }
   }
 }

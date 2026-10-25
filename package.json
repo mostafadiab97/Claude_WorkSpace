@@ -1,7 +1,7 @@
 {
   "name": "reqman",
   "productName": "ReqMan",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Local, Git-based requirements management tool (proof of concept)",
   "main": "./out/main/index.js",
   "author": "ReqMan",
@@ -35,5 +35,8 @@
     "typescript-eslint": "^8.72.0",
     "vite": "^8.3.5",
     "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11"
   }
 }

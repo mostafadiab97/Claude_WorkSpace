@@ -35,7 +35,8 @@ The UI ↔ core contract is **one file**: `src/shared/api.ts`. Adding a capabili
 | --- | --- | --- | --- |
 | `git-adapter` | `GitAdapter` — `getGitInfo()` | `systemGit.ts`: calls the installed Git | `main/ipc.ts` |
 | `logger` | `Logger` — `info/warn/error`, `filePath` | `fileLogger.ts`: appends to `%APPDATA%\ReqMan\logs\reqman.log`, rotates at 1 MB, never throws | `main/index.ts`, `main/ipc.ts` |
-| `theme` | `ThemeService` — `load()` | `fileTheme.ts`: reads `config/theme.json` + logo, validates, falls back to `defaults.ts` | `main/ipc.ts` |
+| `theme` | `ThemeService` — `load()`, `userThemeFile`, `ensureUserThemeFile()` | `fileTheme.ts`: layers defaults ← `config/theme.json` ← `%APPDATA%\ReqMan\theme.json`, validates each, loads logo | `main/ipc.ts` |
+| `updater` | `UpdateService` — `start()`, `checkNow()`, `installAndRestart()`, `current()` | `githubUpdater.ts`: electron-updater against GitHub Releases; background download, user-chosen restart | `main/index.ts`, `main/ipc.ts` |
 
 Planned (see milestones): `repository-store`, `domain-core`, `index-cache`, `diff-merge`, `import-export`, `git-host`.
 Keep this table up to date with every change.

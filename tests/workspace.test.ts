@@ -145,7 +145,7 @@ describe('workspace', () => {
     await ws.saveItem(test, null)
     if (!sp.ok || !sc.ok) throw new Error()
 
-    expect((await ws.getItem(child.id))?.incoming).toEqual([{ id: test.id, type: 'verifies' }])
+    expect((await ws.getItem(child.id))?.incoming).toMatchObject([{ id: test.id, type: 'verifies', suspect: false, exists: true }])
     expect(await ws.deleteItem(parent.id, sp.details.revision)).toMatchObject({ ok: false })
     expect(await ws.deleteItem(child.id, sc.details.revision)).toEqual({ ok: true })
     expect((await ws.refresh()).issues.map((i) => i.message)).toEqual([`"verifies" link to ${child.id}, which does not exist.`])
@@ -226,5 +226,56 @@ describe('workspace', () => {
     expect((await ws.saveSchemaFields(info.schema.fields, info.schemaRevision)).ok).toBe(false)
     // invalid definitions are refused
     expect((await ws.saveSchemaFields([{ id: 'x', name: 'X', type: 'enum' }], r.info.schemaRevision)).ok).toBe(false)
+  })
+  it('adds, confirms and removes typed links; edits to the target make them suspect', async () => {
+    const { ws, root } = await setup()
+    await ws.initialize(root)
+    const save = async (type: string, title: string): Promise<string> => {
+      const it = ws.newItem(type)
+      it.title = title
+      expect((await ws.saveItem(it, null)).ok).toBe(true)
+      return it.id
+    }
+    const sys = await save('system-requirement', 'Accuracy')
+    const tc = await save('test-case', 'Check accuracy')
+    const tc2 = await save('test-case', 'Check again')
+
+    expect(await ws.addLink(tc, 'verifies', sys)).toEqual({ ok: true })
+    expect((await ws.addLink(tc, 'verifies', sys)).ok).toBe(false) // duplicate
+    expect((await ws.addLink(tc, 'verifies', tc)).ok).toBe(false) // itself
+    expect((await ws.addLink(tc, 'blocks', sys)).ok).toBe(false) // unknown type
+    expect((await ws.addLink(tc, 'verifies', 'SYS-ZZZZZZ')).ok).toBe(false) // missing target
+    expect(await ws.addLink(tc2, 'verifies', sys)).toEqual({ ok: true })
+
+    const file = await readFile(join(root, 'requirements', 'items', `${tc}.md`), 'utf8')
+    expect(file).toMatch(new RegExp(`target: ${sys}`))
+    expect(file).toMatch(/confirmed: [0-9a-f]{12}/)
+
+    let d = await ws.getItem(sys)
+    expect(d?.incoming.map((l) => [l.id, l.type, l.suspect]).sort()).toEqual([[tc, 'verifies', false], [tc2, 'verifies', false]].sort())
+    expect(ws.query({ text: sys }).items[0]?.incomingCount).toBe(2)
+
+    // the requirement text changes: both test cases now have a suspect link
+    const cur = await ws.getItem(sys)
+    expect((await ws.saveItem({ ...cur!.item, text: 'Within 0.3 °C.' }, cur!.revision)).ok).toBe(true)
+    expect((await ws.getItem(tc))?.outgoing).toMatchObject([{ id: sys, suspect: true, exists: true, title: 'Accuracy' }])
+    expect(ws.query({ links: 'suspect' }).items.map((i) => i.id).sort()).toEqual([tc, tc2].sort())
+    expect(ws.query({ text: tc }).items[0]?.suspectCount).toBe(1)
+    // a status change alone does not make links suspect
+    expect(await ws.confirmLinks(tc)).toEqual({ ok: true })
+    expect(ws.query({ links: 'suspect' }).items.map((i) => i.id)).toEqual([tc2])
+    d = await ws.getItem(sys)
+    expect((await ws.saveItem({ ...d!.item, fields: { ...d!.item.fields, status: 'Approved' } }, d!.revision)).ok).toBe(true)
+    expect(ws.query({ links: 'suspect' }).items.map((i) => i.id)).toEqual([tc2])
+
+    expect(await ws.removeLink(tc, 'verifies', sys)).toEqual({ ok: true })
+    expect((await ws.removeLink(tc, 'verifies', sys)).ok).toBe(false)
+    expect(ws.query({ links: 'none' }).items.map((i) => i.id)).toEqual([tc])
+
+    // deleting the requirement can take the links pointing to it along
+    d = await ws.getItem(sys)
+    expect(await ws.deleteItem(sys, d!.revision, { removeIncomingLinks: true })).toEqual({ ok: true })
+    expect((await ws.getItem(tc2))?.item.links).toEqual([])
+    expect(ws.query({}).items.every((i) => i.incomingCount === 0)).toBe(true)
   })
 })

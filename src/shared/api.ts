@@ -1,5 +1,5 @@
 // The ONE contract between the UI (renderer) and the core (main process).
-import type { FieldDef, Item, ItemIssue, ItemQuery, LinkRef, QueryResult, Schema, SchemaProblem } from './domain'
+import type { FieldDef, Item, ItemIssue, ItemQuery, QueryResult, Schema, SchemaProblem } from './domain'
 export type * from './domain'
 
 // The UI can do exactly what is listed here and nothing else. Adding a capability = adding it here,
@@ -83,12 +83,26 @@ export interface RepoInfo {
   lastSync: { durationMs: number; full: boolean; changedFiles: number }
 }
 
+/** One end of a link, as shown in the editor. */
+export interface LinkInfo {
+  /** The item on the other end. */
+  id: string
+  type: string
+  /** Its title, if it exists. */
+  title?: string
+  exists: boolean
+  /** The target changed since the link was confirmed — the source may need review. */
+  suspect: boolean
+}
+
 export interface ItemDetails {
   item: Item
   /** Hash of the file as read; saving with an outdated revision is refused (someone else changed it). */
   revision: string
+  /** Links stored in this item, pointing to other items. */
+  outgoing: LinkInfo[]
   /** Links from other items to this one. */
-  incoming: LinkRef[]
+  incoming: LinkInfo[]
   childCount: number
   /** Schema problems in this item. */
   issues: ItemIssue[]
@@ -137,7 +151,7 @@ export interface ReqManApi {
   newItem(type: string, parent?: string): Promise<Item>
   /** `revision` null = a new item. */
   saveItem(item: Item, revision: string | null): Promise<SaveResult>
-  deleteItem(id: string, revision: string): Promise<{ ok: true } | { ok: false; message: string }>
+  deleteItem(id: string, revision: string, opts?: { removeIncomingLinks?: boolean }): Promise<{ ok: true } | { ok: false; message: string }>
   /**
    * Makes `parent` the new parent of `id` (null = top level); the item keeps its children.
    * Placed before the sibling `before`, or last when `before` is not given.
@@ -147,6 +161,11 @@ export interface ReqManApi {
   getAncestors(id: string): Promise<string[]>
   /** Replaces the project's field definitions in schema.yaml and re-opens the repository. */
   saveSchemaFields(fields: FieldDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** Adds a link stored in `source` ("source verifies target"); confirmed against the target as it is now. */
+  addLink(source: string, type: string, target: string): Promise<{ ok: true } | { ok: false; message: string }>
+  removeLink(source: string, type: string, target: string): Promise<{ ok: true } | { ok: false; message: string }>
+  /** Marks suspect links of `source` as reviewed (all of them, or only the one to `target`). */
+  confirmLinks(source: string, target?: string): Promise<{ ok: true } | { ok: false; message: string }>
   /** Moves an item one place up or down among its siblings. */
   moveItem(id: string, direction: 'up' | 'down'): Promise<{ ok: true } | { ok: false; message: string }>
   /** Records an error that happened in the UI in the log file. */
@@ -187,5 +206,8 @@ export const Channels = {
   moveItem: 'ws:moveItem',
   reparentItem: 'ws:reparentItem',
   getAncestors: 'ws:ancestors',
-  saveSchemaFields: 'ws:saveSchemaFields'
+  saveSchemaFields: 'ws:saveSchemaFields',
+  addLink: 'ws:addLink',
+  removeLink: 'ws:removeLink',
+  confirmLinks: 'ws:confirmLinks'
 } as const

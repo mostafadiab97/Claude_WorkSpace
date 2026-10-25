@@ -1175,6 +1175,115 @@ code {
   gap: 2px;
 }
 
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-xs);
+}
+
+.links__head {
+  display: flex;
+  align-items: center;
+  gap: var(--rm-space-sm);
+}
+
+.links__head .links__title {
+  margin: 0;
+  flex: 1;
+}
+
+.links__add {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.6fr);
+  gap: var(--rm-space-sm);
+  align-items: start;
+}
+
+.links__item {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  gap: var(--rm-space-sm);
+  align-items: center;
+  min-height: 28px;
+  padding: 0 var(--rm-space-xs);
+  border-radius: var(--rm-shape-radius-small);
+}
+
+.links__item:hover {
+  background: var(--rm-color-row-hover);
+}
+
+.links__rel {
+  font-size: var(--rm-font-size-small);
+  color: var(--rm-color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.links__target {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--rm-space-sm);
+  row-gap: 0;
+  gap: var(--rm-space-sm);
+  min-width: 0;
+}
+
+.links__id {
+  font-family: var(--rm-font-family-mono);
+  font-size: var(--rm-font-size-small);
+  flex-shrink: 0;
+}
+
+.links__name {
+  flex: 1 1 120px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.links__suspect {
+  flex-shrink: 0;
+  display: inline-flex;
+  gap: var(--rm-space-xs);
+  font-size: var(--rm-font-size-small);
+  color: var(--rm-color-warning);
+  font-weight: var(--rm-font-weight-strong);
+}
+
+.input[readonly] {
+  background: var(--rm-color-surface-alt);
+  color: var(--rm-color-text-muted);
+  cursor: default;
+}
+
+.icon-btn--small {
+  min-width: 24px;
+  height: 24px;
+  font-size: var(--rm-font-size-small);
+}
+
+.table__td--warn {
+  color: var(--rm-color-warning);
+  font-weight: var(--rm-font-weight-strong);
+}
+
+.popover__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rm-space-md);
+}
+
+.fields-builtin {
+  margin: 0 0 var(--rm-space-xs);
+  font-size: var(--rm-font-size-small);
+  color: var(--rm-color-text-muted);
+}
+
 /* unsaved-changes guard */
 
 .guard {

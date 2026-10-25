@@ -3,13 +3,13 @@ import { mkdirSync } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
-import type { FieldValue, Item } from '../items'
+import { contentFingerprint, type FieldValue, type Item } from '../items'
 import type { RequirementsRepo } from '../repository-store'
 import type { ItemIssue } from '../../shared/domain'
 import type { IndexCache, IndexedItem, ItemQuery, LinkRef, QueryResult, SyncStats } from './index'
 
 /** Bump when the table layout changes; an old cache file is then rebuilt automatically. */
-const FORMAT_VERSION = '1'
+const FORMAT_VERSION = '2'
 
 const DDL = `
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS items (
   ord REAL,
   text TEXT NOT NULL,
   fields_json TEXT NOT NULL,
-  links_json TEXT NOT NULL
+  links_json TEXT NOT NULL,
+  fp TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS items_id ON items(id);
 CREATE INDEX IF NOT EXISTS items_type ON items(type);
@@ -32,7 +33,7 @@ CREATE INDEX IF NOT EXISTS items_parent ON items(parent, ord);
 CREATE TABLE IF NOT EXISTS item_fields (rid INTEGER NOT NULL, field TEXT NOT NULL, value TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS item_fields_lookup ON item_fields(field, value, rid);
 CREATE INDEX IF NOT EXISTS item_fields_rid ON item_fields(rid);
-CREATE TABLE IF NOT EXISTS links (rid INTEGER NOT NULL, source TEXT NOT NULL, type TEXT NOT NULL, target TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS links (rid INTEGER NOT NULL, source TEXT NOT NULL, type TEXT NOT NULL, target TEXT NOT NULL, confirmed TEXT);
 CREATE INDEX IF NOT EXISTS links_target ON links(target);
 CREATE INDEX IF NOT EXISTS links_rid ON links(rid);
 CREATE VIRTUAL TABLE IF NOT EXISTS items_fts USING fts5(id, title, text, tokenize = 'unicode61 remove_diacritics 2');
@@ -49,7 +50,28 @@ interface ItemRow {
   text: string
   fields_json: string
   links_json: string
+  fp: string
   child_count: number
+  incoming_count: number
+  suspect_count: number
+}
+
+/** Outgoing links whose target changed since the link was confirmed. */
+const SUSPECT_SQL = 'SELECT 1 FROM links l JOIN items t ON t.id = l.target WHERE l.rid = i.rid AND l.confirmed IS NOT NULL AND l.confirmed <> t.fp'
+const COUNTS = `(SELECT COUNT(*) FROM items c WHERE c.parent = i.id) AS child_count,
+  (SELECT COUNT(*) FROM links l WHERE l.target = i.id) AS incoming_count,
+  (SELECT COUNT(*) FROM links l JOIN items t ON t.id = l.target WHERE l.rid = i.rid AND l.confirmed IS NOT NULL AND l.confirmed <> t.fp) AS suspect_count`
+
+/** Plain-text start of an item's text for table cells: Markdown markers removed, at most 200 characters. */
+export function preview(text: string): string {
+  return text
+    .slice(0, 600)
+    .replace(/```[\s\S]*?(```|$)/g, ' ')
+    .replace(/^\s{0,3}(#{1,6}|[-*+]|\d+[.)]|>|\|)\s*/gm, '')
+    .replace(/[*_`|]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 200)
 }
 
 function rowToItem(r: ItemRow): IndexedItem {
@@ -61,7 +83,9 @@ function rowToItem(r: ItemRow): IndexedItem {
     links: JSON.parse(r.links_json) as IndexedItem['links'],
     text: r.text,
     path: r.path,
-    childCount: r.child_count
+    childCount: r.child_count,
+    incomingCount: r.incoming_count,
+    suspectCount: r.suspect_count
   }
   if (r.parent !== null) item.parent = r.parent
   if (r.ord !== null) item.order = r.ord
@@ -103,17 +127,21 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     deleteFile: db.prepare('DELETE FROM files WHERE path = ?'),
     ridByPath: db.prepare('SELECT rid FROM items WHERE path = ?'),
     insertItem: db.prepare(
-      'INSERT INTO items(path, id, type, title, parent, ord, text, fields_json, links_json) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      'INSERT INTO items(path, id, type, title, parent, ord, text, fields_json, links_json, fp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     ),
     deleteItem: db.prepare('DELETE FROM items WHERE rid = ?'),
     insertField: db.prepare('INSERT INTO item_fields(rid, field, value) VALUES(?, ?, ?)'),
     deleteFields: db.prepare('DELETE FROM item_fields WHERE rid = ?'),
-    insertLink: db.prepare('INSERT INTO links(rid, source, type, target) VALUES(?, ?, ?, ?)'),
+    insertLink: db.prepare('INSERT INTO links(rid, source, type, target, confirmed) VALUES(?, ?, ?, ?, ?)'),
     deleteLinks: db.prepare('DELETE FROM links WHERE rid = ?'),
     insertFts: db.prepare('INSERT INTO items_fts(rowid, id, title, text) VALUES(?, ?, ?, ?)'),
     deleteFts: db.prepare('DELETE FROM items_fts WHERE rowid = ?'),
-    getById: db.prepare('SELECT i.*, (SELECT COUNT(*) FROM items c WHERE c.parent = i.id) AS child_count FROM items i WHERE i.id = ? ORDER BY i.path LIMIT 1'),
-    incoming: db.prepare('SELECT source AS id, type FROM links WHERE target = ? ORDER BY type, source'),
+    getById: db.prepare(`SELECT i.*, ${COUNTS} FROM items i WHERE i.id = ? ORDER BY i.path LIMIT 1`),
+    incoming: db.prepare(
+      `SELECT l.source AS id, l.type, (l.confirmed IS NOT NULL AND l.confirmed <> t.fp) AS suspect
+       FROM links l LEFT JOIN items t ON t.id = l.target WHERE l.target = ? ORDER BY l.type, l.source`
+    ),
+    fingerprint: db.prepare('SELECT fp FROM items WHERE id = ? LIMIT 1'),
     count: db.prepare('SELECT COUNT(*) AS n FROM items')
   }
 
@@ -148,13 +176,14 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       item.order ?? null,
       item.text,
       JSON.stringify(item.fields),
-      JSON.stringify(item.links)
+      JSON.stringify(item.links),
+      contentFingerprint(item)
     )
     const rid = Number(res.lastInsertRowid)
     for (const [field, value] of Object.entries(item.fields)) {
       for (const v of Array.isArray(value) ? value : [value]) stmt.insertField.run(rid, field, String(v))
     }
-    for (const l of item.links) stmt.insertLink.run(rid, item.id, l.type, l.target)
+    for (const l of item.links) stmt.insertLink.run(rid, item.id, l.type, l.target, l.confirmed ?? null)
     stmt.insertFts.run(rid, item.id, item.title, item.text)
   }
 
@@ -288,6 +317,8 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         where.push(`i.rid IN (SELECT rid FROM item_fields WHERE field = ? AND value IN (${values.map(() => '?').join(',')}))`)
         params.push(field, ...values)
       }
+      if (q.links === 'suspect') where.push(`EXISTS (${SUSPECT_SQL})`)
+      else if (q.links === 'none') where.push('NOT EXISTS (SELECT 1 FROM links l WHERE l.rid = i.rid) AND NOT EXISTS (SELECT 1 FROM links l WHERE l.target = i.id)')
       if (q.parent !== undefined) {
         if (q.parent === null) where.push('i.parent IS NULL')
         else {
@@ -320,7 +351,14 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         const pathExpr = `$."${by.slice(6).replace(/"/g, '')}"`
         orderParams.push(pathExpr, pathExpr)
       } else {
-        const col = { id: 'i.id', type: 'i.type', title: 'i.title COLLATE NOCASE', order: 'i.ord IS NULL, i.ord' }[by as 'id']
+        const col = {
+          id: 'i.id',
+          type: 'i.type',
+          title: 'i.title COLLATE NOCASE',
+          order: 'i.ord IS NULL, i.ord',
+          text: 'i.text COLLATE NOCASE',
+          links: `(json_array_length(i.links_json) + (SELECT COUNT(*) FROM links l WHERE l.target = i.id))`
+        }[by as 'id']
         orderSql = `${col} ${dir}, i.id`
       }
 
@@ -328,9 +366,9 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       const limit = Math.max(0, Math.min(q.limit ?? 200, 10_000))
       const offset = Math.max(0, q.offset ?? 0)
       const rows = db
-        .prepare(`SELECT i.*, (SELECT COUNT(*) FROM items c WHERE c.parent = i.id) AS child_count FROM items i ${whereSql} ORDER BY ${orderSql} LIMIT ? OFFSET ?`)
+        .prepare(`SELECT i.*, ${COUNTS} FROM items i ${whereSql} ORDER BY ${orderSql} LIMIT ? OFFSET ?`)
         .all(...params, ...orderParams, limit, offset) as unknown as ItemRow[]
-      return { total, items: rows.map((r) => rowToItem(q.brief ? { ...r, text: '' } : r)) }
+      return { total, items: rows.map((r) => rowToItem(q.brief ? { ...r, text: preview(r.text) } : r)) }
     },
 
     get(id) {
@@ -339,7 +377,11 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     },
 
     incomingLinks(id): LinkRef[] {
-      return stmt.incoming.all(id) as unknown as LinkRef[]
+      return (stmt.incoming.all(id) as unknown as { id: string; type: string; suspect: number }[]).map((r) => ({ id: r.id, type: r.type, suspect: r.suspect === 1 }))
+    },
+
+    fingerprint(id) {
+      return (stmt.fingerprint.get(id) as { fp: string } | undefined)?.fp
     },
 
     count: () => (stmt.count.get() as { n: number }).n,

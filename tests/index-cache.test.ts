@@ -2,7 +2,7 @@ import { mkdtemp, rm, utimes, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { createSqliteIndexCache, type IndexCache } from '../src/modules/index-cache'
+import { createSqliteIndexCache, preview, type IndexCache } from '../src/modules/index-cache'
 import { createFileRepositoryStore, type RequirementsRepo } from '../src/modules/repository-store'
 import type { Item } from '../src/modules/items'
 
@@ -48,7 +48,7 @@ describe('index cache', () => {
   it('returns full items by ID', () => {
     const expected: Partial<Item> = { ...ctx.items.sys! }
     delete expected.extra
-    expect(ctx.cache.get(ctx.items.sys!.id)).toEqual({ ...expected, path: `items/${ctx.items.sys!.id}.md`, childCount: 0 })
+    expect(ctx.cache.get(ctx.items.sys!.id)).toEqual({ ...expected, path: `items/${ctx.items.sys!.id}.md`, childCount: 0, incomingCount: 1, suspectCount: 0 })
   })
 
   it('finds words in title and text, with prefix matching and without accents', () => {
@@ -89,8 +89,8 @@ describe('index cache', () => {
   })
 
   it('answers reverse links ("verified by")', () => {
-    expect(ctx.cache.incomingLinks(ctx.items.sys!.id)).toEqual([{ id: ctx.items.tc!.id, type: 'verifies' }])
-    expect(ctx.cache.incomingLinks(ctx.items.stk!.id)).toEqual([{ id: ctx.items.sys!.id, type: 'refines' }])
+    expect(ctx.cache.incomingLinks(ctx.items.sys!.id)).toEqual([{ id: ctx.items.tc!.id, type: 'verifies', suspect: false }])
+    expect(ctx.cache.incomingLinks(ctx.items.stk!.id)).toEqual([{ id: ctx.items.sys!.id, type: 'refines', suspect: false }])
   })
 
   it('re-reads only changed, new and removed files', async () => {
@@ -151,5 +151,9 @@ describe('relevance ranking', () => {
     const byId = cache.query({ text: chapter.id, sort: { by: 'relevance' }, limit: 1 }).items
     expect(byId[0]?.id).toBe(chapter.id)
     cache.close()
+  })
+  it('makes a plain-text preview of Markdown text', () => {
+    expect(preview('# Heading\n\n- one **bold**\n- two\n\n```\ncode\n```\n| a | b |')).toBe('Heading one bold two a b')
+    expect(preview('x'.repeat(500))).toHaveLength(200)
   })
 })

@@ -4,7 +4,7 @@
 // deleted at any time and is rebuilt from the item files; normally only changed files are re-read.
 import type { IndexedItem, ItemIssue, ItemQuery, LinkRef, QueryResult } from '../../shared/domain'
 import type { RequirementsRepo } from '../repository-store'
-import { createSqliteIndexCache } from './sqliteIndex'
+import { createSqliteIndexCache, preview } from './sqliteIndex'
 
 export type { IndexedItem, SortKey, ItemQuery, QueryResult, LinkRef } from '../../shared/domain'
 
@@ -30,6 +30,8 @@ export interface IndexCache {
   get(id: string): IndexedItem | undefined
   /** Links pointing TO this item (the reverse view: "verified by …"). */
   incomingLinks(id: string): LinkRef[]
+  /** Content fingerprint of an item (for confirming links), or undefined if it does not exist. */
+  fingerprint(id: string): string | undefined
   count(): number
   /**
    * Whole-repository problems, answered from the index in milliseconds: duplicate IDs, links to missing
@@ -39,4 +41,4 @@ export interface IndexCache {
   close(): void
 }
 
-export { createSqliteIndexCache }
+export { createSqliteIndexCache, preview }

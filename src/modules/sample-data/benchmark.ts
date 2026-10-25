@@ -55,7 +55,10 @@ export async function runDataBenchmark(store: RepositoryStore, count: number): P
         ['text search', { text: 'temperature sensor', limit: 100 }],
         ['sort by title, page 50', { sort: { by: 'title' }, limit: 100, offset: 5000 }],
         ['sort by status descending', { sort: { by: 'field:status', descending: true }, limit: 100 }],
-        ['children of one item', { parent: someParent, sort: { by: 'order' } }]
+        ['children of one item', { parent: someParent, sort: { by: 'order' } }],
+        ['items with suspect links', { links: 'suspect', limit: 100 }],
+        ['items without links', { links: 'none', limit: 100 }],
+        ['sort by number of links', { sort: { by: 'links', descending: true }, limit: 100 }]
       ]
       const queries: BenchmarkResult['queries'] = []
       for (const [name, q] of cases) {

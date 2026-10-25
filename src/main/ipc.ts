@@ -104,7 +104,12 @@ export function registerIpc(services: Services, paths: Paths): void {
   ipcMain.handle(Channels.saveItem, (_e, item: unknown, revision: unknown) =>
     ws.saveItem(item as Item, typeof revision === 'string' ? revision : null)
   )
-  ipcMain.handle(Channels.deleteItem, (_e, id: unknown, revision: unknown) => ws.deleteItem(str(id, 'ID'), str(revision, 'revision')))
+  ipcMain.handle(Channels.deleteItem, (_e, id: unknown, revision: unknown, opts: unknown) =>
+    ws.deleteItem(str(id, 'ID'), str(revision, 'revision'), { removeIncomingLinks: (opts as { removeIncomingLinks?: unknown } | null)?.removeIncomingLinks === true })
+  )
+  ipcMain.handle(Channels.addLink, (_e, source: unknown, type: unknown, target: unknown) => ws.addLink(str(source, 'source'), str(type, 'link type'), str(target, 'target')))
+  ipcMain.handle(Channels.removeLink, (_e, source: unknown, type: unknown, target: unknown) => ws.removeLink(str(source, 'source'), str(type, 'link type'), str(target, 'target')))
+  ipcMain.handle(Channels.confirmLinks, (_e, source: unknown, target: unknown) => ws.confirmLinks(str(source, 'source'), typeof target === 'string' && target ? target : undefined))
   ipcMain.handle(Channels.reparentItem, (_e, id: unknown, parent: unknown, before: unknown) =>
     ws.reparentItem(str(id, 'ID'), typeof parent === 'string' && parent ? parent : null, typeof before === 'string' && before ? before : null)
   )

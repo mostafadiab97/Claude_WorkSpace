@@ -2,35 +2,41 @@ import { useEffect, useRef, useState } from 'react'
 import type { RepoInfo } from '../../../shared/api'
 import type { FieldDef, FieldType, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
-import { optionalColumns } from './ItemTable'
+import { optionalColumns, orderColumns, type ColumnPrefs } from './ItemTable'
 
 // ---------------------------------------------------------------- show / hide columns
 
-const storageKey = (root: string): string => `reqman.hiddenColumns:${root}`
+const storageKey = (root: string): string => `reqman.columns:${root}`
+const oldKey = (root: string): string => `reqman.hiddenColumns:${root}`
 
-/** Hidden table columns, remembered per repository on this PC (not shared through Git). */
-export function useHiddenColumns(root: string): [Set<string>, (next: Set<string>) => void] {
-  const [hidden, setHidden] = useState<Set<string>>(() => {
+/** Hidden columns and column order, remembered per repository on this PC (personal, not shared through Git). */
+export function useColumnPrefs(root: string): [ColumnPrefs, (next: ColumnPrefs) => void] {
+  const [prefs, setPrefs] = useState<ColumnPrefs>(() => {
     try {
       const raw = localStorage.getItem(storageKey(root))
-      return new Set(raw ? (JSON.parse(raw) as string[]) : [])
+      if (raw) {
+        const p = JSON.parse(raw) as { hidden?: string[]; order?: string[] }
+        return { hidden: new Set(p.hidden ?? []), order: p.order ?? [] }
+      }
+      const old = localStorage.getItem(oldKey(root)) // v0.3.0 kept only the hidden list
+      return { hidden: new Set(old ? (JSON.parse(old) as string[]) : []), order: [] }
     } catch {
-      return new Set()
+      return { hidden: new Set(), order: [] }
     }
   })
-  const update = (next: Set<string>): void => {
-    setHidden(next)
+  const update = (next: ColumnPrefs): void => {
+    setPrefs(next)
     try {
-      localStorage.setItem(storageKey(root), JSON.stringify([...next]))
+      localStorage.setItem(storageKey(root), JSON.stringify({ hidden: [...next.hidden], order: next.order }))
     } catch {
       // storage unavailable: the choice lasts until the window closes
     }
   }
-  return [hidden, update]
+  return [prefs, update]
 }
 
-/** "Columns" button: tick the columns to show; "Edit fields…" opens the field definitions. */
-export function ColumnsMenu({ schema, hidden, onChange, onEditFields }: { schema: Schema; hidden: Set<string>; onChange: (h: Set<string>) => void; onEditFields: () => void }) {
+/** "Columns" button: tick the columns to show, ↑/↓ to reorder; "Edit fields…" opens the field definitions. */
+export function ColumnsMenu({ schema, prefs, onChange, onEditFields }: { schema: Schema; prefs: ColumnPrefs; onChange: (p: ColumnPrefs) => void; onEditFields: () => void }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -49,13 +55,21 @@ export function ColumnsMenu({ schema, hidden, onChange, onEditFields }: { schema
     }
   }, [open])
 
-  const cols = optionalColumns(schema)
+  const cols = orderColumns(optionalColumns(schema), prefs.order)
+  const { hidden } = prefs
   const shown = cols.filter((c) => !hidden.has(c.key)).length
   const toggle = (key: string): void => {
     const next = new Set(hidden)
     if (next.has(key)) next.delete(key)
     else next.add(key)
-    onChange(next)
+    onChange({ ...prefs, hidden: next })
+  }
+  const move = (index: number, by: number): void => {
+    const keys = cols.map((c) => c.key)
+    const j = index + by
+    if (j < 0 || j >= keys.length) return
+    ;[keys[index], keys[j]] = [keys[j] as string, keys[index] as string]
+    onChange({ ...prefs, order: keys })
   }
 
   return (
@@ -65,20 +79,25 @@ export function ColumnsMenu({ schema, hidden, onChange, onEditFields }: { schema
       </button>
       {open && (
         <div className="popover__panel" role="dialog" aria-label="Columns">
-          <p className="popover__hint">Shown in the table (ID and Title always are):</p>
+          <p className="popover__hint">Shown in the table, in this order after ID and Title:</p>
           <ul className="popover__list">
-            {cols.map((c) => (
-              <li key={c.key}>
+            {cols.map((c, i) => (
+              <li key={c.key} className="popover__row">
                 <label className="check">
                   <input type="checkbox" checked={!hidden.has(c.key)} onChange={() => toggle(c.key)} />
                   {c.label}
+                  {c.builtIn && <span className="muted-inline"> · built in</span>}
                 </label>
+                <span className="actions">
+                  <button type="button" className="icon-btn icon-btn--small" aria-label={`Move ${c.label} column up`} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
+                  <button type="button" className="icon-btn icon-btn--small" aria-label={`Move ${c.label} column down`} disabled={i === cols.length - 1} onClick={() => move(i, 1)}>↓</button>
+                </span>
               </li>
             ))}
           </ul>
           <div className="actions actions--spread popover__footer">
-            <button type="button" className="link-btn" onClick={() => onChange(new Set())} disabled={hidden.size === 0}>
-              Show all
+            <button type="button" className="link-btn" onClick={() => onChange({ hidden: new Set(), order: [] })} disabled={hidden.size === 0 && prefs.order.length === 0}>
+              Reset
             </button>
             <button
               type="button"
@@ -119,6 +138,16 @@ const TYPES: { id: FieldType; label: string }[] = [
 ]
 
 let nextKey = 0
+
+/** Parts of every item that are not schema fields. */
+const BUILT_IN = [
+  { key: 'id', name: 'ID' },
+  { key: 'title', name: 'Title' },
+  { key: 'type', name: 'Type' },
+  { key: 'parent', name: 'Parent' },
+  { key: 'text', name: 'Text' },
+  { key: 'links', name: 'Links' }
+]
 
 const kebab = (s: string): string =>
   s
@@ -164,6 +193,9 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
   withIds.forEach((r, i) => {
     const label = r.name.trim() || `Field ${i + 1}`
     if (!r.name.trim()) problems.push(`Field ${i + 1} needs a name.`)
+    const builtIn = BUILT_IN.find((b) => b.name.toLowerCase() === r.name.trim().toLowerCase() || (!r.isNew && b.key === r.id))
+    if (builtIn) problems.push(`“${r.name.trim()}” is a built-in field of every item — it does not need to be added. Show or hide it with Columns.`)
+    if (withIds.some((x, k) => k < i && x.name.trim().toLowerCase() === r.name.trim().toLowerCase() && r.name.trim())) problems.push(`Two fields are called “${r.name.trim()}”.`)
     if (r.type === 'enum' && splitOptions(r.options).length === 0) problems.push(`${label}: a choice field needs at least one option.`)
     if (r.type === 'enum' && r.default && !splitOptions(r.options).includes(r.default)) problems.push(`${label}: the default must be one of the options.`)
     if (r.type === 'number' && r.default && Number.isNaN(Number(r.default))) problems.push(`${label}: the default must be a number.`)
@@ -223,6 +255,10 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
         </header>
 
         <div className="modal__body scroll">
+          <p className="fields-builtin">
+            <strong>Built in, always there:</strong> {BUILT_IN.map((b) => b.name).join(', ')}. These are not listed below; show or hide them
+            in the table with <em>Columns</em>.
+          </p>
           <div className="fields-table" role="table" aria-label="Field definitions">
             <div className="fields-table__head" role="row">
               <span>Name</span>

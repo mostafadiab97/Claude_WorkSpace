@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ItemDetails } from '../../../shared/api'
 import type { FieldDef, FieldValue, Item, ItemIssue, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
-import { linkName, typeName } from '../lib/schema'
+import { typeName } from '../lib/schema'
+import { LinksSection } from './LinksSection'
 import { ParentPicker } from './ParentPicker'
 
 export type EditorTarget = { kind: 'item'; id: string } | { kind: 'draft'; item: Item }
@@ -11,13 +12,15 @@ type Status = { kind: 'idle' } | { kind: 'saving' } | { kind: 'saved' } | { kind
 
 const same = (a: Item | null, b: Item | null): boolean => JSON.stringify(a) === JSON.stringify(b)
 
-/** Edits one item: its schema fields, parent, order and text. Links are listed (editing them arrives in M3). */
+/** Edits one item: its schema fields, parent, order and text; links are changed straight away in their own section. */
 export function ItemEditor(props: {
   schema: Schema
   target: EditorTarget
   onSaved: (id: string) => void
   onDeleted: () => void
   onMoved: () => void
+  /** Links were added, removed or confirmed (this item's file or another one changed). */
+  onLinksChanged: () => void
   onNewChild: (type: string, parent: string) => void
   onOpen: (id: string) => void
   onDirtyChange: (dirty: boolean) => void
@@ -33,6 +36,7 @@ export function ItemEditor(props: {
   const [status, setStatus] = useState<Status>({ kind: 'idle' })
   const [issues, setIssues] = useState<ItemIssue[]>([])
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [removeIncoming, setRemoveIncoming] = useState(true)
   const isNew = target.kind === 'draft'
 
   const load = useCallback(async () => {
@@ -147,7 +151,7 @@ export function ItemEditor(props: {
 
   const remove = async (): Promise<void> => {
     if (!details) return
-    const r = await window.reqman.deleteItem(form.id, details.revision)
+    const r = await window.reqman.deleteItem(form.id, details.revision, { removeIncomingLinks: removeIncoming && details.incoming.length > 0 })
     if (r.ok) props.onDeleted()
     else setStatus({ kind: 'error', message: r.message })
   }
@@ -179,6 +183,10 @@ export function ItemEditor(props: {
         </label>
 
         <div className="field-grid">
+          <label className="field">
+            <span className="field__label">Type</span>
+            <input className="input" value={typeName(schema, form.type)} readOnly title="The type is chosen when the item is created; it decides the ID prefix" />
+          </label>
           {schema.fields.map((f) => (
             <FieldInput key={f.id} def={f} value={form.fields[f.id]} error={issueFor(`fields.${f.id}`)} onChange={(v) => setField(f.id, v)} />
           ))}
@@ -195,24 +203,17 @@ export function ItemEditor(props: {
           <textarea className="input textarea" value={form.text} onChange={(e) => set({ text: e.target.value })} placeholder="The system shall…" rows={8} />
         </label>
 
-        <section className="links">
-          <h3 className="links__title">Links</h3>
-          {form.links.length === 0 && (details?.incoming.length ?? 0) === 0 && <p className="muted-inline">No links yet. Creating links arrives in the next version.</p>}
-          <ul className="links__list">
-            {form.links.map((l) => (
-              <li key={`o-${l.type}-${l.target}`}>
-                <span className="muted-inline">{linkName(schema, l.type)}</span>{' '}
-                <button type="button" className="link-btn" onClick={() => props.onOpen(l.target)}>{l.target}</button>
-              </li>
-            ))}
-            {details?.incoming.map((l) => (
-              <li key={`i-${l.type}-${l.id}`}>
-                <span className="muted-inline">{linkName(schema, l.type, true)}</span>{' '}
-                <button type="button" className="link-btn" onClick={() => props.onOpen(l.id)}>{l.id}</button>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <LinksSection
+          schema={schema}
+          itemId={form.id}
+          details={details}
+          lockedReason={isNew ? 'Save the item first, then add links.' : dirty ? 'Save or discard your changes before changing links.' : null}
+          onChanged={async () => {
+            await load()
+            props.onLinksChanged()
+          }}
+          onOpen={props.onOpen}
+        />
 
         {issues.filter((i) => !i.path.startsWith('fields.') && i.path !== 'parent').map((i) => (
           <p key={`${i.path}-${i.message}`} className={i.severity === 'error' ? 'notice notice--error' : 'notice notice--warn'}>
@@ -236,7 +237,12 @@ export function ItemEditor(props: {
           <div className="actions">
             <span>
               Delete {form.id}?
-              {(details?.incoming.length ?? 0) > 0 && ` ${details?.incoming.length} link(s) from other items will point to nothing.`}
+              {(details?.incoming.length ?? 0) > 0 && (
+                <label className="check">
+                  <input type="checkbox" checked={removeIncoming} onChange={(e) => setRemoveIncoming(e.target.checked)} />
+                  Also remove the {details?.incoming.length} link(s) other items have to it
+                </label>
+              )}
             </span>
             <button type="button" className="btn btn--danger" onClick={() => void remove()}>Delete</button>
             <button type="button" className="btn" onClick={() => setConfirmDelete(false)}>Cancel</button>

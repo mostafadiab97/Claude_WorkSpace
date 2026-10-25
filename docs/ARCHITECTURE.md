@@ -41,7 +41,7 @@ The UI ↔ core contract is **one file**: `src/shared/api.ts`. Adding a capabili
 | `schema` | `parseSchema(text)` → `{ schema, problems }`; types `Schema`, `ItemTypeDef`, `FieldDef`, `LinkTypeDef` | `parse.ts`: reads `requirements/.reqman/schema.yaml`, skips invalid entries with a message | `items`, `repository-store` |
 | `items` (domain core) | `Item`, `Link`; `parseItemFile`, `serializeItem`, `generateId`, `validateItem`, `contentFingerprint` | Pure logic, no I/O: file format, IDs, per-item validation, suspect-link fingerprint | `repository-store`, `index-cache`, `sample-data` |
 | `repository-store` | `RepositoryStore` — `inspect()`, `initialize()`, `open()`; `RequirementsRepo` — `loadAll()`, `createItem()`, `writeItem()`, `deleteItem()`… | `fileStore.ts`: files in `requirements/`, atomic writes, never overwrites unreadable files; `checks.ts`: duplicate IDs, broken links, parent loops | `main/composition.ts`, `index-cache`, `sample-data` |
-| `index-cache` | `IndexCache` — `sync()`, `syncPaths()`, `rebuild()`, `query()`, `get()`, `incomingLinks()`, `repositoryIssues()` | `sqliteIndex.ts`: SQLite (built into Electron) with full-text search, outside the repo, re-reads only changed files; whole-repository checks as SQL | `workspace` |
+| `index-cache` | `IndexCache` — `sync()`, `syncPaths()`, `rebuild()`, `query()` (incl. link filters/counts), `get()`, `incomingLinks()`, `fingerprint()`, `repositoryIssues()` | `sqliteIndex.ts`: SQLite (built into Electron) with full-text search, outside the repo, re-reads only changed files; whole-repository checks as SQL | `workspace` |
 | `workspace` | `WorkspaceService` — `checkFolder()`, `initialize()`, `open()`, `refresh()`, `query()`, `getItem()`, `newItem()`, `saveItem()`, `deleteItem()`, `moveItem()`, `recent()` | `workspace.ts`: the open repository; conflict-safe saving (file revision check), no parent loops, delete only leaf items, reordering by swapping two files; recent list in `%APPDATA%\\ReqMan\\recent-repositories.json` | `main/ipc.ts` |
 | `sample-data` | `generateItems()`, `runDataBenchmark()` | Fictional thermostat requirements; used by tests, `npm run gen:repo` and the in-app self-test | `main/ipc.ts`, tests |
 
@@ -62,6 +62,12 @@ requirements/
 - **Header order is fixed**: id, type, title, schema fields in schema order, unknown keys (sorted), parent, order,
   links. The same item always produces the same bytes, so Git diffs show only real changes.
 - **Links are stored only on the source item**; the reverse view ("verified by") comes from the index.
+  Adding a link from the target's side ("is verified by TC-1") therefore writes TC-1's file.
+- **Suspect links.** Each link stores `confirmed:` — the target's content fingerprint (type + title + text) when the
+  link was created or last confirmed. If the target's fingerprint is different now, the link is *suspect* (⚠) until
+  someone confirms it. Status, owner, order or links of the target do not count as a change. Links without
+  `confirmed` (written by hand or imported) are never suspect. The index keeps each item's fingerprint, so
+  "items with suspect links" is one SQL query.
 - **Unknown header keys are preserved**, so files written by a newer ReqMan or another tool lose nothing.
 - **The index is a cache**: `%APPDATA%\ReqMan\cache\…sqlite`, rebuilt automatically when missing or when the
   schema's fields change.
@@ -96,7 +102,9 @@ samples/, tools/   sample data and its generator
 | Start | `screens/StartScreen.tsx` | Open repository (folder picker → Git root detection → create `requirements/` if missing), recent list |
 | Workspace | `screens/WorkspaceScreen.tsx` | Filters/search/sort state, selection, unsaved-changes guard, refresh on window focus |
 | Table | `workspace/ItemTable.tsx` | Tree mode (no search/filter): the hierarchy, children loaded per parent when opened (500, then "Show more"), Expand all loads everything in one query; drag & drop calls `reparentItem(id, parent, before)`. Flat mode (search/filter): rows fetched 100 at a time. Virtual scrolling in both; sticky header and ID column |
-| Columns & fields | `workspace/FieldsPanel.tsx` | Hidden columns per repository in the PC's local storage (personal); field definitions saved to `schema.yaml` through `saveSchemaFields` (comment-preserving, refused if the file changed since it was read) |
+| Columns & fields | `workspace/FieldsPanel.tsx` | Hidden columns and column order per repository in the PC's local storage (personal); built-in parts (ID, Title, Type, Parent, Text, Links) cannot be added as fields; field definitions saved to `schema.yaml` through `saveSchemaFields` (comment-preserving, refused if the file changed since it was read) |
+| Links | `workspace/LinksSection.tsx` | Both directions grouped by link type; add (forward or reverse relation + item search), remove, confirm suspect links — each saved immediately; locked while the item has unsaved edits |
+| Item search | `workspace/ItemSearch.tsx` | Shared search-and-pick list for the parent picker and link targets |
 | Parent picker | `workspace/ParentPicker.tsx` | Empty = top-level items; typed = relevance search; loops greyed out via `getAncestors` |
 | Editor | `workspace/ItemEditor.tsx` | Fields generated from the schema; Ctrl+S; conflict message if the file changed outside ReqMan |
 | Settings | `screens/SettingsScreen.tsx` | Environment, diagnostics, data self-test; the workspace stays mounted behind it |

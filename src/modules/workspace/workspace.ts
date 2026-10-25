@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, join, resolve } from 'node:path'
-import type { FolderCheck, Item, ItemDetails, RecentRepository, RepoInfo, SaveResult } from '../../shared/api'
+import type { FolderCheck, Item, ItemDetails, LinkInfo, RecentRepository, RepoInfo, SaveResult } from '../../shared/api'
+import type { Link } from '../../shared/domain'
 import type { GitAdapter } from '../git-adapter'
 import type { IndexCache } from '../index-cache'
 import { validateItem } from '../items'
@@ -115,13 +116,36 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     return false
   }
 
+  /** Rewrites the links of one item file (conflict-safe) and updates the index. */
+  async function editLinks(s: Session, id: string, change: (links: Link[]) => Link[]): Promise<OpResult> {
+    try {
+      const current = await s.repo.readItem(id)
+      if (!current?.ok) return { ok: false, message: `${id} could not be read.` }
+      const links = change(current.item.links)
+      await s.repo.writeItem({ ...current.item, links }, { expectedRevision: current.revision })
+      await s.index.syncPaths(s.repo, [s.repo.itemPath(id)])
+      log.info(`Links of ${id} changed (${current.item.links.length} → ${links.length})`)
+      return { ok: true }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  }
+
   async function details(s: Session, id: string): Promise<ItemDetails | null> {
     const r = await s.repo.readItem(id)
     if (!r || !r.ok) return null
+    const info = (other: string, type: string, suspect: boolean): LinkInfo => {
+      const t = s.index.get(other)
+      return { id: other, type, exists: t !== undefined, suspect, ...(t ? { title: t.title } : {}) }
+    }
     return {
       item: r.item,
       revision: r.revision,
-      incoming: s.index.incomingLinks(id),
+      outgoing: r.item.links.map((l) => {
+        const fp = s.index.fingerprint(l.target)
+        return info(l.target, l.type, l.confirmed !== undefined && fp !== undefined && l.confirmed !== fp)
+      }),
+      incoming: s.index.incomingLinks(id).map((l) => info(l.id, l.type, l.suspect)),
       childCount: s.index.query({ parent: id, limit: 0 }).total,
       issues: validateItem(r.item, s.repo.schema)
     }
@@ -204,7 +228,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       }
     },
 
-    async deleteItem(id, revision): Promise<OpResult> {
+    async deleteItem(id, revision, opts): Promise<OpResult> {
       const s = need()
       const children = s.index.query({ parent: id, limit: 0 }).total
       if (children > 0) return { ok: false, message: `${id} has ${children} child item(s). Move or delete them first.` }
@@ -212,6 +236,13 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
         await s.repo.deleteItem(id, { expectedRevision: revision })
         await s.index.syncPaths(s.repo, [s.repo.itemPath(id)])
         log.info(`Deleted ${id}`)
+        if (opts?.removeIncomingLinks) {
+          const sources = [...new Set(s.index.incomingLinks(id).map((l) => l.id))]
+          for (const src of sources) {
+            const r = await editLinks(s, src, (links) => links.filter((l) => l.target !== id))
+            if (!r.ok) return { ok: false, message: `${id} was deleted, but its links from ${src} could not be removed: ${r.message}` }
+          }
+        }
         return { ok: true }
       } catch (e) {
         if (!(e instanceof ConflictError)) log.error(`Deleting ${id} failed`, e)
@@ -294,6 +325,37 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       } catch (e) {
         return { ok: false, message: (e as Error).message }
       }
+    },
+
+    async addLink(source, type, target): Promise<OpResult> {
+      const s = need()
+      if (!s.repo.schema.linkTypes.some((t) => t.id === type)) return { ok: false, message: `Unknown link type "${type}".` }
+      if (source === target) return { ok: false, message: 'An item cannot link to itself.' }
+      const fp = s.index.fingerprint(target)
+      if (fp === undefined) return { ok: false, message: `${target} does not exist.` }
+      if (!s.index.get(source)) return { ok: false, message: `${source} does not exist.` }
+      return editLinks(s, source, (links) => {
+        if (links.some((l) => l.type === type && l.target === target)) throw new Error(`${source} already has this link to ${target}.`)
+        return [...links, { type, target, confirmed: fp }]
+      })
+    },
+
+    removeLink: async (source, type, target) =>
+      editLinks(need(), source, (links) => {
+        const kept = links.filter((l) => !(l.type === type && l.target === target))
+        if (kept.length === links.length) throw new Error(`${source} has no "${type}" link to ${target}.`)
+        return kept
+      }),
+
+    confirmLinks: async (source, target) => {
+      const s = need()
+      return editLinks(s, source, (links) =>
+        links.map((l) => {
+          if (target !== undefined && l.target !== target) return l
+          const fp = s.index.fingerprint(l.target)
+          return fp === undefined ? l : { ...l, confirmed: fp }
+        })
+      )
     },
 
     async moveItem(id, direction): Promise<OpResult> {

@@ -98,10 +98,14 @@ export interface IndexedItem {
   path: string
   /** Number of items whose parent is this item. */
   childCount: number
+  /** Number of links from other items to this one. */
+  incomingCount: number
+  /** Outgoing links whose target changed (title, text or type) since the link was confirmed. */
+  suspectCount: number
 }
 
 /** `relevance` = best search matches first (exact ID, then title, then text); only meaningful with `text`. */
-export type SortKey = 'id' | 'type' | 'title' | 'order' | 'relevance' | `field:${string}`
+export type SortKey = 'id' | 'type' | 'title' | 'order' | 'relevance' | 'text' | 'links' | `field:${string}`
 
 export interface ItemQuery {
   /** Words to find in ID, title or text. Each word must match (prefix match: "brak" finds "braking"). */
@@ -109,12 +113,14 @@ export interface ItemQuery {
   types?: string[]
   /** Field id → accepted values. An item matches if it has any of the values (for lists: any element). */
   fields?: Record<string, string[]>
+  /** `suspect` = items with at least one suspect outgoing link; `none` = items with no links in or out. */
+  links?: 'suspect' | 'none'
   /** Only direct children of this item; `null` = only top-level items. */
   parent?: string | null
   sort?: { by: SortKey; descending?: boolean }
   limit?: number
   offset?: number
-  /** Leave out the text (smaller results for tables and trees; `text` is then ''). */
+  /** Return only the start of the text, as plain text (smaller results for tables and trees). */
   brief?: boolean
 }
 
@@ -128,4 +134,6 @@ export interface LinkRef {
   /** The item on the other end. */
   id: string
   type: string
+  /** The target changed since this link was confirmed. */
+  suspect: boolean
 }

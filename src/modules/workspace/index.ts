@@ -30,7 +30,11 @@ export interface WorkspaceService {
   getItem(id: string): Promise<ItemDetails | null>
   newItem(type: string, parent?: string): Item
   saveItem(item: Item, revision: string | null): Promise<SaveResult>
-  deleteItem(id: string, revision: string): Promise<OpResult>
+  /** `removeIncomingLinks`: also remove the links other items have to it, so none point to nothing. */
+  deleteItem(id: string, revision: string, opts?: { removeIncomingLinks?: boolean }): Promise<OpResult>
+  addLink(source: string, type: string, target: string): Promise<OpResult>
+  removeLink(source: string, type: string, target: string): Promise<OpResult>
+  confirmLinks(source: string, target?: string): Promise<OpResult>
   moveItem(id: string, direction: 'up' | 'down'): Promise<OpResult>
   reparentItem(id: string, parent: string | null, before?: string | null): Promise<OpResult>
   ancestors(id: string): string[]

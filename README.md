@@ -19,8 +19,9 @@ desktop GUI to view, edit, link, compare and export them. No server, no accounts
 | M0 Foundations — skeleton, module boundaries, theme file, Windows installer | Done |
 | M1 Data layer — schema, item files, repository store, index/search, performance, auto-update | Done |
 | M2 Core UI — open/create a requirements folder, item table, editor, hierarchy | Done (v0.3.0: hierarchy in the table, drag & drop, field editor) |
-| M3 Links — create and remove typed links | Next |
-| M4–M6 | Planned |
+| M3 Links — create, remove and confirm typed links; suspect links | Done (v0.4.0) |
+| M4 Git — status, commit, pull/push, branches inside ReqMan | Next |
+| M5–M6 | Planned |
 
 ## Develop
 

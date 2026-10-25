@@ -5,7 +5,7 @@
 // non-English text and special characters; plus a small, labelled set of deliberately broken items.
 import { mkdir, rename, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import { generateId, type Item } from '../src/modules/items/index.ts'
+import { contentFingerprint, generateId, type Item } from '../src/modules/items/index.ts'
 import { createFileRepositoryStore } from '../src/modules/repository-store/index.ts'
 
 const [folderArg, countArg] = process.argv.slice(2)
@@ -265,6 +265,24 @@ const mismatch = add('test-case', 'PROBLEM: ID prefix does not match the type', 
 mismatch.id = generateId('SW', (x) => taken.has(x))
 taken.add(mismatch.id)
 
+// ---------- link confirmations (suspect links)
+// Every link records the fingerprint of its target as it was when the link was confirmed. Most are current;
+// a few are not, as if the target was edited afterwards: those links show as "suspect" (⚠).
+// Scenario: the hub requirement was reworded after 12 of its 40 test cases were confirmed.
+hub.text += ' Reworded after 12 of its test cases were confirmed — those 12 links are suspect.'
+const byId = new Map(items.map((i) => [i.id, i]))
+let suspect = 0
+for (const it of items) {
+  for (const l of it.links) {
+    const t = byId.get(l.target)
+    if (!t) continue
+    const stale = t === hub ? it.title.startsWith('Hub verification ') && Number(it.title.slice(17)) <= 12 : chance(0.015)
+    // a stale confirmation = the fingerprint of an earlier wording of the target
+    l.confirmed = contentFingerprint(stale ? { ...t, text: `${t.text} (earlier wording)` } : t)
+    if (stale) suspect++
+  }
+}
+
 // ---------- write
 let written = 0
 let next = 0
@@ -289,4 +307,4 @@ const byType = new Map<string, number>()
 for (const i of items) byType.set(i.type, (byType.get(i.type) ?? 0) + 1)
 console.log(`Wrote ${items.length} items + ${BROKEN_FILES} unreadable files to ${repo.folder}`)
 console.log([...byType].sort((a, b) => b[1] - a[1]).map(([t, n]) => `  ${t}: ${n}`).join('\n'))
-console.log(`  links: ${items.reduce((n, i) => n + i.links.length, 0)}`)
+console.log(`  links: ${items.reduce((n, i) => n + i.links.length, 0)} (${suspect} suspect)`)

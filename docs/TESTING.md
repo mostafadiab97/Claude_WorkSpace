@@ -48,7 +48,30 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.3.0 (M2 feedback)
+## Manual test checklist — v0.4.0 (milestone M3: links)
+
+Use the sandbox data again: `git pull` in your `Claude_SandBox` clone (or `git reset --hard origin/main`). The update
+adds a confirmation to every link and makes 175 of them *suspect*, so there is something to review.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Open any item | The editor shows its **Type** (greyed: it is fixed once the item exists) |
+| 2 | Look at the table; open **Columns ▾** | **Links** and **Text** columns (Links like `→2 ←3`, Text = first line of the text). The menu lists Type, Links, every field and Text, each marked built in or not; ↑/↓ change the column order; **Reset** restores the default |
+| 3 | **Columns ▾ → Edit fields…**: if you added fields called "Text" or "Links" in 0.3.0, they are marked as built in — remove them, Save | The note "is a built-in field of every item" disappears; adding a field named Text/Links/Type/Title/Parent/ID is refused |
+| 4 | Open a test case → **+ Add link** → *verifies* → search for a requirement → pick it | The link appears under "verifies"; the test case file gets `- type: verifies / target: … / confirmed: …` |
+| 5 | Click the linked requirement's ID in the list | The requirement opens and shows "verified by" the test case. Its Links column shows `←1` (or more) |
+| 6 | In the requirement, **+ Add link** → *refined by* (under "This item is…") → pick another item | The link shows as "refined by …"; it is stored in the **other** item's file (`refines`) — check with `git diff` |
+| 7 | Change the requirement's text, Save | The test case's link becomes suspect: in the test case "⚠ changed" + **Confirm**; in the requirement "⚠ this item changed" |
+| 8 | **Links: With suspect links** filter | Lists the items whose links need review (the sandbox has 175 such links; the "Hub requirement" in chapter 8 has 12) |
+| 9 | Click **Confirm** on a suspect link (or **Confirm all N suspect**) | The ⚠ disappears; the item drops out of the suspect filter; only `confirmed:` changed in its file |
+| 10 | Change only the requirement's Status, Save | Links do **not** become suspect (only type, title and text count) |
+| 11 | Remove a link with **✕** (try one in each direction) | It disappears from both items; the file that stored it no longer has it |
+| 12 | Edit an item without saving | **+ Add link**, ✕ and Confirm are locked: "Save or discard your changes before changing links." New unsaved items: "Save the item first" |
+| 13 | Delete an item that other items link to | The confirmation offers "Also remove the N link(s) other items have to it" (ticked). Afterwards the status bar shows no new broken-link problems |
+| 14 | **Links: Without any links** | Items with no links in or out — e.g. requirements nobody verifies yet |
+| 15 | Sort by the **Links** header | Most-linked items first (descending) |
+
+## Previous checklist — v0.3.0 (M2 feedback)
 
 Best tried on the sandbox data (`Claude_SandBox`, 10,005 items): `git pull` or `git reset --hard origin/main` there
 first, so you start from the original data.
@@ -96,7 +119,7 @@ You need a Git repository to try it in: any project clone, or a new empty folder
 | 15 | Switch Light / Dark | Everything readable in both, including selected rows and scrollbars |
 | 16 | *(Optional)* `git status` in the repository | Only files under `requirements/` are new or changed |
 
-Links between items are shown but cannot be created yet — that is M3.
+Links between items are shown but cannot be created yet — that is M3 (v0.4.0).
 
 ## Previous checklist — v0.1.0 (milestone M1)
 

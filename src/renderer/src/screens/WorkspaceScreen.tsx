@@ -3,7 +3,7 @@ import type { RepoInfo } from '../../../shared/api'
 import type { ItemQuery, SortKey } from '../../../shared/domain'
 import { errorMessage, useDebounced } from '../lib/hooks'
 import { ItemEditor, type EditorTarget } from '../workspace/ItemEditor'
-import { ColumnsMenu, FieldsDialog, useHiddenColumns } from '../workspace/FieldsPanel'
+import { ColumnsMenu, FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
 import { ItemTable, type TreeControls } from '../workspace/ItemTable'
 
 /**
@@ -15,10 +15,11 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   const [text, setText] = useState('')
   const search = useDebounced(text, 200)
   const [types, setTypes] = useState<string>('')
+  const [linkFilter, setLinkFilter] = useState<'' | 'suspect' | 'none'>('')
   const [fieldFilters, setFieldFilters] = useState<Record<string, string>>({})
   // 'order' = document order (the hierarchy as arranged); column headers sort by that column instead.
   const [sort, setSort] = useState<{ by: SortKey; descending: boolean }>({ by: 'order', descending: false })
-  const [hidden, setHidden] = useHiddenColumns(info.root)
+  const [columnPrefs, setColumnPrefs] = useColumnPrefs(info.root)
   const [editFields, setEditFields] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -32,10 +33,11 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   const [showProblems, setShowProblems] = useState(false)
   const [refreshError, setRefreshError] = useState<string | null>(null)
 
-  const filtered = Boolean(search.trim() || types || Object.entries(fieldFilters).some(([k, v]) => v && schema.fields.some((f) => f.id === k)))
+  const filtered = Boolean(search.trim() || types || linkFilter || Object.entries(fieldFilters).some(([k, v]) => v && schema.fields.some((f) => f.id === k)))
   const query: Omit<ItemQuery, 'limit' | 'offset'> = {
     ...(search.trim() ? { text: search } : {}),
     ...(types ? { types: [types] } : {}),
+    ...(linkFilter ? { links: linkFilter } : {}),
     fields: Object.fromEntries(Object.entries(fieldFilters).filter(([k, v]) => v && schema.fields.some((f) => f.id === k)).map(([k, v]) => [k, [v]])),
     // a search without a chosen column sorts by best match
     sort: search.trim() && sort.by === 'order' ? { by: 'relevance' } : sort
@@ -130,7 +132,7 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
       <section className="workspace__main" aria-label="Items">
         <div className="toolbar">
           <input className="input toolbar__search" type="search" placeholder="Search ID, title, text…" value={text} onChange={(e) => setText(e.target.value)} aria-label="Search" />
-          <select className="input toolbar__filter" value={types} onChange={(e) => setTypes(e.target.value)} aria-label="Type">
+          <select className="input toolbar__filter" value={types} onChange={(e) => setTypes(e.target.value)} aria-label="Type filter">
             <option value="">All types</option>
             {schema.itemTypes.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
@@ -148,12 +150,17 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
               {f.options?.map((o) => <option key={o} value={o}>{o}</option>)}
             </select>
           ))}
+          <select className="input toolbar__filter" value={linkFilter} onChange={(e) => setLinkFilter(e.target.value as '' | 'suspect' | 'none')} aria-label="Links filter">
+            <option value="">Links: any</option>
+            <option value="suspect">With suspect links</option>
+            <option value="none">Without any links</option>
+          </select>
           {filtered && (
-            <button type="button" className="btn" onClick={() => { setText(''); setTypes(''); setFieldFilters({}) }}>
+            <button type="button" className="btn" onClick={() => { setText(''); setTypes(''); setLinkFilter(''); setFieldFilters({}) }}>
               Clear filters
             </button>
           )}
-          <ColumnsMenu schema={schema} hidden={hidden} onChange={setHidden} onEditFields={() => setEditFields(true)} />
+          <ColumnsMenu schema={schema} prefs={columnPrefs} onChange={setColumnPrefs} onEditFields={() => setEditFields(true)} />
           <span className="toolbar__spacer" />
           {!filtered && (
             <>
@@ -174,7 +181,7 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
         {filtered && <div className="table-mode">Search results — the hierarchy is shown again when the search and filters are cleared.</div>}
         <ItemTable
           schema={schema}
-          hidden={hidden}
+          prefs={columnPrefs}
           mode={filtered ? 'flat' : 'tree'}
           query={query}
           dataVersion={dataVersion}
@@ -246,6 +253,7 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
           }}
           onMoved={() => setDataVersion((v) => v + 1)}
           reloadToken={dataVersion}
+          onLinksChanged={() => void afterChange()}
           onNewChild={(type, parent) => void newItem(type, parent)}
           onOpen={select}
           onClose={() => request(null)}

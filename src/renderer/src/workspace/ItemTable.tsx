@@ -20,27 +20,75 @@ export interface Column {
   minPx: number
   grow: number
   value: (i: IndexedItem) => string
+  /** Shown in the warning colour (e.g. suspect links). */
+  warn?: (i: IndexedItem) => boolean
 }
 
-/** Columns that can be hidden: Type and every schema field. ID and Title are always shown. */
-export function optionalColumns(schema: Schema): { key: string; label: string }[] {
-  return [{ key: 'type', label: 'Type' }, ...schema.fields.map((f) => ({ key: `field:${f.id}`, label: f.name }))]
+/** Built-in columns that can be hidden (ID and Title are always shown). */
+export const BUILT_IN_OPTIONAL = [
+  { key: 'type', label: 'Type' },
+  { key: 'text', label: 'Text' },
+  { key: 'links', label: 'Links' }
+] as const
+
+/** Columns that can be hidden: Type, Text, Links and every schema field. */
+export function optionalColumns(schema: Schema): { key: string; label: string; builtIn: boolean }[] {
+  return [
+    { ...BUILT_IN_OPTIONAL[0], builtIn: true },
+    { ...BUILT_IN_OPTIONAL[2], builtIn: true },
+    ...schema.fields.map((f) => ({ key: `field:${f.id}`, label: f.name, builtIn: false })),
+    { ...BUILT_IN_OPTIONAL[1], builtIn: true }
+  ]
 }
 
-export function columnsFor(schema: Schema, hidden: ReadonlySet<string> = new Set()): Column[] {
+/** "→2 ←3 ⚠1": links out, links in, suspect links. */
+export function linkSummary(i: IndexedItem): string {
+  const parts: string[] = []
+  if (i.links.length) parts.push(`→${i.links.length}`)
+  if (i.incomingCount) parts.push(`←${i.incomingCount}`)
+  if (i.suspectCount) parts.push(`⚠${i.suspectCount}`)
+  return parts.join(' ')
+}
+
+/** Personal table layout: hidden column keys, and the order of the optional columns (keys). */
+export interface ColumnPrefs {
+  hidden: ReadonlySet<string>
+  order: string[]
+}
+
+/** Sorts columns by a saved key order; columns not in it (e.g. new fields) keep their place at the end. */
+export function orderColumns<T extends { key: string }>(cols: T[], order: string[]): T[] {
+  const pos = new Map(order.map((k, i) => [k, i]))
+  return cols
+    .map((c, i) => ({ c, rank: pos.get(c.key) ?? order.length + i }))
+    .sort((a, b) => a.rank - b.rank)
+    .map((x) => x.c)
+}
+
+export function columnsFor(schema: Schema, prefs: ColumnPrefs = { hidden: new Set(), order: [] }): Column[] {
   const all: Column[] = [
     { key: 'id', label: 'ID', minPx: 120, grow: 0, value: (i) => i.id },
     { key: 'title', label: 'Title', minPx: 260, grow: 3, value: (i) => i.title || '(no title)' },
     { key: 'type', label: 'Type', minPx: 130, grow: 1.2, value: (i) => typeName(schema, i.type) },
+    {
+      key: 'links',
+      label: 'Links',
+      minPx: 90,
+      grow: 0.6,
+      value: linkSummary,
+      warn: (i) => i.suspectCount > 0
+    },
     ...schema.fields.map<Column>((f) => ({
       key: `field:${f.id}`,
       label: f.name,
       minPx: f.type === 'list' ? 120 : 100,
       grow: f.type === 'list' ? 1.2 : 1,
       value: (i) => formatValue(i.fields[f.id])
-    }))
+    })),
+    { key: 'text', label: 'Text', minPx: 220, grow: 2.5, value: (i) => i.text }
   ]
-  return all.filter((c) => !hidden.has(c.key))
+  const [id, title, ...rest] = all
+  return [id as Column, title as Column, ...orderColumns(rest, prefs.order)].filter((c) => !prefs.hidden.has(c.key))
 }
 
 export type Row =
@@ -55,6 +103,12 @@ export interface TreeControls {
 
 type Sort = NonNullable<ItemQuery['sort']>
 type Zone = 'before' | 'into' | 'after'
+
+function linkTitle(i: IndexedItem): string {
+  const lines = [`${i.links.length} link(s) from this item, ${i.incomingCount} from other items`]
+  if (i.suspectCount) lines.push(`${i.suspectCount} suspect: the linked item changed since the link was confirmed`)
+  return lines.join('\n')
+}
 
 // ---------------------------------------------------------------- flat list (search / filters)
 
@@ -251,7 +305,7 @@ function useTreeRows(active: boolean, sort: Sort, dataVersion: number) {
  */
 export function ItemTable(props: {
   schema: Schema
-  hidden: ReadonlySet<string>
+  prefs: ColumnPrefs
   mode: 'tree' | 'flat'
   query: Omit<ItemQuery, 'limit' | 'offset'>
   dataVersion: number
@@ -266,8 +320,8 @@ export function ItemTable(props: {
   revealNonce?: number
   emptyText: string
 }) {
-  const { schema, hidden, mode, query, dataVersion, selectedId, onSelect, onSort, onTotal, onMove, controlsRef, revealNonce, emptyText } = props
-  const columns = useMemo(() => columnsFor(schema, hidden), [schema, hidden])
+  const { schema, prefs, mode, query, dataVersion, selectedId, onSelect, onSort, onTotal, onMove, controlsRef, revealNonce, emptyText } = props
+  const columns = useMemo(() => columnsFor(schema, prefs), [schema, prefs])
   const template = columns.map((c) => (c.grow ? `minmax(${c.minPx}px, ${c.grow}fr)` : `${c.minPx}px`)).join(' ')
   // When the pane is narrower than all columns together, header and rows scroll sideways together.
   const minWidth = columns.reduce((sum, c) => sum + c.minPx, 0)
@@ -538,7 +592,12 @@ export function ItemTable(props: {
                             {item.childCount > 0 && !open && <span className="table__count">{item.childCount.toLocaleString('en')}</span>}
                           </span>
                         ) : (
-                          <span key={c.key} role="gridcell" className={c.key === 'id' ? 'table__td table__td--id' : 'table__td'} title={c.value(item)}>
+                          <span
+                            key={c.key}
+                            role="gridcell"
+                            className={`table__td${c.key === 'id' ? ' table__td--id' : ''}${c.warn?.(item) ? ' table__td--warn' : ''}`}
+                            title={c.key === 'links' ? linkTitle(item) : c.value(item)}
+                          >
                             {c.value(item)}
                           </span>
                         )

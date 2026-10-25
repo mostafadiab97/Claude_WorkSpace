@@ -161,6 +161,76 @@ export interface ItemVersionCompare {
   unreadable?: string
 }
 
+// ---------- Compare (M5)
+
+/** One side of a comparison. */
+export interface VersionLabel {
+  /** Commit hash, or "WORKING" for the working folder (what is saved on this PC, committed or not). */
+  ref: string
+  /** "a1b2c3d Fix accuracy (Alice, 25 Oct 2026 14:02)" or "Your working folder" */
+  label: string
+}
+
+export interface CompareOptions {
+  /** What the last pull brought in: HEAD before and after it. Null if this PC never pulled anything. */
+  lastPull: { from: string; to: string; date: string } | null
+  /** Uncommitted changes exist under requirements/. */
+  hasUncommitted: boolean
+  /** Recent commits that changed the requirements folder, newest first. */
+  commits: HistoryEntry[]
+  /** Branches, remote branches and tags. */
+  refs: { name: string; kind: 'branch' | 'remote' | 'tag'; hash: string }[]
+  /** Current commit (null before the first commit). */
+  head: string | null
+}
+
+export interface CompareEntry {
+  id: string
+  /** Title in the newer version (older one for deleted items). */
+  title: string
+  type: string
+  kind: 'added' | 'deleted' | 'modified' | 'moved'
+  /** What changed, in a few words: "Text, Status", "Parent, Position", "1 link added". */
+  summary: string
+  diff: ItemDiff
+  /** Type, title or text changed: links pointing to this item become suspect. */
+  contentChanged: boolean
+  /** Links from other items to it today. */
+  incoming: number
+  /** A version that exists but could not be read. */
+  unreadable?: string
+}
+
+export interface LinkChange {
+  source: string
+  type: string
+  target: string
+  change: 'added' | 'removed'
+}
+
+export interface SchemaChange {
+  fieldsAdded: string[]
+  fieldsRemoved: string[]
+  typesAdded: string[]
+  typesRemoved: string[]
+  linkTypesAdded: string[]
+  linkTypesRemoved: string[]
+  /** Something else changed (names, options, defaults…). */
+  otherChanges: boolean
+}
+
+export interface CompareResult {
+  from: VersionLabel
+  to: VersionLabel
+  /** Sorted by ID. */
+  entries: CompareEntry[]
+  links: LinkChange[]
+  schema: SchemaChange | null
+  /** Other changed files under requirements/ (e.g. .gitattributes), as paths. */
+  otherFiles: string[]
+  durationMs: number
+}
+
 export interface ItemDetails {
   item: Item
   /** Hash of the file as read; saving with an outdated revision is refused (someone else changed it). */
@@ -249,6 +319,10 @@ export interface ReqManApi {
   getItemHistory(id: string): Promise<HistoryEntry[]>
   /** What one history entry changed in the item. */
   compareItemVersion(id: string, hash: string): Promise<ItemVersionCompare>
+  // --- Compare (M5)
+  getCompareOptions(): Promise<CompareOptions>
+  /** Requirement-level differences between two versions; `to` may be "WORKING". */
+  compareVersions(from: string, to: string): Promise<CompareResult>
   /** Moves an item one place up or down among its siblings. */
   moveItem(id: string, direction: 'up' | 'down'): Promise<{ ok: true } | { ok: false; message: string }>
   /** Records an error that happened in the UI in the log file. */
@@ -301,5 +375,7 @@ export const Channels = {
   setGitIdentity: 'git:setIdentity',
   undoLastCommit: 'git:undoLastCommit',
   getItemHistory: 'git:itemHistory',
-  compareItemVersion: 'git:compareItemVersion'
+  compareItemVersion: 'git:compareItemVersion',
+  getCompareOptions: 'compare:options',
+  compareVersions: 'compare:versions'
 } as const

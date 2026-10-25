@@ -100,7 +100,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.5.0, 25 Oct 2026)
+## Status (v0.6.0, 25 Oct 2026)
 
 | Milestone | State |
 | --- | --- |
@@ -109,15 +109,17 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | M2 Core UI — open/create folder, table, hierarchy, editor; then owner feedback: tree inside the table, drag & drop, parent picker, fields dialog, columns menu | Done (v0.2.0, v0.3.0) |
 | M3 Links — add/remove both directions, suspect links + confirm, Text/Links columns, link filters, built-in fields protected, column order | Done (v0.4.0, fix v0.4.1) |
 | M4 Git — Git bar, per-item changes, commit (requirements/ only), pull that stops safely on items changed on both sides, push (never forced), discard, undo unpushed commit, name/e-mail form, per-item history with field-level comparison | Done (v0.5.0) |
-| **M5 Compare** — two refs, per-item and per-link differences | **Next** |
-| M6 Export (CSV) and hardening; full journey on two PCs | Planned |
+| M5 Compare — pulls first; default "what the last pull brought in" (reflog); uncommitted / last commit / any two versions; per item (added/changed/moved/deleted + summary + suspect-impact warning) and per link; schema changes; fast via `cat-file --batch` by blob ID | Done (v0.6.0) |
+| **M6 Export (CSV) and hardening**; full journey on two PCs | **Next** |
 
-Owner's last report (25 Oct 2026): "all works fine" on v0.4.1. v0.5.0 is released and waiting for his test
-(checklist "v0.5.0" in `docs/TESTING.md`).
+Owner's last report (25 Oct 2026): "all works fine" on v0.4.1; he answered the M5 questions after v0.5.0 was
+released (test feedback on 0.5.0 not received yet). v0.6.0 is released and waiting for his test (checklists
+"v0.6.0" and "v0.5.0" in `docs/TESTING.md`).
 
-Automated tests: 79 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
+Automated tests: 82 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
 repository and two clones ("PC A", "PC B"); e2e journey with ~75 checks, incl. commit → push → colleague pushes →
-pull → history → conflict stop → undo commit + discard → pull.
+pull → history → conflict stop → undo commit + discard → pull → compare (pull first, last pull, custom range, links).
+Compare on the sandbox: 9,118 changed files (confirmations only) 0.4 s; 3,000 real edits 1.8 s (engine).
 Measured on the sandbox (10,005 items, Linux container): open incl. first indexing 5–8 s, expand all 0.4–0.6 s,
 scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 50k first index 18–73 s (Defender).
 
@@ -132,28 +134,35 @@ scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 5
   unavailable the merge runs and is aborted on conflicts (safety net). Sign-in only via Git Credential Manager
   (`GIT_TERMINAL_PROMPT=0` so nothing hangs on an invisible prompt).
 
-## Next step: M5 Compare (draft plan — confirm with the owner)
+## M5 decisions (owner, 25 Oct 2026) — already built
 
-Goal (journey step 6): "A pulls and opens Compare between the previous commit and now: the tool lists 'REQ-12 text
-changed', 'TC-4 → REQ-7 link added' rather than file lines."
+- Default comparison = "since my last pull" = what the last pull brought in (HEAD before → after the newest
+  `pull…`/`merge <remote>/<branch>…` step in the reflog; pulls outside ReqMan count too).
+- ReqMan **pulls right before any comparison** (skipped, with a note, while the editor has unsaved typing or
+  without a remote).
+- Exporting the comparison list → M6.
+- Implementation: `src/modules/workspace/compare.ts`; `git diff --raw -z -M` gives blob IDs; contents come from
+  `readBlobs()` (one `git cat-file --batch`). Naming objects `<rev>:<path>` instead was 40× slower with 10k files in
+  one folder (tree lookups). Files that differ only in `confirmed:` lines are skipped before parsing.
+
+## Next step: M6 Export and hardening (draft — confirm with the owner)
+
+From the plan: CSV export; end-to-end tests of the whole journey; bug fixes from trials; "the full 8-step journey
+passes on two Windows PCs". Owner added: export of the Compare list (decided 25 Oct 2026).
 
 Proposed scope:
-1. **Pick two versions:** "from" and "to", each a commit (from a list of recent commits of the requirements folder:
-   message, author, date), a branch or tag, or "my working folder". Shortcuts: "since my last pull" (ORIG_HEAD /
-   previous HEAD), "uncommitted changes".
-2. **Summary list:** per item: added / deleted / changed / moved, with what changed in one line ("text, status",
-   "link added: verifies SYS-…"); filters by kind and type; counts. Built from `git diff --name-status -M` between the
-   two refs under `requirements/` + `diffItems()` on both versions (already in `items`), computed in the main process.
-3. **Detail:** clicking an item shows the same field/text/link comparison as the History tab (reuse `HistoryView`'s
-   `ChangeView`, move it to a shared component).
-4. **Link view:** links added/removed across the whole set, listed both ways ("TC-4 verifies SYS-7 — added").
-5. **Performance:** 10k items, many changes — stream/paginate the list; reading both versions via one
-   `git cat-file --batch` process instead of one `git show` per file.
-6. **Tests:** two refs with every kind of change (incl. rename of a file, schema change, broken file), e2e on the
-   two-PC setup used for M4.
+1. **Export the table** (what is shown: current filter/search, visible columns, document order or sort) to CSV
+   (UTF-8 with BOM so Excel opens Arabic/ümlauts correctly; `;` vs `,` question) — plus the item text and links
+   as columns. Save dialog; remember the last folder.
+2. **Export the Compare list** to CSV and Markdown (Markdown is the agreed format for sharing with AI tools).
+3. **Hardening:** React error boundary with "copy diagnostics"; clear message and recovery when the requirements
+   folder disappears or a Git command hangs; startup check for Git ≥ 2.38; log rotation already exists; review all
+   `catch` paths; large-repo smoke test in CI with the scenario generator (10k).
+4. **Two-PC trial:** a written script in `docs/TESTING.md` for the owner and a colleague, journey steps 1–8.
 
-Questions for the owner: is "since my last pull" the main use (then make it the default)? Should Compare also export
-the list (CSV/Markdown) now, or with M6 exports?
+Questions for the owner: CSV separator for his Excel (comma or semicolon — depends on Windows region settings);
+should Word/PDF/Excel (.xlsx) exports (FR-14, MVP) come right after M6 or something else first (import from Excel,
+branches, per-item merge)?
 
 Later milestones and backlog are in DESIGN.md ("Scope by stage") — notable MVP items: schema editor for item and
 link types (fields part done), branches and tags, per-requirement merge, Word/PDF/Excel/Markdown export,

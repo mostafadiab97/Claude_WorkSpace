@@ -3,6 +3,21 @@
 Each version was installed and tried by the product owner on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.6.0 — 25 Oct 2026 — M5 Compare
+- **Compare** button in the Git bar: pulls first (owner's decision), then shows by default **what the last pull
+  brought in** (taken from Git's own record of where the branch was before and after the pull, so pulls made outside
+  ReqMan count too). Other choices: uncommitted changes, the last commit, or any two versions (commits that changed
+  requirements, branches, tags, the working folder).
+- Per requirement: Added / Changed / Moved (parent or position only) / Deleted, with a short summary ("Text,
+  Status", "1 link added") and a warning when other items link to a changed one (their links became suspect).
+  Count chips work as filters; filter by ID/title; Links tab lists every link added or removed.
+- Detail panel with the field table, text before/after and links; **Open the item**.
+- Schema changes are reported (fields / item types / link types added or removed); other files are named.
+- Fast for big ranges: all file versions are read through one `git cat-file` process by blob ID; files whose only
+  difference is a link confirmation are skipped. Measured: 9,118 changed files → 0.4 s; 3,000 real edits → 1.8 s.
+- Owner's decisions (25 Oct 2026): default = since the last pull; pull right before any comparison; exporting the
+  list waits for M6.
+
 ## 0.5.0 — 25 Oct 2026 — M4 Git
 - Git bar: branch, commits to push ↑ / pull ↓, **Changes**, **Pull**, **Push**; results with the affected items.
 - Changes panel: uncommitted changes per item (new / changed / deleted / renamed), **Discard** per item,

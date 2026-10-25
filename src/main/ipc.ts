@@ -110,6 +110,8 @@ export function registerIpc(services: Services, paths: Paths): void {
   ipcMain.handle(Channels.getGitState, () => ws.gitState())
   ipcMain.handle(Channels.commit, (_e, message: unknown) => ws.commit(typeof message === 'string' ? message : ''))
   ipcMain.handle(Channels.pull, () => ws.pull())
+  ipcMain.handle(Channels.getCompareOptions, () => ws.compareOptions())
+  ipcMain.handle(Channels.compareVersions, (_e, from: unknown, to: unknown) => ws.compareVersions(str(from, 'from'), str(to, 'to')))
   ipcMain.handle(Channels.undoLastCommit, () => ws.undoLastCommit())
   ipcMain.handle(Channels.push, () => ws.push())
   ipcMain.handle(Channels.discardChanges, (_e, paths: unknown) => ws.discardChanges(Array.isArray(paths) ? paths.filter((p): p is string => typeof p === 'string') : []))

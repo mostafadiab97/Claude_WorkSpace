@@ -3,6 +3,8 @@
 // up to date, and every item operation the UI performs (query, read, create, save, delete, reorder),
 // with the rules that need the whole repository (no parent loops, conflict-safe saving).
 import type {
+  CompareOptions,
+  CompareResult,
   FieldDef,
   FolderCheck,
   GitResult,
@@ -53,6 +55,9 @@ export interface WorkspaceService {
   undoLastCommit(): Promise<GitResult>
   itemHistory(id: string): Promise<HistoryEntry[]>
   compareItemVersion(id: string, hash: string): Promise<ItemVersionCompare>
+  // Compare (M5) — see compare.ts
+  compareOptions(): Promise<CompareOptions>
+  compareVersions(from: string, to: string): Promise<CompareResult>
 }
 
 export { createWorkspace, cacheFileName, type WorkspaceDeps }

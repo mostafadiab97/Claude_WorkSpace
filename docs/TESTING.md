@@ -48,7 +48,28 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.5.0 (milestone M4: Git)
+## Manual test checklist — v0.6.0 (milestone M5: Compare)
+
+Same setup as for v0.5.0: your `Claude_SandBox` clone, and GitHub's website (or a second clone) as "the colleague".
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to 0.6.0, open the sandbox clone | The Git bar has a new **Compare** button |
+| 2 | As the colleague: change the text of one item and the status of another on GitHub | — |
+| 3 | Click **Compare** | ReqMan **pulls first** ("Pulled first: 2 items changed."), then shows **What the last pull brought in** with exactly those two items, e.g. "SYS-… Text" and "SW-… Status" |
+| 4 | Click one of them | On the right: what changed — the field table (before struck through, after in bold) and the text before/after. A warning if other items link to it (those links became suspect) |
+| 5 | **Open the item** | Compare closes; the item is open in the editor, the table as you left it |
+| 6 | Click **Compare** again without new changes on GitHub | "Pulled first: Already up to date." — the list still shows what the *last* pull brought in |
+| 7 | Edit and save an item (don't commit), **Compare** → choose **Uncommitted changes** | Lists your saved change. (Pull is skipped while the editor has unsaved typing — it says so) |
+| 8 | Choose **Choose two versions…**: From = an older commit (the list shows message, author and date), To = **Your working folder** | All items changed since then, with counts: Added / Changed / Moved / Deleted, and Links +/− |
+| 9 | Click the **Changed** chip, then type part of an ID in the filter | Only changed items, then only the matching ones |
+| 10 | **Links** tab | Links added/removed in that range, e.g. "+ TC-… verifies SYS-… — added"; clicking the ID opens its change |
+| 11 | In the editor, drag an item to another parent, save; compare uncommitted changes | It appears as **Moved** ("Parent, Position") |
+| 12 | Change a field in **Columns → Edit fields…**, compare uncommitted changes | "Schema changed" chip and a line saying which fields were added/removed |
+| 13 | **Choose two versions…**: From = "Add fictional 10,005-item requirements set…", To = "Record link confirmations…" (9,118 changed files) | Finishes in a few seconds; only items with visible changes are listed (re-confirming links alone is not a change) |
+| 14 | **Pull and refresh** inside Compare after another change on GitHub | Pulls and shows the new "last pull" result |
+
+## Previous checklist — v0.5.0 (milestone M4: Git)
 
 You need a repository on GitHub you may push to — the sandbox is ideal: your `Claude_SandBox` clone (run
 `git pull` there first). To play "the colleague", either edit a file on GitHub's website (open

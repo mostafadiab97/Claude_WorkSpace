@@ -1,11 +1,11 @@
 // Implementation: uses the Git installed on the user's PC (Git for Windows), so ReqMan works
 // with exactly the credentials, SSH keys and configuration the user already has.
 // Every call passes arguments as an array (no shell), so file names and messages are never interpreted.
-import { execFile } from 'node:child_process'
+import { execFile, spawn } from 'node:child_process'
 import { rm } from 'node:fs/promises'
 import { join, normalize } from 'node:path'
 import type { GitInfo } from '../../shared/api'
-import type { CommitInfo, FileChange, GitAdapter, GitStatus, MergeCheck } from './index'
+import type { CommitInfo, FileChange, GitAdapter, GitRef, GitStatus, MergeCheck, NameStatus, ReflogEntry } from './index'
 
 export const GIT_DOWNLOAD_URL = 'https://git-scm.com/downloads/win'
 
@@ -35,6 +35,63 @@ const LOCAL_TIMEOUT = 30_000
 /** Pull and push may wait for the network or for the user to sign in (Git Credential Manager window). */
 const NETWORK_TIMEOUT = 180_000
 
+const GIT_ENV = (): NodeJS.ProcessEnv => ({ ...process.env, GIT_TERMINAL_PROMPT: '0', LC_ALL: 'C', LANG: 'C' })
+
+/**
+ * Reads many files of one commit through a single `git cat-file --batch` process (one process instead of one
+ * `git show` per file — matters for thousands of files). Returns null for files missing in that commit.
+ */
+export function readBlobs(root: string, oids: string[], timeoutMs = 120_000): Promise<Map<string, string | null>> {
+  // Objects are named by their blob ID (from `git diff --raw` / `ls-tree`). Naming them "<commit>:<path>" would make
+  // Git search the folder listing for every file — very slow with 10,000 files in one folder.
+  return new Promise((resolve, reject) => {
+    const result = new Map<string, string | null>()
+    const wanted = [...new Set(oids)]
+    if (wanted.length === 0) return resolve(result)
+    const child = spawn('git', ['-C', root, 'cat-file', '--batch'], { windowsHide: true, env: GIT_ENV() })
+    const timer = setTimeout(() => child.kill(), timeoutMs)
+    let buf: Buffer = Buffer.alloc(0)
+    let index = 0
+    let stderr = ''
+    const parse = (): void => {
+      while (index < wanted.length) {
+        const nl = buf.indexOf(10)
+        if (nl < 0) return
+        const header = buf.subarray(0, nl).toString('utf8')
+        const oid = wanted[index] as string
+        if (header.endsWith(' missing') || header.endsWith(' ambiguous')) {
+          result.set(oid, null)
+          buf = buf.subarray(nl + 1)
+          index++
+          continue
+        }
+        const size = Number(header.split(' ')[2])
+        if (buf.length < nl + 1 + size + 1) return // wait for the rest of this object
+        result.set(oid, buf.subarray(nl + 1, nl + 1 + size).toString('utf8'))
+        buf = buf.subarray(nl + 1 + size + 1)
+        index++
+      }
+    }
+    child.stdout.on('data', (chunk: Buffer) => {
+      buf = buf.length ? Buffer.concat([buf, chunk]) : chunk
+      parse()
+      if (index >= wanted.length) child.stdin.end()
+    })
+    child.stderr.on('data', (c: Buffer) => (stderr += c.toString()))
+    child.on('error', (e) => {
+      clearTimeout(timer)
+      reject(e)
+    })
+    child.on('close', (code) => {
+      clearTimeout(timer)
+      if (index >= wanted.length) resolve(result)
+      else reject(new GitError(stderr.trim() || `git cat-file stopped (${code ?? 'killed'})`, ['cat-file', '--batch'], code, '', stderr))
+    })
+    child.stdin.on('error', () => {}) // the process may close early on errors; reported via "close"
+    child.stdin.write(wanted.map((o) => `${o}\n`).join(''))
+  })
+}
+
 const defaultRunner: CommandRunner = (file, args, options = {}) =>
   new Promise((resolve, reject) => {
     execFile(
@@ -47,7 +104,7 @@ const defaultRunner: CommandRunner = (file, args, options = {}) =>
         maxBuffer: 64 * 1024 * 1024,
         // Never wait for a username/password typed into a terminal nobody sees; the Git Credential Manager
         // window (Git for Windows) still appears when a sign-in is needed. LC_ALL keeps messages parseable.
-        env: { ...process.env, GIT_TERMINAL_PROMPT: '0', LC_ALL: 'C', LANG: 'C' }
+        env: GIT_ENV()
       },
       (error, stdout, stderr) => {
         if (!error) return resolve(stdout)
@@ -231,6 +288,97 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
           return { hash: hash ?? '', author: author ?? '', email: email ?? '', date: date ?? '', message: subject.join('\x1f'), path: files.find((f) => f.trim())?.trim() ?? path }
         })
     },
+
+    async commitInfo(root, ref) {
+      try {
+        const out = (await git(root, ['log', '-1', '--format=%H%x1f%an%x1f%ae%x1f%aI%x1f%s', ref, '--'])).trim()
+        const [hash, author, email, date, ...subject] = out.split('\x1f')
+        return hash ? { hash, author: author ?? '', email: email ?? '', date: date ?? '', message: subject.join('\x1f'), path: '' } : null
+      } catch {
+        return null
+      }
+    },
+
+    async commits(root, pathspec, limit = 100): Promise<CommitInfo[]> {
+      const out = await git(root, ['log', `-n${limit}`, '--format=%x1e%H%x1f%an%x1f%ae%x1f%aI%x1f%s', '--', pathspec])
+      return out
+        .split('\x1e')
+        .map((c) => c.trim())
+        .filter(Boolean)
+        .map((c) => {
+          const [hash, author, email, date, ...subject] = c.split('\x1f')
+          return { hash: hash ?? '', author: author ?? '', email: email ?? '', date: date ?? '', message: subject.join('\x1f'), path: pathspec }
+        })
+    },
+
+    async reflog(root, limit = 300): Promise<ReflogEntry[]> {
+      try {
+        // %gd with --date gives "HEAD@{<when HEAD moved>}" — the time of the pull, not of the commit
+        const out = await git(root, ['reflog', 'show', `-n${limit}`, '--date=iso-strict', '--format=%H%x1f%gs%x1f%gd', 'HEAD'])
+        return out
+          .split(/\r?\n/)
+          .filter(Boolean)
+          .map((l) => {
+            const [hash, subject, selector] = l.split('\x1f')
+            return { hash: hash ?? '', subject: subject ?? '', date: /\{(.*)\}/.exec(selector ?? '')?.[1] ?? '' }
+          })
+      } catch {
+        return [] // no commits yet
+      }
+    },
+
+    async refs(root): Promise<GitRef[]> {
+      const out = await git(root, ['for-each-ref', '--format=%(refname)%1f%(objectname)%1f%(*objectname)', 'refs/heads', 'refs/remotes', 'refs/tags'])
+      return out
+        .split(/\r?\n/)
+        .filter(Boolean)
+        .map((l) => {
+          const [ref, oid, peeled] = l.split('\x1f')
+          const name = (ref ?? '').replace(/^refs\/(heads|remotes|tags)\//, '')
+          const kind: GitRef['kind'] = ref?.startsWith('refs/heads/') ? 'branch' : ref?.startsWith('refs/tags/') ? 'tag' : 'remote'
+          return { name, kind, hash: peeled || oid || '' }
+        })
+        .filter((r) => !r.name.endsWith('/HEAD'))
+    },
+
+    async resolve(root, ref) {
+      try {
+        return (await git(root, ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`])).trim() || null
+      } catch {
+        return null
+      }
+    },
+
+    async diffNameStatus(root, from, to, pathspec): Promise<NameStatus[]> {
+      // --raw gives both blob IDs; to = null compares with the working folder (new side = 000… → read the file)
+      const args = ['diff', '--raw', '-z', '-M', '--no-color', '--abbrev=40', from, ...(to ? [to] : []), '--', pathspec]
+      const parts = (await git(root, args, NETWORK_TIMEOUT)).split('\0')
+      const out: NameStatus[] = []
+      const zero = /^0+$/
+      for (let i = 0; i < parts.length; i++) {
+        const meta = parts[i]
+        if (!meta?.startsWith(':')) continue
+        // :100644 100644 <old> <new> M
+        const [, , oldOid, newOid, code] = meta.slice(1).split(' ')
+        const status = (code ?? 'M')[0] as string
+        const blob = (o: string | undefined): string | null => (o && !zero.test(o) ? o : null)
+        if (status === 'R' || status === 'C') {
+          out.push({ status: status === 'R' ? 'R' : 'A', from: parts[i + 1] ?? '', path: parts[i + 2] ?? '', oldOid: status === 'R' ? blob(oldOid) : null, newOid: blob(newOid) })
+          i += 2
+        } else {
+          out.push({ status: (status === 'T' ? 'M' : status) as NameStatus['status'], path: parts[i + 1] ?? '', oldOid: blob(oldOid), newOid: blob(newOid) })
+          i += 1
+        }
+      }
+      if (!to) {
+        const untracked = (await git(root, ['ls-files', '--others', '--exclude-standard', '-z', '--', pathspec])).split('\0').filter(Boolean)
+        for (const p of untracked) out.push({ status: 'A', path: p, oldOid: null, newOid: null })
+      }
+      return out
+    },
+
+    readBlobs: (root, oids) => readBlobs(root, oids),
+
 
     async show(root, ref, path) {
       try {

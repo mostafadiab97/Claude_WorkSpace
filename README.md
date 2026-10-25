@@ -21,8 +21,8 @@ desktop GUI to view, edit, link, compare and export them. No server, no accounts
 | M2 Core UI — open/create a requirements folder, item table, editor, hierarchy | Done (v0.3.0: hierarchy in the table, drag & drop, field editor) |
 | M3 Links — create, remove and confirm typed links; suspect links | Done (v0.4.0) |
 | M4 Git — changes per item, commit, pull/push (stops safely on conflicts), per-item history | Done (v0.5.0) |
-| M5 Compare — two versions of the whole set, per requirement and per link | Next |
-| M6 Export and hardening | Planned |
+| M5 Compare — two versions of the whole set, per requirement and per link (pulls first) | Done (v0.6.0) |
+| M6 Export and hardening | Next |
 
 ## Develop
 

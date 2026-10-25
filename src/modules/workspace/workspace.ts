@@ -8,6 +8,7 @@ import type { IndexCache } from '../index-cache'
 import { validateItem } from '../items'
 import type { Logger } from '../logger'
 import { ConflictError, type RepositoryStore, type RequirementsRepo } from '../repository-store'
+import { createCompare } from './compare'
 import { createGitOps } from './gitOps'
 import type { OpResult, WorkspaceService } from './index'
 
@@ -54,6 +55,8 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       s.lastSync = { durationMs: stats.durationMs, full: stats.full, changedFiles: stats.added + stats.updated + stats.removed }
     }
   })
+
+  const compare = createCompare(git)
 
   const need = (): Session => {
     if (!session) throw new Error('No repository is open.')
@@ -349,6 +352,8 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     undoLastCommit: () => gitOps.undoLastCommit(need()),
     itemHistory: (id) => gitOps.history(need(), id),
     compareItemVersion: (id, hash) => gitOps.compare(need(), id, hash),
+    compareOptions: () => compare.options(need()),
+    compareVersions: (from, to) => compare.compare(need(), from, to),
 
     async addLink(source, type, target): Promise<OpResult> {
       const s = need()

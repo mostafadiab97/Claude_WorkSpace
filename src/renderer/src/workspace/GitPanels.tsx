@@ -32,6 +32,8 @@ export function GitBar(props: {
   notice: GitNotice | null
   onDismiss: () => void
   onOpenItem: (id: string) => void
+  onCompare: () => void
+  compareOpen: boolean
 }) {
   const { state, busy, blockedReason, notice } = props
   if (!state) return null
@@ -58,6 +60,16 @@ export function GitBar(props: {
         {state.mergeInProgress && <span className="statusbar__warn">Merge with conflicts in progress (outside ReqMan)</span>}
         <span className="toolbar__spacer" />
         {busy && <span className="muted-inline" role="status">{busy}…</span>}
+        <button
+          type="button"
+          className={props.compareOpen ? 'btn btn--active' : 'btn'}
+          aria-pressed={props.compareOpen}
+          disabled={busy !== null || props.compareOpen}
+          title="Pulls first, then shows what changed per requirement and per link"
+          onClick={props.onCompare}
+        >
+          Compare
+        </button>
         <button type="button" className={props.changesOpen ? 'btn btn--active' : 'btn'} aria-pressed={props.changesOpen} onClick={props.onToggleChanges}>
           Changes{n > 0 ? ` (${n})` : ''}
         </button>

@@ -4,7 +4,7 @@
 // and change the single line in src/main/composition.ts.
 // Paths given to and returned by these methods are relative to the repository top folder, with forward slashes.
 import type { GitInfo } from '../../shared/api'
-import { createSystemGitAdapter, GitError, parseOverwrittenFiles, parseStatusV2 } from './systemGit'
+import { createSystemGitAdapter, GitError, parseOverwrittenFiles, parseStatusV2, readBlobs } from './systemGit'
 
 export interface FileChange {
   path: string
@@ -44,6 +44,32 @@ export interface CommitInfo {
   path: string
 }
 
+export interface ReflogEntry {
+  /** HEAD after this step */
+  hash: string
+  /** e.g. "pull: Fast-forward", "merge origin/main: Fast-forward", "commit: Add SYS-1" */
+  subject: string
+  date: string
+}
+
+export interface GitRef {
+  /** e.g. "main", "origin/main", "v1.0" */
+  name: string
+  kind: 'branch' | 'remote' | 'tag'
+  hash: string
+}
+
+export interface NameStatus {
+  /** A added, M modified, D deleted, R renamed (T type change counts as M) */
+  status: 'A' | 'M' | 'D' | 'R' | 'T'
+  path: string
+  /** R: the old path */
+  from?: string
+  /** Blob IDs of the old and new content; null when there is none (added / deleted) or the new side is the working folder. */
+  oldOid: string | null
+  newOid: string | null
+}
+
 export interface GitAdapter {
   /** Is Git installed, and which version? */
   getGitInfo(): Promise<GitInfo>
@@ -68,6 +94,20 @@ export interface GitAdapter {
   show(root: string, ref: string, path: string): Promise<string | null>
   /** Back to the last committed version; files that were never committed are deleted. */
   discard(root: string, paths: string[]): Promise<void>
+  /** Author, date and message of one commit (null if unknown). */
+  commitInfo(root: string, ref: string): Promise<CommitInfo | null>
+  /** Recent commits that changed something under `pathspec`, newest first. */
+  commits(root: string, pathspec: string, limit?: number): Promise<CommitInfo[]>
+  /** Where HEAD has been on this PC (commits, pulls, merges, resets), newest first. */
+  reflog(root: string, limit?: number): Promise<ReflogEntry[]>
+  /** Branches, remote branches and tags. */
+  refs(root: string): Promise<GitRef[]>
+  /** Commit hash of a ref, or null. */
+  resolve(root: string, ref: string): Promise<string | null>
+  /** Files under `pathspec` that differ between two commits (`to` null = the working folder, incl. new files). */
+  diffNameStatus(root: string, from: string, to: string | null, pathspec: string): Promise<NameStatus[]>
+  /** Contents of many blobs by ID (null = not found), through one git process. */
+  readBlobs(root: string, oids: string[]): Promise<Map<string, string | null>>
   /** Does this ref (e.g. "origin/main") exist? */
   refExists(root: string, ref: string): Promise<boolean>
   /** Hash of HEAD, or null before the first commit. */
@@ -84,5 +124,5 @@ export interface GitAdapter {
   setIdentity(root: string, name: string, email: string): Promise<void>
 }
 
-export { createSystemGitAdapter, GitError, parseOverwrittenFiles, parseStatusV2 }
+export { createSystemGitAdapter, GitError, parseOverwrittenFiles, parseStatusV2, readBlobs }
 export type { CommandRunner, RunOptions } from './systemGit'

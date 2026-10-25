@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { GitResult, GitState, RepoInfo } from '../../../shared/api'
+import type { CompareEntry, GitResult, GitState, RepoInfo } from '../../../shared/api'
 import type { ItemQuery, SortKey } from '../../../shared/domain'
 import { errorMessage, useDebounced } from '../lib/hooks'
 import { ItemEditor, type EditorTarget } from '../workspace/ItemEditor'
 import { ColumnsMenu, FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
+import { CompareDetail, CompareView } from '../workspace/CompareView'
 import { ChangesPanel, GitBar, type GitNotice } from '../workspace/GitPanels'
 import { ItemTable, type TreeControls } from '../workspace/ItemTable'
 
@@ -30,6 +31,10 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   const [gitBusy, setGitBusy] = useState<string | null>(null)
   const [gitNotice, setGitNotice] = useState<GitNotice | null>(null)
   const [showChanges, setShowChanges] = useState(false)
+  const [compareOpen, setCompareOpen] = useState(false)
+  const [compareEntry, setCompareEntry] = useState<CompareEntry | null>(null)
+  const [comparePulling, setComparePulling] = useState(false)
+  const [comparePull, setComparePull] = useState<{ ok: boolean; message: string } | null>(null)
   const [target, setTarget] = useState<EditorTarget | null>(null)
   const [pending, setPending] = useState<EditorTarget | null | undefined>(undefined)
   const [dirty, setDirty] = useState(false)
@@ -57,6 +62,7 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   }
   const select = (id: string): void => {
     setShowChanges(false)
+    setCompareEntry(null)
     if (target?.kind === 'item' && target.id === id) return
     request({ kind: 'item', id })
   }
@@ -128,6 +134,41 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   }
   const openFromGit = (id: string): void => select(id)
 
+  // Compare always pulls first (owner's decision), so "what the last pull brought in" is current.
+  const pullForCompare = async (): Promise<void> => {
+    const st = gitState ?? (await window.reqman.getGitState())
+    if (!st.available || !st.hasRemote) {
+      setComparePull(null)
+      return
+    }
+    if (dirty) {
+      setComparePull({ ok: false, message: 'Save or discard your edit first.' })
+      return
+    }
+    setComparePulling(true)
+    try {
+      const r = await window.reqman.pull()
+      setGitState(r.state)
+      setComparePull({ ok: r.ok, message: r.message })
+      if (r.ok) await afterChange()
+    } catch (e) {
+      setComparePull({ ok: false, message: errorMessage(e) })
+    } finally {
+      setComparePulling(false)
+    }
+  }
+  const openCompare = (): void => {
+    setShowChanges(false)
+    setGitNotice(null)
+    setCompareEntry(null)
+    setCompareOpen(true)
+    void pullForCompare()
+  }
+  const closeCompare = (): void => {
+    setCompareOpen(false)
+    setCompareEntry(null)
+  }
+
   const afterChange = async (): Promise<void> => {
     setDataVersion((v) => v + 1)
     onInfo(await window.reqman.refreshRepository())
@@ -190,7 +231,22 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
           notice={gitNotice}
           onDismiss={() => setGitNotice(null)}
           onOpenItem={openFromGit}
+          onCompare={openCompare}
+          compareOpen={compareOpen}
         />
+        {compareOpen && (
+          <CompareView
+            schema={schema}
+            pullNote={comparePull}
+            pulling={comparePulling}
+            onPullAgain={() => void pullForCompare()}
+            selected={compareEntry?.id ?? null}
+            onSelect={setCompareEntry}
+            onClose={closeCompare}
+          />
+        )}
+        {/* The table stays mounted while comparing, so its opened levels and scroll position survive. */}
+        <div className={compareOpen ? 'is-hidden' : 'workspace__items'}>
         <div className="toolbar">
           <input className="input toolbar__search" type="search" placeholder="Search ID, title, text…" value={text} onChange={(e) => setText(e.target.value)} aria-label="Search" />
           <select className="input toolbar__filter" value={types} onChange={(e) => setTypes(e.target.value)} aria-label="Type filter">
@@ -261,6 +317,7 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
             <button type="button" className="link-btn" onClick={() => setNotice(null)}>Dismiss</button>
           </div>
         )}
+        </div>
 
         {showProblems && problems.length > 0 && (
           <ul className="problems scroll" aria-label="Problems">
@@ -296,12 +353,24 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
         </footer>
       </section>
 
+      {compareOpen && compareEntry && (
+        <CompareDetail
+          schema={schema}
+          entry={compareEntry}
+          onClose={() => setCompareEntry(null)}
+          onOpenItem={(id) => {
+            closeCompare()
+            select(id)
+          }}
+        />
+      )}
+
       {showChanges && gitState?.available && (
         <ChangesPanel state={gitState} blockedReason={gitBlocked} onResult={onPanelResult} onOpenItem={openFromGit} onClose={() => setShowChanges(false)} />
       )}
 
       {target && (
-        <div className={showChanges && gitState?.available ? 'is-hidden' : 'contents'}>
+        <div className={(showChanges && gitState?.available) || (compareOpen && compareEntry) ? 'is-hidden' : 'contents'}>
         <ItemEditor
           // Same key for a draft and the saved item, so the editor stays in place when a new item is saved.
           key={target.kind === 'item' ? target.id : target.item.id}

@@ -1,19 +1,29 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { RepoInfo } from '../../../shared/api'
 import type { ItemQuery, SortKey } from '../../../shared/domain'
 import { errorMessage, useDebounced } from '../lib/hooks'
 import { ItemEditor, type EditorTarget } from '../workspace/ItemEditor'
-import { ItemTable } from '../workspace/ItemTable'
-import { ItemTree } from '../workspace/ItemTree'
+import { ColumnsMenu, FieldsDialog, useHiddenColumns } from '../workspace/FieldsPanel'
+import { ItemTable, type TreeControls } from '../workspace/ItemTable'
 
-/** The open repository: hierarchy on the left, filterable table in the middle, editor on the right. */
+/**
+ * The open repository: the item table (document hierarchy, or a flat list while searching/filtering)
+ * and the editor on the right.
+ */
 export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: RepoInfo) => void }) {
   const schema = info.schema
   const [text, setText] = useState('')
   const search = useDebounced(text, 200)
   const [types, setTypes] = useState<string>('')
   const [fieldFilters, setFieldFilters] = useState<Record<string, string>>({})
-  const [sort, setSort] = useState<{ by: SortKey; descending: boolean }>({ by: 'id', descending: false })
+  // 'order' = document order (the hierarchy as arranged); column headers sort by that column instead.
+  const [sort, setSort] = useState<{ by: SortKey; descending: boolean }>({ by: 'order', descending: false })
+  const [hidden, setHidden] = useHiddenColumns(info.root)
+  const [editFields, setEditFields] = useState(false)
+  const [notice, setNotice] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const tree = useRef<TreeControls | null>(null)
+  const [revealNonce, setRevealNonce] = useState(0)
   const [target, setTarget] = useState<EditorTarget | null>(null)
   const [pending, setPending] = useState<EditorTarget | null | undefined>(undefined)
   const [dirty, setDirty] = useState(false)
@@ -22,13 +32,14 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   const [showProblems, setShowProblems] = useState(false)
   const [refreshError, setRefreshError] = useState<string | null>(null)
 
+  const filtered = Boolean(search.trim() || types || Object.entries(fieldFilters).some(([k, v]) => v && schema.fields.some((f) => f.id === k)))
   const query: Omit<ItemQuery, 'limit' | 'offset'> = {
     ...(search.trim() ? { text: search } : {}),
     ...(types ? { types: [types] } : {}),
-    fields: Object.fromEntries(Object.entries(fieldFilters).filter(([, v]) => v).map(([k, v]) => [k, [v]])),
-    sort
+    fields: Object.fromEntries(Object.entries(fieldFilters).filter(([k, v]) => v && schema.fields.some((f) => f.id === k)).map(([k, v]) => [k, [v]])),
+    // a search without a chosen column sorts by best match
+    sort: search.trim() && sort.by === 'order' ? { by: 'relevance' } : sort
   }
-  const filtered = Boolean(search.trim() || types || Object.values(fieldFilters).some(Boolean))
 
   // Switching items with unsaved changes asks first.
   const request = (next: EditorTarget | null): void => {
@@ -79,8 +90,32 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
     request({ kind: 'draft', item })
   }
 
+  // Header clicks: ascending → descending → back to document order.
   const onSort = (key: SortKey): void =>
-    setSort((s) => (s.by === key ? { by: key, descending: !s.descending } : { by: key, descending: false }))
+    setSort((s) => (s.by !== key ? { by: key, descending: false } : !s.descending ? { by: key, descending: true } : { by: 'order', descending: false }))
+
+  const onMove = async (id: string, parent: string | null, before: string | null): Promise<void> => {
+    if (dirty && target?.kind === 'item' && target.id === id) {
+      setNotice(`Save or discard your changes to ${id} before moving it.`)
+      return
+    }
+    const r = await window.reqman.reparentItem(id, parent, before)
+    setNotice(r.ok ? null : `Could not move ${id}: ${r.message}`)
+    if (r.ok) {
+      await afterChange()
+      setRevealNonce((n) => n + 1)
+      if (!(target?.kind === 'item' && target.id === id)) request({ kind: 'item', id })
+    }
+  }
+
+  const expandAll = async (): Promise<void> => {
+    setBusy(true)
+    try {
+      await tree.current?.expandAll()
+    } finally {
+      setBusy(false)
+    }
+  }
 
   const enumFields = schema.fields.filter((f) => f.type === 'enum' || f.type === 'list')
   const selectedId = target?.kind === 'item' ? target.id : null
@@ -92,8 +127,6 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
 
   return (
     <div className="workspace">
-      <ItemTree schema={schema} dataVersion={dataVersion} selectedId={selectedId} onSelect={select} />
-
       <section className="workspace__main" aria-label="Items">
         <div className="toolbar">
           <input className="input toolbar__search" type="search" placeholder="Search ID, title, text…" value={text} onChange={(e) => setText(e.target.value)} aria-label="Search" />
@@ -120,14 +153,46 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
               Clear filters
             </button>
           )}
+          <ColumnsMenu schema={schema} hidden={hidden} onChange={setHidden} onEditFields={() => setEditFields(true)} />
           <span className="toolbar__spacer" />
+          {!filtered && (
+            <>
+              <button type="button" className="btn" disabled={busy} onClick={() => void expandAll()} title="Open every level of the hierarchy">
+                {busy ? 'Expanding…' : 'Expand all'}
+              </button>
+              <button type="button" className="btn" onClick={() => tree.current?.collapseAll()} title="Show only the top-level items">
+                Collapse all
+              </button>
+            </>
+          )}
           <select className="select-btn select-btn--primary" value="" onChange={(e) => void newItem(e.target.value)} aria-label="New item">
             <option value="">+ New item…</option>
             {schema.itemTypes.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
         </div>
 
-        <ItemTable schema={schema} query={query} dataVersion={dataVersion} selectedId={selectedId} onSelect={select} onSort={onSort} onTotal={setTotal} emptyText={info.itemCount === 0 ? 'No items yet. Use “New item” to add the first one.' : 'No items match the filters.'} />
+        {filtered && <div className="table-mode">Search results — the hierarchy is shown again when the search and filters are cleared.</div>}
+        <ItemTable
+          schema={schema}
+          hidden={hidden}
+          mode={filtered ? 'flat' : 'tree'}
+          query={query}
+          dataVersion={dataVersion}
+          selectedId={selectedId}
+          onSelect={select}
+          onSort={onSort}
+          onTotal={setTotal}
+          onMove={(id, parent, before) => void onMove(id, parent, before)}
+          controlsRef={tree}
+          revealNonce={revealNonce}
+          emptyText={info.itemCount === 0 ? 'No items yet. Use “New item” to add the first one.' : 'No items match the filters.'}
+        />
+        {notice && (
+          <div className="notice notice--warn table-notice" role="alert">
+            {notice}{' '}
+            <button type="button" className="link-btn" onClick={() => setNotice(null)}>Dismiss</button>
+          </div>
+        )}
 
         {showProblems && problems.length > 0 && (
           <ul className="problems scroll" aria-label="Problems">
@@ -155,6 +220,7 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
           ) : (
             <span className="statusbar__ok">No problems</span>
           )}
+          {!filtered && info.itemCount > 1 && <span className="statusbar__hint">Drag a row onto another row to move it there, with everything below it</span>}
           {!info.isGitRepository && <span className="statusbar__warn">Not a Git repository</span>}
           {refreshError && <span className="statusbar__warn">Refresh failed: {refreshError}</span>}
           <span className="toolbar__spacer" />
@@ -171,7 +237,7 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
           onDirtyChange={setDirty}
           onSaved={(id) => {
             setTarget({ kind: 'item', id })
-            void afterChange()
+            void afterChange().then(() => setRevealNonce((n) => n + 1))
           }}
           onDeleted={() => {
             setDirty(false)
@@ -179,9 +245,22 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
             void afterChange()
           }}
           onMoved={() => setDataVersion((v) => v + 1)}
+          reloadToken={dataVersion}
           onNewChild={(type, parent) => void newItem(type, parent)}
           onOpen={select}
           onClose={() => request(null)}
+        />
+      )}
+
+      {editFields && (
+        <FieldsDialog
+          info={info}
+          onClose={() => setEditFields(false)}
+          onSaved={(i) => {
+            setEditFields(false)
+            onInfo(i)
+            setDataVersion((v) => v + 1)
+          }}
         />
       )}
 

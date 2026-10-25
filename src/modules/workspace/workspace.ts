@@ -71,6 +71,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       isGitRepository: s.isGit,
       schema: s.repo.schema,
       schemaProblems: s.repo.schemaProblems,
+      schemaRevision: s.repo.schemaRevision,
       itemCount: s.index.count(),
       issues: s.index.repositoryIssues(),
       lastSync: s.lastSync
@@ -214,6 +215,83 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
         return { ok: true }
       } catch (e) {
         if (!(e instanceof ConflictError)) log.error(`Deleting ${id} failed`, e)
+        return { ok: false, message: (e as Error).message }
+      }
+    },
+
+    ancestors(id) {
+      const s = need()
+      const chain: string[] = []
+      const seen = new Set<string>([id])
+      let cur = s.index.get(id)?.parent
+      while (cur && !seen.has(cur)) {
+        chain.unshift(cur)
+        seen.add(cur)
+        cur = s.index.get(cur)?.parent
+      }
+      return chain
+    },
+
+    async reparentItem(id, parent, before): Promise<OpResult> {
+      const s = need()
+      const current = await s.repo.readItem(id)
+      if (!current?.ok) return { ok: false, message: `${id} could not be read.` }
+      if (parent !== null) {
+        if (!s.index.get(parent)) return { ok: false, message: `${parent} does not exist.` }
+        if (createsLoop(s, id, parent)) return { ok: false, message: `${parent} is ${id} itself or one of its children.` }
+      }
+      // Its own children move with it: they keep pointing at it.
+      const sibs = siblings(s, parent ?? undefined).filter((x) => x.id !== id)
+      const at = before ? sibs.findIndex((x) => x.id === before) : -1
+      const index = at < 0 ? sibs.length : at
+      const prev = sibs[index - 1]?.order
+      const next = sibs[index]?.order
+      const plan: { id: string; order: number }[] = []
+      if (index === sibs.length) {
+        plan.push({ id, order: Math.floor((prev ?? 0) / ORDER_STEP) * ORDER_STEP + ORDER_STEP })
+      } else if (next !== undefined && (index === 0 ? next > 1 : prev !== undefined && next - prev > 1)) {
+        // there is room between the neighbours: only this file changes
+        plan.push({ id, order: Math.floor(((index === 0 ? 0 : (prev as number)) + next) / 2) })
+      } else {
+        // no room: renumber the siblings 10, 20, 30… (only files whose order changes are written)
+        const list: { id: string; order?: number }[] = [...sibs.slice(0, index), { id }, ...sibs.slice(index)]
+        list.forEach((x, k) => {
+          const order = (k + 1) * ORDER_STEP
+          if (x.id === id || x.order !== order) plan.push({ id: x.id, order })
+        })
+      }
+      try {
+        for (const step of plan) {
+          const cur = step.id === id ? current : await s.repo.readItem(step.id)
+          if (!cur?.ok) return { ok: false, message: `${step.id} could not be read; moving stopped.` }
+          const moved: Item = { ...cur.item, order: step.order }
+          if (step.id === id) {
+            if (parent === null) delete moved.parent
+            else moved.parent = parent
+          }
+          await s.repo.writeItem(moved, { expectedRevision: cur.revision })
+        }
+        await s.index.syncPaths(s.repo, plan.map((p) => s.repo.itemPath(p.id)))
+        log.info(`Moved ${id} under ${parent ?? 'top level'}${before ? ` before ${before}` : ''}`)
+        return { ok: true }
+      } catch (e) {
+        log.error(`Moving ${id} failed`, e)
+        return { ok: false, message: (e as Error).message }
+      }
+    },
+
+    async saveSchemaFields(fields, schemaRevision) {
+      const s = need()
+      try {
+        await s.repo.writeSchemaFields(fields, schemaRevision)
+        log.info(`Schema fields changed: ${fields.map((f) => f.id).join(', ')}`)
+        // Re-open: the new schema changes how files are read, so the index is rebuilt automatically.
+        const repo = await store.open(s.repo.root)
+        const stats = await s.index.sync(repo)
+        s.repo = repo
+        s.lastSync = { durationMs: stats.durationMs, full: stats.full, changedFiles: stats.added + stats.updated + stats.removed }
+        return { ok: true, info: info(s) }
+      } catch (e) {
         return { ok: false, message: (e as Error).message }
       }
     },

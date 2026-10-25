@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ItemDetails } from '../../../shared/api'
 import type { FieldDef, FieldValue, Item, ItemIssue, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
@@ -22,8 +22,10 @@ export function ItemEditor(props: {
   onOpen: (id: string) => void
   onDirtyChange: (dirty: boolean) => void
   onClose: () => void
+  /** Changes when items changed elsewhere (moved in the table, outside edits); reloads unless there are unsaved changes. */
+  reloadToken: number
 }) {
-  const { schema, target, onDirtyChange } = props
+  const { schema, target, onDirtyChange, reloadToken } = props
   // The editor is re-created (keyed) for every target, so a draft can start its state directly.
   const [details, setDetails] = useState<ItemDetails | null>(null)
   const [base, setBase] = useState<Item | null>(null)
@@ -66,6 +68,27 @@ export function ItemEditor(props: {
   }, [target])
 
   const dirty = form !== null && (isNew || !same(form, base))
+  const dirtyRef = useRef(dirty)
+  useEffect(() => {
+    dirtyRef.current = dirty
+  }, [dirty])
+
+  // Data changed elsewhere (e.g. this item was dragged to a new parent): show the current version.
+  const firstToken = useRef(reloadToken)
+  useEffect(() => {
+    if (reloadToken === firstToken.current || target.kind !== 'item' || dirtyRef.current) return
+    let live = true
+    void window.reqman.getItem(target.id).then((d) => {
+      if (!live || dirtyRef.current || !d) return
+      setDetails(d)
+      setBase(d.item)
+      setForm(d.item)
+      setIssues(d.issues)
+    })
+    return () => {
+      live = false
+    }
+  }, [reloadToken, target])
   useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange])
 
   const save = useCallback(async () => {
@@ -163,7 +186,7 @@ export function ItemEditor(props: {
 
         <div className="field">
           <span className="field__label">Parent</span>
-          <ParentPicker value={form.parent} selfId={form.id} onChange={(p) => set(p ? { parent: p } : { parent: undefined })} />
+          <ParentPicker schema={schema} value={form.parent} selfId={form.id} onChange={(p) => set(p ? { parent: p } : { parent: undefined })} />
           {issueFor('parent') && <span className="field__error">{issueFor('parent')}</span>}
         </div>
 

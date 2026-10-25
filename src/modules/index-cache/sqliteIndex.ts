@@ -301,7 +301,21 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       const dir = q.sort?.descending ? 'DESC' : 'ASC'
       let orderSql: string
       const orderParams: string[] = []
-      if (by.startsWith('field:')) {
+      const fts = q.text?.trim() ? toFtsQuery(q.text) : null
+      if (by === 'relevance' && q.text?.trim()) {
+        // Exact ID first, then the best full-text matches. bm25 weights: ID ×4, title ×10, text ×1,
+        // so a heading whose title matches beats a long text that mentions the words in passing.
+        const exact = q.text.trim().toUpperCase()
+        orderSql = 'CASE WHEN i.id = ? THEN 0 WHEN i.id LIKE ? THEN 1 ELSE 2 END'
+        orderParams.push(exact, `${exact.replace(/[%_]/g, '')}%`)
+        if (fts) {
+          orderSql += `, (SELECT bm25(items_fts, 4.0, 10.0, 1.0) FROM items_fts WHERE items_fts MATCH ? AND rowid = i.rid) ASC NULLS LAST`
+          orderParams.push(fts)
+        }
+        orderSql += ', length(i.title), i.id'
+      } else if (by === 'relevance') {
+        orderSql = 'i.id'
+      } else if (by.startsWith('field:')) {
         orderSql = `json_extract(i.fields_json, ?) IS NULL, json_extract(i.fields_json, ?) COLLATE NOCASE ${dir}, i.id`
         const pathExpr = `$."${by.slice(6).replace(/"/g, '')}"`
         orderParams.push(pathExpr, pathExpr)
@@ -316,7 +330,7 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       const rows = db
         .prepare(`SELECT i.*, (SELECT COUNT(*) FROM items c WHERE c.parent = i.id) AS child_count FROM items i ${whereSql} ORDER BY ${orderSql} LIMIT ? OFFSET ?`)
         .all(...params, ...orderParams, limit, offset) as unknown as ItemRow[]
-      return { total, items: rows.map(rowToItem) }
+      return { total, items: rows.map((r) => rowToItem(q.brief ? { ...r, text: '' } : r)) }
     },
 
     get(id) {

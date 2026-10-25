@@ -62,12 +62,13 @@ try {
   const stkId = (await win.locator('.editor__id').textContent()).trim()
   check(/^STK-[0-9A-Z]{6}$/.test(stkId), `stakeholder need saved as ${stkId}`)
 
+  const rowOf = (text) => rows().filter({ hasText: text })
   for (const [title, text] of [
     ['Temperature accuracy', 'The thermostat shall measure room temperature within ±0.5 °C.'],
     ['Display readability', 'The display shall show the current temperature in digits at least 10 mm high.']
   ]) {
     // open the parent, then add a child to it
-    await win.locator('.tree__label', { hasText: stkId }).click()
+    await rowOf(stkId).click()
     await win.locator('.editor__id', { hasText: stkId }).waitFor()
     await win.getByLabel('Add child item').selectOption('system-requirement')
     await win.getByPlaceholder('Short name of the requirement').fill(title)
@@ -79,30 +80,95 @@ try {
   await win.getByPlaceholder('Short name of the requirement').fill('Verify accuracy at 20 °C')
   await save()
 
-  const files = readdirSync(join(repo, 'requirements', 'items')).filter((f) => f.endsWith('.md'))
+  const itemsDir = join(repo, 'requirements', 'items')
+  const files = readdirSync(itemsDir).filter((f) => f.endsWith('.md'))
   check(files.length === 4, `4 item files written (${files.length})`)
-  const sysFile = files.find((f) => readFileSync(join(repo, 'requirements', 'items', f), 'utf8').includes('Temperature accuracy'))
-  const sysText = sysFile ? readFileSync(join(repo, 'requirements', 'items', sysFile), 'utf8') : ''
+  const fileOf = (title) => {
+    const f = readdirSync(itemsDir).find((x) => readFileSync(join(itemsDir, x), 'utf8').includes(`title: ${title}`))
+    return f ? readFileSync(join(itemsDir, f), 'utf8') : ''
+  }
+  const sysText = fileOf('Temperature accuracy')
   check(sysText.includes(`parent: ${stkId}`) && sysText.includes('order: 10') && sysText.includes('priority: High'), 'child file has parent, order and priority')
 
-  // hierarchy in the tree
-  await win.locator('.tree__row', { hasText: stkId }).getByRole('button', { name: 'Expand' }).click()
-  const childTitles = async () => win.locator('.tree__list .tree__list .tree__title').allTextContents()
-  check(JSON.stringify(await childTitles()) === JSON.stringify(['Temperature accuracy', 'Display readability']), 'tree shows the two children in order')
+  // the hierarchy is the table itself; saving a child opened its parent
+  const level2 = async () => win.locator('.table__row[aria-level="2"] .table__text').allTextContents()
+  await win.locator('.table__row[aria-level="2"]').first().waitFor()
+  check(JSON.stringify(await level2()) === JSON.stringify(['Temperature accuracy', 'Display readability']), 'table shows the two children indented under their parent, in order')
+  check((await win.locator('.tree').count()) === 0, 'no separate tree panel any more')
+  await win.getByRole('button', { name: `Collapse ${stkId}` }).click()
+  check((await rows().count()) === 2, 'collapsing the parent hides its children')
+  await win.getByRole('button', { name: `Expand ${stkId}` }).click()
+  await win.locator('.table__row[aria-level="2"]').first().waitFor()
 
   // reorder: move "Display readability" up
-  await win.locator('.tree__label', { hasText: 'Display readability' }).click()
+  await rowOf('Display readability').click()
   await win.locator('.editor__body input').first().waitFor()
   await win.getByRole('button', { name: 'Move up' }).click()
   await win.waitForTimeout(400)
-  check(JSON.stringify(await childTitles()) === JSON.stringify(['Display readability', 'Temperature accuracy']), 'move up reorders the siblings')
+  check(JSON.stringify(await level2()) === JSON.stringify(['Display readability', 'Temperature accuracy']), 'move up reorders the siblings')
   await shot('02-hierarchy')
 
+  console.log('Test 6 — choose a top-level parent; move whole sub-groups')
+  // a chapter heading at the top level
+  await win.getByLabel('New item').selectOption('information')
+  await win.getByPlaceholder('Short name of the requirement').fill('Chapter 1 — Heating')
+  await save()
+  const infoId = (await win.locator('.editor__id').textContent()).trim()
+
+  // parent picker: with nothing typed it lists the top-level items, the item itself greyed out
+  await rowOf('Verify accuracy').click()
+  await win.locator('.editor__id', { hasText: 'TC-' }).waitFor()
+  await win.locator('.picker .input--button').click()
+  await win.locator('.picker__option', { hasText: infoId }).waitFor()
+  check((await win.locator('.picker__option', { hasText: stkId }).count()) === 1, 'picker lists top-level items without typing')
+  check(await win.locator('.picker__option', { hasText: 'Verify accuracy' }).isDisabled(), 'the item itself cannot be chosen as its own parent')
+  await win.getByLabel('Search for a parent').fill('chapter')
+  await win.waitForTimeout(400)
+  check((await win.locator('.picker__option:not(:disabled)').nth(1).textContent()).includes(infoId), 'searching "chapter" puts the heading first')
+  await win.locator('.picker__option', { hasText: infoId }).click()
+  await save()
+  check(fileOf('Verify accuracy at 20 °C').includes(`parent: ${infoId}`), 'test case saved under the top-level heading')
+
+  // a parent with children: its own picker greys out its children
+  await rowOf(stkId).click()
+  await win.locator('.editor__id', { hasText: stkId }).waitFor()
+  await win.locator('.picker .input--button').click()
+  await win.getByLabel('Search for a parent').fill('temperature')
+  await win.waitForTimeout(400)
+  check(await win.locator('.picker__option', { hasText: 'Temperature accuracy' }).isDisabled(), 'a child of the item cannot become its parent (loop)')
+  await win.keyboard.press('Escape')
+
+  // drag the stakeholder need (with its two children) onto the heading
+  await rowOf(stkId).dragTo(rowOf(infoId))
+  await win.waitForTimeout(600)
+  check(fileOf('Comfortable temperature').includes(`parent: ${infoId}`), 'drag onto a row: the item moved under it')
+  check(fileOf('Temperature accuracy').includes(`parent: ${stkId}`), '…and its children came along unchanged')
+  const levels = await win.locator('.table__row').evaluateAll((rs) => rs.map((r) => `${r.getAttribute('aria-level')} ${r.querySelector('.table__text')?.textContent}`))
+  check(levels.includes('2 Comfortable temperature') && levels.includes('3 Temperature accuracy'), 'the table shows the moved sub-group one level deeper')
+  await shot('03-moved-subgroup')
+
+  // drag it back out to the top level: drop on the empty space below the rows
+  const area = await win.locator('.table__scroll').boundingBox()
+  await rowOf(stkId).dragTo(win.locator('.table__scroll'), { targetPosition: { x: 300, y: area.height - 30 } })
+  await win.waitForTimeout(600)
+  check(!/^parent:/m.test(fileOf('Comfortable temperature')), 'drop below the rows: back to the top level')
+  // drop on the upper edge of a row: placed before it
+  const target = await rowOf(infoId).boundingBox()
+  await rowOf(stkId).dragTo(rowOf(infoId), { targetPosition: { x: 300, y: 3 } })
+  await win.waitForTimeout(600)
+  const top = await win.locator('.table__row[aria-level="1"] .table__text').allTextContents()
+  check(target !== null && top[0] === 'Comfortable temperature' && top[1] === 'Chapter 1 — Heating', 'drop on the upper edge: placed before that row')
+
   console.log('Step 3 — filter the table and open an item')
-  check((await rows().count()) === 4, 'table lists 4 items')
+  await win.getByRole('button', { name: 'Expand all' }).click()
+  await win.waitForTimeout(400)
+  check((await rows().count()) === 5, 'expand all: 5 rows')
+  await win.getByRole('button', { name: 'Collapse all' }).click()
+  check((await rows().count()) === 2, 'collapse all: only the 2 top-level items')
   await win.getByLabel('Type').selectOption('system-requirement')
   await win.waitForTimeout(300)
-  check((await rows().count()) === 2, 'type filter: 2 system requirements')
+  check((await rows().count()) === 2, 'type filter: 2 system requirements, listed flat')
+  check(await win.locator('.table-mode').isVisible(), 'the table says it shows search results')
   await win.getByLabel('Search').fill('thermostat')
   await win.waitForTimeout(500)
   check((await rows().count()) === 1, 'search "thermostat": 1 match')
@@ -110,41 +176,66 @@ try {
   await win.locator('.editor__body input').first().waitFor()
   check((await win.locator('.editor__body input').first().inputValue()) === 'Temperature accuracy', 'clicking the row opens the item')
   await win.getByRole('button', { name: 'Clear filters' }).click()
+  await win.waitForTimeout(500)
+  check((await rowOf('Temperature accuracy').count()) === 1, 'clearing the search shows the hierarchy, opened down to the selected item')
+  // header sort: within each parent; a third click returns to document order
+  const topTitles = () => win.locator('.table__row[aria-level="1"] .table__text').allTextContents()
+  await win.getByRole('columnheader', { name: /^Title/ }).click()
   await win.waitForTimeout(300)
-  await win.getByRole('columnheader', { name: /^Priority/ }).click()
+  check((await topTitles())[0] === 'Chapter 1 — Heating', 'sort by title (A→Z) within the top level')
+  await win.getByRole('columnheader', { name: /^Title/ }).click()
+  await win.getByRole('columnheader', { name: /^Title/ }).click()
   await win.waitForTimeout(300)
-  const firstPriority = await rows().first().locator('.table__td').nth(4).textContent()
-  check(firstPriority === 'High', 'sorting by priority works')
-  await shot('03-table-and-editor')
+  check((await topTitles())[0] === 'Comfortable temperature', 'third click: back to document order')
+  await shot('04-table-and-editor')
+
+  console.log('Fields — show/hide columns, add a field')
+  await win.getByRole('button', { name: /^Columns/ }).click()
+  await win.getByRole('dialog', { name: 'Columns' }).getByLabel('Owner').uncheck()
+  check((await win.getByRole('columnheader', { name: /^Owner/ }).count()) === 0, 'unticking Owner hides the column')
+  await win.getByRole('button', { name: 'Edit fields…' }).click()
+  await win.getByRole('button', { name: '+ Add field' }).click()
+  const n = (await win.locator('.fields-table__row').count())
+  await win.getByLabel(`Name of field ${n}`).fill('Safety level')
+  await win.getByLabel(`Kind of field ${n}`).selectOption('enum')
+  await win.getByLabel(`Options of field ${n}`).fill('QM, A, B, C, D')
+  await shot('05-fields-dialog')
+  await win.getByRole('button', { name: 'Save fields' }).click()
+  await win.getByRole('columnheader', { name: /^Safety level/ }).waitFor()
+  const schemaText = readFileSync(join(repo, 'requirements', '.reqman', 'schema.yaml'), 'utf8')
+  check(/id: safety-level/.test(schemaText) && schemaText.startsWith('#'), 'new field saved to schema.yaml (comments kept)')
+  check((await win.locator('.editor').getByLabel('Safety level').count()) === 1, 'the editor offers the new field')
+  check((await win.getByRole('columnheader', { name: /^Owner/ }).count()) === 0, 'hidden column stays hidden')
 
   console.log('Safety — unsaved changes and outside edits')
   await win.getByPlaceholder('Short name of the requirement').fill('Temperature accuracy (edited)')
-  await rows().nth(2).click()
+  await rows().nth(0).click()
   check(await win.getByText('You have unsaved changes. Discard them?').isVisible(), 'switching items with unsaved changes asks first')
-  await shot('04-unsaved-guard')
+  await shot('06-unsaved-guard')
   await win.getByRole('button', { name: 'Keep editing' }).click()
   await win.getByRole('button', { name: 'Discard changes' }).first().click()
 
   // someone edits a file outside ReqMan (e.g. git pull); a window refocus picks it up
-  const tcFile = files.find((f) => f.startsWith('TC-'))
+  const tcFile = readdirSync(itemsDir).find((f) => f.startsWith('TC-'))
   const tcPath = join(repo, 'requirements', 'items', tcFile)
   writeFileSync(tcPath, readFileSync(tcPath, 'utf8').replace('Verify accuracy at 20 °C', 'Verify accuracy at 25 °C'))
   await win.evaluate(() => window.dispatchEvent(new Event('focus')))
+  await win.getByRole('button', { name: 'Expand all' }).click()
   await win.getByText('Verify accuracy at 25 °C').first().waitFor({ timeout: 5000 })
   check(true, 'outside edit picked up on refocus')
 
   console.log('Look — dark mode, wide window, settings page scrollbar')
   await win.getByRole('radio', { name: 'Dark' }).click()
-  await shot('05-dark')
+  await shot('07-dark')
   await win.setViewportSize({ width: 1920, height: 1000 })
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
   await win.getByText('Settings & diagnostics').waitFor()
   const page = await win.locator('.page').boundingBox()
   check(page !== null && Math.abs(page.x + page.width - 1920) < 2, 'settings page scroll area reaches the right window edge')
-  await shot('06-settings-wide')
+  await shot('08-settings-wide')
   await win.getByRole('button', { name: '← Back' }).click()
   await win.waitForTimeout(500)
-  check((await rows().count()) === 4, 'workspace kept its state behind the settings page')
+  check((await rowOf('Temperature accuracy').count()) === 1, 'workspace kept its state behind the settings page')
 } catch (e) {
   failures++
   console.error(e)

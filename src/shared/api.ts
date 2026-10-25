@@ -1,5 +1,5 @@
 // The ONE contract between the UI (renderer) and the core (main process).
-import type { Item, ItemIssue, ItemQuery, LinkRef, QueryResult, Schema, SchemaProblem } from './domain'
+import type { FieldDef, Item, ItemIssue, ItemQuery, LinkRef, QueryResult, Schema, SchemaProblem } from './domain'
 export type * from './domain'
 
 // The UI can do exactly what is listed here and nothing else. Adding a capability = adding it here,
@@ -74,6 +74,8 @@ export interface RepoInfo {
   isGitRepository: boolean
   schema: Schema
   schemaProblems: SchemaProblem[]
+  /** Hash of schema.yaml, passed back when saving schema changes (conflict check). */
+  schemaRevision: string
   itemCount: number
   /** Whole-repository problems: duplicate IDs, broken links, missing parents, unreadable files. */
   issues: ItemIssue[]
@@ -136,6 +138,15 @@ export interface ReqManApi {
   /** `revision` null = a new item. */
   saveItem(item: Item, revision: string | null): Promise<SaveResult>
   deleteItem(id: string, revision: string): Promise<{ ok: true } | { ok: false; message: string }>
+  /**
+   * Makes `parent` the new parent of `id` (null = top level); the item keeps its children.
+   * Placed before the sibling `before`, or last when `before` is not given.
+   */
+  reparentItem(id: string, parent: string | null, before?: string | null): Promise<{ ok: true } | { ok: false; message: string }>
+  /** IDs from the top-level item down to the item's parent (empty for a top-level item). */
+  getAncestors(id: string): Promise<string[]>
+  /** Replaces the project's field definitions in schema.yaml and re-opens the repository. */
+  saveSchemaFields(fields: FieldDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   /** Moves an item one place up or down among its siblings. */
   moveItem(id: string, direction: 'up' | 'down'): Promise<{ ok: true } | { ok: false; message: string }>
   /** Records an error that happened in the UI in the log file. */
@@ -173,5 +184,8 @@ export const Channels = {
   newItem: 'ws:newItem',
   saveItem: 'ws:saveItem',
   deleteItem: 'ws:deleteItem',
-  moveItem: 'ws:moveItem'
+  moveItem: 'ws:moveItem',
+  reparentItem: 'ws:reparentItem',
+  getAncestors: 'ws:ancestors',
+  saveSchemaFields: 'ws:saveSchemaFields'
 } as const

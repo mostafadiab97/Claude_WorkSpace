@@ -32,7 +32,10 @@ const api: ReqManApi = {
   newItem: (type, parent) => ipcRenderer.invoke(Channels.newItem, type, parent),
   saveItem: (item, revision) => ipcRenderer.invoke(Channels.saveItem, item, revision),
   deleteItem: (id, revision) => ipcRenderer.invoke(Channels.deleteItem, id, revision),
-  moveItem: (id, direction) => ipcRenderer.invoke(Channels.moveItem, id, direction)
+  moveItem: (id, direction) => ipcRenderer.invoke(Channels.moveItem, id, direction),
+  reparentItem: (id, parent, before) => ipcRenderer.invoke(Channels.reparentItem, id, parent, before ?? null),
+  getAncestors: (id) => ipcRenderer.invoke(Channels.getAncestors, id),
+  saveSchemaFields: (fields, revision) => ipcRenderer.invoke(Channels.saveSchemaFields, fields, revision)
 }
 
 contextBridge.exposeInMainWorld('reqman', api)

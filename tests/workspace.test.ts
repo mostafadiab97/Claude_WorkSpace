@@ -170,4 +170,61 @@ describe('workspace', () => {
     expect(info.itemCount).toBe(1)
     expect(info.lastSync.changedFiles).toBe(1)
   })
+  it('moves a whole sub-group to a new parent or to the top level, refusing loops', async () => {
+    const { ws, root } = await setup()
+    await ws.initialize(root)
+    const save = async (type: string, title: string, parent?: string): Promise<string> => {
+      const it = ws.newItem(type, parent)
+      it.title = title
+      expect((await ws.saveItem(it, null)).ok).toBe(true)
+      return it.id
+    }
+    const a = await save('stakeholder-need', 'A')
+    const b = await save('stakeholder-need', 'B')
+    const a1 = await save('system-requirement', 'A1', a)
+    const a11 = await save('software-requirement', 'A1.1', a1)
+
+    expect(ws.ancestors(a11)).toEqual([a, a1])
+    expect(ws.ancestors(a)).toEqual([])
+
+    // a1 with its child goes under b, placed last
+    expect(await ws.reparentItem(a1, b)).toEqual({ ok: true })
+    expect(ws.ancestors(a11)).toEqual([b, a1])
+    expect(ws.query({ parent: a }).total).toBe(0)
+
+    // loops are refused: b under its own grandchild
+    expect((await ws.reparentItem(b, a11)).ok).toBe(false)
+    expect((await ws.reparentItem(b, b)).ok).toBe(false)
+
+    // to top level: placed after the existing top-level items
+    expect(await ws.reparentItem(a1, null)).toEqual({ ok: true })
+    const top = ws.query({ parent: null, sort: { by: 'order' } }).items.map((i) => i.id)
+    expect(top).toEqual([a, b, a1])
+    // placed before a sibling: between a and b
+    expect(await ws.reparentItem(a1, null, b)).toEqual({ ok: true })
+    expect(ws.query({ parent: null, sort: { by: 'order' } }).items.map((i) => i.id)).toEqual([a, a1, b])
+    // before the first one, repeatedly, until the orders run out of room and get renumbered
+    for (const x of [b, a, a1, b, a]) expect(await ws.reparentItem(x, null, ws.query({ parent: null, sort: { by: 'order' } }).items[0]?.id)).toEqual({ ok: true })
+    expect(ws.query({ parent: null, sort: { by: 'order' } }).items.map((i) => i.id)).toEqual([a, b, a1])
+    const file = await readFile(join(root, 'requirements', 'items', `${a1}.md`), 'utf8')
+    expect(file).not.toMatch(/^parent:/m)
+  })
+
+  it('saves field definitions to schema.yaml, keeping comments, and refuses stale revisions', async () => {
+    const { ws, root } = await setup()
+    const info = await ws.initialize(root)
+    const fields = [...info.schema.fields, { id: 'safety-level', name: 'Safety level', type: 'enum' as const, options: ['QM', 'A', 'B'] }]
+    const r = await ws.saveSchemaFields(fields, info.schemaRevision)
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.info.schema.fields.map((f) => f.id)).toContain('safety-level')
+    expect(r.info.schemaRevision).not.toBe(info.schemaRevision)
+    const text = await readFile(join(root, 'requirements', '.reqman', 'schema.yaml'), 'utf8')
+    expect(text).toMatch(/safety-level/)
+    expect(text).toMatch(/^#/m)
+    // second save with the old revision: someone else changed it meanwhile
+    expect((await ws.saveSchemaFields(info.schema.fields, info.schemaRevision)).ok).toBe(false)
+    // invalid definitions are refused
+    expect((await ws.saveSchemaFields([{ id: 'x', name: 'X', type: 'enum' }], r.info.schemaRevision)).ok).toBe(false)
+  })
 })

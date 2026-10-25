@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto'
 import { mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import { generateId, ITEM_FILE_EXTENSION, parseItemFile, serializeItem, type FieldValue, type Item } from '../items'
+import { parseDocument } from 'yaml'
 import { parseSchema } from '../schema'
 import { checkRepository } from './checks'
 import { ConflictError } from './errors'
@@ -73,6 +74,30 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
       folder,
       schema,
       schemaProblems,
+      schemaRevision: revisionOf(schemaText),
+
+      async writeSchemaFields(fields, expectedRevision) {
+        const current = await readFile(schemaFile, 'utf8')
+        if (revisionOf(current) !== expectedRevision) {
+          throw new ConflictError('schema.yaml was changed outside ReqMan since the repository was opened. Refresh and try again.')
+        }
+        // Edit only the "fields" list in the YAML document, so comments and the other sections stay as written.
+        const doc = parseDocument(current)
+        doc.set(
+          'fields',
+          fields.map((f) => ({
+            id: f.id,
+            name: f.name,
+            type: f.type,
+            ...(f.type === 'enum' && f.options ? { options: f.options } : {}),
+            ...(f.default !== undefined && f.default !== '' ? { default: f.default } : {})
+          }))
+        )
+        const text = doc.toString({ lineWidth: 0 })
+        const check = parseSchema(text)
+        if (check.problems.length > 0) throw new Error(check.problems.map((p) => `${p.path}: ${p.message}`).join(' '))
+        await atomicWrite(schemaFile, text)
+      },
 
       async listItemFiles(): Promise<ItemFileInfo[]> {
         const names = await readdir(itemsDir).catch(() => [] as string[])

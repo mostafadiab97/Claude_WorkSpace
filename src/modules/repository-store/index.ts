@@ -8,7 +8,7 @@
 //            .gitattributes          keeps LF line endings so diffs are identical on every PC
 //            items/<ID>.md           one file per item
 import type { Item, ItemIssue } from '../items'
-import type { Schema, SchemaProblem } from '../schema'
+import type { FieldDef, Schema, SchemaProblem } from '../schema'
 import { createFileRepositoryStore } from './fileStore'
 
 export const REQUIREMENTS_FOLDER = 'requirements'
@@ -40,6 +40,13 @@ export interface RequirementsRepo {
   readonly folder: string
   readonly schema: Schema
   readonly schemaProblems: SchemaProblem[]
+  /** Hash of schema.yaml as read, for conflict-safe schema edits. */
+  readonly schemaRevision: string
+  /**
+   * Replaces the schema's field list (keeping comments and other sections). Refuses with a ConflictError if
+   * schema.yaml changed since this repository was opened. The repository must be re-opened afterwards.
+   */
+  writeSchemaFields(fields: FieldDef[], expectedRevision: string): Promise<void>
   listItemFiles(): Promise<ItemFileInfo[]>
   readItemFile(path: string): Promise<{ ok: true; item: Item } | { ok: false; error: string }>
   /** Path of an item's file relative to the requirements folder. */

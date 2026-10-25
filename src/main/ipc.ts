@@ -1,7 +1,7 @@
 // Exposes the core services to the UI over IPC, one handler per entry in src/shared/api.ts.
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { dirname, join } from 'node:path'
-import { Channels, type AppInfo, type Item, type ItemQuery } from '../shared/api'
+import { Channels, type AppInfo, type FieldDef, type Item, type ItemQuery } from '../shared/api'
 import { runDataBenchmark } from '../modules/sample-data'
 import type { Paths, Services } from './composition'
 
@@ -105,6 +105,13 @@ export function registerIpc(services: Services, paths: Paths): void {
     ws.saveItem(item as Item, typeof revision === 'string' ? revision : null)
   )
   ipcMain.handle(Channels.deleteItem, (_e, id: unknown, revision: unknown) => ws.deleteItem(str(id, 'ID'), str(revision, 'revision')))
+  ipcMain.handle(Channels.reparentItem, (_e, id: unknown, parent: unknown, before: unknown) =>
+    ws.reparentItem(str(id, 'ID'), typeof parent === 'string' && parent ? parent : null, typeof before === 'string' && before ? before : null)
+  )
+  ipcMain.handle(Channels.getAncestors, (_e, id: unknown) => ws.ancestors(str(id, 'ID')))
+  ipcMain.handle(Channels.saveSchemaFields, (_e, fields: unknown, revision: unknown) =>
+    ws.saveSchemaFields(Array.isArray(fields) ? (fields as FieldDef[]) : [], str(revision, 'revision'))
+  )
   ipcMain.handle(Channels.moveItem, (_e, id: unknown, dir: unknown) => ws.moveItem(str(id, 'ID'), dir === 'up' ? 'up' : 'down'))
 
   ipcMain.on(Channels.reportUiError, (_e, message: unknown) => {

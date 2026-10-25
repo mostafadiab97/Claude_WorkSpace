@@ -48,7 +48,31 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.2.0 (milestone M2)
+## Manual test checklist — v0.3.0 (M2 feedback)
+
+Best tried on the sandbox data (`Claude_SandBox`, 10,005 items): `git pull` or `git reset --hard origin/main` there
+first, so you start from the original data.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let ReqMan update itself to 0.3.0, open the sandbox repository | No side tree any more: the table itself shows the hierarchy — the chapters at the top level, ▸ to open one; a small number next to a closed item tells how many children it has |
+| 2 | Open a chapter, then a system requirement inside it (▸ or → key); ← closes / goes to the parent | Children appear indented under their parent, in document order |
+| 3 | **Expand all**, scroll to the bottom; **Collapse all** | All 10,005 rows within a second or so; scrolling stays smooth; Collapse all shows only the chapters |
+| 4 | Type in **Search** (e.g. "encrypt") or pick a filter | Flat list of matches, best matches first, with a line "Search results — …" above the table. **Clear filters** brings the hierarchy back, opened down to the item you had selected |
+| 5 | Click the **Title** header three times | Sorted A→Z within each parent, then Z→A, then back to document order |
+| 6 | *(Test 6 again)* Open any item, click **Parent** without typing | The top-level items (chapters) are listed — pick one, Save: the item (with everything below it) is now directly under that chapter |
+| 7 | In the parent picker type part of a heading's title, e.g. "verification" | Headings whose title matches come first; the item itself and its own children are greyed out (choosing them would create a loop) |
+| 8 | Drag a row that has children onto another row (the row gets a blue outline) | It moves under that row, with all its children; the file of the dragged item gets the new `parent:`, the children's files are unchanged |
+| 9 | Drag a row onto the upper or lower edge of another row (blue line) | It is placed before / after that row, at that row's level |
+| 10 | Drag a row onto the empty space below the last row (collapse all first) | It becomes a top-level item, placed last |
+| 11 | Hover a dragged row over a closed parent for a moment | The parent opens, so you can drop deeper |
+| 12 | Edit a title without saving, then try to drag that same item | Refused with "Save or discard your changes … before moving it" |
+| 13 | **Columns ▾** → untick Owner and Tags | Those columns disappear; still hidden after closing and reopening the repository (remembered on this PC only) |
+| 14 | **Columns ▾ → Edit fields… → + Add field**: name "Safety level", kind *Choice*, options `QM, A, B, C, D`, default QM → **Save fields** | A Safety level column and filter appear; the editor shows the field; new items get QM. `requirements/.reqman/schema.yaml` has the new field and its comments are still there |
+| 15 | Edit fields again: rename Owner to "Responsible", move it up, remove Tags → Save | Column header renamed and moved; Tags gone, a note says the values stay in the files. `git diff` shows only schema.yaml changed |
+| 16 | Re-add a field named "Tags" (kind List) | The old tag values show again (same key `tags`) |
+
+## Previous checklist — v0.2.0 (milestone M2)
 
 You need a Git repository to try it in: any project clone, or a new empty folder where you run
 `git init`. ReqMan only adds a `requirements` folder; nothing else in the repository is touched.

@@ -100,7 +100,8 @@ export interface IndexedItem {
   childCount: number
 }
 
-export type SortKey = 'id' | 'type' | 'title' | 'order' | `field:${string}`
+/** `relevance` = best search matches first (exact ID, then title, then text); only meaningful with `text`. */
+export type SortKey = 'id' | 'type' | 'title' | 'order' | 'relevance' | `field:${string}`
 
 export interface ItemQuery {
   /** Words to find in ID, title or text. Each word must match (prefix match: "brak" finds "braking"). */
@@ -113,6 +114,8 @@ export interface ItemQuery {
   sort?: { by: SortKey; descending?: boolean }
   limit?: number
   offset?: number
+  /** Leave out the text (smaller results for tables and trees; `text` is then ''). */
+  brief?: boolean
 }
 
 export interface QueryResult {

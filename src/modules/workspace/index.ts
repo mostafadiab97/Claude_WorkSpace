@@ -3,6 +3,7 @@
 // up to date, and every item operation the UI performs (query, read, create, save, delete, reorder),
 // with the rules that need the whole repository (no parent loops, conflict-safe saving).
 import type {
+  FieldDef,
   FolderCheck,
   Item,
   ItemDetails,
@@ -31,6 +32,9 @@ export interface WorkspaceService {
   saveItem(item: Item, revision: string | null): Promise<SaveResult>
   deleteItem(id: string, revision: string): Promise<OpResult>
   moveItem(id: string, direction: 'up' | 'down'): Promise<OpResult>
+  reparentItem(id: string, parent: string | null, before?: string | null): Promise<OpResult>
+  ancestors(id: string): string[]
+  saveSchemaFields(fields: FieldDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
 }
 
 export { createWorkspace, cacheFileName, type WorkspaceDeps }

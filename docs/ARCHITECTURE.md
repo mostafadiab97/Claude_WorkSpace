@@ -83,7 +83,7 @@ src/shared/        UI ↔ core contract (api.ts) and shared data types (domain.t
 src/main/          core entry, composition root, IPC handlers
 src/modules/       one folder per module, each with index.ts as its only public entry
 src/preload/       bridge exposing window.reqman
-src/renderer/      UI (React): screens/ (start, workspace, settings), workspace/ (table, tree, editor), components/
+src/renderer/      UI (React): screens/ (start, workspace, settings), workspace/ (tree table, editor, parent picker, fields), components/
 e2e/               end-to-end test that drives the built app (npm run test:e2e)
 tests/             unit tests (Vitest)
 samples/, tools/   sample data and its generator
@@ -95,7 +95,8 @@ samples/, tools/   sample data and its generator
 | --- | --- | --- |
 | Start | `screens/StartScreen.tsx` | Open repository (folder picker → Git root detection → create `requirements/` if missing), recent list |
 | Workspace | `screens/WorkspaceScreen.tsx` | Filters/search/sort state, selection, unsaved-changes guard, refresh on window focus |
-| Hierarchy | `workspace/ItemTree.tsx` | Lazy: children load when expanded, 500 at a time |
-| Table | `workspace/ItemTable.tsx` | Virtual scrolling; rows fetched from the index 100 at a time; sticky header and ID column |
+| Table | `workspace/ItemTable.tsx` | Tree mode (no search/filter): the hierarchy, children loaded per parent when opened (500, then "Show more"), Expand all loads everything in one query; drag & drop calls `reparentItem(id, parent, before)`. Flat mode (search/filter): rows fetched 100 at a time. Virtual scrolling in both; sticky header and ID column |
+| Columns & fields | `workspace/FieldsPanel.tsx` | Hidden columns per repository in the PC's local storage (personal); field definitions saved to `schema.yaml` through `saveSchemaFields` (comment-preserving, refused if the file changed since it was read) |
+| Parent picker | `workspace/ParentPicker.tsx` | Empty = top-level items; typed = relevance search; loops greyed out via `getAncestors` |
 | Editor | `workspace/ItemEditor.tsx` | Fields generated from the schema; Ctrl+S; conflict message if the file changed outside ReqMan |
 | Settings | `screens/SettingsScreen.tsx` | Environment, diagnostics, data self-test; the workspace stays mounted behind it |

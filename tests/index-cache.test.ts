@@ -129,3 +129,27 @@ describe('index cache', () => {
     c2.close()
   })
 })
+
+describe('relevance ranking', () => {
+  it('puts an exact ID first and title matches before text matches', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'reqman-rel-'))
+    const repo = await store.initialize(root)
+    const taken = new Set<string>()
+    const make = async (type: string, title: string, text: string): Promise<Item> => {
+      const it = { ...repo.createItem(type, taken, { title }), text }
+      taken.add(it.id)
+      await repo.writeItem(it)
+      return it
+    }
+    // many items mention "heating" only in their text…
+    for (let i = 0; i < 30; i++) await make('software-requirement', `Regulation ${i}`, 'The heating control loop shall run every 100 ms. Heating heating.')
+    const chapter = await make('information', '1. Heating Control', 'Chapter.')
+    const cache = createSqliteIndexCache(join(root, 'c.sqlite'))
+    await cache.sync(repo)
+    const top = cache.query({ text: 'heating control', sort: { by: 'relevance' }, limit: 3 }).items
+    expect(top[0]?.id).toBe(chapter.id)
+    const byId = cache.query({ text: chapter.id, sort: { by: 'relevance' }, limit: 1 }).items
+    expect(byId[0]?.id).toBe(chapter.id)
+    cache.close()
+  })
+})

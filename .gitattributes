@@ -1,0 +1,7 @@
+# Keep text files LF everywhere (Windows checkouts included) so diffs stay clean.
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.icns binary
+*.xlsx binary
+*.exe binary

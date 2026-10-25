@@ -42,6 +42,10 @@ builds the installer and publishes it as a GitHub Release; installed copies pick
 
 ## Docs
 
+- `CLAUDE.md` — hand-over and working agreement for Claude Code (start here)
+- `docs/design/DESIGN.md` — domain analysis, product decisions, requirements, architecture, milestone plan
+- `CHANGELOG.md` — what each version changed and what testing found
+- `docs/DEVELOPING.md` — setting up a Windows PC for development
 - `docs/ARCHITECTURE.md` — modules, rules, module map
 - `docs/TESTING.md` — manual test checklist, log file location, bug reporting
 - `docs/THEMING.md` — customising colours, fonts, shapes, logo, light/dark

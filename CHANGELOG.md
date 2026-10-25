@@ -1,0 +1,64 @@
+# Changelog
+
+Each version was installed and tried by the product owner on Windows 11; his feedback is recorded under the
+version it was about, and what it led to.
+
+## 0.4.1 — 25 Oct 2026
+- Fix: opening a repository failed with "table items has no column named fp" when its index cache had been
+  created by 0.3.x. The cache now stores its format version and is dropped and rebuilt when it changes.
+- **Owner:** "all works fine."
+
+## 0.4.0 — 25 Oct 2026 — M3 Links
+- Links section in the editor: add links in either direction ("verifies" / "is verified by" — always stored in
+  the source item), remove, open the other end. Saved immediately; locked while the item has unsaved edits.
+- Suspect links: each link stores the target's fingerprint (type + title + text) when confirmed; a later change
+  marks it ⚠ until **Confirm** / **Confirm all**. Status/owner/order changes don't count.
+- Filters "With suspect links" / "Without any links"; sort by number of links; Links column `→out ←in ⚠suspect`.
+- Delete offers to remove the links other items have to the deleted item.
+- Owner's 0.3.0 feedback fixed: Type shown in the editor (read-only); Text and Links columns; Columns menu lists
+  built-in columns and can reorder columns; Fields dialog refuses names of built-in parts.
+- Sandbox data: confirmations added to all links, 175 suspect (IDs unchanged).
+- **Owner:** reported the cache error fixed in 0.4.1.
+
+## 0.3.0 — 25 Oct 2026 — M2 feedback
+- The table itself is the hierarchy (expand/collapse, Expand all / Collapse all, child counts, reveal the selected
+  item); flat list with best-match ranking while searching or filtering.
+- Drag and drop rows: onto a row (child), its upper/lower edge (before/after), empty space (top level); whole
+  sub-groups move; hovering opens a closed parent.
+- Parent picker: lists top-level items when empty, relevance search, greys out the item and its descendants.
+- Columns menu (show/hide, per repo on this PC) and Fields dialog (add/rename/reorder/remove fields in
+  schema.yaml, comments preserved, conflict-safe).
+- **Owner:** all fixed and working, except: Type not visible in the item panel; Text and Links not available as
+  table columns or in the Columns menu, and adding them as fields created new, different fields → done in 0.4.0.
+
+## 0.2.0 — 25 Oct 2026 — M2 Core UI
+- Start screen with Open repository / recent repositories; create `requirements/` with the default schema.
+- Item table (virtual scrolling, filters, search, sort), side hierarchy tree, schema-driven editor with Ctrl+S,
+  unsaved-changes guard, conflict detection for outside edits, move up/down, add child, delete.
+- Scrollbars at the right window edge, thumb only (owner's request after 0.1.0).
+- **Owner:** all tests passed except test 6 — could not select a top-level parent and could not move a sub-group
+  (the picker only showed the first 8 items by ID). Requested: tree view inside the table (flat only while
+  searching) and GUI control to show/hide fields → done in 0.3.0. Also asked for the test-data repository
+  Claude_SandBox (10,000 items).
+
+## 0.1.0 — 25 Oct 2026 — M1 Data layer
+- Schema, item file format, repository store, SQLite index with full-text search, performance tests, data
+  self-test in the app, automatic updates.
+- **Owner:** self-test 10k: all queries < 15 ms; 50k: first index 18–73 s (Windows Defender), queries ≤ 105 ms.
+  Auto-update tested and working. Asked to align scrollbars to the window's right edge and show only the thumb.
+  Making the repository private broke auto-update (404) → owner chose to keep it public.
+
+## 0.0.4 — 25 Oct 2026
+- Brighter light-mode success green (`#22c55e`) — owner feedback on 0.0.3 test step 4.
+- `%APPDATA%\ReqMan\theme.json` now starts as an override-only file (a full copy froze every value).
+- Zipped installer in each release (Chrome blocked the .exe download for the owner).
+
+## 0.0.3 — 25 Oct 2026
+- Automatic updates from GitHub Releases; user theme file survives updates.
+
+## 0.0.2 — 25 Oct 2026
+- Log file with rotation, diagnostics panel (copy diagnostics, open log folder), first manual test checklist.
+
+## 0.0.1 — 25 Oct 2026 — M0 Foundations
+- Electron + TypeScript + React skeleton, module boundaries enforced by lint, composition root, theme file with
+  light/dark/system, Git check, Windows installer (per-user NSIS) built by GitHub Actions.

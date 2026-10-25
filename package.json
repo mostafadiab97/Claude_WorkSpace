@@ -18,7 +18,9 @@
     "dist:dir": "npm run build && electron-builder --dir --publish never",
     "test:perf": "node -e \"process.env.PERF='1';require('child_process').execSync('npx vitest run tests/perf.test.ts',{stdio:'inherit',env:process.env})\"",
     "gen:repo": "tsx tools/generate-test-repo.mts",
-    "test:e2e": "node e2e/journey.e2e.mjs"
+    "test:e2e": "node e2e/journey.e2e.mjs",
+    "measure:ui": "node e2e/measure-tree.e2e.mjs",
+    "gen:scenario": "tsx tools/generate-scenario-repo.mts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -2,14 +2,17 @@
 // To swap a module for another implementation, change its line here; nothing else needs to know.
 import { createSystemGitAdapter, type GitAdapter } from '../modules/git-adapter'
 import { createFileLogger, type Logger } from '../modules/logger'
+import { createFileRepositoryStore, type RepositoryStore } from '../modules/repository-store'
 import { createFileThemeService, type ThemeService } from '../modules/theme'
 import { createGithubUpdater, type UpdateService } from '../modules/updater'
+import { join } from 'node:path'
 
 export interface Services {
   git: GitAdapter
   theme: ThemeService
   log: Logger
   updater: UpdateService
+  repositories: RepositoryStore
 }
 
 export interface Paths {
@@ -32,6 +35,8 @@ export function createServices(paths: Paths): Services {
     git: createSystemGitAdapter(),
     theme: createFileThemeService(paths.configDir, paths.resourceDir, paths.userDir),
     // Self-updating is supported for the installed Windows app (per-user NSIS installer).
-    updater: createGithubUpdater({ enabled: paths.packaged && process.platform === 'win32', log })
+    updater: createGithubUpdater({ enabled: paths.packaged && process.platform === 'win32', log }),
+    // New requirements folders start from the shipped default schema.
+    repositories: createFileRepositoryStore(join(paths.configDir, 'default-schema.yaml'))
   }
 }

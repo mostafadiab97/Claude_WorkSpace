@@ -44,6 +44,16 @@ export type UpdateStatus =
   | { state: 'ready'; version: string }
   | { state: 'error'; message: string }
 
+/** Result of the built-in data self-test (generates, indexes and queries a temporary repository). */
+export interface DataSelfTestResult {
+  items: number
+  writeMs: number
+  firstIndexMs: number
+  resyncMs: number
+  slowestQueryMs: number
+  queries: { name: string; ms: number; total: number }[]
+}
+
 export interface ReqManApi {
   getAppInfo(): Promise<AppInfo>
   getGitInfo(): Promise<GitInfo>
@@ -62,6 +72,8 @@ export interface ReqManApi {
   reportUiError(message: string): void
   /** A plain-text summary (versions, paths, checks) to paste into a bug report. */
   getDiagnostics(): Promise<string>
+  /** Measures the data layer on this PC with `count` generated items in a temporary folder. */
+  runDataSelfTest(count: number): Promise<DataSelfTestResult>
 }
 
 /** IPC channel names, shared so main and preload can never drift apart. */
@@ -73,6 +85,7 @@ export const Channels = {
   openThemeFolder: 'diag:openThemeFolder',
   reportUiError: 'diag:reportUiError',
   getDiagnostics: 'diag:get',
+  runDataSelfTest: 'diag:runDataSelfTest',
   getUpdateStatus: 'update:getStatus',
   checkForUpdates: 'update:check',
   installUpdate: 'update:install',

@@ -247,3 +247,55 @@ code {
 .banner--ready {
   font-weight: var(--rm-font-weight-strong);
 }
+
+.hint--flush {
+  margin: 0 0 var(--rm-space-md);
+}
+
+.select {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rm-space-sm);
+  color: var(--rm-color-text-muted);
+}
+
+.select select {
+  font: inherit;
+  color: var(--rm-color-text);
+  background: var(--rm-color-surface);
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius-small);
+  padding: var(--rm-space-xs) var(--rm-space-sm);
+}
+
+.results {
+  width: 100%;
+  margin-top: var(--rm-space-md);
+  border-collapse: collapse;
+  font-size: var(--rm-font-size-small);
+}
+
+.results th,
+.results td {
+  text-align: left;
+  font-weight: var(--rm-font-weight-normal);
+  padding: var(--rm-space-xs) 0;
+  border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
+}
+
+.results th {
+  color: var(--rm-color-text-muted);
+}
+
+.results td {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.muted-inline {
+  color: var(--rm-color-text-muted);
+}
+
+.error-text {
+  color: var(--rm-color-danger);
+}

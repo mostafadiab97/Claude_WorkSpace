@@ -38,13 +38,45 @@ The UI ↔ core contract is **one file**: `src/shared/api.ts`. Adding a capabili
 | `theme` | `ThemeService` — `load()`, `userThemeFile`, `ensureUserThemeFile()` | `fileTheme.ts`: layers defaults ← `config/theme.json` ← `%APPDATA%\ReqMan\theme.json`, validates each, loads logo | `main/ipc.ts` |
 | `updater` | `UpdateService` — `start()`, `checkNow()`, `installAndRestart()`, `current()` | `githubUpdater.ts`: electron-updater against GitHub Releases; background download, user-chosen restart | `main/index.ts`, `main/ipc.ts` |
 
-Planned (see milestones): `repository-store`, `domain-core`, `index-cache`, `diff-merge`, `import-export`, `git-host`.
+| `schema` | `parseSchema(text)` → `{ schema, problems }`; types `Schema`, `ItemTypeDef`, `FieldDef`, `LinkTypeDef` | `parse.ts`: reads `requirements/.reqman/schema.yaml`, skips invalid entries with a message | `items`, `repository-store` |
+| `items` (domain core) | `Item`, `Link`; `parseItemFile`, `serializeItem`, `generateId`, `validateItem`, `contentFingerprint` | Pure logic, no I/O: file format, IDs, per-item validation, suspect-link fingerprint | `repository-store`, `index-cache`, `sample-data` |
+| `repository-store` | `RepositoryStore` — `inspect()`, `initialize()`, `open()`; `RequirementsRepo` — `loadAll()`, `createItem()`, `writeItem()`, `deleteItem()`… | `fileStore.ts`: files in `requirements/`, atomic writes, never overwrites unreadable files; `checks.ts`: duplicate IDs, broken links, parent loops | `main/composition.ts`, `index-cache`, `sample-data` |
+| `index-cache` | `IndexCache` — `sync()`, `rebuild()`, `query()`, `get()`, `incomingLinks()` | `sqliteIndex.ts`: SQLite (built into Electron) with full-text search, outside the repo, re-reads only changed files | (M2: item table) |
+| `sample-data` | `generateItems()`, `runDataBenchmark()` | Fictional thermostat requirements; used by tests, `npm run gen:repo` and the in-app self-test | `main/ipc.ts`, tests |
+
+Planned (see milestones): `diff-merge`, `import-export`, `git-host`.
 Keep this table up to date with every change.
+
+## Data format (in the project's Git repository)
+
+```
+requirements/
+  .reqman/schema.yaml   item types, fields, link types (copied from config/default-schema.yaml, then owned by the project)
+  .gitattributes        LF line endings for identical diffs on every PC
+  items/SYS-K7Q3XM.md   one file per item: YAML header + Markdown text
+```
+
+- **IDs**: type prefix + 6 random characters (Crockford base32, no I/L/O/U). Random, not sequential, so items
+  created on different branches never collide.
+- **Header order is fixed**: id, type, title, schema fields in schema order, unknown keys (sorted), parent, order,
+  links. The same item always produces the same bytes, so Git diffs show only real changes.
+- **Links are stored only on the source item**; the reverse view ("verified by") comes from the index.
+- **Unknown header keys are preserved**, so files written by a newer ReqMan or another tool lose nothing.
+- **The index is a cache**: `%APPDATA%\ReqMan\cache\…sqlite`, rebuilt automatically when missing or when the
+  schema's fields change.
+
+## Decisions changed during implementation
+
+| Planned | Built | Why |
+| --- | --- | --- |
+| `better-sqlite3` for the index | Node's built-in `node:sqlite` (in Electron 45) | No native module to compile for Windows; same SQL and full-text search. Hidden behind `IndexCache`, so swappable in one place |
+| Metadata folder `.reqtool/` | `.reqman/` | Matches the product name |
+| Requirement text in field `description` | Built-in property `text` (the Markdown body) | The body of the file is the text; keeps the header small |
 
 ## Folder layout
 
 ```
-config/            user-editable configuration (theme.json)
+config/            shipped configuration: theme.json, default-schema.yaml
 resources/         static assets (logo)
 src/shared/        UI ↔ core contract (api.ts)
 src/main/          core entry, composition root, IPC handlers

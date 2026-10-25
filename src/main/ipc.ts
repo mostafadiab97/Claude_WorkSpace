@@ -2,6 +2,7 @@
 import { app, ipcMain, shell } from 'electron'
 import { dirname, join } from 'node:path'
 import { Channels, type AppInfo } from '../shared/api'
+import { runDataBenchmark } from '../modules/sample-data'
 import type { Paths, Services } from './composition'
 
 export function registerIpc(services: Services, paths: Paths): void {
@@ -52,6 +53,27 @@ export function registerIpc(services: Services, paths: Paths): void {
   ipcMain.handle(Channels.installUpdate, () => {
     log.info('Restarting to install update')
     services.updater.installAndRestart()
+  })
+
+  let selfTestRunning = false
+  ipcMain.handle(Channels.runDataSelfTest, async (_e, count: unknown) => {
+    const n = Math.min(Math.max(Math.round(Number(count) || 0), 100), 50_000)
+    if (selfTestRunning) throw new Error('A self-test is already running.')
+    selfTestRunning = true
+    log.info(`Data self-test started with ${n} items`)
+    try {
+      const r = await runDataBenchmark(services.repositories, n)
+      log.info(
+        `Data self-test: ${n} items — write ${r.writeMs} ms, first index ${r.firstIndexMs} ms, ` +
+          `re-open ${r.resyncMs} ms, slowest query ${r.slowestQueryMs} ms`
+      )
+      return r
+    } catch (e) {
+      log.error('Data self-test failed', e)
+      throw e
+    } finally {
+      selfTestRunning = false
+    }
   })
 
   ipcMain.on(Channels.reportUiError, (_e, message: unknown) => {

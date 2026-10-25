@@ -1,0 +1,47 @@
+# ReqMan default schema.
+# Copied into a project as requirements/.reqman/schema.yaml when the requirements folder is created.
+# The project's copy is versioned with its requirements; edit that copy to add types, fields or link types.
+#
+# Built-in item properties (always present, not listed here): id, type, title, parent, order, links, text.
+
+version: 1
+
+itemTypes:
+  - { id: stakeholder-need,     name: Stakeholder Need,     prefix: STK }
+  - { id: system-requirement,   name: System Requirement,   prefix: SYS }
+  - { id: software-requirement, name: Software Requirement, prefix: SW }
+  - { id: hardware-requirement, name: Hardware Requirement, prefix: HW }
+  - { id: interface-requirement, name: Interface Requirement, prefix: IF }
+  - { id: use-case,             name: Use Case,             prefix: UC }
+  - { id: design-element,       name: Design Element,       prefix: DE }
+  - { id: test-case,            name: Test Case,            prefix: TC }
+  - { id: defect,               name: Defect,               prefix: DEF }
+  - { id: risk,                 name: Risk,                 prefix: RSK }
+  - { id: change-request,       name: Change Request,       prefix: CR }
+  # Headings and explanatory text that structure a specification; not counted as requirements.
+  - { id: information,          name: Heading / Information, prefix: INFO, requirement: false }
+
+fields:
+  - id: status
+    name: Status
+    type: enum
+    options: [Draft, Review, Approved, Obsolete]
+    default: Draft
+  - id: priority
+    name: Priority
+    type: enum
+    options: [High, Medium, Low]
+  - id: owner
+    name: Owner
+    type: text
+  - id: tags
+    name: Tags
+    type: list
+
+linkTypes:
+  - { id: refines,    name: refines,       reverseName: refined by }
+  - { id: satisfies,  name: satisfies,     reverseName: satisfied by }
+  - { id: implements, name: implements,    reverseName: implemented by }
+  - { id: verifies,   name: verifies,      reverseName: verified by }
+  - { id: mitigates,  name: mitigates,     reverseName: mitigated by }
+  - { id: relates-to, name: relates to,    reverseName: related to }

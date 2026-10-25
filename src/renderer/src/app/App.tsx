@@ -5,6 +5,7 @@ import { ThemeToggle } from '../components/ThemeToggle'
 import { StatusRow } from '../components/StatusRow'
 import { DiagnosticsCard } from '../components/DiagnosticsCard'
 import { UpdateBanner, describeUpdate } from '../components/UpdateBanner'
+import { SelfTestCard } from '../components/SelfTestCard'
 
 export function App() {
   const [theme, setTheme] = useState<LoadedTheme | null>(null)
@@ -101,6 +102,7 @@ export function App() {
         </section>
 
         <DiagnosticsCard appInfo={appInfo} />
+        <SelfTestCard />
       </main>
     </div>
   )

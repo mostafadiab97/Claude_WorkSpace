@@ -48,7 +48,24 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.0.3 / v0.0.4
+## Manual test checklist — v0.1.0 (milestone M1)
+
+M1 is the data layer underneath the coming screens, so it is mostly covered by automated tests
+(58 on every build, plus 10,000- and 50,000-item performance tests on Windows). What a person checks:
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | With v0.0.4 installed, open ReqMan (or click **Check for updates**) | The bar offers ReqMan 0.1.0; **Restart and update** installs it; App row shows 0.1.0 |
+| 2 | Look at the start screen | Everything from M0 still works (theme toggle, Diagnostics); a new **Data self-test** panel is shown |
+| 3 | Data self-test: choose **1,000**, click **Run self-test** | Finishes in a few seconds; a table of timings appears; every query is well under 100 ms |
+| 4 | Run it with **10,000** | Finishes in under a minute; queries under 150 ms; "Re-opening" a few seconds at most |
+| 5 | *(Optional)* Run it with **50,000** | May take several minutes (first indexing is the slow part); queries still under 300 ms |
+| 6 | **Copy diagnostics** after the tests, paste into your report together with a screenshot of the timings | The log also contains a "Data self-test" line per run |
+
+Windows Defender scanning new files can make "Writing" and "First indexing" slower than on the build
+machine; that is expected. Please report your numbers — they set the baseline for M2.
+
+## Previous checklist — v0.0.3 / v0.0.4 (milestone M0)
 
 Tick each step; any "No" is a bug to report.
 

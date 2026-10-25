@@ -1,7 +1,7 @@
 {
   "name": "reqman",
   "productName": "ReqMan",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "Local, Git-based requirements management tool (proof of concept)",
   "main": "./out/main/index.js",
   "author": "ReqMan",
@@ -15,7 +15,9 @@
     "test": "vitest run",
     "check": "npm run typecheck && npm run lint && npm test",
     "dist:win": "npm run build && electron-builder --win --publish never",
-    "dist:dir": "npm run build && electron-builder --dir --publish never"
+    "dist:dir": "npm run build && electron-builder --dir --publish never",
+    "test:perf": "node -e \"process.env.PERF='1';require('child_process').execSync('npx vitest run tests/perf.test.ts',{stdio:'inherit',env:process.env})\"",
+    "gen:repo": "tsx tools/generate-test-repo.mts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -31,12 +33,14 @@
     "globals": "^17.13.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "tsx": "^4.23.15",
     "typescript": "~6.0",
     "typescript-eslint": "^8.72.0",
     "vite": "^8.3.5",
     "vitest": "^5.0.5"
   },
   "dependencies": {
-    "electron-updater": "^6.8.11"
+    "electron-updater": "^6.8.11",
+    "yaml": "^2.9.1"
   }
 }

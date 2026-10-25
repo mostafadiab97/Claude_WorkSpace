@@ -10,6 +10,7 @@ const api: ReqManApi = {
   openThemeFolder: () => ipcRenderer.invoke(Channels.openThemeFolder),
   reportUiError: (message) => ipcRenderer.send(Channels.reportUiError, message),
   getDiagnostics: () => ipcRenderer.invoke(Channels.getDiagnostics),
+  runDataSelfTest: (count) => ipcRenderer.invoke(Channels.runDataSelfTest, count),
   getUpdateStatus: () => ipcRenderer.invoke(Channels.getUpdateStatus),
   checkForUpdates: () => ipcRenderer.invoke(Channels.checkForUpdates),
   installUpdate: () => ipcRenderer.invoke(Channels.installUpdate),

@@ -17,8 +17,9 @@ desktop GUI to view, edit, link, compare and export them. No server, no accounts
 | Milestone | Status |
 | --- | --- |
 | M0 Foundations — skeleton, module boundaries, theme file, Windows installer | Done |
-| M1 Data layer | Next |
-| M2–M6 | Planned |
+| M1 Data layer — schema, item files, repository store, index/search, performance, auto-update | Done |
+| M2 Core UI — open a repository, item table, editor, hierarchy | Next |
+| M3–M6 | Planned |
 
 ## Develop
 
@@ -28,6 +29,8 @@ Requires Node.js 22 and Git.
 npm install
 npm run dev        # run the app with live reload
 npm run check      # type-check + lint (incl. module-boundary rules) + tests
+npm run test:perf  # performance tests with 10,000 and 50,000 items
+npm run gen:repo -- <folder> [count]   # create a test repository with generated items
 npm run dist:win   # build the Windows installer (on Windows)
 ```
 

@@ -299,6 +299,11 @@ all fine. The two-PC trial is postponed (only one user for now).
   **Apply my choices**, **Decide later** (leaves the ⚠ marks). Suspect links in the editor get Keep / Unlink and
   Keep all / Unlink all. Changes that arrive by pull do **not** open the window — they only show ⚠ marks, reviewed
   with the "With suspect links" filter.
+- **O-05 decided (27 Oct 2026):** difference view = three blocks stacked top to bottom (Fields, Text, Links); inside each
+  block old (red, left) and new (green, right) side by side, changed words highlighted, unchanged text lines folded.
+  Revert arrows per field row, text block and link — only when comparing with uncommitted changes; other comparisons
+  are read-only. Opens in the wide middle area; falls back to old-above-new when the window is narrow. **Split view
+  only** (no unified switch). Line/word comparison via the `diff` library (BSD).
 
 ## G. Proposed order (to discuss)
 

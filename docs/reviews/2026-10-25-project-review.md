@@ -322,6 +322,8 @@ all fine. The two-PC trial is postponed (only one user for now).
   into the original file — same columns, only changed cells, formatting kept — or a copy; the source file and mapping
   are remembered) and **"Publish to GitHub"** later (paste the address of an empty repository). The "work on this
   file" mode stays a possible later item, not planned.
+- **Group 1 — defects D-01 to D-10 approved (27 Oct 2026):** fix all in the first release of the next round
+  (D-09 comes with branches, as decided in O-02).
 
 ## G. Proposed order (to discuss)
 

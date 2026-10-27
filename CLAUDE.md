@@ -160,8 +160,11 @@ The owner asked to **pause new features**. Done in this step (docs only, no code
    **Do not change code for these until the owner confirms which to do.**
 3. Onboarding guide with diagrams → `docs/ONBOARDING.md`.
 
-Next: the owner sends his test results (combined checklist v0.7.0 + two-PC trial); then we discuss the review and
-roadmap point by point and decide the next milestones. Proposed order (not yet confirmed): fix release 0.7.x →
+**27 Oct 2026:** owner's tests of 0.5.0, 0.6.0 and 0.7.0 all passed; the two-PC trial is postponed (he is the only
+user). He sent seven new requests (O-01–O-07, recorded in the review file, section H). We are now **discussing them
+one at a time** (explanation + recommendation → his answer → next point), then the review findings, then we plan
+milestones. He is a C developer and new to this field: explain concepts from first principles, with C analogies
+where useful, no unexplained jargon. Record each answer in the review file (and DESIGN.md when it is a decision). Proposed order (not yet confirmed): fix release 0.7.x →
 refactor (S-01, S-02) → M7 Excel (0.8.0) → M8 branches + merge with order keys (0.9.0).
 
 ## M6 decisions (owner, 25 Oct 2026) — already built

@@ -4,6 +4,7 @@ Each version was installed and tried by the product owner on Windows 11; his fee
 version it was about, and what it led to.
 
 ## 0.7.0 — 25 Oct 2026 — M6 Export and hardening (prototype complete)
+- **Owner (27 Oct 2026):** combined checklist for 0.5.0, 0.6.0 and 0.7.0 — all passed. Two-PC trial postponed.
 - **Export…** in the table toolbar: all items in document order, or only the current search/filter result;
   columns = ID, Title and the table's visible columns, plus optional Level + Parent, full text, links in both
   directions. **CSV** for Excel (comma — the owner's Excel setting —, UTF-8 with BOM, CRLF, multi-line cells

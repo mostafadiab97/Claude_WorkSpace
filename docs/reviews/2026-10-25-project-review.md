@@ -260,6 +260,23 @@ change; they make M7/M8 smaller). **Recommended before M8:** S-04 (ordering form
 - Performance at 10k items is comfortable; the measurements are recorded and repeatable.
 - Owner-facing checklists per release, and `CLAUDE.md` as project memory, made the hand-over possible.
 
+## H. Product owner's test results and feature requests (27 Oct 2026)
+
+**Test results:** the combined checklist v0.7.0 passed completely — Git (0.5.0), Compare (0.6.0) and Export (0.7.0)
+all fine. The two-PC trial is postponed (only one user for now).
+
+**New requests (to discuss one by one before planning; recommendations are added as each is discussed):**
+
+| # | Request (owner's words, condensed) | Touches | Related findings |
+| --- | --- | --- | --- |
+| O-01 | **ID without type prefix:** an item's type may change over time, so the ID must not contain the type — only the random part | data format, IDs, editor (type becomes editable), migration of existing IDs | D-09 |
+| O-02 | **ID pool per branch:** instead of relying on low collision probability, keep a pool of pre-generated IDs; each branch gets a share; when used up, sync with GitHub for more; unused IDs of merged/deleted branches return to the pool | IDs, Git/branches (M8), offline use | D-09 |
+| O-03 | **Level (outline number) as its own value:** the level like "2.2" is currently part of the text, so it is wrong after a move (an item moved to 3.5.1 still says 2.2); it must be a separate value that updates instantly for the moved item and all affected items | data format, hierarchy, table, export | S-04 |
+| O-04 | **Suspect links — user decides:** a changed text should not simply mark links as broken; ask the user per link to keep or unlink, with "keep all" and "unlink all" for many links | links, suspect links | — |
+| O-05 | **GitHub-style difference view:** old version left in red, new right in green, changed words highlighted; for local (uncommitted) changes, a per-line / per-block "revert this change" arrow | Compare/History/Changes UI, diff engine | S-03 |
+| O-06 | **Merge "Changes" and "Compare" into one "Changes" view:** opens with "Uncommitted changes" selected; clicking an item shows the split difference view; the side panel keeps discard / commit message / commit | UI structure | S-03 |
+| O-07 | **Work with other tools' files, both directions:** open Excel/Word (etc.) files exported from other requirement tools, view and edit them inside ReqMan, save to the same file or a copy; optionally convert them into ReqMan items (full migration); export in formats other tools can import | import-export, new viewers/editors, ReqIF | FR-14, FR-15, FR-20 |
+
 ## G. Proposed order (to discuss)
 
 1. **Fix block before M7 (one patch release, e.g. 0.7.1):** D-01, D-02, D-03, D-04, D-06, D-07, D-10, P-01, P-02,

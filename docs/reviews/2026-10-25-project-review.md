@@ -287,6 +287,10 @@ all fine. The two-PC trial is postponed (only one user for now).
 - **O-02 decided (27 Oct 2026):** no ID pool. IDs get **7 random characters** (`REQ-K7Q3XMB`, ~34 billion values)
   and ReqMan **repairs duplicates automatically at pull/merge** (renames the local, not-yet-shared item and its links,
   and tells the user). Keeps ReqMan fully offline. The 7 characters come with the new ID format; the repair with M8.
+- **O-03 decided (27 Oct 2026):** the outline number (1, 1.2, 2.3.1 …) is **calculated** from parent + position
+  whenever it is shown, never stored in files (a move changes one file). **Every item** gets a number. Shown as a
+  "No." column, in the editor header, parent picker, Compare ("1.2 → 3.5.1") and exports. The typed numbers in the
+  sandbox titles are removed when the sandbox is converted.
 
 ## G. Proposed order (to discuss)
 

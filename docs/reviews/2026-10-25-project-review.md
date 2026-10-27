@@ -277,6 +277,14 @@ all fine. The two-PC trial is postponed (only one user for now).
 | O-06 | **Merge "Changes" and "Compare" into one "Changes" view:** opens with "Uncommitted changes" selected; clicking an item shows the split difference view; the side panel keeps discard / commit message / commit | UI structure | S-03 |
 | O-07 | **Work with other tools' files, both directions:** open Excel/Word (etc.) files exported from other requirement tools, view and edit them inside ReqMan, save to the same file or a copy; optionally convert them into ReqMan items (full migration); export in formats other tools can import | import-export, new viewers/editors, ReqIF | FR-14, FR-15, FR-20 |
 
+### Discussion log
+
+- **O-01 decided (27 Oct 2026):** IDs no longer contain the type. Format: one fixed prefix **`REQ-`** for every item,
+  plus the random part. The type becomes an ordinary, editable field. Existing items are **converted** — not by a
+  conversion feature in ReqMan, but by changing the sandbox repository's data directly (new IDs, all links
+  rewritten, files renamed so Git keeps history, old ID kept as `former-id`); the owner just pulls. To be done in the
+  same release that introduces the new format (the current app would warn that `REQ-` does not match the type).
+
 ## G. Proposed order (to discuss)
 
 1. **Fix block before M7 (one patch release, e.g. 0.7.1):** D-01, D-02, D-03, D-04, D-06, D-07, D-10, P-01, P-02,

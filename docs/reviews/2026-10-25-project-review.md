@@ -310,6 +310,12 @@ all fine. The two-PC trial is postponed (only one user for now).
   uncommitted; Open item / Export otherwise). History tab in the editor stays. **No automatic pulls at all** (replaces
   the M5 rule "pull before any comparison"): before an action that involves the remote (compare with the last pull /
   remote versions, push …) ReqMan **offers** to pull first ("Pull first" / "Continue without pulling").
+- **O-07 decided in part (27 Oct 2026):** phases agreed — (1) M7 Excel/CSV import wizard + Excel export; (2) ReqIF
+  import/export for two-way exchange; (3) later: Excel "work on this file" mode and Word export/round-trip for
+  ReqMan's own documents; no general editor for foreign Word files. Tools to test exchange against: **DOORS and Jama**
+  (used in the company's previous projects). Owner's real concern behind the Excel mode: starting a project from an
+  Excel file should not require creating a Git repository by hand first — proposal "start a project from a file"
+  under discussion.
 
 ## G. Proposed order (to discuss)
 

@@ -291,6 +291,14 @@ all fine. The two-PC trial is postponed (only one user for now).
   whenever it is shown, never stored in files (a move changes one file). **Every item** gets a number. Shown as a
   "No." column, in the editor header, parent picker, Compare ("1.2 → 3.5.1") and exports. The typed numbers in the
   sandbox titles are removed when the sandbox is converted.
+- **O-03 addition (27 Oct 2026):** the outline number must appear in **every export** — a "No." column in CSV/Excel
+  and in Markdown/Word headings. A filtered export keeps the real numbers from the full document (no renumbering);
+  M7 import can rebuild the hierarchy from another tool's numbers ("3.2.1" → child of "3.2").
+- **O-04 decided (27 Oct 2026):** when the user saves a change to an item's type, title or text and other items link
+  to it, a window lists those links with Keep / Unlink per row and **Keep all**, **Unlink all** (asks once more),
+  **Apply my choices**, **Decide later** (leaves the ⚠ marks). Suspect links in the editor get Keep / Unlink and
+  Keep all / Unlink all. Changes that arrive by pull do **not** open the window — they only show ⚠ marks, reviewed
+  with the "With suspect links" filter.
 
 ## G. Proposed order (to discuss)
 

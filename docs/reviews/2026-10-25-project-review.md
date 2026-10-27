@@ -304,6 +304,12 @@ all fine. The two-PC trial is postponed (only one user for now).
   Revert arrows per field row, text block and link — only when comparing with uncommitted changes; other comparisons
   are read-only. Opens in the wide middle area; falls back to old-above-new when the window is narrow. **Split view
   only** (no unified switch). Line/word comparison via the `diff` library (BSD).
+- **O-06 decided (27 Oct 2026):** one **Changes** view replaces Changes panel + Compare: Git bar = Changes (n) / Pull /
+  Push. Middle area: "Show" menu (Uncommitted changes = default, last pull, last commit, choose two versions), counts,
+  item list on top, split difference of the selected item below; side panel follows the menu (commit tools for
+  uncommitted; Open item / Export otherwise). History tab in the editor stays. **No automatic pulls at all** (replaces
+  the M5 rule "pull before any comparison"): before an action that involves the remote (compare with the last pull /
+  remote versions, push …) ReqMan **offers** to pull first ("Pull first" / "Continue without pulling").
 
 ## G. Proposed order (to discuss)
 

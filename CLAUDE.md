@@ -143,8 +143,8 @@ scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 5
 
 - Default comparison = "since my last pull" = what the last pull brought in (HEAD before → after the newest
   `pull…`/`merge <remote>/<branch>…` step in the reflog; pulls outside ReqMan count too).
-- ReqMan **pulls right before any comparison** (skipped, with a note, while the editor has unsaved typing or
-  without a remote).
+- ~~ReqMan pulls right before any comparison~~ — **replaced 27 Oct 2026 (O-06): no automatic pulls; ReqMan offers to
+  pull before remote-related actions.** Still built the old way until the next release implements O-06.
 - Exporting the comparison list → M6.
 - Implementation: `src/modules/workspace/compare.ts`; `git diff --raw -z -M` gives blob IDs; contents come from
   `readBlobs()` (one `git cat-file --batch`). Naming objects `<rev>:<path>` instead was 40× slower with 10k files in

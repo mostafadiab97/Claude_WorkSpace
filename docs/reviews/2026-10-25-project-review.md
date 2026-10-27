@@ -326,6 +326,13 @@ all fine. The two-PC trial is postponed (only one user for now).
   (D-09 comes with branches, as decided in O-02).
 - **Group 2 — speed approved (27 Oct 2026):** owner wants **all** fixes now, "to start the next versions on a clear
   page": P-01, P-02, P-04 and P-05 in the fix round (P-03 needs no action).
+- **Deleted items (27 Oct 2026):** owner only wanted to be sure deleted files are removed (no "zombie" files) — they
+  are (the file is removed; Git history keeps old versions). No restore button / deleted-items list wanted.
+- **Group 3 (27 Oct 2026):** S-06 **yes** — all GUI texts in one central file now (future languages + easy label
+  changes; "better to have a tool you don't need than need a tool you don't have"). S-07 **discarded** (one
+  requirement set per repository). S-08 **later** (private update channel for a commercial version). S-03/S-04
+  explained; S-10 becomes a feature discussion: **rich text** in the item text (images, tables, hyperlinks, links to
+  other items, bold/italic/underline, bullet points, highlight …).
 
 ## G. Proposed order (to discuss)
 

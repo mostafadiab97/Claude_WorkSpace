@@ -324,6 +324,8 @@ all fine. The two-PC trial is postponed (only one user for now).
   file" mode stays a possible later item, not planned.
 - **Group 1 — defects D-01 to D-10 approved (27 Oct 2026):** fix all in the first release of the next round
   (D-09 comes with branches, as decided in O-02).
+- **Group 2 — speed approved (27 Oct 2026):** owner wants **all** fixes now, "to start the next versions on a clear
+  page": P-01, P-02, P-04 and P-05 in the fix round (P-03 needs no action).
 
 ## G. Proposed order (to discuss)
 

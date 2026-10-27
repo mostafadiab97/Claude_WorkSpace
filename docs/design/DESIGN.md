@@ -314,6 +314,7 @@ The five questions marked ★ shape the architecture most; the rest refine scope
 | Confirmed decision (27 Oct 2026) | GitHub-style difference view: Fields / Text / Links blocks stacked, each split old (red, left) vs new (green, right) with word highlights; per-part revert for uncommitted changes only; split view only. |
 | Confirmed decision (27 Oct 2026) | One "Changes" view (default: uncommitted changes) replaces the Changes panel and Compare. No automatic pulls: before remote-related actions ReqMan offers to pull first. Replaces the M5 rule "pull right before any comparison". |
 | Confirmed decision (27 Oct 2026) | Exchange with other tools in phases: Excel/CSV import + Excel export (M7) → ReqIF import/export → later Excel "work on this file" mode and Word round-trip for ReqMan's own documents. Test against DOORS and Jama (used in the company before). |
+| Confirmed decision (27 Oct 2026) | "New project from a file": ReqMan creates the folder and a local Git repository itself, imports the Excel/CSV file, and can later write changes back into that Excel file ("Update the Excel file") or publish the project to GitHub. |
 | Confirmed requirement | Collaboration works like GitHub: no real-time co-editing. Each person edits in their own local copy/branch, shares by push/pull, and conflicts are resolved per requirement in the tool; formal review happens through pull requests. Inference (I): this removes the need for any collaboration server, consistent with the no-server requirement. |
 | Confirmed scope decision | No AI features in the first version (no quality checks, drafting, test generation or agent access); possibly in a later version. Markdown export covers manual use of external AI tools. |
 | Confirmed requirement | Deployment: the tool runs locally on each user's PC; data lives in a Git repository hosted like any other repo (GitHub or similar). Confirmed: the tool must work fully offline (all viewing, editing, linking, comparing, exporting and local commits); only push, pull and PR actions need a connection. How the local tool is built (desktop app, locally served web UI, etc.) is a product-form decision for the architecture stage, not yet decided. Confirmed: Windows is the primary OS; some teams use Linux. Inference (I): this argues for cross-platform technology and against Windows-only UI frameworks, unless Linux support is explicitly postponed. Confirmed: Windows only for the first releases; Linux later. Recommendation (R): treat "Linux possible without a rewrite" as a selection criterion in the technology stage. |
@@ -701,6 +702,17 @@ English/Arabic UI (if wanted; see review S-06) · several requirement sets per r
 ReqIF, GitLab/Bitbucket/Azure DevOps adapters, compliance features (signatures, tamper-proof audit, standards
 templates), AI features and governed AI access, licensing, private update channel and code signing (review S-08,
 X-02).
+
+### File formats — support status (27 Oct 2026)
+
+| Format | Export | Import | Notes |
+| --- | --- | --- | --- |
+| CSV (opens in Excel) | **Supported** (v0.7.0) | Planned — M7 | Comma, UTF-8; table and Compare lists |
+| Excel (.xlsx) | Planned — M7 | Planned — M7 | Import wizard with column mapping, update by ID, links, numbers → hierarchy; "New project from a file"; "Update the Excel file" writes back into the original file |
+| Markdown (.md) | **Supported** (v0.7.0) | Not planned | Export for AI tools and reports; import only if a need appears (ReqMan's own Markdown would be easy) |
+| ReqIF (.reqif / .reqifz) | Planned — after M7 | Planned — after M7 | The standard exchange format of DOORS, Jama, Polarion, Codebeamer, Visure; two-way exchange; tested with DOORS and Jama |
+| Word (.docx) | Planned — M10 | Later: ReqMan-generated files (round trip); other Word files only by rules (e.g. headings → items) | No general editing of foreign Word files |
+| PDF | Planned — M10 | Not planned | Printable document |
 
 ### Proposed versions
 

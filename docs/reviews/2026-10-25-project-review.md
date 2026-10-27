@@ -316,6 +316,12 @@ all fine. The two-PC trial is postponed (only one user for now).
   (used in the company's previous projects). Owner's real concern behind the Excel mode: starting a project from an
   Excel file should not require creating a Git repository by hand first — proposal "start a project from a file"
   under discussion.
+- **O-07 completed (27 Oct 2026):** instead of a separate file-editing mode: **"New project from a file"** (choose an
+  Excel/CSV file and a folder → ReqMan creates the folder and a local Git repository itself, imports via the
+  wizard, first commit "Imported from …") plus **"Update the Excel file"** (writes the current requirements back
+  into the original file — same columns, only changed cells, formatting kept — or a copy; the source file and mapping
+  are remembered) and **"Publish to GitHub"** later (paste the address of an empty repository). The "work on this
+  file" mode stays a possible later item, not planned.
 
 ## G. Proposed order (to discuss)
 

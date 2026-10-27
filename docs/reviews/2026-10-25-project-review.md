@@ -284,6 +284,9 @@ all fine. The two-PC trial is postponed (only one user for now).
   conversion feature in ReqMan, but by changing the sandbox repository's data directly (new IDs, all links
   rewritten, files renamed so Git keeps history, old ID kept as `former-id`); the owner just pulls. To be done in the
   same release that introduces the new format (the current app would warn that `REQ-` does not match the type).
+- **O-02 decided (27 Oct 2026):** no ID pool. IDs get **7 random characters** (`REQ-K7Q3XMB`, ~34 billion values)
+  and ReqMan **repairs duplicates automatically at pull/merge** (renames the local, not-yet-shared item and its links,
+  and tells the user). Keeps ReqMan fully offline. The 7 characters come with the new ID format; the repair with M8.
 
 ## G. Proposed order (to discuss)
 

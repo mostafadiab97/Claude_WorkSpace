@@ -333,6 +333,10 @@ all fine. The two-PC trial is postponed (only one user for now).
   requirement set per repository). S-08 **later** (private update channel for a commercial version). S-03/S-04
   explained; S-10 becomes a feature discussion: **rich text** in the item text (images, tables, hyperlinks, links to
   other items, bold/italic/underline, bullet points, highlight …).
+- **S-10 rich text (27 Oct 2026):** agreed: Markdown stays the stored format + a Word-like editor (toolbar, images in
+  `requirements/attachments/<ID>/`, `@` references to items) — **in a later version** (owner: "this is extra").
+  Item references inside text are **references only**, not traceability links. Tables: question about merged cells
+  open.
 
 ## G. Proposed order (to discuss)
 

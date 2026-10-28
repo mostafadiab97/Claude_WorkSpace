@@ -14,17 +14,11 @@ risks…) that replaces scattered Word and Excel files. It has **no server and n
 - ReqMan is the window that understands those files: a tree table, an editor, typed links between items, "suspect"
   links, and Git actions shown per requirement instead of per file line.
 
-![System context](images/system-context.png)
+![How the parts connect](images/architecture.png)
 
-```mermaid
-flowchart LR
-  U(["Engineer"]) --> APP["ReqMan app (offline)"]
-  APP --> WF[("Repository folder: requirements/")]
-  APP --> GIT["Git for Windows"]
-  GIT --> GH[("GitHub: shared copy")]
-  APP --> AD[("%APPDATA% › ReqMan: cache, logs, theme")]
-  APP -.-> REL[("GitHub Releases: updates")]
-```
+The picture shows the whole system: the window, the bridge, the core with its modules, the files, the cache and
+Git. Open [`docs/diagrams/architecture.html`](diagrams/architecture.html) in a browser for the interactive
+version (zoom, dark mode, and each box links to the source lines it is drawn from).
 
 ## 2. Five ideas that explain most of the code
 
@@ -44,32 +38,7 @@ flowchart LR
 
 ## 3. The parts and how they connect
 
-![Modules](images/modules.png)
-
-```mermaid
-flowchart TB
-  subgraph R["Renderer (React window)"]
-    UI["screens/ + workspace/ components"]
-  end
-  BR{{"window.reqman (preload) — contract: shared/api.ts"}}
-  subgraph M["Main process (Node/Electron)"]
-    IPC["main/ipc.ts"]
-    WS["workspace (+ gitOps, compare)"]
-    RS["repository-store"]
-    IC["index-cache (SQLite)"]
-    GA["git-adapter"]
-    IE["import-export"]
-    IT["items (domain core)"]
-    SC["schema"]
-    OTHER["logger · theme · updater · sample-data"]
-  end
-  UI --> BR --> IPC --> WS
-  IPC --> OTHER
-  WS --> RS & IC & GA & IE & IT
-  RS --> IT & SC
-  IC --> IT
-  IT --> SC
-```
+The architecture picture in section 1 shows these parts and how calls travel between them.
 
 | Part | Role in one sentence | Main files | Used by |
 | --- | --- | --- | --- |
@@ -124,17 +93,16 @@ The main PCB shall limit access tokens in all supported languages.
 
 ## 5. How a request travels — two examples
 
-**Saving an item** (conflict-safe):
+**Saving an item** (conflict-safe) — [interactive version](diagrams/save-flow.html):
 
 ![Save flow](images/save-flow.png)
 
-**Compare** (pulls first, then shows what changed per requirement):
+**Pull** (stops safely before anything changes) — [interactive version](diagrams/pull-flow.html):
 
-![Pull and compare flow](images/pull-compare-flow.png)
+![Pull flow](images/pull-flow.png)
 
-The diagram sources are in `docs/diagrams/*.mmd` (Mermaid). GitHub renders the Mermaid blocks above; the PNG/SVG
-copies in `docs/images/` are regenerated with `npx -y @mermaid-js/mermaid-cli -i docs/diagrams/<name>.mmd -o
-docs/images/<name>.png -b white -w 1600` (or any Mermaid tool).
+The diagrams are made with [Archify](https://github.com/tt-a1i/archify) (Apache-2.0) from the JSON sources in
+`docs/diagrams/archify/`; how to change and regenerate them is in `docs/diagrams/README.md`.
 
 ## 6. Your first day
 

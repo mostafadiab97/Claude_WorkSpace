@@ -1,0 +1,387 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "ReqMan \u2014 how the parts connect",
+    "output": "docs/diagrams/architecture.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "https://github.com/mostafadiab97/claude_workspace",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "a6e78ce3ef1e6606dcdeb613efd7b3a16df8bc95"
+    }
+  },
+  "components": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "Engineer",
+      "sublabel": "Windows 11",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        120,
+        64
+      ]
+    },
+    {
+      "id": "window",
+      "type": "frontend",
+      "label": "Window (renderer)",
+      "sublabel": "React screens",
+      "pos": [
+        250,
+        220
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/renderer/src/app/App.tsx",
+          "line": 1,
+          "end_line": 20,
+          "label": "app shell"
+        },
+        {
+          "path": "src/shared/text.ts",
+          "line": 1,
+          "end_line": 12,
+          "label": "all texts"
+        }
+      ]
+    },
+    {
+      "id": "bridge",
+      "type": "security",
+      "label": "Bridge (preload)",
+      "sublabel": "window.reqman",
+      "pos": [
+        510,
+        220
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/preload/index.ts",
+          "line": 1,
+          "end_line": 23
+        }
+      ]
+    },
+    {
+      "id": "ipc",
+      "type": "backend",
+      "label": "main/ipc.ts",
+      "sublabel": "checks every input",
+      "pos": [
+        700,
+        220
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/main/ipc.ts",
+          "line": 80,
+          "end_line": 82,
+          "label": "handler table"
+        },
+        {
+          "path": "src/main/ipc.ts",
+          "line": 202,
+          "end_line": 204,
+          "label": "registered"
+        },
+        {
+          "path": "src/main/validate.ts",
+          "line": 1,
+          "end_line": 20
+        }
+      ]
+    },
+    {
+      "id": "workspace",
+      "type": "backend",
+      "label": "workspace",
+      "sublabel": "one queue for writes",
+      "pos": [
+        910,
+        220
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/modules/workspace/workspace.ts",
+          "line": 45,
+          "end_line": 60
+        },
+        {
+          "path": "src/modules/workspace/workspace.ts",
+          "line": 139,
+          "end_line": 139,
+          "label": "queue"
+        }
+      ]
+    },
+    {
+      "id": "store",
+      "type": "backend",
+      "label": "repository-store",
+      "sublabel": "atomic, checked writes",
+      "pos": [
+        790,
+        400
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/modules/repository-store/fileStore.ts",
+          "line": 182,
+          "end_line": 200,
+          "label": "writeItem"
+        }
+      ]
+    },
+    {
+      "id": "index",
+      "type": "backend",
+      "label": "index-cache",
+      "sublabel": "search, filters",
+      "pos": [
+        970,
+        400
+      ],
+      "size": [
+        130,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/modules/index-cache/sqliteIndex.ts",
+          "line": 142,
+          "end_line": 150
+        },
+        {
+          "path": "src/modules/index-cache/sqliteIndex.ts",
+          "line": 231,
+          "end_line": 240,
+          "label": "sync"
+        }
+      ]
+    },
+    {
+      "id": "files",
+      "type": "database",
+      "label": "requirements/",
+      "sublabel": "one .md file per item",
+      "pos": [
+        790,
+        560
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "the truth"
+    },
+    {
+      "id": "sqlite",
+      "type": "database",
+      "label": "SQLite cache",
+      "sublabel": "%APPDATA%\\ReqMan",
+      "pos": [
+        970,
+        560
+      ],
+      "size": [
+        130,
+        64
+      ],
+      "tag": "rebuildable"
+    },
+    {
+      "id": "gitadapter",
+      "type": "backend",
+      "label": "git-adapter",
+      "sublabel": "runs git, no shell",
+      "pos": [
+        1110,
+        220
+      ],
+      "size": [
+        130,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/modules/git-adapter/systemGit.ts",
+          "line": 195,
+          "end_line": 196
+        }
+      ]
+    },
+    {
+      "id": "git",
+      "type": "external",
+      "label": "Git for Windows",
+      "sublabel": "Credential Manager",
+      "pos": [
+        1110,
+        560
+      ],
+      "size": [
+        130,
+        64
+      ]
+    },
+    {
+      "id": "github",
+      "type": "cloud",
+      "label": "GitHub",
+      "sublabel": "shared copy",
+      "pos": [
+        1110,
+        700
+      ],
+      "size": [
+        130,
+        64
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Sandboxed window: no files, no Git",
+      "wraps": [
+        "window"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Core (main process)",
+      "wraps": [
+        "ipc",
+        "workspace",
+        "store",
+        "index",
+        "gitadapter"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "use",
+      "from": "user",
+      "to": "window",
+      "label": "uses",
+      "variant": "emphasis"
+    },
+    {
+      "id": "call",
+      "from": "window",
+      "to": "bridge",
+      "label": "window.reqman",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ipc-msg",
+      "from": "bridge",
+      "to": "ipc",
+      "label": "IPC",
+      "variant": "security"
+    },
+    {
+      "id": "to-ws",
+      "from": "ipc",
+      "to": "workspace",
+      "label": "checked"
+    },
+    {
+      "id": "ws-store",
+      "from": "workspace",
+      "to": "store",
+      "label": "read / write"
+    },
+    {
+      "id": "ws-index",
+      "from": "workspace",
+      "to": "index",
+      "label": "query / sync"
+    },
+    {
+      "id": "store-files",
+      "from": "store",
+      "to": "files",
+      "label": "temp + rename"
+    },
+    {
+      "id": "index-db",
+      "from": "index",
+      "to": "sqlite",
+      "label": "SQL"
+    },
+    {
+      "id": "ws-git",
+      "from": "workspace",
+      "to": "gitadapter",
+      "label": "Git"
+    },
+    {
+      "id": "run-git",
+      "from": "gitadapter",
+      "to": "git",
+      "label": "git -C root"
+    },
+    {
+      "id": "sync",
+      "from": "git",
+      "to": "github",
+      "label": "fetch / push",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Files are the truth",
+      "items": [
+        "Every item is a Markdown file in the project's own Git repository",
+        "The SQLite index is only a cache, rebuilt from the files"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Never lose work",
+      "items": [
+        "Writes are refused if the file changed since it was read",
+        "Pushes are never forced; a pull that would clash stops first"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "One front door per module",
+      "items": [
+        "src/modules/<name>/index.ts is the only import",
+        "main/composition.ts wires all implementations"
+      ]
+    }
+  ]
+}

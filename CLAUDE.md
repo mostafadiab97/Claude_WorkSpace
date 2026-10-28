@@ -21,7 +21,7 @@ cloud session from v0.5.0. Nothing lives outside this repository and `Claude_San
 
 | What | Where |
 | --- | --- |
-| **Onboarding for new engineers** (system diagrams, module roles, data flow, first change end to end) | `docs/ONBOARDING.md` (diagram sources `docs/diagrams/*.mmd`, rendered `docs/images/`) |
+| **Onboarding for new engineers** (system diagrams, module roles, data flow, first change end to end) | `docs/ONBOARDING.md` (diagrams: Archify sources `docs/diagrams/archify/*.json`, interactive `docs/diagrams/*.html`, pictures `docs/images/`; regenerate with `node tools/diagrams.mjs`, see `docs/diagrams/README.md`) |
 | Project reviews (defects, structure, performance, risks — proposals awaiting the owner's decision) | `docs/reviews/2026-10-25-project-review.md` |
 | Domain analysis of 5 RM tools, every product question with the owner's answer, product definition, FR/NFR list, journey, scope by stage, architecture, technology choices, milestone plan | `docs/design/DESIGN.md` (**source of truth for decisions**; tags C = confirmed by owner, R = recommendation, I = inference) |
 | Module map, rules, data format, UI structure, decisions changed during build | `docs/ARCHITECTURE.md` |

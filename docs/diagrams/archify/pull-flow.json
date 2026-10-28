@@ -1,0 +1,296 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Pull — stops safely before anything changes",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "output": "docs/diagrams/pull-flow.html",
+    "repository": {
+      "url": "https://github.com/mostafadiab97/claude_workspace",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "a6e78ce3ef1e6606dcdeb613efd7b3a16df8bc95"
+    },
+    "legend": {
+      "entries": {
+        "frontend": {
+          "label": "What you see"
+        },
+        "backend": {
+          "label": "ReqMan step"
+        },
+        "security": {
+          "label": "Check / stop"
+        },
+        "cloud": {
+          "label": "Network"
+        },
+        "external": {
+          "label": "You"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "you",
+      "label": "You"
+    },
+    {
+      "id": "reqman",
+      "label": "ReqMan (workspace)"
+    },
+    {
+      "id": "stop",
+      "label": "Stops — nothing changed",
+      "variant": "exception"
+    },
+    {
+      "id": "git",
+      "label": "Git"
+    }
+  ],
+  "phases": [
+    {
+      "id": "ask",
+      "label": "Ask",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "check",
+      "label": "Check without touching files",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "apply",
+      "label": "Apply",
+      "fromCol": 4,
+      "toCol": 5
+    }
+  ],
+  "mainPath": [
+    "click",
+    "precheck",
+    "fetch",
+    "clash",
+    "merge",
+    "resync",
+    "done"
+  ],
+  "nodes": [
+    {
+      "id": "click",
+      "lane": "you",
+      "col": 0,
+      "type": "external",
+      "label": "Pull",
+      "sublabel": "Git bar button",
+      "sources": [
+        {
+          "path": "src/renderer/src/workspace/screen/useGit.ts",
+          "line": 33,
+          "end_line": 47
+        }
+      ]
+    },
+    {
+      "id": "precheck",
+      "lane": "reqman",
+      "col": 1,
+      "type": "security",
+      "label": "Pre-check",
+      "sublabel": "branch, no open merge",
+      "sources": [
+        {
+          "path": "src/modules/workspace/gitOps.ts",
+          "line": 167,
+          "end_line": 181
+        }
+      ]
+    },
+    {
+      "id": "fetch",
+      "lane": "git",
+      "col": 2,
+      "type": "cloud",
+      "label": "fetch",
+      "sublabel": "download only",
+      "sources": [
+        {
+          "path": "src/modules/workspace/gitOps.ts",
+          "line": 222,
+          "end_line": 222
+        },
+        {
+          "path": "src/modules/git-adapter/systemGit.ts",
+          "line": 250,
+          "end_line": 252
+        }
+      ]
+    },
+    {
+      "id": "clash",
+      "lane": "reqman",
+      "col": 3,
+      "type": "security",
+      "label": "Clash check",
+      "sublabel": "merge in memory",
+      "tag": "git merge-tree",
+      "sources": [
+        {
+          "path": "src/modules/workspace/gitOps.ts",
+          "line": 233,
+          "end_line": 245
+        },
+        {
+          "path": "src/modules/git-adapter/systemGit.ts",
+          "line": 254,
+          "end_line": 267
+        }
+      ]
+    },
+    {
+      "id": "both",
+      "lane": "stop",
+      "col": 3,
+      "type": "security",
+      "label": "Changed on both sides",
+      "sublabel": "lists the items"
+    },
+    {
+      "id": "merge",
+      "lane": "git",
+      "col": 4,
+      "type": "backend",
+      "label": "merge",
+      "sublabel": "updates the branch",
+      "sources": [
+        {
+          "path": "src/modules/workspace/gitOps.ts",
+          "line": 248,
+          "end_line": 248
+        },
+        {
+          "path": "src/modules/git-adapter/systemGit.ts",
+          "line": 269,
+          "end_line": 271
+        }
+      ]
+    },
+    {
+      "id": "overwrite",
+      "lane": "stop",
+      "col": 4,
+      "type": "security",
+      "label": "Would overwrite",
+      "sublabel": "your uncommitted items",
+      "sources": [
+        {
+          "path": "src/modules/workspace/gitOps.ts",
+          "line": 251,
+          "end_line": 257
+        }
+      ]
+    },
+    {
+      "id": "resync",
+      "lane": "reqman",
+      "col": 5,
+      "type": "backend",
+      "label": "Re-read changed files",
+      "sublabel": "index up to date",
+      "sources": [
+        {
+          "path": "src/modules/workspace/gitOps.ts",
+          "line": 270,
+          "end_line": 270
+        }
+      ]
+    },
+    {
+      "id": "done",
+      "lane": "you",
+      "col": 5,
+      "type": "frontend",
+      "label": "Table updated",
+      "sublabel": "“Pulled: 3 items changed”"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "click",
+      "to": "precheck",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e2",
+      "from": "precheck",
+      "to": "fetch",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e3",
+      "from": "fetch",
+      "to": "clash",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e4",
+      "from": "clash",
+      "to": "merge",
+      "label": "clean",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e5",
+      "from": "clash",
+      "to": "both",
+      "label": "same items",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e6",
+      "from": "merge",
+      "to": "overwrite",
+      "label": "refused",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e7",
+      "from": "merge",
+      "to": "resync",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e8",
+      "from": "resync",
+      "to": "done",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "When it stops",
+      "items": [
+        "Your files and the branch stay exactly as they were",
+        "The message names the items, so you can open them"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Taking their version (until M8)",
+      "items": [
+        "Undo your last commit (if not pushed), Discard those items, then Pull",
+        "Choosing per item inside ReqMan comes with branches and merge (0.12.0)"
+      ]
+    }
+  ]
+}

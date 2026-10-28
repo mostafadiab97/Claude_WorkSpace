@@ -1,0 +1,232 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Saving an item \u2014 conflict-safe",
+    "output": "docs/diagrams/save-flow.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "https://github.com/mostafadiab97/claude_workspace",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "a6e78ce3ef1e6606dcdeb613efd7b3a16df8bc95"
+    }
+  },
+  "participants": [
+    {
+      "id": "editor",
+      "type": "frontend",
+      "label": "Editor",
+      "sublabel": "window",
+      "sources": [
+        {
+          "path": "src/renderer/src/workspace/ItemEditor.tsx",
+          "line": 101,
+          "end_line": 120
+        }
+      ]
+    },
+    {
+      "id": "ipc",
+      "type": "security",
+      "label": "main/ipc.ts",
+      "sublabel": "input checks",
+      "sources": [
+        {
+          "path": "src/main/ipc.ts",
+          "line": 165,
+          "end_line": 165
+        }
+      ]
+    },
+    {
+      "id": "ws",
+      "type": "backend",
+      "label": "workspace",
+      "sublabel": "queue + rules",
+      "sources": [
+        {
+          "path": "src/modules/workspace/workspace.ts",
+          "line": 172,
+          "end_line": 172
+        },
+        {
+          "path": "src/modules/workspace/itemOps.ts",
+          "line": 43,
+          "end_line": 66
+        }
+      ]
+    },
+    {
+      "id": "store",
+      "type": "backend",
+      "label": "repository-store",
+      "sublabel": "files",
+      "sources": [
+        {
+          "path": "src/modules/repository-store/fileStore.ts",
+          "line": 182,
+          "end_line": 200
+        },
+        {
+          "path": "src/modules/safe-files/index.ts",
+          "line": 43,
+          "end_line": 60
+        }
+      ]
+    },
+    {
+      "id": "disk",
+      "type": "database",
+      "label": "items/<ID>.md",
+      "sublabel": "in the Git repo"
+    },
+    {
+      "id": "index",
+      "type": "database",
+      "label": "index-cache",
+      "sublabel": "SQLite",
+      "sources": [
+        {
+          "path": "src/modules/index-cache/sqliteIndex.ts",
+          "line": 285,
+          "end_line": 300
+        }
+      ]
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 280,
+      "label": "Check"
+    },
+    {
+      "from": 288,
+      "to": 445,
+      "label": "Write safely"
+    },
+    {
+      "from": 455,
+      "to": 570,
+      "label": "Update and answer"
+    }
+  ],
+  "messages": [
+    {
+      "id": "save",
+      "from": "editor",
+      "to": "ipc",
+      "y": 165,
+      "label": "saveItem(item, revision)",
+      "variant": "emphasis",
+      "note": "Ctrl+S; revision = hash of the file when it was opened"
+    },
+    {
+      "id": "checked",
+      "from": "ipc",
+      "to": "ws",
+      "y": 220,
+      "label": "checked item",
+      "variant": "emphasis",
+      "note": "waits in the queue behind any running write or Git action"
+    },
+    {
+      "id": "write",
+      "from": "ws",
+      "to": "store",
+      "y": 300,
+      "label": "writeItem(expected revision)",
+      "variant": "emphasis",
+      "note": "after schema validation and the parent-loop check"
+    },
+    {
+      "id": "read-now",
+      "from": "store",
+      "to": "disk",
+      "y": 360,
+      "label": "read current file",
+      "variant": "default"
+    },
+    {
+      "id": "same",
+      "from": "disk",
+      "to": "store",
+      "y": 395,
+      "label": "changed? \u2192 ConflictError",
+      "variant": "return"
+    },
+    {
+      "id": "rename",
+      "from": "store",
+      "to": "disk",
+      "y": 430,
+      "label": "temp file + rename",
+      "variant": "default"
+    },
+    {
+      "id": "sync",
+      "from": "ws",
+      "to": "index",
+      "y": 470,
+      "label": "syncPaths(this file)",
+      "variant": "default",
+      "note": "only this file is re-read"
+    },
+    {
+      "id": "answer",
+      "from": "ws",
+      "to": "ipc",
+      "y": 525,
+      "label": "saved / conflict / invalid",
+      "variant": "return"
+    },
+    {
+      "id": "show",
+      "from": "ipc",
+      "to": "editor",
+      "y": 555,
+      "label": "result",
+      "variant": "return"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "ipc",
+      "from": 160,
+      "to": 560,
+      "type": "security"
+    },
+    {
+      "participant": "ws",
+      "from": 215,
+      "to": 530,
+      "type": "backend"
+    },
+    {
+      "participant": "store",
+      "from": 295,
+      "to": 435,
+      "type": "backend"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Never overwrite someone's work",
+      "items": [
+        "If the file changed since it was opened (a pull, a colleague, an editor), the save is refused with a clear message",
+        "A file ReqMan cannot read is never written over"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Never a half-written file",
+      "items": [
+        "The new content goes to a temporary file first, then replaces the old one in one step",
+        "Short Windows locks (antivirus, OneDrive) are retried for about 1.5 s"
+      ]
+    }
+  ]
+}

@@ -38,3 +38,13 @@
 `.gitattributes` keeps every text file LF in the repository and working copy, so Windows checkouts produce no
 whitespace-only diffs. Item files (`requirements/**`) of user repositories get their own `.gitattributes` when
 ReqMan creates the folder.
+
+## Libraries (security and updates)
+
+- `npm run check:deps` lists known security problems (`npm audit`) and available updates (`npm outdated`). It runs
+  automatically before every `npm run build` and in every GitHub build. It only **warns** — it never stops a build
+  (owner's decision, 28 Oct 2026); without network it says so and carries on.
+- **Dependabot** (GitHub) proposes updates as pull requests: security fixes as soon as they are published, other
+  updates weekly (`.github/dependabot.yml`). Review and merge them like any change; the build tests them.
+- Users of ReqMan never update libraries themselves: they are packed into the installer and arrive with ReqMan
+  updates.

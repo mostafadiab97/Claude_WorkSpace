@@ -1,0 +1,18 @@
+# Dependabot (free GitHub service) proposes library updates as pull requests.
+# Security fixes are proposed as soon as they are published; ordinary updates once a week.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # one pull request for all small updates of development tools
+      dev-tools:
+        dependency-type: development
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

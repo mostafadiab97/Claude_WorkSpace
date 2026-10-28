@@ -343,9 +343,11 @@ all fine. The two-PC trial is postponed (only one user for now).
   groups the user changed whose order values are longer than 4 characters are re-spaced.
 - **Tables in rich text (28 Oct 2026):** recorded as a **future feature without milestone**; the later rich-text editor
   covers formatting (bold, italic, underline, highlight, lists, links, images) but no tables for now.
-- **Group 4 approved (28 Oct 2026):** X-01, T-01 – T-05 in the fix round; X-02 (code signing) later. X-03: owner asked how
-  dependency updates are noticed when development moves to a local PC — answer pending his choice (Dependabot on
-  GitHub + `npm audit` check in the build).
+- **Group 4 approved (28 Oct 2026):** X-01, T-01 – T-05 in the fix round; X-02 (code signing) later. X-03 **done (28 Oct 2026)**:
+  `.github/dependabot.yml` (npm weekly, Actions monthly) and `npm run check:deps` (audit + outdated), which also runs
+  before every `npm run build` (locally and in CI) and **only warns, never blocks** (owner's decision). Dependabot
+  security alerts/updates must be switched on by the owner in the repository settings (the API is not reachable
+  from the cloud session).
 
 ## G. Proposed order (to discuss)
 

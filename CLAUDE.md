@@ -79,6 +79,7 @@ npm run measure:ui -- <repo>   # tree-table timings on a big repo (e.g. the sand
 npm run gen:repo -- <folder> [count]        # uniform generated items (performance)
 npm run gen:scenario -- <folder> [count]    # rich scenario data (what Claude_SandBox was made with)
 npm run dist:win          # local Windows installer into dist/ (CI does this for releases)
+npm run check:deps        # library security problems + updates; also runs before every build; warns only, never blocks
 ```
 
 On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows briefly.

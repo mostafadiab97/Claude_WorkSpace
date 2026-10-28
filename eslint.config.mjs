@@ -27,7 +27,7 @@ export default tseslint.config(
   },
   {
     // End-to-end tests run in Node and send small snippets into the app window.
-    files: ['e2e/**/*.mjs', 'tools/**/*.mts'],
+    files: ['e2e/**/*.mjs', 'tools/**/*.mts', 'tools/**/*.mjs'],
     languageOptions: { globals: { ...globals.node, ...globals.browser } }
   },
   {

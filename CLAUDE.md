@@ -250,3 +250,9 @@ Everything else must be automated (unit tests, e2e in CI, the in-app release sel
   project excludes that folder. Tests may import modules only through their `index.ts` (ESLint).
 - **Single-instance lock:** two ReqMan processes with the same `--user-data-dir` cannot run; e2e scenarios each use
   their own profile (`launch()` in `e2e/harness.mjs`), so they can run side by side.
+- **From this cloud session:** `gh workflow run` and other GraphQL calls are refused (403) — start a release with
+  `gh api -X POST repos/mostafadiab97/Claude_WorkSpace/actions/workflows/release.yml/dispatches -f ref=main`.
+  Run logs and artifacts cannot be downloaded either; failed e2e scenarios are therefore written as GitHub
+  annotations (`gh api repos/.../check-runs/<job id>/annotations`).
+- **Electron downloads its program on first use:** two scenarios starting at once failed on Windows ("file in
+  use") — `e2e/run.mjs` imports `electron` once before starting them.

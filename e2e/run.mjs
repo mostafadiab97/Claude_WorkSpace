@@ -13,6 +13,10 @@ const all = readdirSync(dir)
   .filter((f) => wanted.length === 0 || wanted.some((w) => f.startsWith(w)))
 const PARALLEL = Number(process.env.E2E_PARALLEL ?? 2)
 
+// Electron downloads its program on first use. Do that once, here: two scenarios starting at the same moment
+// would both try to unpack it, and Windows refuses the second (the file is in use).
+await import('electron')
+
 const results = []
 const run = (file) =>
   new Promise((resolve) => {

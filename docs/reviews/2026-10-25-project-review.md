@@ -362,6 +362,10 @@ all fine. The two-PC trial is postponed (only one user for now).
 - **Done in 0.9.0 (28 Oct 2026):** S-04 (order keys; a move writes one file; long keys re-spaced at push), O-01 (`REQ-`
   IDs, type editable), O-02 (7 characters, no pool), O-03 (calculated outline numbers everywhere, incl. exports).
   The sandbox was converted in its own repository.
+- **Done in 0.10.0 (28 Oct 2026):** O-04 (Keep / Unlink window after a save; Keep / Unlink in the editor), O-05 (split
+  difference with word marks, folded text, ↶ per field / text / link for uncommitted changes, stacked when narrow),
+  O-06 (one Changes view, uncommitted by default, side panel follows the view; no automatic pulls — "Pull first"
+  offers before the last-pull view and Push). Owner's extra request: draggable column widths.
 
 ## G. Order (confirmed 28 Oct 2026)
 

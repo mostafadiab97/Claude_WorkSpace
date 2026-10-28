@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { ItemDetails } from '../../../shared/api'
+import type { ItemDetails, LinkInfo } from '../../../shared/api'
 import type { FieldDef, FieldValue, Item, ItemIssue, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { typeName } from '../lib/schema'
 import { HistoryView } from './HistoryView'
 import { LinksSection } from './LinksSection'
 import { ParentPicker } from './ParentPicker'
+import { SuspectLinksDialog } from './SuspectLinksDialog'
 import { T } from '../../../shared/text'
 
 export type EditorTarget = { kind: 'item'; id: string } | { kind: 'draft'; item: Item }
@@ -40,6 +41,8 @@ export function ItemEditor(props: {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [tab, setTab] = useState<'details' | 'history'>('details')
   const [removeIncoming, setRemoveIncoming] = useState(true)
+  /** Links from other items to review after a save changed the type, title or text (O-04). */
+  const [review, setReview] = useState<LinkInfo[] | null>(null)
   const isNew = target.kind === 'draft'
 
   const load = useCallback(async () => {
@@ -104,6 +107,10 @@ export function ItemEditor(props: {
     try {
       const r = await window.reqman.saveItem(form, isNew ? null : (details?.revision ?? null))
       if (r.ok) {
+        const before = base
+        const saved = r.details.item
+        const content = before !== null && (before.title !== saved.title || before.text !== saved.text || before.type !== saved.type)
+        if (!isNew && content && r.details.incoming.length > 0) setReview(r.details.incoming)
         setDetails(r.details)
         setBase(r.details.item)
         setForm(r.details.item)
@@ -117,7 +124,7 @@ export function ItemEditor(props: {
     } catch (e) {
       setStatus({ kind: 'error', message: errorMessage(e) })
     }
-  }, [form, status.kind, isNew, details, props])
+  }, [form, status.kind, isNew, details, base, props])
 
   // Ctrl+S saves.
   useEffect(() => {
@@ -316,6 +323,26 @@ export function ItemEditor(props: {
           </div>
         )}
       </footer>
+      {review && (
+        <SuspectLinksDialog
+          schema={schema}
+          itemId={form.id}
+          incoming={review}
+          onOpen={props.onOpen}
+          onDone={(changed) => {
+            setReview(null)
+            if (!changed) return
+            void window.reqman.getItem(form.id).then((d) => {
+              if (d && !dirtyRef.current) {
+                setDetails(d)
+                setBase(d.item)
+                setForm(d.item)
+              }
+            })
+            props.onLinksChanged()
+          }}
+        />
+      )}
     </aside>
   )
 }

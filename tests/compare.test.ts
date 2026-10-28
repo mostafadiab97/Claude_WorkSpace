@@ -80,7 +80,10 @@ describe('compare two versions', { timeout: 120_000 }, () => {
 
     const r = await ws.compareVersions(v1, 'HEAD')
     const by = Object.fromEntries(r.entries.map((e) => [e.id, e]))
-    expect(Object.keys(by).sort()).toEqual([n1, s1, s2, s3, t1, 'SYS-BROKEN'].sort()) // the renamed risk has no visible change
+    expect(Object.keys(by).sort()).toEqual([n1, r1, s1, s2, s3, t1, 'SYS-BROKEN'].sort())
+    // a file renamed by hand is listed (0.10.0: the Changes view must be able to discard it), with both names
+    expect(by[r1]).toMatchObject({ kind: 'modified', summary: 'File name changed' })
+    expect(by[r1]!.paths).toHaveLength(2)
     expect(by[s1]).toMatchObject({ kind: 'modified', summary: 'Text, Status', contentChanged: true })
     expect(by[s1]!.diff.text).toEqual({ before: 'Within 0.5 °C.', after: 'Within 0.3 °C.' })
     expect(by[s2]).toMatchObject({ kind: 'moved', contentChanged: false })

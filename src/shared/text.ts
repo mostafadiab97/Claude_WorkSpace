@@ -189,7 +189,9 @@ export const T = {
     section: 'Links',
     title: (count: number) => (count > 0 ? `Links (${count})` : 'Links'),
     unknownType: (type: string) => `${type} (unknown link type)`,
-    confirmAll: (count: number) => `Confirm all ${count} suspect`,
+    keepAll: (count: number) => `Keep all ${count} suspect`,
+    unlinkAll: (count: number) => `Unlink all ${count} suspect`,
+    unlinkAllAsk: (count: number) => `Remove all ${count} suspect links?`,
     add: '+ Add link',
     linkType: 'Link type',
     thisItem: 'This item…',
@@ -204,11 +206,32 @@ export const T = {
     suspectInTooltip: (id: string) => `This item changed since ${id} linked to it — ${id} may need review`,
     changed: 'changed',
     thisChanged: 'this item changed',
-    confirm: 'Confirm',
+    keep: 'Keep',
+    unlink: 'Unlink',
     confirmTooltip: 'Reviewed — the link still holds',
+    unlinkTooltip: 'The link no longer holds — remove it',
     removeLabel: (relation: string, id: string) => `Remove link ${relation} ${id}`,
     removeInTooltip: (id: string) => `Remove (changes ${id}, where this link is stored)`,
     removeTooltip: 'Remove link'
+  },
+
+  suspect: {
+    title: 'Check the links to this item',
+    intro: (id: string, count: number) =>
+      `You changed ${id}. ${count === 1 ? '1 item links' : `${count} items link`} to it and may no longer fit. Keep the links that still hold, unlink the others — or decide later (they stay marked ⚠).`,
+    list: 'Links to this item',
+    choiceFor: (id: string) => `Keep or unlink the link from ${id}`,
+    keep: 'Keep',
+    unlink: 'Unlink',
+    keepTooltip: 'Still holds — confirm it against the new version',
+    unlinkTooltip: (id: string) => `Remove this link (changes ${id}, where it is stored)`,
+    keepAll: 'Keep all',
+    unlinkAll: 'Unlink all',
+    unlinkAllAsk: (count: number) => `Remove all ${count} link${s(count)}?`,
+    back: 'Back',
+    later: 'Decide later',
+    laterTooltip: 'Leave the links marked ⚠ — find them later with the "With suspect links" filter',
+    apply: (count: number) => (count > 0 ? `Apply my ${count} choice${s(count)}` : 'Apply my choices')
   },
 
   history: {
@@ -233,7 +256,14 @@ export const T = {
     empty: '(empty)',
     position: 'Position',
     oldPlace: 'earlier place',
-    newPlace: 'new place'
+    newPlace: 'new place',
+    fields: 'Fields',
+    links: 'Links',
+    linkAdded: 'added',
+    linkRemoved: 'removed',
+    unfold: (count: number) => `⋯ Show ${n(count)} unchanged line${s(count)}`,
+    revert: (what: string) => `Take back: ${what}`,
+    revertTooltip: (what: string) => `Take back this change (${what}) — it becomes as in the last commit`
   },
 
   editor: {
@@ -345,8 +375,11 @@ export const T = {
     busy: (what: string) => `${what}…`,
     pulling: 'Pulling',
     pushing: 'Pushing',
-    compare: 'Compare',
-    compareTooltip: 'Pulls first, then shows what changed per requirement and per link',
+    changesTooltip: 'What changed, per requirement: your uncommitted changes (commit them here), the last pull, any two versions',
+    pullFirstLabel: 'Pull first?',
+    pullFirstPush: 'Get what others pushed first? Pushing fails when GitHub has commits you do not have yet.',
+    pullThenPush: 'Pull first, then push',
+    pushWithoutPull: 'Push without pulling',
     changes: (count: number) => `Changes${count > 0 ? ` (${count})` : ''}`,
     pull: 'Pull',
     pullTooltip: 'Get the changes others pushed',
@@ -382,6 +415,24 @@ export const T = {
     undoLast: (message: string) => `Undo last commit “${message}”`
   },
 
+  changesView: {
+    label: 'Changes',
+    title: 'Changes',
+    show: 'Show',
+    uncommitted: (count: number) => `Uncommitted changes${count > 0 ? ` (${count})` : ''}`,
+    close: 'Close changes',
+    pullFirst: 'Pull first, so this also shows what others pushed since your last pull?',
+    pullFirstButton: 'Pull first',
+    withoutPull: 'Continue without pulling',
+    working: 'Working…',
+    discardItem: 'Discard this item’s changes',
+    commitLabel: 'Commit',
+    commitTitle: 'Commit',
+    compareLabel: 'Compared versions',
+    compareTitle: 'Compared versions',
+    compareSubtitle: 'Read-only · export the list for others'
+  },
+
   compare: {
     label: 'Compare',
     title: 'Compare',
@@ -414,7 +465,7 @@ export const T = {
     comparing: 'Comparing…',
     rangeFrom: 'From',
     rangeTo: 'to',
-    show: 'Show',
+    show: 'Show only these kinds of change',
     linksChip: (added: number, removed: number) => `Links +${added} −${removed}`,
     schemaChanged: 'Schema changed',
     filter: 'Filter by ID or title…',
@@ -445,7 +496,10 @@ export const T = {
     detailLabel: (id: string) => `Change ${id}`,
     closeChange: 'Close change',
     suspectWarning: (count: number) => `Type, title or text changed: links from ${count} item${s(count)} to it are now suspect and may need review.`,
-    openItem: 'Open the item'
+    openItem: 'Open the item',
+    workingLabel: 'Your working folder (everything saved on this PC)',
+    emptyLabel: 'Nothing (before the first commit)',
+    fileRenamed: 'File name changed'
   },
 
   workspace: {
@@ -554,6 +608,11 @@ export const T = {
     exportBusy: 'The file is open in another program (e.g. Excel). Close it there and export again.',
     exportTitle: 'Export',
     chooseRepo: 'Choose the Git repository folder',
-    selfTestRunning: 'A self-test is already running.'
+    selfTestRunning: 'A self-test is already running.',
+    decideFailed: (source: string, why: string, kept: number, unlinked: number) =>
+      `The links of ${source} could not be changed: ${why}${kept + unlinked > 0 ? ` (done before that: ${kept} kept, ${unlinked} unlinked)` : ''}`,
+    revertNew: (id: string) => `${id} is not in the last commit (it is new, or its file was renamed): use Discard to take back the whole item.`,
+    revertUnreadable: (id: string, why: string) => `The committed version of ${id} could not be read: ${why}`,
+    revertNothing: (id: string) => `Nothing to take back: this part of ${id} is already as in the last commit.`
   }
 }

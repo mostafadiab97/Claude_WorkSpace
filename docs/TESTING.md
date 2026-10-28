@@ -53,7 +53,21 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.9.0 (new data format)
+## Manual test checklist — v0.10.0 (Changes view)
+
+0.10.0 joins **Changes** and **Compare** into one **Changes** view with a GitHub-style side-by-side difference,
+asks about links when you change an item others link to, never pulls by itself, and lets you drag column widths.
+Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Start ReqMan (0.9.0). Wait for **Restart and update**, click it. | ⚙ → Environment → App shows **0.10.0**. |
+| 2 | **⚙ Settings & diagnostics → Run release self-test**. | **All steps passed**, now **18** ✓ (new: "Changes view: take back one part of a change"). If anything shows ✗: **Copy report**. |
+| 3 | Open the sandbox. Drag the right edge of the **No.** column header to the right, then double-click it. | The column gets wider while you drag and stays so (also after restarting ReqMan); double-click returns it to the automatic width. |
+| 4 | Open a requirement that others link to (Links column shows ←), change one word of its **Text** and a **Status**, **Save**. In the window that opens, press **Keep** on one row, **Apply my 1 choice**. Then click **Changes** in the Git bar. | The window lists the items linking to it. After applying, the kept link has no ⚠, the others still do. Changes opens on **Uncommitted changes** in the middle; below the list the item shows old (red, left) and new (green, right) with the changed word marked. Click **↶** next to Status: only Status goes back. Then **Discard this item's changes**. |
+| 5 | In Changes choose **Show → What the last pull brought in**. Answer **Pull first**. Later click **Push** in the Git bar. | ReqMan asks before pulling (no pull happens by itself). Push asks "Pull first, then push" / "Push without pulling" — choose **Pull first, then push**: both run (or say there is nothing to push). |
+
+## Previous checklist — v0.9.0 (new data format)
 
 0.9.0 changes how items are stored: every ID is now `REQ-` + 7 characters, the type can be changed, and the
 outline number (1, 1.2, 2.3.1 …) is calculated by ReqMan instead of typed into titles. The `Claude_SandBox`

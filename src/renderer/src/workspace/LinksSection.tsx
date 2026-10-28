@@ -46,7 +46,18 @@ export function LinksSection(props: {
     return (e.dir === 'out' ? 0 : 1000) + (k < 0 ? 999 : k)
   }
   entries.sort((a, b) => order(a) - order(b) || a.link.id.localeCompare(b.link.id))
-  const suspectOut = (details?.outgoing ?? []).filter((l) => l.suspect).length
+  const suspects = entries.filter((e) => e.link.suspect)
+  const [askUnlinkAll, setAskUnlinkAll] = useState(false)
+  // Keep = the link still holds (confirmed against the item as it is now); Unlink = remove it (O-04)
+  const decision = (e: Entry, keep: boolean) =>
+    e.dir === 'out' ? { source: itemId, type: e.link.type, target: e.link.id, keep } : { source: e.link.id, type: e.link.type, target: itemId, keep }
+  const decideAll = (keep: boolean): void => {
+    setAskUnlinkAll(false)
+    void run(async () => {
+      const r = await window.reqman.decideLinks(suspects.map((e) => decision(e, keep)))
+      return r.ok ? { ok: true } : r
+    })
+  }
 
   const run = async (op: () => Promise<{ ok: true } | { ok: false; message: string }>): Promise<void> => {
     setBusy(true)
@@ -69,8 +80,11 @@ export function LinksSection(props: {
   }
   const remove = (e: Entry): void =>
     void run(() => (e.dir === 'out' ? window.reqman.removeLink(itemId, e.link.type, e.link.id) : window.reqman.removeLink(e.link.id, e.link.type, itemId)))
-  const confirm = (e: Entry): void =>
-    void run(() => (e.dir === 'out' ? window.reqman.confirmLinks(itemId, e.link.id) : window.reqman.confirmLinks(e.link.id, itemId)))
+  const decide = (e: Entry, keep: boolean): void =>
+    void run(async () => {
+      const r = await window.reqman.decideLinks([decision(e, keep)])
+      return r.ok ? { ok: true } : r
+    })
 
   const locked = lockedReason !== null || busy
 
@@ -78,11 +92,27 @@ export function LinksSection(props: {
     <section className="links" aria-label={T.links.section}>
       <div className="links__head">
         <h3 className="links__title">{T.links.title(entries.length)}</h3>
-        {suspectOut > 1 && (
-          <button type="button" className="link-btn" disabled={locked} onClick={() => void run(() => window.reqman.confirmLinks(itemId))}>
-            {T.links.confirmAll(suspectOut)}
-          </button>
-        )}
+        {suspects.length > 1 &&
+          (askUnlinkAll ? (
+            <span className="actions">
+              <span className="muted-inline">{T.links.unlinkAllAsk(suspects.length)}</span>
+              <button type="button" className="btn btn--small btn--danger" disabled={locked} onClick={() => decideAll(false)}>
+                {T.links.unlinkAll(suspects.length)}
+              </button>
+              <button type="button" className="btn btn--small" onClick={() => setAskUnlinkAll(false)}>
+                {T.suspect.back}
+              </button>
+            </span>
+          ) : (
+            <span className="actions">
+              <button type="button" className="link-btn" disabled={locked} onClick={() => decideAll(true)} title={T.links.confirmTooltip}>
+                {T.links.keepAll(suspects.length)}
+              </button>
+              <button type="button" className="link-btn" disabled={locked} onClick={() => setAskUnlinkAll(true)}>
+                {T.links.unlinkAll(suspects.length)}
+              </button>
+            </span>
+          ))}
         {!adding && (
           <button type="button" className="btn btn--small" disabled={locked || schema.linkTypes.length === 0} onClick={() => setAdding(true)} title={lockedReason ?? undefined}>
             {T.links.add}
@@ -136,8 +166,11 @@ export function LinksSection(props: {
                     <span title={e.dir === 'out' ? T.links.suspectOutTooltip(e.link.id) : T.links.suspectInTooltip(e.link.id)}>
                       ⚠ {e.dir === 'out' ? T.links.changed : T.links.thisChanged}
                     </span>
-                    <button type="button" className="link-btn" disabled={locked} onClick={() => confirm(e)} title={T.links.confirmTooltip}>
-                      {T.links.confirm}
+                    <button type="button" className="link-btn" disabled={locked} onClick={() => decide(e, true)} title={T.links.confirmTooltip}>
+                      {T.links.keep}
+                    </button>
+                    <button type="button" className="link-btn" disabled={locked} onClick={() => decide(e, false)} title={T.links.unlinkTooltip}>
+                      {T.links.unlink}
                     </button>
                   </span>
                 )}

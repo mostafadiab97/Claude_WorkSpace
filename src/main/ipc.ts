@@ -173,6 +173,8 @@ export function registerIpc(services: Services, paths: Paths): void {
     addLink: (_e, source, type, target) => ws.addLink(v.str(source, 'source'), v.str(type, 'link type'), v.str(target, 'target')),
     removeLink: (_e, source, type, target) => ws.removeLink(v.str(source, 'source'), v.str(type, 'link type'), v.str(target, 'target')),
     confirmLinks: (_e, source, target) => ws.confirmLinks(v.str(source, 'source'), v.optStr(target, 'target')),
+    decideLinks: (_e, decisions) => ws.decideLinks(v.linkDecisions(decisions)),
+    revertChange: (_e, id, part) => ws.revertChange(v.str(id, 'ID'), v.revertPart(part)),
     fixFileName: (_e, id) => ws.fixFileName(v.str(id, 'ID')),
 
     // ---------- Git, Compare

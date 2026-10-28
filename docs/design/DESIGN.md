@@ -628,7 +628,7 @@ The prototype is built in seven milestones, each ending with a Windows build you
 | M5 Compare | Pick two commits/branches/tags; per-item and per-link difference view | Journey step 6 works |
 | M6 Export and hardening | CSV export; end-to-end tests of the whole journey; bug fixes from your trials | The full 8-step journey passes on two Windows PCs; success measures met |
 
-**Progress:** M0–M6 are complete (v0.7.0) — the prototype scope FR-01 to FR-10 is built; 0.8.0 (review fixes) and 0.9.0 (new data format) are released. The current version and next step are kept in `CLAUDE.md` ("Status") and `CHANGELOG.md` only (review T-04); the plan for the next versions is "Release plan" below.
+**Progress:** M0–M6 are complete (v0.7.0) — the prototype scope FR-01 to FR-10 is built; 0.8.0 (review fixes), 0.9.0 (new data format) and 0.10.0 (Changes view) are released. The current version and next step are kept in `CLAUDE.md` ("Status") and `CHANGELOG.md` only (review T-04); the plan for the next versions is "Release plan" below.
 
 **How we work:** I write the code, tests and architecture notes in a Git repository; after each milestone you install the build, try it and comment here or in chat. Specs and decisions stay in this document and the repo, so work continues across sessions.
 

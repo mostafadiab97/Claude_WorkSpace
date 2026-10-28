@@ -3,6 +3,29 @@
 Each version was installed and tried by the product owner on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.10.0 — 28 Oct 2026 — Changes view
+- **One Changes view** (O-06) instead of the Changes panel and Compare: the Git bar has Changes / Pull / Push.
+  It opens in the middle on **Uncommitted changes** (also before the very first commit); **Show** switches to what
+  the last pull brought in, the last commit or any two versions. The changed items are listed on top, the selected
+  item's difference below; the side panel has the commit tools (uncommitted) or the export (comparisons).
+- **GitHub-style difference** (O-05): Fields, Text and Links blocks, old on the left in red, new on the right in
+  green, the changed words marked, long unchanged parts of the text folded ("⋯ Show 12 unchanged lines"); in a
+  narrow column old sits above new. Also used by the History tab.
+- **Take back one part** of an uncommitted change with **↶** — a field, the position, the text or one link becomes
+  as in the last commit, the rest stays — or **Discard this item's changes**. A file renamed by hand is listed
+  ("File name changed") and can be discarded too.
+- **Check the links** (O-04): saving a changed type, title or text of an item others link to opens a window — Keep
+  or Unlink per link, Keep all, Unlink all (asks once more), Apply my choices, Decide later (leaves the ⚠ marks).
+  Suspect links in the editor have Keep / Unlink and Keep all / Unlink all. Pulled changes only mark links ⚠.
+- **No automatic pulls** (O-06, replaces "Compare pulls first"): "What the last pull brought in" and Push *offer*
+  to pull first.
+- **Column widths** (owner's request on 0.9.0): drag the edge of a column header; double-click = automatic;
+  remembered per repository on this PC. The No. column starts wider.
+- Docs: `docs/diagrams/index.html` navigates all diagrams; skills (`release-to-owner`, `whole-project-review`,
+  `owner-decision-walkthrough`) and `tools/README.md` are in the repository.
+- Release self-test: 18 steps (take back one part of a change; keep a suspect link). Library added: `diff`
+  (jsdiff, BSD-3-Clause) for line and word comparison. 154 unit tests.
+
 ## 0.9.0 — 28 Oct 2026 — New data format
 - **Owner (28 Oct 2026):** all 5 checklist steps passed; release self-test 17/17 in 26.7 s; the Compare + Changes
   bug is fixed. New request: the No. column cuts deep numbers ("2.1.1....") → column widths can be dragged

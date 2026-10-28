@@ -7,7 +7,7 @@ import { columnTemplate, columnsFor, shownColumnKeys, tableMinWidth, withWidth }
 import { dropMove, dropZone } from '../../src/renderer/src/workspace/table/drag'
 import { treeRows, type Level, type Row } from '../../src/renderer/src/workspace/table/rows'
 import { buildQuery, nextSort } from '../../src/renderer/src/workspace/screen/useFilters'
-import { defaultPreset, describeSchema, rangeOf } from '../../src/renderer/src/workspace/compareRange'
+import { describeSchema, rangeOf } from '../../src/renderer/src/workspace/compareRange'
 import { problemsOf } from '../../src/renderer/src/workspace/screen/problemList'
 
 const it_ = (id: string, parent?: string, childCount = 0, order?: string): IndexedItem => ({
@@ -116,11 +116,9 @@ describe('table filters and sorting (screen/useFilters.ts)', () => {
 describe('Compare default range (compareRange.ts)', () => {
   const base: CompareOptions = { lastPull: null, hasUncommitted: false, commits: [], refs: [], head: null }
   const c = (hash: string) => ({ hash, author: '', email: '', date: '', message: '' })
-  it('prefers the last pull, then uncommitted changes, then the last commit', () => {
-    expect(defaultPreset({ ...base, lastPull: { from: 'a', to: 'b', date: '' } })).toBe('lastPull')
-    expect(defaultPreset({ ...base, hasUncommitted: true, head: 'h' })).toBe('uncommitted')
-    expect(defaultPreset({ ...base, commits: [c('2'), c('1')] })).toBe('lastCommit')
-    expect(defaultPreset(base)).toBe('custom')
+  it('uncommitted changes are always possible, before the first commit too (O-06)', () => {
+    expect(rangeOf('uncommitted', base, { from: '', to: '' })).toEqual({ from: 'EMPTY', to: 'WORKING' })
+    expect(rangeOf('lastPull', base, { from: '', to: '' })).toBeNull()
   })
   it('turns a preset into two versions', () => {
     const o = { ...base, head: 'h', commits: [c('2'), c('1')] }

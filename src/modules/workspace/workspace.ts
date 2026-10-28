@@ -18,6 +18,7 @@ import { createItemOps } from './itemOps'
 import { createLinkOps } from './links'
 import { createSerialQueue } from './queue'
 import { createRecentList } from './recent'
+import { createRevertOps } from './revert'
 import { createSchemaFieldOps } from './schemaFields'
 import { compareOutline, createStructureOps, outlineNumbers, planTidy } from './structure'
 import { watchRequirementsFolder } from './watcher'
@@ -98,6 +99,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   const items = createItemOps(ctx, links, structure)
   const fields = createSchemaFieldOps(ctx, () => info())
   const compare = createCompare(git)
+  const revert = createRevertOps(ctx, git, items.saveItem)
   const exporting = createExportOps(ctx, structure, compare)
   const gitOps = createGitOps({
     git,
@@ -232,6 +234,8 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     addLink: q(links.addLink),
     removeLink: q(links.removeLink),
     confirmLinks: q(links.confirmLinks),
+    decideLinks: q(links.decideLinks),
+    revertChange: q(revert.revertChange),
 
     gitState: q(() => gitOps.state(need())),
     commit: q((message: string) => gitOps.commit(need(), message)),

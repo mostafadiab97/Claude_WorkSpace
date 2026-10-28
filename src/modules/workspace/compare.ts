@@ -10,8 +10,12 @@ import { contentFingerprint, diffItems, parseItemFile } from '../items'
 import { parseSchema } from '../schema'
 import { outlineNumbers } from './structure'
 import type { RequirementsRepo } from '../repository-store'
+import { T } from '../../shared/text'
 
 export const WORKING = 'WORKING'
+/** "Before the first commit": Git's empty tree, so uncommitted changes can be listed before anything is committed. */
+export const EMPTY = 'EMPTY'
+const EMPTY_TREE = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
 
 interface Session {
   repo: RequirementsRepo
@@ -62,7 +66,8 @@ function schemaChange(before: Schema | null, after: Schema | null): SchemaChange
 export function createCompare(git: GitAdapter) {
   const numbersAt = (s: Session, ref: string): Promise<Map<string, string>> => numbersFromTree(git, s, ref)
   async function label(s: Session, ref: string): Promise<VersionLabel> {
-    if (ref === WORKING) return { ref, label: 'Your working folder (everything saved on this PC)' }
+    if (ref === WORKING) return { ref, label: T.compare.workingLabel }
+    if (ref === EMPTY_TREE) return { ref: EMPTY, label: T.compare.emptyLabel }
     const c = await git.commitInfo(s.repo.root, ref)
     if (!c) return { ref, label: ref.slice(0, 7) }
     return { ref, label: `${ref.slice(0, 7)} ${c.message} (${c.author}, ${c.date.slice(0, 16).replace('T', ' ')})` }
@@ -95,7 +100,7 @@ export function createCompare(git: GitAdapter) {
       const started = performance.now()
       const root = s.repo.root
       const base = reqPath(s.repo)
-      const from = await git.resolve(root, fromRef)
+      const from = fromRef === EMPTY ? EMPTY_TREE : await git.resolve(root, fromRef)
       if (!from) throw new Error(`"${fromRef}" is not a commit, branch or tag of this repository.`)
       const toWorking = toRef === WORKING
       const to = toWorking ? null : await git.resolve(root, toRef)
@@ -117,7 +122,7 @@ export function createCompare(git: GitAdapter) {
         return r.ok ? { item: r.item } : { item: null, error: r.error }
       }
       // Pair versions by item ID (a file renamed by hand keeps its ID)
-      const pairs = new Map<string, { before: Side; after: Side; path: string }>()
+      const pairs = new Map<string, { before: Side; after: Side; paths: Set<string> }>()
       const otherFiles: string[] = []
       let schema: SchemaChange | null = null
       for (const c of changes) {
@@ -142,7 +147,8 @@ export function createCompare(git: GitAdapter) {
           // the same item deleted in one file and added in another
           if (!known.before.item && before.item) known.before = before
           if (!known.after.item && after.item) known.after = after
-        } else pairs.set(id, { before, after, path: c.path })
+          known.paths.add(oldPath).add(c.path)
+        } else pairs.set(id, { before, after, paths: new Set([oldPath, c.path]) })
       }
 
       // An item converted to a new ID keeps its old one as `former-id` (0.9.0 sandbox conversion, later imports):
@@ -152,6 +158,7 @@ export function createCompare(git: GitAdapter) {
         const old = typeof former === 'string' ? pairs.get(former) : undefined
         if (old && old.before.item && !old.after.item) {
           p.before = old.before
+          for (const x of old.paths) p.paths.add(x)
           pairs.delete(former as string)
           pairs.set(id, p)
         }
@@ -166,8 +173,10 @@ export function createCompare(git: GitAdapter) {
         const diff = diffItems(p.before.item, p.after.item, s.repo.schema)
         const unreadable = p.before.error ?? p.after.error
         const nothing = diff.rows.length === 0 && !diff.text && diff.linksAdded.length === 0 && diff.linksRemoved.length === 0
-        if (nothing && !unreadable) continue // e.g. only a link re-confirmed, or line endings
-        const onlyPosition = diff.kind === 'modified' && !diff.text && diff.linksAdded.length + diff.linksRemoved.length === 0 && diff.rows.every((r) => r.key === 'parent' || r.key === 'order')
+        // a file renamed with nothing else changed is still a change of the folder (and can be discarded)
+        const renamedOnly = nothing && !unreadable && p.paths.size > 1 && p.before.item?.id === p.after.item?.id
+        if (nothing && !unreadable && !renamedOnly) continue // e.g. only a link re-confirmed, or line endings
+        const onlyPosition = diff.kind === 'modified' && diff.rows.length > 0 && !diff.text && diff.linksAdded.length + diff.linksRemoved.length === 0 && diff.rows.every((r) => r.key === 'parent' || r.key === 'order')
         const b = p.before.item
         const a = p.after.item
         const shown = a ?? b
@@ -176,10 +185,11 @@ export function createCompare(git: GitAdapter) {
           title: shown?.title ?? '',
           type: shown?.type ?? '',
           kind: diff.kind === 'unchanged' ? 'modified' : onlyPosition ? 'moved' : diff.kind,
-          summary: unreadable && nothing ? 'Could not be read' : diff.kind === 'added' ? 'New item' : diff.kind === 'deleted' ? 'Deleted' : summarize(diff),
+          summary: renamedOnly ? T.compare.fileRenamed : unreadable && nothing ? 'Could not be read' : diff.kind === 'added' ? 'New item' : diff.kind === 'deleted' ? 'Deleted' : summarize(diff),
           diff,
           contentChanged: !b || !a || contentFingerprint(b) !== contentFingerprint(a),
           incoming: s.index.get(id)?.incomingCount ?? 0,
+          paths: [...p.paths],
           ...(unreadable ? { unreadable } : {})
         })
         for (const l of diff.linksAdded) links.push({ source: id, type: l.type, target: l.target, change: 'added' })
@@ -191,7 +201,7 @@ export function createCompare(git: GitAdapter) {
       if (entries.length > 0) {
         const after = toWorking ? outlineNumbers(s.index.structure()) : await numbersAt(s, to as string)
         const structural = entries.some((e) => e.kind !== 'modified' || e.diff.rows.some((r) => r.key === 'parent' || r.key === 'order'))
-        const before = structural ? await numbersAt(s, from) : after
+        const before = from === EMPTY_TREE ? new Map<string, string>() : structural ? await numbersAt(s, from) : after
         for (const e of entries) {
           const nb = e.kind === 'added' ? undefined : before.get(beforeId.get(e.id) ?? e.id)
           const na = e.kind === 'deleted' ? undefined : after.get(e.id)

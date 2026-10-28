@@ -1,17 +1,12 @@
-// Which two versions Compare shows (pure, unit-tested — review T-02).
+// Which two versions the Changes view shows (pure, unit-tested — review T-02).
 import type { CompareOptions, CompareResult } from '../../../shared/api'
 import { T } from '../../../shared/text'
 
 export const WORKING = 'WORKING'
-export type Preset = 'lastPull' | 'uncommitted' | 'lastCommit' | 'custom'
-
-/** The default comparison: what the last pull brought in; otherwise uncommitted changes; otherwise the last commit. */
-export function defaultPreset(o: CompareOptions): Preset {
-  if (o.lastPull) return 'lastPull'
-  if (o.hasUncommitted && o.head) return 'uncommitted'
-  if (o.commits.length >= 2) return 'lastCommit'
-  return 'custom'
-}
+/** "Before the first commit" (the core compares with Git's empty tree). */
+export const EMPTY = 'EMPTY'
+/** What the Changes view shows; it opens on uncommitted changes (owner's decision O-06). */
+export type Preset = 'uncommitted' | 'lastPull' | 'lastCommit' | 'custom'
 
 /** The two versions of a preset; null when the preset is not possible (yet). */
 export function rangeOf(preset: Preset, o: CompareOptions, custom: { from: string; to: string }): { from: string; to: string } | null {
@@ -19,7 +14,7 @@ export function rangeOf(preset: Preset, o: CompareOptions, custom: { from: strin
     case 'lastPull':
       return o.lastPull ? { from: o.lastPull.from, to: o.lastPull.to } : null
     case 'uncommitted':
-      return o.head ? { from: o.head, to: WORKING } : null
+      return { from: o.head ?? EMPTY, to: WORKING }
     case 'lastCommit':
       return o.commits[1] && o.commits[0] ? { from: o.commits[1].hash, to: o.commits[0].hash } : null
     default:

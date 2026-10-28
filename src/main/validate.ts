@@ -1,7 +1,7 @@
 // Input checks for every call that arrives from the window (review X-01). The window is ReqMan's own code, so
 // this is about robustness: a wrong value is refused with a clear message instead of reaching a file write.
 // Each function either returns a clean value of the expected type or throws.
-import type { ExportItemsRequest, FieldDef, Item, ItemQuery, Link, SortKey } from '../shared/api'
+import type { ExportItemsRequest, FieldDef, Item, ItemQuery, Link, LinkDecision, RevertPart, SortKey } from '../shared/api'
 
 const MAX = 4096
 /** Order keys (see modules/items/orderKey.ts): base-62 digits, at most 200 characters. */
@@ -48,6 +48,22 @@ export function num(v: unknown, what: string, min: number, max: number): number 
   const n = typeof v === 'number' ? v : Number.NaN
   if (!Number.isFinite(n) || n < min || n > max) return bad(what)
   return Math.round(n)
+}
+
+export function linkDecisions(v: unknown): LinkDecision[] {
+  if (!Array.isArray(v) || v.length > 100_000) return bad('link decisions')
+  return v.map((d: unknown) => {
+    if (!isObj(d) || typeof d.keep !== 'boolean') return bad('link decision')
+    return { source: str(d.source, 'source'), type: str(d.type, 'link type'), target: str(d.target, 'target'), keep: d.keep }
+  })
+}
+
+export function revertPart(v: unknown): RevertPart {
+  if (!isObj(v)) return bad('part to take back')
+  if (v.kind === 'text') return { kind: 'text' }
+  if (v.kind === 'row') return { kind: 'row', key: str(v.key, 'field') }
+  if (v.kind === 'link') return { kind: 'link', type: str(v.type, 'link type'), target: str(v.target, 'target') }
+  return bad('part to take back')
 }
 
 function fieldValue(v: unknown): Item['fields'][string] {

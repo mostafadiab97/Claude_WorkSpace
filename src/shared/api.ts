@@ -205,6 +205,22 @@ export interface CompareEntry {
   numberAfter?: string
   /** A version that exists but could not be read. */
   unreadable?: string
+  /** The item's files in the two versions (one, or two when the file was renamed), repository-relative. */
+  paths: string[]
+}
+
+/**
+ * One part of an uncommitted change to take back (the ↶ arrows of the Changes view, O-05): a field row
+ * (`DiffRow.key`: title, type, parent / order = the position, field:…, extra:…), the text, or one link.
+ */
+export type RevertPart = { kind: 'row'; key: string } | { kind: 'text' } | { kind: 'link'; type: string; target: string }
+
+/** Keep (confirm against the target as it is now) or unlink one link (O-04). */
+export interface LinkDecision {
+  source: string
+  type: string
+  target: string
+  keep: boolean
 }
 
 export interface LinkChange {
@@ -336,6 +352,10 @@ export interface ReqManApi {
   removeLink(source: string, type: string, target: string): Promise<{ ok: true } | { ok: false; message: string }>
   /** Marks suspect links of `source` as reviewed (all of them, or only the one to `target`). */
   confirmLinks(source: string, target?: string): Promise<{ ok: true } | { ok: false; message: string }>
+  /** Keeps (confirms) or removes each of these links; one file write per source item (O-04). */
+  decideLinks(decisions: LinkDecision[]): Promise<{ ok: true; kept: number; unlinked: number } | { ok: false; message: string }>
+  /** Takes back one part of an item's uncommitted change: that part becomes as in the last commit (O-05). */
+  revertChange(id: string, part: RevertPart): Promise<{ ok: true } | { ok: false; message: string }>
   /** Renames the file holding `id` to <ID>.md when its name does not match (a repository problem). */
   fixFileName(id: string): Promise<{ ok: true } | { ok: false; message: string }>
   /** Before saving field definitions: how many items have values the changed definitions do not allow. */
@@ -436,6 +456,8 @@ export const Channels = {
   addLink: 'ws:addLink',
   removeLink: 'ws:removeLink',
   confirmLinks: 'ws:confirmLinks',
+  decideLinks: 'ws:decideLinks',
+  revertChange: 'ws:revertChange',
   fixFileName: 'ws:fixFileName',
   checkFields: 'ws:checkFields',
   getGitState: 'git:state',

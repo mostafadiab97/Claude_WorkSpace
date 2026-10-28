@@ -115,7 +115,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.9.0, 28 Oct 2026) — prototype complete, review fixed, new data format
+## Status (v0.10.0, 28 Oct 2026) — prototype complete, new data format, Changes view
 
 | Milestone | State |
 | --- | --- |
@@ -128,17 +128,19 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | M6 Export and hardening — table and Compare export to CSV (comma, UTF-8 BOM) and Markdown; error boundary; old-Git warning; CI smoke test with 10k generated items; combined checklist + two-PC trial script | Done (v0.7.0) |
 | 0.8.0 clean page — all review fixes (D-01–D-08, D-10, P-01/02/04/05, S-01/02/03/06, X-01, T-01–05), release self-test, 5-step checklist | Done (v0.8.0) |
 | 0.9.0 new data format — `REQ-` + 7 chars, type editable, order keys (S-04), outline numbers, sandbox converted | Done (v0.9.0) |
-| **0.10.0 Changes view (O-04/O-05/O-06)** | **Next** |
-| 0.11.0 M7 Excel (+ chosen-items export) · 0.12.0 M8 branches · 0.13.0 ReqIF | Planned (DESIGN.md → "Release plan") |
+| 0.10.0 Changes view — one view for uncommitted + compare, split difference with ↶ per part, Keep/Unlink window, no automatic pulls, column widths | Done (v0.10.0) |
+| **0.11.0 M7 Excel (+ chosen-items export)** | **Next** |
+| 0.12.0 M8 branches · 0.13.0 ReqIF | Planned (DESIGN.md → "Release plan") |
 
 Owner's last report (28 Oct 2026): 0.9.0 all 5 checklist steps passed, self-test 17/17 (26.7 s); Compare + Changes
 bug confirmed fixed. Asked for resizable columns (No. was cut off), a diagram navigator, skills in the repo —
 all done for 0.10.0. Two-PC trial postponed.
 
-Automated tests: 145 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
+Automated tests: 154 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
 repository and two clones ("PC A", "PC B"), the release self-test itself, the sandbox's chapter-9 promises
 (`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `journey` (~75 checks, the
-whole user story) and `fixes` (renamed file, lazy Expand all, second start, release self-test in the window).
+whole user story, incl. the Changes view, ↶, Keep/Unlink window, push offer) and `fixes` (renamed file, lazy Expand all,
+column width drag, Changes view layout + split difference, second start, release self-test in the window).
 0.8.0 measurements (10k scenario repo, Linux): refresh after a save 0.37 → 0.09 s; Expand all first screen 0.26 s.
 Compare on the sandbox: 9,118 changed files (confirmations only) 0.4 s; 3,000 real edits 1.8 s (engine).
 Export of all 10,005 sandbox items: CSV 0.46 s (3.1 MB), Markdown 0.43 s. CI runs `measure:ui` on a generated 10k repo.
@@ -161,7 +163,7 @@ scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 5
 - Default comparison = "since my last pull" = what the last pull brought in (HEAD before → after the newest
   `pull…`/`merge <remote>/<branch>…` step in the reflog; pulls outside ReqMan count too).
 - ~~ReqMan pulls right before any comparison~~ — **replaced 27 Oct 2026 (O-06): no automatic pulls; ReqMan offers to
-  pull before remote-related actions.** Still built the old way until the next release implements O-06.
+  pull before remote-related actions.** Built in 0.10.0 (last-pull view and Push offer "Pull first").
 - Exporting the comparison list → M6.
 - Implementation: `src/modules/workspace/compare.ts`; `git diff --raw -z -M` gives blob IDs; contents come from
   `readBlobs()` (one `git cat-file --batch`). Naming objects `<rev>:<path>` instead was 40× slower with 10k files in
@@ -178,13 +180,11 @@ The owner's tests of 0.5.0–0.7.0 all passed (27 Oct). His requests O-01–O-07
 sandbox converted) → 0.10.0 Changes view (O-04/O-05/O-06) → 0.11.0 M7 Excel (+ export of chosen items) → 0.12.0 M8
 branches → 0.13.0 ReqIF.
 
-**0.9.0 released (28 Oct 2026)** — waiting for the owner's 5-step checklist (`docs/TESTING.md`). The converted
-sandbox (`tools/convert-sandbox-0.9.mts`, two commits: renames, then contents) was pushed right after the release
-(order matters: a sandbox in the new format needs ReqMan 0.9.0). **Next: 0.10.0 Changes view**
-(review H, O-04/O-05/O-06; DESIGN.md "Release plan"): one Changes view instead of Changes panel + Compare, opening
-on "Uncommitted changes"; no automatic pulls — offer "Pull first" before remote-related actions; GitHub-style split
-difference (Fields, Text, Links blocks; old red left, new green right, changed words highlighted; revert arrows for
-uncommitted changes); a Keep/Unlink window for suspect links when a linked item's type, title or text is saved.
+**0.10.0 released (28 Oct 2026)** — waiting for the owner's 5-step checklist (`docs/TESTING.md`). **Next: 0.11.0 M7
+Excel** (see "M7 notes" below, DESIGN.md "Release plan", review H O-07): Excel export (ExcelJS) and the import wizard,
+"New project from a file", "Update the Excel file", "Publish to GitHub", and **export of chosen items**
+(Ctrl/Shift multi-select, right-click "Export this item and everything below it", "Include the items below").
+Before building, check ExcelJS's size/licence and walk the owner through open M7 questions (owner-decision-walkthrough).
 The owner is a C developer new to this field: explain from first principles, short, C analogies where useful.
 Record decisions in the review file / DESIGN.md.
 
@@ -243,8 +243,12 @@ Everything else must be automated (unit tests, e2e in CI, the in-app release sel
   README, tell the owner to `git pull` / `git reset --hard origin/main` there.
 - Release via tag push is not used; the version change in `package.json` triggers the release.
 - `electron-builder --publish always` failed in CI before; publishing uses `gh release create` instead.
-- The Changes panel replaces the editor column but the editor stays **mounted** (hidden) so unsaved edits survive;
-  opening any item closes the panel. In e2e, open the panel only if it is not visible (the button toggles).
+- The Changes view (0.10.0) replaces the table and the editor column, but both stay **mounted** (hidden) so unsaved
+  edits and the tree's open levels survive; opening any item closes the view. In e2e, open it only if it is not
+  visible (the button toggles) — see `openChanges()` in the journey.
+- E2E `save()` closes the "Check the links to this item" window (Decide later) when a save opens it; pass
+  `{ review: 'check' }` where the window itself is tested. `getByLabel('Show')` also matched the chip group
+  ("Show only…") — use `{ exact: true }`.
 - Real-Git tests are slow on the Windows runner (antivirus): give those `describe` blocks a long timeout. The runner
   has `core.autocrlf=true`, so files Git checks out may have CRLF — compare with line endings normalised (item files
   in real repositories are protected by `requirements/.gitattributes`).

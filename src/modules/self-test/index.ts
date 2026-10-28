@@ -139,13 +139,13 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       expect(before === '1.1' && kids.map((k) => k.number).join(',') === '1.1,1.2', `Outline numbers did not follow the move (${kids.map((k) => k.number).join(', ')}).`)
     })
 
-    await step('Link, suspect link, confirm', async () => {
+    await step('Link, suspect link, keep or unlink', async () => {
       const r = await W().addLink(id('test'), 'verifies', id('req'))
       expect(r.ok, r.ok ? '' : r.message)
       await edit('req', (it) => (it.text += ' Measured every second.'))
       expect(W().query({ links: 'suspect' }).total === 1, 'The link did not become suspect after the text changed.')
-      const c = await W().confirmLinks(id('test'))
-      expect(c.ok && W().query({ links: 'suspect' }).total === 0, 'Confirming the link did not clear the suspect mark.')
+      const c = await W().decideLinks([{ source: id('test'), type: 'verifies', target: id('req'), keep: true }])
+      expect(c.ok && c.kept === 1 && W().query({ links: 'suspect' }).total === 0, 'Keeping the link did not clear the suspect mark.')
     })
 
     await step('Commit and push to the fake GitHub', async () => {
@@ -197,6 +197,25 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       const r = await W().compareVersions(o.lastPull.from, o.lastPull.to)
       expect(r.entries.some((e) => e.id === id('req') && e.kind === 'modified'), 'Compare does not show the colleague\'s change.')
       return `${r.durationMs} ms`
+    })
+
+    await step('Changes view: take back one part of a change', async () => {
+      await edit('req', (it) => {
+        it.title = 'Temperature accuracy (try)'
+        it.text += ' Extra sentence.'
+      })
+      const head = (await W().compareOptions()).head ?? ''
+      const before = await W().compareVersions(head, 'WORKING')
+      const e = before.entries.find((x) => x.id === id('req'))
+      expect(e && e.diff.rows.some((r) => r.key === 'title') && e.diff.text, 'The uncommitted change is not listed with its title and text.')
+      const t = await W().revertChange(id('req'), { kind: 'row', key: 'title' })
+      expect(t.ok, t.ok ? '' : t.message)
+      const it = await W().getItem(id('req'))
+      expect(it?.item.title === 'Temperature accuracy (colleague)' && it.item.text.endsWith('Extra sentence.'), 'Taking back the title changed more than the title.')
+      const x = await W().revertChange(id('req'), { kind: 'text' })
+      expect(x.ok, x.ok ? '' : x.message)
+      const after = await W().compareVersions(head, 'WORKING')
+      expect(!after.entries.some((y) => y.id === id('req')), 'After taking back both parts the item is still listed as changed.')
     })
 
     await step('History of an item', async () => {

@@ -17,7 +17,9 @@ import type {
   Item,
   ItemDetails,
   ItemQuery,
+  LinkDecision,
   QueryResult,
+  RevertPart,
   RecentRepository,
   RepoInfo,
   SaveResult
@@ -48,6 +50,8 @@ export interface WorkspaceService {
   addLink(source: string, type: string, target: string): Promise<OpResult>
   removeLink(source: string, type: string, target: string): Promise<OpResult>
   confirmLinks(source: string, target?: string): Promise<OpResult>
+  decideLinks(decisions: LinkDecision[]): Promise<{ ok: true; kept: number; unlinked: number } | { ok: false; message: string }>
+  revertChange(id: string, part: RevertPart): Promise<OpResult>
   /** Renames a file whose name does not match the ID inside it to <ID>.md. */
   fixFileName(id: string): Promise<OpResult>
   /** Before saving field definitions: items whose values the changed definitions would not allow. */

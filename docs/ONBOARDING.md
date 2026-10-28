@@ -42,7 +42,7 @@ The architecture picture in section 1 shows these parts and how calls travel bet
 
 | Part | Role in one sentence | Main files | Used by |
 | --- | --- | --- | --- |
-| **Renderer** (`src/renderer/src`) | Everything on screen: start screen, tree table, editor, links, Git bar, Changes, Compare, History, Fields, Export | `app/App.tsx`, `screens/WorkspaceScreen.tsx`, `workspace/*.tsx`, `styles.css` | the user |
+| **Renderer** (`src/renderer/src`) | Everything on screen: start screen, tree table, editor, links, Git bar, Changes view, History, Fields, Export | `app/App.tsx`, `screens/WorkspaceScreen.tsx`, `workspace/*.tsx`, `styles.css` | the user |
 | **Preload** (`src/preload/index.ts`) | The bridge: exposes `window.reqman`, turning each call into an IPC message | one file | renderer |
 | **Contract** (`src/shared/api.ts`, `domain.ts`) | The types both sides agree on: every call, every data shape, every channel name | two files | everyone |
 | **main/ipc.ts** | Receives calls, checks inputs, shows native dialogs (open folder, save file), forwards to modules | one file | preload |

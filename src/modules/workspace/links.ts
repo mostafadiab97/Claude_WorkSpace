@@ -1,5 +1,6 @@
 // Links between items: always stored in the source item's file, each with the target's fingerprint at the
 // time it was confirmed (a later change of the target makes the link "suspect").
+import type { LinkDecision } from '../../shared/api'
 import type { Link } from '../../shared/domain'
 import type { OpResult, Session, WorkspaceContext } from './context'
 import { T } from '../../shared/text'
@@ -45,6 +46,39 @@ export function createLinkOps(ctx: WorkspaceContext) {
         if (kept.length === links.length) throw new Error(T.wsMsg.noSuchLink(source, type, target))
         return kept
       }),
+
+    /**
+     * The user's answer for suspect links (O-04): keep = confirm against the target as it is now, or unlink.
+     * One write per source item; stops at the first item that cannot be written (the rest stay as they were).
+     */
+    async decideLinks(decisions: LinkDecision[]): Promise<{ ok: true; kept: number; unlinked: number } | { ok: false; message: string }> {
+      const s = ctx.need()
+      const bySource = new Map<string, LinkDecision[]>()
+      for (const d of decisions) bySource.set(d.source, [...(bySource.get(d.source) ?? []), d])
+      let kept = 0
+      let unlinked = 0
+      for (const [source, list] of bySource) {
+        let k = 0
+        let u = 0
+        const r = await editLinks(s, source, (links) =>
+          links.flatMap((l) => {
+            const d = list.find((x) => x.type === l.type && x.target === l.target)
+            if (!d) return [l]
+            if (!d.keep) {
+              u++
+              return []
+            }
+            k++
+            const fp = s.index.fingerprint(l.target)
+            return [fp === undefined ? l : { ...l, confirmed: fp }]
+          })
+        )
+        if (!r.ok) return { ok: false, message: T.wsMsg.decideFailed(source, r.message, kept, unlinked) }
+        kept += k
+        unlinked += u
+      }
+      return { ok: true, kept, unlinked }
+    },
 
     confirmLinks(source: string, target?: string): Promise<OpResult> {
       const s = ctx.need()

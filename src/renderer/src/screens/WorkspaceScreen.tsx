@@ -1,21 +1,23 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { CompareEntry, RepoInfo } from '../../../shared/api'
+import type { CompareEntry, RepoInfo, RevertPart } from '../../../shared/api'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
 import { ItemEditor, type EditorTarget } from '../workspace/ItemEditor'
 import { FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
-import { CompareDetail, CompareView } from '../workspace/CompareView'
-import { ChangesPanel, GitBar } from '../workspace/GitPanels'
+import { ChangesSide, ChangesView } from '../workspace/ChangesView'
+import { GitBar } from '../workspace/GitPanels'
 import { ExportDialog } from '../workspace/ExportDialog'
 import { ItemTable, shownColumnKeys, withWidth, type TreeControls } from '../workspace/ItemTable'
 import { ProblemList, problemsOf } from '../workspace/screen/Problems'
 import { Toolbar } from '../workspace/screen/Toolbar'
 import { useFilters } from '../workspace/screen/useFilters'
+import { useChanges } from '../workspace/screen/useChanges'
 import { useGit } from '../workspace/screen/useGit'
 
 /**
  * The open repository: the item table (document hierarchy, or a flat list while searching/filtering)
- * and the editor on the right. State is grouped by area: filters (useFilters), Git (useGit), Compare, editor.
+ * and the editor on the right. State is grouped by area: filters (useFilters), Git (useGit), the Changes view
+ * (useChanges), editor.
  */
 export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: RepoInfo) => void }) {
   const schema = info.schema
@@ -30,8 +32,6 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   const [showChanges, setShowChanges] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
   const [exported, setExported] = useState<{ path: string; count: number } | null>(null)
-  const [compareOpen, setCompareOpen] = useState(false)
-  const [compareEntry, setCompareEntry] = useState<CompareEntry | null>(null)
   const [target, setTarget] = useState<EditorTarget | null>(null)
   const [pending, setPending] = useState<EditorTarget | null | undefined>(undefined)
   const [dirty, setDirty] = useState(false)
@@ -49,6 +49,7 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
     onInfo(await window.reqman.refreshRepository())
   }, [onInfo])
   const git = useGit({ dataVersion, dirty, afterChange })
+  const changes = useChanges(showChanges, dataVersion)
 
   // Switching items with unsaved changes asks first.
   // Opening an item (or a new one) shows the editor again in place of the Changes panel.
@@ -59,7 +60,6 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   }
   const select = (id: string): void => {
     setShowChanges(false)
-    setCompareEntry(null)
     if (target?.kind === 'item' && target.id === id) return
     request({ kind: 'item', id })
   }
@@ -90,16 +90,22 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
     return () => window.removeEventListener('beforeunload', onUnload)
   }, [dirty])
 
-  const openCompare = (): void => {
-    setShowChanges(false)
-    git.dismiss()
-    setCompareEntry(null)
-    setCompareOpen(true)
-    void git.pullForCompare()
+  const toggleChanges = (): void => {
+    if (!showChanges) {
+      git.reload()
+      changes.reset() // opens on uncommitted changes (O-06)
+    }
+    setShowChanges((v) => !v)
   }
-  const closeCompare = (): void => {
-    setCompareOpen(false)
-    setCompareEntry(null)
+  const revert = async (id: string, part: RevertPart): Promise<void> => {
+    const r = await window.reqman.revertChange(id, part)
+    if (!r.ok) changes.setError(r.message)
+    await afterChange()
+  }
+  const discard = async (entry: CompareEntry): Promise<void> => {
+    const r = await window.reqman.discardChanges(entry.paths)
+    if (!r.ok) changes.setError(r.message)
+    git.onPanelResult(r)
   }
 
   const newItem = async (type: string, parent?: string): Promise<void> => {
@@ -142,34 +148,30 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
           busy={git.busy}
           blockedReason={git.blocked}
           changesOpen={showChanges}
-          onToggleChanges={() => {
-            // Changes and Compare share the right-hand column: opening one closes the other (owner's bug, 0.8.0)
-            if (!showChanges) {
-              git.reload()
-              closeCompare()
-            }
-            setShowChanges((v) => !v)
-          }}
-          onRun={(a) => void git.run(a)}
+          onToggleChanges={toggleChanges}
+          onRun={(a) => (a === 'push' ? git.requestPush() : void git.run(a))}
           notice={git.notice}
           onDismiss={git.dismiss}
           onOpenItem={select}
-          onCompare={openCompare}
-          compareOpen={compareOpen}
+          pushOffer={git.pushOffer}
+          onPushOffer={git.answerPush}
         />
-        {compareOpen && (
-          <CompareView
+        {showChanges && git.state?.available && (
+          <ChangesView
             schema={schema}
-            pullNote={git.comparePull}
-            pulling={git.comparePulling}
-            onPullAgain={() => void git.pullForCompare()}
-            selected={compareEntry?.id ?? null}
-            onSelect={setCompareEntry}
-            onClose={closeCompare}
+            changes={changes}
+            git={git.state}
+            blocked={git.blocked}
+            pulling={git.busy !== null}
+            onPull={() => void git.run('pull')}
+            onRevert={revert}
+            onDiscard={discard}
+            onOpenItem={select}
+            onClose={() => setShowChanges(false)}
           />
         )}
-        {/* The table stays mounted while comparing, so its opened levels and scroll position survive. */}
-        <div className={compareOpen ? 'is-hidden' : 'workspace__items'}>
+        {/* The table stays mounted while the Changes view is open, so its opened levels and scroll position survive. */}
+        <div className={showChanges && git.state?.available ? 'is-hidden' : 'workspace__items'}>
           <Toolbar
             schema={schema}
             filters={filters}
@@ -242,24 +244,10 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
         </footer>
       </section>
 
-      {compareOpen && compareEntry && (
-        <CompareDetail
-          schema={schema}
-          entry={compareEntry}
-          onClose={() => setCompareEntry(null)}
-          onOpenItem={(id) => {
-            closeCompare()
-            select(id)
-          }}
-        />
-      )}
-
-      {showChanges && git.state?.available && (
-        <ChangesPanel state={git.state} blockedReason={git.blocked} onResult={git.onPanelResult} onOpenItem={select} onClose={() => setShowChanges(false)} />
-      )}
+      {showChanges && git.state?.available && <ChangesSide changes={changes} git={git.state} blocked={git.blocked} onResult={git.onPanelResult} />}
 
       {target && (
-        <div className={(showChanges && git.state?.available) || (compareOpen && compareEntry) ? 'is-hidden' : 'contents'}>
+        <div className={showChanges && git.state?.available ? 'is-hidden' : 'contents'}>
           <ItemEditor
             // Same key for a draft and the saved item, so the editor stays in place when a new item is saved.
             key={target.kind === 'item' ? target.id : target.item.id}

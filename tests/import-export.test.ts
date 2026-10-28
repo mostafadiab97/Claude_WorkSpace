@@ -131,6 +131,7 @@ describe('exporting a comparison', () => {
           summary: 'Text, Status · 1 link added',
           contentChanged: true,
           incoming: 2,
+          paths: [],
           diff: {
             kind: 'modified' as const,
             rows: [{ key: 'field:status', label: 'Status', before: 'Draft', after: 'Review' }],

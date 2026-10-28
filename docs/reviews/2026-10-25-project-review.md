@@ -339,9 +339,13 @@ all fine. The two-PC trial is postponed (only one user for now).
   open.
 - **S-03 agreed; S-04 agreed (27–28 Oct 2026)**, owner suggests re-spacing order values regularly (e.g. when pushing)
   so values stay small — proposal: at push time, re-space only sibling groups whose values got long, and only groups
-  the user changed himself (to avoid clashes with colleagues' work). Awaiting confirmation.
+  the user changed himself (to avoid clashes with colleagues' work). **Confirmed with a 4-character maximum**: at push,
+  groups the user changed whose order values are longer than 4 characters are re-spaced.
 - **Tables in rich text (28 Oct 2026):** recorded as a **future feature without milestone**; the later rich-text editor
   covers formatting (bold, italic, underline, highlight, lists, links, images) but no tables for now.
+- **Group 4 approved (28 Oct 2026):** X-01, T-01 – T-05 in the fix round; X-02 (code signing) later. X-03: owner asked how
+  dependency updates are noticed when development moves to a local PC — answer pending his choice (Dependabot on
+  GitHub + `npm audit` check in the build).
 
 ## G. Proposed order (to discuss)
 

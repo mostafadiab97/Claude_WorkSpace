@@ -4,6 +4,9 @@ Each version was installed and tried by the product owner on Windows 11; his fee
 version it was about, and what it led to.
 
 ## 0.8.0 — 28 Oct 2026 — Clean page (all fixes of the project review)
+- **Owner (28 Oct 2026):** update installed; release self-test on his PC **passed all 17 steps** in 32.7 s
+  (Git 2.52.0). Git steps take 2–10 s each there (vs. < 0.5 s on Linux) — process start-up with antivirus.
+  Checklist steps 3–5 pending.
 - **Fixes:** an item whose file was renamed by hand opens, saves and deletes in place, is listed as a problem
   with a one-click **Fix file name** (D-01); only one ReqMan runs at a time — a second start brings the open
   window forward (D-02); writes, index changes and Git actions run one after another (D-03); short Windows file

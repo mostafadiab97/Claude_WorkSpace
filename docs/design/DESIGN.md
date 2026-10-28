@@ -699,6 +699,13 @@ changed this week") · Windows 10 build (commercial need, C) · single-instance 
 requirement quality hints without AI (vague words like "fast", "user-friendly", missing "shall") · Linux build ·
 English/Arabic UI (if wanted; see review S-06) · several requirement sets per repository (review S-07).
 
+**Future, no milestone yet:** tables inside the item text (plain grid tables, or complex tables with joined cells /
+lists in cells stored as HTML) — decided 28 Oct 2026 to leave for a future decision.
+
+**Rich text editor (later version, C 27 Oct 2026):** Markdown stays the stored format; a Word-like editor with bold,
+italic, underline, highlight, bullet/numbered lists, hyperlinks, images (in `requirements/attachments/<ID>/`) and `@`
+references to other items (references only — not traceability links).
+
 **Later / commercial:** PR create/approve/merge in the tool and comments per requirement (FR-19), Word import,
 ReqIF, GitLab/Bitbucket/Azure DevOps adapters, compliance features (signatures, tamper-proof audit, standards
 templates), AI features and governed AI access, licensing, private update channel and code signing (review S-08,

@@ -337,6 +337,11 @@ all fine. The two-PC trial is postponed (only one user for now).
   `requirements/attachments/<ID>/`, `@` references to items) — **in a later version** (owner: "this is extra").
   Item references inside text are **references only**, not traceability links. Tables: question about merged cells
   open.
+- **S-03 agreed; S-04 agreed (27–28 Oct 2026)**, owner suggests re-spacing order values regularly (e.g. when pushing)
+  so values stay small — proposal: at push time, re-space only sibling groups whose values got long, and only groups
+  the user changed himself (to avoid clashes with colleagues' work). Awaiting confirmation.
+- **Tables in rich text (28 Oct 2026):** recorded as a **future feature without milestone**; the later rich-text editor
+  covers formatting (bold, italic, underline, highlight, lists, links, images) but no tables for now.
 
 ## G. Proposed order (to discuss)
 

@@ -177,8 +177,8 @@ sandbox converted) → 0.10.0 Changes view (O-04/O-05/O-06) → 0.11.0 M7 Excel 
 branches → 0.13.0 ReqIF.
 
 **0.9.0 released (28 Oct 2026)** — waiting for the owner's 5-step checklist (`docs/TESTING.md`). The converted
-sandbox (`tools/convert-sandbox-0.9.mts`, two commits: renames, then contents) is pushed **only after** the 0.9.0
-release is published (an older ReqMan would see `REQ-` IDs with the wrong prefix). **Next: 0.10.0 Changes view**
+sandbox (`tools/convert-sandbox-0.9.mts`, two commits: renames, then contents) was pushed right after the release
+(order matters: a sandbox in the new format needs ReqMan 0.9.0). **Next: 0.10.0 Changes view**
 (review H, O-04/O-05/O-06; DESIGN.md "Release plan"): one Changes view instead of Changes panel + Compare, opening
 on "Uncommitted changes"; no automatic pulls — offer "Pull first" before remote-related actions; GitHub-style split
 difference (Fields, Text, Links blocks; old red left, new green right, changed words highlighted; revert arrows for

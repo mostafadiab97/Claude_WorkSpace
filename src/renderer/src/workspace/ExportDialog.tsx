@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ExportItemsRequest, ExportResult } from '../../../shared/api'
 import type { ItemQuery } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
+import { T } from '../../../shared/text'
 
 /**
  * Export the requirements to a file: CSV for Excel (comma-separated, UTF-8) or Markdown for AI tools and documents.
@@ -51,62 +52,62 @@ export function ExportDialog(props: {
 
   return (
     <div className="modal" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && props.onClose()}>
-      <div className="modal__panel modal__panel--narrow" role="dialog" aria-modal="true" aria-label="Export">
+      <div className="modal__panel modal__panel--narrow" role="dialog" aria-modal="true" aria-label={T.exportDialog.title}>
         <header className="modal__header">
           <div>
-            <h2 className="modal__title">Export</h2>
-            <p className="muted">A file for people and tools outside the repository. Nothing in the repository changes.</p>
+            <h2 className="modal__title">{T.exportDialog.title}</h2>
+            <p className="muted">{T.exportDialog.intro}</p>
           </div>
-          <button type="button" className="icon-btn" aria-label="Close" onClick={props.onClose}>
+          <button type="button" className="icon-btn" aria-label={T.common.close} onClick={props.onClose}>
             ✕
           </button>
         </header>
         <div className="modal__body">
           <fieldset className="choice">
-            <legend className="field__label">Which items</legend>
+            <legend className="field__label">{T.exportDialog.which}</legend>
             <label className="check">
               <input type="radio" name="scope" checked={scope === 'all'} onChange={() => setScope('all')} />
-              All {props.totalCount.toLocaleString('en')} items, in document order (the hierarchy)
+              {T.exportDialog.all(props.totalCount)}
             </label>
             <label className="check">
               <input type="radio" name="scope" checked={scope === 'filtered'} disabled={!props.filtered} onChange={() => setScope('filtered')} />
-              {props.filtered ? `Only the ${props.filteredCount.toLocaleString('en')} items of the current search / filters` : 'Only the current search / filter result (no search or filter active)'}
+              {props.filtered ? T.exportDialog.filtered(props.filteredCount) : T.exportDialog.filteredNone}
             </label>
           </fieldset>
           <fieldset className="choice">
-            <legend className="field__label">Columns — ID, Title and the columns shown in the table, plus:</legend>
+            <legend className="field__label">{T.exportDialog.columns}</legend>
             <label className="check">
               <input type="checkbox" checked={hierarchy} onChange={(e) => setHierarchy(e.target.checked)} />
-              Level and Parent (the hierarchy)
+              {T.exportDialog.hierarchy}
             </label>
             <label className="check">
               <input type="checkbox" checked={text} onChange={(e) => setText(e.target.checked)} />
-              The full text
+              {T.exportDialog.fullText}
             </label>
             <label className="check">
               <input type="checkbox" checked={links} onChange={(e) => setLinks(e.target.checked)} />
-              Links (both directions)
+              {T.exportDialog.links}
             </label>
           </fieldset>
           <fieldset className="choice">
-            <legend className="field__label">Format</legend>
+            <legend className="field__label">{T.exportDialog.format}</legend>
             <label className="check">
               <input type="radio" name="format" checked={format === 'csv'} onChange={() => setFormat('csv')} />
-              CSV — opens in Excel (comma-separated, UTF-8)
+              {T.exportDialog.csv}
             </label>
             <label className="check">
               <input type="radio" name="format" checked={format === 'markdown'} onChange={() => setFormat('markdown')} />
-              Markdown — one readable document, e.g. to give to an AI tool
+              {T.exportDialog.markdown}
             </label>
           </fieldset>
           {error && <p className="notice notice--error" role="alert">{error}</p>}
         </div>
         <footer className="modal__footer actions">
           <button type="button" className="btn btn--primary" disabled={busy} onClick={() => void run()}>
-            {busy ? 'Exporting…' : 'Export…'}
+            {busy ? T.exportDialog.running : T.exportDialog.run}
           </button>
           <button type="button" className="btn" onClick={props.onClose}>
-            Cancel
+            {T.common.cancel}
           </button>
         </footer>
       </div>

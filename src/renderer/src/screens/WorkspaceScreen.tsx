@@ -1,43 +1,37 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { CompareEntry, GitResult, GitState, RepoInfo } from '../../../shared/api'
-import type { ItemQuery, SortKey } from '../../../shared/domain'
-import { errorMessage, useDebounced } from '../lib/hooks'
+import type { CompareEntry, RepoInfo } from '../../../shared/api'
+import { T } from '../../../shared/text'
+import { errorMessage } from '../lib/hooks'
 import { ItemEditor, type EditorTarget } from '../workspace/ItemEditor'
-import { ColumnsMenu, FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
+import { FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
 import { CompareDetail, CompareView } from '../workspace/CompareView'
-import { ChangesPanel, GitBar, type GitNotice } from '../workspace/GitPanels'
+import { ChangesPanel, GitBar } from '../workspace/GitPanels'
 import { ExportDialog } from '../workspace/ExportDialog'
-import { ItemTable, optionalColumns, orderColumns, type TreeControls } from '../workspace/ItemTable'
+import { ItemTable, shownColumnKeys, type TreeControls } from '../workspace/ItemTable'
+import { ProblemList, problemsOf } from '../workspace/screen/Problems'
+import { Toolbar } from '../workspace/screen/Toolbar'
+import { useFilters } from '../workspace/screen/useFilters'
+import { useGit } from '../workspace/screen/useGit'
 
 /**
  * The open repository: the item table (document hierarchy, or a flat list while searching/filtering)
- * and the editor on the right.
+ * and the editor on the right. State is grouped by area: filters (useFilters), Git (useGit), Compare, editor.
  */
 export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: RepoInfo) => void }) {
   const schema = info.schema
-  const [text, setText] = useState('')
-  const search = useDebounced(text, 200)
-  const [types, setTypes] = useState<string>('')
-  const [linkFilter, setLinkFilter] = useState<'' | 'suspect' | 'none'>('')
-  const [fieldFilters, setFieldFilters] = useState<Record<string, string>>({})
-  // 'order' = document order (the hierarchy as arranged); column headers sort by that column instead.
-  const [sort, setSort] = useState<{ by: SortKey; descending: boolean }>({ by: 'order', descending: false })
+  const filters = useFilters(schema)
+  const { query, filtered } = filters
   const [columnPrefs, setColumnPrefs] = useColumnPrefs(info.root)
   const [editFields, setEditFields] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
-  const [busy, setBusy] = useState(false)
+  const [expanding, setExpanding] = useState(false)
   const tree = useRef<TreeControls | null>(null)
   const [revealNonce, setRevealNonce] = useState(0)
-  const [gitState, setGitState] = useState<GitState | null>(null)
-  const [gitBusy, setGitBusy] = useState<string | null>(null)
-  const [gitNotice, setGitNotice] = useState<GitNotice | null>(null)
   const [showChanges, setShowChanges] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
   const [exported, setExported] = useState<{ path: string; count: number } | null>(null)
   const [compareOpen, setCompareOpen] = useState(false)
   const [compareEntry, setCompareEntry] = useState<CompareEntry | null>(null)
-  const [comparePulling, setComparePulling] = useState(false)
-  const [comparePull, setComparePull] = useState<{ ok: boolean; message: string } | null>(null)
   const [target, setTarget] = useState<EditorTarget | null>(null)
   const [pending, setPending] = useState<EditorTarget | null | undefined>(undefined)
   const [dirty, setDirty] = useState(false)
@@ -46,15 +40,15 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   const [showProblems, setShowProblems] = useState(false)
   const [refreshError, setRefreshError] = useState<string | null>(null)
 
-  const filtered = Boolean(search.trim() || types || linkFilter || Object.entries(fieldFilters).some(([k, v]) => v && schema.fields.some((f) => f.id === k)))
-  const query: Omit<ItemQuery, 'limit' | 'offset'> = {
-    ...(search.trim() ? { text: search } : {}),
-    ...(types ? { types: [types] } : {}),
-    ...(linkFilter ? { links: linkFilter } : {}),
-    fields: Object.fromEntries(Object.entries(fieldFilters).filter(([k, v]) => v && schema.fields.some((f) => f.id === k)).map(([k, v]) => [k, [v]])),
-    // a search without a chosen column sorts by best match
-    sort: search.trim() && sort.by === 'order' ? { by: 'relevance' } : sort
-  }
+  /**
+   * After ReqMan changed something: redraw, and re-read only the files that changed (the core watches the
+   * folder, so this costs milliseconds even with 10,000 items — review P-01).
+   */
+  const afterChange = useCallback(async (): Promise<void> => {
+    setDataVersion((v) => v + 1)
+    onInfo(await window.reqman.refreshRepository())
+  }, [onInfo])
+  const git = useGit({ dataVersion, dirty, afterChange })
 
   // Switching items with unsaved changes asks first.
   // Opening an item (or a new one) shows the editor again in place of the Changes panel.
@@ -70,22 +64,20 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
     request({ kind: 'item', id })
   }
 
-  const refresh = useCallback(async () => {
-    try {
-      onInfo(await window.reqman.refreshRepository())
-      setRefreshError(null)
-      setDataVersion((v) => v + 1)
-    } catch (e) {
-      setRefreshError(errorMessage(e))
-    }
-  }, [onInfo])
-
-  // Pick up changes made outside ReqMan (Git pull, editor) when the window gets focus again.
+  // Pick up changes made outside ReqMan (Git pull, an editor) when the window gets focus again.
   useEffect(() => {
-    const onFocus = (): void => void refresh()
+    const onFocus = (): void =>
+      void window.reqman
+        .refreshRepository(true)
+        .then((i) => {
+          onInfo(i)
+          setRefreshError(null)
+          setDataVersion((v) => v + 1) // also refreshes the Git bar (commits made outside ReqMan)
+        })
+        .catch((e: unknown) => setRefreshError(errorMessage(e)))
     window.addEventListener('focus', onFocus)
     return () => window.removeEventListener('focus', onFocus)
-  }, [refresh])
+  }, [onInfo])
 
   // Warn before the window closes with unsaved changes.
   useEffect(() => {
@@ -98,83 +90,16 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
     return () => window.removeEventListener('beforeunload', onUnload)
   }, [dirty])
 
-  // Git status follows every change of the data (saves, moves, links, refresh on window focus).
-  useEffect(() => {
-    let live = true
-    const t = window.setTimeout(() => {
-      void window.reqman
-        .getGitState()
-        .then((st) => live && setGitState(st))
-        .catch(() => {})
-    }, 250)
-    return () => {
-      live = false
-      window.clearTimeout(t)
-    }
-  }, [dataVersion])
-
-  const gitBlocked = dirty ? 'Save or discard your edit first.' : null
-  const runGit = async (action: 'pull' | 'push'): Promise<void> => {
-    setGitBusy(action === 'pull' ? 'Pulling' : 'Pushing')
-    setGitNotice(null)
-    try {
-      const r = await window.reqman[action]()
-      setGitState(r.state)
-      setGitNotice({ ok: r.ok, message: r.message, ...(!r.ok && r.items ? { items: r.items } : {}) })
-      if (action === 'pull' && r.ok) await afterChange()
-    } catch (e) {
-      setGitNotice({ ok: false, message: errorMessage(e) })
-    } finally {
-      setGitBusy(null)
-    }
-  }
-  const onPanelResult = (r: GitResult): void => {
-    setGitState(r.state)
-    if (r.ok) {
-      setGitNotice({ ok: true, message: r.message })
-      void afterChange()
-    }
-  }
-  const openFromGit = (id: string): void => select(id)
-
-  // Compare always pulls first (owner's decision), so "what the last pull brought in" is current.
-  const pullForCompare = async (): Promise<void> => {
-    const st = gitState ?? (await window.reqman.getGitState())
-    if (!st.available || !st.hasRemote) {
-      setComparePull(null)
-      return
-    }
-    if (dirty) {
-      setComparePull({ ok: false, message: 'Save or discard your edit first.' })
-      return
-    }
-    setComparePulling(true)
-    try {
-      const r = await window.reqman.pull()
-      setGitState(r.state)
-      setComparePull({ ok: r.ok, message: r.message })
-      if (r.ok) await afterChange()
-    } catch (e) {
-      setComparePull({ ok: false, message: errorMessage(e) })
-    } finally {
-      setComparePulling(false)
-    }
-  }
   const openCompare = (): void => {
     setShowChanges(false)
-    setGitNotice(null)
+    git.dismiss()
     setCompareEntry(null)
     setCompareOpen(true)
-    void pullForCompare()
+    void git.pullForCompare()
   }
   const closeCompare = (): void => {
     setCompareOpen(false)
     setCompareEntry(null)
-  }
-
-  const afterChange = async (): Promise<void> => {
-    setDataVersion((v) => v + 1)
-    onInfo(await window.reqman.refreshRepository())
   }
 
   const newItem = async (type: string, parent?: string): Promise<void> => {
@@ -183,17 +108,13 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
     request({ kind: 'draft', item })
   }
 
-  // Header clicks: ascending → descending → back to document order.
-  const onSort = (key: SortKey): void =>
-    setSort((s) => (s.by !== key ? { by: key, descending: false } : !s.descending ? { by: key, descending: true } : { by: 'order', descending: false }))
-
   const onMove = async (id: string, parent: string | null, before: string | null): Promise<void> => {
     if (dirty && target?.kind === 'item' && target.id === id) {
-      setNotice(`Save or discard your changes to ${id} before moving it.`)
+      setNotice(T.workspace.moveFirst(id))
       return
     }
     const r = await window.reqman.reparentItem(id, parent, before)
-    setNotice(r.ok ? null : `Could not move ${id}: ${r.message}`)
+    setNotice(r.ok ? null : T.workspace.moveFailed(id, r.message))
     if (r.ok) {
       await afterChange()
       setRevealNonce((n) => n + 1)
@@ -202,47 +123,42 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   }
 
   const expandAll = async (): Promise<void> => {
-    setBusy(true)
+    setExpanding(true)
     try {
       await tree.current?.expandAll()
     } finally {
-      setBusy(false)
+      setExpanding(false)
     }
   }
 
-  const enumFields = schema.fields.filter((f) => f.type === 'enum' || f.type === 'list')
   const selectedId = target?.kind === 'item' ? target.id : null
-  const problems: { key: string; text: string; id?: string }[] = [
-    ...info.schemaProblems.map((p) => ({ key: `s-${p.path}`, text: `schema.yaml ${p.path}: ${p.message}` })),
-    // File problems carry the file path instead of an ID; only real IDs are clickable.
-    ...info.issues.map((i) => ({ key: `i-${i.itemId}-${i.path}-${i.message}`, text: `${i.itemId}: ${i.message}`, ...(i.path === 'file' ? {} : { id: i.itemId }) }))
-  ]
+  const problems = problemsOf(info)
 
   return (
     <div className="workspace">
-      <section className="workspace__main" aria-label="Items">
+      <section className="workspace__main" aria-label={T.workspace.items}>
         <GitBar
-          state={gitState}
-          busy={gitBusy}
-          blockedReason={gitBlocked}
+          state={git.state}
+          busy={git.busy}
+          blockedReason={git.blocked}
           changesOpen={showChanges}
           onToggleChanges={() => {
-            if (!showChanges) void window.reqman.getGitState().then(setGitState)
+            if (!showChanges) git.reload()
             setShowChanges((v) => !v)
           }}
-          onRun={(a) => void runGit(a)}
-          notice={gitNotice}
-          onDismiss={() => setGitNotice(null)}
-          onOpenItem={openFromGit}
+          onRun={(a) => void git.run(a)}
+          notice={git.notice}
+          onDismiss={git.dismiss}
+          onOpenItem={select}
           onCompare={openCompare}
           compareOpen={compareOpen}
         />
         {compareOpen && (
           <CompareView
             schema={schema}
-            pullNote={comparePull}
-            pulling={comparePulling}
-            onPullAgain={() => void pullForCompare()}
+            pullNote={git.comparePull}
+            pulling={git.comparePulling}
+            onPullAgain={() => void git.pullForCompare()}
             selected={compareEntry?.id ?? null}
             onSelect={setCompareEntry}
             onClose={closeCompare}
@@ -250,119 +166,74 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
         )}
         {/* The table stays mounted while comparing, so its opened levels and scroll position survive. */}
         <div className={compareOpen ? 'is-hidden' : 'workspace__items'}>
-        <div className="toolbar">
-          <input className="input toolbar__search" type="search" placeholder="Search ID, title, text…" value={text} onChange={(e) => setText(e.target.value)} aria-label="Search" />
-          <select className="input toolbar__filter" value={types} onChange={(e) => setTypes(e.target.value)} aria-label="Type filter">
-            <option value="">All types</option>
-            {schema.itemTypes.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-          </select>
-          {enumFields.map((f) => (
-            <select
-              key={f.id}
-              className="input toolbar__filter"
-              value={fieldFilters[f.id] ?? ''}
-              aria-label={f.name}
-              onChange={(e) => setFieldFilters((ff) => ({ ...ff, [f.id]: e.target.value }))}
-              disabled={f.type === 'list' && !f.options}
-              hidden={f.type === 'list' && !f.options}
-            >
-              <option value="">{f.name}: any</option>
-              {f.options?.map((o) => <option key={o} value={o}>{o}</option>)}
-            </select>
-          ))}
-          <select className="input toolbar__filter" value={linkFilter} onChange={(e) => setLinkFilter(e.target.value as '' | 'suspect' | 'none')} aria-label="Links filter">
-            <option value="">Links: any</option>
-            <option value="suspect">With suspect links</option>
-            <option value="none">Without any links</option>
-          </select>
-          {filtered && (
-            <button type="button" className="btn" onClick={() => { setText(''); setTypes(''); setLinkFilter(''); setFieldFilters({}) }}>
-              Clear filters
-            </button>
-          )}
-          <ColumnsMenu schema={schema} prefs={columnPrefs} onChange={setColumnPrefs} onEditFields={() => setEditFields(true)} />
-          <button type="button" className="btn" onClick={() => setExportOpen(true)} disabled={info.itemCount === 0} title="Save as CSV (Excel) or Markdown">
-            Export…
-          </button>
-          <span className="toolbar__spacer" />
-          {!filtered && (
-            <>
-              <button type="button" className="btn" disabled={busy} onClick={() => void expandAll()} title="Open every level of the hierarchy">
-                {busy ? 'Expanding…' : 'Expand all'}
+          <Toolbar
+            schema={schema}
+            filters={filters}
+            prefs={columnPrefs}
+            onPrefs={setColumnPrefs}
+            onEditFields={() => setEditFields(true)}
+            canExport={info.itemCount > 0}
+            onExport={() => setExportOpen(true)}
+            expanding={expanding}
+            onExpandAll={() => void expandAll()}
+            onCollapseAll={() => tree.current?.collapseAll()}
+            onNewItem={(type) => void newItem(type)}
+          />
+
+          {filtered && <div className="table-mode">{T.workspace.searchMode}</div>}
+          <ItemTable
+            schema={schema}
+            prefs={columnPrefs}
+            mode={filtered ? 'flat' : 'tree'}
+            query={query}
+            dataVersion={dataVersion}
+            selectedId={selectedId}
+            onSelect={select}
+            onSort={filters.onSort}
+            onTotal={setTotal}
+            onMove={(id, parent, before) => void onMove(id, parent, before)}
+            controlsRef={tree}
+            revealNonce={revealNonce}
+            emptyText={info.itemCount === 0 ? T.workspace.emptyRepo : T.workspace.emptyFilter}
+          />
+          {exported && (
+            <div className="notice table-notice table-notice--ok" role="status">
+              {T.exportDialog.done(exported.count, exported.path)}{' '}
+              <button type="button" className="link-btn" onClick={() => void window.reqman.showInFolder(exported.path)}>
+                {T.exportDialog.showInFolder}
+              </button>{' '}
+              <button type="button" className="link-btn" onClick={() => setExported(null)}>
+                {T.common.dismiss}
               </button>
-              <button type="button" className="btn" onClick={() => tree.current?.collapseAll()} title="Show only the top-level items">
-                Collapse all
-              </button>
-            </>
+            </div>
           )}
-          <select className="select-btn select-btn--primary" value="" onChange={(e) => void newItem(e.target.value)} aria-label="New item">
-            <option value="">+ New item…</option>
-            {schema.itemTypes.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-          </select>
+          {notice && (
+            <div className="notice notice--warn table-notice" role="alert">
+              {notice}{' '}
+              <button type="button" className="link-btn" onClick={() => setNotice(null)}>
+                {T.common.dismiss}
+              </button>
+            </div>
+          )}
         </div>
 
-        {filtered && <div className="table-mode">Search results — the hierarchy is shown again when the search and filters are cleared.</div>}
-        <ItemTable
-          schema={schema}
-          prefs={columnPrefs}
-          mode={filtered ? 'flat' : 'tree'}
-          query={query}
-          dataVersion={dataVersion}
-          selectedId={selectedId}
-          onSelect={select}
-          onSort={onSort}
-          onTotal={setTotal}
-          onMove={(id, parent, before) => void onMove(id, parent, before)}
-          controlsRef={tree}
-          revealNonce={revealNonce}
-          emptyText={info.itemCount === 0 ? 'No items yet. Use “New item” to add the first one.' : 'No items match the filters.'}
-        />
-        {exported && (
-          <div className="notice table-notice table-notice--ok" role="status">
-            Exported {exported.count.toLocaleString('en')} items to {exported.path}{' '}
-            <button type="button" className="link-btn" onClick={() => void window.reqman.showInFolder(exported.path)}>Show in folder</button>{' '}
-            <button type="button" className="link-btn" onClick={() => setExported(null)}>Dismiss</button>
-          </div>
-        )}
-        {notice && (
-          <div className="notice notice--warn table-notice" role="alert">
-            {notice}{' '}
-            <button type="button" className="link-btn" onClick={() => setNotice(null)}>Dismiss</button>
-          </div>
-        )}
-        </div>
-
-        {showProblems && problems.length > 0 && (
-          <ul className="problems scroll" aria-label="Problems">
-            {problems.map((p) => (
-              <li key={p.key}>
-                {p.id ? (
-                  <button type="button" className="link-btn" onClick={() => p.id && select(p.id)}>{p.text}</button>
-                ) : (
-                  p.text
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+        {showProblems && problems.length > 0 && <ProblemList problems={problems} onOpen={select} onFixed={() => void afterChange()} />}
         <footer className="statusbar">
-          <span>
-            {filtered
-              ? `${total.toLocaleString('en')} of ${info.itemCount.toLocaleString('en')} items`
-              : `${info.itemCount.toLocaleString('en')} item${info.itemCount === 1 ? '' : 's'}`}
-          </span>
+          <span>{filtered ? T.workspace.of(total, info.itemCount) : T.common.items(info.itemCount)}</span>
           {problems.length > 0 ? (
             <button type="button" className="link-btn statusbar__problems" onClick={() => setShowProblems((s) => !s)}>
-              {problems.length} problem{problems.length === 1 ? '' : 's'} {showProblems ? '▾' : '▸'}
+              {T.workspace.problemCount(problems.length, showProblems)}
             </button>
           ) : (
-            <span className="statusbar__ok">No problems</span>
+            <span className="statusbar__ok">{T.workspace.noProblems}</span>
           )}
-          {!filtered && info.itemCount > 1 && <span className="statusbar__hint">Drag a row onto another row to move it there, with everything below it</span>}
-          {!info.isGitRepository && <span className="statusbar__warn">Not a Git repository</span>}
-          {refreshError && <span className="statusbar__warn">Refresh failed: {refreshError}</span>}
+          {!filtered && info.itemCount > 1 && <span className="statusbar__hint">{T.workspace.dragHint}</span>}
+          {!info.isGitRepository && <span className="statusbar__warn">{T.workspace.notGit}</span>}
+          {refreshError && <span className="statusbar__warn">{T.workspace.refreshFailed(refreshError)}</span>}
           <span className="toolbar__spacer" />
-          <span className="statusbar__path" title={info.root}>{info.root}</span>
+          <span className="statusbar__path" title={info.root}>
+            {info.root}
+          </span>
         </footer>
       </section>
 
@@ -378,40 +249,40 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
         />
       )}
 
-      {showChanges && gitState?.available && (
-        <ChangesPanel state={gitState} blockedReason={gitBlocked} onResult={onPanelResult} onOpenItem={openFromGit} onClose={() => setShowChanges(false)} />
+      {showChanges && git.state?.available && (
+        <ChangesPanel state={git.state} blockedReason={git.blocked} onResult={git.onPanelResult} onOpenItem={select} onClose={() => setShowChanges(false)} />
       )}
 
       {target && (
-        <div className={(showChanges && gitState?.available) || (compareOpen && compareEntry) ? 'is-hidden' : 'contents'}>
-        <ItemEditor
-          // Same key for a draft and the saved item, so the editor stays in place when a new item is saved.
-          key={target.kind === 'item' ? target.id : target.item.id}
-          schema={schema}
-          target={target}
-          onDirtyChange={setDirty}
-          onSaved={(id) => {
-            setTarget({ kind: 'item', id })
-            void afterChange().then(() => setRevealNonce((n) => n + 1))
-          }}
-          onDeleted={() => {
-            setDirty(false)
-            setTarget(null)
-            void afterChange()
-          }}
-          onMoved={() => setDataVersion((v) => v + 1)}
-          reloadToken={dataVersion}
-          onLinksChanged={() => void afterChange()}
-          onNewChild={(type, parent) => void newItem(type, parent)}
-          onOpen={select}
-          onClose={() => request(null)}
-        />
+        <div className={(showChanges && git.state?.available) || (compareOpen && compareEntry) ? 'is-hidden' : 'contents'}>
+          <ItemEditor
+            // Same key for a draft and the saved item, so the editor stays in place when a new item is saved.
+            key={target.kind === 'item' ? target.id : target.item.id}
+            schema={schema}
+            target={target}
+            onDirtyChange={setDirty}
+            onSaved={(id) => {
+              setTarget({ kind: 'item', id })
+              void afterChange().then(() => setRevealNonce((n) => n + 1))
+            }}
+            onDeleted={() => {
+              setDirty(false)
+              setTarget(null)
+              void afterChange()
+            }}
+            onMoved={() => setDataVersion((v) => v + 1)}
+            reloadToken={dataVersion}
+            onLinksChanged={() => void afterChange()}
+            onNewChild={(type, parent) => void newItem(type, parent)}
+            onOpen={select}
+            onClose={() => request(null)}
+          />
         </div>
       )}
 
       {exportOpen && (
         <ExportDialog
-          shownColumns={orderColumns(optionalColumns(schema), columnPrefs.order).filter((c) => !columnPrefs.hidden.has(c.key)).map((c) => c.key)}
+          shownColumns={shownColumnKeys(schema, columnPrefs)}
           filtered={filtered}
           filteredCount={total}
           totalCount={info.itemCount}
@@ -437,14 +308,22 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
       )}
 
       {pending !== undefined && (
-        <div className="guard" role="alertdialog" aria-label="Unsaved changes">
-          <p>You have unsaved changes. Discard them?</p>
+        <div className="guard" role="alertdialog" aria-label={T.workspace.unsaved}>
+          <p>{T.workspace.unsavedAsk}</p>
           <div className="actions">
-            <button type="button" className="btn btn--danger" onClick={() => { setDirty(false); setTarget(pending); setPending(undefined) }}>
-              Discard changes
+            <button
+              type="button"
+              className="btn btn--danger"
+              onClick={() => {
+                setDirty(false)
+                setTarget(pending)
+                setPending(undefined)
+              }}
+            >
+              {T.workspace.discard}
             </button>
             <button type="button" className="btn" onClick={() => setPending(undefined)}>
-              Keep editing
+              {T.workspace.keepEditing}
             </button>
           </div>
         </div>

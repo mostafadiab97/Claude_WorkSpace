@@ -120,6 +120,10 @@ export interface GitAdapter {
   undoLastCommit(root: string): Promise<void>
   /** Subject of the last commit. */
   lastCommitMessage(root: string): Promise<string | null>
+  /** One call for the Git bar: does HEAD have a parent commit, and the subject of the last commit. */
+  headSummary(root: string): Promise<{ hasParent: boolean; lastMessage: string | null }>
+  /** Blob IDs of these paths in a commit (paths that do not exist there are missing from the map). */
+  blobIds(root: string, ref: string, paths: string[]): Promise<Map<string, string>>
   /** Sets user.name and user.email in the user's global Git configuration. */
   setIdentity(root: string, name: string, email: string): Promise<void>
 }

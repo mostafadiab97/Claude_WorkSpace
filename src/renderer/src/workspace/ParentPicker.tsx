@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Schema } from '../../../shared/domain'
 import { ItemSearch } from './ItemSearch'
+import { T } from '../../../shared/text'
 
 /**
  * Choose an item's parent. With nothing typed it lists the top-level items (chapters, headings) in document
@@ -16,7 +17,7 @@ export function ParentPicker({ schema, value, selfId, onChange }: { schema: Sche
     let live = true
     void window.reqman.queryItems({ text: value, sort: { by: 'relevance' }, limit: 1, brief: true }).then((r) => {
       const hit = r.items.find((i) => i.id === value)
-      if (live) setResolved({ value, label: hit ? `${hit.id} — ${hit.title}` : `${value} (not found)` })
+      if (live) setResolved({ value, label: hit ? `${hit.id} — ${hit.title}` : T.parentPicker.notFound(value) })
     })
     return () => {
       live = false
@@ -28,7 +29,7 @@ export function ParentPicker({ schema, value, selfId, onChange }: { schema: Sche
     return (
       <div className="picker">
         <button type="button" className="input input--button" onClick={() => setOpen(true)}>
-          {label || <span className="muted-inline">None (top level)</span>}
+          {label || <span className="muted-inline">{T.parentPicker.none}</span>}
         </button>
       </div>
     )
@@ -36,13 +37,13 @@ export function ParentPicker({ schema, value, selfId, onChange }: { schema: Sche
   return (
     <ItemSearch
       schema={schema}
-      label="Search for a parent"
-      placeholder="Search by ID or title…"
+      label={T.parentPicker.label}
+      placeholder={T.parentPicker.placeholder}
       emptyQuery={{ parent: null, sort: { by: 'order' } }}
-      emptyHint="Top-level items — type to search all items"
+      emptyHint={T.parentPicker.hint}
       blocked={async (item) =>
         item.id === selfId || (item.parent !== undefined && (await window.reqman.getAncestors(item.id)).includes(selfId))
-          ? 'This is the item itself or one of its children'
+          ? T.parentPicker.blocked
           : null
       }
       onPick={(item) => {
@@ -61,7 +62,7 @@ export function ParentPicker({ schema, value, selfId, onChange }: { schema: Sche
               setOpen(false)
             }}
           >
-            <span className="muted-inline">None — make it a top-level item</span>
+            <span className="muted-inline">{T.parentPicker.makeTop}</span>
           </button>
         </li>
       }

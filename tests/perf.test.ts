@@ -7,7 +7,9 @@ import { createFileRepositoryStore } from '../src/modules/repository-store'
 import { runDataBenchmark } from '../src/modules/sample-data'
 
 const store = createFileRepositoryStore(join(__dirname, '..', 'config', 'default-schema.yaml'))
-const PERF = process.env['PERF'] === '1'
+// PERF=1: up to 10,000 items (every build); PERF=all: also 50,000 (releases only — it takes minutes, review T-05)
+const PERF = process.env['PERF'] === '1' || process.env['PERF'] === 'all'
+const PERF_ALL = process.env['PERF'] === 'all'
 
 /** Limits are generous (slow CI disks, virus scanners); typical values are 5–20× lower. */
 const LIMITS = {
@@ -18,7 +20,7 @@ const LIMITS = {
 
 describe('data layer performance', () => {
   for (const count of [1_000, 10_000, 50_000] as const) {
-    const run = count === 1_000 || PERF ? it : it.skip
+    const run = count === 1_000 || (PERF && (count < 50_000 || PERF_ALL)) ? it : it.skip
     run(`${count.toLocaleString('en')} items: indexing and typical queries stay within limits`, { timeout: 600_000 }, async () => {
       const r = await runDataBenchmark(store, count)
       console.log(

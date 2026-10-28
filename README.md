@@ -14,17 +14,9 @@ desktop GUI to view, edit, link, compare and export them. No server, no accounts
 
 ## Status
 
-| Milestone | Status |
-| --- | --- |
-| M0 Foundations — skeleton, module boundaries, theme file, Windows installer | Done |
-| M1 Data layer — schema, item files, repository store, index/search, performance, auto-update | Done |
-| M2 Core UI — open/create a requirements folder, item table, editor, hierarchy | Done (v0.3.0: hierarchy in the table, drag & drop, field editor) |
-| M3 Links — create, remove and confirm typed links; suspect links | Done (v0.4.0) |
-| M4 Git — changes per item, commit, pull/push (stops safely on conflicts), per-item history | Done (v0.5.0) |
-| M5 Compare — two versions of the whole set, per requirement and per link (pulls first) | Done (v0.6.0) |
-| M6 Export (CSV, Markdown) and hardening — prototype complete | Done (v0.7.0) |
-| M7 Excel export and import | Next |
-| M8 Branches and per-requirement conflict resolution | Planned |
+The prototype (milestones M0–M6) is complete. What each version changed is in `CHANGELOG.md`; the current
+state and the next step are in `CLAUDE.md` ("Status"), and the release plan in `docs/design/DESIGN.md`
+("Release plan"). (The status is kept in those places only, so it cannot drift — review T-04.)
 
 ## Develop
 
@@ -34,8 +26,8 @@ Requires Node.js 22 and Git.
 npm install
 npm run dev        # run the app with live reload
 npm run check      # type-check + lint (incl. module-boundary rules) + tests
-npm run test:perf  # performance tests with 10,000 and 50,000 items
-npm run build && npm run test:e2e   # drive the real app through the prototype journey (screenshots in e2e/out/)
+npm run test:perf  # performance tests with 10,000 items (test:perf:all adds 50,000)
+npm run build && npm run test:e2e   # drive the real app through the e2e scenarios (screenshots in e2e/out/)
 npm run gen:repo -- <folder> [count]   # create a test repository with generated items
 npm run dist:win   # build the Windows installer (on Windows)
 ```

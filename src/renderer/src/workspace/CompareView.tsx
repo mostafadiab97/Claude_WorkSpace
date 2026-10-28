@@ -4,40 +4,19 @@ import type { Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { linkName, typeName } from '../lib/schema'
 import { ChangeView } from './ChangeView'
+import { defaultPreset, describeSchema, rangeOf, WORKING, type Preset } from './compareRange'
+import { T } from '../../../shared/text'
 
-const WORKING = 'WORKING'
 const SHOW = 400
 
-type Preset = 'lastPull' | 'uncommitted' | 'lastCommit' | 'custom'
 type Kind = CompareEntry['kind']
 
-const KIND_LABEL: Record<Kind, string> = { added: 'Added', modified: 'Changed', moved: 'Moved', deleted: 'Deleted' }
+const KIND_LABEL: Record<Kind, string> = T.compare.kinds
 const KIND_LETTER: Record<Kind, string> = { added: 'A', modified: 'M', moved: 'P', deleted: 'D' }
 
 const when = (iso: string): string => {
   const d = new Date(iso)
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
-}
-
-/** The default comparison: what the last pull brought in; otherwise uncommitted changes; otherwise the last commit. */
-function defaultPreset(o: CompareOptions): Preset {
-  if (o.lastPull) return 'lastPull'
-  if (o.hasUncommitted && o.head) return 'uncommitted'
-  if (o.commits.length >= 2) return 'lastCommit'
-  return 'custom'
-}
-
-function rangeOf(preset: Preset, o: CompareOptions, custom: { from: string; to: string }): { from: string; to: string } | null {
-  switch (preset) {
-    case 'lastPull':
-      return o.lastPull ? { from: o.lastPull.from, to: o.lastPull.to } : null
-    case 'uncommitted':
-      return o.head ? { from: o.head, to: WORKING } : null
-    case 'lastCommit':
-      return o.commits[1] && o.commits[0] ? { from: o.commits[1].hash, to: o.commits[0].hash } : null
-    default:
-      return custom.from && custom.to ? custom : null
-  }
 }
 
 /**
@@ -147,18 +126,18 @@ export function CompareView(props: {
   const commitLabel = (c: CompareOptions['commits'][number]): string => `${c.hash.slice(0, 7)} ${c.message} — ${c.author}, ${when(c.date)}`
   const refOptions = (withWorking: boolean) => (
     <>
-      {withWorking && <option value={WORKING}>Your working folder (all saved changes)</option>}
+      {withWorking && <option value={WORKING}>{T.compare.working}</option>}
       {options && options.refs.length > 0 && (
-        <optgroup label="Branches and tags">
+        <optgroup label={T.compare.refsGroup}>
           {options.refs.map((r) => (
             <option key={`${r.kind}-${r.name}`} value={r.hash}>
-              {r.kind === 'tag' ? 'Tag' : r.kind === 'remote' ? 'Remote' : 'Branch'} {r.name}
+              {T.compare.refKinds[r.kind]} {r.name}
             </option>
           ))}
         </optgroup>
       )}
       {options && options.commits.length > 0 && (
-        <optgroup label="Commits that changed requirements">
+        <optgroup label={T.compare.commitsGroup}>
           {options.commits.map((c) => (
             <option key={c.hash} value={c.hash}>
               {commitLabel(c)}
@@ -170,12 +149,12 @@ export function CompareView(props: {
   )
 
   return (
-    <section className="compare" aria-label="Compare">
+    <section className="compare" aria-label={T.compare.label}>
       <div className="compare__head">
-        <h2 className="compare__title">Compare</h2>
+        <h2 className="compare__title">{T.compare.title}</h2>
         <select
           className="input compare__preset"
-          aria-label="What to compare"
+          aria-label={T.compare.what}
           value={preset ?? ''}
           onChange={(e) => {
             setPreset(e.target.value as Preset)
@@ -185,47 +164,47 @@ export function CompareView(props: {
           disabled={!options}
         >
           <option value="lastPull" disabled={!options?.lastPull}>
-            What the last pull brought in{options?.lastPull ? ` (${when(options.lastPull.date)})` : ' (no pull on this PC yet)'}
+            {T.compare.lastPull(options?.lastPull ? when(options.lastPull.date) : null)}
           </option>
           <option value="uncommitted" disabled={!options?.head}>
-            Uncommitted changes (last commit → working folder)
+            {T.compare.uncommitted}
           </option>
           <option value="lastCommit" disabled={(options?.commits.length ?? 0) < 2}>
-            The last commit that changed requirements
+            {T.compare.lastCommit}
           </option>
-          <option value="custom">Choose two versions…</option>
+          <option value="custom">{T.compare.custom}</option>
         </select>
         <span className="toolbar__spacer" />
         {data && (
           <>
-            <button type="button" className="btn" onClick={() => void exportAs('csv')} title="One row per changed item and per change — opens in Excel">
-              Export CSV
+            <button type="button" className="btn" onClick={() => void exportAs('csv')} title={T.compare.exportCsvTooltip}>
+              {T.compare.exportCsv}
             </button>
-            <button type="button" className="btn" onClick={() => void exportAs('markdown')} title="A readable report, e.g. for an AI tool or a pull request">
-              Export Markdown
+            <button type="button" className="btn" onClick={() => void exportAs('markdown')} title={T.compare.exportMdTooltip}>
+              {T.compare.exportMd}
             </button>
           </>
         )}
         <button type="button" className="btn" onClick={props.onPullAgain} disabled={props.pulling}>
-          {props.pulling ? 'Pulling…' : 'Pull and refresh'}
+          {props.pulling ? T.compare.pulling : T.compare.pullAgain}
         </button>
         <button type="button" className="btn" onClick={props.onClose}>
-          Close compare
+          {T.compare.close}
         </button>
       </div>
 
       {preset === 'custom' && options && (
         <div className="compare__custom">
           <label className="field">
-            <span className="field__label">From (older)</span>
-            <select className="input" aria-label="Compare from" value={custom.from} onChange={(e) => setCustom((c) => ({ ...c, from: e.target.value }))}>
-              <option value="">Choose…</option>
+            <span className="field__label">{T.compare.from}</span>
+            <select className="input" aria-label={T.compare.fromLabel} value={custom.from} onChange={(e) => setCustom((c) => ({ ...c, from: e.target.value }))}>
+              <option value="">{T.compare.choose}</option>
               {refOptions(false)}
             </select>
           </label>
           <label className="field">
-            <span className="field__label">To (newer)</span>
-            <select className="input" aria-label="Compare to" value={custom.to} onChange={(e) => setCustom((c) => ({ ...c, to: e.target.value }))}>
+            <span className="field__label">{T.compare.to}</span>
+            <select className="input" aria-label={T.compare.toLabel} value={custom.to} onChange={(e) => setCustom((c) => ({ ...c, to: e.target.value }))}>
               {refOptions(true)}
             </select>
           </label>
@@ -234,7 +213,7 @@ export function CompareView(props: {
 
       {props.pullNote && (
         <p className={props.pullNote.ok ? 'compare__pull' : 'compare__pull compare__pull--error'} role="status">
-          {props.pullNote.ok ? 'Pulled first: ' : 'Could not pull first — comparing what is on this PC. '}
+          {props.pullNote.ok ? T.compare.pulledFirst : T.compare.couldNotPull}
           {props.pullNote.ok ? props.pullNote.message.replace(/^Pulled:\s*/, '') : props.pullNote.message}
         </p>
       )}
@@ -242,21 +221,21 @@ export function CompareView(props: {
       {error && <p className="notice notice--error" role="alert">{error}</p>}
       {exported && (
         <p className="compare__pull" role="status">
-          Exported to {exported}{' '}
+          {T.compare.exportedTo(exported)}{' '}
           <button type="button" className="link-btn" onClick={() => void window.reqman.showInFolder(exported)}>
-            Show in folder
+            {T.exportDialog.showInFolder}
           </button>
         </p>
       )}
-      {!range && options && <p className="muted compare__empty">Nothing to compare yet — choose two versions.</p>}
-      {loading && <p className="muted compare__empty" role="status">Comparing…</p>}
+      {!range && options && <p className="muted compare__empty">{T.compare.nothingYet}</p>}
+      {loading && <p className="muted compare__empty" role="status">{T.compare.comparing}</p>}
 
       {data && (
         <>
           <p className="compare__range">
-            <span className="muted-inline">From</span> {data.from.label} <span className="muted-inline">to</span> {data.to.label}
+            <span className="muted-inline">{T.compare.rangeFrom}</span> {data.from.label} <span className="muted-inline">{T.compare.rangeTo}</span> {data.to.label}
           </p>
-          <div className="compare__chips" role="group" aria-label="Show">
+          <div className="compare__chips" role="group" aria-label={T.compare.show}>
             {(Object.keys(KIND_LABEL) as Kind[]).map((k) => (
               <button
                 key={k}
@@ -270,33 +249,33 @@ export function CompareView(props: {
               </button>
             ))}
             <span className="chip chip--static">
-              Links +{linksAdded} −{linksRemoved}
+              {T.compare.linksChip(linksAdded, linksRemoved)}
             </span>
-            {data.schema && <span className="chip chip--static chip--warn">Schema changed</span>}
+            {data.schema && <span className="chip chip--static chip--warn">{T.compare.schemaChanged}</span>}
             <span className="toolbar__spacer" />
-            <input className="input compare__filter" type="search" placeholder="Filter by ID or title…" aria-label="Filter changes" value={filter} onChange={(e) => setFilter(e.target.value)} />
+            <input className="input compare__filter" type="search" placeholder={T.compare.filter} aria-label={T.compare.filterLabel} value={filter} onChange={(e) => setFilter(e.target.value)} />
           </div>
 
           {data.schema && (
             <p className="notice notice--warn compare__schema">
-              Schema: {describeSchema(data.schema) || 'names, options or defaults changed'}
+              {T.compare.schema(describeSchema(data.schema))}
             </p>
           )}
 
-          <div className="tabs compare__tabs" role="tablist" aria-label="Compare view">
+          <div className="tabs compare__tabs" role="tablist" aria-label={T.compare.view}>
             <button type="button" role="tab" aria-selected={tab === 'items'} className={tab === 'items' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('items')}>
-              Items ({data.entries.length})
+              {T.compare.itemsTab(data.entries.length)}
             </button>
             <button type="button" role="tab" aria-selected={tab === 'links'} className={tab === 'links' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('links')}>
-              Links ({data.links.length})
+              {T.compare.linksTab(data.links.length)}
             </button>
           </div>
 
           {tab === 'items' ? (
             data.entries.length === 0 ? (
-              <p className="muted compare__empty">No requirement changed between these two versions.</p>
+              <p className="muted compare__empty">{T.compare.noChange}</p>
             ) : (
-              <ul className="compare__list scroll" aria-label="Changed items">
+              <ul className="compare__list scroll" aria-label={T.compare.changedItems}>
                 {visible.slice(0, shown).map((e) => (
                   <li key={e.id}>
                     <button type="button" className={e.id === selected ? 'compare__row compare__row--selected' : 'compare__row'} aria-pressed={e.id === selected} onClick={() => props.onSelect(e)}>
@@ -304,12 +283,12 @@ export function CompareView(props: {
                         {KIND_LETTER[e.kind]}
                       </span>
                       <span className="tree__id">{e.id}</span>
-                      <span className="compare__name">{e.title || '(no title)'}</span>
+                      <span className="compare__name">{e.title || T.common.noTitle}</span>
                       <span className="compare__type">{typeName(schema, e.type)}</span>
                       <span className="compare__summary">{e.summary}</span>
                       {e.kind === 'modified' && e.contentChanged && e.incoming > 0 && (
-                        <span className="compare__impact" title="Links from these items become suspect: they may need review">
-                          ⚠ {e.incoming === 1 ? '1 item links' : `${e.incoming} items link`} here
+                        <span className="compare__impact" title={T.compare.impactTooltip}>
+                          {T.compare.impact(e.incoming)}
                         </span>
                       )}
                     </button>
@@ -318,40 +297,29 @@ export function CompareView(props: {
                 {visible.length > shown && (
                   <li>
                     <button type="button" className="link-btn compare__more" onClick={() => setShown((n) => n + SHOW)}>
-                      Show more ({(visible.length - shown).toLocaleString('en')} hidden)
+                      {T.compare.showMore(visible.length - shown)}
                     </button>
                   </li>
                 )}
-                {visible.length === 0 && <li className="muted compare__empty">Nothing matches the filter.</li>}
+                {visible.length === 0 && <li className="muted compare__empty">{T.compare.noMatch}</li>}
               </ul>
             )
           ) : (
             <LinkList schema={schema} links={data.links} filter={filter} onOpen={openEntry} />
           )}
-          {data.otherFiles.length > 0 && <p className="muted-inline compare__other">Other files changed: {data.otherFiles.join(', ')}</p>}
+          {data.otherFiles.length > 0 && <p className="muted-inline compare__other">{T.compare.otherFiles(data.otherFiles.join(', '))}</p>}
         </>
       )}
     </section>
   )
 }
 
-function describeSchema(s: NonNullable<CompareResult['schema']>): string {
-  const parts: string[] = []
-  if (s.fieldsAdded.length) parts.push(`fields added: ${s.fieldsAdded.join(', ')}`)
-  if (s.fieldsRemoved.length) parts.push(`fields removed: ${s.fieldsRemoved.join(', ')}`)
-  if (s.typesAdded.length) parts.push(`item types added: ${s.typesAdded.join(', ')}`)
-  if (s.typesRemoved.length) parts.push(`item types removed: ${s.typesRemoved.join(', ')}`)
-  if (s.linkTypesAdded.length) parts.push(`link types added: ${s.linkTypesAdded.join(', ')}`)
-  if (s.linkTypesRemoved.length) parts.push(`link types removed: ${s.linkTypesRemoved.join(', ')}`)
-  return parts.join('; ')
-}
-
 function LinkList({ schema, links, filter, onOpen }: { schema: Schema; links: LinkChange[]; filter: string; onOpen: (id: string) => void }) {
   const words = filter.trim().toLowerCase()
   const shown = links.filter((l) => !words || `${l.source} ${l.target}`.toLowerCase().includes(words))
-  if (links.length === 0) return <p className="muted compare__empty">No link was added or removed.</p>
+  if (links.length === 0) return <p className="muted compare__empty">{T.compare.noLinks}</p>
   return (
-    <ul className="compare__list scroll" aria-label="Changed links">
+    <ul className="compare__list scroll" aria-label={T.compare.changedLinks}>
       {shown.map((l) => (
         <li key={`${l.change}-${l.source}-${l.type}-${l.target}`} className="compare__link">
           <span className={l.change === 'added' ? 'changes__kind changes__kind--added' : 'changes__kind changes__kind--deleted'} title={l.change}>
@@ -362,7 +330,7 @@ function LinkList({ schema, links, filter, onOpen }: { schema: Schema; links: Li
           </button>
           <span className="muted-inline">{linkName(schema, l.type)}</span>
           <span className="tree__id">{l.target}</span>
-          <span className="muted-inline">— {l.change === 'added' ? 'added' : 'removed'}</span>
+          <span className="muted-inline">— {l.change === 'added' ? T.compare.linkAdded : T.compare.linkRemoved}</span>
         </li>
       ))}
     </ul>
@@ -372,7 +340,7 @@ function LinkList({ schema, links, filter, onOpen }: { schema: Schema; links: Li
 /** Right-hand panel in compare mode: what changed in the selected item. */
 export function CompareDetail({ schema, entry, onOpenItem, onClose }: { schema: Schema; entry: CompareEntry; onOpenItem: (id: string) => void; onClose: () => void }) {
   return (
-    <aside className="editor scroll" aria-label={`Change ${entry.id}`}>
+    <aside className="editor scroll" aria-label={T.compare.detailLabel(entry.id)}>
       <header className="editor__header">
         <div>
           <div className="editor__id">{entry.id}</div>
@@ -380,21 +348,21 @@ export function CompareDetail({ schema, entry, onOpenItem, onClose }: { schema: 
             {typeName(schema, entry.type)} · {KIND_LABEL[entry.kind].toLowerCase()}
           </div>
         </div>
-        <button type="button" className="icon-btn" aria-label="Close change" title="Close" onClick={onClose}>
+        <button type="button" className="icon-btn" aria-label={T.compare.closeChange} title={T.common.close} onClick={onClose}>
           ✕
         </button>
       </header>
       <div className="editor__body">
-        <h3 className="compare__detail-title">{entry.title || '(no title)'}</h3>
+        <h3 className="compare__detail-title">{entry.title || T.common.noTitle}</h3>
         {entry.kind === 'modified' && entry.contentChanged && entry.incoming > 0 && (
           <p className="notice notice--warn">
-            Type, title or text changed: links from {entry.incoming} item{entry.incoming === 1 ? '' : 's'} to it are now suspect and may need review.
+            {T.compare.suspectWarning(entry.incoming)}
           </p>
         )}
         <ChangeView schema={schema} diff={entry.diff} unreadable={entry.unreadable} />
         {entry.kind !== 'deleted' && (
           <button type="button" className="btn" onClick={() => onOpenItem(entry.id)}>
-            Open the item
+            {T.compare.openItem}
           </button>
         )}
       </div>

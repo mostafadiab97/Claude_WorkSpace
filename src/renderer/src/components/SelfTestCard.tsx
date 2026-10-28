@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { DataSelfTestResult } from '../../../shared/api'
+import { T } from '../../../shared/text'
 
 const SIZES = [1_000, 10_000, 50_000]
 
@@ -24,14 +25,11 @@ export function SelfTestCard() {
 
   return (
     <section className="card" aria-labelledby="selftest-title">
-      <h2 id="selftest-title">Data self-test</h2>
-      <p className="hint hint--flush">
-        Creates fictional requirements in a temporary folder, indexes them and runs typical searches and filters,
-        then deletes them. Your repositories are not touched.
-      </p>
+      <h2 id="selftest-title">{T.settings.dataTest.title}</h2>
+      <p className="hint hint--flush">{T.settings.dataTest.intro}</p>
       <div className="actions">
         <label className="select">
-          <span>Items</span>
+          <span>{T.settings.dataTest.items}</span>
           <select value={size} onChange={(e) => setSize(Number(e.target.value))} disabled={state.kind === 'running'}>
             {SIZES.map((s) => (
               <option key={s} value={s}>
@@ -41,31 +39,31 @@ export function SelfTestCard() {
           </select>
         </label>
         <button type="button" className="btn btn--primary" onClick={() => void run()} disabled={state.kind === 'running'}>
-          {state.kind === 'running' ? `Running with ${state.size.toLocaleString('en')} items…` : 'Run self-test'}
+          {state.kind === 'running' ? T.settings.dataTest.running(state.size) : T.settings.dataTest.run}
         </button>
       </div>
 
-      {state.kind === 'failed' && <p className="error-text">Self-test failed: {state.message}</p>}
+      {state.kind === 'failed' && <p className="error-text">{T.settings.dataTest.failed(state.message)}</p>}
       {state.kind === 'done' && (
         <table className="results">
           <tbody>
             <tr>
-              <th>Writing {state.r.items.toLocaleString('en')} item files</th>
+              <th>{T.settings.dataTest.writing(state.r.items)}</th>
               <td>{seconds(state.r.writeMs)}</td>
             </tr>
             <tr>
-              <th>First indexing (once per PC, per repository)</th>
+              <th>{T.settings.dataTest.firstIndex}</th>
               <td>{seconds(state.r.firstIndexMs)}</td>
             </tr>
             <tr>
-              <th>Re-opening (nothing changed)</th>
+              <th>{T.settings.dataTest.reopen}</th>
               <td>{seconds(state.r.resyncMs)}</td>
             </tr>
             {state.r.queries.map((q) => (
               <tr key={q.name}>
-                <th>Query: {q.name}</th>
+                <th>{T.settings.dataTest.query(q.name)}</th>
                 <td>
-                  {q.ms} ms <span className="muted-inline">({q.total.toLocaleString('en')} matches)</span>
+                  {q.ms} ms <span className="muted-inline">{T.settings.dataTest.matches(q.total)}</span>
                 </td>
               </tr>
             ))}

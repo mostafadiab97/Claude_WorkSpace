@@ -23,5 +23,6 @@
     "src/modules/**/*",
     "src/shared/**/*",
     "tests/**/*"
-  ]
+  ],
+  "exclude": ["tests/ui/**/*"]
 }

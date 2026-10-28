@@ -1,7 +1,8 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { IndexedItem, ItemQuery, Schema } from '../../../shared/domain'
 import { useDebounced } from '../lib/hooks'
 import { typeName } from '../lib/schema'
+import { T } from '../../../shared/text'
 
 const LIMIT = 30
 
@@ -30,6 +31,13 @@ export function ItemSearch(props: {
   const emptyKey = JSON.stringify(emptyQuery ?? null)
   // nothing typed and nothing to list: show no (stale) results
   const shown = search.trim() || emptyQuery ? results : []
+  // closing on blur waits a moment so a click on a result still counts; a pick cancels that timer (D-06)
+  const blurTimer = useRef<number | null>(null)
+  const pick = (item: IndexedItem): void => {
+    if (blurTimer.current !== null) window.clearTimeout(blurTimer.current)
+    blurTimer.current = null
+    props.onPick(item)
+  }
 
   useEffect(() => {
     let live = true
@@ -63,16 +71,19 @@ export function ItemSearch(props: {
         onKeyDown={(e) => {
           if (e.key === 'Escape') props.onCancel()
           if (e.key === 'Enter') {
-            const first = results.find((r) => !r.reason)
-            if (first) props.onPick(first.item)
+            // what the list shows, not an older result list (D-06)
+            const first = shown.find((r) => !r.reason)
+            if (first) pick(first.item)
           }
         }}
-        onBlur={() => setTimeout(props.onCancel, 150)}
+        onBlur={() => {
+          blurTimer.current = window.setTimeout(props.onCancel, 150)
+        }}
       />
-      <ul className="picker__menu scroll" role="listbox" aria-label="Matching items">
+      <ul className="picker__menu scroll" role="listbox" aria-label={T.search.matching}>
         {props.before}
         {!search.trim() && results.length > 0 && props.emptyHint && <li className="picker__hint">{props.emptyHint}</li>}
-        {!search.trim() && !emptyQuery && <li className="picker__hint">Type an ID or words of the title</li>}
+        {!search.trim() && !emptyQuery && <li className="picker__hint">{T.search.typeHint}</li>}
         {shown.map(({ item, reason }) => (
           <li key={item.id}>
             <button
@@ -82,16 +93,16 @@ export function ItemSearch(props: {
               title={reason ?? `${item.id} · ${typeName(schema, item.type)}`}
               onMouseDown={(e) => {
                 e.preventDefault()
-                if (!reason) props.onPick(item)
+                if (!reason) pick(item)
               }}
             >
-              <span className="tree__id">{item.id}</span> <span className="picker__title">{item.title || '(no title)'}</span>
+              <span className="tree__id">{item.id}</span> <span className="picker__title">{item.title || T.common.noTitle}</span>
               <span className="picker__type">{typeName(schema, item.type)}</span>
             </button>
           </li>
         ))}
-        {shown.length > 0 && total > shown.length && <li className="picker__hint">{(total - shown.length).toLocaleString('en')} more — type more to narrow down</li>}
-        {search.trim() && shown.length === 0 && <li className="picker__hint">Nothing found</li>}
+        {shown.length > 0 && total > shown.length && <li className="picker__hint">{T.search.more(total - shown.length)}</li>}
+        {search.trim() && shown.length === 0 && <li className="picker__hint">{T.search.nothing}</li>}
       </ul>
     </div>
   )

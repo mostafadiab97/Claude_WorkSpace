@@ -1,22 +1,23 @@
 import type { ItemDiff, Link, Schema } from '../../../shared/domain'
 import { linkName } from '../lib/schema'
+import { T } from '../../../shared/text'
 
 /** What one change did to one item: changed fields (before → after), the text, links added and removed. */
 export function ChangeView({ schema, diff, unreadable }: { schema: Schema; diff: ItemDiff; unreadable?: string | undefined }) {
   const links = (ls: Link[], sign: string): string[] => ls.map((l) => `${sign} ${linkName(schema, l.type)} ${l.target}`)
   const nothing = diff.rows.length === 0 && !diff.text && diff.linksAdded.length === 0 && diff.linksRemoved.length === 0
   return (
-    <section className="change" aria-label="What changed">
-      <h4 className="links__title">{diff.kind === 'added' ? 'Created with' : diff.kind === 'deleted' ? 'Deleted' : 'What changed'}</h4>
-      {unreadable && <p className="notice notice--warn">One version could not be read: {unreadable}</p>}
-      {nothing && <p className="muted-inline">Nothing visible changed (e.g. only a link confirmation or formatting).</p>}
+    <section className="change" aria-label={T.change.label}>
+      <h4 className="links__title">{diff.kind === 'added' ? T.change.created : diff.kind === 'deleted' ? T.change.deleted : T.change.changed}</h4>
+      {unreadable && <p className="notice notice--warn">{T.change.unreadable(unreadable)}</p>}
+      {nothing && <p className="muted-inline">{T.change.nothing}</p>}
       {diff.rows.length > 0 && (
         <table className="change__table">
           <thead>
             <tr>
-              <th scope="col">Field</th>
-              {diff.kind !== 'added' && <th scope="col">Before</th>}
-              <th scope="col">{diff.kind === 'added' ? 'Value' : 'After'}</th>
+              <th scope="col">{T.change.field}</th>
+              {diff.kind !== 'added' && <th scope="col">{T.change.before}</th>}
+              <th scope="col">{diff.kind === 'added' ? T.change.value : T.change.after}</th>
             </tr>
           </thead>
           <tbody>
@@ -32,9 +33,9 @@ export function ChangeView({ schema, diff, unreadable }: { schema: Schema; diff:
       )}
       {diff.text && (
         <div className="change__text">
-          <span className="field__label">Text</span>
-          {diff.kind !== 'added' && <pre className="change__before">{diff.text.before || '(empty)'}</pre>}
-          <pre className="change__after">{diff.text.after || '(empty)'}</pre>
+          <span className="field__label">{T.change.text}</span>
+          {diff.kind !== 'added' && <pre className="change__before">{diff.text.before || T.change.empty}</pre>}
+          <pre className="change__after">{diff.text.after || T.change.empty}</pre>
         </div>
       )}
       {(diff.linksAdded.length > 0 || diff.linksRemoved.length > 0) && (

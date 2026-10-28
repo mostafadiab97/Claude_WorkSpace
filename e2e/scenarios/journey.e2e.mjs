@@ -1,59 +1,18 @@
-// End-to-end test of the prototype journey, driving the real built app.
+// The prototype journey as one story, driving the real built app: open → hierarchy → filters → fields →
+// links → safety → commit/push/pull/history/conflicts → compare → export → look. Its steps build on each
+// other on purpose (it is the path a new user takes); separate problems get their own scenario next to it.
 //   npm run build && npm run test:e2e            (screenshots go to e2e/out/)
-// Steps 1–3 of the prototype journey: open a cloned repository, create the requirements folder, create a
-// hierarchy of items, filter the table, open items. Links (step 2's second half) arrive in M3.
-import { execFileSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { _electron as electron } from 'playwright-core'
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { gitIn, gitRepo, launch, scenario, temp } from '../harness.mjs'
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const outDir = join(root, 'e2e', 'out')
-mkdirSync(outDir, { recursive: true })
-const electronPath = (await import('electron')).default
-
-const repo = mkdtempSync(join(tmpdir(), 'reqman-e2e-repo-'))
-// "GitHub" = a bare repository on disk; the test repository is "PC A", a second clone later is "PC B".
-const remote = mkdtempSync(join(tmpdir(), 'reqman-e2e-remote-'))
-const gitIn = (cwd, ...args) => execFileSync('git', args, { cwd, encoding: 'utf8' })
-gitIn(remote, 'init', '-q', '--bare', '-b', 'main')
-execFileSync('git', ['init', '-q', '-b', 'main', repo])
-gitIn(repo, 'remote', 'add', 'origin', remote)
-gitIn(repo, 'config', 'user.name', 'Alice')
-gitIn(repo, 'config', 'user.email', 'alice@example.com')
-const userData = mkdtempSync(join(tmpdir(), 'reqman-e2e-user-'))
-
-let failures = 0
-const check = (cond, what) => {
-  console.log(`${cond ? '  ✓' : '  ✗'} ${what}`)
-  if (!cond) failures++
-}
-
-const app = await electron.launch({
-  executablePath: electronPath,
-  args: ['.', `--user-data-dir=${userData}`, ...(process.platform === 'linux' ? ['--no-sandbox', '--disable-gpu'] : [])],
-  cwd: root,
-  env: { ...process.env, ELECTRON_ENABLE_LOGGING: '0' }
-})
-// The folder picker is a native dialog Playwright cannot click; answer it with the test repository.
-await app.evaluate(({ dialog }, path) => {
-  dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] })
-}, repo)
-// Save dialogs (export): answer with the next path we set
-const exportDir = mkdtempSync(join(tmpdir(), 'reqman-e2e-export-'))
-const saveAs = (name) =>
-  app.evaluate(({ dialog }, file) => {
-    dialog.showSaveDialog = async () => ({ canceled: false, filePath: file })
-  }, join(exportDir, name))
-
-const win = await app.firstWindow()
-await win.setViewportSize({ width: 1400, height: 860 })
-const shot = (name) => win.screenshot({ path: join(outDir, `${name}.png`) })
-const rows = () => win.locator('.table__row')
-
-try {
+await scenario('E2E journey', async (ctx) => {
+  const { repo, remote } = gitRepo('journey')
+  const t = (ctx.t = await launch({ openPath: repo }))
+  const { win, check, shot } = t
+  const exportDir = temp('export')
+  const saveAs = (name) => t.saveAs(join(exportDir, name))
+  const rows = () => win.locator('.table__row')
   console.log('Step 1 — open the repository and create the requirements folder')
   await win.getByRole('button', { name: 'Open repository…' }).click()
   await win.getByText('No requirements folder yet').waitFor()
@@ -347,7 +306,7 @@ try {
   check((await gitbar.locator('.gitbar__sync').textContent()).trim() === '↑0 ↓0', 'pushed: nothing to push or pull')
 
   // PC B (a colleague) clones, renames the test case and pushes
-  const pcB = mkdtempSync(join(tmpdir(), 'reqman-e2e-pcb-'))
+  const pcB = temp('pcb')
   gitIn(pcB, 'clone', '-q', remote, '.')
   gitIn(pcB, 'config', 'user.name', 'Bob')
   gitIn(pcB, 'config', 'user.email', 'bob@example.com')
@@ -443,6 +402,8 @@ try {
   const compare = win.getByRole('region', { name: 'Compare' })
   await compare.locator('.compare__pull', { hasText: 'Pulled first' }).waitFor()
   check((await compare.locator('.compare__pull').textContent()).includes('1 item changed'), 'Compare pulls first')
+  // the comparison is shown once the pull has finished and the table is up to date
+  await compare.locator('.compare__range').waitFor()
   check((await compare.getByLabel('What to compare').inputValue()) === 'lastPull', 'default: what the last pull brought in')
   const changedItems = compare.getByRole('list', { name: 'Changed items' })
   await changedItems.locator('.compare__row').first().waitFor()
@@ -517,14 +478,4 @@ try {
   await win.getByRole('button', { name: '← Back' }).click()
   await win.waitForTimeout(500)
   check((await rowOf('Temperature accuracy').count()) === 1, 'workspace kept its state behind the settings page')
-} catch (e) {
-  failures++
-  console.error(e)
-  await shot('99-failure').catch(() => {})
-} finally {
-  // exit directly: a failed run may leave unsaved edits, and the "unsaved changes" dialog would block close()
-  await app.evaluate(({ app: a }) => a.exit(0)).catch(() => {})
-}
-
-console.log(failures === 0 ? '\nE2E journey passed' : `\nE2E journey: ${failures} failure(s)`)
-process.exit(failures === 0 ? 0 : 1)
+})

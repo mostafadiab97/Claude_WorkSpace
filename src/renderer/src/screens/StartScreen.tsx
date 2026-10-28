@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { FolderCheck, GitInfo, RecentRepository, RepoInfo } from '../../../shared/api'
 import { errorMessage } from '../lib/hooks'
+import { T } from '../../../shared/text'
 
 type Pending = { kind: 'idle' } | { kind: 'busy'; label: string } | { kind: 'confirm-init'; check: FolderCheck } | { kind: 'error'; message: string }
 
@@ -14,12 +15,12 @@ export function StartScreen({ brand, git, onOpened }: { brand: string; git: GitI
   }, [])
 
   const openPath = async (path: string): Promise<void> => {
-    setPending({ kind: 'busy', label: 'Checking folder…' })
+    setPending({ kind: 'busy', label: T.start.checkingFolder })
     try {
       const check = await window.reqman.checkFolder(path)
-      if (check.state === 'missing') return setPending({ kind: 'error', message: `The folder ${path} no longer exists.` })
+      if (check.state === 'missing') return setPending({ kind: 'error', message: T.start.missing(path) })
       if (check.state === 'not-initialized') return setPending({ kind: 'confirm-init', check })
-      setPending({ kind: 'busy', label: 'Opening — the first time on this PC, every requirement file is indexed…' })
+      setPending({ kind: 'busy', label: T.start.opening })
       onOpened(await window.reqman.openRepository(check.root))
     } catch (e) {
       setPending({ kind: 'error', message: errorMessage(e) })
@@ -32,7 +33,7 @@ export function StartScreen({ brand, git, onOpened }: { brand: string; git: GitI
   }
 
   const initialize = async (root: string): Promise<void> => {
-    setPending({ kind: 'busy', label: 'Creating requirements folder…' })
+    setPending({ kind: 'busy', label: T.start.creating })
     try {
       onOpened(await window.reqman.initializeRepository(root))
     } catch (e) {
@@ -50,15 +51,12 @@ export function StartScreen({ brand, git, onOpened }: { brand: string; git: GitI
     <div className="page">
       <div className="page__inner">
         <section className="hero">
-          <h1>Requirements, versioned like code.</h1>
-          <p className="muted">
-            {brand} turns a folder in your project&apos;s Git repository into a structured, linkable requirements
-            database — no server, no accounts.
-          </p>
+          <h1>{T.start.headline}</h1>
+          <p className="muted">{T.start.intro(brand)}</p>
           <button type="button" className="btn btn--primary" onClick={() => void choose()} disabled={busy}>
-            Open repository…
+            {T.start.open}
           </button>
-          {git && !git.installed && <p className="hint">Git is not installed; you can edit requirements, but not share them yet.</p>}
+          {git && !git.installed && <p className="hint">{T.start.noGit}</p>}
         </section>
 
         {pending.kind === 'busy' && <p className="notice">{pending.label}</p>}
@@ -69,32 +67,28 @@ export function StartScreen({ brand, git, onOpened }: { brand: string; git: GitI
         )}
         {pending.kind === 'confirm-init' && (
           <section className="card card--accent" aria-labelledby="init-title">
-            <h2 id="init-title">No requirements folder yet</h2>
+            <h2 id="init-title">{T.start.initTitle}</h2>
             <p>
-              <code>{pending.check.root}</code> has no ReqMan requirements. Create a <code>requirements</code> folder
-              there with the default item types, fields and link types?
+              {T.start.initBefore}<code>{pending.check.root}</code>{T.start.initAfter}
             </p>
             {!pending.check.isGitRepository && (
-              <p className="notice notice--warn">
-                This folder is not a Git repository. ReqMan will work, but history, branches and sharing need Git —
-                usually you would pick the folder of an existing project clone.
-              </p>
+              <p className="notice notice--warn">{T.start.notGit}</p>
             )}
             <div className="actions">
               <button type="button" className="btn btn--primary" onClick={() => void initialize(pending.check.root)}>
-                Create requirements folder
+                {T.start.create}
               </button>
               <button type="button" className="btn" onClick={() => setPending({ kind: 'idle' })}>
-                Cancel
+                {T.common.cancel}
               </button>
             </div>
           </section>
         )}
 
         <section className="card" aria-labelledby="recent-title">
-          <h2 id="recent-title">Recent repositories</h2>
+          <h2 id="recent-title">{T.start.recentTitle}</h2>
           {recent.length === 0 ? (
-            <p className="muted muted--flush">Repositories you open appear here.</p>
+            <p className="muted muted--flush">{T.start.recentEmpty}</p>
           ) : (
             <ul className="recent">
               {recent.map((r) => (
@@ -103,7 +97,7 @@ export function StartScreen({ brand, git, onOpened }: { brand: string; git: GitI
                     <span className="recent__name">{r.name}</span>
                     <span className="recent__path">{r.root}</span>
                   </button>
-                  <button type="button" className="icon-btn" aria-label={`Remove ${r.name} from the list`} title="Remove from list" onClick={() => void forget(r.root)}>
+                  <button type="button" className="icon-btn" aria-label={T.start.forget(r.name)} title={T.start.forgetTooltip} onClick={() => void forget(r.root)}>
                     ✕
                   </button>
                 </li>

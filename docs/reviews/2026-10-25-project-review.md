@@ -355,6 +355,11 @@ all fine. The two-PC trial is postponed (only one user for now).
   data) plus at most 5 manual steps per version, from 0.8.0. Dependabot alerts stay off (weekly updates are enough;
   `check:deps` warns about indirect libraries in every build).
 
+- **Done in 0.8.0 (28 Oct 2026):** D-01 – D-04, D-06, D-07, D-08, D-10, P-01, P-02, P-04, P-05, S-01, S-02, S-03, S-06,
+  X-01, T-01 – T-05 (T-01: the journey stays one story on purpose — its steps build on each other — but scenarios
+  now share a harness, each has its own repository and profile, and they run side by side; new checks get their own
+  scenario). Still open as planned: D-05 and D-09 (M8), S-04 (0.9.0), S-05 (M8), S-08 / X-02 (later).
+
 ## G. Order (confirmed 28 Oct 2026)
 
 See `docs/design/DESIGN.md` → "Release plan": 0.8.0 clean page (all fixes of this review) → 0.9.0 new data format →

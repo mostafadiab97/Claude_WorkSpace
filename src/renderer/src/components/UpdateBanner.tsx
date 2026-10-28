@@ -1,20 +1,21 @@
 import type { UpdateStatus } from '../../../shared/api'
+import { T } from '../../../shared/text'
 
 /** Shown above the content while an update downloads or is ready to install. */
 export function UpdateBanner({ status }: { status: UpdateStatus | null }) {
   if (status?.state === 'downloading') {
     return (
       <div className="banner" role="status">
-        Downloading ReqMan {status.version}… {status.percent}%
+        {T.updates.downloading(status.version, status.percent)}
       </div>
     )
   }
   if (status?.state === 'ready') {
     return (
       <div className="banner banner--ready" role="status">
-        <span>ReqMan {status.version} is ready to install.</span>
+        <span>{T.updates.ready(status.version)}</span>
         <button type="button" className="btn btn--primary" onClick={() => void window.reqman.installUpdate()}>
-          Restart and update
+          {T.updates.restart}
         </button>
       </div>
     )
@@ -26,17 +27,17 @@ export function describeUpdate(status: UpdateStatus | null): string {
   switch (status?.state) {
     case undefined:
     case 'idle':
-      return 'Not checked yet'
+      return T.updates.notChecked
     case 'disabled':
-      return `Off (${status.reason})`
+      return T.updates.off(status.reason)
     case 'checking':
-      return 'Checking…'
+      return T.common.checking
     case 'up-to-date':
-      return `Up to date (checked ${new Date(status.checkedAt).toLocaleTimeString()})`
+      return T.updates.upToDate(new Date(status.checkedAt).toLocaleTimeString())
     case 'downloading':
-      return `Downloading ${status.version} — ${status.percent}%`
+      return T.updates.downloadingShort(status.version, status.percent)
     case 'ready':
-      return `Version ${status.version} ready — restart to install`
+      return T.updates.readyShort(status.version)
     case 'error':
       return status.message
   }

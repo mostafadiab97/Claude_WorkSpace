@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { T } from '../../../shared/text'
 
 interface State {
   error: Error | null
@@ -36,21 +37,18 @@ export class ErrorBoundary extends Component<{ children: ReactNode; area: string
     return (
       <div className="page" role="alert">
         <div className="page__inner">
-          <h2>Something went wrong in {this.props.area}</h2>
-          <p>
-            ReqMan hit an unexpected error while showing this part of the window. Your saved work is not affected — only
-            unsaved typing in the editor may be lost. The details were written to the log file.
-          </p>
+          <h2>{T.errorBoundary.title(this.props.area)}</h2>
+          <p>{T.errorBoundary.body}</p>
           <p className="notice notice--error">{error.message}</p>
           <div className="actions">
             <button type="button" className="btn btn--primary" onClick={() => this.setState({ error: null, copied: false })}>
-              Try again
+              {T.errorBoundary.retry}
             </button>
             <button type="button" className="btn" onClick={() => void this.copy()}>
-              {copied ? 'Copied ✓' : 'Copy diagnostics for a bug report'}
+              {copied ? T.common.copied : T.errorBoundary.copy}
             </button>
             <button type="button" className="btn" onClick={() => window.location.reload()}>
-              Reload the window
+              {T.errorBoundary.reload}
             </button>
           </div>
         </div>

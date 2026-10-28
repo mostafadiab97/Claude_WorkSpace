@@ -1,12 +1,17 @@
 # Testing ReqMan
 
-Two kinds of checks protect each build:
+Three kinds of checks protect each version:
 
 1. **Automated checks** run on a Windows machine on GitHub for every push: type checking, lint rules
-   (including the module-boundary rules) and unit tests. A build that fails any of them produces no installer.
-   To see them: repository → **Actions** → latest **Build** run → **windows** → expand **Run npm run check**.
-2. **Manual checks** below — done by a person on a real Windows 11 PC, because things like installation,
-   Windows dark mode and Explorer integration can only be judged by hand.
+   (including the module-boundary rules), about 130 unit tests (real Git with a fake "GitHub", the sandbox's
+   broken files, …), performance tests, and end-to-end scenarios that click through the real app. A build that
+   fails any of them produces no installer. To see them: repository → **Actions** → latest **Build** run.
+2. **The release self-test** (from 0.8.0) — on *your* PC, inside ReqMan: **⚙ Settings & diagnostics → Run
+   release self-test**. It does the main actions on a practice repository in a temporary folder (never your
+   data) and shows ✓/✗ per step. It checks what only your PC has: your Git, Windows Defender, your disk.
+3. **A short manual checklist** — at most 5 steps per version (owner's rule, 28 Oct 2026): the update
+   arrives, the self-test passes, the sandbox opens, one real push when the Git parts changed, and a quick look
+   at what is new.
 
 ## Where things are on Windows
 
@@ -48,7 +53,20 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.7.0 (covers everything since 0.4.1: Git, Compare, Export)
+## Manual test checklist — v0.8.0 (clean-up release)
+
+Almost nothing new to see: 0.8.0 fixes everything the project review found and makes ReqMan faster and
+sturdier. Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Start ReqMan (0.7.0). Wait for **Restart and update**, click it. Then **⚙** → Environment → App. | ReqMan restarts; App shows **0.8.0**. |
+| 2 | **⚙ Settings & diagnostics → Run release self-test**. Wait about a minute. | **All steps passed** and a list of 17 steps, each with ✓. If anything shows ✗: **Copy report** and paste it into your message. |
+| 3 | Open your `Claude_SandBox` clone. Click **… problems ▸** in the status bar. Find the line *"RSK-…: The file items/RSK-RENAMD.md holds RSK-…"*. Click the line, then **Fix file name**. Then open **Changes** and **Discard** both lines it shows (the old and the new file name). | Clicking the line opens the risk normally (before 0.8.0 it said "could not be read"). **Fix file name** makes the problem disappear. Discard puts the sandbox back as it was. |
+| 4 | Speed: in the sandbox, **Expand all**, then drag the scrollbar to the bottom. Edit any item's title, **Save**. Switch to another program and back (Alt+Tab). | Expand all is instant; while scrolling, a few rows briefly say "Loading…". Saving and coming back to the window cause no noticeable pause. |
+| 5 | While ReqMan is open, start it again from the Start menu. | No second ReqMan opens; the open window comes to the front. |
+
+## Previous checklist — v0.7.0 (covers everything since 0.4.1: Git, Compare, Export)
 
 One pass tests versions 0.5.0, 0.6.0 and 0.7.0 together. Use your `Claude_SandBox` clone (`git pull` there first) and
 GitHub's website as "the colleague" (open a file under `requirements/items/` → pencil icon → **Commit changes**).

@@ -414,6 +414,34 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
       await git(root, ['reset', '--soft', '--quiet', 'HEAD~1'])
     },
 
+    async headSummary(root) {
+      try {
+        const lines = (await git(root, ['log', '-2', '--format=%s'])).split(/\r?\n/).filter((l, i, all) => i < all.length - 1 || l !== '')
+        return { hasParent: lines.length >= 2, lastMessage: lines[0]?.trim() || null }
+      } catch {
+        return { hasParent: false, lastMessage: null } // no commits yet
+      }
+    },
+
+    async blobIds(root, ref, paths) {
+      const out = new Map<string, string>()
+      // a few hundred paths per call keeps the command line short enough for Windows
+      for (let i = 0; i < paths.length; i += 200) {
+        let text: string
+        try {
+          text = await git(root, ['ls-tree', '-z', ref, '--', ...paths.slice(i, i + 200)])
+        } catch {
+          continue // no such commit (e.g. before the first commit)
+        }
+        for (const entry of text.split('\0')) {
+          // <mode> blob <oid>\t<path>
+          const m = /^\d+ blob ([0-9a-f]+)\t(.*)$/s.exec(entry)
+          if (m) out.set(m[2] as string, m[1] as string)
+        }
+      }
+      return out
+    },
+
     async lastCommitMessage(root) {
       try {
         return (await git(root, ['log', '-1', '--format=%s'])).trim() || null

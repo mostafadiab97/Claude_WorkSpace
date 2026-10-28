@@ -37,7 +37,8 @@ flowchart LR
    may import (ESLint enforces it). `src/main/composition.ts` is the one place where implementations are created
    and connected, so a module can be swapped in one line.
 4. **The window cannot touch files or Git.** The UI (renderer) runs sandboxed; it only calls `window.reqman.*`,
-   defined in `src/shared/api.ts`. All file, Git and database work happens in the main process.
+   defined in `src/shared/api.ts`. All file, Git and database work happens in the main process, which checks
+   every argument it receives (`src/main/validate.ts`). Every word on screen comes from `src/shared/text.ts`.
 5. **One theme file.** Colours, fonts, sizes, radii and spacing come from `config/theme.json` as CSS variables
    (`--rm-*`). Hard-coded colours in the UI fail a test.
 
@@ -77,7 +78,9 @@ flowchart TB
 | **Contract** (`src/shared/api.ts`, `domain.ts`) | The types both sides agree on: every call, every data shape, every channel name | two files | everyone |
 | **main/ipc.ts** | Receives calls, checks inputs, shows native dialogs (open folder, save file), forwards to modules | one file | preload |
 | **main/composition.ts** | Builds all modules and wires them together — the only place to swap an implementation | one file | `main/index.ts` |
-| **workspace** | "The open repository": opens/creates it and runs every user operation with the rules that need the whole set (no parent loops, conflict-safe saves, links, moves, schema fields, export); `gitOps.ts` = commit/pull/push/history, `compare.ts` = Compare | `workspace.ts`, `gitOps.ts`, `compare.ts` | ipc |
+| **workspace** | "The open repository": opens/creates it and runs every user operation with the rules that need the whole set (no parent loops, conflict-safe saves, links, moves, schema fields, export). `workspace.ts` is the facade and runs every write and Git action through one queue (one at a time, like a mutex); the work is in small files: `itemOps`, `links`, `structure`, `schemaFields`, `exporting`, `gitOps` (commit/pull/push/history), `compare`, `watcher` (which files changed) | `workspace.ts` + the files named | ipc |
+| **safe-files** | Writes files atomically and retries while Windows briefly locks a file | `index.ts` | store, workspace, ipc |
+| **self-test** | The release self-test the owner runs in the app: the main actions on a practice repository | `index.ts` | composition |
 | **repository-store** | Reads and writes the files in `requirements/` — atomic, revision-checked | `fileStore.ts` | workspace |
 | **index-cache** | A local SQLite copy of all items for fast search, filters, counts, suspect links and problems; re-reads only changed files | `sqliteIndex.ts` | workspace |
 | **git-adapter** | Runs the installed `git` (argument arrays, no shell, timeouts) and parses its output | `systemGit.ts` | workspace |
@@ -149,9 +152,11 @@ Example: a new operation "mark several items as Approved".
 1. **Domain/logic** in the right module (e.g. a pure helper in `items`, or the operation in `workspace`), using
    existing pieces: `repository-store.writeItem` with `expectedRevision`, then `index.syncPaths`.
 2. **Contract:** add the call to `ReqManApi` and its channel name to `Channels` in `src/shared/api.ts`.
-3. **Main:** handle the channel in `src/main/ipc.ts` (check inputs) and expose it in `src/preload/index.ts`.
-   The TypeScript compiler tells you if one side is missing.
-4. **UI:** call `window.reqman.<name>()` from a component; use only `--rm-*` CSS variables for styling.
+3. **Main:** add its handler to `handlers` in `src/main/ipc.ts`, checking inputs with `src/main/validate.ts`.
+   The compiler reports a missing handler; the preload picks the new channel up by itself. If it writes, wrap it
+   in the workspace queue (`q(...)`).
+4. **UI:** call `window.reqman.<name>()` from a component; use only `--rm-*` CSS variables for styling and
+   put every text in `src/shared/text.ts`.
 5. **Tests:** a unit test in `tests/` (real temp folders and real Git, no mocks for files), and extend
    `e2e/journey.e2e.mjs` when the user can see the feature.
 6. **Docs and release:** the owner's checklist in `docs/TESTING.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`
@@ -169,8 +174,9 @@ that opens an old cache file.
 | Lint incl. module boundaries and React hooks rules | `npm run lint` | yes |
 | Unit tests (incl. real Git with a bare remote and two clones) | `npm test` | yes |
 | All three | `npm run check` | yes |
-| Performance with 10,000 and 50,000 items | `npm run test:perf` | yes |
-| The whole user journey in the real app (Playwright) | `npm run build && npm run test:e2e` | yes |
+| Performance with 10,000 items (50,000: `test:perf:all`, releases) | `npm run test:perf` | yes |
+| End-to-end scenarios in the real app (Playwright): the user journey, review fixes | `npm run build && npm run test:e2e` | yes |
+| No literal words in screen code (texts live in `src/shared/text.ts`) | part of `npm test` | yes |
 | A generated 10,000-item repository opened in the real app | `npm run measure:ui -- <folder>` | yes |
 
 ## 9. Glossary

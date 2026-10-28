@@ -2,7 +2,9 @@
 // Responsibility: the requirements repository the user has open — opening/creating it, keeping its index
 // up to date, and every item operation the UI performs (query, read, create, save, delete, reorder),
 // with the rules that need the whole repository (no parent loops, conflict-safe saving).
+// Implementation: workspace.ts (facade + queue) over small services — see the file list there.
 import type {
+  FieldCheck,
   CompareOptions,
   CompareResult,
   ExportItemsRequest,
@@ -22,14 +24,18 @@ import type {
 } from '../../shared/api'
 import { cacheFileName, createWorkspace, type WorkspaceDeps } from './workspace'
 
-export type OpResult = { ok: true } | { ok: false; message: string }
+import type { OpResult } from './context'
+export type { OpResult }
 
 export interface WorkspaceService {
   checkFolder(path: string): Promise<FolderCheck>
   initialize(root: string): Promise<RepoInfo>
   open(root: string): Promise<RepoInfo>
   close(): void
-  refresh(): Promise<RepoInfo>
+  /** Re-reads what changed on disk. `focus`: the window got focus again (also re-checks Git settings). */
+  refresh(focus?: boolean): Promise<RepoInfo>
+  /** The repository summary as the index has it now, without touching the disk. */
+  repoInfo(): RepoInfo
   isOpen(): boolean
   recent(): Promise<RecentRepository[]>
   forgetRecent(root: string): Promise<void>
@@ -42,6 +48,10 @@ export interface WorkspaceService {
   addLink(source: string, type: string, target: string): Promise<OpResult>
   removeLink(source: string, type: string, target: string): Promise<OpResult>
   confirmLinks(source: string, target?: string): Promise<OpResult>
+  /** Renames a file whose name does not match the ID inside it to <ID>.md. */
+  fixFileName(id: string): Promise<OpResult>
+  /** Before saving field definitions: items whose values the changed definitions would not allow. */
+  checkFields(fields: FieldDef[]): FieldCheck[]
   moveItem(id: string, direction: 'up' | 'down'): Promise<OpResult>
   reparentItem(id: string, parent: string | null, before?: string | null): Promise<OpResult>
   ancestors(id: string): string[]
@@ -65,3 +75,5 @@ export interface WorkspaceService {
 }
 
 export { createWorkspace, cacheFileName, type WorkspaceDeps }
+/** Pure ordering rules, exported for tests and future tools (import, merge). */
+export { documentOrderOf, planInsert, planSwap } from './structure'

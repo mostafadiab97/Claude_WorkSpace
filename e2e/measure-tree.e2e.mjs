@@ -39,17 +39,24 @@ try {
     await win.locator('.table__row').first().waitFor({ timeout: 120_000 })
   })
   console.log('top-level rows:', await win.locator('.table__row').count())
-  await time('expand all', async () => {
+  // "Expand all" opens every level at once and loads levels as they scroll into view (P-04, 0.8.0)
+  await time('expand all (first screen ready)', async () => {
     await win.getByRole('button', { name: 'Expand all' }).click()
-    await win.getByRole('button', { name: 'Expand all' }).waitFor()
+    await win.locator('.table__row[aria-level="2"]').first().waitFor()
+    await win.waitForFunction(() => document.querySelectorAll('.table__row--loading').length === 0)
   })
-  console.log('rows after expand all:', Math.round((await win.locator('.table__scroll').evaluate((e) => e.scrollHeight)) / 34))
-  await time('scroll to the bottom', async () => {
-    await win.locator('.table__scroll').evaluate((e) => {
-      e.scrollTop = e.scrollHeight
-    })
-    await win.waitForTimeout(50)
+  await time('scroll to the bottom (levels load on the way)', async () => {
+    // keep jumping to the end until nothing is left to load there
+    for (let i = 0; i < 50; i++) {
+      await win.locator('.table__scroll').evaluate((e) => {
+        e.scrollTop = e.scrollHeight
+      })
+      await win.waitForTimeout(30)
+      const loading = await win.locator('.table__row--loading').count()
+      if (loading === 0) break
+    }
   })
+  console.log('rows known after scrolling to the bottom:', Math.round((await win.locator('.table__scroll').evaluate((e) => e.scrollHeight)) / 34))
   await win.screenshot({ path: join(outDir, 'measure-expanded-bottom.png') })
   await time('collapse all', async () => {
     await win.getByRole('button', { name: 'Collapse all' }).click()

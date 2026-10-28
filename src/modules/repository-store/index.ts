@@ -48,9 +48,20 @@ export interface RequirementsRepo {
    */
   writeSchemaFields(fields: FieldDef[], expectedRevision: string): Promise<void>
   listItemFiles(): Promise<ItemFileInfo[]>
-  readItemFile(path: string): Promise<{ ok: true; item: Item } | { ok: false; error: string }>
-  /** Path of an item's file relative to the requirements folder. */
+  /**
+   * Reads one item file. `allKeysAsFields`: every header key with a simple value goes to `fields`, whether or not
+   * the schema defines it (the index stores them all, so adding or removing a field needs no re-index).
+   */
+  readItemFile(path: string, opts?: { allKeysAsFields?: boolean }): Promise<{ ok: true; item: Item } | { ok: false; error: string }>
+  /** Path of an item's file relative to the requirements folder — where it really is (see OpenOptions.locate). */
   itemPath(id: string): string
+  /** Where the item's file should be: items/<ID>.md. */
+  defaultItemPath(id: string): string
+  /**
+   * Renames a file whose name does not match its ID to items/<ID>.md (Git sees a rename, so history is kept).
+   * Refuses if that name is taken. Returns the new path.
+   */
+  fixFileName(id: string): Promise<string>
   /**
    * Reads one item by ID, with a revision (hash of the file content) for conflict-safe saving.
    * `null` if no file exists.
@@ -69,6 +80,14 @@ export interface RequirementsRepo {
   deleteItem(id: string, options?: { expectedRevision?: string }): Promise<void>
 }
 
+export interface OpenOptions {
+  /**
+   * Where an item's file really is (path relative to the requirements folder), if known — e.g. from the index.
+   * Without it, items/<ID>.md is assumed.
+   */
+  locate?: (id: string) => string | undefined
+}
+
 export type FolderState = 'ready' | 'not-initialized' | 'missing'
 
 export interface RepositoryStore {
@@ -76,7 +95,7 @@ export interface RepositoryStore {
   inspect(repoRoot: string): Promise<FolderState>
   /** Creates the requirements folder with the default schema. Refuses if it already exists. */
   initialize(repoRoot: string): Promise<RequirementsRepo>
-  open(repoRoot: string): Promise<RequirementsRepo>
+  open(repoRoot: string, options?: OpenOptions): Promise<RequirementsRepo>
 }
 
 export { createFileRepositoryStore }

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import type { RepoInfo } from '../../../shared/api'
+import type { FieldCheck, RepoInfo } from '../../../shared/api'
 import type { FieldDef, FieldType, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { optionalColumns, orderColumns, type ColumnPrefs } from './ItemTable'
+import { T } from '../../../shared/text'
 
 // ---------------------------------------------------------------- show / hide columns
 
@@ -75,29 +76,29 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields }: { schema:
   return (
     <div className="popover" ref={ref}>
       <button type="button" className={open ? 'btn btn--active' : 'btn'} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-        Columns{shown < cols.length ? ` (${shown + 2}/${cols.length + 2})` : ''} ▾
+        {T.columnsMenu.button(shown < cols.length ? shown + 2 : null, cols.length + 2)}
       </button>
       {open && (
-        <div className="popover__panel" role="dialog" aria-label="Columns">
-          <p className="popover__hint">Shown in the table, in this order after ID and Title:</p>
+        <div className="popover__panel" role="dialog" aria-label={T.columnsMenu.label}>
+          <p className="popover__hint">{T.columnsMenu.hint}</p>
           <ul className="popover__list">
             {cols.map((c, i) => (
               <li key={c.key} className="popover__row">
                 <label className="check">
                   <input type="checkbox" checked={!hidden.has(c.key)} onChange={() => toggle(c.key)} />
                   {c.label}
-                  {c.builtIn && <span className="muted-inline"> · built in</span>}
+                  {c.builtIn && <span className="muted-inline">{T.columnsMenu.builtIn}</span>}
                 </label>
                 <span className="actions">
-                  <button type="button" className="icon-btn icon-btn--small" aria-label={`Move ${c.label} column up`} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
-                  <button type="button" className="icon-btn icon-btn--small" aria-label={`Move ${c.label} column down`} disabled={i === cols.length - 1} onClick={() => move(i, 1)}>↓</button>
+                  <button type="button" className="icon-btn icon-btn--small" aria-label={T.columnsMenu.up(c.label)} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
+                  <button type="button" className="icon-btn icon-btn--small" aria-label={T.columnsMenu.down(c.label)} disabled={i === cols.length - 1} onClick={() => move(i, 1)}>↓</button>
                 </span>
               </li>
             ))}
           </ul>
           <div className="actions actions--spread popover__footer">
             <button type="button" className="link-btn" onClick={() => onChange({ hidden: new Set(), order: [] })} disabled={hidden.size === 0 && prefs.order.length === 0}>
-              Reset
+              {T.columnsMenu.reset}
             </button>
             <button
               type="button"
@@ -107,7 +108,7 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields }: { schema:
                 onEditFields()
               }}
             >
-              Edit fields…
+              {T.columnsMenu.editFields}
             </button>
           </div>
         </div>
@@ -129,25 +130,12 @@ interface Draft {
   default: string
 }
 
-const TYPES: { id: FieldType; label: string }[] = [
-  { id: 'text', label: 'Text' },
-  { id: 'enum', label: 'Choice (one value)' },
-  { id: 'list', label: 'List (several values)' },
-  { id: 'number', label: 'Number' },
-  { id: 'date', label: 'Date' }
-]
+const TYPES: { id: FieldType; label: string }[] = (['text', 'enum', 'list', 'number', 'date'] as const).map((id) => ({ id, label: T.fields.kinds[id] }))
 
 let nextKey = 0
 
 /** Parts of every item that are not schema fields. */
-const BUILT_IN = [
-  { key: 'id', name: 'ID' },
-  { key: 'title', name: 'Title' },
-  { key: 'type', name: 'Type' },
-  { key: 'parent', name: 'Parent' },
-  { key: 'text', name: 'Text' },
-  { key: 'links', name: 'Links' }
-]
+const BUILT_IN = ['id', 'title', 'type', 'parent', 'text', 'links'].map((key) => ({ key, name: T.fields.builtInNames[key] ?? key }))
 
 const kebab = (s: string): string =>
   s
@@ -173,6 +161,8 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
   const [rows, setRows] = useState<Draft[]>(() => info.schema.fields.map(toDraft))
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  // D-08: items whose values a changed definition would no longer allow; null = not checked for this version
+  const [check, setCheck] = useState<FieldCheck[] | null>(null)
 
   const original = new Map(info.schema.fields.map((f) => [f.id, f]))
   const removed = info.schema.fields.filter((f) => !rows.some((r) => !r.isNew && r.id === f.id))
@@ -191,17 +181,20 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
 
   const problems: string[] = []
   withIds.forEach((r, i) => {
-    const label = r.name.trim() || `Field ${i + 1}`
-    if (!r.name.trim()) problems.push(`Field ${i + 1} needs a name.`)
+    const label = r.name.trim() || T.fields.fieldN(i + 1)
+    if (!r.name.trim()) problems.push(T.fields.needsName(i + 1))
     const builtIn = BUILT_IN.find((b) => b.name.toLowerCase() === r.name.trim().toLowerCase() || (!r.isNew && b.key === r.id))
-    if (builtIn) problems.push(`“${r.name.trim()}” is a built-in field of every item — it does not need to be added. Show or hide it with Columns.`)
-    if (withIds.some((x, k) => k < i && x.name.trim().toLowerCase() === r.name.trim().toLowerCase() && r.name.trim())) problems.push(`Two fields are called “${r.name.trim()}”.`)
-    if (r.type === 'enum' && splitOptions(r.options).length === 0) problems.push(`${label}: a choice field needs at least one option.`)
-    if (r.type === 'enum' && r.default && !splitOptions(r.options).includes(r.default)) problems.push(`${label}: the default must be one of the options.`)
-    if (r.type === 'number' && r.default && Number.isNaN(Number(r.default))) problems.push(`${label}: the default must be a number.`)
+    if (builtIn) problems.push(T.fields.isBuiltIn(r.name.trim()))
+    if (withIds.some((x, k) => k < i && x.name.trim().toLowerCase() === r.name.trim().toLowerCase() && r.name.trim())) problems.push(T.fields.duplicate(r.name.trim()))
+    if (r.type === 'enum' && splitOptions(r.options).length === 0) problems.push(T.fields.needsOption(label))
+    if (r.type === 'enum' && r.default && !splitOptions(r.options).includes(r.default)) problems.push(T.fields.defaultNotOption(label))
+    if (r.type === 'number' && r.default && Number.isNaN(Number(r.default))) problems.push(T.fields.defaultNotNumber(label))
   })
 
-  const patch = (key: number, p: Partial<Draft>): void => setRows((rs) => rs.map((r) => (r.key === key ? { ...r, ...p } : r)))
+  const patch = (key: number, p: Partial<Draft>): void => {
+    setCheck(null)
+    setRows((rs) => rs.map((r) => (r.key === key ? { ...r, ...p } : r)))
+  }
   const move = (index: number, by: number): void =>
     setRows((rs) => {
       const j = index + by
@@ -228,6 +221,13 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
     setSaving(true)
     setError(null)
     try {
+      // First press: check the items; if some would hold values the new definitions do not allow, say so and
+      // let the user decide (press again = save anyway).
+      if (check === null) {
+        const found = await window.reqman.checkFields(fields)
+        setCheck(found)
+        if (found.length > 0) return
+      }
       const r = await window.reqman.saveSchemaFields(fields, info.schemaRevision)
       if (r.ok) onSaved(r.info)
       else setError(r.message)
@@ -240,31 +240,33 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
 
   return (
     <div className="modal" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal__panel" role="dialog" aria-modal="true" aria-label="Fields">
+      <div className="modal__panel" role="dialog" aria-modal="true" aria-label={T.fields.label}>
         <header className="modal__header">
           <div>
-            <h2 className="modal__title">Fields</h2>
+            <h2 className="modal__title">{T.fields.title}</h2>
             <p className="muted">
-              Every item has these fields. Changes are saved to <code>requirements/.reqman/schema.yaml</code> and reach your team through Git
-              like any other change.
+              {T.fields.introBefore}
+              <code>requirements/.reqman/schema.yaml</code>
+              {T.fields.introAfter}
             </p>
           </div>
-          <button type="button" className="icon-btn" aria-label="Close" onClick={onClose}>
+          <button type="button" className="icon-btn" aria-label={T.common.close} onClick={onClose}>
             ✕
           </button>
         </header>
 
         <div className="modal__body scroll">
           <p className="fields-builtin">
-            <strong>Built in, always there:</strong> {BUILT_IN.map((b) => b.name).join(', ')}. These are not listed below; show or hide them
-            in the table with <em>Columns</em>.
+            <strong>{T.fields.builtInLead}</strong> {BUILT_IN.map((b) => b.name).join(', ')}
+            {T.fields.builtInAfter}
+            <em>{T.fields.builtInColumns}</em>.
           </p>
-          <div className="fields-table" role="table" aria-label="Field definitions">
+          <div className="fields-table" role="table" aria-label={T.fields.table}>
             <div className="fields-table__head" role="row">
-              <span>Name</span>
-              <span>Kind</span>
-              <span>Options (comma separated)</span>
-              <span>Default for new items</span>
+              <span>{T.fields.name}</span>
+              <span>{T.fields.kind}</span>
+              <span>{T.fields.options}</span>
+              <span>{T.fields.default}</span>
               <span />
             </div>
             {withIds.map((r, i) => {
@@ -272,22 +274,22 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
               return (
                 <div key={r.key} className="fields-table__row" role="row">
                   <span>
-                    <input className="input" aria-label={`Name of field ${i + 1}`} value={r.name} placeholder="e.g. Safety level" onChange={(e) => patch(r.key, { name: e.target.value })} />
-                    <span className="fields-table__id" title="Stored in the item files under this key">{r.id ? `key: ${r.id}` : 'key from name'}</span>
+                    <input className="input" aria-label={T.fields.nameOf(i + 1)} value={r.name} placeholder={T.fields.namePlaceholder} onChange={(e) => patch(r.key, { name: e.target.value })} />
+                    <span className="fields-table__id" title={T.fields.keyTooltip}>{r.id ? T.fields.key(r.id) : T.fields.keyFromName}</span>
                   </span>
                   <span>
-                    <select className="input" aria-label={`Kind of field ${i + 1}`} value={r.type} onChange={(e) => patch(r.key, { type: e.target.value as FieldType })}>
+                    <select className="input" aria-label={T.fields.kindOf(i + 1)} value={r.type} onChange={(e) => patch(r.key, { type: e.target.value as FieldType })}>
                       {TYPES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
                     </select>
-                    {was && was.type !== r.type && <span className="field__error">Existing values are kept as they are; check them after changing the kind.</span>}
+                    {was && was.type !== r.type && <span className="field__error">{T.fields.kindChanged}</span>}
                   </span>
                   <span>
                     {r.type === 'enum' || r.type === 'list' ? (
                       <input
                         className="input"
-                        aria-label={`Options of field ${i + 1}`}
+                        aria-label={T.fields.optionsOf(i + 1)}
                         value={r.options}
-                        placeholder={r.type === 'list' ? 'optional — empty allows any value' : 'High, Medium, Low'}
+                        placeholder={r.type === 'list' ? T.fields.listPlaceholder : T.fields.enumPlaceholder}
                         onChange={(e) => patch(r.key, { options: e.target.value })}
                       />
                     ) : (
@@ -296,14 +298,14 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
                   </span>
                   <span>
                     {r.type === 'enum' ? (
-                      <select className="input" aria-label={`Default of field ${i + 1}`} value={r.default} onChange={(e) => patch(r.key, { default: e.target.value })}>
-                        <option value="">(none)</option>
+                      <select className="input" aria-label={T.fields.defaultOf(i + 1)} value={r.default} onChange={(e) => patch(r.key, { default: e.target.value })}>
+                        <option value="">{T.fields.none}</option>
                         {splitOptions(r.options).map((o) => <option key={o} value={o}>{o}</option>)}
                       </select>
                     ) : (
                       <input
                         className="input"
-                        aria-label={`Default of field ${i + 1}`}
+                        aria-label={T.fields.defaultOf(i + 1)}
                         type={r.type === 'number' ? 'number' : r.type === 'date' ? 'date' : 'text'}
                         value={r.default}
                         onChange={(e) => patch(r.key, { default: e.target.value })}
@@ -311,35 +313,40 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
                     )}
                   </span>
                   <span className="actions">
-                    <button type="button" className="icon-btn" aria-label={`Move ${r.name || 'field'} up`} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
-                    <button type="button" className="icon-btn" aria-label={`Move ${r.name || 'field'} down`} disabled={i === rows.length - 1} onClick={() => move(i, 1)}>↓</button>
-                    <button type="button" className="icon-btn" aria-label={`Remove ${r.name || 'field'}`} title="Remove" onClick={() => setRows((rs) => rs.filter((x) => x.key !== r.key))}>✕</button>
+                    <button type="button" className="icon-btn" aria-label={T.fields.up(r.name)} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
+                    <button type="button" className="icon-btn" aria-label={T.fields.down(r.name)} disabled={i === rows.length - 1} onClick={() => move(i, 1)}>↓</button>
+                    <button type="button" className="icon-btn" aria-label={T.fields.remove(r.name)} title={T.fields.removeTooltip} onClick={() => {
+                      setCheck(null)
+                      setRows((rs) => rs.filter((x) => x.key !== r.key))
+                    }}>✕</button>
                   </span>
                 </div>
               )
             })}
           </div>
           <button type="button" className="btn" onClick={add}>
-            + Add field
+            {T.fields.add}
           </button>
           {removed.length > 0 && (
-            <p className="notice notice--warn">
-              Removing {removed.map((f) => f.name).join(', ')}: values already stored in items are not deleted — they stay in the files
-              and come back if a field with the same key is added again.
-            </p>
+            <p className="notice notice--warn">{T.fields.removing(removed.map((f) => f.name).join(', '))}</p>
           )}
           {problems.map((p) => (
             <p key={p} className="notice notice--error">{p}</p>
+          ))}
+          {check?.map((c) => (
+            <p key={c.fieldId} className="notice notice--warn" role="alert">
+              {T.fields.invalidAfter(c.count, c.name, c.examples.join(', '))}
+            </p>
           ))}
           {error && <p className="notice notice--error" role="alert">{error}</p>}
         </div>
 
         <footer className="modal__footer actions">
           <button type="button" className="btn btn--primary" disabled={saving || problems.length > 0} onClick={() => void save()}>
-            {saving ? 'Saving…' : 'Save fields'}
+            {saving ? T.editor.saving : check && check.length > 0 ? T.fields.saveAnyway : T.fields.save}
           </button>
           <button type="button" className="btn" onClick={onClose}>
-            Cancel
+            {T.common.cancel}
           </button>
         </footer>
       </div>

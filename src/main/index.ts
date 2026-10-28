@@ -7,6 +7,18 @@ import { Channels } from '../shared/api'
 
 app.setName('ReqMan')
 
+// One ReqMan per user (review D-02): a second start (e.g. a double-click on the shortcut while ReqMan is open)
+// brings the open window to the front instead of starting a second app on the same data.
+const firstInstance = app.requestSingleInstanceLock()
+if (!firstInstance) app.quit()
+app.on('second-instance', () => {
+  const win = BrowserWindow.getAllWindows()[0]
+  if (!win) return
+  if (win.isMinimized()) win.restore()
+  win.show()
+  win.focus()
+})
+
 function resolvePaths(): Paths {
   // Installed app: config/ and resources/ are copied next to the app (electron-builder extraResources),
   // so the theme can be edited without rebuilding. During development they are read from the repo.
@@ -74,8 +86,9 @@ function createWindow(services: ReturnType<typeof createServices>): void {
 }
 
 void app.whenReady().then(() => {
+  if (!firstInstance) return
   const paths = resolvePaths()
-  const services = createServices(paths)
+  const services = createServices(paths, app.getVersion())
   const { log } = services
 
   log.info(

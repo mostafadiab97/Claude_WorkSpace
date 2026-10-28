@@ -1,9 +1,10 @@
-import { createHash, randomBytes } from 'node:crypto'
-import { mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import { generateId, ITEM_FILE_EXTENSION, parseItemFile, serializeItem, type FieldValue, type Item } from '../items'
 import { parseDocument } from 'yaml'
 import { parseSchema } from '../schema'
+import { removeFile, renameFile, writeFileAtomic } from '../safe-files'
 import { checkRepository } from './checks'
 import { ConflictError } from './errors'
 import {
@@ -11,6 +12,7 @@ import {
   type FolderState,
   type ItemFileInfo,
   type LoadResult,
+  type OpenOptions,
   type RepositoryStore,
   type RequirementsRepo
 } from './index'
@@ -20,22 +22,15 @@ const META_DIR = '.reqman'
 const SCHEMA_FILE = 'schema.yaml'
 const GITATTRIBUTES = '# Written by ReqMan: identical line endings on every PC keep diffs clean.\n* text=auto eol=lf\n'
 const READ_CONCURRENCY = 64
+/** Every header key that holds a simple value counts as a field (used by the index; see readItemFile). */
+const ALL_KEYS: ReadonlySet<string> = { has: () => true } as unknown as ReadonlySet<string>
 
 const revisionOf = (content: string): string => createHash('sha1').update(content).digest('hex').slice(0, 16)
 
 const exists = async (p: string): Promise<boolean> => (await stat(p).catch(() => null)) !== null
 
-/** Writes to a temporary file in the same folder, then renames it over the target. */
-async function atomicWrite(file: string, content: string): Promise<void> {
-  const tmp = `${file}.${randomBytes(4).toString('hex')}.tmp`
-  try {
-    await writeFile(tmp, content, 'utf8')
-    await rename(tmp, file)
-  } catch (e) {
-    await rm(tmp, { force: true })
-    throw e
-  }
-}
+/** Temporary file + rename, retried while Windows briefly locks the file (see modules/safe-files). */
+const atomicWrite = (file: string, content: string): Promise<void> => writeFileAtomic(file, content)
 
 /** Runs `fn` over `inputs` with at most `limit` in flight (keeps 50k file reads from exhausting handles). */
 async function mapLimit<T, R>(inputs: T[], limit: number, fn: (t: T) => Promise<R>): Promise<R[]> {
@@ -55,7 +50,7 @@ async function mapLimit<T, R>(inputs: T[], limit: number, fn: (t: T) => Promise<
 export function createFileRepositoryStore(defaultSchemaFile: string): RepositoryStore {
   const folderOf = (root: string): string => join(root, REQUIREMENTS_FOLDER)
 
-  async function open(root: string): Promise<RequirementsRepo> {
+  async function open(root: string, options: OpenOptions = {}): Promise<RequirementsRepo> {
     const folder = folderOf(root)
     const schemaFile = join(folder, META_DIR, SCHEMA_FILE)
     let schemaText: string
@@ -67,7 +62,11 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
     const { schema, problems: schemaProblems } = parseSchema(schemaText)
     const fieldIds = new Set(schema.fields.map((f) => f.id))
     const itemsDir = join(folder, ITEMS_DIR)
-    const fileFor = (id: string): string => join(itemsDir, `${id}${ITEM_FILE_EXTENSION}`)
+    const defaultPath = (id: string): string => `${ITEMS_DIR}/${id}${ITEM_FILE_EXTENSION}`
+    // An item's file is normally items/<ID>.md, but a file renamed by hand still holds its item: the caller's
+    // locator (the index) knows the real path, so such an item can be read, saved and deleted in place.
+    const pathOf = (id: string): string => options.locate?.(id) ?? defaultPath(id)
+    const fileFor = (id: string): string => join(folder, pathOf(id))
 
     const repo: RequirementsRepo = {
       root,
@@ -109,15 +108,29 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
         return infos.filter((x): x is ItemFileInfo => x !== null).sort((a, b) => a.path.localeCompare(b.path))
       },
 
-      async readItemFile(path) {
+      async readItemFile(path, opts) {
         try {
-          return parseItemFile(await readFile(join(folder, path), 'utf8'), fieldIds)
+          return parseItemFile(await readFile(join(folder, path), 'utf8'), opts?.allKeysAsFields ? ALL_KEYS : fieldIds)
         } catch (e) {
           return { ok: false, error: `Could not read the file: ${(e as Error).message}` }
         }
       },
 
-      itemPath: (id) => `${ITEMS_DIR}/${id}${ITEM_FILE_EXTENSION}`,
+      itemPath: pathOf,
+      defaultItemPath: defaultPath,
+
+      async fixFileName(id) {
+        const from = pathOf(id)
+        const to = defaultPath(id)
+        if (from === to) return to
+        if (await exists(join(folder, to))) throw new Error(`${to} already exists; the file ${from} was not renamed.`)
+        const current = await readFile(join(folder, from), 'utf8').catch(() => null)
+        if (current === null) throw new Error(`${from} could not be read.`)
+        const r = parseItemFile(current, fieldIds)
+        if (!r.ok || r.item.id !== id) throw new Error(`${from} does not contain the item ${id}.`)
+        await renameFile(join(folder, from), join(folder, to))
+        return to
+      },
 
       async readItem(id) {
         let content: string
@@ -196,7 +209,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
             throw new ConflictError(`${id} was changed outside ReqMan since you opened it.`)
           }
         }
-        await rm(fileFor(id), { force: true })
+        await removeFile(fileFor(id))
       }
     }
     return repo
@@ -220,6 +233,6 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
       return open(root)
     },
 
-    open
+    open: (root, options) => open(root, options)
   }
 }

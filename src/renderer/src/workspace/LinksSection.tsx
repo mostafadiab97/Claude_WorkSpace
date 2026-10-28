@@ -3,6 +3,7 @@ import type { ItemDetails, LinkInfo } from '../../../shared/api'
 import type { Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { ItemSearch } from './ItemSearch'
+import { T } from '../../../shared/text'
 
 type Direction = 'out' | 'in'
 interface Entry {
@@ -33,7 +34,7 @@ export function LinksSection(props: {
   const linkType = (id: string) => schema.linkTypes.find((t) => t.id === id)
   const label = (dir: Direction, type: string): string => {
     const t = linkType(type)
-    return t ? (dir === 'out' ? t.name : t.reverseName) : `${type} (unknown link type)`
+    return t ? (dir === 'out' ? t.name : t.reverseName) : T.links.unknownType(type)
   }
   const entries: Entry[] = [
     ...(details?.outgoing ?? []).map((link) => ({ dir: 'out' as const, link })),
@@ -74,17 +75,17 @@ export function LinksSection(props: {
   const locked = lockedReason !== null || busy
 
   return (
-    <section className="links" aria-label="Links">
+    <section className="links" aria-label={T.links.section}>
       <div className="links__head">
-        <h3 className="links__title">Links{entries.length > 0 && ` (${entries.length})`}</h3>
+        <h3 className="links__title">{T.links.title(entries.length)}</h3>
         {suspectOut > 1 && (
           <button type="button" className="link-btn" disabled={locked} onClick={() => void run(() => window.reqman.confirmLinks(itemId))}>
-            Confirm all {suspectOut} suspect
+            {T.links.confirmAll(suspectOut)}
           </button>
         )}
         {!adding && (
           <button type="button" className="btn btn--small" disabled={locked || schema.linkTypes.length === 0} onClick={() => setAdding(true)} title={lockedReason ?? undefined}>
-            + Add link
+            {T.links.add}
           </button>
         )}
       </div>
@@ -93,23 +94,23 @@ export function LinksSection(props: {
 
       {adding && (
         <div className="links__add">
-          <select className="input" aria-label="Link type" value={relation} onChange={(e) => setRelation(e.target.value)}>
-            <optgroup label="This item…">
+          <select className="input" aria-label={T.links.linkType} value={relation} onChange={(e) => setRelation(e.target.value)}>
+            <optgroup label={T.links.thisItem}>
               {schema.linkTypes.map((t) => <option key={`out-${t.id}`} value={`out:${t.id}`}>{t.name}</option>)}
             </optgroup>
-            <optgroup label="This item is…">
+            <optgroup label={T.links.thisItemIs}>
               {schema.linkTypes.map((t) => <option key={`in-${t.id}`} value={`in:${t.id}`}>{t.reverseName}</option>)}
             </optgroup>
           </select>
           <ItemSearch
             schema={schema}
-            label="Search for the item to link"
-            placeholder="ID or words of the title…"
+            label={T.links.searchLabel}
+            placeholder={T.links.searchPlaceholder}
             blocked={(item) =>
               item.id === itemId
-                ? 'This is the item itself'
+                ? T.links.self
                 : entries.some((e) => e.dir === dir && e.link.type === type && e.link.id === item.id)
-                  ? 'Already linked this way'
+                  ? T.links.already
                   : null
             }
             onPick={(item) => add(item.id)}
@@ -118,7 +119,7 @@ export function LinksSection(props: {
         </div>
       )}
 
-      {entries.length === 0 && !adding && !lockedReason && <p className="muted-inline">No links yet.</p>}
+      {entries.length === 0 && !adding && !lockedReason && <p className="muted-inline">{T.links.none}</p>}
       <ul className="links__list">
         {entries.map((e, i) => {
           const groupStart = i === 0 || order(entries[i - 1] as Entry) !== order(e)
@@ -128,15 +129,15 @@ export function LinksSection(props: {
               <span className="links__target">
                 <button type="button" className="link-btn links__id" onClick={() => props.onOpen(e.link.id)}>{e.link.id}</button>
                 <span className="links__name" title={e.link.title}>
-                  {e.link.exists ? e.link.title || '(no title)' : <span className="field__error">does not exist</span>}
+                  {e.link.exists ? e.link.title || T.common.noTitle : <span className="field__error">{T.links.missing}</span>}
                 </span>
                 {e.link.suspect && (
                   <span className="links__suspect">
-                    <span title={e.dir === 'out' ? `${e.link.id} changed since this link was confirmed — check that this item still fits` : `This item changed since ${e.link.id} linked to it — ${e.link.id} may need review`}>
-                      ⚠ {e.dir === 'out' ? 'changed' : 'this item changed'}
+                    <span title={e.dir === 'out' ? T.links.suspectOutTooltip(e.link.id) : T.links.suspectInTooltip(e.link.id)}>
+                      ⚠ {e.dir === 'out' ? T.links.changed : T.links.thisChanged}
                     </span>
-                    <button type="button" className="link-btn" disabled={locked} onClick={() => confirm(e)} title="Reviewed — the link still holds">
-                      Confirm
+                    <button type="button" className="link-btn" disabled={locked} onClick={() => confirm(e)} title={T.links.confirmTooltip}>
+                      {T.links.confirm}
                     </button>
                   </span>
                 )}
@@ -145,8 +146,8 @@ export function LinksSection(props: {
                 type="button"
                 className="icon-btn icon-btn--small"
                 disabled={locked}
-                aria-label={`Remove link ${label(e.dir, e.link.type)} ${e.link.id}`}
-                title={e.dir === 'in' ? `Remove (changes ${e.link.id}, where this link is stored)` : 'Remove link'}
+                aria-label={T.links.removeLabel(label(e.dir, e.link.type), e.link.id)}
+                title={e.dir === 'in' ? T.links.removeInTooltip(e.link.id) : T.links.removeTooltip}
                 onClick={() => remove(e)}
               >
                 ✕

@@ -8,6 +8,8 @@ import { createFileRepositoryStore, type RepositoryStore } from '../modules/repo
 import { createFileThemeService, type ThemeService } from '../modules/theme'
 import { createGithubUpdater, type UpdateService } from '../modules/updater'
 import { cacheFileName, createWorkspace, type WorkspaceService } from '../modules/workspace'
+import { runReleaseSelfTest } from '../modules/self-test'
+import type { ReleaseSelfTestResult } from '../shared/api'
 
 export interface Services {
   git: GitAdapter
@@ -16,6 +18,8 @@ export interface Services {
   updater: UpdateService
   repositories: RepositoryStore
   workspace: WorkspaceService
+  /** The in-app release self-test on a practice repository (Diagnostics). */
+  releaseSelfTest(): Promise<ReleaseSelfTestResult>
 }
 
 export interface Paths {
@@ -31,7 +35,7 @@ export interface Paths {
   packaged: boolean
 }
 
-export function createServices(paths: Paths): Services {
+export function createServices(paths: Paths, version = '0.0.0'): Services {
   const log = createFileLogger(paths.logDir)
   const git = createSystemGitAdapter()
   // New requirements folders start from the shipped default schema.
@@ -43,6 +47,23 @@ export function createServices(paths: Paths): Services {
     theme: createFileThemeService(paths.configDir, paths.resourceDir, paths.userDir),
     // Self-updating is supported for the installed Windows app (per-user NSIS installer).
     updater: createGithubUpdater({ enabled: paths.packaged && process.platform === 'win32', log }),
+    releaseSelfTest: () =>
+      runReleaseSelfTest({
+        version,
+        gitVersion: async () => {
+          const g = await git.getGitInfo()
+          return g.installed ? g.version : null
+        },
+        // a separate workspace with its own (temporary) settings and index folder
+        createWorkspace: (userDir) =>
+          createWorkspace({
+            store: repositories,
+            git,
+            openIndex: (root) => createSqliteIndexCache(join(userDir, 'cache', cacheFileName(root))),
+            userDir,
+            log: { info: () => {}, warn: (m) => log.warn(`Self-test: ${m}`), error: (m, e) => log.error(`Self-test: ${m}`, e) }
+          })
+      }),
     workspace: createWorkspace({
       store: repositories,
       git,

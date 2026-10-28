@@ -7,6 +7,7 @@ import { UpdateBanner } from '../components/UpdateBanner'
 import { StartScreen } from '../screens/StartScreen'
 import { SettingsScreen } from '../screens/SettingsScreen'
 import { WorkspaceScreen } from '../screens/WorkspaceScreen'
+import { T } from '../../../shared/text'
 
 export function App() {
   const [theme, setTheme] = useState<LoadedTheme | null>(null)
@@ -50,7 +51,7 @@ export function App() {
     setRepo(null)
   }
 
-  if (!theme) return <div className="splash">Loading…</div>
+  if (!theme) return <div className="splash">{T.common.loading}</div>
   const brand = theme.config.brand.name
 
   return (
@@ -64,7 +65,7 @@ export function App() {
               <span className="topbar__sep" aria-hidden="true">/</span>
               <span className="topbar__repo" title={repo.root}>{repo.name}</span>
               <button type="button" className="btn btn--small" onClick={() => void close()}>
-                Close repository
+                {T.app.closeRepository}
               </button>
             </>
           )}
@@ -74,8 +75,8 @@ export function App() {
           <button
             type="button"
             className={showSettings ? 'icon-btn icon-btn--active' : 'icon-btn'}
-            aria-label="Settings and diagnostics"
-            title="Settings & diagnostics"
+            aria-label={T.app.settings}
+            title={T.app.settingsTooltip}
             onClick={() => setShowSettings((s) => !s)}
           >
             ⚙
@@ -88,13 +89,13 @@ export function App() {
         {/* The workspace stays mounted while settings are shown, so unsaved edits are not lost. */}
         {repo && (
           <div className="main__view" hidden={showSettings}>
-            <ErrorBoundary area="the workspace" key={repo.root}>
+            <ErrorBoundary area={T.app.workspaceArea} key={repo.root}>
               <WorkspaceScreen info={repo} onInfo={onInfo} />
             </ErrorBoundary>
           </div>
         )}
         {showSettings && (
-          <ErrorBoundary area="settings">
+          <ErrorBoundary area={T.app.settingsArea}>
             <SettingsScreen theme={theme} git={git} update={update} appInfo={appInfo} onBack={() => setShowSettings(false)} />
           </ErrorBoundary>
         )}

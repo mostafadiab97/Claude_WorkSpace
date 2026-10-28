@@ -2,8 +2,9 @@
 import type { FieldDef, Item, ItemDiff, ItemIssue, ItemQuery, QueryResult, Schema, SchemaProblem } from './domain'
 export type * from './domain'
 
-// The UI can do exactly what is listed here and nothing else. Adding a capability = adding it here,
-// implementing it in src/main/ipc.ts, and exposing it in src/preload/index.ts.
+// The UI can do exactly what is listed here and nothing else. Adding a capability = a method in ReqManApi,
+// its channel name in `Channels` below, and its handler in src/main/ipc.ts (the compiler reports a missing
+// one). The preload builds window.reqman from `Channels` automatically.
 
 export interface AppInfo {
   name: string
@@ -264,6 +265,15 @@ export type SaveResult =
   | { ok: true; details: ItemDetails }
   | { ok: false; reason: 'conflict' | 'invalid' | 'error'; message: string; issues?: ItemIssue[] }
 
+/** Items holding values a changed field definition would no longer allow (shown before saving). */
+export interface FieldCheck {
+  fieldId: string
+  name: string
+  count: number
+  /** Up to five of their IDs. */
+  examples: string[]
+}
+
 export interface RecentRepository {
   root: string
   name: string
@@ -293,8 +303,11 @@ export interface ReqManApi {
   initializeRepository(root: string): Promise<RepoInfo>
   openRepository(root: string): Promise<RepoInfo>
   closeRepository(): Promise<void>
-  /** Re-reads files changed outside ReqMan (e.g. after a Git pull or a hand edit). */
-  refreshRepository(): Promise<RepoInfo>
+  /**
+   * Re-reads files changed on disk (by ReqMan, a Git pull or a hand edit) — only the changed ones when the
+   * folder can be watched. `focus`: the window got focus again, so Git settings are re-read too.
+   */
+  refreshRepository(focus?: boolean): Promise<RepoInfo>
   getRecentRepositories(): Promise<RecentRepository[]>
   forgetRecentRepository(root: string): Promise<void>
   queryItems(query: ItemQuery): Promise<QueryResult>
@@ -318,6 +331,10 @@ export interface ReqManApi {
   removeLink(source: string, type: string, target: string): Promise<{ ok: true } | { ok: false; message: string }>
   /** Marks suspect links of `source` as reviewed (all of them, or only the one to `target`). */
   confirmLinks(source: string, target?: string): Promise<{ ok: true } | { ok: false; message: string }>
+  /** Renames the file holding `id` to <ID>.md when its name does not match (a repository problem). */
+  fixFileName(id: string): Promise<{ ok: true } | { ok: false; message: string }>
+  /** Before saving field definitions: how many items have values the changed definitions do not allow. */
+  checkFields(fields: FieldDef[]): Promise<FieldCheck[]>
   // --- Git (all operate on the open repository; only requirements/ is committed)
   getGitState(): Promise<GitState>
   /** Commits all changes under requirements/. */
@@ -352,6 +369,31 @@ export interface ReqManApi {
   getDiagnostics(): Promise<string>
   /** Measures the data layer on this PC with `count` generated items in a temporary folder. */
   runDataSelfTest(count: number): Promise<DataSelfTestResult>
+  /**
+   * Runs the main actions (create, edit, links, commit, pull with a clash, push, compare, export) on a practice
+   * repository with a fake "GitHub" in a temporary folder — never the user's data — and reports each step.
+   */
+  runReleaseSelfTest(): Promise<ReleaseSelfTestResult>
+}
+
+/** Calls that go through `ipcRenderer.invoke` (all except the event subscription and the fire-and-forget log). */
+export type InvokeMethod = Exclude<keyof ReqManApi, 'onUpdateStatus' | 'reportUiError'>
+
+export interface ReleaseSelfTestStep {
+  name: string
+  ok: boolean
+  ms: number
+  /** What went wrong, or a short note. */
+  detail?: string
+}
+
+export interface ReleaseSelfTestResult {
+  ok: boolean
+  version: string
+  gitVersion: string | null
+  startedAt: string
+  totalMs: number
+  steps: ReleaseSelfTestStep[]
 }
 
 /** IPC channel names, shared so main and preload can never drift apart. */
@@ -364,6 +406,7 @@ export const Channels = {
   reportUiError: 'diag:reportUiError',
   getDiagnostics: 'diag:get',
   runDataSelfTest: 'diag:runDataSelfTest',
+  runReleaseSelfTest: 'diag:runReleaseSelfTest',
   getUpdateStatus: 'update:getStatus',
   checkForUpdates: 'update:check',
   installUpdate: 'update:install',
@@ -388,6 +431,8 @@ export const Channels = {
   addLink: 'ws:addLink',
   removeLink: 'ws:removeLink',
   confirmLinks: 'ws:confirmLinks',
+  fixFileName: 'ws:fixFileName',
+  checkFields: 'ws:checkFields',
   getGitState: 'git:state',
   commit: 'git:commit',
   pull: 'git:pull',
@@ -402,4 +447,4 @@ export const Channels = {
   exportItems: 'export:items',
   exportCompare: 'export:compare',
   showInFolder: 'app:showInFolder'
-} as const
+} as const satisfies Record<Exclude<keyof ReqManApi, 'onUpdateStatus'> | 'updateStatusChanged', string>

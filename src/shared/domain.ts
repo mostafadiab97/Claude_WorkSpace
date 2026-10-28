@@ -81,6 +81,8 @@ export interface ItemIssue {
   path: string
   message: string
   severity: 'error' | 'warning'
+  /** ReqMan can fix this with one click: 'file-name' = rename the file to <ID>.md. */
+  fix?: 'file-name'
 }
 
 // ---------- index queries

@@ -3,6 +3,28 @@
 Each version was installed and tried by the product owner on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.8.0 — 28 Oct 2026 — Clean page (all fixes of the project review)
+- **Fixes:** an item whose file was renamed by hand opens, saves and deletes in place, is listed as a problem
+  with a one-click **Fix file name** (D-01); only one ReqMan runs at a time — a second start brings the open
+  window forward (D-02); writes, index changes and Git actions run one after another (D-03); short Windows file
+  locks (antivirus, indexer, OneDrive) are retried instead of failing (D-04); item search: Enter picks what the
+  list shows (D-06); changing a field's kind or choices first says how many items would hold values it no longer
+  allows (D-08); settings files are written safely (D-10).
+- **Speed:** after a save, a move or Alt+Tab only the changed files are re-read (the folder is watched) — 0.37 s →
+  0.09 s at 10,000 items (P-01); the Git bar needs 3 Git commands instead of 8 per refresh (P-02); titles of
+  deleted items in Changes come from one Git process (D-07); **Expand all** is instant and loads levels while
+  scrolling (P-04); adding or removing a field re-reads no item file (P-05; the index cache is rebuilt once).
+- **Inside (no visible change):** the workspace code is split into small services, every window call is listed
+  once and its inputs are checked (S-01, S-02, X-01); the workspace screen and the table are split into smaller
+  files (S-03); **every text on screen lives in one file**, `src/shared/text.ts` (S-06).
+- **Testing:** new **release self-test** in Settings & diagnostics (the main actions on a practice repository on
+  your PC); the checklist per version is now at most 5 steps; the end-to-end tests are independent scenarios run
+  side by side (T-01); window logic has unit tests (T-02); the sandbox's broken-data promises are tested (T-03);
+  the status is kept only in `CLAUDE.md` and this file (T-04); the 50,000-item test runs for releases only
+  (T-05). 130 unit tests.
+- Owner's decisions (28 Oct 2026): release plan 0.8.0 → 0.13.0 confirmed; export of chosen items added to M7;
+  testing reduced to a self-test + 5 steps; Dependabot weekly is enough (alerts stay off).
+
 ## 0.7.0 — 25 Oct 2026 — M6 Export and hardening (prototype complete)
 - **Owner (27 Oct 2026):** combined checklist for 0.5.0, 0.6.0 and 0.7.0 — all passed. Two-PC trial postponed.
 - **Export…** in the table toolbar: all items in document order, or only the current search/filter result;

@@ -9,7 +9,7 @@ import type { ItemIssue } from '../../shared/domain'
 import type { IndexCache, IndexedItem, ItemQuery, LinkRef, QueryResult, SyncStats } from './index'
 
 /** Bump when the table layout changes; an old cache file is then rebuilt automatically. */
-const FORMAT_VERSION = '2'
+const FORMAT_VERSION = '3'
 
 const DDL = `
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -74,12 +74,20 @@ export function preview(text: string): string {
     .slice(0, 200)
 }
 
-function rowToItem(r: ItemRow): IndexedItem {
+/** Only the values of fields the current schema defines (the index keeps every header key; see P-05). */
+function schemaFields(json: string, fieldIds: ReadonlySet<string>): Record<string, FieldValue> {
+  const all = JSON.parse(json) as Record<string, FieldValue>
+  const out: Record<string, FieldValue> = {}
+  for (const k of Object.keys(all)) if (fieldIds.has(k)) out[k] = all[k] as FieldValue
+  return out
+}
+
+function rowToItem(r: ItemRow, fieldIds: ReadonlySet<string>): IndexedItem {
   const item: IndexedItem = {
     id: r.id,
     type: r.type,
     title: r.title,
-    fields: JSON.parse(r.fields_json) as Record<string, FieldValue>,
+    fields: schemaFields(r.fields_json, fieldIds),
     links: JSON.parse(r.links_json) as IndexedItem['links'],
     text: r.text,
     path: r.path,
@@ -136,6 +144,11 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
   const db = new DatabaseSync(dbFile)
   db.exec('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY;')
   prepareTables(db)
+  /** Field IDs of the schema last synced with; query results show only these. */
+  let fieldIds: ReadonlySet<string> = new Set()
+  const useSchema = (repo: RequirementsRepo): void => {
+    fieldIds = new Set(repo.schema.fields.map((f) => f.id))
+  }
 
   const stmt = {
     getMeta: db.prepare('SELECT value FROM meta WHERE key = ?'),
@@ -209,14 +222,15 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     db.exec('DELETE FROM items; DELETE FROM item_fields; DELETE FROM links; DELETE FROM items_fts; DELETE FROM files;')
   }
 
-  /** The cache must be rebuilt when the cache format or the set of schema fields changes. */
-  const signature = (repo: RequirementsRepo): string =>
-    createHash('sha1')
-      .update(`${FORMAT_VERSION}|${repo.root}|${repo.schema.fields.map((f) => `${f.id}:${f.type}`).join(',')}`)
-      .digest('hex')
+  /**
+   * The cache must be rebuilt when its format or the repository changes. Schema fields are NOT part of it: every
+   * header key is stored, and results are filtered to the current fields, so a field change re-reads nothing.
+   */
+  const signature = (repo: RequirementsRepo): string => createHash('sha1').update(`${FORMAT_VERSION}|${repo.root}`).digest('hex')
 
   async function doSync(repo: RequirementsRepo, forceFull: boolean): Promise<SyncStats> {
     const started = performance.now()
+    useSchema(repo)
     const sig = signature(repo)
     const full = forceFull || (stmt.getMeta.get('signature') as { value: string } | undefined)?.value !== sig
 
@@ -232,7 +246,7 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     const removed = full ? [] : [...known.keys()].filter((p) => !diskPaths.has(p))
 
     // Read changed files first (async, a few at a time), then apply everything in one transaction.
-    const parsed = await mapLimit(changed, 64, async (f) => ({ f, r: await repo.readItemFile(f.path) }))
+    const parsed = await mapLimit(changed, 64, async (f) => ({ f, r: await repo.readItemFile(f.path, { allKeysAsFields: true }) }))
 
     let added = 0
     let updated = 0
@@ -269,10 +283,11 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     sync: (repo) => doSync(repo, false),
 
     async syncPaths(repo, paths) {
+      useSchema(repo)
       const unique = [...new Set(paths)]
       const results = await mapLimit(unique, 16, async (path) => {
         const s = await stat(join(repo.folder, path)).catch(() => null)
-        return { path, s, r: s ? await repo.readItemFile(path) : null }
+        return { path, s, r: s ? await repo.readItemFile(path, { allKeysAsFields: true }) : null }
       })
       transaction(() => {
         for (const { path, s, r } of results) {
@@ -303,6 +318,12 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         .all() as { id: string; parent: string }[]
       for (const r of orphans) {
         issues.push({ itemId: r.id, path: 'parent', message: `Parent ${r.parent} does not exist.`, severity: 'error' })
+      }
+      const misnamed = db
+        .prepare("SELECT id, path FROM items WHERE path <> 'items/' || id || '.md' ORDER BY id")
+        .all() as { id: string; path: string }[]
+      for (const r of misnamed) {
+        issues.push({ itemId: r.id, path: 'file-name', message: `The file ${r.path} holds ${r.id}; it should be named ${r.id}.md.`, severity: 'warning', fix: 'file-name' })
       }
       for (const r of db.prepare('SELECT path FROM files WHERE ok = 0 ORDER BY path').all() as { path: string }[]) {
         issues.push({ itemId: r.path, path: 'file', message: 'This file could not be read.', severity: 'error' })
@@ -386,12 +407,12 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       const rows = db
         .prepare(`SELECT i.*, ${COUNTS} FROM items i ${whereSql} ORDER BY ${orderSql} LIMIT ? OFFSET ?`)
         .all(...params, ...orderParams, limit, offset) as unknown as ItemRow[]
-      return { total, items: rows.map((r) => rowToItem(q.brief ? { ...r, text: preview(r.text) } : r)) }
+      return { total, items: rows.map((r) => rowToItem(q.brief ? { ...r, text: preview(r.text) } : r, fieldIds)) }
     },
 
     get(id) {
       const r = stmt.getById.get(id) as ItemRow | undefined
-      return r ? rowToItem(r) : undefined
+      return r ? rowToItem(r, fieldIds) : undefined
     },
 
     incomingLinks(id): LinkRef[] {

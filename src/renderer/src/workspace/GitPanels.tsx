@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import type { GitResult, GitState, ItemChange } from '../../../shared/api'
 import { errorMessage } from '../lib/hooks'
+import { T } from '../../../shared/text'
 
 const KIND: Record<ItemChange['kind'], { letter: string; label: string }> = {
-  added: { letter: 'A', label: 'new' },
-  modified: { letter: 'M', label: 'changed' },
-  deleted: { letter: 'D', label: 'deleted' },
-  renamed: { letter: 'R', label: 'renamed' },
-  conflict: { letter: '!', label: 'conflict' }
+  added: { letter: 'A', label: T.git.kinds.added },
+  modified: { letter: 'M', label: T.git.kinds.modified },
+  deleted: { letter: 'D', label: T.git.kinds.deleted },
+  renamed: { letter: 'R', label: T.git.kinds.renamed },
+  conflict: { letter: '!', label: T.git.kinds.conflict }
 }
 
 /** Last Git action's outcome, shown under the Git bar until dismissed. */
@@ -39,58 +40,58 @@ export function GitBar(props: {
   if (!state) return null
   if (!state.available) {
     return (
-      <div className="gitbar gitbar--off" role="region" aria-label="Git">
+      <div className="gitbar gitbar--off" role="region" aria-label={T.git.region}>
         <span className="muted-inline">{state.reason}</span>
       </div>
     )
   }
   const n = state.changes.length
   return (
-    <div role="region" aria-label="Git">
+    <div role="region" aria-label={T.git.region}>
       <div className="gitbar">
-        <span className="gitbar__branch" title={state.upstream ? `Remote branch: ${state.upstream}` : 'Not on the remote yet — Push publishes it'}>
-          <span aria-hidden="true">⎇</span> {state.detached ? '(no branch)' : (state.branch ?? '—')}
+        <span className="gitbar__branch" title={state.upstream ? T.git.remoteBranch(state.upstream) : T.git.notOnRemote}>
+          <span aria-hidden="true">⎇</span> {state.detached ? T.git.noBranch : (state.branch ?? '—')}
         </span>
         {state.hasRemote && (
-          <span className="gitbar__sync" title="Commits to push ↑ and to pull ↓ (as of the last pull)">
-            {state.upstream ? `↑${state.ahead} ↓${state.behind}` : 'not pushed yet'}
+          <span className="gitbar__sync" title={T.git.syncTooltip}>
+            {state.upstream ? `↑${state.ahead} ↓${state.behind}` : T.git.notPushed}
           </span>
         )}
-        {!state.hasRemote && <span className="muted-inline">No remote (e.g. GitHub) — commits stay on this PC</span>}
-        {state.warning && <span className="statusbar__warn" title={state.warning}>Old Git version</span>}
-        {state.mergeInProgress && <span className="statusbar__warn">Merge with conflicts in progress (outside ReqMan)</span>}
+        {!state.hasRemote && <span className="muted-inline">{T.git.noRemote}</span>}
+        {state.warning && <span className="statusbar__warn" title={state.warning}>{T.git.oldGit}</span>}
+        {state.mergeInProgress && <span className="statusbar__warn">{T.git.mergeOutside}</span>}
         <span className="toolbar__spacer" />
-        {busy && <span className="muted-inline" role="status">{busy}…</span>}
+        {busy && <span className="muted-inline" role="status">{T.git.busy(busy)}</span>}
         <button
           type="button"
           className={props.compareOpen ? 'btn btn--active' : 'btn'}
           aria-pressed={props.compareOpen}
           disabled={busy !== null || props.compareOpen}
-          title="Pulls first, then shows what changed per requirement and per link"
+          title={T.git.compareTooltip}
           onClick={props.onCompare}
         >
-          Compare
+          {T.git.compare}
         </button>
         <button type="button" className={props.changesOpen ? 'btn btn--active' : 'btn'} aria-pressed={props.changesOpen} onClick={props.onToggleChanges}>
-          Changes{n > 0 ? ` (${n})` : ''}
+          {T.git.changes(n)}
         </button>
         <button
           type="button"
           className="btn"
           disabled={busy !== null || blockedReason !== null || !state.hasRemote}
-          title={blockedReason ?? 'Get the changes others pushed'}
+          title={blockedReason ?? T.git.pullTooltip}
           onClick={() => props.onRun('pull')}
         >
-          Pull
+          {T.git.pull}
         </button>
         <button
           type="button"
           className="btn"
           disabled={busy !== null || !state.hasRemote}
-          title="Send your commits to the remote (never forced)"
+          title={T.git.pushTooltip}
           onClick={() => props.onRun('push')}
         >
-          Push{state.ahead > 0 ? ` (${state.ahead})` : ''}
+          {T.git.push(state.ahead)}
         </button>
       </div>
       {notice && (
@@ -113,7 +114,7 @@ export function GitBar(props: {
               </ul>
             )}
           </div>
-          <button type="button" className="icon-btn icon-btn--small" aria-label="Dismiss" onClick={props.onDismiss}>
+          <button type="button" className="icon-btn icon-btn--small" aria-label={T.common.dismiss} onClick={props.onDismiss}>
             ✕
           </button>
         </div>
@@ -157,22 +158,22 @@ export function ChangesPanel(props: {
   const locked = busy || blockedReason !== null || !state.available || state.mergeInProgress
 
   return (
-    <aside className="editor changes scroll" aria-label="Changes">
+    <aside className="editor changes scroll" aria-label={T.changesPanel.label}>
       <header className="editor__header">
         <div>
-          <div className="editor__id">Changes</div>
-          <div className="editor__type">Not committed yet · only the requirements folder is committed</div>
+          <div className="editor__id">{T.changesPanel.title}</div>
+          <div className="editor__type">{T.changesPanel.subtitle}</div>
         </div>
-        <button type="button" className="icon-btn" aria-label="Close changes" title="Close" onClick={props.onClose}>
+        <button type="button" className="icon-btn" aria-label={T.changesPanel.close} title={T.common.close} onClick={props.onClose}>
           ✕
         </button>
       </header>
 
       <div className="editor__body">
         {state.changes.length === 0 ? (
-          <p className="muted">No uncommitted changes. Everything you saved is committed.</p>
+          <p className="muted">{T.changesPanel.none}</p>
         ) : (
-          <ul className="changes__list" aria-label="Changed items">
+          <ul className="changes__list" aria-label={T.changesPanel.list}>
             {state.changes.map((c) => (
               <li key={c.path} className="changes__item">
                 <span className={`changes__kind changes__kind--${c.kind}`} title={KIND[c.kind].label}>
@@ -196,10 +197,10 @@ export function ChangesPanel(props: {
                       disabled={locked}
                       onClick={() => void run(() => window.reqman.discardChanges([c.path]), () => setConfirm(null))}
                     >
-                      {c.kind === 'added' ? 'Delete it' : 'Undo change'}
+                      {c.kind === 'added' ? T.changesPanel.deleteIt : T.changesPanel.undoChange}
                     </button>
                     <button type="button" className="btn btn--small" onClick={() => setConfirm(null)}>
-                      Keep
+                      {T.changesPanel.keep}
                     </button>
                   </span>
                 ) : (
@@ -207,10 +208,10 @@ export function ChangesPanel(props: {
                     type="button"
                     className="link-btn"
                     disabled={locked}
-                    title={c.kind === 'added' ? 'Delete this new, never committed item' : 'Go back to the last committed version'}
+                    title={c.kind === 'added' ? T.changesPanel.discardNewTooltip : T.changesPanel.discardTooltip}
                     onClick={() => setConfirm(c.path)}
                   >
-                    Discard
+                    {T.changesPanel.discard}
                   </button>
                 )}
               </li>
@@ -226,17 +227,17 @@ export function ChangesPanel(props: {
               void run(() => window.reqman.setGitIdentity(name, email))
             }}
           >
-            <p className="notice notice--warn">Git does not know who you are yet. Your name and e-mail are stored in your Git settings and appear in the history of every change you commit.</p>
+            <p className="notice notice--warn">{T.changesPanel.whoAreYou}</p>
             <label className="field">
-              <span className="field__label">Your name</span>
+              <span className="field__label">{T.changesPanel.yourName}</span>
               <input className="input" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
             </label>
             <label className="field">
-              <span className="field__label">Your e-mail</span>
+              <span className="field__label">{T.changesPanel.yourEmail}</span>
               <input className="input" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
             </label>
             <button type="submit" className="btn" disabled={busy}>
-              Save
+              {T.common.save}
             </button>
           </form>
         ) : (
@@ -249,20 +250,20 @@ export function ChangesPanel(props: {
               }}
             >
               <label className="field">
-                <span className="field__label">Commit message</span>
+                <span className="field__label">{T.changesPanel.message}</span>
                 <textarea
                   className="input textarea"
                   rows={3}
                   value={message}
-                  placeholder="What changed and why, e.g. “Tighten temperature accuracy after customer review”"
+                  placeholder={T.changesPanel.messagePlaceholder}
                   onChange={(e) => setMessage(e.target.value)}
                 />
               </label>
               <p className="muted-inline">
-                As {state.identity.name} &lt;{state.identity.email}&gt;
+                {T.changesPanel.as(state.identity.name ?? '', state.identity.email ?? '')}
               </p>
               <button type="submit" className="btn btn--primary" disabled={locked || !message.trim()} title={blockedReason ?? undefined}>
-                {busy ? 'Committing…' : `Commit ${state.changes.length} change${state.changes.length === 1 ? '' : 's'}`}
+                {busy ? T.changesPanel.committing : T.changesPanel.commit(state.changes.length)}
               </button>
               {blockedReason && <p className="muted-inline">{blockedReason}</p>}
             </form>
@@ -272,17 +273,17 @@ export function ChangesPanel(props: {
           <div className="changes__undo">
             {confirm === '#undo' ? (
               <span className="actions">
-                <span>Take back “{state.lastCommitMessage}”? Its changes stay, as uncommitted changes.</span>
+                <span>{T.changesPanel.undoAsk(state.lastCommitMessage)}</span>
                 <button type="button" className="btn btn--small" disabled={locked} onClick={() => void run(() => window.reqman.undoLastCommit(), () => setConfirm(null))}>
-                  Undo commit
+                  {T.changesPanel.undoCommit}
                 </button>
                 <button type="button" className="btn btn--small" onClick={() => setConfirm(null)}>
-                  Keep
+                  {T.changesPanel.keep}
                 </button>
               </span>
             ) : (
-              <button type="button" className="link-btn" disabled={locked} onClick={() => setConfirm('#undo')} title="Only for commits that are not pushed yet">
-                Undo last commit “{state.lastCommitMessage}”
+              <button type="button" className="link-btn" disabled={locked} onClick={() => setConfirm('#undo')} title={T.changesPanel.undoTooltip}>
+                {T.changesPanel.undoLast(state.lastCommitMessage)}
               </button>
             )}
           </div>

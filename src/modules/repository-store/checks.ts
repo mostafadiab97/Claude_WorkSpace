@@ -15,7 +15,7 @@ export function checkRepository(items: Item[], schema: Schema, fileNameIds?: Map
     } else byId.set(item.id, item)
     const fileId = fileNameIds?.get(item)
     if (fileId !== undefined && fileId !== item.id) {
-      issues.push({ itemId: item.id, path: 'id', message: `The file is named ${fileId} but contains ID ${item.id}.`, severity: 'warning' })
+      issues.push({ itemId: item.id, path: 'id', message: `The file is named ${fileId} but contains ID ${item.id}.`, severity: 'warning', fix: 'file-name' })
     }
   }
 

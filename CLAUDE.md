@@ -65,6 +65,12 @@ cloud session from v0.5.0. Nothing lives outside this repository and `Claude_San
 - The SQLite index (`%APPDATA%\ReqMan\cache\<sha1(root)>.sqlite`) is only a cache. **If you change its tables,
   bump `FORMAT_VERSION` in `src/modules/index-cache/sqliteIndex.ts`** — the cache is then dropped and rebuilt
   (lesson of v0.4.1, see Pitfalls).
+- **Texts (S-06):** every word on screen comes from `src/shared/text.ts` (`T.area.key`, functions for texts with
+  values); core messages shown to the user too. `tests/ui-texts.test.ts` fails on literal words in `.tsx`.
+- **Window calls:** add a method to `ReqManApi` + a `Channels` entry + a handler in `src/main/ipc.ts` (the compiler
+  insists) that checks its inputs with `src/main/validate.ts`. The preload needs no change.
+- **Writes and Git actions go through the workspace queue** (`q(...)` in `workspace.ts`) — never call one queued
+  operation from inside another (it would wait for itself).
 
 ## Commands
 
@@ -73,8 +79,8 @@ npm ci                    # install exactly what package-lock.json says
 npm run dev               # run the app with live reload
 npm run check             # typecheck (both projects) + ESLint (incl. module rules) + unit tests — must be green
 npm run build             # production build into out/ (needed before e2e)
-npm run test:e2e          # drives the built app through the whole journey (Playwright + Electron), screenshots in e2e/out/
-npm run test:perf         # 10k and 50k item data-layer performance tests (~1–2 min)
+npm run test:e2e          # e2e scenarios (e2e/scenarios/*.e2e.mjs, two at a time) drive the built app; `-- fixes` runs one; screenshots in e2e/out/
+npm run test:perf         # 10k data-layer performance test (every build); test:perf:all adds 50k (releases)
 npm run measure:ui -- <repo>   # tree-table timings on a big repo (e.g. the sandbox clone)
 npm run gen:repo -- <folder> [count]        # uniform generated items (performance)
 npm run gen:scenario -- <folder> [count]    # rich scenario data (what Claude_SandBox was made with)
@@ -103,7 +109,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.7.0, 25 Oct 2026) — prototype scope complete
+## Status (v0.8.0, 28 Oct 2026) — prototype complete, review fixed
 
 | Milestone | State |
 | --- | --- |
@@ -114,14 +120,17 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | M4 Git — Git bar, per-item changes, commit (requirements/ only), pull that stops safely on items changed on both sides, push (never forced), discard, undo unpushed commit, name/e-mail form, per-item history with field-level comparison | Done (v0.5.0) |
 | M5 Compare — pulls first; default "what the last pull brought in" (reflog); uncommitted / last commit / any two versions; per item (added/changed/moved/deleted + summary + suspect-impact warning) and per link; schema changes; fast via `cat-file --batch` by blob ID | Done (v0.6.0) |
 | M6 Export and hardening — table and Compare export to CSV (comma, UTF-8 BOM) and Markdown; error boundary; old-Git warning; CI smoke test with 10k generated items; combined checklist + two-PC trial script | Done (v0.7.0) |
-| 0.8.0 clean page (review fixes, refactors, central texts, release self-test) | **In progress** |
-| 0.9.0 data format · 0.10.0 Changes view · 0.11.0 M7 Excel · 0.12.0 M8 branches · 0.13.0 ReqIF | Planned (DESIGN.md → "Release plan") |
+| 0.8.0 clean page — all review fixes (D-01–D-08, D-10, P-01/02/04/05, S-01/02/03/06, X-01, T-01–05), release self-test, 5-step checklist | Done (v0.8.0) |
+| **0.9.0 new data format** — `REQ-` + 7 chars, type editable, fractional order keys (S-04), outline numbers, sandbox converted | **Next** |
+| 0.10.0 Changes view · 0.11.0 M7 Excel (+ chosen-items export) · 0.12.0 M8 branches · 0.13.0 ReqIF | Planned (DESIGN.md → "Release plan") |
 
 Owner's last report (27 Oct 2026): combined checklist 0.5.0–0.7.0 all passed; two-PC trial postponed.
 
-Automated tests: 87 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
-repository and two clones ("PC A", "PC B"); e2e journey with ~75 checks, incl. commit → push → colleague pushes →
-pull → history → conflict stop → undo commit + discard → pull → compare (pull first, last pull, custom range, links).
+Automated tests: 130 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
+repository and two clones ("PC A", "PC B"), the release self-test itself, the sandbox's chapter-9 promises
+(`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `journey` (~75 checks, the
+whole user story) and `fixes` (renamed file, lazy Expand all, second start, release self-test in the window).
+0.8.0 measurements (10k scenario repo, Linux): refresh after a save 0.37 → 0.09 s; Expand all first screen 0.26 s.
 Compare on the sandbox: 9,118 changed files (confirmations only) 0.4 s; 3,000 real edits 1.8 s (engine).
 Export of all 10,005 sandbox items: CSV 0.46 s (3.1 MB), Markdown 0.43 s. CI runs `measure:ui` on a generated 10k repo.
 Measured on the sandbox (10,005 items, Linux container): open incl. first indexing 5–8 s, expand all 0.4–0.6 s,
@@ -160,8 +169,15 @@ The owner's tests of 0.5.0–0.7.0 all passed (27 Oct). His requests O-01–O-07
 sandbox converted) → 0.10.0 Changes view (O-04/O-05/O-06) → 0.11.0 M7 Excel (+ export of chosen items) → 0.12.0 M8
 branches → 0.13.0 ReqIF.
 
-**Current work: 0.8.0.** The owner is a C developer new to this field: explain from first principles, short, C
-analogies where useful. Record decisions in the review file / DESIGN.md.
+**0.8.0 released (28 Oct 2026)** — waiting for the owner's 5-step checklist (`docs/TESTING.md`). **Next: 0.9.0
+new data format** (see DESIGN.md "Release plan" and review section H, O-01–O-03, S-04): `REQ-` + 7 random
+characters for every item, type editable; fractional order keys (a move changes one file; at push, re-space only
+the sibling groups the user changed whose keys are longer than 4 characters); calculated outline numbers (never
+stored) in the table ("No."), editor header, parent picker, Compare and every export; convert the sandbox
+directly in its repository (new IDs, links rewritten, `git mv` so history follows, `former-id`, typed numbers
+removed from titles) — the owner just pulls. Bump the index `FORMAT_VERSION` and add an old-cache test.
+The owner is a C developer new to this field: explain from first principles, short, C analogies where useful.
+Record decisions in the review file / DESIGN.md.
 
 **Testing rule from 0.8.0 (owner, 28 Oct 2026):** the manual checklist per version has **at most 5 steps** (update
 arrives, release self-test, open the sandbox, one real push only when Git changed, the version's new feature).
@@ -227,3 +243,10 @@ Everything else must be automated (unit tests, e2e in CI, the in-app release sel
 - Git tests that need "no identity" must isolate `HOME` and `GIT_CONFIG_GLOBAL` (see `tests/workspace-git.test.ts`).
 - A clone of an empty remote has an upstream configured but no remote branch: treat that as "no upstream" (status
   has no `branch.ab` line) so the first push publishes with `-u`.
+- **Folder watch timing (P-01):** the OS reports file changes a few ms after they happen; `refresh()` waits 60 ms
+  before taking the watcher's list. Code that changes files and refreshes right away (tests, the self-test) must
+  not assume the change is seen without that wait.
+- **Window logic tests** live in `tests/ui/` and are type-checked with `tsconfig.web.json` (DOM types); the node
+  project excludes that folder. Tests may import modules only through their `index.ts` (ESLint).
+- **Single-instance lock:** two ReqMan processes with the same `--user-data-dir` cannot run; e2e scenarios each use
+  their own profile (`launch()` in `e2e/harness.mjs`), so they can run side by side.

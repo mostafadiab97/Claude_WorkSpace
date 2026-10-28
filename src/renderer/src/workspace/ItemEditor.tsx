@@ -6,6 +6,7 @@ import { typeName } from '../lib/schema'
 import { HistoryView } from './HistoryView'
 import { LinksSection } from './LinksSection'
 import { ParentPicker } from './ParentPicker'
+import { T } from '../../../shared/text'
 
 export type EditorTarget = { kind: 'item'; id: string } | { kind: 'draft'; item: Item }
 
@@ -132,12 +133,12 @@ export function ItemEditor(props: {
 
   if (target.kind === 'item' && details === null && form === null) {
     return (
-      <aside className="editor" aria-label="Item">
-        <p className="muted">This item could not be read. It may have been deleted, or its file is not valid.</p>
+      <aside className="editor" aria-label={T.editor.label}>
+        <p className="muted">{T.editor.unreadable}</p>
       </aside>
     )
   }
-  if (!form) return <aside className="editor" aria-label="Item" />
+  if (!form) return <aside className="editor" aria-label={T.editor.label} />
 
   const set = (patch: Partial<Item>): void => {
     setForm({ ...form, ...patch })
@@ -167,24 +168,24 @@ export function ItemEditor(props: {
   }
 
   return (
-    <aside className="editor scroll" aria-label={`Item ${form.id}`}>
+    <aside className="editor scroll" aria-label={T.editor.labelFor(form.id)}>
       <header className="editor__header">
         <div>
           <div className="editor__id">{form.id}</div>
-          <div className="editor__type">{typeName(schema, form.type)}{isNew && ' · new, not saved yet'}</div>
+          <div className="editor__type">{typeName(schema, form.type)}{isNew && T.editor.newNotSaved}</div>
         </div>
-        <button type="button" className="icon-btn" aria-label="Close" title="Close" onClick={props.onClose}>
+        <button type="button" className="icon-btn" aria-label={T.common.close} title={T.common.close} onClick={props.onClose}>
           ✕
         </button>
       </header>
 
       {!isNew && (
-        <div className="tabs" role="tablist" aria-label="Item view">
+        <div className="tabs" role="tablist" aria-label={T.editor.tabs}>
           <button type="button" role="tab" aria-selected={tab === 'details'} className={tab === 'details' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('details')}>
-            Details
+            {T.editor.details}
           </button>
           <button type="button" role="tab" aria-selected={tab === 'history'} className={tab === 'history' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('history')}>
-            History
+            {T.editor.history}
           </button>
         </div>
       )}
@@ -196,14 +197,14 @@ export function ItemEditor(props: {
       ) : (
       <div className="editor__body">
         <label className="field">
-          <span className="field__label">Title</span>
-          <input className="input" value={form.title} autoFocus={isNew} onChange={(e) => set({ title: e.target.value })} placeholder="Short name of the requirement" />
+          <span className="field__label">{T.editor.title}</span>
+          <input className="input" value={form.title} autoFocus={isNew} onChange={(e) => set({ title: e.target.value })} placeholder={T.editor.titlePlaceholder} />
         </label>
 
         <div className="field-grid">
           <label className="field">
-            <span className="field__label">Type</span>
-            <input className="input" value={typeName(schema, form.type)} readOnly title="The type is chosen when the item is created; it decides the ID prefix" />
+            <span className="field__label">{T.editor.type}</span>
+            <input className="input" value={typeName(schema, form.type)} readOnly title={T.editor.typeTooltip} />
           </label>
           {schema.fields.map((f) => (
             <FieldInput key={f.id} def={f} value={form.fields[f.id]} error={issueFor(`fields.${f.id}`)} onChange={(v) => setField(f.id, v)} />
@@ -211,21 +212,21 @@ export function ItemEditor(props: {
         </div>
 
         <div className="field">
-          <span className="field__label">Parent</span>
+          <span className="field__label">{T.editor.parent}</span>
           <ParentPicker schema={schema} value={form.parent} selfId={form.id} onChange={(p) => set(p ? { parent: p } : { parent: undefined })} />
           {issueFor('parent') && <span className="field__error">{issueFor('parent')}</span>}
         </div>
 
         <label className="field">
-          <span className="field__label">Text</span>
-          <textarea className="input textarea" value={form.text} onChange={(e) => set({ text: e.target.value })} placeholder="The system shall…" rows={8} />
+          <span className="field__label">{T.editor.text}</span>
+          <textarea className="input textarea" value={form.text} onChange={(e) => set({ text: e.target.value })} placeholder={T.editor.textPlaceholder} rows={8} />
         </label>
 
         <LinksSection
           schema={schema}
           itemId={form.id}
           details={details}
-          lockedReason={isNew ? 'Save the item first, then add links.' : dirty ? 'Save or discard your changes before changing links.' : null}
+          lockedReason={isNew ? T.editor.linksAfterSave : dirty ? T.editor.linksLocked : null}
           onChanged={async () => {
             await load()
             props.onLinksChanged()
@@ -247,7 +248,7 @@ export function ItemEditor(props: {
             {status.message}{' '}
             {status.conflict && (
               <button type="button" className="link-btn" onClick={() => void load()}>
-                Reload the current version (your changes are discarded)
+                {T.editor.reload}
               </button>
             )}
           </p>
@@ -255,47 +256,47 @@ export function ItemEditor(props: {
         {confirmDelete ? (
           <div className="actions">
             <span>
-              Delete {form.id}?
+              {T.editor.deleteAsk(form.id)}
               {(details?.incoming.length ?? 0) > 0 && (
                 <label className="check">
                   <input type="checkbox" checked={removeIncoming} onChange={(e) => setRemoveIncoming(e.target.checked)} />
-                  Also remove the {details?.incoming.length} link(s) other items have to it
+                  {T.editor.removeIncoming(details?.incoming.length ?? 0)}
                 </label>
               )}
             </span>
-            <button type="button" className="btn btn--danger" onClick={() => void remove()}>Delete</button>
-            <button type="button" className="btn" onClick={() => setConfirmDelete(false)}>Cancel</button>
+            <button type="button" className="btn btn--danger" onClick={() => void remove()}>{T.editor.delete}</button>
+            <button type="button" className="btn" onClick={() => setConfirmDelete(false)}>{T.common.cancel}</button>
           </div>
         ) : (
           <div className="actions actions--spread">
             <div className="actions">
-              <button type="button" className="btn btn--primary" onClick={() => void save()} disabled={!dirty || status.kind === 'saving'} title="Ctrl+S">
-                {status.kind === 'saving' ? 'Saving…' : status.kind === 'saved' && !dirty ? 'Saved ✓' : 'Save'}
+              <button type="button" className="btn btn--primary" onClick={() => void save()} disabled={!dirty || status.kind === 'saving'} title={T.editor.saveTooltip}>
+                {status.kind === 'saving' ? T.editor.saving : status.kind === 'saved' && !dirty ? T.editor.saved : T.common.save}
               </button>
               {dirty && !isNew && (
                 <button type="button" className="btn" onClick={() => { setForm(base); setStatus({ kind: 'idle' }) }}>
-                  Discard changes
+                  {T.editor.discard}
                 </button>
               )}
             </div>
             {!isNew && (
               <div className="actions">
-                <button type="button" className="icon-btn" title="Move up among siblings" aria-label="Move up" disabled={dirty} onClick={() => void move('up')}>↑</button>
-                <button type="button" className="icon-btn" title="Move down among siblings" aria-label="Move down" disabled={dirty} onClick={() => void move('down')}>↓</button>
+                <button type="button" className="icon-btn" title={T.editor.moveUpTooltip} aria-label={T.editor.moveUp} disabled={dirty} onClick={() => void move('up')}>↑</button>
+                <button type="button" className="icon-btn" title={T.editor.moveDownTooltip} aria-label={T.editor.moveDown} disabled={dirty} onClick={() => void move('down')}>↓</button>
                 <select
                   className="select-btn"
                   value=""
                   disabled={dirty}
-                  aria-label="Add child item"
+                  aria-label={T.editor.addChild}
                   onChange={(e) => e.target.value && props.onNewChild(e.target.value, form.id)}
                 >
-                  <option value="">+ Child…</option>
+                  <option value="">{T.editor.addChildOption}</option>
                   {schema.itemTypes.map((t) => (
                     <option key={t.id} value={t.id}>{t.name}</option>
                   ))}
                 </select>
                 <button type="button" className="btn btn--quiet-danger" onClick={() => setConfirmDelete(true)} disabled={dirty}>
-                  Delete
+                  {T.editor.delete}
                 </button>
               </div>
             )}
@@ -315,7 +316,7 @@ function FieldInput({ def, value, error, onChange }: { def: FieldDef; value: Fie
         <select className="input" value={str} onChange={(e) => onChange(e.target.value || undefined)}>
           <option value="">—</option>
           {def.options?.map((o) => <option key={o} value={o}>{o}</option>)}
-          {str && !def.options?.includes(str) && <option value={str}>{str} (not allowed)</option>}
+          {str && !def.options?.includes(str) && <option value={str}>{T.editor.notAllowed(str)}</option>}
         </select>
       )
       break
@@ -325,7 +326,7 @@ function FieldInput({ def, value, error, onChange }: { def: FieldDef; value: Fie
           className="input"
           defaultValue={str}
           key={str}
-          placeholder="comma, separated"
+          placeholder={T.editor.listPlaceholder}
           onBlur={(e) => onChange(e.target.value.split(',').map((x) => x.trim()).filter(Boolean))}
         />
       )

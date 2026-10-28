@@ -260,6 +260,15 @@ code {
   color: var(--rm-color-warning);
 }
 
+.notice--ok {
+  color: var(--rm-color-success);
+}
+
+.results__row--bad th,
+.results__row--bad td {
+  color: var(--rm-color-danger);
+}
+
 .error-text {
   color: var(--rm-color-danger);
 }

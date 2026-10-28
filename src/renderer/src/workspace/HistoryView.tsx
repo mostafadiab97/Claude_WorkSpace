@@ -3,6 +3,7 @@ import type { HistoryEntry, ItemVersionCompare } from '../../../shared/api'
 import { ChangeView } from './ChangeView'
 import type { Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
+import { T } from '../../../shared/text'
 
 const when = (iso: string): string => {
   if (!iso) return ''
@@ -48,19 +49,19 @@ export function HistoryView({ schema, itemId, reloadToken }: { schema: Schema; i
   }, [itemId, selected, reloadToken])
 
   if (error) return <p className="notice notice--error">{error}</p>
-  if (!entries) return <p className="muted-inline">Loading history…</p>
-  if (entries.length === 0) return <p className="muted">No history yet — the item has never been committed.</p>
+  if (!entries) return <p className="muted-inline">{T.history.loading}</p>
+  if (entries.length === 0) return <p className="muted">{T.history.none}</p>
 
   const shown = compare && compare.hash === selected ? compare.data : null
   return (
     <div className="history">
-      <ul className="history__list" aria-label="Versions">
+      <ul className="history__list" aria-label={T.history.versions}>
         {entries.map((e) => (
           <li key={e.hash}>
             <button type="button" className={e.hash === selected ? 'history__entry history__entry--selected' : 'history__entry'} aria-pressed={e.hash === selected} onClick={() => setSelected(e.hash)}>
               <span className="history__message">{e.message}</span>
               <span className="history__meta">
-                {e.hash === 'working' ? 'your saved, uncommitted version' : `${e.author} · ${when(e.date)} · ${e.hash.slice(0, 7)}`}
+                {e.hash === 'working' ? T.history.working : `${e.author} · ${when(e.date)} · ${e.hash.slice(0, 7)}`}
               </span>
             </button>
           </li>

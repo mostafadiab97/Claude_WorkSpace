@@ -24,6 +24,14 @@ const run = (file) =>
     child.on('exit', (code) => {
       // print each scenario's output in one block, so parallel runs stay readable
       console.log(`\n===== ${file} (${Math.round((Date.now() - started) / 1000)} s) =====\n${out.trim()}`)
+      // on GitHub, a failure also becomes an annotation on the run page (readable without downloading logs)
+      if (code !== 0 && process.env.GITHUB_ACTIONS) {
+        const lines = out.split(/\r?\n/)
+        const failed = lines.filter((l) => l.includes('✗'))
+        const tail = lines.slice(-25)
+        const text = [...failed, '…', ...tail].join('%0A').replace(/::/g, ': :')
+        console.log(`::error title=E2E ${file}::${text}`)
+      }
       results.push({ file, ok: code === 0 })
       resolve()
     })

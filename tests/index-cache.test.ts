@@ -20,13 +20,13 @@ async function setup(): Promise<{ repo: RequirementsRepo; cache: IndexCache; ite
   const stk = make('stakeholder-need', 'Comfortable temperature', { text: 'Users want a stable room temperature.' })
   const sys = make('system-requirement', 'Temperature accuracy', {
     parent: stk.id,
-    order: 10,
+    order: 'aA',
     text: 'The thermostat shall measure temperature within ±0.5 °C.',
     fields: { status: 'Approved', priority: 'High', owner: 'A. Hassan', tags: ['safety', 'performance'] }
   })
   const sys2 = make('system-requirement', 'Braking response', {
     parent: stk.id,
-    order: 20,
+    order: 'aK',
     text: 'Schedules shall apply within 2 seconds.',
     fields: { status: 'Draft', priority: 'Low', tags: ['ux'] }
   })
@@ -145,6 +145,24 @@ describe('index cache', () => {
     expect(stats.full).toBe(true)
     expect(cache.get(ctx.items.sys!.id)?.suspectCount).toBe(0)
     expect(cache.query({ links: 'suspect' }).total).toBe(0)
+    cache.close()
+    await rm(dir, { recursive: true, force: true })
+  })
+  it('rebuilds a 0.8.0 cache (numeric positions) so positions sort as order keys (0.9.0)', async () => {
+    const { DatabaseSync } = await import('node:sqlite')
+    const dir = await mkdtemp(join(tmpdir(), 'reqman-oldcache3-'))
+    const file = join(dir, 'v3.sqlite')
+    const first = createSqliteIndexCache(file)
+    await first.sync(ctx.repo)
+    first.close()
+    // pretend 0.8.0 wrote it: format 3, numeric positions
+    const db = new DatabaseSync(file)
+    db.exec("UPDATE meta SET value = '3' WHERE key = 'format'; UPDATE items SET ord = 10;")
+    db.close()
+    const cache = createSqliteIndexCache(file)
+    expect((await cache.sync(ctx.repo)).full).toBe(true)
+    const kids = cache.query({ parent: ctx.items.stk!.id, sort: { by: 'order' } }).items
+    expect(kids.map((k) => k.order)).toEqual(['aA', 'aK'])
     cache.close()
     await rm(dir, { recursive: true, force: true })
   })

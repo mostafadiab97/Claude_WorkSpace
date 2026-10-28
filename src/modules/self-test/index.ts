@@ -129,11 +129,14 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       expect(W().query({ fields: { status: ['Review'] } }).total === 1, 'The Status filter does not find the edited item.')
     })
 
-    await step('Move an item in the hierarchy', async () => {
+    await step('Move an item; outline numbers follow', async () => {
+      expect(/^REQ-[0-9A-Z]{7}$/.test(id('req')), `New IDs should look like REQ-K7Q3XMB, got ${id('req')}.`)
+      const before = (await W().getItem(id('req')))?.number
       const r = await W().reparentItem(id('test'), id('heading'), id('req'))
       expect(r.ok, r.ok ? '' : r.message)
-      const order = W().query({ parent: id('heading'), sort: { by: 'order' } }).items.map((i) => i.id)
-      expect(order[0] === id('test'), 'The moved item is not first.')
+      const kids = W().query({ parent: id('heading'), sort: { by: 'order' } }).items
+      expect(kids[0]?.id === id('test'), 'The moved item is not first.')
+      expect(before === '1.1' && kids.map((k) => k.number).join(',') === '1.1,1.2', `Outline numbers did not follow the move (${kids.map((k) => k.number).join(', ')}).`)
     })
 
     await step('Link, suspect link, confirm', async () => {

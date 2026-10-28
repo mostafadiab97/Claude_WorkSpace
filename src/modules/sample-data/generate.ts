@@ -1,4 +1,4 @@
-import { generateId, type Item } from '../items'
+import { generateId, keyBetween, type Item } from '../items'
 import type { Schema } from '../schema'
 
 export interface SampleOptions {
@@ -50,26 +50,25 @@ const PARENT_TYPE: Record<string, string> = {
 export function generateItems(schema: Schema, { count, seed = 1 }: SampleOptions): Item[] {
   const rand = rng(seed)
   const pick = <T>(xs: readonly T[]): T => xs[Math.floor(rand() * xs.length)] as T
-  const prefixOf = new Map(schema.itemTypes.map((t) => [t.id, t.prefix]))
+  const knownTypes = new Set(schema.itemTypes.map((t) => t.id))
   const taken = new Set<string>()
   const byType = new Map<string, Item[]>()
   const items: Item[] = []
-  const orderCounter = new Map<string, number>()
+  const orderCounter = new Map<string, string>()
 
   const sentence = (): string => `The ${pick(SUBJECTS)} shall ${pick(VERBS)} ${pick(OBJECTS)} ${pick(QUALIFIERS)}.`
-  const nextOrder = (parent: string): number => {
-    const n = (orderCounter.get(parent) ?? 0) + 10
-    orderCounter.set(parent, n)
-    return n
+  const nextOrder = (parent: string): string => {
+    const k = keyBetween(orderCounter.get(parent) ?? null, null)
+    orderCounter.set(parent, k)
+    return k
   }
 
   let made = 0
   MIX.forEach(([type, share], idx) => {
-    const prefix = prefixOf.get(type)
-    if (!prefix) return
+    if (!knownTypes.has(type)) return
     const n = idx === MIX.length - 1 ? count - made : Math.round(count * share)
     for (let i = 0; i < n && made < count; i++, made++) {
-      const id = generateId(prefix, (x) => taken.has(x))
+      const id = generateId((x) => taken.has(x))
       taken.add(id)
       const text = type === 'information' ? `Overview of the ${pick(SUBJECTS)}.` : `${sentence()}${rand() < 0.4 ? `\n\nRationale: ${sentence()}` : ''}`
       const subject = pick(SUBJECTS)

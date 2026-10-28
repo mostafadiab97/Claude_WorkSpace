@@ -171,8 +171,14 @@ export function ItemEditor(props: {
     <aside className="editor scroll" aria-label={T.editor.labelFor(form.id)}>
       <header className="editor__header">
         <div>
-          <div className="editor__id">{form.id}</div>
-          <div className="editor__type">{typeName(schema, form.type)}{isNew && T.editor.newNotSaved}</div>
+          <div className="editor__heading">
+            {details?.number && <span className="editor__number" title={T.editor.number(details.number)}>{details.number}</span>}
+            <span className="editor__id">{form.id}</span>
+          </div>
+          <div className="editor__type">
+            {typeName(schema, form.type)}
+            {isNew && T.editor.newNotSaved}
+          </div>
         </div>
         <button type="button" className="icon-btn" aria-label={T.common.close} title={T.common.close} onClick={props.onClose}>
           ✕
@@ -204,7 +210,14 @@ export function ItemEditor(props: {
         <div className="field-grid">
           <label className="field">
             <span className="field__label">{T.editor.type}</span>
-            <input className="input" value={typeName(schema, form.type)} readOnly title={T.editor.typeTooltip} />
+            <select className="input" aria-label={T.editor.type} value={form.type} title={T.editor.typeTooltip} onChange={(e) => set({ type: e.target.value })}>
+              {schema.itemTypes.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+              {!schema.itemTypes.some((t) => t.id === form.type) && <option value={form.type}>{form.type}</option>}
+            </select>
           </label>
           {schema.fields.map((f) => (
             <FieldInput key={f.id} def={f} value={form.fields[f.id]} error={issueFor(`fields.${f.id}`)} onChange={(v) => setField(f.id, v)} />

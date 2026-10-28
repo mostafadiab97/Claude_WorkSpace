@@ -26,6 +26,11 @@ export interface GitOpsDeps {
   log: Pick<Logger, 'info' | 'warn' | 'error'>
   /** Re-reads changed item files into the index after Git changed the working folder. */
   resync(): Promise<void>
+  /**
+   * Right before a push: give short order keys back to sibling groups the user changed (since `upstream`) whose
+   * keys got longer than 4 characters, as one extra commit. Returns how many items were touched.
+   */
+  tidyBeforePush?(s: GitSession, upstream: string): Promise<number>
 }
 
 const ID_FROM_PATH = /\/items\/([^/]+)\.md$/
@@ -283,9 +288,11 @@ export function createGitOps(deps: GitOpsDeps) {
       if (st.upstream && st.ahead === 0) {
         return done(s, st.changes.length > 0 ? T.gitMsg.notCommittedYet : T.gitMsg.remoteHasAll)
       }
+      // owner's rule (28 Oct 2026): keep order keys short, but only in groups this user changed
+      const tidied = st.upstream && deps.tidyBeforePush ? await deps.tidyBeforePush(s, st.upstream).catch((e: unknown) => (log.warn(`Tidying positions skipped: ${String(e)}`), 0)) : 0
       try {
         await git.push(s.repo.root, st.upstream || !remote || !st.branch ? undefined : { remote, branch: st.branch })
-        log.info(`Pushed ${st.branch ?? ''}`)
+        log.info(`Pushed ${st.branch ?? ''}${tidied ? ` (positions of ${tidied} items tidied)` : ''}`)
         return done(s, T.gitMsg.pushed(st.changes.length))
       } catch (e) {
         log.warn(`Push failed: ${String(e)}`)

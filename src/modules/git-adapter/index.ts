@@ -82,6 +82,8 @@ export interface GitAdapter {
   identity(root: string): Promise<{ name: string | null; email: string | null }>
   /** Commits every change under `pathspec` and nothing else. Returns the new commit's hash. */
   commit(root: string, pathspec: string, message: string): Promise<string>
+  /** Commits exactly these files (paths from the repository top), nothing else that may be staged or changed. */
+  commitFiles(root: string, paths: string[], message: string): Promise<string>
   fetch(root: string): Promise<void>
   /** Would merging `upstream` into HEAD conflict? Computed without touching the working folder. */
   checkMerge(root: string, upstream: string): Promise<MergeCheck>
@@ -124,6 +126,8 @@ export interface GitAdapter {
   headSummary(root: string): Promise<{ hasParent: boolean; lastMessage: string | null }>
   /** Blob IDs of these paths in a commit (paths that do not exist there are missing from the map). */
   blobIds(root: string, ref: string, paths: string[]): Promise<Map<string, string>>
+  /** Every file under `dir` in a commit, path → blob ID (one `ls-tree -r` process). */
+  treeBlobs(root: string, ref: string, dir: string): Promise<Map<string, string>>
   /** Sets user.name and user.email in the user's global Git configuration. */
   setIdentity(root: string, name: string, email: string): Promise<void>
 }

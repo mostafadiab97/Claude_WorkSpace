@@ -4,7 +4,7 @@ import type { Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { linkName, typeName } from '../lib/schema'
 import { ChangeView } from './ChangeView'
-import { defaultPreset, describeSchema, rangeOf, WORKING, type Preset } from './compareRange'
+import { defaultPreset, describeSchema, numberLabel, rangeOf, WORKING, type Preset } from './compareRange'
 import { T } from '../../../shared/text'
 
 const SHOW = 400
@@ -282,6 +282,7 @@ export function CompareView(props: {
                       <span className={`changes__kind changes__kind--${e.kind === 'modified' ? 'modified' : e.kind === 'moved' ? 'renamed' : e.kind}`} title={KIND_LABEL[e.kind]}>
                         {KIND_LETTER[e.kind]}
                       </span>
+                      <span className="compare__number">{numberLabel(e)}</span>
                       <span className="tree__id">{e.id}</span>
                       <span className="compare__name">{e.title || T.common.noTitle}</span>
                       <span className="compare__type">{typeName(schema, e.type)}</span>

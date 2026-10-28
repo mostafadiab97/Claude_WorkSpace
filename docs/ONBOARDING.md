@@ -61,11 +61,11 @@ The architecture picture in section 1 shows these parts and how calls travel bet
 
 ## 4. What the data looks like
 
-An item file (`requirements/items/SYS-0033FV.md`):
+An item file (`requirements/items/REQ-0033FVK.md`):
 
 ```markdown
 ---
-id: SYS-0033FV
+id: REQ-0033FVK
 type: system-requirement
 title: Main PCB authenticates safety limits
 status: Approved
@@ -74,21 +74,23 @@ owner: L. Samir
 tags:
   - i18n
   - release-1.0
-parent: INFO-A6P9A8
-order: 1620
+parent: REQ-A6P9A8T
+order: a0V
 links:
   - type: refines
-    target: STK-ZWN5M8
+    target: REQ-ZWN5M8Q
     confirmed: 994b9d44bde8
 ---
 The main PCB shall limit access tokens in all supported languages.
 ```
 
-- `id` is `PREFIX-` + 6 random characters, so two people never need to coordinate numbers.
-- `parent` + `order` build the hierarchy; `links` are stored only on the source item ("this verifies that").
+- `id` is `REQ-` + 7 random characters, so two people never need to coordinate numbers, and the type can change.
+- `parent` + `order` build the hierarchy. `order` is an order key: there is always room between two keys, so a
+  move rewrites only the moved file. The outline number shown in the window ("2.3.1") is calculated from these
+  two, never stored. `links` are stored only on the source item ("this verifies that").
 - `confirmed` is the fingerprint (type + title + text) of the target when the link was last confirmed; if the
   target changes, the link becomes **suspect** until someone confirms it.
-- The project's `requirements/.reqman/schema.yaml` defines item types (with ID prefixes), fields (text, choice,
+- The project's `requirements/.reqman/schema.yaml` defines item types, fields (text, choice,
   list, number, date) and link types (name + reverse name). It is versioned with the requirements.
 
 ## 5. How a request travels — two examples

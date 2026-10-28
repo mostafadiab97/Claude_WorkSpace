@@ -61,7 +61,9 @@ cloud session from v0.5.0. Nothing lives outside this repository and `Claude_San
 - Offline first; no server; no user accounts — access = Git host permissions.
 - Data format: one Markdown file per item, `requirements/items/<ID>.md`, YAML header in fixed key order, links
   stored only on the source item, each with `confirmed:` (target fingerprint). Schema in
-  `requirements/.reqman/schema.yaml`. IDs `PREFIX-XXXXXX` (6 random Crockford base32). Details: ARCHITECTURE.md.
+  `requirements/.reqman/schema.yaml`. IDs `REQ-XXXXXXX` (7 random Crockford base32, every type; older `PREFIX-XXXXXX` stay valid). `order:` is an order
+  key (`src/modules/items/orderKey.ts`) compared **byte-wise** (`<`), never with `localeCompare`; outline numbers
+  are calculated, never stored. Details: ARCHITECTURE.md.
 - The SQLite index (`%APPDATA%\ReqMan\cache\<sha1(root)>.sqlite`) is only a cache. **If you change its tables,
   bump `FORMAT_VERSION` in `src/modules/index-cache/sqliteIndex.ts`** — the cache is then dropped and rebuilt
   (lesson of v0.4.1, see Pitfalls).
@@ -112,7 +114,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.8.0, 28 Oct 2026) — prototype complete, review fixed
+## Status (v0.9.0, 28 Oct 2026) — prototype complete, review fixed, new data format
 
 | Milestone | State |
 | --- | --- |
@@ -124,12 +126,14 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | M5 Compare — pulls first; default "what the last pull brought in" (reflog); uncommitted / last commit / any two versions; per item (added/changed/moved/deleted + summary + suspect-impact warning) and per link; schema changes; fast via `cat-file --batch` by blob ID | Done (v0.6.0) |
 | M6 Export and hardening — table and Compare export to CSV (comma, UTF-8 BOM) and Markdown; error boundary; old-Git warning; CI smoke test with 10k generated items; combined checklist + two-PC trial script | Done (v0.7.0) |
 | 0.8.0 clean page — all review fixes (D-01–D-08, D-10, P-01/02/04/05, S-01/02/03/06, X-01, T-01–05), release self-test, 5-step checklist | Done (v0.8.0) |
-| **0.9.0 new data format** — `REQ-` + 7 chars, type editable, fractional order keys (S-04), outline numbers, sandbox converted | **Next** |
-| 0.10.0 Changes view · 0.11.0 M7 Excel (+ chosen-items export) · 0.12.0 M8 branches · 0.13.0 ReqIF | Planned (DESIGN.md → "Release plan") |
+| 0.9.0 new data format — `REQ-` + 7 chars, type editable, order keys (S-04), outline numbers, sandbox converted | Done (v0.9.0) |
+| **0.10.0 Changes view (O-04/O-05/O-06)** | **Next** |
+| 0.11.0 M7 Excel (+ chosen-items export) · 0.12.0 M8 branches · 0.13.0 ReqIF | Planned (DESIGN.md → "Release plan") |
 
-Owner's last report (27 Oct 2026): combined checklist 0.5.0–0.7.0 all passed; two-PC trial postponed.
+Owner's last report (28 Oct 2026): 0.8.0 self-test passed (17 steps, 32.7 s), steps 3–5 passed; Compare + Changes
+overlap bug (fixed in 0.9.0). Two-PC trial postponed.
 
-Automated tests: 130 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
+Automated tests: 145 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
 repository and two clones ("PC A", "PC B"), the release self-test itself, the sandbox's chapter-9 promises
 (`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `journey` (~75 checks, the
 whole user story) and `fixes` (renamed file, lazy Expand all, second start, release self-test in the window).
@@ -172,13 +176,13 @@ The owner's tests of 0.5.0–0.7.0 all passed (27 Oct). His requests O-01–O-07
 sandbox converted) → 0.10.0 Changes view (O-04/O-05/O-06) → 0.11.0 M7 Excel (+ export of chosen items) → 0.12.0 M8
 branches → 0.13.0 ReqIF.
 
-**0.8.0 released (28 Oct 2026)** — waiting for the owner's 5-step checklist (`docs/TESTING.md`). **Next: 0.9.0
-new data format** (see DESIGN.md "Release plan" and review section H, O-01–O-03, S-04): `REQ-` + 7 random
-characters for every item, type editable; fractional order keys (a move changes one file; at push, re-space only
-the sibling groups the user changed whose keys are longer than 4 characters); calculated outline numbers (never
-stored) in the table ("No."), editor header, parent picker, Compare and every export; convert the sandbox
-directly in its repository (new IDs, links rewritten, `git mv` so history follows, `former-id`, typed numbers
-removed from titles) — the owner just pulls. Bump the index `FORMAT_VERSION` and add an old-cache test.
+**0.9.0 released (28 Oct 2026)** — waiting for the owner's 5-step checklist (`docs/TESTING.md`). The converted
+sandbox (`tools/convert-sandbox-0.9.mts`, two commits: renames, then contents) is pushed **only after** the 0.9.0
+release is published (an older ReqMan would see `REQ-` IDs with the wrong prefix). **Next: 0.10.0 Changes view**
+(review H, O-04/O-05/O-06; DESIGN.md "Release plan"): one Changes view instead of Changes panel + Compare, opening
+on "Uncommitted changes"; no automatic pulls — offer "Pull first" before remote-related actions; GitHub-style split
+difference (Fields, Text, Links blocks; old red left, new green right, changed words highlighted; revert arrows for
+uncommitted changes); a Keep/Unlink window for suspect links when a linked item's type, title or text is saved.
 The owner is a C developer new to this field: explain from first principles, short, C analogies where useful.
 Record decisions in the review file / DESIGN.md.
 
@@ -214,7 +218,7 @@ Everything else must be automated (unit tests, e2e in CI, the in-app release sel
 - Header sort: ascending → descending → back to document order.
 - Hidden/ordered columns are personal (per repo, per PC, localStorage) — not shared through Git; field
   definitions are shared (schema.yaml).
-- Type is read-only in the editor (it decides the ID prefix).
+- Type is editable in the editor since 0.9.0 (IDs no longer contain the type).
 - Link edits are saved immediately and locked while the item has unsaved edits.
 - Delete offers to remove incoming links (ticked by default).
 
@@ -257,5 +261,9 @@ Everything else must be automated (unit tests, e2e in CI, the in-app release sel
   `gh api -X POST repos/mostafadiab97/Claude_WorkSpace/actions/workflows/release.yml/dispatches -f ref=main`.
   Run logs and artifacts cannot be downloaded either; failed e2e scenarios are therefore written as GitHub
   annotations (`gh api repos/.../check-runs/<job id>/annotations`).
+- **Order keys are compared byte-wise.** `localeCompare` sorts `a0` / `aA` / `aa` differently from SQLite and
+  `keyBetween` → wrong order (hit in the sandbox conversion). Use `<`/`>` (see `cmp` in the conversion tool).
+- **IDs that change** (conversion): Compare pairs items by `former-id`; code that maps "before" items must look them
+  up by the old ID (`beforeId` map in `compare.ts`).
 - **Electron downloads its program on first use:** two scenarios starting at once failed on Windows ("file in
   use") — `e2e/run.mjs` imports `electron` once before starting them.

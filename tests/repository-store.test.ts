@@ -30,9 +30,9 @@ describe('repository store', () => {
     const taken = new Set<string>()
     const stk = repo.createItem('stakeholder-need', taken, { title: 'Comfort' })
     taken.add(stk.id)
-    const sys = repo.createItem('system-requirement', taken, { title: 'Accuracy', parent: stk.id, order: 10 })
+    const sys = repo.createItem('system-requirement', taken, { title: 'Accuracy', parent: stk.id, order: 'aA' })
     sys.links.push({ type: 'refines', target: stk.id })
-    expect(stk.id).toMatch(/^STK-/)
+    expect(stk.id).toMatch(/^REQ-[0-9A-Z]{7}$/)
     expect(sys.fields.status).toBe('Draft')
 
     await repo.writeItem(stk)

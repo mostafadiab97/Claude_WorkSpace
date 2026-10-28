@@ -53,7 +53,22 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.8.0 (clean-up release)
+## Manual test checklist — v0.9.0 (new data format)
+
+0.9.0 changes how items are stored: every ID is now `REQ-` + 7 characters, the type can be changed, and the
+outline number (1, 1.2, 2.3.1 …) is calculated by ReqMan instead of typed into titles. The `Claude_SandBox`
+repository has been converted to the new format — **update ReqMan first, then pull the sandbox.** Report by step
+number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Start ReqMan (0.8.0). Wait for **Restart and update**, click it. Then in your `Claude_SandBox` clone run `git pull` (if it refuses because of your test edits: `git reset --hard origin/main`). | App shows **0.9.0** (⚙ → Environment → App). The pull brings in two commits "Convert to ReqMan 0.9.0 (1/2)" and "(2/2)". |
+| 2 | **⚙ Settings & diagnostics → Run release self-test**. | **All steps passed**, 17 ✓. If anything shows ✗: **Copy report** and paste it into your message. |
+| 3 | Open the sandbox. Look at the table, then open any requirement. Change its **Type** in the editor and **Save**. | A **No.** column next to ID shows 1, 1.1, 2.3.1 …; heading titles no longer start with a typed number. Every ID starts with `REQ-`. The editor header shows the number before the ID. After the type change the ID stays the same. |
+| 4 | Drag a requirement under another chapter (or use the parent picker). Then **Compare** → *Uncommitted changes*. | Its number changes at once (e.g. 3.2.4 → 5.1), and so do the numbers of the items after its old place. Compare lists the item as **moved** with "3.2.4 → 5.1". Only **one** file is changed (Changes panel). |
+| 5 | Commit the move, **Push**. Then **Compare** → *since my last pull*. | The push works. Compare after the step-1 pull shows the items as **changed** (not deleted + added) and the numbers before and after are equal. |
+
+## Previous checklist — v0.8.0 (clean-up release)
 
 Almost nothing new to see: 0.8.0 fixes everything the project review found and makes ReqMan faster and
 sturdier. Report by step number.

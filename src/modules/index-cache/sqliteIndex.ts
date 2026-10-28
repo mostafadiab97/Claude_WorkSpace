@@ -9,7 +9,7 @@ import type { ItemIssue } from '../../shared/domain'
 import type { IndexCache, IndexedItem, ItemQuery, LinkRef, QueryResult, SyncStats } from './index'
 
 /** Bump when the table layout changes; an old cache file is then rebuilt automatically. */
-const FORMAT_VERSION = '3'
+const FORMAT_VERSION = '4'
 
 const DDL = `
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS items (
   type TEXT NOT NULL,
   title TEXT NOT NULL,
   parent TEXT,
-  ord REAL,
+  ord TEXT,
   text TEXT NOT NULL,
   fields_json TEXT NOT NULL,
   links_json TEXT NOT NULL,
@@ -46,7 +46,7 @@ interface ItemRow {
   type: string
   title: string
   parent: string | null
-  ord: number | null
+  ord: string | null
   text: string
   fields_json: string
   links_json: string
@@ -176,7 +176,10 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     count: db.prepare('SELECT COUNT(*) AS n FROM items')
   }
 
+  /** Goes up by one with every change to the index, so callers can cache things computed from it. */
+  let revision = 0
   const transaction = (fn: () => void): void => {
+    revision++
     db.exec('BEGIN')
     try {
       fn()
@@ -424,6 +427,15 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     },
 
     count: () => (stmt.count.get() as { n: number }).n,
+
+    revision: () => revision,
+
+    structure: () =>
+      (db.prepare('SELECT id, parent, ord FROM items ORDER BY ord IS NULL, ord, id').all() as { id: string; parent: string | null; ord: string | null }[]).map((r) => ({
+        id: r.id,
+        ...(r.parent !== null ? { parent: r.parent } : {}),
+        ...(r.ord !== null ? { order: r.ord } : {})
+      })),
 
     close() {
       db.close()

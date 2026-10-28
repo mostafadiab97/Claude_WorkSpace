@@ -4,17 +4,24 @@ import { toCsv } from './csv'
 
 const KIND: Record<string, string> = { added: 'Added', modified: 'Changed', moved: 'Moved', deleted: 'Deleted' }
 
+/** "2.3", or "1.2 → 3.5.1" when the item moved. */
+export function numberLabel(e: { numberBefore?: string; numberAfter?: string }): string {
+  if (e.numberBefore && e.numberAfter && e.numberBefore !== e.numberAfter) return `${e.numberBefore} → ${e.numberAfter}`
+  return e.numberAfter ?? e.numberBefore ?? ''
+}
+
 /** One row per changed item, plus one per changed field — easy to filter in Excel. */
 export function compareToCsv(schema: Schema, r: CompareResult): string {
   const typeName = (id: string): string => schema.itemTypes.find((t) => t.id === id)?.name ?? id
   const linkName = (id: string): string => schema.linkTypes.find((l) => l.id === id)?.name ?? id
-  const rows: string[][] = [['ID', 'Title', 'Type', 'Change', 'What', 'Before', 'After']]
+  const rows: string[][] = [['ID', 'No.', 'Title', 'Type', 'Change', 'What', 'Before', 'After']]
   for (const e of r.entries) {
-    rows.push([e.id, e.title, typeName(e.type), KIND[e.kind] ?? e.kind, e.summary, '', ''])
-    for (const d of e.diff.rows) rows.push([e.id, e.title, typeName(e.type), KIND[e.kind] ?? e.kind, d.label, d.before, d.after])
-    if (e.diff.text) rows.push([e.id, e.title, typeName(e.type), KIND[e.kind] ?? e.kind, 'Text', e.diff.text.before, e.diff.text.after])
-    for (const l of e.diff.linksAdded) rows.push([e.id, e.title, typeName(e.type), KIND[e.kind] ?? e.kind, 'Link added', '', `${linkName(l.type)} ${l.target}`])
-    for (const l of e.diff.linksRemoved) rows.push([e.id, e.title, typeName(e.type), KIND[e.kind] ?? e.kind, 'Link removed', `${linkName(l.type)} ${l.target}`, ''])
+    const head = [e.id, numberLabel(e), e.title, typeName(e.type), KIND[e.kind] ?? e.kind]
+    rows.push([...head, e.summary, '', ''])
+    for (const d of e.diff.rows) rows.push([...head, d.label, d.before, d.after])
+    if (e.diff.text) rows.push([...head, 'Text', e.diff.text.before, e.diff.text.after])
+    for (const l of e.diff.linksAdded) rows.push([...head, 'Link added', '', `${linkName(l.type)} ${l.target}`])
+    for (const l of e.diff.linksRemoved) rows.push([...head, 'Link removed', `${linkName(l.type)} ${l.target}`, ''])
   }
   return toCsv(rows)
 }
@@ -46,7 +53,7 @@ export function compareToMarkdown(schema: Schema, r: CompareResult): string {
     out.push(`**Schema changed:** ${parts.join('; ') || 'names, options or defaults'}`, '')
   }
   for (const e of r.entries) {
-    out.push(`## ${e.id} — ${e.title || '(no title)'}`, '', `${typeName(e.type)} · **${KIND[e.kind] ?? e.kind}** · ${e.summary}`, '')
+    out.push(`## ${numberLabel(e) ? `${numberLabel(e)} ` : ''}${e.id} — ${e.title || '(no title)'}`, '', `${typeName(e.type)} · **${KIND[e.kind] ?? e.kind}** · ${e.summary}`, '')
     if (e.diff.rows.length) {
       out.push('| Field | Before | After |', '| --- | --- | --- |')
       for (const d of e.diff.rows) out.push(`| ${esc(d.label)} | ${esc(d.before) || '—'} | ${esc(d.after) || '—'} |`)

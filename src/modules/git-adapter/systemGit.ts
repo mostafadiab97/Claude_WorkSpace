@@ -247,6 +247,12 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
       return (await git(root, ['rev-parse', 'HEAD'])).trim()
     },
 
+    async commitFiles(root, paths, message) {
+      await git(root, ['add', '--', ...paths])
+      await git(root, ['commit', '--quiet', '-m', message, '--only', '--', ...paths])
+      return (await git(root, ['rev-parse', 'HEAD'])).trim()
+    },
+
     async fetch(root) {
       await git(root, ['fetch', '--quiet', '--prune'], NETWORK_TIMEOUT)
     },
@@ -438,6 +444,16 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
           const m = /^\d+ blob ([0-9a-f]+)\t(.*)$/s.exec(entry)
           if (m) out.set(m[2] as string, m[1] as string)
         }
+      }
+      return out
+    },
+
+    async treeBlobs(root, ref, dir) {
+      const out = new Map<string, string>()
+      const text = await git(root, ['ls-tree', '-r', '-z', ref, '--', dir]).catch(() => '')
+      for (const entry of text.split('\0')) {
+        const m = /^\d+ blob ([0-9a-f]+)\t(.*)$/s.exec(entry)
+        if (m) out.set(m[2] as string, m[1] as string)
       }
       return out
     },

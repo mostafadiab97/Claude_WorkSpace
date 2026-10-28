@@ -71,24 +71,29 @@ describe('exporting items', () => {
     const { content, count } = await ws.exportItems({ scope: 'all', columns: ['id', 'level', 'title', 'type', 'field:status', 'parent', 'text', 'links', 'linkedFrom'], format: 'csv' })
     expect(count).toBe(4)
     const rows = parseCsv(content)
-    expect(rows[0]).toEqual(['ID', 'Level', 'Title', 'Type', 'Status', 'Parent', 'Text', 'Links', 'Linked from'])
-    expect(rows.slice(1).map((r) => [r[0], r[1]])).toEqual([
-      [ch1, '1'],
-      [sys, '2'],
-      [ch2, '1'],
-      [tc, '2']
+    // the outline number always follows the ID (O-03)
+    expect(rows[0]).toEqual(['ID', 'No.', 'Level', 'Title', 'Type', 'Status', 'Parent', 'Text', 'Links', 'Linked from'])
+    expect(rows.slice(1).map((r) => [r[0], r[1], r[2]])).toEqual([
+      [ch1, '1', '1'],
+      [sys, '1.1', '2'],
+      [ch2, '2', '1'],
+      [tc, '2.1', '2']
     ])
-    expect(rows[2]).toEqual([sys, '2', 'Accuracy, ±0.5 °C', 'System Requirement', 'Approved', ch1, 'The thermostat shall\n- measure "room" temperature', '', `verified by ${tc}`])
-    expect(rows[4]?.[7]).toBe(`verifies ${sys}`)
+    expect(rows[2]).toEqual([sys, '1.1', '2', 'Accuracy, ±0.5 °C', 'System Requirement', 'Approved', ch1, 'The thermostat shall\n- measure "room" temperature', '', `verified by ${tc}`])
+    expect(rows[4]?.[8]).toBe(`verifies ${sys}`)
 
     // only the filtered result, in the table's sort
     const f = await ws.exportItems({ scope: 'filtered', query: { types: ['system-requirement', 'test-case'], sort: { by: 'title' } }, columns: ['id', 'title'], format: 'csv' })
-    expect(parseCsv(f.content).slice(1).map((r) => r[1])).toEqual(['Accuracy, ±0.5 °C', 'Check accuracy'])
+    // a filtered export keeps the real outline numbers from the whole document
+    expect(parseCsv(f.content).slice(1).map((r) => [r[1], r[2]])).toEqual([
+      ['1.1', 'Accuracy, ±0.5 °C'],
+      ['2.1', 'Check accuracy']
+    ])
 
     // Markdown: headings follow the hierarchy
     const md = await ws.exportItems({ scope: 'all', columns: ['id', 'title', 'type', 'field:status', 'text', 'links'], format: 'markdown' })
-    expect(md.content).toContain(`## ${ch1} — Chapter 1`)
-    expect(md.content).toContain(`### ${sys} — Accuracy, ±0.5 °C`)
+    expect(md.content).toContain(`## 1 ${ch1} — Chapter 1`)
+    expect(md.content).toContain(`### 1.1 ${sys} — Accuracy, ±0.5 °C`)
     expect(md.content).toContain('**Type:** System Requirement · **Status:** Approved')
     expect(md.content).toContain(`Linked from: verified by ${tc}`)
   })
@@ -142,11 +147,11 @@ describe('exporting a comparison', () => {
     }
     const rows = parseCsv(compareToCsv(schema, result))
     expect(rows).toEqual([
-      ['ID', 'Title', 'Type', 'Change', 'What', 'Before', 'After'],
-      ['SYS-1', 'Accuracy', 'System Requirement', 'Changed', 'Text, Status · 1 link added', '', ''],
-      ['SYS-1', 'Accuracy', 'System Requirement', 'Changed', 'Status', 'Draft', 'Review'],
-      ['SYS-1', 'Accuracy', 'System Requirement', 'Changed', 'Text', 'Within 0.5 °C.', 'Within 0.3 °C.'],
-      ['SYS-1', 'Accuracy', 'System Requirement', 'Changed', 'Link added', '', 'verifies SYS-2']
+      ['ID', 'No.', 'Title', 'Type', 'Change', 'What', 'Before', 'After'],
+      ['SYS-1', '', 'Accuracy', 'System Requirement', 'Changed', 'Text, Status · 1 link added', '', ''],
+      ['SYS-1', '', 'Accuracy', 'System Requirement', 'Changed', 'Status', 'Draft', 'Review'],
+      ['SYS-1', '', 'Accuracy', 'System Requirement', 'Changed', 'Text', 'Within 0.5 °C.', 'Within 0.3 °C.'],
+      ['SYS-1', '', 'Accuracy', 'System Requirement', 'Changed', 'Link added', '', 'verifies SYS-2']
     ])
     const md = compareToMarkdown(schema, result)
     expect(md).toContain('From **a1 Start** to **Your working folder**')

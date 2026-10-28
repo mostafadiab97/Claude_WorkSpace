@@ -1085,6 +1085,19 @@ code {
   user-select: all;
 }
 
+.editor__number,
+.picker__number,
+.compare__number {
+  font-family: var(--rm-font-family-mono);
+  color: var(--rm-color-text-muted);
+  white-space: nowrap;
+}
+
+.editor__number {
+  margin-right: var(--rm-space-sm);
+  user-select: none;
+}
+
 .editor__type {
   color: var(--rm-color-text-muted);
   font-size: var(--rm-font-size-small);
@@ -1720,7 +1733,7 @@ code {
   font: inherit;
   width: 100%;
   display: grid;
-  grid-template-columns: 22px 110px minmax(140px, 1.6fr) minmax(90px, 0.8fr) minmax(120px, 1.4fr) auto;
+  grid-template-columns: 22px minmax(56px, auto) 120px minmax(140px, 1.6fr) minmax(90px, 0.8fr) minmax(120px, 1.4fr) auto;
   gap: var(--rm-space-sm);
   align-items: center;
   min-height: 32px;

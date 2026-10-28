@@ -13,13 +13,10 @@ export function validateItem(item: Item, schema: Schema): ItemIssue[] {
   const add = (path: string, message: string, severity: ItemIssue['severity'] = 'error'): void =>
     void issues.push({ itemId: item.id, path, message, severity })
 
-  if (!isValidId(item.id)) add('id', `"${item.id}" is not in the ReqMan ID format (e.g. SYS-K7Q3XM).`, 'warning')
+  if (!isValidId(item.id)) add('id', `"${item.id}" is not in the ReqMan ID format (e.g. REQ-K7Q3XMB).`, 'warning')
 
-  const type = schema.itemTypes.find((t) => t.id === item.type)
-  if (!type) add('type', `Unknown item type "${item.type}".`)
-  else if (isValidId(item.id) && !item.id.startsWith(`${type.prefix}-`)) {
-    add('id', `IDs of type "${type.name}" start with ${type.prefix}-.`, 'warning')
-  }
+  // the type is free to change: IDs no longer depend on it (0.9.0)
+  if (!schema.itemTypes.some((t) => t.id === item.type)) add('type', `Unknown item type "${item.type}".`)
   if (!item.title.trim()) add('title', 'The title is empty.', 'warning')
 
   for (const f of schema.fields) {

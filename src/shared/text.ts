@@ -125,6 +125,7 @@ export const T = {
 
   columns: {
     id: 'ID',
+    number: 'No.',
     title: 'Title',
     type: 'Type',
     text: 'Text',
@@ -228,7 +229,10 @@ export const T = {
     after: 'After',
     value: 'Value',
     text: 'Text',
-    empty: '(empty)'
+    empty: '(empty)',
+    position: 'Position',
+    oldPlace: 'earlier place',
+    newPlace: 'new place'
   },
 
   editor: {
@@ -242,7 +246,9 @@ export const T = {
     title: 'Title',
     titlePlaceholder: 'Short name of the requirement',
     type: 'Type',
-    typeTooltip: 'The type is chosen when the item is created; it decides the ID prefix',
+    typeTooltip: 'The kind of item. It can change at any time; the ID stays the same. Links to this item become suspect when it changes.',
+    number: (n: string) => `No. ${n}`,
+    noNumber: 'Not in the hierarchy (its parent is missing)',
     parent: 'Parent',
     text: 'Text',
     textPlaceholder: 'The system shall…',
@@ -523,6 +529,7 @@ export const T = {
     badIdentity: 'Enter your name and a valid e-mail address.',
     identitySaved: 'Saved in your Git settings.',
     notCommitted: 'Not committed yet',
+    tidyCommit: (count: number) => `Tidy positions of ${count} item${s(count)} (shorter order keys)`,
     notInHistory: (hash: string, id: string) => `Commit ${hash} is not in the history of ${id}.`
   },
 

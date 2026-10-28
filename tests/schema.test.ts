@@ -9,9 +9,8 @@ describe('schema', () => {
   it('parses the shipped default schema without problems', () => {
     const { schema, problems } = parseSchema(defaultSchema)
     expect(problems).toEqual([])
-    expect(schema.itemTypes.map((t) => t.prefix)).toEqual([
-      'STK', 'SYS', 'SW', 'HW', 'IF', 'UC', 'DE', 'TC', 'DEF', 'RSK', 'CR', 'INFO'
-    ])
+    expect(schema.itemTypes.map((t) => t.id)).toContain('system-requirement')
+    expect(schema.itemTypes).toHaveLength(12)
     expect(schema.itemTypes.find((t) => t.id === 'information')?.requirement).toBe(false)
     expect(schema.fields.map((f) => f.id)).toEqual(['status', 'priority', 'owner', 'tags'])
     expect(schema.fields[0]?.default).toBe('Draft')
@@ -33,13 +32,13 @@ linkTypes:
   - { id: verifies }
   - { id: verifies }
 `)
-    expect(schema.itemTypes.map((t) => t.id)).toEqual(['system-requirement'])
+    // a prefix is no longer needed or checked (IDs are REQ-… for every type since 0.9.0)
+    expect(schema.itemTypes.map((t) => t.id)).toEqual(['system-requirement', 'other'])
     expect(schema.fields.map((f) => f.id)).toEqual(['asil'])
     expect(schema.fields[0]?.default).toBeUndefined()
     expect(schema.linkTypes).toHaveLength(1)
     expect(problems.map((p) => p.path)).toEqual([
       'itemTypes[1].id',
-      'itemTypes[2].prefix',
       'fields[0].id',
       'fields[1].options',
       'fields[2].default',

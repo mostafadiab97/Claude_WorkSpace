@@ -5,7 +5,7 @@
 // non-English text and special characters; plus a small, labelled set of deliberately broken items.
 import { mkdir, rename, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import { contentFingerprint, generateId, type Item } from '../src/modules/items/index.ts'
+import { contentFingerprint, generateId, keyBetween, type Item } from '../src/modules/items/index.ts'
 import { createFileRepositoryStore } from '../src/modules/repository-store/index.ts'
 
 const [folderArg, countArg] = process.argv.slice(2)
@@ -97,16 +97,15 @@ function textFor(kind: string, subject: string): string {
 const store = createFileRepositoryStore(join(import.meta.dirname, '..', 'config', 'default-schema.yaml'))
 await mkdir(root, { recursive: true })
 const repo = await store.initialize(root)
-const prefix = new Map(repo.schema.itemTypes.map((t) => [t.id, t.prefix]))
 const taken = new Set<string>()
 const items: Item[] = []
-const orderOf = new Map<string, number>()
+const orderOf = new Map<string, string>()
 
 function add(type: string, title: string, opts: { parent?: Item; text?: string; links?: Item['links']; fields?: Item['fields'] } = {}): Item {
-  const id = generateId(prefix.get(type) ?? 'X', (x) => taken.has(x))
+  const id = generateId((x) => taken.has(x))
   taken.add(id)
   const parentKey = opts.parent?.id ?? ''
-  const order = (orderOf.get(parentKey) ?? 0) + 10
+  const order = keyBetween(orderOf.get(parentKey) ?? null, null)
   orderOf.set(parentKey, order)
   const status = pick(STATUS_WEIGHTED)
   const priority = pick(PRIORITY_WEIGHTED)
@@ -143,12 +142,12 @@ const allTc: Item[] = []
 
 for (const area of AREAS) {
   const start = items.length
-  const chapter = add('information', `${AREAS.indexOf(area) + 1}. ${area.name}`, { fields: {}, text: `Requirements for the ${area.name.toLowerCase()}.` })
-  const needs = add('information', `${AREAS.indexOf(area) + 1}.1 Stakeholder needs`, { parent: chapter, fields: {} })
-  const sysSection = add('information', `${AREAS.indexOf(area) + 1}.2 System requirements`, { parent: chapter, fields: {} })
-  const verif = add('information', `${AREAS.indexOf(area) + 1}.3 Verification`, { parent: chapter, fields: {} })
-  const riskSec = add('information', `${AREAS.indexOf(area) + 1}.4 Risks`, { parent: chapter, fields: {} })
-  const issues = add('information', `${AREAS.indexOf(area) + 1}.5 Defects and change requests`, { parent: chapter, fields: {} })
+  const chapter = add('information', area.name, { fields: {}, text: `Requirements for the ${area.name.toLowerCase()}.` })
+  const needs = add('information', 'Stakeholder needs', { parent: chapter, fields: {} })
+  const sysSection = add('information', 'System requirements', { parent: chapter, fields: {} })
+  const verif = add('information', 'Verification', { parent: chapter, fields: {} })
+  const riskSec = add('information', 'Risks', { parent: chapter, fields: {} })
+  const issues = add('information', 'Defects and change requests', { parent: chapter, fields: {} })
 
   const stks: Item[] = []
   for (let i = 0; i < 12; i++) {
@@ -184,7 +183,7 @@ for (const area of AREAS) {
       if (kind === 'software-requirement') allSw.push(child)
       // some go deeper: a chain of refinements up to 4 levels below the system requirement
       let cur = child
-      while (chance(0.18) && Number(cur.order) < 1e6) {
+      while (chance(0.18)) {
         const deeper = add(kind, `${cap(pick(VERBS))} ${pick(OBJECTS)} — detail`, { parent: cur, text: textFor(kind, s) })
         link(deeper, 'refines', cur)
         cur = deeper
@@ -216,7 +215,7 @@ for (const area of AREAS) {
 }
 
 // ---------- edge-case chapter: things a requirements tool must cope with
-const edge = add('information', '8. Edge cases for testing ReqMan', { fields: {}, text: 'Items with unusual content. All valid — they should show and save normally.' })
+const edge = add('information', 'Edge cases for testing ReqMan', { fields: {}, text: 'Items with unusual content. All valid — they should show and save normally.' })
 add('system-requirement', 'Title with "quotes", a colon: and a # hash', { parent: edge, text: 'YAML-sensitive characters in the title must round-trip unchanged.' })
 add('system-requirement', 'A very long title that keeps going to test truncation in the table, the tree and the editor header — it should be cut with an ellipsis in narrow places but stay complete in the editor field itself, even at 200+ characters', { parent: edge, text: 'Long title.' })
 add('system-requirement', 'Unicode: Ünïcödé, 日本語, العربية, émojis 🌡️🔥, µs, ±, ≤, °C', { parent: edge, text: 'Mixed scripts and symbols: «العربية» — 温度 — Größe — ≤ 0.5 °C.' })
@@ -251,7 +250,7 @@ while (items.length < TARGET - BROKEN_FILES) {
 }
 
 // ---------- deliberately broken items (problems ReqMan must report, not crash on)
-const broken = add('information', '9. Deliberately broken test data', { fields: {}, text: 'Each item below contains one known problem. ReqMan should list them under "problems" in the status bar.' })
+const broken = add('information', 'Deliberately broken test data', { fields: {}, text: 'Each item below contains one known problem. ReqMan should list them under "problems" in the status bar.' })
 const problems: Item[] = []
 problems.push(add('system-requirement', 'PROBLEM: link to an item that does not exist', { parent: broken, links: [{ type: 'verifies', target: 'SYS-ZZZZZZ' }], text: 'Expected: "link to SYS-ZZZZZZ, which does not exist".' }))
 problems.push(add('system-requirement', 'PROBLEM: parent that does not exist', { text: 'Expected: "Parent SYS-YYYYYY does not exist". Appears nowhere in the tree.' }))
@@ -260,10 +259,6 @@ problems.push(add('system-requirement', 'PROBLEM: status value not in the schema
 problems.push(add('system-requirement', 'PROBLEM: unknown link type', { parent: broken, links: [{ type: 'blocks', target: allSys[0]!.id }], text: 'Expected: unknown link type "blocks" — shown when opened.' }))
 problems.push(add('test-case', 'NOTE: header key unknown to ReqMan (kept, not a problem)', { parent: broken, text: 'This file has "x-imported-from: DOORS"; ReqMan must keep it when saving.' }))
 problems[4]!.extra = { 'x-imported-from': 'DOORS', 'x-legacy-id': 'REQ-00421' }
-// type/prefix mismatch: an SW- id on a test case
-const mismatch = add('test-case', 'PROBLEM: ID prefix does not match the type', { parent: broken, text: 'A test case with an SW- ID. Expected warning when opened.' })
-mismatch.id = generateId('SW', (x) => taken.has(x))
-taken.add(mismatch.id)
 
 // ---------- link confirmations (suspect links)
 // Every link records the fingerprint of its target as it was when the link was confirmed. Most are current;

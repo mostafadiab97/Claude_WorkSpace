@@ -10,7 +10,7 @@ import { buildQuery, nextSort } from '../../src/renderer/src/workspace/screen/us
 import { defaultPreset, describeSchema, rangeOf } from '../../src/renderer/src/workspace/compareRange'
 import { problemsOf } from '../../src/renderer/src/workspace/screen/problemList'
 
-const it_ = (id: string, parent?: string, childCount = 0, order?: number): IndexedItem => ({
+const it_ = (id: string, parent?: string, childCount = 0, order?: string): IndexedItem => ({
   id,
   type: 'system-requirement',
   title: id,
@@ -27,7 +27,7 @@ const it_ = (id: string, parent?: string, childCount = 0, order?: number): Index
 const level = (...items: IndexedItem[]): Level => ({ items, total: items.length, limit: 500 })
 const schema: Schema = {
   version: 1,
-  itemTypes: [{ id: 'system-requirement', name: 'System Requirement', prefix: 'SYS', requirement: true }],
+  itemTypes: [{ id: 'system-requirement', name: 'System Requirement', requirement: true }],
   fields: [
     { id: 'status', name: 'Status', type: 'enum', options: ['Draft', 'Approved'] },
     { id: 'owner', name: 'Owner', type: 'text' }
@@ -119,7 +119,7 @@ describe('Compare default range (compareRange.ts)', () => {
 
 describe('export columns and problems list', () => {
   it('exports the visible optional columns in the user\'s order', () => {
-    expect(shownColumnKeys(schema, { hidden: new Set(['field:owner']), order: ['text', 'type'] })).toEqual(['text', 'type', 'links', 'field:status'])
+    expect(shownColumnKeys(schema, { hidden: new Set(['field:owner']), order: ['text', 'type'] })).toEqual(['text', 'type', 'number', 'links', 'field:status'])
   })
   it('file problems are not clickable; renamed files offer a fix', () => {
     const p = problemsOf({

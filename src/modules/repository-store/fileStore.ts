@@ -166,7 +166,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
         const fields: Record<string, FieldValue> = {}
         for (const f of schema.fields) if (f.default !== undefined) fields[f.id] = f.default
         const item: Item = {
-          id: generateId(type.prefix, (id) => takenIds.has(id)),
+          id: generateId((id) => takenIds.has(id)),
           type: typeId,
           title: init.title ?? '',
           fields,

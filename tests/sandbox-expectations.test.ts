@@ -58,10 +58,6 @@ describe('sandbox data: chapter 9 "Deliberately broken data"', { timeout: 180_00
     const d = await ws.getItem(find('PROBLEM: unknown link type')!.id)
     expect(d?.issues.some((i) => /Unknown link type "blocks"/.test(i.message))).toBe(true)
   })
-  it('a test case with an SW- ID → warning when opened', async () => {
-    const d = await ws.getItem(find('PROBLEM: ID prefix does not match the type')!.id)
-    expect(d?.issues.some((i) => i.severity === 'warning' && i.path === 'id')).toBe(true)
-  })
   it('RSK-RENAMD.md → opens normally, listed with "Fix file name"', async () => {
     const renamed = info.issues.find((i) => i.fix === 'file-name')
     expect(renamed).toBeTruthy()

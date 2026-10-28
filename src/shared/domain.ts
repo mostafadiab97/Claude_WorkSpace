@@ -8,8 +8,6 @@ export type FieldType = 'text' | 'enum' | 'list' | 'number' | 'date'
 export interface ItemTypeDef {
   id: string
   name: string
-  /** ID prefix, e.g. SYS → SYS-K7Q3XM. */
-  prefix: string
   /** False for headings/information that structure a specification but are not requirements. */
   requirement: boolean
 }
@@ -64,8 +62,11 @@ export interface Item {
   type: string
   title: string
   parent?: string
-  /** Position among siblings; spaced (10, 20, 30) so inserting rarely touches other files. */
-  order?: number
+  /**
+   * Position among siblings: an order key ("a0", "a1", "a0V" …) that sorts as text and always leaves room
+   * between two neighbours, so a move rewrites only the moved item. Older files' numbers are read as keys.
+   */
+  order?: string
   /** Values of schema fields (status, priority, owner, tags, custom fields). */
   fields: Record<string, FieldValue>
   links: Link[]
@@ -92,7 +93,7 @@ export interface IndexedItem {
   type: string
   title: string
   parent?: string
-  order?: number
+  order?: string
   fields: Record<string, FieldValue>
   links: Link[]
   text: string
@@ -104,10 +105,12 @@ export interface IndexedItem {
   incomingCount: number
   /** Outgoing links whose target changed (title, text or type) since the link was confirmed. */
   suspectCount: number
+  /** Outline number in the document ("2.3.1"), calculated from the hierarchy; none for items outside it. */
+  number?: string
 }
 
 /** `relevance` = best search matches first (exact ID, then title, then text); only meaningful with `text`. */
-export type SortKey = 'id' | 'type' | 'title' | 'order' | 'relevance' | 'text' | 'links' | `field:${string}`
+export type SortKey = 'id' | 'type' | 'title' | 'order' | 'number' | 'relevance' | 'text' | 'links' | `field:${string}`
 
 export interface ItemQuery {
   /** Words to find in ID, title or text. Each word must match (prefix match: "brak" finds "braking"). */

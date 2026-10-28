@@ -3,10 +3,29 @@
 Each version was installed and tried by the product owner on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.9.0 — 28 Oct 2026 — New data format
+- **IDs:** every new item gets `REQ-` + 7 random characters, whatever its type (O-01, O-02). The type can now be
+  changed in the editor; the ID stays. Older IDs (`SYS-K7Q3XM` …) remain valid; the schema no longer needs a
+  prefix per type.
+- **Positions:** `order:` is now a short *order key* (`a0`, `a0V` …) — there is always room between two keys, so
+  moving an item rewrites **only the moved file** (S-04; fewer merge conflicts later with branches). Numbers
+  written by older versions are read as before. At **push**, sibling groups you changed whose keys grew longer than
+  4 characters are re-spaced in a separate commit "Tidy positions of N items".
+- **Outline numbers** (1, 1.2, 2.3.1 …) are calculated from parent + position, never stored (O-03): new **No.**
+  column in the table (between ID and Title, can be hidden, sortable = document order), in the editor header, the
+  item search, the parent picker, Compare ("moved 3.2.4 → 5.1") and every export (CSV column *No.*, Markdown
+  headings "## 1.2 REQ-… — Title").
+- **Compare** pairs an item with its `former-id`, so a converted repository shows changed items, not deletions +
+  additions.
+- **Fix:** opening **Changes** while Compare was open showed both panels on top of each other; Compare now closes.
+- **Sandbox converted** (`tools/convert-sandbox-0.9.mts`): new IDs (old ones kept as `former-id`), links and
+  parents rewritten, `git mv` first so every file's history continues, typed numbers removed from heading titles.
+- Index cache format 4 (rebuilt once on first open). Diagrams in `docs/` redrawn with Archify. 145 unit tests.
+
 ## 0.8.0 — 28 Oct 2026 — Clean page (all fixes of the project review)
 - **Owner (28 Oct 2026):** update installed; release self-test on his PC **passed all 17 steps** in 32.7 s
   (Git 2.52.0). Git steps take 2–10 s each there (vs. < 0.5 s on Linux) — process start-up with antivirus.
-  Checklist steps 3–5 pending.
+  Checklist steps 3–5 passed (Expand all "shows instantly"); found the Compare + Changes overlap (fixed in 0.9.0).
 - **Fixes:** an item whose file was renamed by hand opens, saves and deletes in place, is listed as a problem
   with a one-click **Fix file name** (D-01); only one ReqMan runs at a time — a second start brings the open
   window forward (D-02); writes, index changes and Git actions run one after another (D-03); short Windows file

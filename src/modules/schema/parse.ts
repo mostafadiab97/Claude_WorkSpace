@@ -6,7 +6,6 @@ export const BUILT_IN_PROPERTIES = ['id', 'type', 'title', 'parent', 'order', 'l
 
 const FIELD_TYPES: FieldType[] = ['text', 'enum', 'list', 'number', 'date']
 const ID_RE = /^[a-z][a-z0-9-]*$/
-const PREFIX_RE = /^[A-Z][A-Z0-9]{0,5}$/
 
 type Obj = Record<string, unknown>
 const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v)
@@ -40,18 +39,14 @@ export function parseSchema(text: string): ParsedSchema {
 
   // ---- item types
   const itemTypes: ItemTypeDef[] = []
-  const prefixes = new Set<string>()
   list('itemTypes').forEach((v, i) => {
     const p = `itemTypes[${i}]`
-    if (!isObj(v)) return add(p, 'Must be a mapping with id, name and prefix.')
+    if (!isObj(v)) return add(p, 'Must be a mapping with id and name.')
     const id = str(v.id)
-    const prefix = str(v.prefix)
     if (!id || !ID_RE.test(id)) return add(`${p}.id`, 'Must be lower-case letters, digits and dashes, e.g. "system-requirement".')
     if (itemTypes.some((t) => t.id === id)) return add(`${p}.id`, `Duplicate item type "${id}".`)
-    if (!prefix || !PREFIX_RE.test(prefix)) return add(`${p}.prefix`, 'Must be 1–6 upper-case letters/digits starting with a letter, e.g. "SYS".')
-    if (prefixes.has(prefix)) return add(`${p}.prefix`, `Prefix "${prefix}" is already used by another type.`)
-    prefixes.add(prefix)
-    itemTypes.push({ id, prefix, name: str(v.name) ?? id, requirement: v.requirement !== false })
+    // Since 0.9.0 IDs do not depend on the type (all are REQ-…), so a "prefix" in older schemas is ignored.
+    itemTypes.push({ id, name: str(v.name) ?? id, requirement: v.requirement !== false })
   })
   if (itemTypes.length === 0) add('itemTypes', 'At least one valid item type is needed.')
 

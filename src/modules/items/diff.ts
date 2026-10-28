@@ -1,4 +1,5 @@
 import type { DiffRow, FieldValue, Item, ItemDiff, Link, Schema } from '../../shared/domain'
+import { T } from '../../shared/text'
 
 const show = (v: FieldValue | undefined | unknown): string =>
   v === undefined || v === null ? '' : Array.isArray(v) ? v.join(', ') : typeof v === 'object' ? JSON.stringify(v) : String(v)
@@ -19,7 +20,9 @@ export function diffItems(before: Item | null, after: Item | null, schema: Pick<
   add('title', 'Title', before?.title ?? '', after?.title ?? '')
   add('type', 'Type', typeName(before?.type), typeName(after?.type))
   add('parent', 'Parent', before?.parent ?? '', after?.parent ?? '')
-  add('order', 'Position', before?.order === undefined ? '' : String(before.order), after?.order === undefined ? '' : String(after.order))
+  // Order keys mean nothing to a reader: a changed position is shown in words here, and Compare replaces them
+  // with the outline numbers before and after ("1.2 → 3.5.1"). A new or deleted item has no position change.
+  if (before && after && (before.order ?? '') !== (after.order ?? '')) rows.push({ key: 'order', label: T.change.position, before: T.change.oldPlace, after: T.change.newPlace })
   const known = new Set(schema.fields.map((f) => f.id))
   for (const f of schema.fields) add(`field:${f.id}`, f.name, show(before?.fields[f.id]), show(after?.fields[f.id]))
   // values of fields that are no longer (or not yet) in the schema

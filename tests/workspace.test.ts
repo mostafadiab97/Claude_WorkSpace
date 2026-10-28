@@ -55,12 +55,12 @@ describe('workspace', () => {
     sys.text = 'The thermostat shall measure within ±0.5 °C.'
     const sys2 = ws.newItem('system-requirement', stk.id)
     sys2.title = 'Display readability'
-    expect(sys.order).toBe(10)
+    expect(sys.order).toBe('a0')
     expect((await ws.saveItem(sys, null)).ok).toBe(true)
     // the second new item is created after the first is saved, so it must be numbered after it
     const sys3 = ws.newItem('system-requirement', stk.id)
-    expect(sys3.order).toBe(20)
-    sys2.order = 20
+    expect(sys3.order).toBe('a1')
+    sys2.order = 'a1'
     await ws.saveItem(sys2, null)
 
     expect(ws.query({ types: ['system-requirement'] }).total).toBe(2)

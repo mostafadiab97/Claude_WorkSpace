@@ -200,6 +200,9 @@ export interface CompareEntry {
   contentChanged: boolean
   /** Links from other items to it today. */
   incoming: number
+  /** Outline numbers in the older and the newer version ("1.2" → "3.5.1"), where it had one. */
+  numberBefore?: string
+  numberAfter?: string
   /** A version that exists but could not be read. */
   unreadable?: string
 }
@@ -257,6 +260,8 @@ export interface ItemDetails {
   /** Links from other items to this one. */
   incoming: LinkInfo[]
   childCount: number
+  /** Outline number ("2.3.1"); none when the item is outside the hierarchy (missing parent, loop). */
+  number?: string
   /** Schema problems in this item. */
   issues: ItemIssue[]
 }

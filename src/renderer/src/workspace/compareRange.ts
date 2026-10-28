@@ -27,6 +27,12 @@ export function rangeOf(preset: Preset, o: CompareOptions, custom: { from: strin
   }
 }
 
+/** "2.3", or "1.2 → 3.5.1" when the item moved between the two versions. */
+export function numberLabel(e: { numberBefore?: string; numberAfter?: string }): string {
+  if (e.numberBefore && e.numberAfter && e.numberBefore !== e.numberAfter) return `${e.numberBefore} → ${e.numberAfter}`
+  return e.numberAfter ?? e.numberBefore ?? ''
+}
+
 /** "fields added: Safety; link types removed: mitigates" */
 export function describeSchema(s: NonNullable<CompareResult['schema']>): string {
   const t = T.compare.schemaParts

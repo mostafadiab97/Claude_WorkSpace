@@ -4,6 +4,8 @@
 import type { ExportItemsRequest, FieldDef, Item, ItemQuery, Link, SortKey } from '../shared/api'
 
 const MAX = 4096
+/** Order keys (see modules/items/orderKey.ts): base-62 digits, at most 200 characters. */
+const ORDER_KEY = /^[0-9A-Za-z]{2,200}$/
 const MAX_TEXT = 1_000_000
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
@@ -77,7 +79,7 @@ export function item(v: unknown): Item {
   }
   if (v.parent !== undefined && v.parent !== '') out.parent = str(v.parent, 'parent', 64)
   if (v.order !== undefined) {
-    if (typeof v.order !== 'number' || !Number.isFinite(v.order)) return bad('order')
+    if (typeof v.order !== 'string' || !ORDER_KEY.test(v.order)) return bad('order')
     out.order = v.order
   }
   return out
@@ -96,7 +98,7 @@ export function fieldDefs(v: unknown): FieldDef[] {
   })
 }
 
-const SORT = /^(id|type|title|order|relevance|text|links|field:[\w-]+)$/
+const SORT = /^(id|type|title|order|number|relevance|text|links|field:[\w-]+)$/
 
 export function query(v: unknown): ItemQuery {
   if (v === undefined || v === null) return {}

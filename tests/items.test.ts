@@ -21,7 +21,7 @@ const sample: Item = {
   title: 'Brake pedal response: time',
   fields: { status: 'Draft', priority: 'High', owner: 'm.hassan', tags: ['braking', 'safety'] },
   parent: 'STK-2B8R1C',
-  order: 30,
+  order: 'aU',
   links: [{ type: 'refines', target: 'STK-2B8R1C', confirmed: '4e1a9c0b2d11' }],
   text: 'The system shall begin braking within **150 ms** of pedal input.\n\n- second paragraph',
   extra: {}
@@ -40,7 +40,7 @@ tags:
   - braking
   - safety
 parent: STK-2B8R1C
-order: 30
+order: aU
 links:
   - type: refines
     target: STK-2B8R1C
@@ -113,16 +113,18 @@ Body
 })
 
 describe('ids', () => {
-  it('generates prefixed IDs in the expected format', () => {
-    const ids = new Set(Array.from({ length: 2000 }, () => generateId('SYS')))
+  it('generates REQ- IDs with 7 characters, whatever the type (0.9.0)', () => {
+    const ids = new Set(Array.from({ length: 2000 }, () => generateId()))
     expect(ids.size).toBe(2000)
-    for (const id of ids) expect(isValidId(id)).toBe(true)
+    for (const id of ids) expect(isValidId(id) && /^REQ-[0-9A-Z]{7}$/.test(id)).toBe(true)
+    // older IDs stay valid
+    expect(isValidId('SYS-K7Q3XM')).toBe(true)
     expect([...ids].every((id) => !/[ILOU]/.test(id.slice(4)))).toBe(true)
   })
 
   it('never returns an ID that is already taken', () => {
     const taken = new Set<string>()
-    for (let i = 0; i < 500; i++) taken.add(generateId('TC', (id) => taken.has(id)))
+    for (let i = 0; i < 500; i++) taken.add(generateId((id) => taken.has(id)))
     expect(taken.size).toBe(500)
   })
 
@@ -152,7 +154,6 @@ describe('validation', () => {
       ]
     }
     expect(validateItem(bad, schema).map((i) => `${i.severity}:${i.path}`)).toEqual([
-      'warning:id',
       'error:fields.status',
       'error:parent',
       'error:links[0].type',

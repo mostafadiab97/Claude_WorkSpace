@@ -28,6 +28,8 @@ export interface WorkspaceContext {
   openRepo(root: string): Promise<RequirementsRepo>
   /** Re-opens the schema and re-reads every changed file (after Git changed the working folder). */
   resyncAll(s: Session): Promise<void>
+  /** Outline numbers of all items (calculated, cached until the index changes). */
+  numbers(s: Session): Map<string, string>
 }
 
 export const syncInfo = (stats: SyncStats): RepoInfo['lastSync'] => ({

@@ -3,14 +3,14 @@
 //   gitOps (M4) and compare (M5).
 // Every operation that writes files, changes the index or runs Git goes through one queue (review D-03).
 import { createHash } from 'node:crypto'
-import { basename, resolve } from 'node:path'
-import type { FolderCheck, RepoInfo } from '../../shared/api'
+import { basename, relative, resolve } from 'node:path'
+import type { FolderCheck, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
 import type { GitAdapter } from '../git-adapter'
 import type { IndexCache } from '../index-cache'
 import type { Logger } from '../logger'
 import type { RepositoryStore } from '../repository-store'
 import { createCompare } from './compare'
-import { syncInfo, type Session, type WorkspaceContext } from './context'
+import { queryAll, syncInfo, type Session, type WorkspaceContext } from './context'
 import { createExportOps } from './exporting'
 import { createGitOps } from './gitOps'
 import type { WorkspaceService } from './index'
@@ -19,7 +19,7 @@ import { createLinkOps } from './links'
 import { createSerialQueue } from './queue'
 import { createRecentList } from './recent'
 import { createSchemaFieldOps } from './schemaFields'
-import { createStructureOps } from './structure'
+import { compareOutline, createStructureOps, outlineNumbers, planTidy } from './structure'
 import { watchRequirementsFolder } from './watcher'
 import { T } from '../../shared/text'
 
@@ -33,6 +33,11 @@ export interface WorkspaceDeps {
   log: Pick<Logger, 'info' | 'warn' | 'error'>
   /** Watch the requirements folder so refreshes re-read only changed files (default true). */
   watchFiles?: boolean
+}
+
+const withNumber = (i: IndexedItem, numbers: Map<string, string>): IndexedItem => {
+  const n = numbers.get(i.id)
+  return n === undefined ? i : { ...i, number: n }
 }
 
 /** How long a refresh waits for change notices that are still on their way (see refresh). */
@@ -53,6 +58,8 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     return session
   }
 
+  let outline: { index: IndexCache; revision: number; map: Map<string, string> } | null = null
+
   const ctx: WorkspaceContext = {
     store,
     git,
@@ -61,6 +68,11 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     // The index knows where each item's file really is, so an item in a renamed file can still be read and
     // saved in place (review D-01).
     openRepo: (root) => store.open(root, { locate: (id) => (session && session.repo.root === root ? session.index.get(id)?.path : undefined) }),
+    numbers(s) {
+      const revision = s.index.revision()
+      if (!outline || outline.index !== s.index || outline.revision !== revision) outline = { index: s.index, revision, map: outlineNumbers(s.index.structure()) }
+      return outline.map
+    },
     async resyncAll(s) {
       s.watch?.take() // everything is re-checked now; keep only changes that happen from here on
       const repo = await ctx.openRepo(s.repo.root)
@@ -87,7 +99,37 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   const fields = createSchemaFieldOps(ctx, () => info())
   const compare = createCompare(git)
   const exporting = createExportOps(ctx, structure, compare)
-  const gitOps = createGitOps({ git, log, resync: () => ctx.resyncAll(need()) })
+  const gitOps = createGitOps({
+    git,
+    log,
+    resync: () => ctx.resyncAll(need()),
+    async tidyBeforePush(s, upstream) {
+      const session = need()
+      const base = relative(session.repo.root, session.repo.folder).split('\\').join('/') || '.'
+      const prefix = base === '.' ? '' : `${base}/`
+      // groups (parents) of the items this user changed in commits not on the remote yet
+      const changed = await git.changedFiles(s.repo.root, upstream, 'HEAD', `${prefix}items`)
+      const parents = new Set<string>()
+      for (const f of changed) {
+        const it = session.index.get(basename(f, '.md'))
+        if (it) parents.add(it.parent ?? '')
+      }
+      if (parents.size === 0) return 0
+      // never touch a group with uncommitted edits: they would end up in this commit
+      const dirty = new Set((await git.status(s.repo.root, base)).changes.map((c) => c.path))
+      const plan: { id: string; order: string }[] = []
+      for (const p of parents) {
+        const sibs = structure.siblings(session, p || undefined)
+        if (sibs.some((x) => dirty.has(`${prefix}${x.path}`))) continue
+        plan.push(...planTidy(sibs))
+      }
+      if (plan.length === 0) return 0
+      const r = await structure.applyPlan(session, plan)
+      if (!r.ok) throw new Error(r.message)
+      await git.commitFiles(s.repo.root, plan.map((x) => `${prefix}${session.repo.itemPath(x.id)}`), T.gitMsg.tidyCommit(plan.length))
+      return plan.length
+    }
+  })
 
   function closeSession(): void {
     session?.watch?.close()
@@ -166,7 +208,17 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     recent: recent.read,
     forgetRecent: (root) => recent.forget(root),
 
-    query: (query) => need().index.query(query),
+    query(query) {
+      const s = need()
+      const numbers = ctx.numbers(s)
+      const withNumbers = (r: QueryResult): QueryResult => ({ total: r.total, items: r.items.map((i) => withNumber(i, numbers)) })
+      if (query.sort?.by !== 'number') return withNumbers(s.index.query(query))
+      // sorted by outline number: the index cannot do that in SQL, so sort the matching rows here
+      const { limit = 200, offset = 0, ...rest } = query
+      const all = queryAll(s.index, { ...rest, sort: { by: 'id' } }).map((i) => withNumber(i, numbers))
+      all.sort((a, b) => compareOutline(a.number, b.number) * (query.sort?.descending ? -1 : 1) || a.id.localeCompare(b.id))
+      return { total: all.length, items: all.slice(offset, offset + limit) }
+    },
     getItem: items.getItem,
     newItem: items.newItem,
     saveItem: q(items.saveItem),

@@ -1,12 +1,12 @@
 // The item file format: one Markdown file per item with a YAML header.
 //
 //   ---
-//   id: SYS-K7Q3XM
+//   id: REQ-K7Q3XMB
 //   type: system-requirement
 //   title: Brake pedal response time
 //   status: Draft            <- schema fields, in schema order
 //   parent: STK-2B8R1C
-//   order: 30
+//   order: a3               <- order key (older files: a number, read as a key)
 //   links:
 //     - type: refines
 //       target: STK-2B8R1C
@@ -18,6 +18,7 @@
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml'
 import type { Schema } from '../schema'
 import type { FieldValue, Item, Link } from './index'
+import { isOrderKey, keyOfNumber } from './orderKey'
 
 export const ITEM_FILE_EXTENSION = '.md'
 
@@ -94,7 +95,10 @@ export function parseItemFile(content: string, schemaFieldIds: ReadonlySet<strin
     extra
   }
   if (typeof header.parent === 'string' && header.parent.trim()) item.parent = header.parent.trim()
-  if (typeof header.order === 'number' && Number.isFinite(header.order)) item.order = header.order
+  if (typeof header.order === 'number' && Number.isFinite(header.order)) item.order = keyOfNumber(header.order)
+  else if (typeof header.order === 'string' && isOrderKey(header.order.trim())) item.order = header.order.trim()
+  // an order value ReqMan cannot read is kept as it was (never lost), but gives no position
+  else if (header.order !== undefined && header.order !== null) item.extra['order'] = header.order
   return { ok: true, item }
 }
 
@@ -116,6 +120,7 @@ export function serializeItem(item: Item, schema: Pick<Schema, 'fields'>): strin
   }
   if (item.parent) header.parent = item.parent
   if (item.order !== undefined) header.order = item.order
+  else if (item.extra['order'] !== undefined) header.order = item.extra['order']
   if (item.links.length > 0) {
     header.links = item.links.map((l) => (l.confirmed ? { type: l.type, target: l.target, confirmed: l.confirmed } : { type: l.type, target: l.target }))
   }

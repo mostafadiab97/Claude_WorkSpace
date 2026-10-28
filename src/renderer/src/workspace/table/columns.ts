@@ -16,6 +16,7 @@ export interface Column {
 
 /** Built-in columns that can be hidden (ID and Title are always shown). */
 export const BUILT_IN_OPTIONAL = [
+  { key: 'number', label: T.columns.number },
   { key: 'type', label: T.columns.type },
   { key: 'text', label: T.columns.text },
   { key: 'links', label: T.columns.links }
@@ -25,9 +26,10 @@ export const BUILT_IN_OPTIONAL = [
 export function optionalColumns(schema: Schema): { key: string; label: string; builtIn: boolean }[] {
   return [
     { ...BUILT_IN_OPTIONAL[0], builtIn: true },
-    { ...BUILT_IN_OPTIONAL[2], builtIn: true },
+    { ...BUILT_IN_OPTIONAL[1], builtIn: true },
+    { ...BUILT_IN_OPTIONAL[3], builtIn: true },
     ...schema.fields.map((f) => ({ key: `field:${f.id}`, label: f.name, builtIn: false })),
-    { ...BUILT_IN_OPTIONAL[1], builtIn: true }
+    { ...BUILT_IN_OPTIONAL[2], builtIn: true }
   ]
 }
 
@@ -70,7 +72,9 @@ export function shownColumnKeys(schema: Schema, prefs: ColumnPrefs): string[] {
 
 export function columnsFor(schema: Schema, prefs: ColumnPrefs = { hidden: new Set(), order: [] }): Column[] {
   const all: Column[] = [
-    { key: 'id', label: T.columns.id, minPx: 120, grow: 0, value: (i) => i.id },
+    { key: 'id', label: T.columns.id, minPx: 130, grow: 0, value: (i) => i.id },
+    // the outline number (calculated, never stored — O-03); sorting by it = document order
+    { key: 'number', label: T.columns.number, minPx: 70, grow: 0, value: (i) => i.number ?? '' },
     { key: 'title', label: T.columns.title, minPx: 260, grow: 3, value: (i) => i.title || T.common.noTitle },
     { key: 'type', label: T.columns.type, minPx: 130, grow: 1.2, value: (i) => typeName(schema, i.type) },
     { key: 'links', label: T.columns.links, minPx: 90, grow: 0.6, value: linkSummary, warn: (i) => i.suspectCount > 0 },
@@ -83,6 +87,7 @@ export function columnsFor(schema: Schema, prefs: ColumnPrefs = { hidden: new Se
     })),
     { key: 'text', label: T.columns.text, minPx: 220, grow: 2.5, value: (i) => i.text }
   ]
-  const [id, title, ...rest] = all
-  return [id as Column, title as Column, ...orderColumns(rest, prefs.order)].filter((c) => !prefs.hidden.has(c.key))
+  // ID, No. and Title stay at the front; the rest follow the user's order
+  const [id, number, title, ...rest] = all
+  return [id as Column, number as Column, title as Column, ...orderColumns(rest, prefs.order)].filter((c) => !prefs.hidden.has(c.key))
 }

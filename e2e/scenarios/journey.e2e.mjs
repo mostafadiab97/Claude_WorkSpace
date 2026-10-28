@@ -13,6 +13,8 @@ await scenario('E2E journey', async (ctx) => {
   const exportDir = temp('export')
   const saveAs = (name) => t.saveAs(join(exportDir, name))
   const rows = () => win.locator('.table__row')
+  // IDs no longer show the type (all are REQ-…, 0.9.0): find an item file by the type inside it
+  const fileOfType = (dir, type) => readdirSync(dir).find((f) => f.endsWith('.md') && readFileSync(join(dir, f), 'utf8').includes(`\ntype: ${type}\n`))
   console.log('Step 1 — open the repository and create the requirements folder')
   await win.getByRole('button', { name: 'Open repository…' }).click()
   await win.getByText('No requirements folder yet').waitFor()
@@ -32,7 +34,7 @@ await scenario('E2E journey', async (ctx) => {
   await win.getByPlaceholder('The system shall…').fill('Users want the room to stay at the chosen temperature.')
   await save()
   const stkId = (await win.locator('.editor__id').textContent()).trim()
-  check(/^STK-[0-9A-Z]{6}$/.test(stkId), `stakeholder need saved as ${stkId}`)
+  check(/^REQ-[0-9A-Z]{7}$/.test(stkId), `stakeholder need saved as ${stkId} (REQ- + 7 characters, 0.9.0)`)
 
   const rowOf = (text) => rows().filter({ hasText: text })
   for (const [title, text] of [
@@ -60,13 +62,15 @@ await scenario('E2E journey', async (ctx) => {
     return f ? readFileSync(join(itemsDir, f), 'utf8') : ''
   }
   const sysText = fileOf('Temperature accuracy')
-  check(sysText.includes(`parent: ${stkId}`) && sysText.includes('order: 10') && sysText.includes('priority: High'), 'child file has parent, order and priority')
+  check(sysText.includes(`parent: ${stkId}`) && sysText.includes('order: a0') && sysText.includes('priority: High'), 'child file has parent, order and priority')
 
   // the hierarchy is the table itself; saving a child opened its parent
   const level2 = async () => win.locator('.table__row[aria-level="2"] .table__text').allTextContents()
   await win.locator('.table__row[aria-level="2"]').first().waitFor()
   check(JSON.stringify(await level2()) === JSON.stringify(['Temperature accuracy', 'Display readability']), 'table shows the two children indented under their parent, in order')
   check((await win.locator('.tree').count()) === 0, 'no separate tree panel any more')
+  const numbers = await win.locator('.table__row[data-id] [role="gridcell"]:nth-child(2)').allTextContents()
+  check(JSON.stringify(numbers.slice(0, 3)) === JSON.stringify(['1', '1.1', '1.2']), `the No. column shows outline numbers (${numbers.slice(0, 3).join(', ')})`)
   await win.getByRole('button', { name: `Collapse ${stkId}` }).click()
   check((await rows().count()) === 2, 'collapsing the parent hides its children')
   await win.getByRole('button', { name: `Expand ${stkId}` }).click()
@@ -89,7 +93,7 @@ await scenario('E2E journey', async (ctx) => {
 
   // parent picker: with nothing typed it lists the top-level items, the item itself greyed out
   await rowOf('Verify accuracy').click()
-  await win.locator('.editor__id', { hasText: 'TC-' }).waitFor()
+  await win.locator('.editor__type', { hasText: 'Test Case' }).waitFor()
   await win.locator('.picker .input--button').click()
   await win.locator('.picker__option', { hasText: infoId }).waitFor()
   check((await win.locator('.picker__option', { hasText: stkId }).count()) === 1, 'picker lists top-level items without typing')
@@ -180,7 +184,10 @@ await scenario('E2E journey', async (ctx) => {
   check((await win.getByRole('columnheader', { name: /^Owner/ }).count()) === 0, 'hidden column stays hidden')
 
   console.log('Built-in fields — Type in the editor; Text and Links columns')
-  check((await win.locator('.editor').getByLabel('Type', { exact: true }).inputValue()) === 'System Requirement', 'the editor shows the item type')
+  const typeBox = win.locator('.editor').getByLabel('Type', { exact: true })
+  check((await typeBox.inputValue()) === 'system-requirement', 'the editor shows the item type')
+  check(await typeBox.isEnabled(), 'the type can be changed (IDs no longer depend on it, 0.9.0)')
+  check(/^1\.\d$/.test((await win.locator('.editor__number').textContent()) ?? ''), 'the editor header shows the outline number')
   await win.getByRole('button', { name: /^Columns/ }).click()
   const colMenu = win.getByRole('dialog', { name: 'Columns' })
   check((await colMenu.getByRole('checkbox', { name: 'Text' }).count()) === 1 && (await colMenu.getByRole('checkbox', { name: 'Links' }).count()) === 1, 'Columns menu offers Text and Links')
@@ -276,7 +283,7 @@ await scenario('E2E journey', async (ctx) => {
   await win.getByRole('button', { name: 'Discard changes' }).first().click()
 
   // someone edits a file outside ReqMan (e.g. git pull); a window refocus picks it up
-  const tcFile = readdirSync(itemsDir).find((f) => f.startsWith('TC-'))
+  const tcFile = fileOfType(itemsDir, 'test-case')
   const tcPath = join(repo, 'requirements', 'items', tcFile)
   writeFileSync(tcPath, readFileSync(tcPath, 'utf8').replace('Verify accuracy at 20 °C', 'Verify accuracy at 25 °C'))
   await win.evaluate(() => window.dispatchEvent(new Event('focus')))
@@ -310,7 +317,7 @@ await scenario('E2E journey', async (ctx) => {
   gitIn(pcB, 'clone', '-q', remote, '.')
   gitIn(pcB, 'config', 'user.name', 'Bob')
   gitIn(pcB, 'config', 'user.email', 'bob@example.com')
-  const tcName = readdirSync(join(pcB, 'requirements', 'items')).find((f) => f.startsWith('TC-'))
+  const tcName = fileOfType(join(pcB, 'requirements', 'items'), 'test-case')
   const tcB = join(pcB, 'requirements', 'items', tcName)
   writeFileSync(tcB, readFileSync(tcB, 'utf8').replace(/^title: .*$/m, 'title: Verify accuracy at 22 °C'))
   gitIn(pcB, 'commit', '-q', '-am', 'Bob: test at 22 °C')
@@ -338,7 +345,7 @@ await scenario('E2E journey', async (ctx) => {
 
   // conflict: Bob changes the stakeholder need's title and pushes; Alice changes it too and commits
   gitIn(pcB, 'pull', '-q')
-  const stkName = readdirSync(join(pcB, 'requirements', 'items')).find((f) => f.startsWith('STK-'))
+  const stkName = fileOfType(join(pcB, 'requirements', 'items'), 'stakeholder-need')
   const stkB = join(pcB, 'requirements', 'items', stkName)
   writeFileSync(stkB, readFileSync(stkB, 'utf8').replace(/^title: .*$/m, 'title: Comfortable temperature (Bob)'))
   gitIn(pcB, 'commit', '-q', '-am', 'Bob renames the need')
@@ -432,7 +439,7 @@ await scenario('E2E journey', async (ctx) => {
   await compare.getByRole('button', { name: 'Export CSV' }).click()
   await compare.locator('.compare__pull', { hasText: 'Exported to' }).waitFor()
   const changesCsv = readFileSync(join(exportDir, 'changes.csv'), 'utf8')
-  check(changesCsv.startsWith('\uFEFFID,Title,Type,Change,What,Before,After\r\n') && changesCsv.includes(cmpId), 'Compare → Export CSV writes one row per change')
+  check(changesCsv.startsWith('\uFEFFID,No.,Title,Type,Change,What,Before,After\r\n') && changesCsv.includes(cmpId), 'Compare → Export CSV writes one row per change')
   await saveAs('changes.md')
   await compare.getByRole('button', { name: 'Export Markdown' }).click()
   await win.waitForTimeout(500)
@@ -462,7 +469,7 @@ await scenario('E2E journey', async (ctx) => {
   await exportDialog.getByRole('button', { name: 'Export…' }).click()
   await win.locator('.table-notice--ok', { hasText: 'Exported 2 items' }).waitFor()
   const md = readFileSync(join(exportDir, 'sys.md'), 'utf8')
-  check(md.startsWith('# ') && (md.match(/^#{2,6} SYS-/gm) ?? []).length === 2, 'Markdown export of the filtered items: one heading per item')
+  check(md.startsWith('# ') && (md.match(/^#{2,6} [\d.]+ REQ-/gm) ?? []).length === 2, 'Markdown export of the filtered items: one heading per item')
   await win.getByRole('button', { name: 'Clear filters' }).click()
   await shot('14-export')
 

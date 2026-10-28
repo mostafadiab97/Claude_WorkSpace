@@ -17,7 +17,7 @@ export function ParentPicker({ schema, value, selfId, onChange }: { schema: Sche
     let live = true
     void window.reqman.queryItems({ text: value, sort: { by: 'relevance' }, limit: 1, brief: true }).then((r) => {
       const hit = r.items.find((i) => i.id === value)
-      if (live) setResolved({ value, label: hit ? `${hit.id} — ${hit.title}` : T.parentPicker.notFound(value) })
+      if (live) setResolved({ value, label: hit ? `${hit.number ? `${hit.number} ` : ''}${hit.id} — ${hit.title}` : T.parentPicker.notFound(value) })
     })
     return () => {
       live = false

@@ -359,6 +359,9 @@ all fine. The two-PC trial is postponed (only one user for now).
   X-01, T-01 – T-05 (T-01: the journey stays one story on purpose — its steps build on each other — but scenarios
   now share a harness, each has its own repository and profile, and they run side by side; new checks get their own
   scenario). Still open as planned: D-05 and D-09 (M8), S-04 (0.9.0), S-05 (M8), S-08 / X-02 (later).
+- **Done in 0.9.0 (28 Oct 2026):** S-04 (order keys; a move writes one file; long keys re-spaced at push), O-01 (`REQ-`
+  IDs, type editable), O-02 (7 characters, no pool), O-03 (calculated outline numbers everywhere, incl. exports).
+  The sandbox was converted in its own repository.
 
 ## G. Order (confirmed 28 Oct 2026)
 

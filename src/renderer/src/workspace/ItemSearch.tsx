@@ -96,6 +96,7 @@ export function ItemSearch(props: {
                 if (!reason) pick(item)
               }}
             >
+              {item.number && <span className="picker__number">{item.number}</span>}
               <span className="tree__id">{item.id}</span> <span className="picker__title">{item.title || T.common.noTitle}</span>
               <span className="picker__type">{typeName(schema, item.type)}</span>
             </button>

@@ -27,6 +27,7 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
       }),
       incoming: s.index.incomingLinks(id).map((l) => info(l.id, l.type, l.suspect)),
       childCount: s.index.query({ parent: id, limit: 0 }).total,
+      ...(ctx.numbers(s).has(id) ? { number: ctx.numbers(s).get(id) as string } : {}),
       issues: validateItem(r.item, s.repo.schema)
     }
   }

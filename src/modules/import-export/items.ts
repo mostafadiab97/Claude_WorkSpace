@@ -10,7 +10,7 @@ export interface ExportItem {
 }
 
 /**
- * Columns to export, in order: "id", "title", "type", "parent", "level", "text", "links", "linkedFrom",
+ * Columns to export, in order: "id", "number", "title", "type", "parent", "level", "text", "links", "linkedFrom",
  * or "field:<id>". Unknown keys are skipped.
  */
 export type ExportColumn = string
@@ -18,7 +18,7 @@ export type ExportColumn = string
 const show = (v: FieldValue | undefined): string => (v === undefined ? '' : Array.isArray(v) ? v.join(', ') : String(v))
 
 function header(schema: Schema, key: ExportColumn): string | null {
-  const fixed: Record<string, string> = { id: 'ID', title: 'Title', type: 'Type', parent: 'Parent', level: 'Level', text: 'Text', links: 'Links', linkedFrom: 'Linked from' }
+  const fixed: Record<string, string> = { id: 'ID', number: 'No.', title: 'Title', type: 'Type', parent: 'Parent', level: 'Level', text: 'Text', links: 'Links', linkedFrom: 'Linked from' }
   if (fixed[key]) return fixed[key]
   if (key.startsWith('field:')) return schema.fields.find((f) => f.id === key.slice(6))?.name ?? key.slice(6)
   return null
@@ -33,6 +33,8 @@ function cell(schema: Schema, e: ExportItem, key: ExportColumn): string {
   switch (key) {
     case 'id':
       return e.item.id
+    case 'number':
+      return e.item.number ?? ''
     case 'title':
       return e.item.title
     case 'type':
@@ -67,7 +69,8 @@ export function itemsToMarkdown(schema: Schema, items: ExportItem[], columns: Ex
   const out: string[] = [`# ${title}`, '', `${items.length} items · exported ${new Date().toISOString().slice(0, 10)} from ReqMan`, '']
   for (const e of items) {
     const level = Math.min(6, e.depth + 2)
-    out.push(`${'#'.repeat(level)} ${e.item.id} — ${e.item.title || '(no title)'}`, '')
+    // the outline number leads every heading (owner's decision O-03): "## 2.3 REQ-K7Q3XMB — Title"
+    out.push(`${'#'.repeat(level)} ${e.item.number ? `${e.item.number} ` : ''}${e.item.id} — ${e.item.title || '(no title)'}`, '')
     const facts = fieldCols.map((c) => [header(schema, c), cell(schema, e, c)] as const).filter(([, v]) => v)
     if (facts.length) out.push(facts.map(([k, v]) => `**${k}:** ${v}`).join(' · '), '')
     if (columns.includes('text') && e.item.text.trim()) out.push(e.item.text.trim(), '')

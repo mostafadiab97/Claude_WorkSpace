@@ -2,10 +2,10 @@
 import type { Item } from '../../shared/api'
 import type { IndexedItem } from '../index-cache'
 import type { ExportItem } from '../import-export'
+import { keyBetween, keysBetween, MAX_ORDER_KEY_LENGTH } from '../items'
 import { queryAll, type OpResult, type Session, type WorkspaceContext } from './context'
 import { T } from '../../shared/text'
 
-export const ORDER_STEP = 10
 
 /** Would making `newParent` the parent of `id` create a loop (newParent is id itself or below it)? */
 export function createsLoop(s: Session, id: string, newParent: string): boolean {
@@ -59,46 +59,89 @@ export function documentOrderOf(all: IndexedItem[]): ExportItem[] {
   return out
 }
 
+type Placed = { id: string; order?: string }
+
 /**
- * Where to put `id` among `sibs` (already without it) so that it lands before `before` (or last).
- * Returns the order values to write: normally only the moved item; when there is no room between the
- * neighbours, the siblings are renumbered 10, 20, 30… (only those whose value changes). Pure.
+ * Outline numbers ("1", "1.2", "2.3.1") from parent + position (owner's decision O-03): calculated whenever they are
+ * shown, never stored, so a move changes one file and every number follows at once. `rows` must list siblings
+ * in document order (as `IndexCache.structure()` does). Items whose parent is missing, or that sit in a parent
+ * loop, are not in the hierarchy and get no number. Pure.
  */
-export function planInsert(sibs: { id: string; order?: number }[], id: string, before: string | null | undefined): { id: string; order: number }[] {
-  const at = before ? sibs.findIndex((x) => x.id === before) : -1
-  const index = at < 0 ? sibs.length : at
-  const prev = sibs[index - 1]?.order
-  const next = sibs[index]?.order
-  if (index === sibs.length) return [{ id, order: Math.floor((prev ?? 0) / ORDER_STEP) * ORDER_STEP + ORDER_STEP }]
-  if (next !== undefined && (index === 0 ? next > 1 : prev !== undefined && next - prev > 1)) {
-    return [{ id, order: Math.floor(((index === 0 ? 0 : (prev as number)) + next) / 2) }]
+export function outlineNumbers(rows: { id: string; parent?: string }[]): Map<string, string> {
+  const ids = new Set(rows.map((r) => r.id))
+  const children = new Map<string, string[]>()
+  for (const r of rows) {
+    if (r.parent !== undefined && !ids.has(r.parent)) continue // orphan: not in the tree
+    const key = r.parent ?? ''
+    const list = children.get(key)
+    if (list) list.push(r.id)
+    else children.set(key, [r.id])
   }
-  const list: { id: string; order?: number }[] = [...sibs.slice(0, index), { id }, ...sibs.slice(index)]
-  const plan: { id: string; order: number }[] = []
-  list.forEach((x, k) => {
-    const order = (k + 1) * ORDER_STEP
-    if (x.id === id || x.order !== order) plan.push({ id: x.id, order })
-  })
-  return plan
+  const out = new Map<string, string>()
+  const walk = (key: string, prefix: string): void => {
+    ;(children.get(key) ?? []).forEach((id, k) => {
+      if (out.has(id)) return
+      const number = prefix ? `${prefix}.${k + 1}` : String(k + 1)
+      out.set(id, number)
+      walk(id, number)
+    })
+  }
+  walk('', '')
+  return out
 }
 
-/** Order values for swapping item `i` with its neighbour `j` (one place up or down). Pure. */
-export function planSwap(sibs: { id: string; order?: number }[], i: number, j: number): { id: string; order: number }[] {
-  const a = sibs[i]
-  const b = sibs[j]
-  if (!a || !b) return []
-  // Normal case: swap the two values — two files change. Only if values are missing or equal (hand-edited
-  // files) is the whole sibling list renumbered.
-  if (a.order !== undefined && b.order !== undefined && a.order !== b.order) {
-    return [
-      { id: a.id, order: b.order },
-      { id: b.id, order: a.order }
-    ]
+/** Compares outline numbers part by part ("1.10" after "1.9"); items without a number come last. Pure. */
+export function compareOutline(a: string | undefined, b: string | undefined): number {
+  if (a === b) return 0
+  if (a === undefined) return 1
+  if (b === undefined) return -1
+  const pa = a.split('.').map(Number)
+  const pb = b.split('.').map(Number)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pa[i] ?? -1) - (pb[i] ?? -1)
+    if (d !== 0) return d
   }
-  const reordered = [...sibs]
-  reordered[i] = b
-  reordered[j] = a
-  return reordered.map((x, k) => ({ id: x.id, order: (k + 1) * ORDER_STEP })).filter((p) => sibs.find((x) => x.id === p.id)?.order !== p.order)
+  return 0
+}
+
+/** True when the siblings' keys are usable as they are: present, strictly increasing. */
+const keysUsable = (sibs: Placed[]): boolean => sibs.every((x, k) => x.order !== undefined && (k === 0 || (sibs[k - 1]?.order as string) < x.order))
+
+/** The whole group with fresh, short, evenly spaced keys — only for hand-edited groups with missing or equal keys. */
+function respace(list: Placed[]): { id: string; order: string }[] {
+  const keys = keysBetween(null, null, list.length)
+  return list.map((x, k) => ({ id: x.id, order: keys[k] as string })).filter((p, k) => list[k]?.order !== p.order)
+}
+
+/**
+ * Where to put `id` among `sibs` (already without it, in order) so that it lands before `before` (or last).
+ * Returns the keys to write: normally exactly one — the moved item's (S-04). Only when the group's keys are
+ * missing or out of order (files edited by hand) is the group re-spaced. Pure.
+ */
+export function planInsert(sibs: Placed[], id: string, before: string | null | undefined): { id: string; order: string }[] {
+  const at = before ? sibs.findIndex((x) => x.id === before) : -1
+  const index = at < 0 ? sibs.length : at
+  if (!keysUsable(sibs)) return respace([...sibs.slice(0, index), { id }, ...sibs.slice(index)])
+  return [{ id, order: keyBetween(sibs[index - 1]?.order ?? null, sibs[index]?.order ?? null) }]
+}
+
+/** Moving item `i` one place up or down (`j` = its neighbour): one new key for the moved item. Pure. */
+export function planSwap(sibs: Placed[], i: number, j: number): { id: string; order: string }[] {
+  const a = sibs[i]
+  if (!a || !sibs[j]) return []
+  // Without the moved item, the item that should follow it sits at index j in both directions:
+  // up = before the old neighbour (still at j); down = after it (it moved to j-1), so before rest[j] (or last).
+  const rest = sibs.filter((_, k) => k !== i)
+  return planInsert(rest, a.id, rest[j]?.id ?? null)
+}
+
+/**
+ * Sibling groups whose keys got long (owner's rule, 28 Oct 2026: more than 4 characters) get short, evenly
+ * spaced keys again. Returns the new keys of the items that change. Pure.
+ */
+export function planTidy(sibs: Placed[]): { id: string; order: string }[] {
+  if (!sibs.some((x) => (x.order?.length ?? MAX_ORDER_KEY_LENGTH + 1) > MAX_ORDER_KEY_LENGTH)) return []
+  return respace(sibs)
 }
 
 export function createStructureOps(ctx: WorkspaceContext) {
@@ -108,7 +151,7 @@ export function createStructureOps(ctx: WorkspaceContext) {
     s.index.query({ parent: parent ?? null, sort: { by: 'order' }, limit: 10_000 }).items
 
   /** Writes the planned order values (and the new parent of `moved`), conflict-safe, then updates the index. */
-  async function apply(s: Session, plan: { id: string; order: number }[], moved?: { id: string; parent: string | null }): Promise<OpResult> {
+  async function apply(s: Session, plan: { id: string; order: string }[], moved?: { id: string; parent: string | null }): Promise<OpResult> {
     const paths = plan.map((p) => s.repo.itemPath(p.id))
     for (const step of plan) {
       const cur = await s.repo.readItem(step.id)
@@ -126,6 +169,8 @@ export function createStructureOps(ctx: WorkspaceContext) {
 
   return {
     siblings,
+    /** Writes planned order keys (conflict-safe) and updates the index. */
+    applyPlan: (s: Session, plan: { id: string; order: string }[]) => apply(s, plan),
     documentOrder: (s: Session): ExportItem[] => documentOrderOf(queryAll(s.index, { sort: { by: 'order' } })),
 
     ancestors(id: string): string[] {
@@ -142,9 +187,9 @@ export function createStructureOps(ctx: WorkspaceContext) {
     },
 
     /** Order value for a new item placed last under `parent`. */
-    nextOrder(s: Session, parent: string | undefined): number {
+    nextOrder(s: Session, parent: string | undefined): string {
       const last = s.index.query({ parent: parent ?? null, sort: { by: 'order', descending: true }, limit: 1 }).items[0]
-      return Math.floor((last?.order ?? 0) / ORDER_STEP) * ORDER_STEP + ORDER_STEP
+      return keyBetween(last?.order ?? null, null)
     },
 
     async reparentItem(id: string, parent: string | null, before?: string | null): Promise<OpResult> {

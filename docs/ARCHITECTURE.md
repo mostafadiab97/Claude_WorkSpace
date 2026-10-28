@@ -66,11 +66,22 @@ Keep this table up to date with every change.
 requirements/
   .reqman/schema.yaml   item types, fields, link types (copied from config/default-schema.yaml, then owned by the project)
   .gitattributes        LF line endings for identical diffs on every PC
-  items/SYS-K7Q3XM.md   one file per item: YAML header + Markdown text
+  items/REQ-K7Q3XMB.md  one file per item: YAML header + Markdown text
 ```
 
-- **IDs**: type prefix + 6 random characters (Crockford base32, no I/L/O/U). Random, not sequential, so items
-  created on different branches never collide.
+- **IDs** (0.9.0): `REQ-` + 7 random characters (Crockford base32, no I/L/O/U), the same prefix for every type, so
+  the **type can change** without changing the ID. Random, not sequential, so items created on different branches
+  practically never collide (32^7 ≈ 34 billion). Older IDs (`SYS-K7Q3XM`) and other tools' IDs stay valid; a
+  converted item keeps its old ID as `former-id`, and Compare pairs the two.
+- **Positions** (0.9.0, review S-04): `order:` is an *order key* — short text that sorts like a number with
+  unlimited decimals (`a0` < `a0V` < `a1`; `src/modules/items/orderKey.ts`). There is always room between two
+  neighbours, so **a move rewrites only the moved item's file** (no renumbering of siblings, no merge conflicts in
+  files nobody edited). Older files' numbers (`order: 30`) are read as keys that sort the same way. At push time,
+  sibling groups the user changed whose keys got longer than 4 characters get short keys again, as one extra
+  commit "Tidy positions of N items" (only groups without uncommitted edits).
+- **Outline numbers** (0.9.0, O-03): "1", "1.2", "2.3.1" are **calculated** from parent + position whenever they are
+  shown (table "No.", editor header, pickers, Compare "1.2 → 3.5.1", every export) — never stored, so they are
+  always right after a move. Items outside the hierarchy (missing parent, loop) have none.
 - **Header order is fixed**: id, type, title, schema fields in schema order, unknown keys (sorted), parent, order,
   links. The same item always produces the same bytes, so Git diffs show only real changes.
 - **Links are stored only on the source item**; the reverse view ("verified by") comes from the index.
@@ -81,8 +92,9 @@ requirements/
   `confirmed` (written by hand or imported) are never suspect. The index keeps each item's fingerprint, so
   "items with suspect links" is one SQL query.
 - **Unknown header keys are preserved**, so files written by a newer ReqMan or another tool lose nothing.
-- **The index is a cache**: `%APPDATA%\ReqMan\cache\…sqlite`, rebuilt automatically when missing or when the
-  schema's fields change.
+- **The index is a cache**: `%APPDATA%\ReqMan\cache\…sqlite`, rebuilt automatically when missing or when its
+  format changes (format 4 since 0.9.0: positions are text). It stores every header key, so a field change
+  re-reads nothing.
 
 ## Decisions changed during implementation
 

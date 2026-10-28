@@ -4,7 +4,8 @@
 export type { FieldValue, Link, Item, ItemIssue, ItemDiff, DiffRow } from '../../shared/domain'
 
 export { parseItemFile, serializeItem, ITEM_FILE_EXTENSION, type ParseResult } from './itemFile'
-export { generateId, isValidId, ID_ALPHABET } from './ids'
+export { generateId, isValidId, ID_ALPHABET, ID_PREFIX } from './ids'
 export { validateItem } from './validate'
 export { contentFingerprint } from './fingerprint'
 export { diffItems, isEmptyDiff } from './diff'
+export { isOrderKey, keyBetween, keysBetween, keyOfNumber, MAX_ORDER_KEY_LENGTH, ORDER_DIGITS } from './orderKey'

@@ -8,6 +8,7 @@ import type { GitAdapter, NameStatus } from '../git-adapter'
 import type { IndexCache } from '../index-cache'
 import { contentFingerprint, diffItems, parseItemFile } from '../items'
 import { parseSchema } from '../schema'
+import { outlineNumbers } from './structure'
 import type { RequirementsRepo } from '../repository-store'
 
 export const WORKING = 'WORKING'
@@ -59,6 +60,7 @@ function schemaChange(before: Schema | null, after: Schema | null): SchemaChange
 }
 
 export function createCompare(git: GitAdapter) {
+  const numbersAt = (s: Session, ref: string): Promise<Map<string, string>> => numbersFromTree(git, s, ref)
   async function label(s: Session, ref: string): Promise<VersionLabel> {
     if (ref === WORKING) return { ref, label: 'Your working folder (everything saved on this PC)' }
     const c = await git.commitInfo(s.repo.root, ref)
@@ -143,9 +145,24 @@ export function createCompare(git: GitAdapter) {
         } else pairs.set(id, { before, after, path: c.path })
       }
 
+      // An item converted to a new ID keeps its old one as `former-id` (0.9.0 sandbox conversion, later imports):
+      // a deleted old ID and an added item that says it was that ID are one changed item, not two.
+      for (const [id, p] of [...pairs]) {
+        const former = p.after.item && !p.before.item ? p.after.item.extra['former-id'] : undefined
+        const old = typeof former === 'string' ? pairs.get(former) : undefined
+        if (old && old.before.item && !old.after.item) {
+          p.before = old.before
+          pairs.delete(former as string)
+          pairs.set(id, p)
+        }
+      }
+
       const entries: CompareEntry[] = []
       const links: LinkChange[] = []
+      /** The ID an entry had in the older version (differs after an ID conversion). */
+      const beforeId = new Map<string, string>()
       for (const [id, p] of pairs) {
+        if (p.before.item) beforeId.set(id, p.before.item.id)
         const diff = diffItems(p.before.item, p.after.item, s.repo.schema)
         const unreadable = p.before.error ?? p.after.error
         const nothing = diff.rows.length === 0 && !diff.text && diff.linksAdded.length === 0 && diff.linksRemoved.length === 0
@@ -168,6 +185,28 @@ export function createCompare(git: GitAdapter) {
         for (const l of diff.linksAdded) links.push({ source: id, type: l.type, target: l.target, change: 'added' })
         for (const l of diff.linksRemoved) links.push({ source: id, type: l.type, target: l.target, change: 'removed' })
       }
+      // Outline numbers on both sides ("1.2 → 3.5.1", owner's decision O-03). The newer side comes from the index
+      // when it is the working folder; a commit's tree is read through one ls-tree and one cat-file process.
+      // The older side is read only when something moved, appeared or disappeared — otherwise it is the same.
+      if (entries.length > 0) {
+        const after = toWorking ? outlineNumbers(s.index.structure()) : await numbersAt(s, to as string)
+        const structural = entries.some((e) => e.kind !== 'modified' || e.diff.rows.some((r) => r.key === 'parent' || r.key === 'order'))
+        const before = structural ? await numbersAt(s, from) : after
+        for (const e of entries) {
+          const nb = e.kind === 'added' ? undefined : before.get(beforeId.get(e.id) ?? e.id)
+          const na = e.kind === 'deleted' ? undefined : after.get(e.id)
+          if (nb !== undefined) e.numberBefore = nb
+          if (na !== undefined) e.numberAfter = na
+          const pos = e.diff.rows.find((r) => r.key === 'order')
+          if (nb !== undefined && na !== undefined && nb !== na) {
+            if (pos) {
+              pos.before = nb
+              pos.after = na
+            } else if (e.kind === 'moved') e.diff.rows.push({ key: 'order', label: 'Position', before: nb, after: na })
+            if (e.kind === 'moved') e.summary = `${nb} → ${na}`
+          }
+        }
+      }
       entries.sort((x, y) => x.id.localeCompare(y.id))
       links.sort((x, y) => x.source.localeCompare(y.source) || x.target.localeCompare(y.target))
 
@@ -183,6 +222,23 @@ export function createCompare(git: GitAdapter) {
     }
   }
 }
+
+/** Outline numbers of all items in a commit (siblings by order key, then ID — like the index). */
+async function numbersFromTree(git: GitAdapter, s: Session, ref: string): Promise<Map<string, string>> {
+  const base = reqPath(s.repo)
+  const tree = await git.treeBlobs(s.repo.root, ref, `${base === '.' ? '' : `${base}/`}items`)
+  const blobs = await git.readBlobs(s.repo.root, [...new Set(tree.values())])
+  const rows: { id: string; parent?: string; order?: string }[] = []
+  for (const text of blobs.values()) {
+    if (text === null) continue
+    const r = parseItemFile(text, new Set())
+    if (!r.ok) continue
+    rows.push({ id: r.item.id, ...(r.item.parent ? { parent: r.item.parent } : {}), ...(r.item.order !== undefined ? { order: r.item.order } : {}) })
+  }
+  rows.sort((a, b) => (a.order === undefined ? 1 : 0) - (b.order === undefined ? 1 : 0) || cmp(a.order ?? '', b.order ?? '') || cmp(a.id, b.id))
+  return outlineNumbers(rows)
+}
+const cmp = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0)
 
 const CONFIRMED_LINE = /^[ \t]+confirmed:[^\n]*\n?/gm
 function sameIgnoringConfirmations(a: string | null, b: string | null): boolean {

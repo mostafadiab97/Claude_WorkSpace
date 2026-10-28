@@ -10,6 +10,7 @@ export function createExportOps(ctx: WorkspaceContext, structure: StructureOps, 
   return {
     async exportItems(request: ExportItemsRequest): Promise<{ content: string; count: number }> {
       const s = ctx.need()
+      const numbers = ctx.numbers(s)
       let rows: ExportItem[]
       if (request.scope === 'filtered' && request.query) {
         const all = queryAll(s.index, request.query)
@@ -18,14 +19,21 @@ export function createExportOps(ctx: WorkspaceContext, structure: StructureOps, 
       } else {
         rows = structure.documentOrder(s)
       }
+      // every export carries the real outline numbers (also for a filtered result: no renumbering)
+      for (const r of rows) {
+        const n = numbers.get(r.item.id)
+        if (n !== undefined) r.item = { ...r.item, number: n }
+      }
+      // the number column always comes right after the ID
+      const columns = request.columns.includes('number') ? request.columns : request.columns.flatMap((c) => (c === 'id' ? ['id', 'number'] : [c]))
       // Markdown lists both directions under "links"
       if (request.columns.includes('linkedFrom') || (request.format === 'markdown' && request.columns.includes('links'))) {
         for (const r of rows) r.incoming = s.index.incomingLinks(r.item.id)
       }
       const content =
         request.format === 'markdown'
-          ? itemsToMarkdown(s.repo.schema, rows, request.columns, `${basename(s.repo.root)} — requirements`)
-          : itemsToCsv(s.repo.schema, rows, request.columns)
+          ? itemsToMarkdown(s.repo.schema, rows, columns, `${basename(s.repo.root)} — requirements`)
+          : itemsToCsv(s.repo.schema, rows, columns)
       return { content, count: rows.length }
     },
 

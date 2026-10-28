@@ -640,7 +640,7 @@ The prototype is built in seven milestones, each ending with a Windows build you
 
   Working name: **ReqMan**. Sample data: a fictional smart-thermostat requirements sheet (59 items: needs, system/software/hardware requirements, tests, risks, change requests) is in the repo at `samples/sample-requirements.xlsx`.
 
-## Roadmap after the prototype (proposal, 25 Oct 2026 — to discuss with the owner)
+## Roadmap after the prototype (release plan confirmed 28 Oct 2026)
 
 The prototype scope (FR-01 to FR-10) is built (v0.7.0). This section plans the next versions: where each
 requirement stands, what is still missing compared with the five analysed products, the preferred new features, and
@@ -722,25 +722,20 @@ X-02).
 | Word (.docx) | Planned — M10 | Later: ReqMan-generated files (round trip); other Word files only by rules (e.g. headings → items) | No general editing of foreign Word files |
 | PDF | Planned — M10 | Not planned | Printable document |
 
-### Proposed versions
+### Release plan (C, confirmed by the owner 28 Oct 2026)
 
-| Version | Milestone | Contents | Why in this order |
-| --- | --- | --- | --- |
-| 0.7.x | Fixes | Owner's test findings for 0.5–0.7; review fixes D-01–D-04, D-06, D-07, D-10, P-01, P-02, T-03 | Stabilise before adding more |
-| 0.7.x | Refactor (no visible change) | Review S-01, S-02, X-01, T-04, T-05, X-03 | M7/M8 add many calls and screens; cheaper on a clean base |
-| 0.8.0 | **M7 Excel** | .xlsx export (same options as CSV), import wizard for .xlsx/.csv: sheet, header row, column → field mapping (guessed), type per row, hierarchy from Level/Parent, links from a Links column, **update existing items by ID** with a preview of what changes, new IDs + `source-id` for foreign IDs; result = uncommitted changes to review in Compare | Owner's order (C); the main migration path from Excel |
-| 0.9.0 | **M8 Branches and merge** | Order keys that never need renumbering (review S-04, data format); create/switch branches; tags as baselines; compare branches/tags; pull/merge with field-level 3-way merge and a per-requirement conflict screen; duplicate-ID repair | Owner's order (C); needs S-04 first |
-| 0.10.0 | M9 Schema, coverage, views | Item types and link types in the GUI; coverage view + matrix; saved views; bulk edit | Completes "configurable like an Excel column" and traceability |
-| 0.11.0 | M10 Documents | Word (.docx) and PDF export (document order, headings, fields table), Markdown preview, item templates | Stakeholder communication outside the repository |
-| 1.0.0 | M11 MVP | GitHub PR stage 1 (view per requirement), Windows 10 build, hardening, docs for a team hand-over | MVP scope (FR-11 – FR-18) complete |
+| Version | Name | Contents |
+| --- | --- | --- |
+| **0.8.0** | Clean page | All review fixes D-01 – D-08, D-10, P-01, P-02, P-04, P-05, X-01; restructuring S-01 – S-03; all GUI texts in one central file (S-06); tests T-01 – T-05; **release self-test** inside ReqMan (runs the main actions on a temporary practice repository with a fake "GitHub" folder on the owner's PC, pass/fail per step, copy report); the owner's checklist shrinks to **at most 5 steps per version** from now on |
+| **0.9.0** | New data format | IDs `REQ-` + 7 random characters (O-01, O-02), type editable; fractional order keys (S-04; at push, groups the user changed whose values are longer than 4 characters are re-spaced); calculated outline numbers (O-03) in table ("No."), editor, picker, Compare and every export; sandbox converted directly in its repository |
+| **0.10.0** | Changes view | One Changes view instead of Changes + Compare (O-06), no automatic pulls ("Pull first" offer); GitHub-style split difference with highlighted words and revert arrows (O-05); Keep/Unlink window for suspect links (O-04) |
+| **0.11.0** | **M7 Excel** | Excel export (ExcelJS); import wizard for Excel/CSV (update by ID with preview, links, outline numbers → hierarchy); "New project from a file", "Update the Excel file", "Publish to GitHub"; **export of chosen items**: Ctrl/Shift+click to select several rows, right-click "Export this item and everything below it", export window choice "Selected items and everything below them" (all levels; tick box "Include the items below", ticked by default; overlaps exported once; document order; full outline numbers) |
+| **0.12.0** | **M8 Branches** | Create/switch branches, tags as baselines, per-requirement (field-level 3-way) merge (S-05), automatic duplicate-ID repair (D-09), D-05 |
+| **0.13.0** | ReqIF | Two-way exchange with DOORS and Jama (O-07 phase 2) |
+| later | — | Item and link types in the GUI, coverage view and matrix, saved views, bulk edit (M9); Word/PDF export, rich text editor (M10); GitHub PR view (M11); Windows 10 build. **No milestone yet:** tables in text, code signing (X-02), private update channel (S-08) |
 
-### Decisions needed from the owner
-
-1. Order of M9 / M10 / M11 after M8 (above is a proposal).
-2. Translation of the UI ever needed? (review S-06)
-3. Several requirement sets per repository / configurable folder? (review S-07)
-4. Commercial preparation timing: private update channel and code signing (review S-08, X-02).
-5. Which "Should" features matter most to the teams (bulk edit, templates, impact view, quality hints…)?
+Settled owner decisions on the review (27–28 Oct 2026): UI texts in one central file (S-06, yes); one requirement
+set per repository (S-07, discarded); private update channel and code signing later (S-08, X-02).
 
 ## Sources
 

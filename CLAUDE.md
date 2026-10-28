@@ -114,12 +114,10 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | M4 Git — Git bar, per-item changes, commit (requirements/ only), pull that stops safely on items changed on both sides, push (never forced), discard, undo unpushed commit, name/e-mail form, per-item history with field-level comparison | Done (v0.5.0) |
 | M5 Compare — pulls first; default "what the last pull brought in" (reflog); uncommitted / last commit / any two versions; per item (added/changed/moved/deleted + summary + suspect-impact warning) and per link; schema changes; fast via `cat-file --batch` by blob ID | Done (v0.6.0) |
 | M6 Export and hardening — table and Compare export to CSV (comma, UTF-8 BOM) and Markdown; error boundary; old-Git warning; CI smoke test with 10k generated items; combined checklist + two-PC trial script | Done (v0.7.0) |
-| **M7 Excel export and import** (FR-14 part, FR-15) | **Next** |
-| M8 Branches (create/switch) and per-requirement conflict resolution (FR-12, FR-13) | Planned |
+| 0.8.0 clean page (review fixes, refactors, central texts, release self-test) | **In progress** |
+| 0.9.0 data format · 0.10.0 Changes view · 0.11.0 M7 Excel · 0.12.0 M8 branches · 0.13.0 ReqIF | Planned (DESIGN.md → "Release plan") |
 
-Owner's last report (25 Oct 2026): "all works fine" on v0.4.1. He has not tested 0.5.0–0.7.0 yet; at his request
-`docs/TESTING.md` has **one combined checklist** ("v0.7.0 — covers everything since 0.4.1", 26 steps) plus the
-"Two-PC trial" script. Expect feedback by step number from that list.
+Owner's last report (27 Oct 2026): combined checklist 0.5.0–0.7.0 all passed; two-PC trial postponed.
 
 Automated tests: 87 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
 repository and two clones ("PC A", "PC B"); e2e journey with ~75 checks, incl. commit → push → colleague pushes →
@@ -151,22 +149,23 @@ scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 5
   `readBlobs()` (one `git cat-file --batch`). Naming objects `<rev>:<path>` instead was 40× slower with 10k files in
   one folder (tree lookups). Files that differ only in `confirmed:` lines are skipped before parsing.
 
-## Where we are right now (25 Oct 2026, after v0.7.0) — read this first
+## Where we are right now (28 Oct 2026) — read this first
 
-The owner asked to **pause new features**. Done in this step (docs only, no code changes):
-1. Roadmap, gap analysis vs. the analysed tools and preferred-feature backlog → `docs/design/DESIGN.md`,
-   section "Roadmap after the prototype".
-2. Whole-project review → `docs/reviews/2026-10-25-project-review.md` (1 confirmed defect D-01: items whose file
-   name ≠ ID cannot be opened; likely defects D-02–D-04; P-01 full refresh per save; S-04 order keys before M8…).
-   **Do not change code for these until the owner confirms which to do.**
-3. Onboarding guide with diagrams → `docs/ONBOARDING.md`.
+The owner's tests of 0.5.0–0.7.0 all passed (27 Oct). His requests O-01–O-07 and the whole project review
+(`docs/reviews/2026-10-25-project-review.md`, section H = every answer) have been discussed and decided. The
+**release plan is confirmed** (DESIGN.md → "Release plan"):
 
-**27 Oct 2026:** owner's tests of 0.5.0, 0.6.0 and 0.7.0 all passed; the two-PC trial is postponed (he is the only
-user). He sent seven new requests (O-01–O-07, recorded in the review file, section H). We are now **discussing them
-one at a time** (explanation + recommendation → his answer → next point), then the review findings, then we plan
-milestones. He is a C developer and new to this field: explain concepts from first principles, with C analogies
-where useful, no unexplained jargon. Record each answer in the review file (and DESIGN.md when it is a decision). Proposed order (not yet confirmed): fix release 0.7.x →
-refactor (S-01, S-02) → M7 Excel (0.8.0) → M8 branches + merge with order keys (0.9.0).
+0.8.0 clean page (all review fixes, refactors S-01–S-03, central GUI text file S-06, tests T-01–T-05, in-app
+**release self-test**, checklist ≤ 5 steps) → 0.9.0 new data format (`REQ-` + 7 chars, order keys, outline numbers,
+sandbox converted) → 0.10.0 Changes view (O-04/O-05/O-06) → 0.11.0 M7 Excel (+ export of chosen items) → 0.12.0 M8
+branches → 0.13.0 ReqIF.
+
+**Current work: 0.8.0.** The owner is a C developer new to this field: explain from first principles, short, C
+analogies where useful. Record decisions in the review file / DESIGN.md.
+
+**Testing rule from 0.8.0 (owner, 28 Oct 2026):** the manual checklist per version has **at most 5 steps** (update
+arrives, release self-test, open the sandbox, one real push only when Git changed, the version's new feature).
+Everything else must be automated (unit tests, e2e in CI, the in-app release self-test).
 
 ## M6 decisions (owner, 25 Oct 2026) — already built
 
@@ -177,26 +176,15 @@ refactor (S-01, S-02) → M7 Excel (0.8.0) → M8 branches + merge with order ke
   `main/ipc.ts` shows the save dialog (last folder in `%APPDATA%\ReqMan\export-settings.json`). E2E mocks
   `dialog.showSaveDialog` (`saveAs()` helper in the journey).
 
-## Next step: M7 Excel export and import (draft — confirm with the owner)
+## M7 notes (now version 0.11.0)
 
-1. **Excel export (.xlsx):** same choices as the CSV export, real columns, header row frozen, column widths, text
-   cells wrapped, one sheet "Requirements" (+ optional "Links" sheet). Library: **ExcelJS** (MIT, reads and writes
-   .xlsx, no native code) — check licence and size before adding.
-2. **Import from Excel (.xlsx) and CSV** (FR-15), a wizard: choose file → sheet → header row; **map columns** to ID,
-   Title, Type, Text, Parent / Level, Status and other fields (guessed from header names; unknown columns can become
-   new fields); type per row from a column or one fixed type; **preview** with problems (unknown status values,
-   missing titles, duplicate IDs) before anything is written; import writes item files as **uncommitted changes**
-   (the user reviews them in Compare → Uncommitted changes and commits).
-3. **IDs:** keep IDs that already look like ReqMan IDs (round trip of our own export); otherwise generate new ones
-   and keep the original in an extra header key (e.g. `source-id`) so a later re-import can find them.
-4. **Round trip test:** export the sandbox to xlsx/CSV, import into an empty repository → same items, hierarchy and
-   links. The fictional sheet `samples/sample-requirements.xlsx` (59 items) is the first real-world-like import test.
-
-Owner's answers (25 Oct 2026): **update** existing items by ID (with a preview of what changes); **read links too**.
-
-Later milestones and backlog are in DESIGN.md ("Scope by stage"): after M8 — schema editor for item and link
-types (fields part done), tags as baselines, Word/PDF export, coverage rules (open question: report-only by
-default), GitHub PR view, Word import, ReqIF.
+- Excel export with ExcelJS (MIT; check size); import wizard (file → sheet → header row → column mapping guessed →
+  type per row → preview with problems) writing uncommitted changes; update existing items by ID; read links; foreign
+  IDs kept as `source-id`; outline numbers rebuild the hierarchy. Round trip test with the sandbox and
+  `samples/sample-requirements.xlsx` (59 items).
+- Plus "New project from a file", "Update the Excel file", "Publish to GitHub" and **export of chosen items**
+  (Ctrl/Shift+click multi-select, right-click "Export this item and everything below it", tick box "Include the items
+  below" ticked by default, overlaps once, document order, full outline numbers).
 
 ## Small things the owner has asked for or accepted along the way
 

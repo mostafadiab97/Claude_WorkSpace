@@ -349,12 +349,13 @@ all fine. The two-PC trial is postponed (only one user for now).
   security alerts/updates must be switched on by the owner in the repository settings (the API is not reachable
   from the cloud session).
 
-## G. Proposed order (to discuss)
+- **Plan confirmed (28 Oct 2026):** release plan in `docs/design/DESIGN.md` → "Release plan". Owner additions:
+  **export of chosen items** (one item or several selected items + everything below them) in 0.11.0 with the Excel
+  export; **testing reduced**: a release self-test inside ReqMan (temporary practice repository, never the user's
+  data) plus at most 5 manual steps per version, from 0.8.0. Dependabot alerts stay off (weekly updates are enough;
+  `check:deps` warns about indirect libraries in every build).
 
-1. **Fix block before M7 (one patch release, e.g. 0.7.1):** D-01, D-02, D-03, D-04, D-06, D-07, D-10, P-01, P-02,
-   T-03.
-2. **Refactor block (no visible change, 0.7.2):** S-01, S-02 (+ X-01), T-05, T-04, X-03.
-3. **M7 Excel export/import** on top of that.
-4. **Before M8:** S-04 (order keys) decided and implemented; D-05; T-01; then **M8** with S-05 and D-09.
-5. **Owner decisions needed:** S-06 (translation ever?), S-07 (several requirement folders?), S-08 / X-02
-   (commercial update channel and code signing).
+## G. Order (confirmed 28 Oct 2026)
+
+See `docs/design/DESIGN.md` → "Release plan": 0.8.0 clean page (all fixes of this review) → 0.9.0 new data format →
+0.10.0 Changes view → 0.11.0 M7 Excel → 0.12.0 M8 branches → 0.13.0 ReqIF.

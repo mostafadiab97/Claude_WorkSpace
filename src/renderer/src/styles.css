@@ -676,6 +676,38 @@ code {
   text-overflow: ellipsis;
 }
 
+.table__thcell {
+  position: relative;
+  display: flex;
+  align-self: stretch;
+  min-width: 0;
+}
+
+.table__thcell > .table__th {
+  flex: 1;
+  min-width: 0;
+}
+
+/* drag handle on the right edge of each header cell (column width) */
+.table__resize {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--rm-space-sm);
+  cursor: col-resize;
+  touch-action: none;
+  border-right: var(--rm-shape-border-width) solid var(--rm-color-border);
+}
+
+.table__resize:hover,
+.table__resize:focus-visible,
+.table__resize--active {
+  outline: none;
+  border-right-width: calc(var(--rm-shape-border-width) * 3);
+  border-right-color: var(--rm-color-primary);
+}
+
 .table__th--sorted {
   color: var(--rm-color-text);
 }

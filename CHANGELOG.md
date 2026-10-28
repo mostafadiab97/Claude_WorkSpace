@@ -4,6 +4,9 @@ Each version was installed and tried by the product owner on Windows 11; his fee
 version it was about, and what it led to.
 
 ## 0.9.0 — 28 Oct 2026 — New data format
+- **Owner (28 Oct 2026):** all 5 checklist steps passed; release self-test 17/17 in 26.7 s; the Compare + Changes
+  bug is fixed. New request: the No. column cuts deep numbers ("2.1.1....") → column widths can be dragged
+  (0.10.0). Also asked for a navigator page for the diagrams and the skills in the repository (done).
 - **IDs:** every new item gets `REQ-` + 7 random characters, whatever its type (O-01, O-02). The type can now be
   changed in the editor; the ID stays. Older IDs (`SYS-K7Q3XM` …) remain valid; the schema no longer needs a
   prefix per type.

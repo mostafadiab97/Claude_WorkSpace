@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest'
 import type { CompareOptions } from '../../src/shared/api'
 import type { IndexedItem, Schema } from '../../src/shared/domain'
-import { shownColumnKeys } from '../../src/renderer/src/workspace/table/columns'
+import { columnTemplate, columnsFor, shownColumnKeys, tableMinWidth, withWidth } from '../../src/renderer/src/workspace/table/columns'
 import { dropMove, dropZone } from '../../src/renderer/src/workspace/table/drag'
 import { treeRows, type Level, type Row } from '../../src/renderer/src/workspace/table/rows'
 import { buildQuery, nextSort } from '../../src/renderer/src/workspace/screen/useFilters'
@@ -34,6 +34,22 @@ const schema: Schema = {
   ],
   linkTypes: [{ id: 'verifies', name: 'verifies', reverseName: 'verified by' }]
 }
+
+describe('column widths (table/columns.ts)', () => {
+  const bare: Schema = { version: 1, itemTypes: [], fields: [], linkTypes: [] }
+  it('a dragged width is fixed, other columns keep growing; double-click returns to automatic', () => {
+    const auto = columnsFor(bare, { hidden: new Set(['type', 'links', 'text']), order: [] })
+    expect(columnTemplate(auto)).toBe('130px 90px minmax(260px, 3fr)')
+    const widths = withWidth(undefined, 'number', 160.4)
+    const wide = columnsFor(bare, { hidden: new Set(['type', 'links', 'text']), order: [], widths })
+    expect(columnTemplate(wide)).toBe('130px 160px minmax(260px, 3fr)')
+    expect(tableMinWidth(wide)).toBe(130 + 160 + 260)
+    expect(withWidth(widths, 'number', null)).toEqual({})
+    // never narrower than a grip, never absurdly wide
+    expect(withWidth({}, 'title', 3)).toEqual({ title: 48 })
+    expect(withWidth({}, 'title', 99999)).toEqual({ title: 1200 })
+  })
+})
 
 describe('tree rows (table/rows.ts) — lazy "Expand all" (P-04)', () => {
   const levels = new Map<string, Level>([

@@ -103,7 +103,8 @@ The main PCB shall limit access tokens in all supported languages.
 
 ![Pull flow](images/pull-flow.png)
 
-The diagrams are made with [Archify](https://github.com/tt-a1i/archify) (Apache-2.0) from the JSON sources in
+All diagrams in one place: open [`docs/diagrams/index.html`](diagrams/index.html) — a list on the left, the chosen
+diagram on the right. The diagrams are made with [Archify](https://github.com/tt-a1i/archify) (Apache-2.0) from the JSON sources in
 `docs/diagrams/archify/`; how to change and regenerate them is in `docs/diagrams/README.md`.
 
 ## 6. Your first day

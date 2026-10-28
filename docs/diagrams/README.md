@@ -1,5 +1,10 @@
 # Diagrams
 
+**Start here: `index.html`** — a navigator with every diagram on the left; click one to show it on the right
+(links like `index.html#pull-flow` open a diagram directly). It is written by `node tools/diagrams.mjs` (or
+`node tools/diagrams.mjs --index` alone, no Archify needed) — a new JSON in `archify/` appears there automatically;
+add its one-line description to `ABOUT` in the script.
+
 | Diagram | Interactive (open in a browser) | Picture (used in the docs) | Source |
 | --- | --- | --- | --- |
 | How the parts connect (architecture) | `architecture.html` | `../images/architecture.png` | `archify/architecture.json` |

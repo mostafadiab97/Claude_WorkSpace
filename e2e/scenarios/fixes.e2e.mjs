@@ -57,6 +57,23 @@ await scenario('E2E fixes', async (ctx) => {
   check((await win.locator('.table__row[data-id]').count()) === 21, 'all 21 items have a row (3 levels)')
   await t.shot('fixes-expanded')
 
+  console.log('Column width — drag the edge of the No. column (owner, 28 Oct 2026)')
+  const numberHead = win.locator('[data-column="number"]')
+  const before = await numberHead.boundingBox()
+  const grip = await win.getByRole('separator', { name: /Width of the No\. column/ }).boundingBox()
+  await win.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2)
+  await win.mouse.down()
+  await win.mouse.move(grip.x + 80, grip.y + grip.height / 2, { steps: 5 })
+  await win.mouse.up()
+  const after = await numberHead.boundingBox()
+  check(Math.abs(after.width - before.width - 80) < 6, `dragging widens the column (${Math.round(before.width)} → ${Math.round(after.width)} px)`)
+  const cell = await win.locator('.table__row[data-id]').first().locator('.table__td').nth(1).boundingBox()
+  check(Math.abs(cell.width - after.width) < 2, 'the rows follow the header')
+  const saved = await win.evaluate(() => Object.entries(localStorage).find(([k]) => k.startsWith('reqman.columns:'))?.[1] ?? '')
+  check(/"number":\d+/.test(saved), 'the width is remembered for this repository')
+  await win.getByRole('separator', { name: /Width of the No\. column/ }).dblclick()
+  check(Math.abs((await numberHead.boundingBox()).width - before.width) < 2, 'double-click returns to the automatic width')
+
   console.log('D-02 — a second start')
   const electronPath = (await import('electron')).default
   const second = spawn(electronPath, ['.', `--user-data-dir=${t.userData}`, ...(process.platform === 'linux' ? ['--no-sandbox', '--disable-gpu'] : [])], { cwd: root, stdio: 'ignore' })

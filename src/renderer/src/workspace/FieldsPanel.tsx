@@ -10,14 +10,14 @@ import { T } from '../../../shared/text'
 const storageKey = (root: string): string => `reqman.columns:${root}`
 const oldKey = (root: string): string => `reqman.hiddenColumns:${root}`
 
-/** Hidden columns and column order, remembered per repository on this PC (personal, not shared through Git). */
+/** Hidden columns, column order and widths, remembered per repository on this PC (personal, not shared through Git). */
 export function useColumnPrefs(root: string): [ColumnPrefs, (next: ColumnPrefs) => void] {
   const [prefs, setPrefs] = useState<ColumnPrefs>(() => {
     try {
       const raw = localStorage.getItem(storageKey(root))
       if (raw) {
-        const p = JSON.parse(raw) as { hidden?: string[]; order?: string[] }
-        return { hidden: new Set(p.hidden ?? []), order: p.order ?? [] }
+        const p = JSON.parse(raw) as { hidden?: string[]; order?: string[]; widths?: Record<string, number> }
+        return { hidden: new Set(p.hidden ?? []), order: p.order ?? [], widths: p.widths ?? {} }
       }
       const old = localStorage.getItem(oldKey(root)) // v0.3.0 kept only the hidden list
       return { hidden: new Set(old ? (JSON.parse(old) as string[]) : []), order: [] }
@@ -28,7 +28,7 @@ export function useColumnPrefs(root: string): [ColumnPrefs, (next: ColumnPrefs) 
   const update = (next: ColumnPrefs): void => {
     setPrefs(next)
     try {
-      localStorage.setItem(storageKey(root), JSON.stringify({ hidden: [...next.hidden], order: next.order }))
+      localStorage.setItem(storageKey(root), JSON.stringify({ hidden: [...next.hidden], order: next.order, widths: next.widths ?? {} }))
     } catch {
       // storage unavailable: the choice lasts until the window closes
     }
@@ -97,7 +97,7 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields }: { schema:
             ))}
           </ul>
           <div className="actions actions--spread popover__footer">
-            <button type="button" className="link-btn" onClick={() => onChange({ hidden: new Set(), order: [] })} disabled={hidden.size === 0 && prefs.order.length === 0}>
+            <button type="button" className="link-btn" onClick={() => onChange({ hidden: new Set(), order: [], widths: {} })} disabled={hidden.size === 0 && prefs.order.length === 0 && Object.keys(prefs.widths ?? {}).length === 0}>
               {T.columnsMenu.reset}
             </button>
             <button

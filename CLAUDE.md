@@ -21,7 +21,7 @@ cloud session from v0.5.0. Nothing lives outside this repository and `Claude_San
 
 | What | Where |
 | --- | --- |
-| **Onboarding for new engineers** (system diagrams, module roles, data flow, first change end to end) | `docs/ONBOARDING.md` (diagrams: Archify sources `docs/diagrams/archify/*.json`, interactive `docs/diagrams/*.html`, pictures `docs/images/`; regenerate with `node tools/diagrams.mjs`, see `docs/diagrams/README.md`) |
+| **Onboarding for new engineers** (system diagrams, module roles, data flow, first change end to end) | `docs/ONBOARDING.md` (diagrams: navigator `docs/diagrams/index.html`; Archify sources `docs/diagrams/archify/*.json`, interactive `docs/diagrams/*.html`, pictures `docs/images/`; regenerate with `node tools/diagrams.mjs`, see `docs/diagrams/README.md`) |
 | Project reviews (defects, structure, performance, risks — proposals awaiting the owner's decision) | `docs/reviews/2026-10-25-project-review.md` |
 | Domain analysis of 5 RM tools, every product question with the owner's answer, product definition, FR/NFR list, journey, scope by stage, architecture, technology choices, milestone plan | `docs/design/DESIGN.md` (**source of truth for decisions**; tags C = confirmed by owner, R = recommendation, I = inference) |
 | Module map, rules, data format, UI structure, decisions changed during build | `docs/ARCHITECTURE.md` |
@@ -29,6 +29,7 @@ cloud session from v0.5.0. Nothing lives outside this repository and `Claude_San
 | Theme file and customisation | `docs/THEMING.md` |
 | What changed in each version and what the owner reported | `CHANGELOG.md` |
 | Local development setup (Windows) | `docs/DEVELOPING.md` |
+| Every script in `tools/` and the working procedures (skills) | `tools/README.md`; skills in `.claude/skills/` (`release-to-owner` — use it for every release, `whole-project-review`, `owner-decision-walkthrough`) |
 | Test data repository (10,005 fictional items) | GitHub `mostafadiab97/Claude_SandBox` — clone it **next to** this repo, never inside |
 | Releases (installers + auto-update feed) | GitHub Releases of `mostafadiab97/Claude_WorkSpace` |
 
@@ -89,7 +90,7 @@ npm run gen:scenario -- <folder> [count]    # rich scenario data (what Claude_Sa
 npm run dist:win          # local Windows installer into dist/ (CI does this for releases)
 npm run check:deps        # library security problems + updates; also runs before every build; warns only, never blocks
 node tools/ci.mjs status  # GitHub runs; wait / failures (annotations) / release (start by hand) / released
-node tools/diagrams.mjs   # rebuild the Archify diagrams in docs/diagrams (Archify cloned next to the repo)
+node tools/diagrams.mjs   # rebuild the Archify diagrams + navigator index.html in docs/diagrams (Archify cloned next to the repo; --index = navigator only)
 ```
 
 On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows briefly.
@@ -130,8 +131,9 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | **0.10.0 Changes view (O-04/O-05/O-06)** | **Next** |
 | 0.11.0 M7 Excel (+ chosen-items export) · 0.12.0 M8 branches · 0.13.0 ReqIF | Planned (DESIGN.md → "Release plan") |
 
-Owner's last report (28 Oct 2026): 0.8.0 self-test passed (17 steps, 32.7 s), steps 3–5 passed; Compare + Changes
-overlap bug (fixed in 0.9.0). Two-PC trial postponed.
+Owner's last report (28 Oct 2026): 0.9.0 all 5 checklist steps passed, self-test 17/17 (26.7 s); Compare + Changes
+bug confirmed fixed. Asked for resizable columns (No. was cut off), a diagram navigator, skills in the repo —
+all done for 0.10.0. Two-PC trial postponed.
 
 Automated tests: 145 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
 repository and two clones ("PC A", "PC B"), the release self-test itself, the sandbox's chapter-9 promises
@@ -216,6 +218,7 @@ Everything else must be automated (unit tests, e2e in CI, the in-app release sel
 - `theme.json` in `%APPDATA%` starts as an override-only file with a `_help` key (a full copy froze values).
 - Table = tree when not searching/filtering; flat list (best match first) when searching or filtering.
 - Header sort: ascending → descending → back to document order.
+- Column widths: drag the header edge (double-click = automatic); personal like hidden/ordered columns (0.10.0).
 - Hidden/ordered columns are personal (per repo, per PC, localStorage) — not shared through Git; field
   definitions are shared (schema.yaml).
 - Type is editable in the editor since 0.9.0 (IDs no longer contain the type).

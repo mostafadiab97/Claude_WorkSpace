@@ -7,7 +7,7 @@ import { FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
 import { CompareDetail, CompareView } from '../workspace/CompareView'
 import { ChangesPanel, GitBar } from '../workspace/GitPanels'
 import { ExportDialog } from '../workspace/ExportDialog'
-import { ItemTable, shownColumnKeys, type TreeControls } from '../workspace/ItemTable'
+import { ItemTable, shownColumnKeys, withWidth, type TreeControls } from '../workspace/ItemTable'
 import { ProblemList, problemsOf } from '../workspace/screen/Problems'
 import { Toolbar } from '../workspace/screen/Toolbar'
 import { useFilters } from '../workspace/screen/useFilters'
@@ -188,6 +188,7 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
           <ItemTable
             schema={schema}
             prefs={columnPrefs}
+            onResize={(key, width) => setColumnPrefs({ ...columnPrefs, widths: withWidth(columnPrefs.widths, key, width) })}
             mode={filtered ? 'flat' : 'tree'}
             query={query}
             dataVersion={dataVersion}

@@ -9,6 +9,8 @@ export interface Column {
   /** Narrowest the column may get; wider windows share the extra space by `grow`. */
   minPx: number
   grow: number
+  /** Width the user dragged the column to (px); replaces minPx/grow. */
+  width?: number
   value: (i: IndexedItem) => string
   /** Shown in the warning colour (e.g. suspect links). */
   warn?: (i: IndexedItem) => boolean
@@ -48,10 +50,32 @@ export function linkTitle(i: Pick<IndexedItem, 'links' | 'incomingCount' | 'susp
   return lines.join('\n')
 }
 
-/** Personal table layout: hidden column keys, and the order of the optional columns (keys). */
+/** Personal table layout: hidden column keys, the order of the optional columns, and widths set by dragging. */
 export interface ColumnPrefs {
   hidden: ReadonlySet<string>
   order: string[]
+  /** Column key → width in px; columns without an entry size themselves. */
+  widths?: Readonly<Record<string, number>>
+}
+
+export const MIN_COLUMN_PX = 48
+export const MAX_COLUMN_PX = 1200
+export const clampWidth = (px: number): number => Math.round(Math.min(MAX_COLUMN_PX, Math.max(MIN_COLUMN_PX, px)))
+
+/** CSS grid columns: a dragged width is fixed; other columns grow from their minimum. */
+export function columnTemplate(cols: Pick<Column, 'minPx' | 'grow' | 'width'>[]): string {
+  return cols.map((c) => (c.width !== undefined ? `${c.width}px` : c.grow ? `minmax(${c.minPx}px, ${c.grow}fr)` : `${c.minPx}px`)).join(' ')
+}
+
+/** Narrowest the whole table may get before it scrolls sideways. */
+export const tableMinWidth = (cols: Pick<Column, 'minPx' | 'width'>[]): number => cols.reduce((sum, c) => sum + (c.width ?? c.minPx), 0)
+
+/** New width list after a drag (null = back to automatic). */
+export function withWidth(widths: Readonly<Record<string, number>> | undefined, key: string, px: number | null): Record<string, number> {
+  const next = { ...widths }
+  if (px === null) delete next[key]
+  else next[key] = clampWidth(px)
+  return next
 }
 
 /** Sorts columns by a saved key order; columns not in it (e.g. new fields) keep their place at the end. */
@@ -74,7 +98,7 @@ export function columnsFor(schema: Schema, prefs: ColumnPrefs = { hidden: new Se
   const all: Column[] = [
     { key: 'id', label: T.columns.id, minPx: 130, grow: 0, value: (i) => i.id },
     // the outline number (calculated, never stored — O-03); sorting by it = document order
-    { key: 'number', label: T.columns.number, minPx: 70, grow: 0, value: (i) => i.number ?? '' },
+    { key: 'number', label: T.columns.number, minPx: 90, grow: 0, value: (i) => i.number ?? '' },
     { key: 'title', label: T.columns.title, minPx: 260, grow: 3, value: (i) => i.title || T.common.noTitle },
     { key: 'type', label: T.columns.type, minPx: 130, grow: 1.2, value: (i) => typeName(schema, i.type) },
     { key: 'links', label: T.columns.links, minPx: 90, grow: 0.6, value: linkSummary, warn: (i) => i.suspectCount > 0 },
@@ -89,5 +113,8 @@ export function columnsFor(schema: Schema, prefs: ColumnPrefs = { hidden: new Se
   ]
   // ID, No. and Title stay at the front; the rest follow the user's order
   const [id, number, title, ...rest] = all
-  return [id as Column, number as Column, title as Column, ...orderColumns(rest, prefs.order)].filter((c) => !prefs.hidden.has(c.key))
+  const widths = prefs.widths ?? {}
+  return [id as Column, number as Column, title as Column, ...orderColumns(rest, prefs.order)]
+    .filter((c) => !prefs.hidden.has(c.key))
+    .map((c) => (widths[c.key] !== undefined ? { ...c, width: widths[c.key] } : c))
 }

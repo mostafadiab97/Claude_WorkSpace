@@ -1,12 +1,12 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { useEffect, useMemo, useRef, type KeyboardEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import type { ItemQuery, Schema, SortKey } from '../../../shared/domain'
 import { T } from '../../../shared/text'
-import { columnsFor, linkTitle, type ColumnPrefs } from './table/columns'
+import { clampWidth, columnTemplate, columnsFor, linkTitle, tableMinWidth, type ColumnPrefs } from './table/columns'
 import { useRowDrag } from './table/drag'
 import { useFlatRows, useTreeRows, type Row } from './table/rows'
 
-export { optionalColumns, orderColumns, shownColumnKeys, columnsFor, linkSummary, type Column, type ColumnPrefs } from './table/columns'
+export { optionalColumns, orderColumns, shownColumnKeys, columnsFor, withWidth, linkSummary, type Column, type ColumnPrefs } from './table/columns'
 export type { Row } from './table/rows'
 
 const ROW_HEIGHT = 34
@@ -39,12 +39,47 @@ export function ItemTable(props: {
   /** Bumped after a save or move: show the selected item again (its parent may have changed). */
   revealNonce?: number
   emptyText: string
+  /** The user dragged a column edge: new width in px, or null = automatic again. */
+  onResize?: (key: string, width: number | null) => void
 }) {
-  const { schema, prefs, mode, query, dataVersion, selectedId, onSelect, onSort, onTotal, onMove, controlsRef, revealNonce, emptyText } = props
-  const columns = useMemo(() => columnsFor(schema, prefs), [schema, prefs])
-  const template = columns.map((c) => (c.grow ? `minmax(${c.minPx}px, ${c.grow}fr)` : `${c.minPx}px`)).join(' ')
+  const { schema, prefs, mode, query, dataVersion, selectedId, onSelect, onSort, onTotal, onMove, controlsRef, revealNonce, emptyText, onResize } = props
+  const saved = useMemo(() => columnsFor(schema, prefs), [schema, prefs])
+  // while a column edge is dragged, its width lives here and is saved when the mouse is released
+  const [live, setLive] = useState<{ key: string; width: number } | null>(null)
+  const columns = live ? saved.map((c) => (c.key === live.key ? { ...c, width: live.width } : c)) : saved
+  const template = columnTemplate(columns)
   // When the pane is narrower than all columns together, header and rows scroll sideways together.
-  const minWidth = columns.reduce((sum, c) => sum + c.minPx, 0)
+  const minWidth = tableMinWidth(columns)
+  const startResize = (e: ReactPointerEvent<HTMLSpanElement>, key: string): void => {
+    e.preventDefault()
+    e.stopPropagation()
+    const handle = e.currentTarget
+    const start = (handle.parentElement as HTMLElement).getBoundingClientRect().width
+    const startX = e.clientX
+    let width = start
+    handle.setPointerCapture(e.pointerId)
+    const move = (ev: PointerEvent): void => {
+      width = clampWidth(start + ev.clientX - startX)
+      setLive({ key, width })
+    }
+    const up = (): void => {
+      handle.removeEventListener('pointermove', move)
+      handle.removeEventListener('pointerup', up)
+      handle.removeEventListener('pointercancel', up)
+      setLive(null)
+      if (width !== start) onResize?.(key, width)
+    }
+    handle.addEventListener('pointermove', move)
+    handle.addEventListener('pointerup', up)
+    handle.addEventListener('pointercancel', up)
+  }
+  const resizeByKey = (e: KeyboardEvent<HTMLSpanElement>, key: string): void => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+    e.preventDefault()
+    e.stopPropagation()
+    const now = (e.currentTarget.parentElement as HTMLElement).getBoundingClientRect().width
+    onResize?.(key, clampWidth(now + (e.key === 'ArrowRight' ? 16 : -16)))
+  }
   const isTree = mode === 'tree'
   const sort = query.sort ?? { by: 'order' as const }
 
@@ -159,18 +194,33 @@ export function ItemTable(props: {
       <div className="table__inner" style={{ minWidth }}>
         <div className="table__head" role="row" style={{ gridTemplateColumns: template }}>
           {columns.map((c) => (
-            <button
-              key={c.key}
-              type="button"
-              role="columnheader"
-              aria-sort={sortBy === c.key ? (desc ? 'descending' : 'ascending') : 'none'}
-              className={`${sortBy === c.key ? 'table__th table__th--sorted' : 'table__th'}${c.key === 'id' ? ' table__th--id' : ''}`}
-              onClick={() => onSort(c.key)}
-              title={isTree ? T.table.sortTreeTooltip(c.label) : T.table.sortTooltip(c.label)}
-            >
-              {c.label}
-              {sortBy === c.key && <span aria-hidden="true">{desc ? ' ▾' : ' ▴'}</span>}
-            </button>
+            <div key={c.key} role="columnheader" aria-sort={sortBy === c.key ? (desc ? 'descending' : 'ascending') : 'none'} className={`table__thcell${c.key === 'id' ? ' table__th--id' : ''}`} data-column={c.key}>
+              <button
+                type="button"
+                className={sortBy === c.key ? 'table__th table__th--sorted' : 'table__th'}
+                onClick={() => onSort(c.key)}
+                title={isTree ? T.table.sortTreeTooltip(c.label) : T.table.sortTooltip(c.label)}
+              >
+                {c.label}
+                {sortBy === c.key && <span aria-hidden="true">{desc ? ' ▾' : ' ▴'}</span>}
+              </button>
+              {onResize && (
+                <span
+                  role="separator"
+                  aria-orientation="vertical"
+                  aria-label={T.table.resize(c.label)}
+                  title={T.table.resize(c.label)}
+                  tabIndex={0}
+                  className={live?.key === c.key ? 'table__resize table__resize--active' : 'table__resize'}
+                  onPointerDown={(e) => startResize(e, c.key)}
+                  onDoubleClick={(e) => {
+                    e.stopPropagation()
+                    onResize(c.key, null)
+                  }}
+                  onKeyDown={(e) => resizeByKey(e, c.key)}
+                />
+              )}
+            </div>
           ))}
         </div>
         {count === 0 ? (

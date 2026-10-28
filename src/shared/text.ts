@@ -143,7 +143,8 @@ export const T = {
     sortTooltip: (label: string) => `Sort by ${label}`,
     showMore: (hidden: number) => `Show more (${n(hidden)} hidden)`,
     collapse: (id: string) => `Collapse ${id}`,
-    expand: (id: string) => `Expand ${id}`
+    expand: (id: string) => `Expand ${id}`,
+    resize: (label: string) => `Width of the ${label} column: drag (or ← →). Double-click: automatic width.`
   },
 
   exportDialog: {
@@ -275,7 +276,7 @@ export const T = {
   columnsMenu: {
     button: (shown: number | null, all: number) => `Columns${shown !== null ? ` (${shown}/${all})` : ''} ▾`,
     label: 'Columns',
-    hint: 'Shown in the table, in this order after ID and Title:',
+    hint: 'Shown in the table, in this order after ID and Title. Drag a column edge in the table header to change its width.',
     builtIn: ' · built in',
     up: (label: string) => `Move ${label} column up`,
     down: (label: string) => `Move ${label} column down`,

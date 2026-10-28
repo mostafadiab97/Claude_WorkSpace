@@ -143,7 +143,11 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
           blockedReason={git.blocked}
           changesOpen={showChanges}
           onToggleChanges={() => {
-            if (!showChanges) git.reload()
+            // Changes and Compare share the right-hand column: opening one closes the other (owner's bug, 0.8.0)
+            if (!showChanges) {
+              git.reload()
+              closeCompare()
+            }
             setShowChanges((v) => !v)
           }}
           onRun={(a) => void git.run(a)}

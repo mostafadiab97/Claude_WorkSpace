@@ -3,9 +3,9 @@
 // (P-04); a second start brings the open window forward instead of starting a second ReqMan (D-02); and the
 // release self-test runs from Settings & diagnostics.
 import { spawn } from 'node:child_process'
-import { copyFileSync, mkdirSync, renameSync, writeFileSync } from 'node:fs'
+import { copyFileSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { gitRepo, launch, root, scenario } from '../harness.mjs'
+import { gitIn, gitRepo, launch, root, scenario } from '../harness.mjs'
 
 await scenario('E2E fixes', async (ctx) => {
   const { repo } = gitRepo('fixes')
@@ -29,6 +29,9 @@ await scenario('E2E fixes', async (ctx) => {
     }
   }
   const renamedId = id6('SYS', n - 1)
+  const editedId = id6('SYS', 3)
+  gitIn(repo, 'add', '-A')
+  gitIn(repo, 'commit', '-q', '-m', 'test data')
   renameSync(join(items, `${renamedId}.md`), join(items, 'RENAMED-BY-HAND.md'))
 
   const t = (ctx.t = await launch({ openPath: repo, prefix: '' }))
@@ -69,6 +72,23 @@ await scenario('E2E fixes', async (ctx) => {
   })
   check(code === 0, `the second ReqMan quits at once (exit ${code})`)
   check((await win.locator('.table__row[data-id]').count()) === 21, 'the first window keeps working')
+
+  console.log('Compare, then Changes (owner\'s bug report on 0.8.0)')
+  const edited = join(items, `${editedId}.md`)
+  writeFileSync(edited, readFileSync(edited, 'utf8').replace('Text of', 'Changed text of'))
+  await win.evaluate(() => window.dispatchEvent(new Event('focus')))
+  await win.getByRole('button', { name: 'Compare', exact: true }).click()
+  const compare = win.getByRole('region', { name: 'Compare' })
+  await compare.getByLabel('What to compare').selectOption('uncommitted')
+  await compare.locator('.compare__row').first().click()
+  await win.locator('.editor__header', { hasText: editedId }).first().waitFor()
+  await win.getByRole('button', { name: /^Changes/ }).click()
+  await win.getByRole('complementary', { name: 'Changes' }).waitFor()
+  check((await compare.count()) === 0, 'opening Changes closes Compare and its detail panel')
+  const panel = await win.getByRole('complementary', { name: 'Changes' }).boundingBox()
+  check(panel !== null && panel.y < 120, 'the Changes panel sits in the right-hand column, not below the table')
+  await t.shot('fixes-compare-then-changes')
+  await win.getByRole('button', { name: /^Changes/ }).click()
 
   console.log('Release self-test')
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()

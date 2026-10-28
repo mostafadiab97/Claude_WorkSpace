@@ -113,7 +113,8 @@ await scenario('E2E fixes', async (ctx) => {
   await view.getByText('No uncommitted changes').waitFor()
   check(!readFileSync(edited, 'utf8').includes('Changed text of'), 'the ↶ arrow takes the text back')
   await view.getByRole('button', { name: 'Close changes' }).click()
-  check(await win.locator('.table__row[data-id]').first().isVisible(), 'closing shows the table again')
+  await win.locator('.table__row[data-id]').first().waitFor({ timeout: 10_000 })
+  check((await view.count()) === 0, 'closing shows the table again')
 
   console.log('Release self-test')
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()

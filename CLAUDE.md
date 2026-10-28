@@ -86,6 +86,8 @@ npm run gen:repo -- <folder> [count]        # uniform generated items (performan
 npm run gen:scenario -- <folder> [count]    # rich scenario data (what Claude_SandBox was made with)
 npm run dist:win          # local Windows installer into dist/ (CI does this for releases)
 npm run check:deps        # library security problems + updates; also runs before every build; warns only, never blocks
+node tools/ci.mjs status  # GitHub runs; wait / failures (annotations) / release (start by hand) / released
+node tools/diagrams.mjs   # rebuild the Archify diagrams in docs/diagrams (Archify cloned next to the repo)
 ```
 
 On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows briefly.
@@ -103,8 +105,9 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
      `gh release create v<version>` with `ReqMan-Setup-<v>.exe`, `.blockmap`, `.zip`, `latest.yml`.
 5. Installed copies auto-update from that feed (electron-updater, GitHub provider in `electron-builder.yml`).
    The repository **must stay public** for auto-update to work without a token (tested: private → 404).
-6. Watch: `gh run list --limit 3`, `gh run watch <id> --exit-status`. Tell the owner the version and the
-   checklist location when it is green.
+6. Watch with `node tools/ci.mjs status | wait | failures | release | released` (REST only — works in the cloud
+   session where `gh run …`/`gh workflow run` are refused). Tell the owner the version and the checklist location
+   when it is green.
 
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.

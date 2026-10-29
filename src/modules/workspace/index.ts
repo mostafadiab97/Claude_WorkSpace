@@ -7,12 +7,17 @@ import type {
   FieldCheck,
   CompareOptions,
   CompareResult,
+  ExportFormat,
   ExportItemsRequest,
   FieldDef,
   FolderCheck,
   GitResult,
   GitState,
   HistoryEntry,
+  ImportPreview,
+  ImportResult,
+  ImportSettings,
+  ImportSource,
   ItemVersionCompare,
   Item,
   ItemDetails,
@@ -24,6 +29,7 @@ import type {
   RepoInfo,
   SaveResult
 } from '../../shared/api'
+import type { CellEdit } from '../import-export'
 import { cacheFileName, createWorkspace, type WorkspaceDeps } from './workspace'
 
 import type { OpResult } from './context'
@@ -74,8 +80,20 @@ export interface WorkspaceService {
   compareOptions(): Promise<CompareOptions>
   compareVersions(from: string, to: string): Promise<CompareResult>
   // Export (M6): builds the file content; the main process asks where to save it
-  exportItems(request: ExportItemsRequest): Promise<{ content: string; count: number }>
-  exportCompare(from: string, to: string, format: 'csv' | 'markdown'): Promise<{ content: string; count: number }>
+  /** "New project from a file": creates `root`, a Git repository and a requirements folder, and opens it. */
+  createProject(root: string): Promise<RepoInfo>
+  /** Adds the remote "origin" and pushes for the first time. */
+  publish(url: string): Promise<GitResult>
+  /** What importing these rows (a whole sheet) would do. */
+  previewImport(sheet: string[][], settings: ImportSettings): Promise<ImportPreview>
+  /** Imports them (uncommitted changes; committed when `commitMessage` is given) and remembers the file. */
+  runImport(sheet: string[][], settings: ImportSettings, source: Omit<ImportSource, 'sheet'>, commitMessage?: string): Promise<ImportResult>
+  /** The file this repository was last imported from on this PC. */
+  importSource(): Promise<ImportSource | null>
+  /** The cells "Update the Excel file" changes in that file (given as its current rows) and the rows it adds. */
+  sourceUpdate(sheet: string[][]): Promise<{ edits: CellEdit[]; append: string[][]; sheet: string; changedItems: number; added: number }>
+  exportItems(request: ExportItemsRequest): Promise<{ content: string | Uint8Array; count: number }>
+  exportCompare(from: string, to: string, format: ExportFormat): Promise<{ content: string | Uint8Array; count: number }>
 }
 
 export { createWorkspace, cacheFileName, type WorkspaceDeps }

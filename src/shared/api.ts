@@ -255,14 +255,103 @@ export interface CompareResult {
 
 // ---------- Export (M6)
 
+export type ExportFormat = 'csv' | 'markdown' | 'xlsx'
+
 export interface ExportItemsRequest {
-  /** "all" = every item in document order (hierarchy); "filtered" = the current search/filter result. */
-  scope: 'all' | 'filtered'
+  /**
+   * "all" = every item in document order (hierarchy); "filtered" = the current search/filter result;
+   * "chosen" = the items in `ids` (and everything below them with `includeBelow`), in document order (M7).
+   */
+  scope: 'all' | 'filtered' | 'chosen'
   /** For "filtered": the table's query (search, filters, sort). */
   query?: Omit<ItemQuery, 'limit' | 'offset' | 'brief'>
+  /** For "chosen". */
+  ids?: string[]
+  includeBelow?: boolean
   /** Column keys in order: id, title, type, parent, level, text, links, linkedFrom, field:<id>. */
   columns: string[]
-  format: 'csv' | 'markdown'
+  format: ExportFormat
+}
+
+// ---------- Excel / CSV import (M7)
+
+/**
+ * What a file column becomes: a built-in part, a field ("field:status"), this item's links of one type
+ * ("link:verifies" — the cell lists target IDs), or links of one type stored in other items ("linkFrom:verifies",
+ * e.g. a "Verified by" column). "links" / "linkedFrom" are ReqMan's own export format ("verifies REQ-…; …").
+ */
+export type ImportTarget =
+  | 'ignore'
+  | 'id'
+  | 'number'
+  | 'title'
+  | 'text'
+  | 'type'
+  | 'parent'
+  | 'level'
+  | 'links'
+  | 'linkedFrom'
+  | `field:${string}`
+  | `link:${string}`
+  | `linkFrom:${string}`
+
+/** A file chosen for import; its contents stay in the main process (the window refers to it by `token`). */
+export interface ImportFile {
+  token: string
+  name: string
+  path: string
+  kind: 'xlsx' | 'csv'
+  sheets: { name: string; rowCount: number; sample: string[][] }[]
+}
+
+export interface ImportSettings {
+  token: string
+  sheet: string
+  /** 0-based row of the column names. */
+  headerRow: number
+  /** One target per column; leave out to let ReqMan guess from the column names. */
+  mapping?: ImportTarget[]
+  /** Type of rows without a (known) type. */
+  defaultType: string
+}
+
+export interface ImportProblem {
+  /** Row number in the file (1-based, as Excel shows it). */
+  row: number
+  column?: string
+  message: string
+  severity: 'error' | 'warning'
+}
+
+export interface ImportPlanRow {
+  row: number
+  action: 'create' | 'update' | 'unchanged' | 'skip'
+  id: string
+  type: string
+  title: string
+}
+
+export interface ImportPreview {
+  headers: string[]
+  mapping: ImportTarget[]
+  counts: { create: number; update: number; unchanged: number; skip: number }
+  /** Links added to existing items that are not rows of the file ("Verified by" columns). */
+  extraLinks: number
+  problems: ImportProblem[]
+  /** The first rows, as they would be imported. */
+  rows: ImportPlanRow[]
+}
+
+export type ImportResult =
+  | { ok: true; created: number; updated: number; unchanged: number; skipped: number; committed: boolean; info: RepoInfo }
+  | { ok: false; message: string }
+
+/** The file the repository was last imported from on this PC ("Update the Excel file"). */
+export interface ImportSource {
+  path: string
+  name: string
+  kind: 'xlsx' | 'csv'
+  sheet: string
 }
 
 export type ExportResult = { ok: true; path: string; count: number } | { ok: false; canceled: true } | { ok: false; canceled?: false; message: string }
@@ -382,8 +471,23 @@ export interface ReqManApi {
   /** Requirement-level differences between two versions; `to` may be "WORKING". */
   compareVersions(from: string, to: string): Promise<CompareResult>
   // --- Export (M6): each asks where to save, then writes the file
+  // --- Excel / CSV import (M7)
+  /** Asks for an .xlsx or .csv file and reads it; null when the user cancels. */
+  chooseImportFile(): Promise<ImportFile | null>
+  /** What importing the chosen sheet would do (nothing is written). */
+  previewImport(settings: ImportSettings): Promise<ImportPreview>
+  /** Imports it as uncommitted changes; with `commitMessage` (new project) commits right away. */
+  runImport(settings: ImportSettings, commitMessage?: string): Promise<ImportResult>
+  /** Asks for a file and an empty folder, creates a Git repository with a requirements folder there and opens it. */
+  newProjectFromFile(): Promise<{ ok: true; info: RepoInfo; file: ImportFile } | { ok: false; canceled: true } | { ok: false; canceled?: false; message: string }>
+  /** The file this repository was imported from on this PC, if any ("Update the Excel file"). */
+  getImportSource(): Promise<ImportSource | null>
+  /** Writes the current requirements back into that file (only changed cells, new items as new rows), or into a copy. */
+  updateSourceFile(mode: 'original' | 'copy'): Promise<ExportResult>
+  /** Connects the repository to an empty GitHub repository ("origin") and pushes for the first time. */
+  publishToRemote(url: string): Promise<GitResult>
   exportItems(request: ExportItemsRequest): Promise<ExportResult>
-  exportCompare(from: string, to: string, format: 'csv' | 'markdown'): Promise<ExportResult>
+  exportCompare(from: string, to: string, format: ExportFormat): Promise<ExportResult>
   /** Opens Explorer with the file selected. */
   showInFolder(path: string): Promise<void>
   /** Moves an item one place up or down among its siblings. */
@@ -471,6 +575,13 @@ export const Channels = {
   compareItemVersion: 'git:compareItemVersion',
   getCompareOptions: 'compare:options',
   compareVersions: 'compare:versions',
+  chooseImportFile: 'import:choose',
+  previewImport: 'import:preview',
+  runImport: 'import:run',
+  newProjectFromFile: 'import:newProject',
+  getImportSource: 'import:source',
+  updateSourceFile: 'import:updateSource',
+  publishToRemote: 'git:publish',
   exportItems: 'export:items',
   exportCompare: 'export:compare',
   showInFolder: 'app:showInFolder'

@@ -1,5 +1,6 @@
 import type { FieldValue, IndexedItem, LinkRef, Schema } from '../../shared/domain'
 import { toCsv } from './csv'
+import type { SheetData } from './xlsx'
 
 /** One item ready for export: the indexed item, its depth in the hierarchy and the links other items have to it. */
 export interface ExportItem {
@@ -54,10 +55,35 @@ function cell(schema: Schema, e: ExportItem, key: ExportColumn): string {
   }
 }
 
+/** The export as a table: column names and one row of text cells per item. */
+export function itemsToTable(schema: Schema, items: ExportItem[], columns: ExportColumn[]): { header: string[]; rows: string[][]; keys: string[] } {
+  const keys = columns.filter((c) => header(schema, c) !== null)
+  return { header: keys.map((c) => header(schema, c) as string), rows: items.map((e) => keys.map((c) => cell(schema, e, c))), keys }
+}
+
 /** Items as a CSV file Excel opens directly (comma separator, UTF-8 with BOM). */
 export function itemsToCsv(schema: Schema, items: ExportItem[], columns: ExportColumn[]): string {
-  const cols = columns.filter((c) => header(schema, c) !== null)
-  return toCsv([cols.map((c) => header(schema, c) as string), ...items.map((e) => cols.map((c) => cell(schema, e, c)))])
+  const t = itemsToTable(schema, items, columns)
+  return toCsv([t.header, ...t.rows])
+}
+
+/**
+ * Items as an Excel workbook (M7): the same columns as the CSV; the title is indented by level and rows are grouped
+ * by the hierarchy (Excel's +/− buttons on the left), long texts wrap.
+ */
+export function itemsToSheet(schema: Schema, items: ExportItem[], columns: ExportColumn[], name = 'Requirements'): SheetData {
+  const t = itemsToTable(schema, items, columns)
+  const titleCol = t.keys.indexOf('title')
+  const wrap = ['text', 'links', 'linkedFrom'].map((k) => t.keys.indexOf(k)).filter((i) => i >= 0)
+  return {
+    name,
+    header: t.header,
+    rows: t.rows,
+    levels: items.map((e) => e.depth),
+    ...(titleCol >= 0 ? { indentColumn: titleCol } : {}),
+    wrapColumns: wrap,
+    widths: t.keys.map((k) => (k === 'text' ? 70 : k === 'title' ? 45 : k === 'id' ? 14 : k === 'number' ? 10 : k === 'links' || k === 'linkedFrom' ? 30 : 16))
+  }
 }
 
 /**

@@ -48,6 +48,21 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
     }
   }
 
+  /** "Publish to GitHub": add the remote and push for the first time. */
+  const publish = async (url: string): Promise<void> => {
+    setBusy(T.git.pushing)
+    setNotice(null)
+    try {
+      const r = await window.reqman.publishToRemote(url)
+      setState(r.state)
+      setNotice({ ok: r.ok, message: r.message })
+    } catch (e) {
+      setNotice({ ok: false, message: errorMessage(e) })
+    } finally {
+      setBusy(null)
+    }
+  }
+
   /** The Push button: offers to pull first when the branch is on the remote already (first push: nothing to pull). */
   const requestPush = (): void => {
     if (state?.upstream) {
@@ -80,6 +95,7 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
     run,
     onPanelResult,
     requestPush,
+    publish: (url: string) => void publish(url),
     pushOffer,
     answerPush: (c: 'pull-first' | 'push' | 'cancel') => void answerPush(c)
   }

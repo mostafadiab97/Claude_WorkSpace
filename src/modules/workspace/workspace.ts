@@ -3,8 +3,9 @@
 //   gitOps (M4) and compare (M5).
 // Every operation that writes files, changes the index or runs Git goes through one queue (review D-03).
 import { createHash } from 'node:crypto'
+import { mkdir } from 'node:fs/promises'
 import { basename, relative, resolve } from 'node:path'
-import type { FolderCheck, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
+import type { FolderCheck, GitResult, ImportSettings, ImportSource, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
 import type { GitAdapter } from '../git-adapter'
 import type { IndexCache } from '../index-cache'
 import type { Logger } from '../logger'
@@ -14,6 +15,7 @@ import { queryAll, syncInfo, type Session, type WorkspaceContext } from './conte
 import { createExportOps } from './exporting'
 import { createGitOps } from './gitOps'
 import type { WorkspaceService } from './index'
+import { createImportOps } from './importing'
 import { createItemOps } from './itemOps'
 import { createLinkOps } from './links'
 import { createSerialQueue } from './queue'
@@ -100,6 +102,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   const fields = createSchemaFieldOps(ctx, () => info())
   const compare = createCompare(git)
   const revert = createRevertOps(ctx, git, items.saveItem)
+  const importing = createImportOps(ctx, structure, { userDir: deps.userDir, cacheName: cacheFileName, info: () => info() })
   const exporting = createExportOps(ctx, structure, compare)
   const gitOps = createGitOps({
     git,
@@ -189,6 +192,16 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       return { root, isGitRepository: gitRoot !== null, state: await store.inspect(root) }
     },
 
+    /** "New project from a file" (M7): a new Git repository with a requirements folder in an empty folder. */
+    createProject: q(async (root: string) => {
+      await mkdir(root, { recursive: true })
+      await git.init(root)
+      return startSession(root, true, async () => {
+        await store.initialize(root)
+        log.info(`Created a new project in ${root}`)
+      })
+    }),
+
     initialize: q(async (root: string) => {
       const isGit = (await git.findRepositoryRoot(root)) !== null
       return startSession(root, isGit, async () => {
@@ -246,6 +259,23 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     undoLastCommit: q(() => gitOps.undoLastCommit(need())),
     itemHistory: (id) => gitOps.history(need(), id),
     compareItemVersion: (id, hash) => gitOps.compare(need(), id, hash),
+
+    /** "Publish to GitHub" (M7): the address of an empty repository becomes "origin", then the first push. */
+    publish: q(async (url: string): Promise<GitResult> => {
+      const s = need()
+      const u = url.trim()
+      if (!/^(https:\/\/|ssh:\/\/|file:\/\/|git@)[^\s]+$/.test(u)) return { ok: false, message: T.importMsg.badUrl, state: await gitOps.state(s) }
+      if ((await git.remotes(s.repo.root)).length > 0) return { ok: false, message: T.importMsg.hasRemote, state: await gitOps.state(s) }
+      await git.addRemote(s.repo.root, 'origin', u)
+      gitOps.invalidate()
+      log.info(`Added remote origin ${u}`)
+      return gitOps.push(s)
+    }),
+
+    previewImport: (sheet, settings) => importing.preview(sheet, settings),
+    runImport: q((sheet: string[][], settings: ImportSettings, source: Omit<ImportSource, 'sheet'>, commitMessage?: string) => importing.run(sheet, settings, source, commitMessage)),
+    importSource: () => importing.source(),
+    sourceUpdate: (sheet) => importing.sourceUpdate(sheet),
 
     compareOptions: () => compare.options(need()),
     compareVersions: (from, to) => compare.compare(need(), from, to),

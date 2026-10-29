@@ -1,6 +1,7 @@
 import type { CompareResult } from '../../shared/api'
 import type { Schema } from '../../shared/domain'
 import { toCsv } from './csv'
+import type { SheetData } from './xlsx'
 
 const KIND: Record<string, string> = { added: 'Added', modified: 'Changed', moved: 'Moved', deleted: 'Deleted' }
 
@@ -12,6 +13,16 @@ export function numberLabel(e: { numberBefore?: string; numberAfter?: string }):
 
 /** One row per changed item, plus one per changed field — easy to filter in Excel. */
 export function compareToCsv(schema: Schema, r: CompareResult): string {
+  return toCsv(compareRows(schema, r))
+}
+
+/** The same rows as an Excel sheet (header + rows). */
+export function compareToSheet(schema: Schema, r: CompareResult): SheetData {
+  const [header, ...rows] = compareRows(schema, r)
+  return { name: 'Changes', header: header as string[], rows, wrapColumns: [6, 7], widths: [14, 10, 40, 18, 10, 22, 50, 50] }
+}
+
+function compareRows(schema: Schema, r: CompareResult): string[][] {
   const typeName = (id: string): string => schema.itemTypes.find((t) => t.id === id)?.name ?? id
   const linkName = (id: string): string => schema.linkTypes.find((l) => l.id === id)?.name ?? id
   const rows: string[][] = [['ID', 'No.', 'Title', 'Type', 'Change', 'What', 'Before', 'After']]
@@ -23,7 +34,7 @@ export function compareToCsv(schema: Schema, r: CompareResult): string {
     for (const l of e.diff.linksAdded) rows.push([...head, 'Link added', '', `${linkName(l.type)} ${l.target}`])
     for (const l of e.diff.linksRemoved) rows.push([...head, 'Link removed', `${linkName(l.type)} ${l.target}`, ''])
   }
-  return toCsv(rows)
+  return rows
 }
 
 /** The comparison as a Markdown report (for sharing with AI tools or in a pull request description). */

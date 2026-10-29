@@ -40,11 +40,11 @@ export interface AtomicWriteOptions {
  * over the target (retried while Windows holds a lock). If the final rename still fails, the temporary file
  * is KEPT so nothing typed is lost, and the error message names it.
  */
-export async function writeFileAtomic(file: string, content: string, options: AtomicWriteOptions = {}): Promise<void> {
+export async function writeFileAtomic(file: string, content: string | Uint8Array, options: AtomicWriteOptions = {}): Promise<void> {
   if (options.mkdir) await mkdir(dirname(file), { recursive: true })
   const tmp = `${file}.${randomBytes(4).toString('hex')}.tmp`
   try {
-    await writeFile(tmp, content, 'utf8')
+    await (typeof content === 'string' ? writeFile(tmp, content, 'utf8') : writeFile(tmp, content))
   } catch (e) {
     await rm(tmp, { force: true }).catch(() => {})
     throw e

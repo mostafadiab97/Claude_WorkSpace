@@ -2,11 +2,12 @@
 // `handlers` must name every invoke call of ReqManApi with the matching result type — the compiler reports a
 // missing or wrong one. Every input is checked by src/main/validate.ts before it reaches a module (X-01).
 import { app, BrowserWindow, dialog, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
-import { readFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { Channels, type AppInfo, type ExportResult, type InvokeMethod, type ReqManApi } from '../shared/api'
+import { Channels, type AppInfo, type ExportFormat, type ExportResult, type InvokeMethod, type ReqManApi } from '../shared/api'
 import { runDataBenchmark } from '../modules/sample-data'
 import { writeFileAtomic } from '../modules/safe-files'
+import { createImportFiles, loadImportFile, writeSourceUpdate } from './importFiles'
 import type { Paths, Services } from './composition'
 import * as v from './validate'
 import { T } from '../shared/text'
@@ -38,16 +39,13 @@ export function registerIpc(services: Services, paths: Paths): void {
       return app.getPath('documents')
     }
   }
-  const saveExport = async (e: IpcMainInvokeEvent, name: string, format: 'csv' | 'markdown', build: () => Promise<{ content: string; count: number }>): Promise<ExportResult> => {
+  const saveExport = async (e: IpcMainInvokeEvent, name: string, format: ExportFormat, build: () => Promise<{ content: string | Uint8Array; count: number }>): Promise<ExportResult> => {
     try {
       const { content, count } = await build()
       const win = BrowserWindow.fromWebContents(e.sender)
-      const ext = format === 'markdown' ? 'md' : 'csv'
-      const opts = {
-        title: T.wsMsg.exportTitle,
-        defaultPath: join(await lastFolder(), `${name}.${ext}`),
-        filters: format === 'markdown' ? [{ name: 'Markdown', extensions: ['md'] }] : [{ name: 'CSV (Excel)', extensions: ['csv'] }]
-      }
+      const ext = format === 'markdown' ? 'md' : format
+      const filter = { markdown: { name: 'Markdown', extensions: ['md'] }, csv: { name: 'CSV (Excel)', extensions: ['csv'] }, xlsx: { name: 'Excel workbook', extensions: ['xlsx'] } }[format]
+      const opts = { title: T.wsMsg.exportTitle, defaultPath: join(await lastFolder(), `${name}.${ext}`), filters: [filter] }
       const r = win ? await dialog.showSaveDialog(win, opts) : await dialog.showSaveDialog(opts)
       if (r.canceled || !r.filePath) return { ok: false, canceled: true }
       await writeFileAtomic(r.filePath, content)
@@ -61,6 +59,28 @@ export function registerIpc(services: Services, paths: Paths): void {
     }
   }
   const today = (): string => new Date().toISOString().slice(0, 10)
+
+  // ---------- import (M7): the chosen files stay here; the window refers to them by token
+  const importFiles = createImportFiles()
+  const openDialog = async (e: IpcMainInvokeEvent, opts: Electron.OpenDialogOptions): Promise<string | null> => {
+    const win = BrowserWindow.fromWebContents(e.sender)
+    const r = win ? await dialog.showOpenDialog(win, opts) : await dialog.showOpenDialog(opts)
+    return r.canceled ? null : (r.filePaths[0] ?? null)
+  }
+  const chooseFile = async (e: IpcMainInvokeEvent) => {
+    const path = await openDialog(e, { title: T.importDialog.chooseTitle, properties: ['openFile'], filters: [{ name: T.importDialog.fileFilter, extensions: ['xlsx', 'xlsm', 'csv', 'txt'] }] })
+    if (!path) return null
+    const f = await loadImportFile(path)
+    log.info(`Import file chosen: ${path} (${f.sheets.length} sheet(s))`)
+    return importFiles.add(f)
+  }
+  const sheetOf = (token: string, sheet: string) => {
+    const f = importFiles.get(token)
+    if (!f) throw new Error(T.importMsg.fileGone)
+    const s = f.sheets.find((x) => x.name === sheet)
+    if (!s) throw new Error(T.importMsg.noSheet(sheet))
+    return { f, rows: s.rows }
+  }
 
   let selfTestRunning = false
   const exclusiveTest = async <T>(name: string, fn: () => Promise<T>): Promise<T> => {
@@ -190,13 +210,71 @@ export function registerIpc(services: Services, paths: Paths): void {
     getCompareOptions: () => ws.compareOptions(),
     compareVersions: (_e, from, to) => ws.compareVersions(v.str(from, 'from'), v.str(to, 'to')),
 
+    // ---------- import (M7)
+    chooseImportFile: (e) => chooseFile(e),
+    previewImport: (_e, settings) => {
+      const s = v.importSettings(settings)
+      return ws.previewImport(sheetOf(s.token, s.sheet).rows, s)
+    },
+    runImport: (_e, settings, message) => {
+      const s = v.importSettings(settings)
+      const { f, rows } = sheetOf(s.token, s.sheet)
+      const commit = v.text(message, 'commit message', 10_000)
+      return ws.runImport(rows, s, { path: f.path, name: f.name, kind: f.kind }, commit || undefined)
+    },
+    newProjectFromFile: async (e) => {
+      try {
+        const file = await chooseFile(e)
+        if (!file) return { ok: false, canceled: true }
+        const folder = await openDialog(e, { title: T.importDialog.folderTitle, properties: ['openDirectory', 'createDirectory', 'promptToCreate'] })
+        if (!folder) return { ok: false, canceled: true }
+        const inside = await readdir(folder).catch(() => [] as string[])
+        if (inside.length > 0) return { ok: false, message: T.importMsg.notEmpty }
+        return { ok: true, info: await ws.createProject(folder), file }
+      } catch (err) {
+        log.error('New project from a file failed', err)
+        return { ok: false, message: (err as Error).message }
+      }
+    },
+    getImportSource: () => ws.importSource(),
+    updateSourceFile: async (e, mode) => {
+      const m = v.oneOf(mode, ['original', 'copy'], 'mode')
+      try {
+        const src = await ws.importSource()
+        if (!src) return { ok: false, message: T.importMsg.noSource }
+        const f = await loadImportFile(src.path).catch(() => {
+          throw new Error(T.importMsg.sourceMissing(src.path))
+        })
+        const sheet = f.sheets.find((x) => x.name === src.sheet) ?? (f.kind === 'csv' ? f.sheets[0] : undefined)
+        if (!sheet) return { ok: false, message: T.importMsg.noSheet(src.sheet) }
+        const u = await ws.sourceUpdate(sheet.rows)
+        let target = src.path
+        if (m === 'copy') {
+          const win = BrowserWindow.fromWebContents(e.sender)
+          const ext = f.kind === 'xlsx' ? 'xlsx' : 'csv'
+          const opts = { title: T.importDialog.copyTitle, defaultPath: src.path.replace(/(\.[^.\\/]+)$/, ` (updated)$1`), filters: [{ name: T.importDialog.fileFilter, extensions: [ext] }] }
+          const r = win ? await dialog.showSaveDialog(win, opts) : await dialog.showSaveDialog(opts)
+          if (r.canceled || !r.filePath) return { ok: false, canceled: true }
+          target = r.filePath
+        }
+        await writeSourceUpdate(f, u.sheet, u.edits, u.append, target)
+        log.info(`Updated ${target}: ${u.edits.length} cell(s), ${u.added} new row(s)`)
+        return { ok: true, path: target, count: u.changedItems + u.added }
+      } catch (err) {
+        const message = err instanceof Error && /EBUSY|EPERM/.test(err.message) ? T.wsMsg.exportBusy : (err as Error).message
+        log.error('Updating the source file failed', err)
+        return { ok: false, message }
+      }
+    },
+    publishToRemote: (_e, url) => ws.publish(v.str(url, 'address', 2000)),
+
     // ---------- export
     exportItems: (e, request) => {
       const req = v.exportRequest(request)
       return saveExport(e, `requirements-${today()}`, req.format, () => ws.exportItems(req))
     },
     exportCompare: (e, from, to, format) => {
-      const f = v.oneOf(format, ['csv', 'markdown'], 'export format')
+      const f = v.oneOf(format, ['csv', 'markdown', 'xlsx'], 'export format')
       return saveExport(e, `requirement-changes-${today()}`, f, () => ws.exportCompare(v.str(from, 'from'), v.str(to, 'to'), f))
     }
   }

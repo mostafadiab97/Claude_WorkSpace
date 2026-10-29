@@ -501,6 +501,8 @@ await scenario('E2E journey', async (ctx) => {
   await saveAs('all.csv')
   await win.getByRole('button', { name: 'Export…' }).click()
   const exportDialog = win.getByRole('dialog', { name: 'Export' })
+  check(await exportDialog.getByLabel(/^Excel workbook/).isChecked(), 'Excel is the default format (0.11.0)')
+  await exportDialog.getByLabel(/^CSV/).check()
   await exportDialog.getByRole('button', { name: 'Export…' }).click()
   await win.locator('.table-notice--ok', { hasText: 'Exported 5 items' }).waitFor()
   const allCsv = readFileSync(join(exportDir, 'all.csv'), 'utf8')

@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import type { FolderCheck, GitInfo, RecentRepository, RepoInfo } from '../../../shared/api'
+import type { FolderCheck, GitInfo, RecentRepository, RepoInfo, ImportFile } from '../../../shared/api'
 import { errorMessage } from '../lib/hooks'
 import { T } from '../../../shared/text'
 
 type Pending = { kind: 'idle' } | { kind: 'busy'; label: string } | { kind: 'confirm-init'; check: FolderCheck } | { kind: 'error'; message: string }
 
 /** Opening screen: open or create a requirements repository, or reopen a recent one. */
-export function StartScreen({ brand, git, onOpened }: { brand: string; git: GitInfo | null; onOpened: (info: RepoInfo) => void }) {
+export function StartScreen({ brand, git, onOpened }: { brand: string; git: GitInfo | null; onOpened: (info: RepoInfo, importFile?: ImportFile) => void }) {
   const [recent, setRecent] = useState<RecentRepository[]>([])
   const [pending, setPending] = useState<Pending>({ kind: 'idle' })
 
@@ -41,6 +41,18 @@ export function StartScreen({ brand, git, onOpened }: { brand: string; git: GitI
     }
   }
 
+  // M7: choose an Excel/CSV file and an empty folder; ReqMan makes the Git repository and opens the import wizard
+  const fromFile = async (): Promise<void> => {
+    setPending({ kind: 'busy', label: T.start.creating })
+    try {
+      const r = await window.reqman.newProjectFromFile()
+      if (r.ok) onOpened(r.info, r.file)
+      else setPending(r.canceled ? { kind: 'idle' } : { kind: 'error', message: r.message })
+    } catch (e) {
+      setPending({ kind: 'error', message: errorMessage(e) })
+    }
+  }
+
   const forget = async (root: string): Promise<void> => {
     await window.reqman.forgetRecentRepository(root)
     setRecent(await window.reqman.getRecentRepositories())
@@ -53,9 +65,14 @@ export function StartScreen({ brand, git, onOpened }: { brand: string; git: GitI
         <section className="hero">
           <h1>{T.start.headline}</h1>
           <p className="muted">{T.start.intro(brand)}</p>
-          <button type="button" className="btn btn--primary" onClick={() => void choose()} disabled={busy}>
-            {T.start.open}
-          </button>
+          <span className="actions">
+            <button type="button" className="btn btn--primary" onClick={() => void choose()} disabled={busy}>
+              {T.start.open}
+            </button>
+            <button type="button" className="btn" onClick={() => void fromFile()} disabled={busy} title={T.start.fromFileTooltip}>
+              {T.start.fromFile}
+            </button>
+          </span>
           {git && !git.installed && <p className="hint">{T.start.noGit}</p>}
         </section>
 

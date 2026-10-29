@@ -28,8 +28,11 @@ export function GitBar(props: {
   /** Push was clicked: "pull first?" is shown until answered (owner's decision O-06: no automatic pulls). */
   pushOffer: boolean
   onPushOffer: (choice: 'pull-first' | 'push' | 'cancel') => void
+  /** "Publish to GitHub" (M7): connect a repository without a remote to an empty GitHub repository. */
+  onPublish: (url: string) => void
 }) {
   const { state, busy, blockedReason, notice } = props
+  const [publishing, setPublishing] = useState<string | null>(null)
   if (!state) return null
   if (!state.available) {
     return (
@@ -51,6 +54,11 @@ export function GitBar(props: {
           </span>
         )}
         {!state.hasRemote && <span className="muted-inline">{T.git.noRemote}</span>}
+        {!state.hasRemote && publishing === null && (
+          <button type="button" className="link-btn" disabled={busy !== null} onClick={() => setPublishing('')} title={T.git.publishTooltip}>
+            {T.git.publish}
+          </button>
+        )}
         {state.warning && <span className="statusbar__warn" title={state.warning}>{T.git.oldGit}</span>}
         {state.mergeInProgress && <span className="statusbar__warn">{T.git.mergeOutside}</span>}
         <span className="toolbar__spacer" />
@@ -77,6 +85,26 @@ export function GitBar(props: {
           {T.git.push(state.ahead)}
         </button>
       </div>
+      {publishing !== null && !state.hasRemote && (
+        <form
+          className="gitbar__notice gitbar__publish"
+          aria-label={T.git.publishLabel}
+          onSubmit={(e) => {
+            e.preventDefault()
+            props.onPublish(publishing)
+            setPublishing(null)
+          }}
+        >
+          <span className="gitbar__notice-text">{T.git.publishIntro}</span>
+          <input className="input gitbar__url" value={publishing} placeholder={T.git.publishPlaceholder} aria-label={T.git.publishAddress} onChange={(e) => setPublishing(e.target.value)} autoFocus />
+          <button type="submit" className="btn btn--small btn--primary" disabled={!publishing.trim()}>
+            {T.git.publishRun}
+          </button>
+          <button type="button" className="icon-btn icon-btn--small" aria-label={T.common.cancel} onClick={() => setPublishing(null)}>
+            ✕
+          </button>
+        </form>
+      )}
       {props.pushOffer && (
         <div className="gitbar__notice gitbar__offer" role="alertdialog" aria-label={T.git.pullFirstLabel}>
           <span className="gitbar__notice-text">{T.git.pullFirstPush}</span>

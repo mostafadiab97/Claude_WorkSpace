@@ -41,8 +41,15 @@ export function ItemTable(props: {
   emptyText: string
   /** The user dragged a column edge: new width in px, or null = automatic again. */
   onResize?: (key: string, width: number | null) => void
+  /** Items chosen with Ctrl/Shift+click (M7: export of chosen items). */
+  chosen?: ReadonlySet<string>
+  /** Ctrl+click toggles one item; Shift+click chooses the rows from the last clicked one; a plain click clears. */
+  onChoose?: (ids: string[], how: 'toggle' | 'range' | 'clear') => void
+  /** Right-click on a row (the context menu). */
+  onRowMenu?: (id: string, x: number, y: number) => void
 }) {
-  const { schema, prefs, mode, query, dataVersion, selectedId, onSelect, onSort, onTotal, onMove, controlsRef, revealNonce, emptyText, onResize } = props
+  const { schema, prefs, mode, query, dataVersion, selectedId, onSelect, onSort, onTotal, onMove, controlsRef, revealNonce, emptyText, onResize, chosen, onChoose, onRowMenu } = props
+  const anchor = useRef<number | null>(null)
   const saved = useMemo(() => columnsFor(schema, prefs), [schema, prefs])
   // while a column edge is dragged, its width lives here and is saved when the mouse is released
   const [live, setLive] = useState<{ key: string; width: number } | null>(null)
@@ -248,6 +255,7 @@ export function ItemTable(props: {
               }
               const item = row?.item
               const selected = item?.id === selectedId
+              const isChosen = item ? chosen?.has(item.id) === true : false
               const dropClass = drag.drop?.index === v.index ? ` table__row--drop-${drag.drop.zone}` : ''
               const open = item ? tree.isOpen(item.id) : false
               return (
@@ -255,11 +263,11 @@ export function ItemTable(props: {
                   key={v.key}
                   role="row"
                   aria-rowindex={v.index + 1}
-                  aria-selected={selected}
+                  aria-selected={selected || isChosen}
                   aria-level={isTree && row ? row.depth + 1 : undefined}
                   aria-expanded={isTree && item && item.childCount > 0 ? open : undefined}
                   data-id={item?.id}
-                  className={`table__row${selected ? ' table__row--selected' : ''}${dropClass}`}
+                  className={`table__row${selected ? ' table__row--selected' : ''}${isChosen ? ' table__row--chosen' : ''}${dropClass}`}
                   style={style}
                   draggable={Boolean(item)}
                   onDragStart={(e) => item && drag.start(e, item.id)}
@@ -267,7 +275,32 @@ export function ItemTable(props: {
                   onDragOver={(e) => row?.kind === 'item' && drag.over(e, v.index, row)}
                   onDragLeave={() => drag.leave(v.index)}
                   onDrop={(e) => row?.kind === 'item' && drag.dropOn(e, row)}
-                  onClick={() => item && onSelect(item.id)}
+                  onClick={(e) => {
+                    if (!item) return
+                    if ((e.ctrlKey || e.metaKey) && onChoose) {
+                      anchor.current = v.index
+                      onChoose([item.id], 'toggle')
+                      return
+                    }
+                    if (e.shiftKey && onChoose && anchor.current !== null) {
+                      const [a, b] = anchor.current < v.index ? [anchor.current, v.index] : [v.index, anchor.current]
+                      const ids: string[] = []
+                      for (let i = a; i <= b; i++) {
+                        const r = rowAt(i)
+                        if (r?.kind === 'item') ids.push(r.item.id)
+                      }
+                      onChoose(ids, 'range')
+                      return
+                    }
+                    anchor.current = v.index
+                    if (chosen && chosen.size > 0) onChoose?.([], 'clear')
+                    onSelect(item.id)
+                  }}
+                  onContextMenu={(e) => {
+                    if (!item || !onRowMenu) return
+                    e.preventDefault()
+                    onRowMenu(item.id, e.clientX, e.clientY)
+                  }}
                 >
                   {row && item
                     ? columns.map((c) =>

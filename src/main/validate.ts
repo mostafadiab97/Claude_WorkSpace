@@ -1,7 +1,7 @@
 // Input checks for every call that arrives from the window (review X-01). The window is ReqMan's own code, so
 // this is about robustness: a wrong value is refused with a clear message instead of reaching a file write.
 // Each function either returns a clean value of the expected type or throws.
-import type { ExportItemsRequest, FieldDef, Item, ItemQuery, Link, LinkDecision, RevertPart, SortKey } from '../shared/api'
+import type { ExportItemsRequest, FieldDef, ImportSettings, ImportTarget, Item, ItemQuery, Link, LinkDecision, RevertPart, SortKey } from '../shared/api'
 
 const MAX = 4096
 /** Order keys (see modules/items/orderKey.ts): base-62 digits, at most 200 characters. */
@@ -56,6 +56,24 @@ export function linkDecisions(v: unknown): LinkDecision[] {
     if (!isObj(d) || typeof d.keep !== 'boolean') return bad('link decision')
     return { source: str(d.source, 'source'), type: str(d.type, 'link type'), target: str(d.target, 'target'), keep: d.keep }
   })
+}
+
+const TARGET = /^(ignore|id|number|title|text|type|parent|level|links|linkedFrom|(field|link|linkFrom):[A-Za-z0-9_-]{1,64})$/
+
+export function importSettings(v: unknown): ImportSettings {
+  if (!isObj(v)) return bad('import settings')
+  const r: ImportSettings = {
+    token: str(v.token, 'file'),
+    sheet: str(v.sheet, 'sheet', 200),
+    headerRow: num(v.headerRow, 'header row', 0, 1_000_000),
+    defaultType: str(v.defaultType, 'type', 100)
+  }
+  if (v.mapping !== undefined && v.mapping !== null) {
+    const m = strings(v.mapping, 'column mapping', 2000)
+    if (!m.every((t) => TARGET.test(t))) return bad('column mapping')
+    r.mapping = m as ImportTarget[]
+  }
+  return r
 }
 
 export function revertPart(v: unknown): RevertPart {
@@ -140,11 +158,15 @@ export function query(v: unknown): ItemQuery {
 
 export function exportRequest(v: unknown): ExportItemsRequest {
   if (!isObj(v)) return bad('export request')
-  const scope = oneOf(v.scope, ['all', 'filtered'], 'export scope')
+  const scope = oneOf(v.scope, ['all', 'filtered', 'chosen'], 'export scope')
   const r: ExportItemsRequest = {
     scope,
     columns: strings(v.columns, 'export columns', 500),
-    format: oneOf(v.format, ['csv', 'markdown'], 'export format')
+    format: oneOf(v.format, ['csv', 'markdown', 'xlsx'], 'export format')
+  }
+  if (scope === 'chosen') {
+    r.ids = strings(v.ids, 'chosen items')
+    r.includeBelow = v.includeBelow === true
   }
   if (v.query !== undefined && v.query !== null) {
     const q = query(v.query)

@@ -60,6 +60,12 @@ export async function launch({ openPath, userData = temp('user'), prefix = '' } 
       return failures
     },
     shot: (name) => win.screenshot({ path: join(outDir, `${name}.png`) }),
+    /** Open dialogs (file / folder pickers): answer with these paths, one per dialog, in order. */
+    openFiles: (...paths) =>
+      app.evaluate(({ dialog }, list) => {
+        const queue = [...list]
+        dialog.showOpenDialog = async () => (queue.length ? { canceled: false, filePaths: [queue.shift()] } : { canceled: true, filePaths: [] })
+      }, paths),
     /** Save dialogs (export): answer with this file. */
     saveAs: (file) =>
       app.evaluate(({ dialog }, f) => {

@@ -13,6 +13,7 @@ export function Toolbar(props: {
   onEditFields: () => void
   canExport: boolean
   onExport: () => void
+  onImport: () => void
   expanding: boolean
   onExpandAll: () => void
   onCollapseAll: () => void
@@ -61,6 +62,9 @@ export function Toolbar(props: {
         </button>
       )}
       <ColumnsMenu schema={schema} prefs={props.prefs} onChange={props.onPrefs} onEditFields={props.onEditFields} />
+      <button type="button" className="btn" onClick={props.onImport} title={T.importDialog.buttonTooltip}>
+        {T.importDialog.button}
+      </button>
       <button type="button" className="btn" onClick={props.onExport} disabled={!props.canExport} title={T.exportDialog.buttonTooltip}>
         {tw.export}
       </button>

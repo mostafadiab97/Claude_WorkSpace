@@ -11,6 +11,7 @@ import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promise
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { ReleaseSelfTestResult, ReleaseSelfTestStep } from '../../shared/api'
+import { readXlsx, writeXlsx } from '../import-export'
 import type { WorkspaceService } from '../workspace'
 
 export interface SelfTestDeps {
@@ -225,11 +226,16 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       expect(c.diff.rows.some((r) => r.key === 'title'), 'The history comparison does not show the title change.')
     })
 
-    await step('Export CSV and Markdown', async () => {
+    await step('Export CSV, Markdown and Excel', async () => {
+      const text = (c: string | Uint8Array): string => (typeof c === 'string' ? c : '')
       const csv = await W().exportItems({ scope: 'all', columns: ['id', 'title', 'level', 'parent', 'text', 'links'], format: 'csv' })
-      expect(csv.count === 3 && csv.content.includes(id('req')), 'The CSV export is incomplete.')
+      expect(csv.count === 3 && text(csv.content).includes(id('req')), 'The CSV export is incomplete.')
       const md = await W().exportItems({ scope: 'all', columns: ['id', 'title', 'text'], format: 'markdown' })
-      expect(md.content.includes('Temperature control'), 'The Markdown export is incomplete.')
+      expect(text(md.content).includes('Temperature control'), 'The Markdown export is incomplete.')
+      const xlsx = await W().exportItems({ scope: 'chosen', ids: [id('heading')], includeBelow: true, columns: ['id', 'title'], format: 'xlsx' })
+      expect(typeof xlsx.content !== 'string', 'The Excel export is not a workbook.')
+      const [sheet] = await readXlsx(xlsx.content as Uint8Array)
+      expect(sheet && sheet.rows.length === 1 + xlsx.count && sheet.rows.some((r) => r[0] === id('req')), 'The Excel export of a chosen chapter does not hold its requirement.')
     })
 
     await step('A file renamed by hand is found and fixed', async () => {
@@ -251,6 +257,25 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       expect(r.ok, r.ok ? '' : r.message)
       const t = await W().getItem(id('test'))
       expect(t && t.item.links.length === 0, 'The link to the deleted item was not removed.')
+    })
+
+    await step('Import from Excel', async () => {
+      const file = await writeXlsx([
+        { name: 'Sheet1', header: ['No.', 'Title', 'Type', 'Verified by'], rows: [['1', 'Imported chapter', 'Heading / Information', ''], ['1.1', 'Imported requirement', 'System Requirement', 'T-1'], ['', 'Imported test', 'Test Case', '']] }
+      ])
+      const [sheet] = await readXlsx(file)
+      const rows = (sheet?.rows ?? []).map((r, i) => (i === 3 ? ['', 'Imported test', 'Test Case', '', 'T-1'] : r))
+      rows[0] = ['No.', 'Title', 'Type', 'Verified by', 'ID']
+      const settings = { token: 'self-test', sheet: 'Sheet1', headerRow: 0, defaultType: 'system-requirement' }
+      const p = await W().previewImport(rows, settings)
+      expect(p.counts.create === 3 && p.mapping.join(',') === 'number,title,type,linkFrom:verifies,id', `The import preview is wrong: ${JSON.stringify(p.counts)} ${p.mapping.join(',')}.`)
+      const r = await W().runImport(rows, settings, { path: join(base, 'self-test.xlsx'), name: 'self-test.xlsx', kind: 'xlsx' })
+      expect(r.ok && r.created === 3, r.ok ? 'Not all rows were imported.' : r.message)
+      const req = W().query({ text: 'Imported requirement' }).items[0]
+      const chapter = W().query({ text: 'Imported chapter' }).items[0]
+      expect(req && chapter && req.parent === chapter.id && req.number?.endsWith('.1'), 'The outline numbers did not become the hierarchy.')
+      const test = W().query({ text: 'Imported test' }).items[0]
+      expect(test?.links.some((l) => l.type === 'verifies' && l.target === req?.id), 'The "Verified by" column did not become a link.')
     })
   } finally {
     ;(ws as WorkspaceService | null)?.close()

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { AppInfo, GitInfo, LoadedTheme, RepoInfo, UpdateStatus } from '../../../shared/api'
+import type { AppInfo, GitInfo, LoadedTheme, RepoInfo, UpdateStatus, ImportFile } from '../../../shared/api'
 import { applyTheme, loadSavedMode, saveMode, type ThemeMode } from '../theme/applyTheme'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import { ThemeToggle } from '../components/ThemeToggle'
@@ -16,6 +16,8 @@ export function App() {
   const [git, setGit] = useState<GitInfo | null>(null)
   const [update, setUpdate] = useState<UpdateStatus | null>(null)
   const [repo, setRepo] = useState<RepoInfo | null>(null)
+  /** "New project from a file": the file the new workspace opens the import wizard with. */
+  const [pendingImport, setPendingImport] = useState<ImportFile | null>(null)
   const [showSettings, setShowSettings] = useState(false)
 
   useEffect(() => {
@@ -90,7 +92,7 @@ export function App() {
         {repo && (
           <div className="main__view" hidden={showSettings}>
             <ErrorBoundary area={T.app.workspaceArea} key={repo.root}>
-              <WorkspaceScreen info={repo} onInfo={onInfo} />
+              <WorkspaceScreen info={repo} onInfo={onInfo} importFile={pendingImport} />
             </ErrorBoundary>
           </div>
         )}
@@ -99,7 +101,16 @@ export function App() {
             <SettingsScreen theme={theme} git={git} update={update} appInfo={appInfo} onBack={() => setShowSettings(false)} />
           </ErrorBoundary>
         )}
-        {!repo && !showSettings && <StartScreen brand={brand} git={git} onOpened={setRepo} />}
+        {!repo && !showSettings && (
+          <StartScreen
+            brand={brand}
+            git={git}
+            onOpened={(info, file) => {
+              setPendingImport(file ?? null)
+              setRepo(info)
+            }}
+          />
+        )}
       </main>
     </div>
   )

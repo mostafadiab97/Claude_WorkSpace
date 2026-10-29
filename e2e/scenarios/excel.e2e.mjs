@@ -1,0 +1,121 @@
+// 0.11.0 (M7) in the window: a new project from an Excel file (wizard: file → columns → check → import and commit),
+// choosing items with Ctrl+click and exporting them with everything below (right-click), the Excel export, writing
+// a change back into the file it came from, importing it again, and publishing to an empty remote.
+import { copyFileSync, existsSync, readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
+import ExcelJS from 'exceljs'
+import { gitIn, launch, root, scenario, temp } from '../harness.mjs'
+
+const readSheet = async (file) => {
+  const wb = new ExcelJS.Workbook()
+  await wb.xlsx.readFile(file)
+  const ws = wb.worksheets[0]
+  const rows = []
+  ws.eachRow((r) => rows.push(r.values.slice(1).map((v) => (v === null || v === undefined ? '' : typeof v === 'object' && 'richText' in v ? v.richText.map((x) => x.text).join('') : String(v)))))
+  return rows
+}
+
+await scenario('E2E excel', async (ctx) => {
+  const work = temp('excel')
+  const source = join(work, 'customer-requirements.xlsx')
+  copyFileSync(join(root, 'samples', 'sample-requirements.xlsx'), source)
+  const project = join(temp('excel-project'), 'thermostat')
+  const t = (ctx.t = await launch({ prefix: '' }))
+  const { win, check } = t
+
+  console.log('New project from a file — the import wizard')
+  await t.openFiles(source, project)
+  await win.getByRole('button', { name: 'New project from a file…' }).click()
+  const wizard = win.getByRole('dialog', { name: 'Import from Excel or CSV' })
+  await wizard.waitFor()
+  check((await wizard.locator('.import__file').textContent()) === 'customer-requirements.xlsx', 'the wizard opens with the chosen file')
+  check((await wizard.locator('.import__row--header').textContent()).includes('Verified By'), 'row 1 is taken as the column names')
+  check(existsSync(join(project, '.git')) && existsSync(join(project, 'requirements')), 'the folder, the Git repository and the requirements folder were created')
+  gitIn(project, 'config', 'user.name', 'Alice')
+  gitIn(project, 'config', 'user.email', 'alice@example.com')
+  await wizard.getByRole('button', { name: 'Next' }).click()
+  await wizard.locator('.import__counts', { hasText: '59 new' }).waitFor()
+  check((await wizard.getByLabel('Use column ID as').inputValue()) === 'id', 'ID column recognised')
+  check((await wizard.getByLabel('Use column Verified By as').inputValue()) === 'linkFrom:verifies', '"Verified By" becomes "verified by" links')
+  check((await wizard.getByLabel('Use column Description as').inputValue()) === 'text', 'Description becomes the text')
+  await t.shot('excel-1-columns')
+  await wizard.getByRole('button', { name: 'Next' }).click()
+  await wizard.getByText('No problems found.').waitFor()
+  await t.shot('excel-2-check')
+  await wizard.getByRole('button', { name: 'Import 59 items and commit' }).click()
+  await win.locator('.table-notice--ok', { hasText: 'Imported: 59 new' }).waitFor()
+  check((await win.locator('.table-notice--ok').textContent()).includes('Committed'), 'the import is the first commit')
+  check(gitIn(project, 'log', '--format=%s').trim() === 'Imported from customer-requirements.xlsx', 'commit message names the file')
+  await win.getByRole('button', { name: 'Expand all' }).click()
+  await win.locator('.table__row[aria-level="2"]').first().waitFor()
+  check((await win.locator('.table__row[aria-level="2"]').count()) > 0, 'the "Parent" column became the hierarchy')
+
+  console.log('Choose items and export them with everything below (Excel)')
+  const rows = win.locator('.table__row[data-id]')
+  const top = rows.filter({ hasText: 'Comfortable temperature' }).first()
+  const other = rows.filter({ hasText: 'Remote control' }).first()
+  await top.click({ modifiers: ['Control'] })
+  await other.click({ modifiers: ['Control'] })
+  check((await win.locator('.table__row--chosen').count()) === 2, 'Ctrl+click chooses rows')
+  check((await win.locator('.statusbar').textContent()).includes('2 chosen'), 'the status bar counts them')
+  await other.click({ button: 'right' })
+  const menu = win.getByRole('menu')
+  await menu.getByRole('menuitem', { name: 'Export the 2 chosen items…' }).click()
+  const exp = win.getByRole('dialog', { name: 'Export' })
+  check(await exp.getByRole('radio', { name: 'The 2 chosen items' }).isChecked(), 'the export dialog opens on the chosen items')
+  check(await exp.getByRole('checkbox', { name: 'Include the items below them' }).isChecked(), '"Include the items below" is ticked')
+  check(await exp.getByRole('radio', { name: /^Excel workbook/ }).isChecked(), 'Excel is the default format')
+  const chosenFile = join(work, 'chosen.xlsx')
+  await t.saveAs(chosenFile)
+  await exp.getByRole('button', { name: 'Export…' }).click()
+  await win.locator('.table-notice--ok', { hasText: 'Exported' }).waitFor()
+  const chosenRows = await readSheet(chosenFile)
+  const titles = chosenRows.map((r) => r.join(' '))
+  check(titles[0].startsWith('ID'), 'the workbook has a header row')
+  check(titles.some((x) => x.includes('Comfortable temperature')) && titles.some((x) => x.includes('Remote control')) && chosenRows.length > 3, `both chosen items and the items below them (${chosenRows.length - 1} rows)`)
+  check(chosenRows[1][1] !== '' && /^\d+$/.test(chosenRows[1][1]), 'full outline numbers in the No. column')
+  await win.locator('.statusbar').getByRole('button', { name: 'Clear choice' }).click()
+  // right-click a single item
+  await top.click({ button: 'right' })
+  await win.getByRole('menuitem', { name: 'Export this item and everything below it…' }).click()
+  check(await exp.getByRole('radio', { name: /^The chosen item REQ-/ }).isChecked(), 'right-click → export this item opens with that item')
+  await exp.getByRole('button', { name: 'Cancel' }).click()
+
+  console.log('Update the Excel file with a change made in ReqMan')
+  await other.click()
+  await win.locator('.editor').getByLabel('Status').selectOption('Obsolete')
+  await win.getByRole('button', { name: 'Save', exact: true }).click()
+  await win.getByRole('button', { name: 'Saved ✓' }).waitFor()
+  while ((await win.locator('.table-notice--ok').count()) > 0) await win.locator('.table-notice--ok').first().getByRole('button', { name: 'Dismiss' }).click()
+  await win.getByRole('button', { name: 'Export…' }).click()
+  await exp.getByRole('button', { name: 'Update customer-requirements.xlsx' }).click()
+  await win.locator('.table-notice--ok', { hasText: 'customer-requirements.xlsx' }).waitFor()
+  const updated = await readSheet(source)
+  check(updated.find((r) => r[2] === 'Remote control')?.[4] === 'Obsolete', 'the changed cell is written into the original file')
+  check(readdirSync(work).some((f) => f.startsWith('customer-requirements (before ReqMan update')), 'a backup of the file as it was is kept next to it')
+
+  console.log('Import the same file again: nothing to do')
+  await t.openFiles(source)
+  await win.getByRole('button', { name: 'Import…' }).click()
+  const again = win.getByRole('dialog', { name: 'Import from Excel or CSV' })
+  await again.getByRole('button', { name: 'Choose a file…' }).click()
+  await again.locator('.import__file').waitFor()
+  await again.getByRole('button', { name: 'Next' }).click()
+  await again.locator('.import__counts', { hasText: '59 unchanged' }).waitFor()
+  check(true, 'every row matches its item (the file and ReqMan agree)')
+  await again.getByRole('button', { name: 'Cancel' }).click()
+
+  console.log('Publish to GitHub (an empty remote)')
+  const remote = join(temp('excel-remote'), 'empty.git')
+  gitIn(work, 'init', '-q', '--bare', '-b', 'main', remote)
+  // the Status change above is uncommitted; commit it first so the push has everything
+  gitIn(project, 'commit', '-qam', 'Remote control is obsolete')
+  const gitbar = win.getByRole('region', { name: 'Git' })
+  await gitbar.getByRole('button', { name: 'Publish to GitHub…' }).click()
+  await gitbar.getByLabel('Address of the GitHub repository').fill(pathToFileURL(remote).href)
+  await gitbar.getByRole('button', { name: 'Publish', exact: true }).click()
+  await gitbar.locator('.gitbar__notice', { hasText: 'Pushed' }).waitFor({ timeout: 30_000 })
+  check(gitIn(remote, 'log', '--format=%s', 'main').trim().split('\n').length === 2, 'the remote has both commits')
+  check(readFileSync(join(project, '.git', 'config'), 'utf8').includes('[remote "origin"]'), 'origin is set')
+})

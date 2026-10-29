@@ -130,6 +130,10 @@ export interface GitAdapter {
   treeBlobs(root: string, ref: string, dir: string): Promise<Map<string, string>>
   /** Sets user.name and user.email in the user's global Git configuration. */
   setIdentity(root: string, name: string, email: string): Promise<void>
+  /** Makes `root` a new Git repository with the branch `main` (M7: "New project from a file"). */
+  init(root: string): Promise<void>
+  /** Adds a remote, e.g. origin → https://github.com/… (M7: "Publish to GitHub"). */
+  addRemote(root: string, name: string, url: string): Promise<void>
 }
 
 export { createSystemGitAdapter, GitError, parseOverwrittenFiles, parseStatusV2, readBlobs }

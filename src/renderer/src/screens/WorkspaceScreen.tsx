@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { CompareEntry, RepoInfo, RevertPart } from '../../../shared/api'
+import type { CompareEntry, ImportFile, ImportResult, RepoInfo, RevertPart } from '../../../shared/api'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
 import { ItemEditor, type EditorTarget } from '../workspace/ItemEditor'
@@ -7,6 +7,8 @@ import { FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
 import { ChangesSide, ChangesView } from '../workspace/ChangesView'
 import { GitBar } from '../workspace/GitPanels'
 import { ExportDialog } from '../workspace/ExportDialog'
+import { ImportDialog } from '../workspace/ImportDialog'
+import { RowMenu } from '../workspace/RowMenu'
 import { ItemTable, shownColumnKeys, withWidth, type TreeControls } from '../workspace/ItemTable'
 import { ProblemList, problemsOf } from '../workspace/screen/Problems'
 import { Toolbar } from '../workspace/screen/Toolbar'
@@ -19,7 +21,7 @@ import { useGit } from '../workspace/screen/useGit'
  * and the editor on the right. State is grouped by area: filters (useFilters), Git (useGit), the Changes view
  * (useChanges), editor.
  */
-export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: RepoInfo) => void }) {
+export function WorkspaceScreen({ info, onInfo, importFile }: { info: RepoInfo; onInfo: (i: RepoInfo) => void; importFile?: ImportFile | null }) {
   const schema = info.schema
   const filters = useFilters(schema)
   const { query, filtered } = filters
@@ -30,8 +32,14 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
   const tree = useRef<TreeControls | null>(null)
   const [revealNonce, setRevealNonce] = useState(0)
   const [showChanges, setShowChanges] = useState(false)
-  const [exportOpen, setExportOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState<false | { chosen?: string[] }>(false)
+  // items chosen with Ctrl/Shift+click, and the right-click menu (M7)
+  const [chosen, setChosen] = useState<ReadonlySet<string>>(new Set())
+  const [rowMenu, setRowMenu] = useState<{ id: string; x: number; y: number } | null>(null)
+  // the import wizard; a new project from a file opens it straight away (and commits the import)
+  const [importing, setImporting] = useState<{ file: ImportFile | null; newProject: boolean } | null>(importFile ? { file: importFile, newProject: true } : null)
   const [exported, setExported] = useState<{ path: string; count: number } | null>(null)
+  const [imported, setImported] = useState<(ImportResult & { ok: true }) | null>(null)
   const [target, setTarget] = useState<EditorTarget | null>(null)
   const [pending, setPending] = useState<EditorTarget | null | undefined>(undefined)
   const [dirty, setDirty] = useState(false)
@@ -155,6 +163,7 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
           onOpenItem={select}
           pushOffer={git.pushOffer}
           onPushOffer={git.answerPush}
+          onPublish={git.publish}
         />
         {showChanges && git.state?.available && (
           <ChangesView
@@ -179,7 +188,8 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
             onPrefs={setColumnPrefs}
             onEditFields={() => setEditFields(true)}
             canExport={info.itemCount > 0}
-            onExport={() => setExportOpen(true)}
+            onExport={() => setExportOpen({})}
+            onImport={() => setImporting({ file: null, newProject: false })}
             expanding={expanding}
             onExpandAll={() => void expandAll()}
             onCollapseAll={() => tree.current?.collapseAll()}
@@ -191,6 +201,19 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
             schema={schema}
             prefs={columnPrefs}
             onResize={(key, width) => setColumnPrefs({ ...columnPrefs, widths: withWidth(columnPrefs.widths, key, width) })}
+            chosen={chosen}
+            onChoose={(ids, how) =>
+              setChosen((prev) => {
+                if (how === 'clear') return new Set()
+                // the open item counts as chosen when the choosing starts
+                const next = new Set(prev.size === 0 && selectedId ? [selectedId] : prev)
+                if (how === 'range') for (const id of ids) next.add(id)
+                else for (const id of ids) if (next.has(id)) next.delete(id)
+                else next.add(id)
+                return next
+              })
+            }
+            onRowMenu={(id, x, y) => setRowMenu({ id, x, y })}
             mode={filtered ? 'flat' : 'tree'}
             query={query}
             dataVersion={dataVersion}
@@ -210,6 +233,14 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
                 {T.exportDialog.showInFolder}
               </button>{' '}
               <button type="button" className="link-btn" onClick={() => setExported(null)}>
+                {T.common.dismiss}
+              </button>
+            </div>
+          )}
+          {imported && (
+            <div className="notice table-notice table-notice--ok" role="status">
+              {T.importDialog.done(imported.created, imported.updated, imported.unchanged, imported.skipped, imported.committed)}{' '}
+              <button type="button" className="link-btn" onClick={() => setImported(null)}>
                 {T.common.dismiss}
               </button>
             </div>
@@ -234,7 +265,16 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
           ) : (
             <span className="statusbar__ok">{T.workspace.noProblems}</span>
           )}
-          {!filtered && info.itemCount > 1 && <span className="statusbar__hint">{T.workspace.dragHint}</span>}
+          {chosen.size > 0 ? (
+            <span className="statusbar__hint">
+              {T.rowMenu.chosenStatus(chosen.size)} · {T.rowMenu.chosenHint}{' '}
+              <button type="button" className="link-btn" onClick={() => setChosen(new Set())}>
+                {T.rowMenu.clearChosen}
+              </button>
+            </span>
+          ) : (
+            !filtered && info.itemCount > 1 && <span className="statusbar__hint">{T.workspace.dragHint}</span>
+          )}
           {!info.isGitRepository && <span className="statusbar__warn">{T.workspace.notGit}</span>}
           {refreshError && <span className="statusbar__warn">{T.workspace.refreshFailed(refreshError)}</span>}
           <span className="toolbar__spacer" />
@@ -273,8 +313,36 @@ export function WorkspaceScreen({ info, onInfo }: { info: RepoInfo; onInfo: (i: 
         </div>
       )}
 
+      {rowMenu && (
+        <RowMenu
+          {...rowMenu}
+          chosenCount={chosen.has(rowMenu.id) ? chosen.size : 0}
+          onOpen={() => select(rowMenu.id)}
+          onExportItem={() => setExportOpen({ chosen: [rowMenu.id] })}
+          onExportChosen={() => setExportOpen({ chosen: [...chosen] })}
+          onClose={() => setRowMenu(null)}
+        />
+      )}
+
+      {importing && (
+        <ImportDialog
+          schema={schema}
+          file={importing.file}
+          newProject={importing.newProject}
+          onClose={() => setImporting(null)}
+          onDone={(r) => {
+            setImporting(null)
+            onInfo(r.info)
+            setDataVersion((v) => v + 1)
+            setNotice(null)
+            setImported(r)
+          }}
+        />
+      )}
+
       {exportOpen && (
         <ExportDialog
+          {...(exportOpen.chosen ? { chosen: exportOpen.chosen } : {})}
           shownColumns={shownColumnKeys(schema, columnPrefs)}
           filtered={filtered}
           filteredCount={total}

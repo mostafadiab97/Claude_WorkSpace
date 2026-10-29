@@ -70,7 +70,7 @@ describe('exporting items', () => {
 
     const { content, count } = await ws.exportItems({ scope: 'all', columns: ['id', 'level', 'title', 'type', 'field:status', 'parent', 'text', 'links', 'linkedFrom'], format: 'csv' })
     expect(count).toBe(4)
-    const rows = parseCsv(content)
+    const rows = parseCsv(content as string)
     // the outline number always follows the ID (O-03)
     expect(rows[0]).toEqual(['ID', 'No.', 'Level', 'Title', 'Type', 'Status', 'Parent', 'Text', 'Links', 'Linked from'])
     expect(rows.slice(1).map((r) => [r[0], r[1], r[2]])).toEqual([
@@ -85,7 +85,7 @@ describe('exporting items', () => {
     // only the filtered result, in the table's sort
     const f = await ws.exportItems({ scope: 'filtered', query: { types: ['system-requirement', 'test-case'], sort: { by: 'title' } }, columns: ['id', 'title'], format: 'csv' })
     // a filtered export keeps the real outline numbers from the whole document
-    expect(parseCsv(f.content).slice(1).map((r) => [r[1], r[2]])).toEqual([
+    expect(parseCsv(f.content as string).slice(1).map((r) => [r[1], r[2]])).toEqual([
       ['1.1', 'Accuracy, ±0.5 °C'],
       ['2.1', 'Check accuracy']
     ])
@@ -105,7 +105,7 @@ describe('exporting items', () => {
     const orphanPath = join(info.root, 'requirements', 'items', 'SYS-ORPHAN.md')
     await writeFile(orphanPath, '---\nid: SYS-ORPHAN\ntype: system-requirement\ntitle: Orphan\nparent: SYS-NOPE\n---\n')
     await ws.refresh()
-    const rows = parseCsv((await ws.exportItems({ scope: 'all', columns: ['id'], format: 'csv' })).content)
+    const rows = parseCsv((await ws.exportItems({ scope: 'all', columns: ['id'], format: 'csv' })).content as string)
     expect(rows.slice(1).map((r) => r[0])).toEqual([a, 'SYS-ORPHAN'])
   })
 })

@@ -276,6 +276,14 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
       await git(root, fastForwardOnly ? ['merge', '--ff-only', '--quiet', upstream] : ['merge', '--no-edit', '--quiet', upstream])
     },
 
+    async init(root) {
+      await git(root, ['init', '--quiet', '-b', 'main'])
+    },
+
+    async addRemote(root, name, url) {
+      await git(root, ['remote', 'add', name, url])
+    },
+
     async push(root, setUpstream) {
       await git(root, setUpstream ? ['push', '--quiet', '-u', setUpstream.remote, `HEAD:refs/heads/${setUpstream.branch}`] : ['push', '--quiet'], NETWORK_TIMEOUT)
     },

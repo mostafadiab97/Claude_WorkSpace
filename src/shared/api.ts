@@ -255,7 +255,7 @@ export interface CompareResult {
 
 // ---------- Export (M6)
 
-export type ExportFormat = 'csv' | 'markdown' | 'xlsx'
+export type ExportFormat = 'csv' | 'markdown' | 'xlsx' | 'reqif'
 
 export interface ExportItemsRequest {
   /**
@@ -300,7 +300,7 @@ export interface ImportFile {
   token: string
   name: string
   path: string
-  kind: 'xlsx' | 'csv'
+  kind: 'xlsx' | 'csv' | 'reqif'
   sheets: { name: string; rowCount: number; sample: string[][] }[]
 }
 
@@ -350,7 +350,7 @@ export type ImportResult =
 export interface ImportSource {
   path: string
   name: string
-  kind: 'xlsx' | 'csv'
+  kind: 'xlsx' | 'csv' | 'reqif'
   sheet: string
 }
 

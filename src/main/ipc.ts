@@ -44,7 +44,7 @@ export function registerIpc(services: Services, paths: Paths): void {
       const { content, count } = await build()
       const win = BrowserWindow.fromWebContents(e.sender)
       const ext = format === 'markdown' ? 'md' : format
-      const filter = { markdown: { name: 'Markdown', extensions: ['md'] }, csv: { name: 'CSV (Excel)', extensions: ['csv'] }, xlsx: { name: 'Excel workbook', extensions: ['xlsx'] } }[format]
+      const filter = { markdown: { name: 'Markdown', extensions: ['md'] }, csv: { name: 'CSV (Excel)', extensions: ['csv'] }, xlsx: { name: 'Excel workbook', extensions: ['xlsx'] }, reqif: { name: 'ReqIF', extensions: ['reqif'] } }[format]
       const opts = { title: T.wsMsg.exportTitle, defaultPath: join(await lastFolder(), `${name}.${ext}`), filters: [filter] }
       const r = win ? await dialog.showSaveDialog(win, opts) : await dialog.showSaveDialog(opts)
       if (r.canceled || !r.filePath) return { ok: false, canceled: true }
@@ -68,7 +68,7 @@ export function registerIpc(services: Services, paths: Paths): void {
     return r.canceled ? null : (r.filePaths[0] ?? null)
   }
   const chooseFile = async (e: IpcMainInvokeEvent) => {
-    const path = await openDialog(e, { title: T.importDialog.chooseTitle, properties: ['openFile'], filters: [{ name: T.importDialog.fileFilter, extensions: ['xlsx', 'xlsm', 'csv', 'txt'] }] })
+    const path = await openDialog(e, { title: T.importDialog.chooseTitle, properties: ['openFile'], filters: [{ name: T.importDialog.fileFilter, extensions: ['xlsx', 'xlsm', 'csv', 'txt', 'reqif', 'reqifz'] }] })
     if (!path) return null
     const f = await loadImportFile(path)
     log.info(`Import file chosen: ${path} (${f.sheets.length} sheet(s))`)
@@ -242,6 +242,7 @@ export function registerIpc(services: Services, paths: Paths): void {
       try {
         const src = await ws.importSource()
         if (!src) return { ok: false, message: T.importMsg.noSource }
+        if (src.kind === 'reqif') return { ok: false, message: T.importMsg.reqifNoUpdate }
         const f = await loadImportFile(src.path).catch(() => {
           throw new Error(T.importMsg.sourceMissing(src.path))
         })
@@ -274,7 +275,7 @@ export function registerIpc(services: Services, paths: Paths): void {
       return saveExport(e, `requirements-${today()}`, req.format, () => ws.exportItems(req))
     },
     exportCompare: (e, from, to, format) => {
-      const f = v.oneOf(format, ['csv', 'markdown', 'xlsx'], 'export format')
+      const f = v.oneOf(format, ['csv', 'markdown', 'xlsx', 'reqif'], 'export format')
       return saveExport(e, `requirement-changes-${today()}`, f, () => ws.exportCompare(v.str(from, 'from'), v.str(to, 'to'), f))
     }
   }

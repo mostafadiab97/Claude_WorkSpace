@@ -4,13 +4,15 @@ import { randomBytes } from 'node:crypto'
 import { copyFile, readFile } from 'node:fs/promises'
 import { basename, extname } from 'node:path'
 import type { ImportFile } from '../shared/api'
-import { detectSeparator, parseCsv, readXlsx, toCsv, updateXlsx, type CellEdit } from '../modules/import-export'
+import JSZip from 'jszip'
+import { detectSeparator, parseCsv, readReqif, readXlsx, toCsv, updateXlsx, type CellEdit } from '../modules/import-export'
 import { writeFileAtomic } from '../modules/safe-files'
+import { T } from '../shared/text'
 
 export interface LoadedFile {
   path: string
   name: string
-  kind: 'xlsx' | 'csv'
+  kind: 'xlsx' | 'csv' | 'reqif'
   separator: string
   sheets: { name: string; rows: string[][] }[]
 }
@@ -26,7 +28,19 @@ function decodeText(data: Uint8Array): string {
 
 export async function loadImportFile(path: string): Promise<LoadedFile> {
   const data = new Uint8Array(await readFile(path))
-  const kind = /^\.(xlsx|xlsm)$/i.test(extname(path)) ? 'xlsx' : 'csv'
+  const ext = extname(path).toLowerCase()
+  if (ext === '.reqif' || ext === '.reqifz') {
+    // .reqifz = a zip with the .reqif file (and its attachments)
+    let xml: string
+    if (ext === '.reqifz') {
+      const zip = await JSZip.loadAsync(data)
+      const entry = Object.values(zip.files).find((f) => !f.dir && f.name.toLowerCase().endsWith('.reqif'))
+      if (!entry) throw new Error(T.importMsg.reqifzEmpty)
+      xml = await entry.async('string')
+    } else xml = decodeText(data)
+    return { path, name: basename(path), kind: 'reqif', separator: ',', sheets: readReqif(xml) }
+  }
+  const kind = ext === '.xlsx' || ext === '.xlsm' ? 'xlsx' : 'csv'
   if (kind === 'xlsx') return { path, name: basename(path), kind, separator: ',', sheets: await readXlsx(data) }
   const text = decodeText(data)
   const separator = detectSeparator(text)

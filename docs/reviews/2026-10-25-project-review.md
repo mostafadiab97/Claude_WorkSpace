@@ -366,6 +366,12 @@ all fine. The two-PC trial is postponed (only one user for now).
   difference with word marks, folded text, ↶ per field / text / link for uncommitted changes, stacked when narrow),
   O-06 (one Changes view, uncommitted by default, side panel follows the view; no automatic pulls — "Pull first"
   offers before the last-pull view and Push). Owner's extra request: draggable column widths.
+- **Owner on 0.10.0 (29 Oct 2026):** all 5 steps passed; dark-mode diff colours too faint and "Changes (1)" with an empty
+  list (a kept link's confirmation was hidden) — both fixed in 0.11.0. **Decision: ReqIF is merged into 0.11.0**
+  (fewer test rounds); branches stay alone in 0.12.0 (two-PC trial). Asked for a GitHub-vs-RM-tool comparison
+  (answered in chat, not stored).
+- **Done in 0.11.0 (29 Oct 2026):** O-07 phases 1 + 2 — Excel/CSV/ReqIF import wizard, Excel and ReqIF export, "New
+  project from a file", "Update the Excel file", "Publish to GitHub", export of chosen items.
 
 ## G. Order (confirmed 28 Oct 2026)
 

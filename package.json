@@ -1,7 +1,7 @@
 {
   "name": "reqman",
   "productName": "ReqMan",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "Local, Git-based requirements management tool (proof of concept)",
   "main": "./out/main/index.js",
   "author": "ReqMan",
@@ -44,6 +44,7 @@
     "playwright-core": "^1.63.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "saxes": "^6.0.0",
     "tsx": "^4.23.15",
     "typescript": "~6.0",
     "typescript-eslint": "^8.72.0",

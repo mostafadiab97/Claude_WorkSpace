@@ -1,7 +1,7 @@
 // Export (M6): builds the file content for the table or a comparison; the main process asks where to save it.
 import { basename } from 'node:path'
 import type { ExportFormat, ExportItemsRequest } from '../../shared/api'
-import { compareToCsv, compareToMarkdown, compareToSheet, itemsToCsv, itemsToMarkdown, itemsToSheet, writeXlsx, type ExportItem } from '../import-export'
+import { compareToCsv, compareToMarkdown, compareToSheet, itemsToCsv, itemsToMarkdown, itemsToSheet, writeReqif, writeXlsx, type ExportItem } from '../import-export'
 import { queryAll, type WorkspaceContext } from './context'
 import type { createCompare } from './compare'
 import { depthOf, type StructureOps } from './structure'
@@ -38,6 +38,21 @@ export function createExportOps(ctx: WorkspaceContext, structure: StructureOps, 
         rows = rows.map((r) => ({ ...r, depth: r.depth - top }))
       }
       const title = `${basename(s.repo.root)} — requirements`
+      if (request.format === 'reqif') {
+        // objects that came from ReqIF keep their identifier, so the other tool recognises them
+        const sourceIds = new Map<string, string>()
+        for (let i = 0; i < rows.length; i += 32) {
+          await Promise.all(
+            rows.slice(i, i + 32).map(async (r) => {
+              const f = await s.repo.readItem(r.item.id)
+              const src = f?.ok ? f.item.extra['source-id'] : undefined
+              if (typeof src === 'string') sourceIds.set(r.item.id, src)
+            })
+          )
+        }
+        const items = rows.map((r) => ({ item: r.item, depth: r.depth, ...(sourceIds.has(r.item.id) ? { sourceId: sourceIds.get(r.item.id) as string } : {}) }))
+        return { content: writeReqif(s.repo.schema, items, title), count: rows.length }
+      }
       const content =
         request.format === 'markdown'
           ? itemsToMarkdown(s.repo.schema, rows, columns, title)

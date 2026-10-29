@@ -6,5 +6,6 @@
 export { csvCell, detectSeparator, parseCsv, toCsv } from './csv'
 export { cellText, readXlsx, updateXlsx, writeXlsx, type CellEdit, type SheetData } from './xlsx'
 export { guessHeaderRow, guessMapping, outlineOf, planImport, type ExistingItems, type ImportPlan, type ImportPlanInput, type PlannedItem } from './importPlan'
+export { markdownToXhtml, readReqif, REQIF_COLUMNS, writeReqif, type ReqifItem } from './reqif'
 export { itemsToCsv, itemsToMarkdown, itemsToSheet, itemsToTable, type ExportColumn, type ExportItem } from './items'
 export { compareToCsv, compareToMarkdown, compareToSheet } from './compare'

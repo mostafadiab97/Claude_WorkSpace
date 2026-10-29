@@ -53,7 +53,23 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.10.0 (Changes view)
+## Manual test checklist — v0.11.0 (Excel and ReqIF)
+
+0.11.0 brings Excel and ReqIF: import with a wizard, export of everything or of chosen items, writing changes
+back into the Excel file you imported, starting a project from a file, and publishing to GitHub. It also fixes the
+two things you found in 0.10.0. For steps 3–5 download the sample file:
+https://github.com/mostafadiab97/Claude_WorkSpace/raw/main/samples/sample-requirements.xlsx (or use an Excel file of
+your own). Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.11.0**. Switch to **Dark**, open the sandbox, change one word of a requirement's text, **Save**, open **Changes**. Then keep one suspect link (any item with ⚠: **Keep**) and look at **Changes (n)** again. | Old text clearly red, new clearly green. The number on the Changes button always matches the list — a kept link shows as "Link review only". Discard both afterwards. |
+| 2 | **⚙ → Run release self-test**. | **All steps passed**, now **20** ✓ (new: Excel export of a chosen chapter, Import from Excel, ReqIF export and import). |
+| 3 | **Close repository** → **New project from a file…** → choose the sample file → choose (or create) an **empty** folder. Click through the three steps (Next, Next) and **Import 59 items and commit**. | The wizard guesses every column (ID, Type, Title, Description → Text, Status …, "Verified By" → *verified by* links). The table shows 59 items with the hierarchy; the Git bar shows one commit and offers **Publish to GitHub…**. |
+| 4 | In that project: **Ctrl+click** two items, **right-click** one → **Export the 2 chosen items…** → Excel → Export. Open the file in Excel. Then **Export… → ReqIF** once. | The Excel file has both items with everything below them, the **No.** column, titles indented, and +/− buttons on the left to fold the hierarchy. The .reqif file is written (DOORS / Jama can read it). |
+| 5 | Change the **Status** of one item, **Save**. **Export…** → **Update sample-requirements.xlsx**. Open the Excel file. Then **Import…** the same file again (Next). | Only that one cell changed in the file; the formatting is as before, and a copy "sample-requirements (before ReqMan update …).xlsx" lies next to it. The import shows **59 unchanged**. |
+
+## Previous checklist — v0.10.0 (Changes view)
 
 0.10.0 joins **Changes** and **Compare** into one **Changes** view with a GitHub-style side-by-side difference,
 asks about links when you change an item others link to, never pulls by itself, and lets you drag column widths.

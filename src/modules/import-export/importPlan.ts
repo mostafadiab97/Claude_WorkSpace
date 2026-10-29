@@ -15,10 +15,10 @@ const norm = (s: string): string =>
 
 /** Header names other tools and people use, per target (compared after lower-casing and removing punctuation). */
 const SYNONYMS: [ImportTarget, string[]][] = [
-  ['id', ['id', 'req id', 'requirement id', 'identifier', 'object identifier', 'key', 'uid', 'absolute number', 'req no', 'requirement no']],
+  ['id', ['reqif identifier', 'id', 'req id', 'requirement id', 'identifier', 'object identifier', 'key', 'uid', 'absolute number', 'req no', 'requirement no']],
   ['number', ['no.', 'no', 'number', '#', 'section', 'chapter', 'outline', 'outline number', 'heading number', 'paragraph', 'clause', 'nr', 'nr.']],
-  ['title', ['title', 'name', 'summary', 'heading', 'short text', 'short description', 'subject', 'caption']],
-  ['text', ['text', 'description', 'requirement', 'requirement text', 'details', 'body', 'object text', 'content', 'statement', 'long text']],
+  ['title', ['reqif.name', 'reqif.chaptername', 'title', 'name', 'summary', 'heading', 'short text', 'short description', 'subject', 'caption']],
+  ['text', ['reqif.text', 'reqif.description', 'text', 'description', 'requirement', 'requirement text', 'details', 'body', 'object text', 'content', 'statement', 'long text']],
   ['type', ['type', 'item type', 'kind', 'category', 'object type', 'artifact type', 'requirement type']],
   ['parent', ['parent', 'parent id', 'parent requirement', 'derived from', 'parent item']],
   ['level', ['level', 'depth', 'outline level', 'hierarchy level', 'indent']],
@@ -31,6 +31,19 @@ const SYNONYMS: [ImportTarget, string[]][] = [
  * columns ("Verified by" = links of type verifies stored in the other item). Each target is used once.
  */
 export function guessMapping(headers: string[], schema: Schema): ImportTarget[] {
+  // ReqMan's own ReqIF export: its "ReqMan.Type" is the item type (the ReqIF object type is just "Requirement")
+  if (headers.some((h) => norm(h) === 'reqman.type')) {
+    // … and its "ReqMan.Markdown" is the exact text (ReqIF.Text is the same text as XHTML, for other tools)
+    const markdown = headers.some((h) => norm(h) === 'reqman.markdown')
+    const rename = (h: string): string => {
+      const n = norm(h)
+      if (n === 'type' || n === 'reqman.number' || (markdown && n === 'reqif.text')) return ''
+      if (n === 'reqman.type') return 'Type'
+      if (n === 'reqman.markdown') return 'Text'
+      return h
+    }
+    return guessMapping(headers.map(rename), schema)
+  }
   const used = new Set<ImportTarget>()
   const pick = (t: ImportTarget): ImportTarget => {
     if (used.has(t)) return 'ignore'
@@ -147,8 +160,9 @@ export function planImport(input: ImportPlanInput): ImportPlan {
   rows.forEach((r, i) => {
     const row = input.firstRow + i
     const title0 = cell(r, col('title'))
-    const text = cell(r, col('text'))
-    if (!title0 && !text) {
+    // the text exactly as in the cell (spaces at line ends are part of it); only Windows line ends are normalised
+    const text = col('text') === null ? '' : (r[col('text') as number] ?? '').replace(/\r\n/g, '\n').replace(/^\n+|\n+$/g, '')
+    if (!title0 && !text.trim()) {
       if (r.some((x) => x.trim())) {
         skip++
         problem(row, null, T.importMsg.empty)
@@ -194,7 +208,8 @@ export function planImport(input: ImportPlanInput): ImportPlan {
       const v = fieldValue(def, raw)
       if (v === undefined) {
         if (raw) problem(row, c, T.importMsg.badValue(raw, def.name, def.options ?? null, base !== null))
-        else if (base) delete item.fields[def.id]
+        // an empty cell clears the value — unless the value is one the file could not hold (not an allowed option)
+        else if (base && (def.type !== 'enum' || def.options?.includes(String(base.fields[def.id])) !== false)) delete item.fields[def.id]
         continue
       }
       item.fields[def.id] = v
@@ -223,6 +238,8 @@ export function planImport(input: ImportPlanInput): ImportPlan {
         if (p) {
           parent = resolve(p)
           if (!parent) problem(d.row, pc, T.importMsg.unknownParent(p))
+        } else if (d.base?.parent && resolve(d.base.parent) === null) {
+          parent = undefined // a parent that exists nowhere cannot be in the file: leave it (it stays listed as a problem)
         } else parent = null
       } else if (nc !== null) {
         const num = outlineOf(cell(d.r, nc))
@@ -319,10 +336,14 @@ export function planImport(input: ImportPlanInput): ImportPlan {
   for (const d of drafts) {
     const w = wantedOf.get(d) as { replaced: Set<string>; links: Link[] }
     const before = d.base?.links ?? []
-    const next: Link[] = before.filter((l) => !w.replaced.has(l.type))
-    for (const l of [...w.links, ...(reverse.get(d.item.id) ?? [])]) {
+    // links to items that exist nowhere cannot be in the file either: they stay (and stay listed as problems)
+    const incoming = [...w.links, ...(reverse.get(d.item.id) ?? [])]
+    const wanted = (l: Link): boolean => incoming.some((x) => x.type === l.type && x.target === l.target)
+    // links that stay keep their place (and confirmation); new ones follow in file order
+    const next: Link[] = before.filter((l) => !w.replaced.has(l.type) || resolve(l.target) === null || wanted(l))
+    for (const l of incoming) {
       if (l.target === d.item.id || next.some((x) => x.type === l.type && x.target === l.target)) continue
-      next.push(before.find((x) => x.type === l.type && x.target === l.target) ?? l)
+      next.push(l)
     }
     d.item.links = next
   }

@@ -142,6 +142,10 @@ export function ExportDialog(props: {
               {T.exportDialog.xlsx}
             </label>
             <label className="check">
+              <input type="radio" name="format" checked={format === 'reqif'} onChange={() => setFormat('reqif')} />
+              {T.exportDialog.reqif}
+            </label>
+            <label className="check">
               <input type="radio" name="format" checked={format === 'csv'} onChange={() => setFormat('csv')} />
               {T.exportDialog.csv}
             </label>
@@ -150,7 +154,7 @@ export function ExportDialog(props: {
               {T.exportDialog.markdown}
             </label>
           </fieldset>
-          {source && (
+          {source && source.kind !== 'reqif' && (
             <fieldset className="choice export__source">
               <legend className="field__label">{T.exportDialog.sourceTitle}</legend>
               <p className="muted-inline">{T.exportDialog.sourceIntro(source.name)}</p>

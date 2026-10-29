@@ -3,6 +3,35 @@
 Each version was installed and tried by the product owner on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.11.0 — 29 Oct 2026 — Excel and ReqIF (M7)
+- **Import from Excel, CSV or ReqIF** (Import… in the toolbar): a wizard in three steps — file, sheet and the row
+  with the column names → what each column means (guessed from the names: ID, No., Title, Text, Type, Parent,
+  Level, every field, link columns such as "Verified by") → check (new / updated / unchanged / skipped, every problem
+  by row). Writes uncommitted changes. IDs from other tools are kept as `source-id`, so importing the file again
+  updates the same items; the hierarchy comes from a parent column, outline numbers (3.2.1) or a level column.
+  Separators `,` `;` and tab, UTF-8 or Windows-1252 CSV.
+- **ReqIF** (DOORS, Jama, Polarion …, merged into this release — owner, 29 Oct 2026): import through the same wizard
+  (one sheet per specification; XHTML text becomes Markdown, enumerations by name, relations by type), export with
+  the hierarchy, every field, links as relations and the exact Markdown text for ReqMan itself. Objects that came
+  from ReqIF keep their identifier on export.
+- **Excel export** (now the default format): one row per item, titles indented, rows grouped by the hierarchy (+/−),
+  long texts wrapped. The Changes view exports Excel too.
+- **Export of chosen items**: Ctrl+click / Shift+click rows, right-click → "Export this item and everything below it"
+  or "Export the N chosen items"; "Include the items below" (ticked); every item once, in document order, full
+  outline numbers.
+- **Update the Excel file**: Export… → "Update <file>" writes the current values into the file you imported from —
+  only changed cells, new items as new rows, formatting kept, a backup copy next to it — or saves an updated copy.
+- **New project from a file** on the start screen: empty folder → Git repository → wizard → first commit.
+  **Publish to GitHub…** in the Git bar for repositories without a remote.
+- Round trips measured on the 10,005-item sandbox: Excel export 1.8 s, ReqIF export 4.9 s, import of all items into
+  a new project 11.7 s; importing either export again finds **10,005 unchanged** (broken references stay as they were).
+- **Fixes (owner, 0.10.0):** the Changes view's red and green were hardly visible in dark mode (own theme colours
+  now, `diffOldBg` …); "Changes (1)" with an empty list — a kept link changes only a confirmation, which is now listed.
+- Libraries added (all free for commercial use): ExcelJS (MIT), JSZip (MIT), saxes (ISC); uuid pinned to 11 (security
+  advisory). Release self-test: 20 steps. 165 unit tests; new e2e scenario `excel`.
+- **Owner (29 Oct 2026) on 0.10.0:** all 5 steps passed, self-test 18/18 (33.7 s); found the two issues above.
+  Decision: ReqIF merged into 0.11.0; branches stay alone as 0.12.0.
+
 ## 0.10.0 — 28 Oct 2026 — Changes view
 - **One Changes view** (O-06) instead of the Changes panel and Compare: the Git bar has Changes / Pull / Push.
   It opens in the middle on **Uncommitted changes** (also before the very first commit); **Show** switches to what

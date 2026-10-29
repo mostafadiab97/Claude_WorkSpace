@@ -162,7 +162,7 @@ export function exportRequest(v: unknown): ExportItemsRequest {
   const r: ExportItemsRequest = {
     scope,
     columns: strings(v.columns, 'export columns', 500),
-    format: oneOf(v.format, ['csv', 'markdown', 'xlsx'], 'export format')
+    format: oneOf(v.format, ['csv', 'markdown', 'xlsx', 'reqif'], 'export format')
   }
   if (scope === 'chosen') {
     r.ids = strings(v.ids, 'chosen items')

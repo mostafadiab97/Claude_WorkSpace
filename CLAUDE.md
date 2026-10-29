@@ -29,6 +29,7 @@ cloud session from v0.5.0. Nothing lives outside this repository and `Claude_San
 | Theme file and customisation | `docs/THEMING.md` |
 | What changed in each version and what the owner reported | `CHANGELOG.md` |
 | Local development setup (Windows) | `docs/DEVELOPING.md` |
+| Import/export formats (Excel, CSV, ReqIF) and the import plan | `docs/ARCHITECTURE.md` (import-export, importing.ts, Import wizard) |
 | Every script in `tools/` and the working procedures (skills) | `tools/README.md`; skills in `.claude/skills/` (`release-to-owner` — use it for every release, `whole-project-review`, `owner-decision-walkthrough`) |
 | Test data repository (10,005 fictional items) | GitHub `mostafadiab97/Claude_SandBox` — clone it **next to** this repo, never inside |
 | Releases (installers + auto-update feed) | GitHub Releases of `mostafadiab97/Claude_WorkSpace` |
@@ -115,7 +116,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.10.0, 28 Oct 2026) — prototype complete, new data format, Changes view
+## Status (v0.11.0, 29 Oct 2026) — prototype complete; Changes view; Excel + ReqIF exchange
 
 | Milestone | State |
 | --- | --- |
@@ -129,16 +130,16 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | 0.8.0 clean page — all review fixes (D-01–D-08, D-10, P-01/02/04/05, S-01/02/03/06, X-01, T-01–05), release self-test, 5-step checklist | Done (v0.8.0) |
 | 0.9.0 new data format — `REQ-` + 7 chars, type editable, order keys (S-04), outline numbers, sandbox converted | Done (v0.9.0) |
 | 0.10.0 Changes view — one view for uncommitted + compare, split difference with ↶ per part, Keep/Unlink window, no automatic pulls, column widths | Done (v0.10.0) |
-| **0.11.0 M7 Excel (+ chosen-items export)** | **Next** |
-| 0.12.0 M8 branches · 0.13.0 ReqIF | Planned (DESIGN.md → "Release plan") |
+| 0.11.0 M7 Excel + ReqIF — import wizard (xlsx/csv/reqif), Excel + ReqIF export, chosen items, update the Excel file, new project from a file, publish to GitHub | Done (v0.11.0) |
+| **0.12.0 M8 branches** (create/switch, tags as baselines, per-requirement merge S-05, D-09, D-05) | **Next** |
 
-Owner's last report (28 Oct 2026): 0.9.0 all 5 checklist steps passed, self-test 17/17 (26.7 s); Compare + Changes
-bug confirmed fixed. Asked for resizable columns (No. was cut off), a diagram navigator, skills in the repo —
-all done for 0.10.0. Two-PC trial postponed.
+Owner's last report (29 Oct 2026): 0.10.0 all 5 steps passed, self-test 18/18; dark-mode diff colours and a
+"Changes (1)" mismatch — fixed in 0.11.0. Decided: ReqIF merged into 0.11.0. Two-PC trial postponed (needed for 0.12.0).
 
-Automated tests: 154 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
+Automated tests: 165 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
 repository and two clones ("PC A", "PC B"), the release self-test itself, the sandbox's chapter-9 promises
-(`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `journey` (~75 checks, the
+(`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `excel` (new project from the sample file, chosen-items export, update the file, ReqIF round trip,
+publish), `journey` (~75 checks, the
 whole user story, incl. the Changes view, ↶, Keep/Unlink window, push offer) and `fixes` (renamed file, lazy Expand all,
 column width drag, Changes view layout + split difference, second start, release self-test in the window).
 0.8.0 measurements (10k scenario repo, Linux): refresh after a save 0.37 → 0.09 s; Expand all first screen 0.26 s.
@@ -177,14 +178,13 @@ The owner's tests of 0.5.0–0.7.0 all passed (27 Oct). His requests O-01–O-07
 
 0.8.0 clean page (all review fixes, refactors S-01–S-03, central GUI text file S-06, tests T-01–T-05, in-app
 **release self-test**, checklist ≤ 5 steps) → 0.9.0 new data format (`REQ-` + 7 chars, order keys, outline numbers,
-sandbox converted) → 0.10.0 Changes view (O-04/O-05/O-06) → 0.11.0 M7 Excel (+ export of chosen items) → 0.12.0 M8
-branches → 0.13.0 ReqIF.
+sandbox converted) → 0.10.0 Changes view (O-04/O-05/O-06) → 0.11.0 M7 Excel + ReqIF (ReqIF merged in, owner 29 Oct
+2026) → 0.12.0 M8 branches.
 
-**0.10.0 released (28 Oct 2026)** — waiting for the owner's 5-step checklist (`docs/TESTING.md`). **Next: 0.11.0 M7
-Excel** (see "M7 notes" below, DESIGN.md "Release plan", review H O-07): Excel export (ExcelJS) and the import wizard,
-"New project from a file", "Update the Excel file", "Publish to GitHub", and **export of chosen items**
-(Ctrl/Shift multi-select, right-click "Export this item and everything below it", "Include the items below").
-Before building, check ExcelJS's size/licence and walk the owner through open M7 questions (owner-decision-walkthrough).
+**0.11.0 released (29 Oct 2026)** — waiting for the owner's 5-step checklist. **Next: 0.12.0 M8 branches** (DESIGN.md
+"Release plan"): create/switch branches, tags as baselines, per-requirement 3-way merge on pull (S-05, FR-13),
+duplicate-ID repair (D-09), D-05. Walk the owner through the open M8 questions first (owner-decision-walkthrough) and
+plan the two-PC trial with him (it is the real test of merging).
 The owner is a C developer new to this field: explain from first principles, short, C analogies where useful.
 Record decisions in the review file / DESIGN.md.
 
@@ -201,7 +201,7 @@ Everything else must be automated (unit tests, e2e in CI, the in-app release sel
   `main/ipc.ts` shows the save dialog (last folder in `%APPDATA%\ReqMan\export-settings.json`). E2E mocks
   `dialog.showSaveDialog` (`saveAs()` helper in the journey).
 
-## M7 notes (now version 0.11.0)
+## M7 notes (0.11.0) — built
 
 - Excel export with ExcelJS (MIT; check size); import wizard (file → sheet → header row → column mapping guessed →
   type per row → preview with problems) writing uncommitted changes; update existing items by ID; read links; foreign
@@ -272,5 +272,13 @@ Everything else must be automated (unit tests, e2e in CI, the in-app release sel
   `keyBetween` → wrong order (hit in the sandbox conversion). Use `<`/`>` (see `cmp` in the conversion tool).
 - **IDs that change** (conversion): Compare pairs items by `former-id`; code that maps "before" items must look them
   up by the old ID (`beforeId` map in `compare.ts`).
+- **ExcelJS 4.4 and absolute part paths:** files written by openpyxl (e.g. `samples/sample-requirements.xlsx`) point
+  to tables with "/xl/tables/…"; ExcelJS crashes ("reading 'name'"). `loadWorkbook()` in `import-export/xlsx.ts`
+  rewrites them first — always read through `readXlsx`/`updateXlsx`, never `new Workbook().xlsx.load` directly.
+- **XML attribute values lose line breaks** unless written as `&#10;` (`escAttr` in `reqif.ts`).
+- **Import round trips:** a column that is mapped must not get the field's default for new items (an empty cell
+  = no value), the text cell is taken exactly (trailing spaces are data), lists compare as sets, and references the
+  file cannot hold (missing parents/targets, values outside an enum) stay as they were. The sandbox test of both
+  round trips (10,005 unchanged) is the check — `previewImport` only returns the first 300 rows.
 - **Electron downloads its program on first use:** two scenarios starting at once failed on Windows ("file in
   use") — `e2e/run.mjs` imports `electron` once before starting them.

@@ -11,7 +11,7 @@ import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promise
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { ReleaseSelfTestResult, ReleaseSelfTestStep } from '../../shared/api'
-import { readXlsx, writeXlsx } from '../import-export'
+import { readReqif, readXlsx, writeXlsx } from '../import-export'
 import type { WorkspaceService } from '../workspace'
 
 export interface SelfTestDeps {
@@ -276,6 +276,15 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       expect(req && chapter && req.parent === chapter.id && req.number?.endsWith('.1'), 'The outline numbers did not become the hierarchy.')
       const test = W().query({ text: 'Imported test' }).items[0]
       expect(test?.links.some((l) => l.type === 'verifies' && l.target === req?.id), 'The "Verified by" column did not become a link.')
+    })
+
+    await step('ReqIF: export and import again', async () => {
+      const x = await W().exportItems({ scope: 'all', columns: [], format: 'reqif' })
+      const xml = typeof x.content === 'string' ? x.content : ''
+      expect(xml.includes('<REQ-IF ') && (xml.match(/<SPEC-OBJECT /g) ?? []).length === x.count, 'The ReqIF file does not hold every item.')
+      const [spec] = readReqif(xml)
+      const p = await W().previewImport(spec?.rows ?? [], { token: 'self-test', sheet: spec?.name ?? '', headerRow: 0, defaultType: 'system-requirement' })
+      expect(p.counts.unchanged === x.count && p.counts.create + p.counts.update === 0, `Importing the ReqIF export would change items: ${JSON.stringify(p.counts)}.`)
     })
   } finally {
     ;(ws as WorkspaceService | null)?.close()

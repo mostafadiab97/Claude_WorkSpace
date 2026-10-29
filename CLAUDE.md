@@ -134,7 +134,8 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | 0.11.1 owner's requests — non-empty folder asks again, move several chosen items, auto-scroll while dragging, discard chosen/all in Changes, one export entry in the row menu, ReqIF validated against the official schema in tests | Done (v0.11.1) |
 | **0.12.0 M8 branches** (create/switch, tags as baselines, per-requirement merge S-05, D-09, D-05) | **Next** |
 
-Owner's last report (29 Oct 2026): 0.11.0 all 5 steps passed, self-test 20/20; five requests → 0.11.1. He has no
+Owner's last report (29 Oct 2026): 0.11.1 all 5 steps passed, self-test 20/20 (62 s — Git steps slower on his PC).
+Before that 0.11.0 passed too; his five requests went into 0.11.1. He has no
 DOORS/Jama to try ReqIF: exports are validated against the official schema in `tests/reqif.test.ts`
 (`tests/fixtures/reqif-schema/`, xmllint-wasm). Two-PC trial postponed (needed for 0.12.0).
 

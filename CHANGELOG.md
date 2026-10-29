@@ -4,6 +4,8 @@ Each version was installed and tried by the product owner on Windows 11; his fee
 version it was about, and what it led to.
 
 ## 0.11.1 — 29 Oct 2026 — Owner's requests on 0.11.0
+- **Owner (29 Oct 2026):** all 5 steps passed; release self-test 20/20 in 62.4 s (twice the usual: the Git steps
+  were slower on his PC that time, e.g. step 11 25.8 s instead of 7 s — nothing failed).
 - **New project from a file:** a folder that is not empty is refused right away with "Choose another folder…"; the
   folder dialog opens again instead of the whole process stopping.
 - **Move several items at once:** drag one of the chosen rows (Ctrl/Shift+click) — all chosen items move together,

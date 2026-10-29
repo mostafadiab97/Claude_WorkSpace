@@ -14,6 +14,8 @@ export function useChanges(open: boolean, dataVersion: number) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   /** Whether the user already answered "pull first?" since opening the view. */
   const [pullAnswered, setPullAnswered] = useState(false)
+  /** The branch reviewed like a pull request (M8-2) and its range (common ancestor → branch). */
+  const [branch, setBranch] = useState<{ name: string; range: { from: string; to: string } | null } | null>(null)
 
   // options (commits, last pull) follow every change of the data while the view is open
   useEffect(() => {
@@ -32,7 +34,7 @@ export function useChanges(open: boolean, dataVersion: number) {
     }
   }, [open, dataVersion])
 
-  const range = options ? rangeOf(preset, options, custom) : null
+  const range = options ? rangeOf(preset, options, custom, branch?.range ?? null) : null
   const key = range ? `${range.from}..${range.to}` : ''
   // the working folder changes with every save, so uncommitted changes are compared again then
   const reload = range?.to === WORKING ? dataVersion : 0
@@ -64,6 +66,19 @@ export function useChanges(open: boolean, dataVersion: number) {
       setPreset(p)
       setSelectedId(null)
       if (p !== 'lastPull') setPullAnswered(false)
+    },
+    branch,
+    /** Shows what `name` would bring into the current branch. */
+    chooseBranch: async (name: string): Promise<void> => {
+      setSelectedId(null)
+      setPreset('branch')
+      setBranch({ name, range: null })
+      try {
+        const r = await window.reqman.branchRange(name)
+        setBranch({ name, range: r })
+      } catch (e) {
+        setError(errorMessage(e))
+      }
     },
     custom,
     setCustom,

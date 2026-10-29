@@ -1,7 +1,7 @@
 // PUBLIC ENTRY of the self-test module. Other code may import only from this file.
 // Responsibility: the RELEASE SELF-TEST the owner runs on his own PC after each update (Diagnostics →
 // "Run release self-test"). It does the main things a user does — create, edit, move, link, suspect links,
-// commit, push, a colleague's change, a pull that stops on a clash, undo + discard, pull, compare, history,
+// commit, push, a colleague's change, a pull that asks per requirement, branches, compare, history,
 // export, a renamed file — on a PRACTICE repository with a fake "GitHub" (a bare repository) in a temporary
 // folder. It never touches the user's repositories or Git settings, and deletes everything afterwards.
 // Why on his PC: the automated tests run on GitHub's Windows machines; this checks the things only his PC
@@ -10,7 +10,7 @@ import { execFile } from 'node:child_process'
 import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import type { ReleaseSelfTestResult, ReleaseSelfTestStep } from '../../shared/api'
+import type { MergePlan, ReleaseSelfTestResult, ReleaseSelfTestStep } from '../../shared/api'
 import { readReqif, readXlsx, writeXlsx } from '../import-export'
 import type { WorkspaceService } from '../workspace'
 
@@ -169,26 +169,29 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       await git(colleague, ['push', '-q'])
     })
 
-    await step('Pull stops on an item changed on both sides', async () => {
+    let plan: MergePlan | undefined
+    await step('Pull asks per requirement when both changed the same part', async () => {
       await edit('req', (it) => (it.title = 'Temperature accuracy (mine)'))
+      await edit('test', (it) => (it.fields['status'] = 'Review')) // another item: must simply survive the pull
       const c = await W().commit('My edit')
       expect(c.ok, c.message)
       const p = await W().pull()
-      expect(!p.ok && (p.items ?? []).some((i) => i.id === id('req')), `Pull did not stop on the clash: ${p.message}`)
+      plan = p.ok ? undefined : p.plan
+      expect(plan && plan.questions.length === 1 && plan.questions[0]?.id === id('req') && plan.questions[0]?.parts.map((x) => x.key).join() === 'title', `The pull did not ask about the title of ${id('req')}: ${p.message}`)
       const d = await W().getItem(id('req'))
-      expect(d?.item.title === 'Temperature accuracy (mine)', 'The stopped pull changed my item.')
+      expect(d?.item.title === 'Temperature accuracy (mine)', 'The pull changed my item before I decided.')
     })
 
-    await step('Undo my commit, discard, pull', async () => {
-      const u = await W().undoLastCommit()
-      expect(u.ok, u.message)
-      const st = await W().gitState()
-      const d = await W().discardChanges(st.changes.map((c) => c.path))
-      expect(d.ok, d.message)
-      const p = await W().pull()
-      expect(p.ok, p.message)
+    await step('Take their title, finish the pull, push', async () => {
+      if (!plan) return
+      const q = plan.questions[0]
+      const r = await W().finishPull(plan, q ? { [q.path]: { title: 'theirs' } } : {})
+      expect(r.ok, r.message)
       const it = await W().getItem(id('req'))
       expect(it?.item.title === 'Temperature accuracy (colleague)', 'After the pull the item does not have the colleague\'s title.')
+      expect((await W().getItem(id('test')))?.item.fields['status'] === 'Review', 'My other change was lost in the pull.')
+      const p = await W().push()
+      expect(p.ok, p.message)
     })
 
     await step('Compare: what the last pull brought in', async () => {
@@ -198,6 +201,22 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       const r = await W().compareVersions(o.lastPull.from, o.lastPull.to)
       expect(r.entries.some((e) => e.id === id('req') && e.kind === 'modified'), 'Compare does not show the colleague\'s change.')
       return `${r.durationMs} ms`
+    })
+
+    await step('Branches: create, switch, pull from a branch', async () => {
+      const made = await W().createBranch('self-test/feature')
+      expect(made.ok && made.state.branch === 'self-test/feature', made.message)
+      await edit('test', (it) => (it.title = 'Check accuracy (feature)'))
+      expect((await W().commit('Feature work')).ok, 'Commit on the new branch failed.')
+      const back = await W().switchBranch('main', 'take')
+      expect(back.ok && back.state.branch === 'main', back.message)
+      expect((await W().getItem(id('test')))?.item.title === 'Check accuracy', 'Switching back to main did not show main\'s version.')
+      const range = await W().branchRange('self-test/feature')
+      const cmp = range ? await W().compareVersions(range.from, range.to) : null
+      expect(cmp?.entries.length === 1 && cmp.entries[0]?.id === id('test'), 'Comparing the branch (like a pull request) did not show its one change.')
+      const pulled = await W().pullFrom('self-test/feature')
+      expect(pulled.ok, pulled.message)
+      expect((await W().getItem(id('test')))?.item.title === 'Check accuracy (feature)', 'Pull from the branch did not bring its change.')
     })
 
     await step('Changes view: take back one part of a change', async () => {

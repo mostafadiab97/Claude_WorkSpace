@@ -2,7 +2,8 @@
 // with exactly the credentials, SSH keys and configuration the user already has.
 // Every call passes arguments as an array (no shell), so file names and messages are never interpreted.
 import { execFile, spawn } from 'node:child_process'
-import { rm } from 'node:fs/promises'
+import { mkdtemp, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { join, normalize } from 'node:path'
 import type { GitInfo } from '../../shared/api'
 import type { CommitInfo, FileChange, GitAdapter, GitRef, GitStatus, MergeCheck, NameStatus, ReflogEntry } from './index'
@@ -12,6 +13,10 @@ export const GIT_DOWNLOAD_URL = 'https://git-scm.com/downloads/win'
 export interface RunOptions {
   cwd?: string
   timeoutMs?: number
+  /** Extra environment variables (e.g. GIT_INDEX_FILE for a temporary index, GIT_REFLOG_ACTION). */
+  env?: Record<string, string>
+  /** Text written to the program's standard input. */
+  input?: string
 }
 
 /** Runs a program and returns its stdout; rejects with a GitError. Injected so tests can fake it. */
@@ -94,7 +99,7 @@ export function readBlobs(root: string, oids: string[], timeoutMs = 120_000): Pr
 
 const defaultRunner: CommandRunner = (file, args, options = {}) =>
   new Promise((resolve, reject) => {
-    execFile(
+    const child = execFile(
       file,
       args,
       {
@@ -104,7 +109,7 @@ const defaultRunner: CommandRunner = (file, args, options = {}) =>
         maxBuffer: 64 * 1024 * 1024,
         // Never wait for a username/password typed into a terminal nobody sees; the Git Credential Manager
         // window (Git for Windows) still appears when a sign-in is needed. LC_ALL keeps messages parseable.
-        env: GIT_ENV()
+        env: { ...GIT_ENV(), ...options.env }
       },
       (error, stdout, stderr) => {
         if (!error) return resolve(stdout)
@@ -113,6 +118,10 @@ const defaultRunner: CommandRunner = (file, args, options = {}) =>
         reject(new GitError(detail || `git ${args[0] ?? ''} failed`, args, code, stdout, stderr))
       }
     )
+    if (options.input !== undefined) {
+      child.stdin?.on('error', () => {}) // reported through the callback
+      child.stdin?.end(options.input)
+    }
   })
 
 export function parseGitVersion(output: string): string | null {
@@ -193,7 +202,8 @@ export function parseOverwrittenFiles(stderr: string): string[] {
 }
 
 export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitAdapter {
-  const git = (root: string, args: string[], timeoutMs = LOCAL_TIMEOUT): Promise<string> => run('git', ['-C', root, ...args], { timeoutMs })
+  const git = (root: string, args: string[], timeoutMs = LOCAL_TIMEOUT, extra: Omit<RunOptions, 'timeoutMs'> = {}): Promise<string> =>
+    run('git', ['-C', root, ...args], { timeoutMs, ...extra })
   const configValue = async (root: string, key: string): Promise<string | null> => {
     try {
       return (await git(root, ['config', '--get', key])).trim() || null
@@ -257,23 +267,78 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
       await git(root, ['fetch', '--quiet', '--prune'], NETWORK_TIMEOUT)
     },
 
-    async checkMerge(root, upstream): Promise<MergeCheck> {
+    async checkMerge(root, upstream, ours): Promise<MergeCheck> {
       // Computes the merge in memory (Git ≥ 2.38); nothing in the working folder changes.
       try {
-        await git(root, ['merge-tree', '--write-tree', '--name-only', '--no-messages', 'HEAD', upstream])
-        return { clean: true, conflicts: [] }
+        const out = await git(root, ['merge-tree', '--write-tree', '--name-only', '--no-messages', ours ?? 'HEAD', upstream])
+        return { clean: true, conflicts: [], tree: out.trim().split(/\r?\n/)[0] ?? '' }
       } catch (e) {
         if (e instanceof GitError && e.code === 1) {
-          // stdout: tree id, then the conflicted paths, one per line
+          // stdout: tree id (with conflict markers in the clashing files), then the conflicted paths, one per line
           const lines = e.stdout.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
-          return { clean: false, conflicts: [...new Set(lines.slice(1))] }
+          return { clean: false, conflicts: [...new Set(lines.slice(1))], tree: lines[0] ?? '' }
         }
         throw e
       }
     },
 
-    async merge(root, upstream, fastForwardOnly) {
-      await git(root, fastForwardOnly ? ['merge', '--ff-only', '--quiet', upstream] : ['merge', '--no-edit', '--quiet', upstream])
+    async merge(root, upstream, fastForwardOnly, reflogAction) {
+      await git(root, fastForwardOnly ? ['merge', '--ff-only', '--quiet', upstream] : ['merge', '--no-edit', '--quiet', upstream], LOCAL_TIMEOUT, reflogAction ? { env: { GIT_REFLOG_ACTION: reflogAction } } : {})
+    },
+
+    async mergeBase(root, a, b) {
+      try {
+        return (await git(root, ['merge-base', a, b])).trim() || null
+      } catch {
+        return null // no common history
+      }
+    },
+
+    async isAncestor(root, a, b) {
+      try {
+        await git(root, ['merge-base', '--is-ancestor', a, b])
+        return true
+      } catch (e) {
+        if (e instanceof GitError && e.code === 1) return false
+        throw e
+      }
+    },
+
+    async commitTree(root, tree, files, parents, message) {
+      // A temporary index (never the user's): Git's merged tree, then the decided files on top. The working
+      // folder and the user's staged files are not touched; the caller fast-forwards to the new commit.
+      const dir = await mkdtemp(join(tmpdir(), 'reqman-merge-'))
+      const env = { GIT_INDEX_FILE: join(dir, 'index') }
+      try {
+        await git(root, ['read-tree', tree], LOCAL_TIMEOUT, { env })
+        for (const f of files) {
+          if (f.content === null) {
+            await git(root, ['update-index', '--force-remove', '--', f.path], LOCAL_TIMEOUT, { env })
+          } else {
+            const blob = (await git(root, ['hash-object', '-w', '--stdin', `--path=${f.path}`], LOCAL_TIMEOUT, { input: f.content })).trim()
+            await git(root, ['update-index', '--add', '--cacheinfo', `100644,${blob},${f.path}`], LOCAL_TIMEOUT, { env })
+          }
+        }
+        const finalTree = (await git(root, ['write-tree'], LOCAL_TIMEOUT, { env })).trim()
+        return (await git(root, ['commit-tree', finalTree, ...parents.flatMap((p) => ['-p', p]), '-m', message])).trim()
+      } finally {
+        await rm(dir, { recursive: true, force: true })
+      }
+    },
+
+    async checkBranchName(root, name) {
+      try {
+        await git(root, ['check-ref-format', '--branch', name])
+        return true
+      } catch {
+        return false
+      }
+    },
+
+    async switchBranch(root, name, create) {
+      // `git switch` carries uncommitted changes along when they do not clash, and refuses otherwise (nothing lost)
+      if (create) await git(root, ['switch', '--quiet', '-c', name, create.startPoint, ...(create.track ? ['--track'] : ['--no-track'])])
+      else await git(root, ['switch', '--quiet', name])
     },
 
     async init(root) {

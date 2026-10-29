@@ -12,6 +12,9 @@ import type {
   FieldDef,
   FolderCheck,
   GitResult,
+  BranchInfo,
+  MergeAnswers,
+  MergePlan,
   GitState,
   HistoryEntry,
   ImportPreview,
@@ -72,6 +75,13 @@ export interface WorkspaceService {
   gitState(): Promise<GitState>
   commit(message: string): Promise<GitResult>
   pull(): Promise<GitResult>
+  // Pull from a branch, decisions per requirement, branches (M8) — see merging.ts for the rules
+  pullFrom(source: string): Promise<GitResult>
+  finishPull(plan: MergePlan, answers: MergeAnswers): Promise<GitResult>
+  listBranches(): Promise<BranchInfo[]>
+  createBranch(name: string): Promise<GitResult>
+  switchBranch(name: string, changes: 'take' | 'discard'): Promise<GitResult>
+  branchRange(name: string): Promise<{ from: string; to: string } | null>
   push(): Promise<GitResult>
   discardChanges(paths: string[]): Promise<GitResult>
   setGitIdentity(name: string, email: string): Promise<GitResult>

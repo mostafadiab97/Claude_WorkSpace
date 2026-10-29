@@ -3,6 +3,33 @@
 Each version was installed and tried by the product owner on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.12.0 — 29 Oct 2026 — Branches and a pull that decides per requirement (M8)
+- **Pull no longer stops** when you and someone else changed the same item. Each item is combined part by part
+  (title, type, place in the document, text, every field, links): a part only one side changed is taken from that
+  side; links and list values (tags) from both sides are kept. Only a part **both** changed differently — or an
+  item deleted on one side and changed on the other — is shown in a window **"your decision"**: Keep yours, Take
+  theirs, or Write it myself. Nothing changes until **Finish the pull**; Cancel leaves everything as it was.
+- **Branches** (the ⎇ button in the Git bar): create a branch from the current one (uncommitted changes come
+  along), switch branches (with uncommitted changes: Commit first / Take them along — only when the other branch has
+  the same version of those items, otherwise ReqMan lists them / Discard), **Pull into …** any branch on this PC or on
+  GitHub (owner's decision 6), and **Compare** = what a branch would bring in, like a pull request on GitHub (merging
+  into main stays on GitHub, where code owners approve — decision 2). The Changes view has this as a new choice too.
+- **Same ID created on both sides** (review D-09): fixed automatically during the pull — your item gets a new ID and
+  the links/parents you added to it follow; the notice says which.
+- **"What the last pull brought in"** (review D-05) also works after `git pull --rebase` in another Git tool, and
+  ReqMan names its own pulls in Git's record.
+- Inside: the merge commit is built without touching the working folder (temporary Git index), then the folder
+  moves to it in one step — a pull either completes or changes nothing. New module code `items/merge.ts`,
+  `workspace/merging.ts`.
+- Tests: 187 unit tests (new: field-by-field merge rules; real Git with two clones — combined parts, delete vs change,
+  edited answer, stale plan, duplicate-ID repair, uncommitted edits, branches create/switch/take along/discard,
+  pull from a remote branch, the rebase case), a new e2e scenario `branches`, the journey now decides a conflict in
+  the window, and the release self-test has 21 steps (pull with a decision, branches).
+- **Owner's decisions (29 Oct 2026):** 1 switch with Commit / Discard / Take along (safe only when both branches
+  have the same version); 2 merging branches only on GitHub, ReqMan shows the differences; 3 conflicts field by field;
+  4 baselines (tags) delayed; 5 two-PC trial with two folders on his PC; 6 "Pull from branch" from any visible
+  branch; 7 pull on the same branch resolves per requirement.
+
 ## 0.11.1 — 29 Oct 2026 — Owner's requests on 0.11.0
 - **Owner (29 Oct 2026):** all 5 steps passed; release self-test 20/20 in 62.4 s (twice the usual: the Git steps
   were slower on his PC that time, e.g. step 11 25.8 s instead of 7 s — nothing failed).

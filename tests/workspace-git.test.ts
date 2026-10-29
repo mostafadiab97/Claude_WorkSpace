@@ -129,7 +129,7 @@ describe('Git in the workspace (two PCs)', { timeout: 120_000 }, () => {
     expect((await a.ws.getItem(sys))?.item.title).toBe('Temperature accuracy')
   })
 
-  it('stops a pull without changing anything when both sides changed the same item', async () => {
+  it('asks per requirement when both sides changed the same part, and changes nothing until answered', async () => {
     const { base, a, create } = await setup()
     const sys = await create(a.ws, 'system-requirement', 'Shared requirement')
     const other = await create(a.ws, 'system-requirement', 'Other requirement')
@@ -150,24 +150,23 @@ describe('Git in the workspace (two PCs)', { timeout: 120_000 }, () => {
     const headBefore = sh(b.root, 'rev-parse', 'HEAD')
     const r = await b.ws.pull()
     expect(r.ok).toBe(false)
-    expect(r.message).toMatch(/^Pull stopped — nothing was changed/)
-    expect(r.ok ? [] : r.items?.map((i) => i.label)).toEqual([`${sys} Shared requirement`])
+    const plan = r.ok ? undefined : r.plan
+    expect(plan?.questions.map((q) => [q.label, q.parts.map((p) => [p.key, p.mine, p.theirs])])).toEqual([[`${sys} Shared requirement`, [['text', 'Bob wording', 'Alice wording']]]])
     expect(sh(b.root, 'rev-parse', 'HEAD')).toBe(headBefore)
     expect(sh(b.root, 'status', '--porcelain')).toBe('')
     expect((await b.ws.getItem(sys))?.item.text).toBe('Bob wording')
 
-    // take their version, all inside ReqMan: undo the (unpushed) commit, discard the item, pull
-    let st = await b.ws.gitState()
-    expect(st).toMatchObject({ canUndoCommit: true, lastCommitMessage: 'Bob' })
-    const undone = await b.ws.undoLastCommit()
-    expect(undone.ok).toBe(true)
-    expect(undone.state.changes.map((c) => c.id)).toEqual([sys])
-    expect((await b.ws.discardChanges([undone.state.changes[0]!.path])).ok).toBe(true)
-    expect((await b.ws.pull()).ok).toBe(true)
+    // unanswered: refused; answered with their version: merged
+    expect(await b.ws.finishPull(plan!, {})).toMatchObject({ ok: false, message: 'Decide every highlighted part first.' })
+    const path = plan!.questions[0]!.path
+    const done = await b.ws.finishPull(plan!, { [path]: { text: 'theirs' } })
+    expect(done).toMatchObject({ ok: true, message: 'Pulled: 1 item changed, 1 decided by you.' })
     expect((await b.ws.getItem(sys))?.item.text).toBe('Alice wording')
-    st = await b.ws.gitState()
-    expect(st.canUndoCommit).toBe(false) // nothing of Bob's that is not on the remote
-    expect((await b.ws.undoLastCommit()).ok).toBe(false)
+    expect(sh(b.root, 'log', '-1', '--format=%s').trim()).toBe('Merge origin/main into main')
+    expect(sh(b.root, 'log', '-1', '--format=%p').trim().split(' ')).toHaveLength(2) // a real merge commit
+    expect(sh(b.root, 'status', '--porcelain')).toBe('')
+    expect((await b.ws.push()).ok).toBe(true)
+    await a.ws.pull()
 
     // different items on both sides: merged automatically
     await edit(b.ws, other, (i) => (i.text = 'Bob edits the other one'))

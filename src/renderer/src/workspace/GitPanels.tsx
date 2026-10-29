@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { GitResult, GitState, ItemChange } from '../../../shared/api'
 import { errorMessage } from '../lib/hooks'
+import { BranchMenu } from './BranchMenu'
 import { T } from '../../../shared/text'
 
 /** Last Git action's outcome, shown under the Git bar until dismissed. */
@@ -30,9 +31,19 @@ export function GitBar(props: {
   onPushOffer: (choice: 'pull-first' | 'push' | 'cancel') => void
   /** "Publish to GitHub" (M7): connect a repository without a remote to an empty GitHub repository. */
   onPublish: (url: string) => void
+  /** Branches (M8): create, switch, pull from, compare. */
+  onCreateBranch: (name: string) => Promise<boolean>
+  onSwitchBranch: (name: string, changes: 'take' | 'discard') => Promise<boolean>
+  onPullFrom: (name: string) => Promise<boolean>
+  onCompareBranch: (name: string) => void
+  onCommitFirst: () => void
 }) {
   const { state, busy, blockedReason, notice } = props
   const [publishing, setPublishing] = useState<string | null>(null)
+  const [branches, setBranches] = useState(false)
+  const closeAfter = (p: Promise<boolean>): void => {
+    void p.then((ok) => ok && setBranches(false))
+  }
   if (!state) return null
   if (!state.available) {
     return (
@@ -45,9 +56,17 @@ export function GitBar(props: {
   return (
     <div role="region" aria-label={T.git.region}>
       <div className="gitbar">
-        <span className="gitbar__branch" title={state.upstream ? T.git.remoteBranch(state.upstream) : T.git.notOnRemote}>
-          <span aria-hidden="true">⎇</span> {state.detached ? T.git.noBranch : (state.branch ?? '—')}
-        </span>
+        <button
+          type="button"
+          className={branches ? 'btn btn--small btn--active gitbar__branch' : 'btn btn--small gitbar__branch'}
+          aria-expanded={branches}
+          aria-label={T.branches.open(state.branch ?? '')}
+          title={`${T.branches.open(state.branch ?? '')}\n${state.upstream ? T.git.remoteBranch(state.upstream) : T.git.notOnRemote}`}
+          disabled={busy !== null || state.detached || state.mergeInProgress}
+          onClick={() => setBranches((v) => !v)}
+        >
+          <span aria-hidden="true">⎇</span> {state.detached ? T.git.noBranch : (state.branch ?? '—')} <span aria-hidden="true">▾</span>
+        </button>
         {state.hasRemote && (
           <span className="gitbar__sync" title={T.git.syncTooltip}>
             {state.upstream ? `↑${state.ahead} ↓${state.behind}` : T.git.notPushed}
@@ -85,6 +104,27 @@ export function GitBar(props: {
           {T.git.push(state.ahead)}
         </button>
       </div>
+      {branches && (
+        <BranchMenu
+          state={state}
+          blockedReason={blockedReason}
+          onClose={() => setBranches(false)}
+          onCreate={(n) => closeAfter(props.onCreateBranch(n))}
+          onSwitch={(n, c) => closeAfter(props.onSwitchBranch(n, c))}
+          onPullFrom={(n) => {
+            setBranches(false)
+            void props.onPullFrom(n)
+          }}
+          onCompare={(n) => {
+            setBranches(false)
+            props.onCompareBranch(n)
+          }}
+          onCommitFirst={() => {
+            setBranches(false)
+            props.onCommitFirst()
+          }}
+        />
+      )}
       {publishing !== null && !state.hasRemote && (
         <form
           className="gitbar__notice gitbar__publish"

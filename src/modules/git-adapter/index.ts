@@ -31,6 +31,8 @@ export interface MergeCheck {
   clean: boolean
   /** Files both sides changed in ways Git cannot combine. */
   conflicts: string[]
+  /** The merged tree (clashing files contain Git's conflict markers). */
+  tree: string
 }
 
 export interface CommitInfo {
@@ -85,9 +87,23 @@ export interface GitAdapter {
   /** Commits exactly these files (paths from the repository top), nothing else that may be staged or changed. */
   commitFiles(root: string, paths: string[], message: string): Promise<string>
   fetch(root: string): Promise<void>
-  /** Would merging `upstream` into HEAD conflict? Computed without touching the working folder. */
-  checkMerge(root: string, upstream: string): Promise<MergeCheck>
-  merge(root: string, upstream: string, fastForwardOnly: boolean): Promise<void>
+  /** Would merging `upstream` into `ours` (default HEAD) conflict? Computed without touching the working folder. */
+  checkMerge(root: string, upstream: string, ours?: string): Promise<MergeCheck>
+  /** `reflogAction` names the step in Git's reflog (e.g. "pull"), so "what the last pull brought in" finds it. */
+  merge(root: string, upstream: string, fastForwardOnly: boolean, reflogAction?: string): Promise<void>
+  /** The newest commit both have (null: no common history). */
+  mergeBase(root: string, a: string, b: string): Promise<string | null>
+  /** Is commit `a` contained in `b`'s history? */
+  isAncestor(root: string, a: string, b: string): Promise<boolean>
+  /**
+   * Builds a commit from `tree` with these files replaced (content null = removed), without touching the working
+   * folder or the user's index. Returns the new commit's hash (M8: the merge commit with the user's decisions).
+   */
+  commitTree(root: string, tree: string, files: { path: string; content: string | null }[], parents: string[], message: string): Promise<string>
+  /** Is this a valid new branch name? */
+  checkBranchName(root: string, name: string): Promise<boolean>
+  /** Switches to a branch; `create` makes it first (from `startPoint`, following it when `track`). */
+  switchBranch(root: string, name: string, create?: { startPoint: string; track: boolean }): Promise<void>
   /** Never forces. `setUpstream` publishes a branch that has no remote branch yet. */
   push(root: string, setUpstream?: { remote: string; branch: string }): Promise<void>
   /** Commits that changed this file, newest first, following renames. */

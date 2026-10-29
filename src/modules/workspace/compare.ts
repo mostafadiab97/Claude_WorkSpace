@@ -28,6 +28,7 @@ const reqPath = (repo: RequirementsRepo): string => relative(repo.root, repo.fol
 
 /** A pull or a merge of a remote branch in the reflog: "pull: Fast-forward", "merge origin/main: Merge made by …". */
 const PULL_STEP = /^(pull\b|merge [^\s:]+\/[^\s:]+:)/
+const REBASE_STEP = /^pull\b.*\((finish|pick|continue|reword|edit|squash|fixup)\)/
 
 /** "Text, Status · 1 link added" */
 export function summarize(diff: ItemDiff): string {
@@ -85,7 +86,14 @@ export function createCompare(git: GitAdapter) {
       ])
       let lastPull: CompareOptions['lastPull'] = null
       const i = reflog.findIndex((e) => PULL_STEP.test(e.subject))
-      const before = i >= 0 ? reflog[i + 1] : undefined
+      // `git pull --rebase` writes several steps, newest first: (finish), (pick)…, (start). The pull began before
+      // the start step (review D-05). ReqMan's own pulls are one step named "pull <branch>".
+      let first = i
+      if (i >= 0 && REBASE_STEP.test(reflog[i]?.subject ?? '')) {
+        const start = reflog.findIndex((e, k) => k >= i && /\(start\)/.test(e.subject))
+        if (start >= 0) first = start
+      }
+      const before = i >= 0 ? reflog[first + 1] : undefined
       if (i >= 0 && before) lastPull = { from: before.hash, to: (reflog[i] as { hash: string }).hash, date: (reflog[i] as { date: string }).date }
       return {
         lastPull,

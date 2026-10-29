@@ -141,6 +141,7 @@ export function ChangesView(props: {
             {T.compare.lastCommit}
           </option>
           <option value="custom">{T.compare.custom}</option>
+          <option value="branch">{T.compare.branch}</option>
         </select>
         <span className="toolbar__spacer" />
         <button type="button" className="btn" onClick={props.onClose}>
@@ -163,6 +164,25 @@ export function ChangesView(props: {
               {refOptions(true)}
             </select>
           </label>
+        </div>
+      )}
+
+      {c.preset === 'branch' && options && (
+        <div className="compare__custom">
+          <label className="field">
+            <span className="field__label">{T.compare.branchLabel}</span>
+            <select className="input" aria-label={T.compare.branchLabel} value={c.branch?.name ?? ''} onChange={(e) => void c.chooseBranch(e.target.value)}>
+              <option value="">{T.compare.choose}</option>
+              {options.refs
+                .filter((r) => r.kind !== 'tag' && !(r.kind === 'branch' && r.name === git?.branch))
+                .map((r) => (
+                  <option key={`${r.kind}-${r.name}`} value={r.name}>
+                    {T.compare.refKinds[r.kind]} {r.name}
+                  </option>
+                ))}
+            </select>
+          </label>
+          {c.branch && <p className="muted-inline">{T.compare.branchRange(c.branch.name)}</p>}
         </div>
       )}
 

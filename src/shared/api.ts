@@ -141,8 +141,61 @@ export type GitResult =
       message: string
       /** The items the message is about (e.g. changed on both sides). */
       items?: ItemChange[]
+      /** A pull needs the user's decisions first (M8): answer the questions and call finishPull. */
+      plan?: MergePlan
       state: GitState
     }
+
+// ---------- Branches and merging (M8)
+
+export interface BranchInfo {
+  /** "main", "feature-x", or "origin/feature-x" for a branch that is only on the remote */
+  name: string
+  kind: 'branch' | 'remote'
+  hash: string
+  current: boolean
+}
+
+/** One part of an item both sides changed differently (owner's decision M8-3: field by field). */
+export interface MergePart {
+  /** "title", "type", "position", "text", "field:<id>", "extra:<key>", "item" (deleted vs changed), "file" */
+  key: string
+  label: string
+  base: string
+  mine: string
+  theirs: string
+  /** The user may type a value of their own. */
+  editable: boolean
+}
+
+export interface MergeQuestion {
+  /** Repository-relative file path. */
+  path: string
+  id?: string
+  /** "REQ-K7Q3XMB Temperature accuracy", or a file name. */
+  label: string
+  parts: MergePart[]
+}
+
+export type MergeChoice = 'mine' | 'theirs' | { edit: string }
+/** Answers per question (path) and part (key). */
+export type MergeAnswers = Record<string, Record<string, MergeChoice>>
+
+/** What a pull will do, worked out without changing anything (M8-6/M8-7). Finishing uses exactly these commits. */
+export interface MergePlan {
+  /** What is pulled in: "origin/main", "feature-x" … */
+  source: string
+  head: string
+  theirs: string
+  /** Items the other side changed. */
+  incoming: number
+  /** Items both sides changed in different parts: combined automatically. */
+  combined: ItemChange[]
+  /** Items that need a decision. */
+  questions: MergeQuestion[]
+  /** Items created on both sides with the same ID (review D-09): this branch's item gets a new ID. */
+  duplicates: ItemChange[]
+}
 
 export interface HistoryEntry {
   /** Full commit hash; "working" for the uncommitted version. */
@@ -455,8 +508,26 @@ export interface ReqManApi {
   getGitState(): Promise<GitState>
   /** Commits all changes under requirements/. */
   commit(message: string): Promise<GitResult>
-  /** Fetches and merges the remote branch; stops without changing anything if items changed on both sides. */
+  /**
+   * Fetches and merges the remote branch. Items both sides changed are combined field by field; when some part was
+   * changed differently on both sides, nothing is changed yet and the result carries a `plan` with the questions.
+   */
   pull(): Promise<GitResult>
+  /** Like pull, from any branch (local or remote) into the current one (owner's decision M8-6). */
+  pullFrom(source: string): Promise<GitResult>
+  /** Completes a pull with the user's answers to the plan's questions. */
+  finishPull(plan: MergePlan, answers: MergeAnswers): Promise<GitResult>
+  /** Local branches, and remote branches that have no local branch of the same name. */
+  listBranches(): Promise<BranchInfo[]>
+  /** Creates a branch from the current one and switches to it; uncommitted changes come along. */
+  createBranch(name: string): Promise<GitResult>
+  /**
+   * Switches branch. Uncommitted changes: `take` brings them along (refused, with the blocking items, when the
+   * other branch has a different version of those files); `discard` throws them away first.
+   */
+  switchBranch(name: string, changes: 'take' | 'discard'): Promise<GitResult>
+  /** What a branch would bring into the current one, like a pull request: common ancestor → that branch. */
+  branchRange(name: string): Promise<{ from: string; to: string } | null>
   /** Never forces. Publishes the branch if it is not on the remote yet. */
   push(): Promise<GitResult>
   /** Undoes uncommitted changes of these files (paths from GitState.changes). */
@@ -570,6 +641,12 @@ export const Channels = {
   getGitState: 'git:state',
   commit: 'git:commit',
   pull: 'git:pull',
+  pullFrom: 'git:pullFrom',
+  finishPull: 'git:finishPull',
+  listBranches: 'git:listBranches',
+  createBranch: 'git:createBranch',
+  switchBranch: 'git:switchBranch',
+  branchRange: 'git:branchRange',
   push: 'git:push',
   discardChanges: 'git:discard',
   setGitIdentity: 'git:setIdentity',

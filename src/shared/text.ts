@@ -463,6 +463,7 @@ export const T = {
     busy: (what: string) => `${what}…`,
     pulling: 'Pulling',
     pushing: 'Pushing',
+    switching: 'Switching branch',
     changesTooltip: 'What changed, per requirement: your uncommitted changes (commit them here), the last pull, any two versions',
     pullFirstLabel: 'Pull first?',
     pullFirstPush: 'Get what others pushed first? Pushing fails when GitHub has commits you do not have yet.',
@@ -481,6 +482,57 @@ export const T = {
     push: (ahead: number) => `Push${ahead > 0 ? ` (${ahead})` : ''}`,
     pushTooltip: 'Send your commits to the remote (never forced)',
     blocked: 'Save or discard your edit first.'
+  },
+
+  /** The branch panel under the Git bar (M8). */
+  branches: {
+    open: (branch: string) => `Branch: ${branch} — open the branch list`,
+    label: 'Branches',
+    current: 'current branch',
+    newLabel: 'New branch name',
+    newPlaceholder: 'New branch, e.g. feature/braking',
+    create: 'Create and switch',
+    createTooltip: (from: string) => `A new branch from "${from}". Your uncommitted changes come along.`,
+    filter: 'Find a branch',
+    loading: 'Reading branches…',
+    local: 'On this PC',
+    remote: 'On the remote (GitHub)',
+    switch: 'Switch',
+    switchTooltip: (b: string) => `Work on "${b}" (the table shows that branch's requirements)`,
+    pullInto: (current: string) => `Pull into ${current}`,
+    pullTooltip: (b: string, current: string) => `Bring the changes of "${b}" into "${current}", deciding per requirement where both changed the same part`,
+    compare: 'Compare',
+    compareTooltip: (b: string, current: string) => `What "${b}" would bring into "${current}" — like a pull request on GitHub`,
+    askLabel: 'Uncommitted changes',
+    ask: (count: number, b: string) => `You have ${count} uncommitted change${s(count)}. What should happen to ${count === 1 ? 'it' : 'them'} when you switch to "${b}"?`,
+    commitFirst: 'Commit first',
+    take: (count: number) => (count === 1 ? 'Take it along' : 'Take them along'),
+    takeTooltip: 'Possible when the other branch has the same version of these items; otherwise ReqMan lists the ones in the way',
+    discard: (count: number) => `Discard ${count === 1 ? 'it' : `all ${count}`}`
+  },
+
+  /** The window for decisions during a pull (M8). */
+  mergeDialog: {
+    title: (source: string) => `Pull from ${source}: your decision`,
+    intro: (incoming: number, combined: number, questions: number) =>
+      `${incoming} item${s(incoming)} changed there. ${combined > 0 ? `${combined} changed on both sides in different parts and ${combined === 1 ? 'was' : 'were'} combined automatically. ` : ''}${questions} item${s(questions)} changed the same part differently — decide below. Nothing changes until you finish.`,
+    duplicates: (labels: string) => `Created on both sides with the same ID (yours will get a new ID): ${labels}`,
+    openTooltip: 'Show this item in the table (your version)',
+    partLabel: (label: string) => `Decision: ${label}`,
+    before: (base: string) => `before both changes: ${base}`,
+    yours: 'Yours (this branch)',
+    theirs: 'Theirs (being pulled in)',
+    empty: '(empty)',
+    keepYours: 'Keep yours',
+    takeTheirs: 'Take theirs',
+    edit: 'Write it myself',
+    editLabel: (label: string) => `Your value for ${label}`,
+    allMine: 'Keep all of yours',
+    allTheirs: 'Take all of theirs',
+    progress: (done: number, total: number) => `${done} of ${total} decided`,
+    cancelTooltip: 'Close without pulling — nothing was changed',
+    finish: 'Finish the pull',
+    finishing: 'Finishing…'
   },
 
   changesPanel: {
@@ -548,6 +600,9 @@ export const T = {
     uncommitted: 'Uncommitted changes (last commit → working folder)',
     lastCommit: 'The last commit that changed requirements',
     custom: 'Choose two versions…',
+    branch: 'What a branch would bring in (like a pull request)…',
+    branchLabel: 'Branch to review',
+    branchRange: (b: string) => `What "${b}" would bring in — from the last common version to "${b}"`,
     exportCsv: 'Export CSV',
     exportCsvTooltip: 'One row per changed item and per change — opens in Excel',
     exportMd: 'Export Markdown',
@@ -689,6 +744,38 @@ export const T = {
     notCommitted: 'Not committed yet',
     tidyCommit: (count: number) => `Tidy positions of ${count} item${s(count)} (shorter order keys)`,
     notInHistory: (hash: string, id: string) => `Commit ${hash} is not in the history of ${id}.`
+  },
+
+  /** Pull with decisions per requirement and branches (M8). */
+  merge: {
+    wholeItem: 'The item',
+    deleted: 'Deleted',
+    changed: 'Changed',
+    title: 'Title',
+    type: 'Type',
+    position: 'Place in the document',
+    under: (parent: string) => `Under ${parent}`,
+    topLevel: 'At the top level',
+    text: 'Text',
+    file: 'The whole file',
+    fileMine: 'Your version',
+    fileTheirs: 'Their version',
+    outside: (files: string) => `Pull stopped — nothing was changed. Files outside the requirements folder were changed on both sides (${files}). Combine them with Git outside ReqMan first.`,
+    unanswered: 'Decide every highlighted part first.',
+    moved: 'Something changed in the meantime (a commit or another pull). Pull again.',
+    pulled: (items: number, combined: number, decided: number) =>
+      `${items > 0 ? `Pulled: ${items} item${s(items)} changed` : 'Pulled. No items changed'}${combined > 0 ? `, ${combined} combined automatically` : ''}${decided > 0 ? `, ${decided} decided by you` : ''}.`,
+    duplicate: (id: string, newId: string) => ` ${id} was also created on the other side for a different item: yours is now ${newId} (links to it updated).`,
+    needsDecision: (count: number) => `${count} item${s(count)} changed differently on both sides. Decide which version to keep — nothing changes until you finish.`,
+    mergeMessage: (source: string, branch: string) => `Merge ${source} into ${branch}`,
+    noSuchBranch: (name: string) => `There is no branch "${name}".`,
+    sameBranch: 'That is the current branch.',
+    badName: (name: string) => `"${name}" cannot be a branch name. Use letters, digits, - and / (no spaces).`,
+    exists: (name: string) => `A branch "${name}" exists already.`,
+    created: (name: string) => `Created the branch "${name}" and switched to it. Push publishes it.`,
+    switched: (name: string) => `Switched to "${name}".`,
+    blocking: 'These items are different on the other branch, so your uncommitted changes cannot come along. Commit or discard them first.',
+    nothingToPull: (source: string) => `Already up to date — "${source}" has nothing this branch does not have.`
   },
 
   /** Messages the core sends after item operations. */

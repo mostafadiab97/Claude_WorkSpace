@@ -5,7 +5,7 @@
 import { createHash } from 'node:crypto'
 import { mkdir } from 'node:fs/promises'
 import { basename, relative, resolve } from 'node:path'
-import type { FolderCheck, GitResult, ImportSettings, ImportSource, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
+import type { FolderCheck, GitResult, ImportSettings, MergeAnswers, MergePlan, ImportSource, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
 import type { GitAdapter } from '../git-adapter'
 import type { IndexCache } from '../index-cache'
 import type { Logger } from '../logger'
@@ -14,6 +14,7 @@ import { createCompare } from './compare'
 import { queryAll, syncInfo, type Session, type WorkspaceContext } from './context'
 import { createExportOps } from './exporting'
 import { createGitOps } from './gitOps'
+import { createMerging } from './merging'
 import type { WorkspaceService } from './index'
 import { createImportOps } from './importing'
 import { createItemOps } from './itemOps'
@@ -136,6 +137,8 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     }
   })
 
+  const merging = createMerging({ git, log, resync: () => ctx.resyncAll(need()), ops: gitOps })
+
   function closeSession(): void {
     session?.watch?.close()
     session?.index.close()
@@ -253,7 +256,13 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
 
     gitState: q(() => gitOps.state(need())),
     commit: q((message: string) => gitOps.commit(need(), message)),
-    pull: q(() => gitOps.pull(need())),
+    pull: q(() => merging.pull(need())),
+    pullFrom: q((source: string) => merging.pullFrom(need(), source)),
+    finishPull: q((plan: MergePlan, answers: MergeAnswers) => merging.finishPull(need(), plan, answers)),
+    listBranches: () => merging.listBranches(need()),
+    createBranch: q((name: string) => merging.createBranch(need(), name)),
+    switchBranch: q((name: string, changes: 'take' | 'discard') => merging.switchBranch(need(), name, changes)),
+    branchRange: (name: string) => merging.branchRange(need(), name),
     push: q(() => gitOps.push(need())),
     discardChanges: q((paths: string[]) => gitOps.discard(need(), paths)),
     setGitIdentity: q((name: string, email: string) => gitOps.setIdentity(need(), name, email)),

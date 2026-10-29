@@ -386,6 +386,8 @@ all fine. The two-PC trial is postponed (only one user for now).
   6. *Pull from branch:* besides the normal pull, ReqMan can bring any visible branch (local or on GitHub, not just
      `main`) into the current branch, with the same per-requirement resolution as 3.
   7. *Pull on the same branch* resolves per requirement (3) instead of stopping (answer "a").
+- **Done in 0.12.0 (29 Oct 2026):** M8 decisions 1, 2, 3, 6, 7 built; S-05 (field-level 3-way merge), D-09 (automatic
+  duplicate-ID repair) and D-05 (rebase-aware last pull, ReqMan's pulls named in the reflog) closed. Baselines (4) delayed.
 - **Done in 0.11.0 (29 Oct 2026):** O-07 phases 1 + 2 — Excel/CSV/ReqIF import wizard, Excel and ReqIF export, "New
   project from a file", "Update the Excel file", "Publish to GitHub", export of chosen items.
 

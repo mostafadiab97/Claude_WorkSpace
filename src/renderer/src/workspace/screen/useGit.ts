@@ -1,7 +1,7 @@
 // The Git bar's state and actions (review S-03: grouped out of WorkspaceScreen). No automatic pulls: Push first
 // offers to pull (owner's decision O-06).
 import { useEffect, useState } from 'react'
-import type { GitResult, GitState } from '../../../../shared/api'
+import type { GitResult, GitState, MergePlan } from '../../../../shared/api'
 import { T } from '../../../../shared/text'
 import { errorMessage } from '../../lib/hooks'
 import type { GitNotice } from '../GitPanels'
@@ -12,6 +12,8 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
   const [busy, setBusy] = useState<string | null>(null)
   const [notice, setNotice] = useState<GitNotice | null>(null)
   const [pushOffer, setPushOffer] = useState(false)
+  /** A pull that needs decisions (M8): the merge window is open while this is set. */
+  const [plan, setPlan] = useState<MergePlan | null>(null)
 
   // Git status follows every change of the data (saves, moves, links, refresh on window focus).
   useEffect(() => {
@@ -30,15 +32,19 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
 
   const blocked = dirty ? T.git.blocked : null
 
-  /** Runs pull or push; true when it worked. */
-  const run = async (action: 'pull' | 'push'): Promise<boolean> => {
-    setBusy(action === 'pull' ? T.git.pulling : T.git.pushing)
+  /** Runs a Git action that may change files and shows its outcome; true when it worked. */
+  const perform = async (label: string, op: () => Promise<GitResult>): Promise<boolean> => {
+    setBusy(label)
     setNotice(null)
     try {
-      const r = await window.reqman[action]()
+      const r = await op()
       setState(r.state)
+      if (!r.ok && r.plan) {
+        setPlan(r.plan) // the merge window asks; nothing changed yet
+        return false
+      }
       setNotice({ ok: r.ok, message: r.message, ...(!r.ok && r.items ? { items: r.items } : {}) })
-      if (r.ok) await afterChange() // a pull changes items; a push may tidy positions
+      if (r.ok) await afterChange() // a pull or a switch changes items; a push may tidy positions
       return r.ok
     } catch (e) {
       setNotice({ ok: false, message: errorMessage(e) })
@@ -46,6 +52,17 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
     } finally {
       setBusy(null)
     }
+  }
+  /** Runs pull or push; true when it worked. */
+  const run = (action: 'pull' | 'push'): Promise<boolean> => perform(action === 'pull' ? T.git.pulling : T.git.pushing, () => window.reqman[action]())
+
+  /** The merge window closed: finished (result) or cancelled (null). */
+  const mergeDone = (r: GitResult | null): void => {
+    setPlan(null)
+    if (!r) return
+    setState(r.state)
+    setNotice({ ok: r.ok, message: r.message, ...(!r.ok && r.items ? { items: r.items } : {}) })
+    if (r.ok) void afterChange()
   }
 
   /** "Publish to GitHub": add the remote and push for the first time. */
@@ -97,6 +114,11 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
     requestPush,
     publish: (url: string) => void publish(url),
     pushOffer,
-    answerPush: (c: 'pull-first' | 'push' | 'cancel') => void answerPush(c)
+    answerPush: (c: 'pull-first' | 'push' | 'cancel') => void answerPush(c),
+    plan,
+    mergeDone,
+    pullFrom: (name: string) => perform(T.git.pulling, () => window.reqman.pullFrom(name)),
+    createBranch: (name: string) => perform(T.git.switching, () => window.reqman.createBranch(name)),
+    switchBranch: (name: string, changes: 'take' | 'discard') => perform(T.git.switching, () => window.reqman.switchBranch(name, changes))
   }
 }

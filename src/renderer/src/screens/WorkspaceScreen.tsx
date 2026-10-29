@@ -6,6 +6,7 @@ import { ItemEditor, type EditorTarget } from '../workspace/ItemEditor'
 import { FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
 import { ChangesSide, ChangesView } from '../workspace/ChangesView'
 import { GitBar } from '../workspace/GitPanels'
+import { MergeDialog } from '../workspace/MergeDialog'
 import { ExportDialog } from '../workspace/ExportDialog'
 import { ImportDialog } from '../workspace/ImportDialog'
 import { RowMenu } from '../workspace/RowMenu'
@@ -170,6 +171,23 @@ export function WorkspaceScreen({ info, onInfo, importFile }: { info: RepoInfo; 
           pushOffer={git.pushOffer}
           onPushOffer={git.answerPush}
           onPublish={git.publish}
+          onCreateBranch={git.createBranch}
+          onSwitchBranch={async (name, how) => {
+            const ok = await git.switchBranch(name, how)
+            // the open item may not exist on the other branch: start from the table
+            if (ok && !dirty) setTarget(null)
+            return ok
+          }}
+          onPullFrom={git.pullFrom}
+          onCompareBranch={(name) => {
+            if (!showChanges) git.reload()
+            setShowChanges(true)
+            void changes.chooseBranch(name)
+          }}
+          onCommitFirst={() => {
+            if (!showChanges) toggleChanges()
+            else changes.reset()
+          }}
         />
         {showChanges && git.state?.available && (
           <ChangesView
@@ -323,6 +341,8 @@ export function WorkspaceScreen({ info, onInfo, importFile }: { info: RepoInfo; 
           />
         </div>
       )}
+
+      {git.plan && <MergeDialog plan={git.plan} onDone={git.mergeDone} onOpen={select} />}
 
       {rowMenu && (
         <RowMenu

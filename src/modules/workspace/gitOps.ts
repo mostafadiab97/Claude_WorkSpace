@@ -1,14 +1,12 @@
 // The Git side of the workspace (M4): what changed, commit, pull, push, discard, per-item history.
 // Rules (decided with the product owner, 25 Oct 2026):
 //  - ReqMan commits only the requirements folder, never other project files.
-//  - Pull stops without changing anything when items were changed on both sides; it lists those items.
-//    (Resolving them item by item comes with the merge milestone.)
-//  - Push never forces. Branches are shown, not created or switched (later milestone).
+//  - Push never forces. Pull and branches live in merging.ts (M8).
 import { readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 import type { GitResult, GitState, HistoryEntry, ItemChange, ItemVersionCompare } from '../../shared/api'
 import type { Item } from '../../shared/domain'
-import { GitError, parseOverwrittenFiles, type FileChange, type GitAdapter } from '../git-adapter'
+import { GitError, type FileChange, type GitAdapter } from '../git-adapter'
 import type { IndexCache } from '../index-cache'
 import { diffItems, parseItemFile } from '../items'
 import type { Logger } from '../logger'
@@ -33,10 +31,10 @@ export interface GitOpsDeps {
   tidyBeforePush?(s: GitSession, upstream: string): Promise<number>
 }
 
-const ID_FROM_PATH = /\/items\/([^/]+)\.md$/
+export const ID_FROM_PATH = /\/items\/([^/]+)\.md$/
 
 /** "requirements" for the usual layout; forward slashes, relative to the repository top folder. */
-const reqPath = (repo: RequirementsRepo): string => relative(repo.root, repo.folder).split('\\').join('/') || '.'
+export const reqPath = (repo: RequirementsRepo): string => relative(repo.root, repo.folder).split('\\').join('/') || '.'
 
 /** Turns Git's often technical messages into something a requirements engineer can act on. */
 export function explainGitError(e: unknown): string {
@@ -198,6 +196,8 @@ export function createGitOps(deps: GitOpsDeps) {
   return {
     state,
     invalidate,
+    /** Shared with merging.ts (pull, branches). */
+    internal: { precheck, fail, done, toChange, remoteBranch },
 
     async commit(s: GitSession, message: string): Promise<GitResult> {
       const blocked = await precheck(s)
@@ -215,67 +215,6 @@ export function createGitOps(deps: GitOpsDeps) {
         log.error('Commit failed', e)
         return fail(s, explainGitError(e))
       }
-    },
-
-    async pull(s: GitSession): Promise<GitResult> {
-      const blocked = await precheck(s)
-      if (blocked) return blocked
-      const root = s.repo.root
-      let st = await state(s)
-      if (!st.hasRemote) return fail(s, T.gitMsg.noRemotePull)
-      try {
-        await git.fetch(root)
-      } catch (e) {
-        log.warn(`Fetch failed: ${String(e)}`)
-        return fail(s, explainGitError(e))
-      }
-      st = await state(s)
-      const { ref } = await remoteBranch(s, st)
-      if (!ref) return done(s, T.gitMsg.branchNotOnRemote(st.branch ?? ''))
-      if (st.upstream && st.behind === 0) return done(s, T.gitMsg.upToDate)
-
-      const before = await git.head(root)
-      const check = await git.checkMerge(root, ref).catch((e: unknown) => {
-        log.warn(`In-memory merge check unavailable (${String(e)}); relying on Git's own checks.`)
-        return { clean: true, conflicts: [] as string[] }
-      })
-      if (!check.clean) {
-        const items = check.conflicts.map((p) => toChange(s, { path: p, kind: 'conflict' }))
-        log.info(`Pull stopped: ${items.length} item(s) changed on both sides`)
-        return fail(
-          s,
-          T.gitMsg.clash,
-          items
-        )
-      }
-      try {
-        // fast-forwards when possible, otherwise a merge commit (the items differ, so it is clean)
-        await git.merge(root, ref, false)
-      } catch (e) {
-        const overwritten = e instanceof GitError ? parseOverwrittenFiles(e.stderr) : []
-        if (overwritten.length > 0) {
-          return fail(
-            s,
-            T.gitMsg.wouldOverwrite,
-            overwritten.map((p) => toChange(s, { path: p, kind: 'modified' }))
-          )
-        }
-        // Safety net (e.g. an old Git without the in-memory check): never leave a half-finished merge behind.
-        const after = await git.status(root, '.').catch(() => null)
-        const conflicted = after?.changes.filter((c) => c.kind === 'conflict') ?? []
-        if (conflicted.length > 0) {
-          await git.abortMerge(root).catch((x: unknown) => log.error('merge --abort failed', x))
-          await deps.resync()
-          return fail(s, T.gitMsg.clashShort, conflicted.map((c) => toChange(s, c)))
-        }
-        log.error('Pull failed', e)
-        return fail(s, explainGitError(e))
-      }
-      const files = before ? await git.changedFiles(root, before, 'HEAD', reqPath(s.repo)).catch(() => []) : []
-      await deps.resync()
-      const items = files.filter((f) => ID_FROM_PATH.test(f)).length
-      log.info(`Pulled ${ref}: ${files.length} file(s) under requirements changed`)
-      return done(s, T.gitMsg.pulled(items))
     },
 
     async push(s: GitSession): Promise<GitResult> {

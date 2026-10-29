@@ -1,7 +1,7 @@
 // Input checks for every call that arrives from the window (review X-01). The window is ReqMan's own code, so
 // this is about robustness: a wrong value is refused with a clear message instead of reaching a file write.
 // Each function either returns a clean value of the expected type or throws.
-import type { ExportItemsRequest, FieldDef, ImportSettings, ImportTarget, Item, ItemQuery, Link, LinkDecision, RevertPart, SortKey } from '../shared/api'
+import type { ExportItemsRequest, FieldDef, ImportSettings, ImportTarget, Item, ItemQuery, Link, LinkDecision, MergeAnswers, MergeChoice, MergePlan, RevertPart, SortKey } from '../shared/api'
 
 const MAX = 4096
 /** Order keys (see modules/items/orderKey.ts): base-62 digits, at most 200 characters. */
@@ -56,6 +56,29 @@ export function linkDecisions(v: unknown): LinkDecision[] {
     if (!isObj(d) || typeof d.keep !== 'boolean') return bad('link decision')
     return { source: str(d.source, 'source'), type: str(d.type, 'link type'), target: str(d.target, 'target'), keep: d.keep }
   })
+}
+
+const HASH = /^[0-9a-f]{0,64}$/
+/** Finishing a pull uses only which commits were planned; everything else is worked out again (M8). */
+export function mergePlan(v: unknown): MergePlan {
+  if (!isObj(v) || typeof v.head !== 'string' || !HASH.test(v.head) || typeof v.theirs !== 'string' || !HASH.test(v.theirs) || !v.theirs) return bad('pull plan')
+  return { source: str(v.source, 'branch'), head: v.head, theirs: v.theirs, incoming: 0, combined: [], questions: [], duplicates: [] }
+}
+
+export function mergeAnswers(v: unknown): MergeAnswers {
+  if (!isObj(v)) return bad('answers')
+  const out: MergeAnswers = {}
+  for (const [path, parts] of Object.entries(v)) {
+    if (!isObj(parts)) return bad('answers')
+    const clean: Record<string, MergeChoice> = {}
+    for (const [key, c] of Object.entries(parts)) {
+      if (c === 'mine' || c === 'theirs') clean[key] = c
+      else if (isObj(c) && typeof c.edit === 'string' && c.edit.length <= MAX_TEXT) clean[key] = { edit: c.edit }
+      else return bad('answer')
+    }
+    out[str(path, 'file')] = clean
+  }
+  return out
 }
 
 const TARGET = /^(ignore|id|number|title|text|type|parent|level|links|linkedFrom|(field|link|linkFrom):[A-Za-z0-9_-]{1,64})$/

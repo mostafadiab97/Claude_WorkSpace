@@ -93,7 +93,7 @@ describe('git-adapter with real repositories', { timeout: 90_000 }, () => {
     st = await git.status(b, 'requirements')
     expect(st.upstream).toBe('origin/main')
     expect(st.behind).toBe(1)
-    expect(await git.checkMerge(b, 'origin/main')).toEqual({ clean: true, conflicts: [] })
+    expect(await git.checkMerge(b, 'origin/main')).toMatchObject({ clean: true, conflicts: [] })
     await git.merge(b, 'origin/main', true)
     expect(lf(await readFile(join(b, 'requirements/items/SYS-1.md'), 'utf8'))).toBe('one, edited\n')
   })
@@ -120,7 +120,7 @@ describe('git-adapter with real repositories', { timeout: 90_000 }, () => {
     const st = await git.status(b, 'requirements')
     expect([st.ahead, st.behind]).toEqual([1, 1])
     const check = await git.checkMerge(b, 'origin/main')
-    expect(check).toEqual({ clean: false, conflicts: ['requirements/items/SYS-1.md'] })
+    expect(check).toMatchObject({ clean: false, conflicts: ['requirements/items/SYS-1.md'] })
     expect(sh(b, 'status', '--porcelain')).toBe('') // nothing touched
 
     // different items: merges cleanly

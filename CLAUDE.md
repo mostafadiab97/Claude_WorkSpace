@@ -116,7 +116,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.11.1, 29 Oct 2026) — prototype complete; Changes view; Excel + ReqIF exchange
+## Status (v0.12.0, 29 Oct 2026) — prototype complete; Changes view; Excel + ReqIF; branches + per-requirement pull
 
 | Milestone | State |
 | --- | --- |
@@ -132,16 +132,18 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | 0.10.0 Changes view — one view for uncommitted + compare, split difference with ↶ per part, Keep/Unlink window, no automatic pulls, column widths | Done (v0.10.0) |
 | 0.11.0 M7 Excel + ReqIF — import wizard (xlsx/csv/reqif), Excel + ReqIF export, chosen items, update the Excel file, new project from a file, publish to GitHub | Done (v0.11.0) |
 | 0.11.1 owner's requests — non-empty folder asks again, move several chosen items, auto-scroll while dragging, discard chosen/all in Changes, one export entry in the row menu, ReqIF validated against the official schema in tests | Done (v0.11.1) |
-| **0.12.0 M8 branches** (create/switch, tags as baselines, per-requirement merge S-05, D-09, D-05) | **Next** |
+| 0.12.0 M8 branches — create/switch (commit / take along / discard), pull and "pull from branch" with field-level 3-way merge + decision window (S-05), compare a branch like a PR, duplicate-ID repair (D-09), D-05; tag baselines delayed | Done (v0.12.0) |
+| **Next** | owner's 0.12.0 checklist (= the two-folder trial); then plan with him (candidates from the ReqView comparison: traceability matrix / coverage M9, Word/PDF export, comments, baselines) | — |
 
-Owner's last report (29 Oct 2026): 0.11.1 all 5 steps passed, self-test 20/20 (62 s — Git steps slower on his PC).
+**0.12.0 released (29 Oct 2026)** — waiting for the owner's checklist (it is the two-folder trial: clone the sandbox a
+second time as `Claude_SandBox_B`). Owner's last report (29 Oct 2026): 0.11.1 all 5 steps passed, self-test 20/20 (62 s — Git steps slower on his PC).
 Before that 0.11.0 passed too; his five requests went into 0.11.1. He has no
 DOORS/Jama to try ReqIF: exports are validated against the official schema in `tests/reqif.test.ts`
 (`tests/fixtures/reqif-schema/`, xmllint-wasm). Two-PC trial postponed (needed for 0.12.0).
 
-Automated tests: 170 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
+Automated tests: 187 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
 repository and two clones ("PC A", "PC B"), the release self-test itself, the sandbox's chapter-9 promises
-(`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `excel` (new project from the sample file, chosen-items export, update the file, ReqIF round trip,
+(`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `branches` (create, switch back, compare like a PR, pull into main, the uncommitted-changes question), `excel` (new project from the sample file, chosen-items export, update the file, ReqIF round trip,
 publish), `journey` (~75 checks, the
 whole user story, incl. the Changes view, ↶, Keep/Unlink window, push offer) and `fixes` (renamed file, lazy Expand all,
 column width drag, Changes view layout + split difference, second start, release self-test in the window).
@@ -151,11 +153,20 @@ Export of all 10,005 sandbox items: CSV 0.46 s (3.1 MB), Markdown 0.43 s. CI run
 Measured on the sandbox (10,005 items, Linux container): open incl. first indexing 5–8 s, expand all 0.4–0.6 s,
 scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 50k first index 18–73 s (Defender).
 
+## M8 notes (0.12.0) — built
+
+- `items/merge.ts` = pure 3-way merge per item; `workspace/merging.ts` = pull / pullFrom / finishPull / branches.
+  `pull()` returns `{ ok:false, plan }` when questions remain; `finishPull(plan, answers)` re-analyses with the
+  planned commit hashes (refuses if HEAD moved). Merge commit built with `commitTree` (temporary `GIT_INDEX_FILE`),
+  then `merge --ff-only <commit>` with `GIT_REFLOG_ACTION="pull <source>"` (so lastPull finds it).
+- The old "pull stops on a clash" path and its texts are gone; Undo last commit + Discard still exist.
+- Skills: use `release-to-owner` for every release and `owner-decision-walkthrough` for every question round
+  (owner asked 29 Oct how much the skills helped: honest answer — they were not loaded before; CLAUDE.md duplicated them).
+
 ## M4 decisions (owner, 25 Oct 2026) — already built
 
-- Pull that finds items changed on both sides **stops without changing anything** and lists them; per-item
-  resolution is FR-13 (MVP). Until then: Undo last commit (if unpushed) + Discard = take their version.
-- Branch is **shown only**; creating/switching branches is FR-12 (MVP).
+- ~~Pull that finds items changed on both sides stops~~ — replaced in 0.12.0 by per-requirement decisions (M8-7).
+- ~~Branch is shown only~~ — create/switch since 0.12.0.
 - ReqMan commits **only `requirements/`** (`git add --all -- requirements` + `git commit --only -- requirements`).
 - Implementation notes: `src/modules/workspace/gitOps.ts` (rules + messages), `src/modules/git-adapter/systemGit.ts`
   (commands). In-memory conflict check = `git merge-tree --write-tree` (Git ≥ 2.38; owner has 2.47); if it is
@@ -184,10 +195,10 @@ The owner's tests of 0.5.0–0.7.0 all passed (27 Oct). His requests O-01–O-07
 sandbox converted) → 0.10.0 Changes view (O-04/O-05/O-06) → 0.11.0 M7 Excel + ReqIF (ReqIF merged in, owner 29 Oct
 2026) → 0.12.0 M8 branches.
 
-**0.11.1 released (29 Oct 2026)** — waiting for the owner's 5-step checklist. **Next: 0.12.0 M8 branches** (DESIGN.md
-"Release plan"): create/switch branches, tags as baselines, per-requirement 3-way merge on pull (S-05, FR-13),
-duplicate-ID repair (D-09), D-05. Walk the owner through the open M8 questions first (owner-decision-walkthrough) and
-plan the two-PC trial with him (it is the real test of merging).
+**0.12.0 released (29 Oct 2026)** — M8 done (decisions 1–7 in the review file, section F). Waiting for his checklist
+(the two-folder trial). Next: ask him what comes after M8 (owner-decision-walkthrough); the ReqView comparison
+(answered in chat 29 Oct) listed the gaps: traceability matrix/coverage, Word/PDF export, comments, rich text,
+baselines (delayed by him).
 The owner is a C developer new to this field: explain from first principles, short, C analogies where useful.
 Record decisions in the review file / DESIGN.md.
 
@@ -285,6 +296,10 @@ Everything else must be automated (unit tests, e2e in CI, the in-app release sel
   round trips (10,005 unchanged) is the check — `previewImport` only returns the first 300 rows.
 - **E2E drag to a row off screen:** Playwright's `dragTo` scrolls the table between pressing and moving; the
   virtual table reuses row elements, so the drag starts on another item. Drag to a row that is on screen.
+- **E2E role names are substring matches:** a branch button labelled "…pull from other branches" made
+  `getByRole('button', { name: 'Pull' })` find two buttons. Keep labels of new buttons free of other buttons' words.
+- **Git bar state lags a save by ~250 ms:** panels that decide on `state.changes` right after a save (branch switch
+  question) must ask `getGitState()` again (BranchMenu does).
 - **Dependabot:** read each proposal before merging (CI must be green; see the ignore list in `.github/dependabot.yml`).
   TypeScript majors wait for typescript-eslint support (PR #5: `npm ci` ERESOLVE); `@types/node` follows the Node.js
   inside Electron (Electron 45 = Node 24, so `^24`; PR #6). Merging/closing PRs needs the owner's yes (his repo).

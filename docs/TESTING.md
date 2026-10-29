@@ -3,7 +3,7 @@
 Three kinds of checks protect each version:
 
 1. **Automated checks** run on a Windows machine on GitHub for every push: type checking, lint rules
-   (including the module-boundary rules), about 130 unit tests (real Git with a fake "GitHub", the sandbox's
+   (including the module-boundary rules), about 190 unit tests (real Git with a fake "GitHub", the sandbox's
    broken files, …), performance tests, and end-to-end scenarios that click through the real app. A build that
    fails any of them produces no installer. To see them: repository → **Actions** → latest **Build** run.
 2. **The release self-test** (from 0.8.0) — on *your* PC, inside ReqMan: **⚙ Settings & diagnostics → Run
@@ -53,7 +53,22 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.11.1 (your requests on 0.11.0)
+## Manual test checklist — v0.12.0 (branches, pull with decisions — the two-folder trial)
+
+0.12.0 brings branches and a pull that decides **per requirement** instead of stopping. Steps 2–5 are the two-PC
+trial you chose, with two folders on your PC: **A** = your sandbox clone, **B** = a second clone. Make B once:
+in a terminal in the folder above your sandbox, `git clone https://github.com/mostafadiab97/Claude_SandBox.git Claude_SandBox_B`.
+Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.12.0**, then **⚙ → Run release self-test**. | App shows 0.12.0; **All steps passed**, **21** ✓ (new: the pull asks per requirement; branches). |
+| 2 | In **A**: change the **title** of one requirement, Save, commit, **Push**. **Close repository**, open **B**: change the **title** of the same requirement differently **and** its **Status**, Save, commit, **Pull**. | A window **"Pull from origin/main: your decision"** asks only about the **Title** (yours and theirs side by side); the Status change needs no question. Nothing changes until you finish — try **Cancel** once, then Pull again. |
+| 3 | In the window: **Write it myself** (combine both titles) → **Finish the pull**, then **Push** (without pulling). | Notice "Pulled: 1 item changed, 1 decided by you"; the table shows your combined title **and** your Status. Push works (one real push). |
+| 4 | In **B**: click the branch button **⎇ main ▾** → type `trial/one` → **Create and switch**. Change one item, Save, commit, **Push** (publishes the branch). Open **A**, **Pull**, click **⎇ main ▾**: at **origin/trial/one** click **Compare**, then (⎇ again) **Pull into main**. | Compare opens Changes on "What a branch would bring in" with exactly that one item. **Pull into main** brings it: "Pulled: 1 item changed". (Merging into main is normally done on GitHub as a pull request — this is the local view of it.) |
+| 5 | In **A**: change any item, Save (don't commit). **⎇ → Switch** at **trial/one**. Choose **Take it along**. | First a question with **Commit first / Take it along / Discard it / Cancel**. It switches to `trial/one` with your change still there (or lists the item if `trial/one` has another version of it — then choose Discard or Commit first). |
+
+## Previous checklist — v0.11.1 (your requests on 0.11.0)
 
 Small release with the five things you asked for after 0.11.0. Report by step number.
 

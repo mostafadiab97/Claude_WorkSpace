@@ -370,6 +370,19 @@ all fine. The two-PC trial is postponed (only one user for now).
   list (a kept link's confirmation was hidden) — both fixed in 0.11.0. **Decision: ReqIF is merged into 0.11.0**
   (fewer test rounds); branches stay alone in 0.12.0 (two-PC trial). Asked for a GitHub-vs-RM-tool comparison
   (answered in chat, not stored).
+- **M8 / 0.12.0 decisions (owner, 29 Oct 2026):**
+  1. *Switching branches with uncommitted changes:* offer **Commit first**, **Discard**, or **Take the changes along**
+     (common in his team: new branch from the current one, changes move with it). "Take along" only when it is safe:
+     every changed file is the same on both branches (always true for a new branch from the current one); otherwise
+     ReqMan lists the items that block it.
+  2. *Merging branches only on GitHub* (pull requests, code owners approve; ReqMan has no access rights yet). ReqMan
+     shows the differences between two branches per requirement — a local pull-request review. Creating, approving and
+     merging pull requests inside ReqMan may come later, with access rights.
+  3. *Conflicts field by field* (3-way: base / mine / theirs); only the same field (or text) changed differently on
+     both sides, or delete vs change, asks "mine / theirs / edit".
+  4. *Baselines (tags):* open — owner asked whether they can be validated like pull requests (see the answer of
+     29 Oct: GitHub cannot require a review for a tag; it can restrict who creates tags and block deletion).
+  5. *Two-PC trial:* two folders (two clones of the sandbox) on his PC.
 - **Done in 0.11.0 (29 Oct 2026):** O-07 phases 1 + 2 — Excel/CSV/ReqIF import wizard, Excel and ReqIF export, "New
   project from a file", "Update the Excel file", "Publish to GitHub", export of chosen items.
 

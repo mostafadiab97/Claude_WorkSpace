@@ -7,6 +7,13 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # typescript-eslint (the code checker) supports TypeScript only up to 6.x yet — see closed PR #5
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # must match the Node.js inside Electron (Electron 45 = Node 24) — see closed PR #6
+      - dependency-name: "@types/node"
+        versions: [">=25"]
     groups:
       # one pull request for all small updates of development tools
       dev-tools:

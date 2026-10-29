@@ -285,5 +285,8 @@ Everything else must be automated (unit tests, e2e in CI, the in-app release sel
   round trips (10,005 unchanged) is the check — `previewImport` only returns the first 300 rows.
 - **E2E drag to a row off screen:** Playwright's `dragTo` scrolls the table between pressing and moving; the
   virtual table reuses row elements, so the drag starts on another item. Drag to a row that is on screen.
+- **Dependabot:** read each proposal before merging (CI must be green; see the ignore list in `.github/dependabot.yml`).
+  TypeScript majors wait for typescript-eslint support (PR #5: `npm ci` ERESOLVE); `@types/node` follows the Node.js
+  inside Electron (Electron 45 = Node 24, so `^24`; PR #6). Merging/closing PRs needs the owner's yes (his repo).
 - **Electron downloads its program on first use:** two scenarios starting at once failed on Windows ("file in
   use") — `e2e/run.mjs` imports `electron` once before starting them.

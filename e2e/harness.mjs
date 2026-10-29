@@ -66,6 +66,11 @@ export async function launch({ openPath, userData = temp('user'), prefix = '' } 
         const queue = [...list]
         dialog.showOpenDialog = async () => (queue.length ? { canceled: false, filePaths: [queue.shift()] } : { canceled: true, filePaths: [] })
       }, paths),
+    /** Message boxes: answer with the button at this index. */
+    answerMessageBox: (response) =>
+      app.evaluate(({ dialog }, r) => {
+        dialog.showMessageBox = async () => ({ response: r, checkboxChecked: false })
+      }, response),
     /** Save dialogs (export): answer with this file. */
     saveAs: (file) =>
       app.evaluate(({ dialog }, f) => {

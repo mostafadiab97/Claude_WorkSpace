@@ -122,13 +122,19 @@ export function WorkspaceScreen({ info, onInfo, importFile }: { info: RepoInfo; 
     request({ kind: 'draft', item })
   }
 
-  const onMove = async (id: string, parent: string | null, before: string | null): Promise<void> => {
-    if (dirty && target?.kind === 'item' && target.id === id) {
-      setNotice(T.workspace.moveFirst(id))
+  const onMove = async (ids: string[], parent: string | null, before: string | null): Promise<void> => {
+    const id = ids[0] as string
+    if (dirty && target?.kind === 'item' && ids.includes(target.id)) {
+      setNotice(T.workspace.moveFirst(target.id))
       return
     }
-    const r = await window.reqman.reparentItem(id, parent, before)
-    setNotice(r.ok ? null : T.workspace.moveFailed(id, r.message))
+    // several chosen rows move together (owner, 0.11.0); they stay chosen
+    const r = ids.length > 1 ? await window.reqman.reparentItems(ids, parent, before) : await window.reqman.reparentItem(id, parent, before)
+    setNotice(r.ok ? null : T.workspace.moveFailed(ids.length > 1 ? T.workspace.items : id, r.message))
+    if (r.ok && ids.length > 1) {
+      await afterChange()
+      return
+    }
     if (r.ok) {
       await afterChange()
       setRevealNonce((n) => n + 1)
@@ -175,6 +181,11 @@ export function WorkspaceScreen({ info, onInfo, importFile }: { info: RepoInfo; 
             onPull={() => void git.run('pull')}
             onRevert={revert}
             onDiscard={discard}
+            onDiscardPaths={async (paths) => {
+              const r = await window.reqman.discardChanges(paths)
+              if (!r.ok) changes.setError(r.message)
+              git.onPanelResult(r)
+            }}
             onOpenItem={select}
             onClose={() => setShowChanges(false)}
           />
@@ -221,7 +232,7 @@ export function WorkspaceScreen({ info, onInfo, importFile }: { info: RepoInfo; 
             onSelect={select}
             onSort={filters.onSort}
             onTotal={setTotal}
-            onMove={(id, parent, before) => void onMove(id, parent, before)}
+            onMove={(ids, parent, before) => void onMove(ids, parent, before)}
             controlsRef={tree}
             revealNonce={revealNonce}
             emptyText={info.itemCount === 0 ? T.workspace.emptyRepo : T.workspace.emptyFilter}

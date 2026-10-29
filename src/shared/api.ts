@@ -432,6 +432,8 @@ export interface ReqManApi {
    * Placed before the sibling `before`, or last when `before` is not given.
    */
   reparentItem(id: string, parent: string | null, before?: string | null): Promise<{ ok: true } | { ok: false; message: string }>
+  /** Moves several items at once: they keep their order, land together before `before` (or last), keep their children. */
+  reparentItems(ids: string[], parent: string | null, before?: string | null): Promise<{ ok: true } | { ok: false; message: string }>
   /** IDs from the top-level item down to the item's parent (empty for a top-level item). */
   getAncestors(id: string): Promise<string[]>
   /** Replaces the project's field definitions in schema.yaml and re-opens the repository. */
@@ -555,6 +557,7 @@ export const Channels = {
   deleteItem: 'ws:deleteItem',
   moveItem: 'ws:moveItem',
   reparentItem: 'ws:reparentItem',
+  reparentItems: 'ws:reparentItems',
   getAncestors: 'ws:ancestors',
   saveSchemaFields: 'ws:saveSchemaFields',
   addLink: 'ws:addLink',

@@ -33,8 +33,8 @@ export function ItemTable(props: {
   onSelect: (id: string) => void
   onSort: (key: SortKey) => void
   onTotal?: (total: number) => void
-  /** Drag and drop: make `id` a child of `parent` (null = top level), placed before `before` (null = last). */
-  onMove: (id: string, parent: string | null, before: string | null) => void
+  /** Drag and drop: make `ids` children of `parent` (null = top level), placed before `before` (null = last). */
+  onMove: (ids: string[], parent: string | null, before: string | null) => void
   controlsRef?: { current: TreeControls | null }
   /** Bumped after a save or move: show the selected item again (its parent may have changed). */
   revealNonce?: number
@@ -95,9 +95,9 @@ export function ItemTable(props: {
   const count = isTree ? tree.rows.length : flat.count
   const rowAt = (i: number): Row | undefined => (isTree ? tree.rows[i] : flat.rowAt(i))
   const indexOf = (id: string): number => (isTree ? tree.rows.findIndex((r) => r.kind === 'item' && r.item.id === id) : flat.indexOf(id))
-  const drag = useRowDrag({ tree: isTree, levels: tree.levels, isOpen: tree.isOpen, open: (id) => tree.setOpen(id, true), onMove })
-
   const scrollRef = useRef<HTMLDivElement>(null)
+  const drag = useRowDrag({ tree: isTree, levels: tree.levels, isOpen: tree.isOpen, open: (id) => tree.setOpen(id, true), onMove, ...(chosen ? { chosen } : {}), scroller: scrollRef, headerHeight: HEADER_HEIGHT })
+
   // A new search or filter scrolls back to the top; a data refresh keeps the scroll position.
   const viewKey = `${mode}|${JSON.stringify(query)}`
   const lastView = useRef(viewKey)

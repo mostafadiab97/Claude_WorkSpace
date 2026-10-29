@@ -1,12 +1,13 @@
 // ReqIF (0.11.0): reading a file written by another tool (DOORS-style attributes, XHTML, enumerations, nested
 // hierarchy, relations) into the import table, and a full round trip ReqMan → ReqIF → ReqMan.
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { guessMapping, planImport, readReqif, writeReqif } from '../src/modules/import-export'
 import { generateId, isValidId, type Item } from '../src/modules/items'
 import { parseSchema } from '../src/modules/schema'
 import type { IndexedItem } from '../src/shared/domain'
+import { validateXML } from 'xmllint-wasm'
 
 const { schema } = parseSchema(readFileSync(join(__dirname, '..', 'config', 'default-schema.yaml'), 'utf8'))
 
@@ -112,5 +113,27 @@ describe('ReqIF', () => {
     expect(byTitle.get('Chapter <1> & "more"')!.type).toBe('information')
     expect(r).toMatchObject({ parent: ch.id, type: 'system-requirement', text: 'Line one\nline two\n\n| a | b |\n| --- | --- |\n\n```\ncode\n```', fields: { status: 'Approved', tags: ['safety', 'ux'], owner: 'A. Hassan' } })
     expect(byTitle.get('Check')!.links).toEqual([{ type: 'verifies', target: req.id }])
+  })
+
+  it('every file ReqMan writes is valid against the official ReqIF schema (what DOORS and Jama check first)', async () => {
+    const dir = join(__dirname, 'fixtures', 'reqif-schema')
+    const xsd = readdirSync(dir).filter((f) => f.endsWith('.xsd'))
+    const it = (id: string, type: string, title: string, extra: Partial<IndexedItem> = {}): IndexedItem => ({
+      id, type, title, fields: {}, links: [], text: '', path: '', childCount: 0, incomingCount: 0, suspectCount: 0, ...extra
+    })
+    const ch = it('REQ-AAAAAAA', 'information', 'Chapter <1> & "x"', { number: '1' })
+    const req = it('REQ-BBBBBBB', 'system-requirement', 'Accuracy', { parent: ch.id, number: '1.1', text: 'Line **one**\nline two\n\n- a\n- b\n\n| t | x |', fields: { status: 'Approved', priority: 'High', tags: ['safety', 'ux'], owner: 'A. Hassan' } })
+    const deep = it('REQ-DDDDDDD', 'software-requirement', 'Deep', { parent: req.id, number: '1.1.1' })
+    const tc = it('REQ-CCCCCCC', 'test-case', 'Check', { number: '2', links: [{ type: 'verifies', target: req.id }, { type: 'verifies', target: 'REQ-MISSING' }] })
+    const empty = writeReqif(schema, [], 'Nothing')
+    const full = writeReqif(schema, [{ item: ch, depth: 0 }, { item: req, depth: 1, sourceId: '_doors-17' }, { item: deep, depth: 2 }, { item: tc, depth: 0 }], 'Test & more')
+    for (const [name, xml] of [['full.reqif', full], ['empty.reqif', empty]] as const) {
+      const r = await validateXML({
+        xml: [{ fileName: name, contents: xml }],
+        schema: [{ fileName: 'reqif.xsd', contents: readFileSync(join(dir, 'reqif.xsd'), 'utf8') }],
+        preload: xsd.filter((f) => f !== 'reqif.xsd').map((f) => ({ fileName: f, contents: readFileSync(join(dir, f), 'utf8') }))
+      })
+      expect(r.errors.map((e) => e.rawMessage), name).toEqual([])
+    }
   })
 })

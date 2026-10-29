@@ -64,6 +64,8 @@ export interface WorkspaceService {
   checkFields(fields: FieldDef[]): FieldCheck[]
   moveItem(id: string, direction: 'up' | 'down'): Promise<OpResult>
   reparentItem(id: string, parent: string | null, before?: string | null): Promise<OpResult>
+  /** Several items at once, in document order, placed together (each keeps its children). */
+  reparentItems(ids: string[], parent: string | null, before?: string | null): Promise<OpResult>
   ancestors(id: string): string[]
   saveSchemaFields(fields: FieldDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   // Git (M4) — see gitOps.ts for the rules

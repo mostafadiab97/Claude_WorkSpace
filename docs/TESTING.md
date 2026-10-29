@@ -53,7 +53,19 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.11.0 (Excel and ReqIF)
+## Manual test checklist — v0.11.1 (your requests on 0.11.0)
+
+Small release with the five things you asked for after 0.11.0. Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.11.1**, then **⚙ → Run release self-test**. | App shows 0.11.1; **All steps passed**, 20 ✓. |
+| 2 | **Close repository → New project from a file…**, choose the sample file, then on purpose a folder that **has files** in it. | A message "This folder is not empty" with **Choose another folder…** — the folder dialog opens again; pick an empty one and the wizard continues as before (Cancel there stops). |
+| 3 | In the sandbox (**Expand all**): **Ctrl+click** three requirements of different sections, then drag **one of them** onto another chapter. While dragging, move the pointer to the bottom edge of the table. | The table scrolls while the pointer is near its bottom (or top) edge. After the drop **all three** sit under that chapter, in their old order, each with its children; they stay chosen. |
+| 4 | Right-click one of the chosen items, then right-click an item that is **not** chosen. | Chosen item: one entry, **Export the 3 chosen items and everything below them…**. Other item: one entry, **Export this item and everything below it…**. |
+| 5 | Open **Changes**: tick two items → **Discard 2 chosen** (confirm). Then **Discard all changes** (confirm). | First only the two ticked items go back, then everything; the list says "No uncommitted changes". |
+
+## Previous checklist — v0.11.0 (Excel and ReqIF)
 
 0.11.0 brings Excel and ReqIF: import with a wizard, export of everything or of chosen items, writing changes
 back into the Excel file you imported, starting a project from a file, and publishing to GitHub. It also fixes the

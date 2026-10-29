@@ -2,7 +2,9 @@ import { useEffect, useRef } from 'react'
 import { T } from '../../../shared/text'
 
 /**
- * Right-click menu of a table row (M7): export this item with everything below it, or the chosen items.
+ * Right-click menu of a table row (M7). Right-clicking one of several chosen items acts on all of them; right-clicking
+ * any other row acts on that row only — one export entry, never both (owner, 0.11.0: two entries were confusing).
+ * The export dialog has "Include the items below" (ticked) to export only the items themselves.
  * Closes on Escape, on a click elsewhere and when the window scrolls.
  */
 export function RowMenu(props: { id: string; x: number; y: number; chosenCount: number; onExportItem: () => void; onExportChosen: () => void; onOpen: () => void; onClose: () => void }) {
@@ -35,12 +37,13 @@ export function RowMenu(props: { id: string; x: number; y: number; chosenCount: 
       <button type="button" role="menuitem" className="row-menu__item" onClick={act(props.onOpen)}>
         {T.rowMenu.open}
       </button>
-      <button type="button" role="menuitem" className="row-menu__item" onClick={act(props.onExportItem)}>
-        {T.rowMenu.exportItem}
-      </button>
-      {props.chosenCount > 1 && (
+      {props.chosenCount > 1 ? (
         <button type="button" role="menuitem" className="row-menu__item" onClick={act(props.onExportChosen)}>
           {T.rowMenu.exportChosen(props.chosenCount)}
+        </button>
+      ) : (
+        <button type="button" role="menuitem" className="row-menu__item" onClick={act(props.onExportItem)}>
+          {T.rowMenu.exportItem}
         </button>
       )}
     </div>

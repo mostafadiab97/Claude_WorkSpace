@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import type { CompareOptions } from '../../src/shared/api'
 import type { IndexedItem, Schema } from '../../src/shared/domain'
 import { columnTemplate, columnsFor, shownColumnKeys, tableMinWidth, withWidth } from '../../src/renderer/src/workspace/table/columns'
-import { dropMove, dropZone } from '../../src/renderer/src/workspace/table/drag'
+import { autoScrollStep, dropMove, dropZone } from '../../src/renderer/src/workspace/table/drag'
 import { treeRows, type Level, type Row } from '../../src/renderer/src/workspace/table/rows'
 import { buildQuery, nextSort } from '../../src/renderer/src/workspace/screen/useFilters'
 import { describeSchema, rangeOf } from '../../src/renderer/src/workspace/compareRange'
@@ -68,6 +68,23 @@ describe('tree rows (table/rows.ts) — lazy "Expand all" (P-04)', () => {
   it('ends a wide level with a "more" row', () => {
     const wide = new Map<string, Level>([['', { items: [it_('A')], total: 3, limit: 1 }]])
     expect(treeRows(wide, { all: false, ids: new Set() })).toContainEqual({ kind: 'more', parent: '', depth: 0, hidden: 2 })
+  })
+})
+
+describe('dragging several rows and scrolling while dragging (owner, 0.11.0)', () => {
+  it('no row of the dragged set, nor anything below them, is a drop target', () => {
+    const row = (id: string, path: string[]): Row & { kind: 'item' } => ({ kind: 'item', item: it_(id), depth: path.length, path })
+    const set = new Set(['A', 'C'])
+    expect(dropZone(set, row('A', []), 0.5, true)).toBeNull()
+    expect(dropZone(set, row('C1', ['C']), 0.5, true)).toBeNull()
+    expect(dropZone(set, row('B', []), 0.5, true)).toBe('into')
+  })
+  it('scrolls faster the closer the pointer is to the edge', () => {
+    expect(autoScrollStep(300, 100, 600)).toBe(0)
+    expect(autoScrollStep(101, 100, 600)).toBeLessThan(0)
+    expect(autoScrollStep(140, 100, 600)).toBeGreaterThan(autoScrollStep(101, 100, 600))
+    expect(autoScrollStep(599, 100, 600)).toBe(28)
+    expect(autoScrollStep(700, 100, 600)).toBe(28)
   })
 })
 

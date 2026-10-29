@@ -187,6 +187,7 @@ export function registerIpc(services: Services, paths: Paths): void {
       ws.deleteItem(v.str(id, 'ID'), v.str(revision, 'revision'), { removeIncomingLinks: (opts as { removeIncomingLinks?: unknown } | null)?.removeIncomingLinks === true }),
     moveItem: (_e, id, dir) => ws.moveItem(v.str(id, 'ID'), v.oneOf(dir, ['up', 'down'], 'direction')),
     reparentItem: (_e, id, parent, before) => ws.reparentItem(v.str(id, 'ID'), v.optStr(parent, 'parent') ?? null, v.optStr(before, 'position') ?? null),
+    reparentItems: (_e, ids, parent, before) => ws.reparentItems(v.strings(ids, 'items', 100_000), v.optStr(parent, 'parent') ?? null, v.optStr(before, 'position') ?? null),
     getAncestors: (_e, id) => ws.ancestors(v.str(id, 'ID')),
     saveSchemaFields: (_e, fields, revision) => ws.saveSchemaFields(v.fieldDefs(fields), v.str(revision, 'revision')),
     checkFields: (_e, fields) => ws.checkFields(v.fieldDefs(fields)),
@@ -226,11 +227,17 @@ export function registerIpc(services: Services, paths: Paths): void {
       try {
         const file = await chooseFile(e)
         if (!file) return { ok: false, canceled: true }
-        const folder = await openDialog(e, { title: T.importDialog.folderTitle, properties: ['openDirectory', 'createDirectory', 'promptToCreate'] })
-        if (!folder) return { ok: false, canceled: true }
-        const inside = await readdir(folder).catch(() => [] as string[])
-        if (inside.length > 0) return { ok: false, message: T.importMsg.notEmpty }
-        return { ok: true, info: await ws.createProject(folder), file }
+        // the folder must be empty: a full one is refused right there, and the folder dialog opens again
+        for (;;) {
+          const folder = await openDialog(e, { title: T.importDialog.folderTitle, properties: ['openDirectory', 'createDirectory', 'promptToCreate'] })
+          if (!folder) return { ok: false, canceled: true }
+          const inside = await readdir(folder).catch(() => [] as string[])
+          if (inside.length === 0) return { ok: true, info: await ws.createProject(folder), file }
+          const win = BrowserWindow.fromWebContents(e.sender)
+          const opts = { type: 'warning' as const, title: T.importDialog.titleNew, message: T.importMsg.notEmpty, detail: T.importMsg.notEmptyDetail(folder), buttons: [T.importDialog.chooseAnother, T.common.cancel], defaultId: 0, cancelId: 1, noLink: true }
+          const answer = win ? await dialog.showMessageBox(win, opts) : await dialog.showMessageBox(opts)
+          if (answer.response !== 0) return { ok: false, canceled: true }
+        }
       } catch (err) {
         log.error('New project from a file failed', err)
         return { ok: false, message: (err as Error).message }

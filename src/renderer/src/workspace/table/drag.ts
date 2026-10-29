@@ -1,5 +1,6 @@
 // Drag and drop of table rows: dropping onto a row (child), its upper/lower edge (before/after), or the empty
-// space below the rows (top level). The rules are pure functions so they are unit-tested (review T-02).
+// space below the rows (top level). Dragging one of several chosen rows moves all of them (owner, 0.11.0); near the
+// top or bottom edge the table scrolls. The rules are pure functions so they are unit-tested (review T-02).
 import { useRef, useState, type DragEvent } from 'react'
 import { ROOT, type Level, type Row } from './rows'
 
@@ -11,21 +12,23 @@ type ItemRow = Row & { kind: 'item' }
  * null when the dragged item cannot go there (onto itself or one of its own descendants). In a search result
  * only "into" makes sense (there are no neighbours to place it between).
  */
-export function dropZone(dragged: string, row: ItemRow, y: number, tree: boolean): Zone | null {
-  if (row.item.id === dragged || row.path.includes(dragged)) return null
+export function dropZone(dragged: string | ReadonlySet<string>, row: ItemRow, y: number, tree: boolean): Zone | null {
+  const set = typeof dragged === 'string' ? new Set([dragged]) : dragged
+  if (set.has(row.item.id) || row.path.some((p) => set.has(p))) return null
   if (!tree) return 'into'
   return y < 0.25 ? 'before' : y > 0.75 ? 'after' : 'into'
 }
 
 /** The move a drop means: new parent (null = top level) and the sibling to place it before (null = last). */
 export function dropMove(
-  dragged: string,
+  dragged: string | ReadonlySet<string>,
   row: ItemRow,
   zone: Zone,
   tree: boolean,
   levels: ReadonlyMap<string, Level>,
   isOpen: (id: string) => boolean
 ): { parent: string | null; before: string | null } {
+  const set = typeof dragged === 'string' ? new Set([dragged]) : dragged
   const parentOf = (r: ItemRow): string | null => (tree ? (r.path.at(-1) ?? null) : (r.item.parent ?? null))
   if (zone === 'into') return { parent: row.item.id, before: null }
   if (zone === 'before') return { parent: parentOf(row), before: row.item.id }
@@ -35,8 +38,18 @@ export function dropMove(
   const parent = parentOf(row)
   const sibs = levels.get(parent ?? ROOT)?.items ?? []
   const k = sibs.findIndex((s) => s.id === row.item.id)
-  const next = sibs.slice(k + 1).find((s) => s.id !== dragged)
+  const next = sibs.slice(k + 1).find((s) => !set.has(s.id))
   return { parent, before: next?.id ?? null }
+}
+
+/**
+ * How far to scroll while dragging at `y` (pointer) in a scroll area from `top` to `bottom` (px, the header already
+ * excluded): faster the closer to the edge, 0 outside the edge zones. Pure.
+ */
+export function autoScrollStep(y: number, top: number, bottom: number, edge = 48, max = 28): number {
+  if (y < top + edge) return -Math.ceil(max * Math.min(1, (top + edge - y) / edge))
+  if (y > bottom - edge) return Math.ceil(max * Math.min(1, (y - (bottom - edge)) / edge))
+  return 0
 }
 
 /** Event handlers and the drop marker for the table. */
@@ -45,9 +58,14 @@ export function useRowDrag(opts: {
   levels: ReadonlyMap<string, Level>
   isOpen: (id: string) => boolean
   open: (id: string) => void
-  onMove: (id: string, parent: string | null, before: string | null) => void
+  /** Items chosen with Ctrl/Shift+click: dragging one of them drags them all. */
+  chosen?: ReadonlySet<string>
+  /** The scroll area (scrolled while dragging near its edges) and the height of its sticky header. */
+  scroller?: { current: HTMLElement | null }
+  headerHeight?: number
+  onMove: (ids: string[], parent: string | null, before: string | null) => void
 }) {
-  const dragging = useRef<string | null>(null)
+  const dragging = useRef<ReadonlySet<string> | null>(null)
   const [drop, setDrop] = useState<{ index: number; zone: Zone } | null>(null)
   const expandTimer = useRef<{ id: string; timer: number } | null>(null)
   const clear = (): void => {
@@ -55,6 +73,13 @@ export function useRowDrag(opts: {
     setDrop(null)
     if (expandTimer.current) window.clearTimeout(expandTimer.current.timer)
     expandTimer.current = null
+  }
+  const scroll = (e: DragEvent<HTMLElement>): void => {
+    const el = opts.scroller?.current
+    if (!el || !dragging.current) return
+    const r = el.getBoundingClientRect()
+    const step = autoScrollStep(e.clientY, r.top + (opts.headerHeight ?? 0), r.bottom)
+    if (step) el.scrollBy(0, step)
   }
   const zoneOf = (e: DragEvent<HTMLElement>, row: ItemRow): Zone | null => {
     const id = dragging.current
@@ -66,12 +91,14 @@ export function useRowDrag(opts: {
   return {
     drop,
     start(e: DragEvent<HTMLElement>, id: string): void {
-      dragging.current = id
+      const many = opts.chosen && opts.chosen.size > 1 && opts.chosen.has(id)
+      dragging.current = many ? new Set(opts.chosen) : new Set([id])
       e.dataTransfer.effectAllowed = 'move'
-      e.dataTransfer.setData('text/plain', id)
+      e.dataTransfer.setData('text/plain', [...dragging.current].join('\n'))
     },
     end: clear,
     over(e: DragEvent<HTMLElement>, index: number, row: ItemRow): void {
+      scroll(e)
       const zone = zoneOf(e, row)
       e.stopPropagation()
       if (!zone) {
@@ -94,25 +121,26 @@ export function useRowDrag(opts: {
     dropOn(e: DragEvent<HTMLElement>, row: ItemRow): void {
       e.preventDefault()
       e.stopPropagation()
-      const id = dragging.current
+      const ids = dragging.current
       const zone = zoneOf(e, row)
       clear()
-      if (!id || !zone) return
-      const m = dropMove(id, row, zone, opts.tree, opts.levels, opts.isOpen)
-      opts.onMove(id, m.parent, m.before)
+      if (!ids || !zone) return
+      const m = dropMove(ids, row, zone, opts.tree, opts.levels, opts.isOpen)
+      opts.onMove([...ids], m.parent, m.before)
     },
     // Dropping on the empty space below the rows makes the item a top-level item.
     areaOver(e: DragEvent<HTMLElement>): void {
+      scroll(e)
       if (!dragging.current || !opts.tree) return
       e.preventDefault()
       setDrop(null)
     },
     areaDrop(e: DragEvent<HTMLElement>): void {
-      const id = dragging.current
+      const ids = dragging.current
       clear()
-      if (!id || !opts.tree) return
+      if (!ids || !opts.tree) return
       e.preventDefault()
-      opts.onMove(id, null, null)
+      opts.onMove([...ids], null, null)
     }
   }
 }

@@ -116,6 +116,28 @@ await scenario('E2E fixes', async (ctx) => {
   await win.locator('.table__row[data-id]').first().waitFor({ timeout: 10_000 })
   check((await view.count()) === 0, 'closing shows the table again')
 
+  console.log('Move several chosen items at once, then discard them together (owner, 0.11.0)')
+  const row = (title) => win.locator('.table__row[data-id]', { hasText: title }).first()
+  await row('Requirement 2.1.1').click()
+  await row('Requirement 2.1.2').click({ modifiers: ['Control'] })
+  check((await win.locator('.table__row--chosen').count()) === 2, 'two rows chosen')
+  const movedIds = [await row('Requirement 2.1.1').getAttribute('data-id'), await row('Requirement 2.1.2').getAttribute('data-id')]
+  // a target on screen: Playwright would scroll the table between pressing and moving, and the press would land on another row
+  const sectionId = await row('Section 2.2').getAttribute('data-id')
+  await win.waitForTimeout(500) // the table settles after opening the item (it scrolls it into view)
+  await row('Requirement 2.1.2').dragTo(row('Section 2.2'))
+  await win.waitForFunction(() => document.querySelectorAll('.table__row--chosen').length === 2)
+  await win.waitForTimeout(500)
+  check(movedIds.every((id) => readFileSync(join(items, `${id}.md`), 'utf8').includes(`parent: ${sectionId}`)), 'dragging one chosen row moves both under the new parent')
+  await win.getByRole('button', { name: /^Changes/ }).click()
+  await view.locator('.compare__row').first().waitFor()
+  await view.getByRole('group', { name: 'Discard several' }).getByLabel('All').check()
+  await view.getByRole('button', { name: 'Discard 2 chosen' }).click()
+  await view.getByRole('button', { name: 'Discard 2 chosen' }).click() // the confirmation
+  await view.getByText('No uncommitted changes').first().waitFor()
+  check(!readFileSync(join(items, `${movedIds[0]}.md`), 'utf8').includes(`parent: ${sectionId}`), '"Discard 2 chosen" takes both back')
+  await view.getByRole('button', { name: 'Close changes' }).click()
+
   console.log('Release self-test')
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
   await win.getByRole('button', { name: 'Run release self-test' }).click()

@@ -37,6 +37,8 @@ export function ChangesView(props: {
   onPull: () => void
   onRevert: (id: string, part: RevertPart) => Promise<void>
   onDiscard: (entry: CompareEntry) => Promise<void>
+  /** Discards these files (several chosen items, or everything) — owner, 0.11.0. */
+  onDiscardPaths: (paths: string[]) => Promise<void>
   onOpenItem: (id: string) => void
   onClose: () => void
 }) {
@@ -48,6 +50,9 @@ export function ChangesView(props: {
   const [shown, setShown] = useState(SHOW)
   const [working, setWorking] = useState(false)
   const [confirmDiscard, setConfirmDiscard] = useState<string | null>(null)
+  // items ticked for "Discard N chosen" (uncommitted changes only)
+  const [picked, setPicked] = useState<ReadonlySet<string>>(new Set())
+  const [confirmMany, setConfirmMany] = useState<'picked' | 'all' | null>(null)
   const uncommitted = c.preset === 'uncommitted'
 
   const counts = useMemo(() => {
@@ -123,6 +128,8 @@ export function ChangesView(props: {
             c.choose(e.target.value as Preset)
             setShown(SHOW)
             setConfirmDiscard(null)
+            setPicked(new Set())
+            setConfirmMany(null)
           }}
           disabled={!options}
         >
@@ -207,6 +214,52 @@ export function ChangesView(props: {
 
           {data.schema && <p className="notice notice--warn compare__schema">{T.compare.schema(describeSchema(data.schema))}</p>}
 
+          {uncommitted && (git?.changes.length ?? 0) > 0 && (
+            <div className="changes-view__bulk" role="group" aria-label={T.changesView.bulk}>
+              {confirmMany ? (
+                <>
+                  <span>{confirmMany === 'all' ? T.changesView.discardAllAsk(git?.changes.length ?? 0) : T.changesView.discardPickedAsk(picked.size)}</span>
+                  <button
+                    type="button"
+                    className="btn btn--small btn--danger"
+                    disabled={locked !== null}
+                    onClick={() =>
+                      void act(async () => {
+                        const paths =
+                          confirmMany === 'all' ? (git?.changes.map((x) => x.path) ?? []) : [...new Set((data.entries ?? []).filter((e) => picked.has(e.id)).flatMap((e) => e.paths))]
+                        await props.onDiscardPaths(paths)
+                        setPicked(new Set())
+                        setConfirmMany(null)
+                      })
+                    }
+                  >
+                    {confirmMany === 'all' ? T.changesView.discardAll : T.changesView.discardPicked(picked.size)}
+                  </button>
+                  <button type="button" className="btn btn--small" onClick={() => setConfirmMany(null)}>
+                    {T.changesPanel.keep}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <label className="check">
+                    <input
+                      type="checkbox"
+                      checked={visible.length > 0 && visible.every((e) => picked.has(e.id))}
+                      onChange={(e) => setPicked(e.target.checked ? new Set(visible.map((x) => x.id)) : new Set())}
+                    />
+                    {T.changesView.pickAll}
+                  </label>
+                  <button type="button" className="btn btn--small" disabled={picked.size === 0 || locked !== null} title={locked ?? undefined} onClick={() => setConfirmMany('picked')}>
+                    {T.changesView.discardPicked(picked.size)}
+                  </button>
+                  <button type="button" className="btn btn--small" disabled={locked !== null} title={locked ?? undefined} onClick={() => setConfirmMany('all')}>
+                    {T.changesView.discardAll}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
           <div className="tabs compare__tabs" role="tablist" aria-label={T.compare.view}>
             <button type="button" role="tab" aria-selected={tab === 'items'} className={tab === 'items' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('items')}>
               {T.compare.itemsTab(data.entries.length)}
@@ -222,7 +275,23 @@ export function ChangesView(props: {
             ) : (
               <ul className="compare__list changes-view__list scroll" aria-label={T.compare.changedItems}>
                 {visible.slice(0, shown).map((e) => (
-                  <li key={e.id}>
+                  <li key={e.id} className={uncommitted ? 'changes-view__item' : undefined}>
+                    {uncommitted && (
+                      <input
+                        type="checkbox"
+                        className="changes-view__pick"
+                        aria-label={T.changesView.pick(e.id)}
+                        checked={picked.has(e.id)}
+                        onChange={(ev) =>
+                          setPicked((p) => {
+                            const n = new Set(p)
+                            if (ev.target.checked) n.add(e.id)
+                            else n.delete(e.id)
+                            return n
+                          })
+                        }
+                      />
+                    )}
                     <button
                       type="button"
                       className={e.id === sel?.id ? 'compare__row compare__row--selected' : 'compare__row'}

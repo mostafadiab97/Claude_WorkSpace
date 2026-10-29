@@ -2204,3 +2204,23 @@ code {
 .export__source .actions {
   flex-wrap: wrap;
 }
+
+/* Changes: tick boxes to discard several items (0.11.1) */
+.changes-view__item {
+  display: flex;
+  align-items: center;
+  gap: var(--rm-space-xs);
+}
+
+.changes-view__item > .compare__row {
+  flex: 1;
+  min-width: 0;
+}
+
+.changes-view__bulk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rm-space-sm);
+  font-size: var(--rm-font-size-small);
+}

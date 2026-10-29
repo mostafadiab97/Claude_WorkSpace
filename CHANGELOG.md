@@ -3,6 +3,20 @@
 Each version was installed and tried by the product owner on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.11.1 — 29 Oct 2026 — Owner's requests on 0.11.0
+- **New project from a file:** a folder that is not empty is refused right away with "Choose another folder…"; the
+  folder dialog opens again instead of the whole process stopping.
+- **Move several items at once:** drag one of the chosen rows (Ctrl/Shift+click) — all chosen items move together,
+  in their document order, each with its children (an item whose parent is chosen too stays under it).
+- **Scrolling while dragging:** near the top or bottom edge of the table it scrolls, faster closer to the edge.
+- **Changes:** tick boxes on the uncommitted list, **Discard N chosen** and **Discard all changes** (each confirmed).
+- **Right-click menu:** one export entry only — on a chosen item "Export the N chosen items and everything below
+  them…", on any other item "Export this item and everything below it…".
+- **ReqIF checked against the official schema:** every ReqIF file ReqMan writes is now validated in the automated
+  tests with the OMG ReqIF schema (as published by Eclipse RMF) — the check DOORS, Jama and other tools make first.
+- **Owner (29 Oct 2026) on 0.11.0:** all 5 steps passed, self-test 20/20 (30.5 s); asked for the points above; no
+  DOORS/Jama access to try the ReqIF file (hence the schema check; ReqIF Studio is a free viewer).
+
 ## 0.11.0 — 29 Oct 2026 — Excel and ReqIF (M7)
 - **Import from Excel, CSV or ReqIF** (Import… in the toolbar): a wizard in three steps — file, sheet and the row
   with the column names → what each column means (guessed from the names: ID, No., Title, Text, Type, Parent,

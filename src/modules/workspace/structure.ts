@@ -125,6 +125,19 @@ export function planInsert(sibs: Placed[], id: string, before: string | null | u
   return [{ id, order: keyBetween(sibs[index - 1]?.order ?? null, sibs[index]?.order ?? null) }]
 }
 
+/**
+ * Where to put several items (in this order) among `sibs` (already without them) so that they land before `before`
+ * (or last): one key per moved item, between the two neighbours — or the whole group re-spaced when its keys are
+ * not usable. Pure.
+ */
+export function planInsertMany(sibs: Placed[], ids: string[], before: string | null | undefined): { id: string; order: string }[] {
+  const at = before ? sibs.findIndex((x) => x.id === before) : -1
+  const index = at < 0 ? sibs.length : at
+  if (!keysUsable(sibs)) return respace([...sibs.slice(0, index), ...ids.map((id) => ({ id })), ...sibs.slice(index)])
+  const keys = keysBetween(sibs[index - 1]?.order ?? null, sibs[index]?.order ?? null, ids.length)
+  return ids.map((id, k) => ({ id, order: keys[k] as string }))
+}
+
 /** Moving item `i` one place up or down (`j` = its neighbour): one new key for the moved item. Pure. */
 export function planSwap(sibs: Placed[], i: number, j: number): { id: string; order: string }[] {
   const a = sibs[i]
@@ -151,13 +164,13 @@ export function createStructureOps(ctx: WorkspaceContext) {
     s.index.query({ parent: parent ?? null, sort: { by: 'order' }, limit: 10_000 }).items
 
   /** Writes the planned order values (and the new parent of `moved`), conflict-safe, then updates the index. */
-  async function apply(s: Session, plan: { id: string; order: string }[], moved?: { id: string; parent: string | null }): Promise<OpResult> {
+  async function apply(s: Session, plan: { id: string; order: string }[], moved?: { ids: ReadonlySet<string>; parent: string | null }): Promise<OpResult> {
     const paths = plan.map((p) => s.repo.itemPath(p.id))
     for (const step of plan) {
       const cur = await s.repo.readItem(step.id)
       if (!cur?.ok) return { ok: false, message: T.wsMsg.movingStopped(step.id) }
       const next: Item = { ...cur.item, order: step.order }
-      if (moved && step.id === moved.id) {
+      if (moved && moved.ids.has(step.id)) {
         if (moved.parent === null) delete next.parent
         else next.parent = moved.parent
       }
@@ -202,11 +215,55 @@ export function createStructureOps(ctx: WorkspaceContext) {
       // Its own children move with it: they keep pointing at it.
       const plan = planInsert(siblings(s, parent ?? undefined).filter((x) => x.id !== id), id, before)
       try {
-        const r = await apply(s, plan, { id, parent })
+        const r = await apply(s, plan, { ids: new Set([id]), parent })
         if (r.ok) log.info(`Moved ${id} under ${parent ?? 'top level'}${before ? ` before ${before}` : ''}`)
         return r
       } catch (e) {
         log.error(`Moving ${id} failed`, e)
+        return { ok: false, message: (e as Error).message }
+      }
+    },
+
+    /**
+     * Moves several items at once (owner, 0.11.0): they keep their document order, land together before `before`
+     * (or last) under `parent`, and each keeps its children. An item whose parent is moved too stays under it.
+     */
+    async reparentItems(ids: string[], parent: string | null, before?: string | null): Promise<OpResult> {
+      const s = ctx.need()
+      const wanted = new Set(ids)
+      for (const id of wanted) if (!s.index.get(id)) return { ok: false, message: T.wsMsg.unreadable(id) }
+      if (parent !== null) {
+        if (!s.index.get(parent)) return { ok: false, message: T.wsMsg.missing(parent) }
+        for (const id of wanted) if (createsLoop(s, id, parent)) return { ok: false, message: T.wsMsg.moveLoop(parent, id) }
+      }
+      // items below another moved item go along with it
+      const hasMovedAncestor = (id: string): boolean => {
+        const seen = new Set<string>()
+        let cur = s.index.get(id)?.parent
+        while (cur && !seen.has(cur)) {
+          if (wanted.has(cur)) return true
+          seen.add(cur)
+          cur = s.index.get(cur)?.parent
+        }
+        return false
+      }
+      const numbers = ctx.numbers(s)
+      const moving = [...wanted].filter((id) => !hasMovedAncestor(id)).sort((a, b) => compareOutline(numbers.get(a), numbers.get(b)) || (a < b ? -1 : 1))
+      const set = new Set(moving)
+      const sibs = siblings(s, parent ?? undefined).filter((x) => !set.has(x.id))
+      // dropping before one of the moved items means before the next one that stays
+      let target = before ?? null
+      if (target && set.has(target)) {
+        const all = siblings(s, parent ?? undefined)
+        const k = all.findIndex((x) => x.id === target)
+        target = all.slice(k + 1).find((x) => !set.has(x.id))?.id ?? null
+      }
+      try {
+        const r = await apply(s, planInsertMany(sibs, moving, target), { ids: set, parent })
+        if (r.ok) log.info(`Moved ${moving.length} items under ${parent ?? 'top level'}${target ? ` before ${target}` : ''}`)
+        return r
+      } catch (e) {
+        log.error(`Moving ${moving.length} items failed`, e)
         return { ok: false, message: (e as Error).message }
       }
     },

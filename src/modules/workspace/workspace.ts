@@ -241,6 +241,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     fixFileName: q(items.fixFileName),
     ancestors: structure.ancestors,
     reparentItem: q(structure.reparentItem),
+    reparentItems: q(structure.reparentItems),
     moveItem: q(structure.moveItem),
     checkFields: fields.checkFields,
     saveSchemaFields: q(fields.saveSchemaFields),

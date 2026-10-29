@@ -160,6 +160,7 @@ export const T = {
     stepNames: { file: 'File', columns: 'Columns', check: 'Check and import' } as Record<'file' | 'columns' | 'check', string>,
     chooseFile: 'Choose a file…',
     otherFile: 'Choose another file…',
+    chooseAnother: 'Choose another folder…',
     chooseTitle: 'Import requirements from',
     folderTitle: 'Choose an empty folder for the new project',
     copyTitle: 'Save the updated copy as',
@@ -218,7 +219,7 @@ export const T = {
     label: (id: string) => `Actions for ${id}`,
     open: 'Open',
     exportItem: 'Export this item and everything below it…',
-    exportChosen: (count: number) => `Export the ${n(count)} chosen items…`,
+    exportChosen: (count: number) => `Export the ${n(count)} chosen items and everything below them…`,
     chosenStatus: (count: number) => `${n(count)} chosen`,
     chosenHint: 'Ctrl+click to add or remove, Shift+click for a range, right-click to export',
     clearChosen: 'Clear choice'
@@ -524,7 +525,14 @@ export const T = {
     commitTitle: 'Commit',
     compareLabel: 'Compared versions',
     compareTitle: 'Compared versions',
-    compareSubtitle: 'Read-only · export the list for others'
+    compareSubtitle: 'Read-only · export the list for others',
+    bulk: 'Discard several',
+    pick: (id: string) => `Choose ${id}`,
+    pickAll: 'All',
+    discardPicked: (count: number) => `Discard ${n(count)} chosen`,
+    discardPickedAsk: (count: number) => `Take back the changes of ${n(count)} item${s(count)}? New items are deleted.`,
+    discardAll: 'Discard all changes',
+    discardAllAsk: (count: number) => `Take back all ${n(count)} uncommitted change${s(count)} — everything since the last commit? New items are deleted.`
   },
 
   compare: {
@@ -700,7 +708,8 @@ export const T = {
     rowFailed: (row: number) => `Row ${row} cannot be imported:`,
     unknownType2: (type: string) => `Unknown default type "${type}".`,
     fileGone: 'The file is no longer open for import — choose it again.',
-    notEmpty: 'Choose an empty folder (or a new one) for the new project.',
+    notEmpty: 'This folder is not empty.',
+    notEmptyDetail: (folder: string) => `${folder} already holds files. A new project needs an empty folder — choose another one, or make a new folder in the dialog.`,
     imported: (name: string) => `Imported from ${name}`,
     noSource: 'This repository was not imported from a file on this PC.',
     sourceMissing: (path: string) => `The file ${path} is not there any more.`,

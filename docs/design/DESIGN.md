@@ -671,7 +671,7 @@ after his test round and the project review (`docs/reviews/2026-10-25-project-re
 | Feature (from "B. Common features") | In ReqMan today | Proposal |
 | --- | --- | --- |
 | Word and Excel import/export, round trip | CSV + Markdown export | **M7**: Excel export + import (update existing items by ID, read links — C, 25 Oct 2026); Word/PDF export M10 |
-| Baselines | Any commit can be compared | **M8**: tags as named baselines ("Release 1.0"), compare against them |
+| Baselines | Any commit can be compared | Later (delayed by the owner 29 Oct 2026): tags as named baselines ("Release 1.0") |
 | Branches / parallel versions | Shown only | **M8**: create, switch, compare branches |
 | Merge and conflict resolution per requirement | Pull stops and lists clashes | **M8**: field-level 3-way merge, choose mine/theirs/edit only for real conflicts |
 | Traceability matrix and coverage views | Link filters ("without links", "suspect") | **M9**: coverage view (e.g. which system requirements have no verifying test) and a matrix (rows × columns by link type) |
@@ -730,7 +730,7 @@ X-02).
 | **0.9.0** | New data format | IDs `REQ-` + 7 random characters (O-01, O-02), type editable; fractional order keys (S-04; at push, groups the user changed whose values are longer than 4 characters are re-spaced); calculated outline numbers (O-03) in table ("No."), editor, picker, Compare and every export; sandbox converted directly in its repository |
 | **0.10.0** | Changes view | One Changes view instead of Changes + Compare (O-06), no automatic pulls ("Pull first" offer); GitHub-style split difference with highlighted words and revert arrows (O-05); Keep/Unlink window for suspect links (O-04) |
 | **0.11.0** | **M7 Excel + ReqIF** (ReqIF merged in, owner 29 Oct 2026) | ReqIF import/export (DOORS, Jama, Polarion) through the same wizard; Excel export (ExcelJS); import wizard for Excel/CSV (update by ID with preview, links, outline numbers → hierarchy); "New project from a file", "Update the Excel file", "Publish to GitHub"; **export of chosen items**: Ctrl/Shift+click to select several rows, right-click "Export this item and everything below it", export window choice "Selected items and everything below them" (all levels; tick box "Include the items below", ticked by default; overlaps exported once; document order; full outline numbers) |
-| **0.12.0** | **M8 Branches** | Create/switch branches, tags as baselines, per-requirement (field-level 3-way) merge (S-05), automatic duplicate-ID repair (D-09), D-05 |
+| **0.12.0** | **M8 Branches** | Create/switch branches (commit / discard / take changes along), compare two branches per requirement (local PR review), "Pull from branch" (any visible branch) and pull with per-requirement (field-level 3-way) merge (S-05), automatic duplicate-ID repair (D-09), D-05. Tag baselines delayed (owner, 29 Oct 2026) |
 | ~~0.13.0~~ | ~~ReqIF~~ | merged into 0.11.0 (owner, 29 Oct 2026: fewer test rounds; same wizard and export pipeline) |
 | later | — | Item and link types in the GUI, coverage view and matrix, saved views, bulk edit (M9); Word/PDF export, rich text editor (M10); GitHub PR view (M11); Windows 10 build. **No milestone yet:** tables in text, code signing (X-02), private update channel (S-08) |
 

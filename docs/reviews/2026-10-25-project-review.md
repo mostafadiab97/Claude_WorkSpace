@@ -380,9 +380,12 @@ all fine. The two-PC trial is postponed (only one user for now).
      merging pull requests inside ReqMan may come later, with access rights.
   3. *Conflicts field by field* (3-way: base / mine / theirs); only the same field (or text) changed differently on
      both sides, or delete vs change, asks "mine / theirs / edit".
-  4. *Baselines (tags):* open — owner asked whether they can be validated like pull requests (see the answer of
-     29 Oct: GitHub cannot require a review for a tag; it can restrict who creates tags and block deletion).
+  4. *Baselines (tags):* **delayed** (not in 0.12.0). Background: GitHub cannot require a review for a tag; it can
+     restrict who creates tags and block deletion.
   5. *Two-PC trial:* two folders (two clones of the sandbox) on his PC.
+  6. *Pull from branch:* besides the normal pull, ReqMan can bring any visible branch (local or on GitHub, not just
+     `main`) into the current branch, with the same per-requirement resolution as 3.
+  7. *Pull on the same branch* resolves per requirement (3) instead of stopping (answer "a").
 - **Done in 0.11.0 (29 Oct 2026):** O-07 phases 1 + 2 — Excel/CSV/ReqIF import wizard, Excel and ReqIF export, "New
   project from a file", "Update the Excel file", "Publish to GitHub", export of chosen items.
 

@@ -146,3 +146,24 @@ describe('Changes view data', () => {
     expect(await readFile(join(dir, `${id}.md`), 'utf8')).toContain('title: Renamed')
   })
 })
+
+describe('owner report on 0.10.0: "Changes (1)" while the list was empty', () => {
+  it('lists an item whose only uncommitted change is a link confirmation (Keep), so it can be committed or discarded', async () => {
+    const { ws } = await setup()
+    const target = await add(ws, 'Target', { text: 'old' })
+    const test = await add(ws, 'Test', {}, 'test-case')
+    expect((await ws.addLink(test, 'verifies', target)).ok).toBe(true)
+    expect((await ws.commit('start')).ok).toBe(true)
+    await edit(ws, target, (d) => {
+      d.item.text = 'new'
+    })
+    expect((await ws.decideLinks([{ source: test, type: 'verifies', target, keep: true }])).ok).toBe(true)
+    expect((await ws.discardChanges([`requirements/items/${target}.md`])).ok).toBe(true)
+    const st = await ws.gitState()
+    expect(st.changes.map((c) => c.id)).toEqual([test])
+    const head = (await ws.compareOptions()).head as string
+    const e = (await ws.compareVersions(head, 'WORKING')).entries
+    expect(e.map((x) => [x.id, x.summary])).toEqual([[test, 'Link review only (a link was kept or confirmed)']])
+    // between two commits such a change stays hidden (nothing a reader would call a change)
+  })
+})

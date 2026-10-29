@@ -499,7 +499,8 @@ export const T = {
     openItem: 'Open the item',
     workingLabel: 'Your working folder (everything saved on this PC)',
     emptyLabel: 'Nothing (before the first commit)',
-    fileRenamed: 'File name changed'
+    fileRenamed: 'File name changed',
+    linksReviewed: 'Link review only (a link was kept or confirmed)'
   },
 
   workspace: {

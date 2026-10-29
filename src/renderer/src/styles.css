@@ -1849,11 +1849,11 @@ code {
 }
 
 .diff__cell--old {
-  background: color-mix(in srgb, var(--rm-color-danger) 8%, transparent);
+  background: var(--rm-color-diff-old-bg);
 }
 
 .diff__cell--new {
-  background: color-mix(in srgb, var(--rm-color-success) 9%, transparent);
+  background: var(--rm-color-diff-new-bg);
 }
 
 .diff__cell--empty {
@@ -1867,13 +1867,13 @@ code {
 }
 
 .diff__mark--old {
-  background: color-mix(in srgb, var(--rm-color-danger) 30%, transparent);
+  background: var(--rm-color-diff-old-mark);
   text-decoration: line-through;
   text-decoration-thickness: 1px;
 }
 
 .diff__mark--new {
-  background: color-mix(in srgb, var(--rm-color-success) 34%, transparent);
+  background: var(--rm-color-diff-new-mark);
 }
 
 .diff__revert {
@@ -1926,11 +1926,11 @@ code {
 }
 
 .diff__src--old {
-  background: color-mix(in srgb, var(--rm-color-danger) 8%, transparent);
+  background: var(--rm-color-diff-old-bg);
 }
 
 .diff__src--new {
-  background: color-mix(in srgb, var(--rm-color-success) 9%, transparent);
+  background: var(--rm-color-diff-new-bg);
 }
 
 .diff__src--blank {

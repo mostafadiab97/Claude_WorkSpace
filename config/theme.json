@@ -45,7 +45,11 @@
       "rowHover": "#f1f3f7",
       "selection": "#e3ebff",
       "scrollbarThumb": "#c3c9d3",
-      "scrollbarThumbHover": "#9aa3b2"
+      "scrollbarThumbHover": "#9aa3b2",
+      "diffOldBg": "#fdecec",
+      "diffNewBg": "#e6f6ec",
+      "diffOldMark": "#f5b5b2",
+      "diffNewMark": "#9fe2b8"
     },
     "dark": {
       "background": "#14171c",
@@ -64,7 +68,11 @@
       "rowHover": "#20252d",
       "selection": "#263352",
       "scrollbarThumb": "#3a414e",
-      "scrollbarThumbHover": "#566070"
+      "scrollbarThumbHover": "#566070",
+      "diffOldBg": "#3d1f22",
+      "diffNewBg": "#16362a",
+      "diffOldMark": "#8c3036",
+      "diffNewMark": "#1e7a48"
     }
   }
 }

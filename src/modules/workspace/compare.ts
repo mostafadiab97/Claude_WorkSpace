@@ -138,7 +138,8 @@ export function createCompare(git: GitAdapter) {
           continue
         }
         // Fast path: only link confirmations or line endings differ → nothing a reader would call a change
-        if (c.status === 'M' && sameIgnoringConfirmations(beforeText(c), afterText(c))) continue
+        // (not for uncommitted changes: every changed file must be visible there, to commit or discard it)
+        if (!toWorking && c.status === 'M' && sameIgnoringConfirmations(beforeText(c), afterText(c))) continue
         const before = c.status === 'A' ? { item: null } : parse(beforeText(c))
         const after = c.status === 'D' ? { item: null } : parse(afterText(c))
         const id = after.item?.id ?? before.item?.id ?? ITEM_FILE.exec(c.path)?.[1] ?? c.path
@@ -175,7 +176,9 @@ export function createCompare(git: GitAdapter) {
         const nothing = diff.rows.length === 0 && !diff.text && diff.linksAdded.length === 0 && diff.linksRemoved.length === 0
         // a file renamed with nothing else changed is still a change of the folder (and can be discarded)
         const renamedOnly = nothing && !unreadable && p.paths.size > 1 && p.before.item?.id === p.after.item?.id
-        if (nothing && !unreadable && !renamedOnly) continue // e.g. only a link re-confirmed, or line endings
+        // in the working folder, a file whose only change is a link confirmation (Keep) is still uncommitted
+        const confirmedOnly = nothing && !unreadable && !renamedOnly && toWorking && confirmationsDiffer(p.before.item, p.after.item)
+        if (nothing && !unreadable && !renamedOnly && !confirmedOnly) continue // e.g. only line endings
         const onlyPosition = diff.kind === 'modified' && diff.rows.length > 0 && !diff.text && diff.linksAdded.length + diff.linksRemoved.length === 0 && diff.rows.every((r) => r.key === 'parent' || r.key === 'order')
         const b = p.before.item
         const a = p.after.item
@@ -185,7 +188,7 @@ export function createCompare(git: GitAdapter) {
           title: shown?.title ?? '',
           type: shown?.type ?? '',
           kind: diff.kind === 'unchanged' ? 'modified' : onlyPosition ? 'moved' : diff.kind,
-          summary: renamedOnly ? T.compare.fileRenamed : unreadable && nothing ? 'Could not be read' : diff.kind === 'added' ? 'New item' : diff.kind === 'deleted' ? 'Deleted' : summarize(diff),
+          summary: renamedOnly ? T.compare.fileRenamed : confirmedOnly ? T.compare.linksReviewed : unreadable && nothing ? 'Could not be read' : diff.kind === 'added' ? 'New item' : diff.kind === 'deleted' ? 'Deleted' : summarize(diff),
           diff,
           contentChanged: !b || !a || contentFingerprint(b) !== contentFingerprint(a),
           incoming: s.index.get(id)?.incomingCount ?? 0,
@@ -249,6 +252,13 @@ async function numbersFromTree(git: GitAdapter, s: Session, ref: string): Promis
   return outlineNumbers(rows)
 }
 const cmp = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0)
+
+/** The two versions differ in a link's confirmation (the link was kept / confirmed after its target changed). */
+function confirmationsDiffer(a: Item | null, b: Item | null): boolean {
+  if (!a || !b) return false
+  const key = (i: Item): string => i.links.map((l) => `${l.type} ${l.target} ${l.confirmed ?? ''}`).join('\n')
+  return key(a) !== key(b)
+}
 
 const CONFIRMED_LINE = /^[ \t]+confirmed:[^\n]*\n?/gm
 function sameIgnoringConfirmations(a: string | null, b: string | null): boolean {

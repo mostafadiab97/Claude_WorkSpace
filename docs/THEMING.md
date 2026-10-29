@@ -24,7 +24,7 @@ Edit your file, save, and restart ReqMan. No rebuild needed.
 | `typography` | `fontFamily`, `fontSizeBase`, `fontWeightStrong` | `--rm-font-family`, `--rm-font-size-base` |
 | `shape` | `buttonRadius`, `radiusLarge`, `borderWidth` | `--rm-shape-button-radius` |
 | `spacing` | `xs` … `xl` | `--rm-space-md` |
-| `modes.light` / `modes.dark` | `background`, `surface`, `text`, `primary`, `danger`, `rowHover`, `selection`, `scrollbarThumb`, `scrollbarThumbHover` … | `--rm-color-primary` (for the active mode) |
+| `modes.light` / `modes.dark` | `background`, `surface`, `text`, `primary`, `danger`, `rowHover`, `selection`, `scrollbarThumb`, `scrollbarThumbHover`, `diffOldBg` / `diffNewBg` / `diffOldMark` / `diffNewMark` (the Changes view's red and green) … | `--rm-color-primary` (for the active mode) |
 
 You only need to include the values you change; everything else falls back to the built-in defaults.
 Invalid values are ignored and listed as warnings on the start screen, so a typo can never break the app.

@@ -71,3 +71,6 @@ Rust and Python are common in his field (Python not a good fit). Points for that
 - Cost: core rewrite ≈ 9,600 lines + tests; the module boundaries and the `ReqManApi` contract make it possible
   module by module, keeping the app working throughout.
 - Decide together with the rename (one "big" version) or right after it — not in the middle of feature work.
+
+**Decision (owner, 31 Oct 2026):** a pure-Rust window cannot carry this interface today, so **no migration to Rust
+now**. TypeScript stays. (The Tauri middle path remains a possible later step if a Rust-speaking team takes over.)

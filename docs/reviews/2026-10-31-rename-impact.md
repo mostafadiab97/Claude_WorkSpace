@@ -86,3 +86,10 @@ new name.
   the cache is rebuilt. `requirements/.reqman/` folders inside project repositories are the user's data, not app
   files — they are read as before and never deleted by the installer. Last update of the old app should be a
   ReqMan version that points to the new installer (the old feed cannot install a different `appId` by itself).
+- **Owner, 31 Oct 2026 (later):** the `.reqman` folder **goes too** — the new-name version creates the folder with the
+  new name and removes the old one, as a **Git rename** (`git mv requirements/.reqman requirements/.<newname>`,
+  committed like any change, visible on GitHub as a rename). This replaces "read both, never automatic" in 3.3.
+  **R for the build:** ReqMan offers the rename when it opens a project with the old folder ("Update this project to
+  <NewName>"), as one commit the user pushes; the new app still *reads* `.reqman` until then, so a project opened by
+  a colleague who has not updated yet keeps working. Name idea liked by the owner: **reqochet** — but he wants a name
+  without "req" to stand apart from the many Req- tools; still choosing.

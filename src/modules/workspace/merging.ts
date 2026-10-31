@@ -18,6 +18,8 @@ import type { Item } from '../../shared/domain'
 import { T } from '../../shared/text'
 import { GitError, parseOverwrittenFiles, type GitAdapter } from '../git-adapter'
 import { generateId, mergeItems, parseItemFile, renameReferences, sameItem, serializeItem } from '../items'
+import { rm } from 'node:fs/promises'
+import { join } from 'node:path'
 import type { Logger } from '../logger'
 import { explainGitError, ID_FROM_PATH, reqPath, type createGitOps, type GitSession } from './gitOps'
 
@@ -179,7 +181,7 @@ export function createMerging(deps: MergingDeps) {
     if (!theirs) return fail(s, T.merge.noSuchBranch(src.ref))
     if (!head) {
       // nothing committed here yet: simply take theirs
-      return { plan: { source: src.ref, head: '', theirs, incoming: 0, combined: [], questions: [], duplicates: [] }, analysis: { kind: 'fastForward', incoming: 0 } }
+      return { plan: { source: src.ref, head: '', theirs, incoming: 0, combined: [], questions: [], duplicates: [], uncommitted: false }, analysis: { kind: 'fastForward', incoming: 0 } }
     }
     const a = await analyse(s, head, theirs)
     if (a.kind === 'outside') return fail(s, T.merge.outside(a.files.join(', ')))
@@ -187,8 +189,13 @@ export function createMerging(deps: MergingDeps) {
     const clash = await overwritten(s, await ops.state(s), a.kind === 'merge' ? (a.base ?? head) : head, theirs)
     if (clash.length > 0) return fail(s, T.gitMsg.wouldOverwrite, clash)
     const entries = a.kind === 'merge' ? a.entries : []
+    // Pull from another branch (owner, 31 Oct 2026): its changes arrive as uncommitted changes to review, keep or
+    // discard. A pull of this branch's own remote branch still commits (otherwise the next push would be refused).
+    const upstream = source === undefined ? null : (await remoteBranch(s, st)).ref
+    const uncommitted = source !== undefined && src.ref !== upstream
     return {
       plan: {
+        uncommitted,
         source: src.ref,
         head,
         theirs,
@@ -210,7 +217,11 @@ export function createMerging(deps: MergingDeps) {
     try {
       if (a.kind === 'upToDate') return done(s, T.gitMsg.upToDate)
       if (a.kind === 'fastForward') {
-        await git.merge(root, p.theirs, true, action)
+        if (p.uncommitted) {
+          const r = await bringIn(s, p.theirs)
+          if (typeof r !== 'number') return r
+          if (r === 0) return done(s, T.merge.nothingToPull(p.source))
+        } else await git.merge(root, p.theirs, true, action)
       } else {
         const files: Resolved[] = []
         for (const e of a.entries) {
@@ -229,7 +240,11 @@ export function createMerging(deps: MergingDeps) {
           repaired = extra.message
         }
         const commit = await git.commitTree(root, a.tree, files, [p.head, p.theirs], T.merge.mergeMessage(p.source, st.branch ?? 'HEAD'))
-        await git.merge(root, commit, true, action)
+        if (p.uncommitted) {
+          const r = await bringIn(s, commit)
+          if (typeof r !== 'number') return r
+          if (r === 0) return done(s, T.merge.nothingToPull(p.source))
+        } else await git.merge(root, commit, true, action)
       }
     } catch (e) {
       const over = e instanceof GitError ? parseOverwrittenFiles(e.stderr) : []
@@ -239,8 +254,27 @@ export function createMerging(deps: MergingDeps) {
     }
     await deps.resync()
     const combined = a.kind === 'merge' ? a.entries.filter((e) => e.kind === 'combined').length : 0
-    log.info(`Pulled ${p.source}: ${a.kind === 'merge' ? a.incoming : 0} item(s), ${combined} combined, ${decided} decided`)
-    return done(s, T.merge.pulled(a.incoming, combined, decided) + repaired)
+    log.info(`Pulled ${p.source}${p.uncommitted ? ' (as uncommitted changes)' : ''}: ${a.kind === 'merge' ? a.incoming : 0} item(s), ${combined} combined, ${decided} decided`)
+    return done(s, (p.uncommitted ? T.merge.broughtIn(p.source, a.incoming, combined, decided) : T.merge.pulled(a.incoming, combined, decided)) + repaired)
+  }
+
+  /**
+   * Writes the files of `commit` that differ from HEAD (under the requirements folder) into the working folder,
+   * without committing: they show up as uncommitted changes. Refuses — before touching anything — when one of
+   * those files has uncommitted changes of its own.
+   */
+  async function bringIn(s: GitSession, commit: string): Promise<GitResult | number> {
+    const root = s.repo.root
+    const base = reqPath(s.repo)
+    const diff = await git.diffNameStatus(root, 'HEAD', commit, base)
+    const touched = new Set(diff.flatMap((d) => (d.from ? [d.path, d.from] : [d.path])))
+    const dirty = (await ops.state(s)).changes.filter((c) => touched.has(c.path))
+    if (dirty.length > 0) return fail(s, T.gitMsg.wouldOverwrite, dirty)
+    const restore = diff.filter((d) => d.status !== 'D').map((d) => d.path)
+    const remove = [...diff.filter((d) => d.status === 'D').map((d) => d.path), ...diff.flatMap((d) => (d.status === 'R' && d.from ? [d.from] : []))]
+    if (restore.length > 0) await git.restoreFrom(root, commit, restore)
+    for (const r of remove) await rm(join(root, r), { force: true })
+    return diff.length
   }
 
   /**
@@ -392,6 +426,37 @@ export function createMerging(deps: MergingDeps) {
       ops.invalidate()
       log.info(`Switched to ${local}`)
       return done(s, T.merge.switched(local))
+    },
+
+    async deleteBranch(s: GitSession, name: string, force: boolean): Promise<GitResult> {
+      const blocked = await precheck(s)
+      if (blocked) return blocked
+      const root = s.repo.root
+      const st = await ops.state(s)
+      if (name === st.branch) return fail(s, T.merge.deleteCurrent)
+      const refs = await git.refs(root)
+      if (!refs.some((r) => r.kind === 'branch' && r.name === name) || !(await git.checkBranchName(root, name))) return fail(s, T.merge.noSuchBranch(name))
+      try {
+        await git.deleteBranch(root, name, force)
+      } catch (e) {
+        if (!force && e instanceof GitError && /not fully merged/i.test(e.stderr)) {
+          // its commits are not in this branch's history — but after "Pull from…" (uncommitted, then committed)
+          // their *content* is: merging the branch would change nothing, so nothing can be lost
+          const merged = await git.checkMerge(root, name, 'HEAD').catch(() => null)
+          const contained = merged?.clean === true && merged.tree === (await git.treeOf(root, 'HEAD'))
+          if (!contained) return { ok: false, message: T.merge.unmerged(name), unmerged: true, state: await ops.state(s) }
+          try {
+            await git.deleteBranch(root, name, true)
+          } catch (x) {
+            return fail(s, explainGitError(x))
+          }
+          log.info(`Deleted branch ${name} (its content is already here)`)
+          return done(s, T.merge.branchDeleted(name))
+        }
+        return fail(s, explainGitError(e))
+      }
+      log.info(`Deleted branch ${name}${force ? ' (unmerged)' : ''}`)
+      return done(s, T.merge.branchDeleted(name))
     },
 
     async branchRange(s: GitSession, name: string): Promise<{ from: string; to: string } | null> {

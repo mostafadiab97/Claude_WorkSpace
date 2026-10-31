@@ -24,6 +24,12 @@ await scenario('E2E journey', async (ctx) => {
   check(readdirSync(join(repo, 'requirements')).includes('.reqman'), 'requirements/.reqman created on disk')
   await shot('01-empty-repo')
 
+  // 0.13.0: the filters live in a pop-up behind the "Filters" button (one toolbar row)
+  const filters = async () => {
+    const panel = win.getByRole('group', { name: 'Filters', exact: true })
+    if (!(await panel.isVisible())) await win.getByRole('button', { name: /^Filters/ }).click()
+    return panel
+  }
   console.log('Step 2 — create a hierarchy')
   const save = async ({ review = 'later' } = {}) => {
     await win.getByRole('button', { name: 'Save', exact: true }).click()
@@ -147,7 +153,7 @@ await scenario('E2E journey', async (ctx) => {
   check((await rows().count()) === 5, 'expand all: 5 rows')
   await win.getByRole('button', { name: 'Collapse all' }).click()
   check((await rows().count()) === 2, 'collapse all: only the 2 top-level items')
-  await win.getByLabel('Type filter').selectOption('system-requirement')
+  await (await filters()).getByLabel('Type filter').selectOption('system-requirement')
   await win.waitForTimeout(300)
   check((await rows().count()) === 2, 'type filter: 2 system requirements, listed flat')
   check(await win.locator('.table-mode').isVisible(), 'the table says it shows search results')
@@ -260,7 +266,7 @@ await scenario('E2E journey', async (ctx) => {
   await shot('09a-check-links')
   await ask.getByRole('button', { name: 'Decide later' }).click()
   check((await ask.count()) === 0, '"Decide later" closes the window and keeps the ⚠ marks')
-  await win.getByLabel('Links filter').selectOption('suspect')
+  await (await filters()).getByLabel('Links filter').selectOption('suspect')
   await win.waitForTimeout(500)
   const suspectRows = await rows().allTextContents()
   check(suspectRows.length === 2 && suspectRows.some((t) => t.includes('Verify accuracy')) && suspectRows.some((t) => t.includes('Display readability')), 'filter "With suspect links": the two items linking to the changed requirement')
@@ -273,7 +279,7 @@ await scenario('E2E journey', async (ctx) => {
   check((await links().locator('.links__suspect').count()) === 0, 'Keep clears the suspect mark')
   await win.waitForTimeout(300)
   check((await rows().count()) === 1, 'only the other item is still suspect')
-  await win.getByLabel('Links filter').selectOption('')
+  await (await filters()).getByLabel('Links filter').selectOption('')
   await win.waitForTimeout(300)
 
   // remove the link
@@ -513,7 +519,7 @@ await scenario('E2E journey', async (ctx) => {
   check(lines[0].endsWith(',Parent,Text,Links,Linked from'), `header ends with Parent, Text, Links, Linked from (${lines[0]})`)
   check(lines[1].split(',')[1] === '1' && lines[2].split(',')[1] === '2', 'document order with levels (chapter, then its child)')
   check(allCsv.includes('"The thermostat shall measure room temperature within ±0.2 °C."') || allCsv.includes('within ±0.2 °C.'), 'full text exported')
-  await win.getByLabel('Type filter').selectOption('system-requirement')
+  await (await filters()).getByLabel('Type filter').selectOption('system-requirement')
   await win.waitForTimeout(400)
   await saveAs('sys.md')
   await win.getByRole('button', { name: 'Export…' }).click()

@@ -17,15 +17,17 @@ export interface Column {
 }
 
 /** Built-in columns that can be hidden (ID and Title are always shown). */
-export const BUILT_IN_OPTIONAL = [
-  { key: 'number', label: T.columns.number },
-  { key: 'type', label: T.columns.type },
-  { key: 'text', label: T.columns.text },
-  { key: 'links', label: T.columns.links }
-] as const
+const builtInOptional = () =>
+  [
+    { key: 'number', label: T.columns.number },
+    { key: 'type', label: T.columns.type },
+    { key: 'text', label: T.columns.text },
+    { key: 'links', label: T.columns.links }
+  ] as const
 
 /** Columns that can be hidden: Type, Text, Links and every schema field. */
 export function optionalColumns(schema: Schema): { key: string; label: string; builtIn: boolean }[] {
+  const BUILT_IN_OPTIONAL = builtInOptional()
   return [
     { ...BUILT_IN_OPTIONAL[0], builtIn: true },
     { ...BUILT_IN_OPTIONAL[1], builtIn: true },

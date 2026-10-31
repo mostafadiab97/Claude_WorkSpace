@@ -1,16 +1,23 @@
 // ALL TEXTS SHOWN TO THE USER, in one place (review S-06, owner's decision 27 Oct 2026).
-// Change a label or message here and it changes everywhere. A later translation (e.g. Arabic or German) is a
-// copy of this object with the same keys. Texts with values are small functions: T.table.showMore(12).
+// Change a label or message here and it changes everywhere. Translations are copies of this object with the same
+// keys: Arabic in text-ar.ts (0.13.0) — the compiler refuses a translation with a missing or extra key.
+// Texts with values are small functions: T.table.showMore(12).
+//
+// T is ONE object whose contents are swapped in place by setLanguage(), so code that keeps a reference to a part of
+// it (const tw = T.workspace) still sees the new language. Never copy a single string into a module-level
+// constant — read T when the text is shown.
 //
 // Rules: plain words, no jargon without explanation; keep keys grouped by the screen part that shows them.
 // Data (item titles, field names from schema.yaml) is never in here — only ReqMan's own words.
 //
 // Used by the window (renderer) and by the core for messages it sends to the window (Git, saving…).
 
+import { ar } from './text-ar'
+
 const n = (count: number): string => count.toLocaleString('en')
 const s = (count: number, one = '', many = 's'): string => (count === 1 ? one : many)
 
-export const T = {
+const en = {
   common: {
     loading: 'Loading…',
     checking: 'Checking…',
@@ -31,7 +38,8 @@ export const T = {
     settingsTooltip: 'Settings & diagnostics',
     workspaceArea: 'the workspace',
     settingsArea: 'settings',
-    theme: { label: 'Colour theme', light: 'Light', dark: 'Dark', system: 'System' }
+    theme: { label: 'Colour theme', light: 'Light', dark: 'Dark', system: 'System' },
+    language: { label: 'Language', en: 'English', ar: 'العربية', blocked: 'Save or discard your edit before switching the language.' }
   },
 
   start: {
@@ -95,7 +103,7 @@ export const T = {
     releaseTest: {
       title: 'Release self-test',
       intro:
-        'Run this once after each update. It tries the main actions — create, edit, move, links, commit, push, a colleague\'s change, a pull that stops on a clash, undo, compare, history, export — on a practice repository with a pretend "GitHub" in a temporary folder, then deletes it. Your repositories and Git settings are not touched. Takes about a minute.',
+        'Run this once after each update. It tries the main actions — create, edit, move, links, commit, push, a colleague\'s change, a pull that asks per requirement, branches, compare, history, export — on a practice repository with a pretend "GitHub" in a temporary folder, then deletes it. Your repositories and Git settings are not touched. Takes about a minute.',
       run: 'Run release self-test',
       running: 'Running… (about a minute)',
       passed: (ms: number) => `All steps passed in ${(ms / 1000).toFixed(1)} s.`,
@@ -458,6 +466,7 @@ export const T = {
     syncTooltip: 'Commits to push ↑ and to pull ↓ (as of the last pull)',
     notPushed: 'not pushed yet',
     noRemote: 'No remote (e.g. GitHub) — commits stay on this PC',
+    noRemoteShort: 'no remote',
     oldGit: 'Old Git version',
     mergeOutside: 'Merge with conflicts in progress (outside ReqMan)',
     busy: (what: string) => `${what}…`,
@@ -508,11 +517,17 @@ export const T = {
     choosePull: (current: string) => `Pull into ${current} from which branch? (Esc = back)`,
     chooseCompare: (current: string) => `Compare ${current} with which branch? (Esc = back)`,
     noOthers: 'No other branches yet.',
+    deleteLabel: (b: string) => `Delete the branch "${b}" on this PC`,
+    deleteAskLabel: 'Delete branch',
+    deleteAsk: (b: string) => `Delete the branch "${b}" on this PC? The branch on GitHub (if any) is not touched.`,
+    deleteUnmerged: (b: string) => `"${b}" has commits that no other branch has. If you delete it, that work is lost unless it is on GitHub. Delete anyway?`,
+    delete: 'Delete',
+    deleteAnyway: 'Delete anyway',
     noMatch: 'No branch matches.',
     askLabel: 'Uncommitted changes',
     ask: (count: number, b: string) => `You have ${count} uncommitted change${s(count)}. What should happen to ${count === 1 ? 'it' : 'them'} when you switch to "${b}"?`,
     commitFirst: 'Commit first',
-    take: (count: number) => (count === 1 ? 'Take it along' : 'Take them along'),
+    take: (count: number): string => (count === 1 ? 'Take it along' : 'Take them along'),
     takeTooltip: 'Possible when the other branch has the same version of these items; otherwise ReqMan lists the ones in the way',
     discard: (count: number) => `Discard ${count === 1 ? 'it' : `all ${count}`}`
   },
@@ -667,6 +682,8 @@ export const T = {
   },
 
   workspace: {
+    filters: 'Filters',
+    filtersTooltip: 'Filter by type, field values and links',
     items: 'Items',
     search: 'Search',
     searchPlaceholder: 'Search ID, title, text…',
@@ -731,11 +748,7 @@ export const T = {
     noRemotePull: 'This repository has no remote (for example GitHub) to pull from.',
     branchNotOnRemote: (branch: string) => `The branch "${branch}" is not on the remote yet — nothing to pull. Push to publish it.`,
     upToDate: 'Already up to date.',
-    clash:
-      'Pull stopped — nothing was changed. You and someone else changed the same items. To take their version: Undo your last commit in Changes (if it is not pushed), Discard these items, then Pull. To keep both versions, combine them with Git outside ReqMan for now — choosing per item inside ReqMan comes with the merge milestone.',
     wouldOverwrite: 'Pull stopped — nothing was changed. These items have changes you have not committed, and the pull would overwrite them. Commit them first (or discard them), then pull again.',
-    clashShort: 'Pull stopped — nothing was changed. You and someone else changed the same items.',
-    pulled: (items: number) => (items > 0 ? `Pulled: ${items} item${s(items)} changed.` : 'Pulled. No items changed (other files only).'),
     noRemotePush: 'This repository has no remote (for example GitHub) to push to.',
     nothingToPushYet: 'Nothing to push yet — commit your changes first.',
     notCommittedYet: 'Nothing to push. Your changes are not committed yet — commit them first.',
@@ -781,6 +794,11 @@ export const T = {
     created: (name: string) => `Created the branch "${name}" and switched to it. Push publishes it.`,
     switched: (name: string) => `Switched to "${name}".`,
     blocking: 'These items are different on the other branch, so your uncommitted changes cannot come along. Commit or discard them first.',
+    broughtIn: (source: string, items: number, combined: number, decided: number) =>
+      `Brought ${items} changed item${s(items)} from ${source} into your working folder${combined > 0 ? ` (${combined} combined automatically)` : ''}${decided > 0 ? `, ${decided} decided by you` : ''} — nothing is committed. Review them in Changes: keep, take back or discard, then commit.`,
+    deleteCurrent: 'The current branch cannot be deleted. Switch to another branch first.',
+    unmerged: (name: string) => `"${name}" has commits that no other branch has. Deleting it would lose them (unless they are on GitHub).`,
+    branchDeleted: (name: string) => `Deleted the branch "${name}" on this PC.`,
     nothingToPull: (source: string) => `Already up to date — "${source}" has nothing this branch does not have.`
   },
 
@@ -841,3 +859,35 @@ export const T = {
     revertNothing: (id: string) => `Nothing to take back: this part of ${id} is already as in the last commit.`
   }
 }
+
+/** The shape every translation must have (all keys of the English texts). */
+export type Texts = typeof en
+export type Language = 'en' | 'ar'
+
+/** Deep copy that keeps functions (the texts with values). */
+function copy<V>(v: V): V {
+  if (typeof v !== 'object' || v === null) return v
+  const out: Record<string, unknown> = {}
+  for (const [k, x] of Object.entries(v)) out[k] = copy(x)
+  return out as V
+}
+/** Writes `from` into `to` key by key, keeping `to`'s nested objects (references to them stay valid). */
+function assign(to: Record<string, unknown>, from: Record<string, unknown>): void {
+  for (const [k, x] of Object.entries(from)) {
+    const cur = to[k]
+    if (typeof x === 'object' && x !== null && typeof cur === 'object' && cur !== null) assign(cur as Record<string, unknown>, x as Record<string, unknown>)
+    else to[k] = x
+  }
+}
+
+export const T: Texts = copy(en)
+let current: Language = 'en'
+
+/** Switches every text to `lang` (renderer and core each call it for their own copy). */
+export function setLanguage(lang: Language): void {
+  current = lang
+  assign(T as unknown as Record<string, unknown>, (lang === 'ar' ? ar : en) as unknown as Record<string, unknown>)
+}
+export const getLanguage = (): Language => current
+/** Right-to-left languages flip the window. */
+export const isRtl = (lang: Language): boolean => lang === 'ar'

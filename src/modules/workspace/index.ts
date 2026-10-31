@@ -82,6 +82,7 @@ export interface WorkspaceService {
   createBranch(name: string): Promise<GitResult>
   switchBranch(name: string, changes: 'take' | 'discard'): Promise<GitResult>
   branchRange(name: string): Promise<{ from: string; to: string } | null>
+  deleteBranch(name: string, force: boolean): Promise<GitResult>
   push(): Promise<GitResult>
   discardChanges(paths: string[]): Promise<GitResult>
   setGitIdentity(name: string, email: string): Promise<GitResult>

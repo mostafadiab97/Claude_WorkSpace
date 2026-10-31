@@ -3,6 +3,9 @@ import type { AppInfo, GitInfo, LoadedTheme, RepoInfo, UpdateStatus, ImportFile 
 import { applyTheme, loadSavedMode, saveMode, type ThemeMode } from '../theme/applyTheme'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import { ThemeToggle } from '../components/ThemeToggle'
+import { LanguageToggle } from '../components/LanguageToggle'
+import { applyLanguage, LanguageContext, loadSavedLanguage } from '../lib/language'
+import type { Language } from '../../../shared/text'
 import { UpdateBanner } from '../components/UpdateBanner'
 import { StartScreen } from '../screens/StartScreen'
 import { SettingsScreen } from '../screens/SettingsScreen'
@@ -12,6 +15,12 @@ import { T } from '../../../shared/text'
 export function App() {
   const [theme, setTheme] = useState<LoadedTheme | null>(null)
   const [mode, setMode] = useState<ThemeMode>(loadSavedMode)
+  // the saved language is applied once, before the first render (texts and direction)
+  const [lang, setLang] = useState<Language>(() => {
+    const l = loadSavedLanguage()
+    applyLanguage(l)
+    return l
+  })
   const [appInfo, setAppInfo] = useState<AppInfo | null>(null)
   const [git, setGit] = useState<GitInfo | null>(null)
   const [update, setUpdate] = useState<UpdateStatus | null>(null)
@@ -19,6 +28,8 @@ export function App() {
   /** "New project from a file": the file the new workspace opens the import wizard with. */
   const [pendingImport, setPendingImport] = useState<ImportFile | null>(null)
   const [showSettings, setShowSettings] = useState(false)
+  /** Where the workspace puts its Git controls: inside the top bar (0.13.0 — one bar less). */
+  const [gitSlot, setGitSlot] = useState<HTMLDivElement | null>(null)
 
   useEffect(() => {
     void window.reqman.getTheme().then(setTheme)
@@ -47,6 +58,10 @@ export function App() {
     setMode(m)
     saveMode(m)
   }
+  const changeLanguage = (l: Language): void => {
+    applyLanguage(l)
+    setLang(l) // everything re-renders with the new texts; nothing is remounted, so unsaved edits stay
+  }
   const onInfo = useCallback((i: RepoInfo) => setRepo(i), [])
   const close = async (): Promise<void> => {
     await window.reqman.closeRepository()
@@ -57,6 +72,7 @@ export function App() {
   const brand = theme.config.brand.name
 
   return (
+    <LanguageContext.Provider value={lang}>
     <div className="shell">
       <header className="topbar">
         <div className="brand">
@@ -66,13 +82,15 @@ export function App() {
             <>
               <span className="topbar__sep" aria-hidden="true">/</span>
               <span className="topbar__repo" title={repo.root}>{repo.name}</span>
-              <button type="button" className="btn btn--small" onClick={() => void close()}>
-                {T.app.closeRepository}
+              <button type="button" className="icon-btn icon-btn--small" aria-label={T.app.closeRepository} title={T.app.closeRepository} onClick={() => void close()}>
+                ✕
               </button>
             </>
           )}
         </div>
+        <div className="topbar__git" ref={setGitSlot} hidden={!repo || showSettings} />
         <div className="topbar__right">
+          <LanguageToggle lang={lang} onChange={changeLanguage} />
           <ThemeToggle mode={mode} onChange={changeMode} />
           <button
             type="button"
@@ -92,7 +110,7 @@ export function App() {
         {repo && (
           <div className="main__view" hidden={showSettings}>
             <ErrorBoundary area={T.app.workspaceArea} key={repo.root}>
-              <WorkspaceScreen info={repo} onInfo={onInfo} importFile={pendingImport} />
+              <WorkspaceScreen info={repo} onInfo={onInfo} importFile={pendingImport} gitSlot={gitSlot} />
             </ErrorBoundary>
           </div>
         )}
@@ -113,5 +131,6 @@ export function App() {
         )}
       </main>
     </div>
+    </LanguageContext.Provider>
   )
 }

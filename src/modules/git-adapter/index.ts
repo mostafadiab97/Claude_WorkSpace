@@ -100,6 +100,12 @@ export interface GitAdapter {
    * folder or the user's index. Returns the new commit's hash (M8: the merge commit with the user's decisions).
    */
   commitTree(root: string, tree: string, files: { path: string; content: string | null }[], parents: string[], message: string): Promise<string>
+  /** Writes these files as they are in `ref` into the working folder only (not staged, nothing committed). */
+  restoreFrom(root: string, ref: string, paths: string[]): Promise<void>
+  /** Deletes a local branch; without `force` Git refuses when it has commits no other branch has (GitError). */
+  deleteBranch(root: string, name: string, force: boolean): Promise<void>
+  /** Tree hash of a commit (null if unknown). */
+  treeOf(root: string, ref: string): Promise<string | null>
   /** Is this a valid new branch name? */
   checkBranchName(root: string, name: string): Promise<boolean>
   /** Switches to a branch; `create` makes it first (from `startPoint`, following it when `track`). */

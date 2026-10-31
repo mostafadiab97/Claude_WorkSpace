@@ -12,6 +12,7 @@ const plan: MergePlan = {
   incoming: 3,
   combined: [],
   duplicates: [],
+  uncommitted: false,
   questions: [
     { path: 'requirements/items/REQ-1.md', id: 'REQ-1', label: 'REQ-1 One', parts: [part('title'), part('text')] },
     { path: 'requirements/items/REQ-2.md', id: 'REQ-2', label: 'REQ-2 Two', parts: [part('item')] }

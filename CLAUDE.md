@@ -71,6 +71,9 @@ cloud session from v0.5.0. Nothing lives outside this repository and `Claude_San
   (lesson of v0.4.1, see Pitfalls).
 - **Texts (S-06):** every word on screen comes from `src/shared/text.ts` (`T.area.key`, functions for texts with
   values); core messages shown to the user too. `tests/ui-texts.test.ts` fails on literal words in `.tsx`.
+  **Arabic (0.13.0):** every key also in `src/shared/text-ar.ts` (the compiler insists); never store a text in a
+  module-level constant (the language switch swaps `T` in place — read it when rendering; memoised lists depend on
+  `useLanguage()`); CSS uses logical properties only (the window is right-to-left in Arabic).
 - **Window calls:** add a method to `ReqManApi` + a `Channels` entry + a handler in `src/main/ipc.ts` (the compiler
   insists) that checks its inputs with `src/main/validate.ts`. The preload needs no change.
 - **Writes and Git actions go through the workspace queue** (`q(...)` in `workspace.ts`) — never call one queued
@@ -116,7 +119,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.12.1, 31 Oct 2026) — prototype complete; Changes view; Excel + ReqIF; branches + per-requirement pull
+## Status (v0.13.0, 31 Oct 2026) — prototype complete; Changes view; Excel + ReqIF; branches + per-requirement pull
 
 | Milestone | State |
 | --- | --- |
@@ -134,16 +137,18 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | 0.11.1 owner's requests — non-empty folder asks again, move several chosen items, auto-scroll while dragging, discard chosen/all in Changes, one export entry in the row menu, ReqIF validated against the official schema in tests | Done (v0.11.1) |
 | 0.12.0 M8 branches — create/switch (commit / take along / discard), pull and "pull from branch" with field-level 3-way merge + decision window (S-05), compare a branch like a PR, duplicate-ID repair (D-09), D-05; tag baselines delayed | Done (v0.12.0) |
 | 0.12.1 owner's points on 0.12.0 — branch drop-down under the button, click a name to switch, Pull from… / Compare with… on the current branch, search + scrolling for tens of branches | Done (v0.12.1) |
-| **Next** | owner's 0.12.1 checklist; his decisions on the three analyses (new name, order of the gap-analysis features, Rust); proposed 0.13.0 = rename + traceability matrix/coverage + types in the GUI + saved views + bulk edit | — |
+| 0.13.0 owner's points on 0.12.1 — pull from another branch = uncommitted changes for review, delete branch, Git controls in the top bar + one-row toolbar (Filters pop-up), **Arabic / English with right-to-left** | Done (v0.13.0) |
+| **Next** | owner's 0.13.0 checklist (incl. reading the Arabic); then the **long planning discussion** (feature catalogue) and the new name | — |
 
-Owner's last report (31 Oct 2026): **0.12.0 all 5 steps passed** — that was the two-folder trial (two clones of the
+Owner's last report (31 Oct 2026): 0.12.1 steps 1–3, 5 passed, 21/21 (50.7 s); step 4 (pull from a branch
+committed at once) and three requests → 0.13.0. Before: **0.12.0 all 5 steps passed** — that was the two-folder trial (two clones of the
 sandbox, `Claude_SandBox` and `Claude_SandBox_B`, still on his PC) — self-test 21/21 in 44.6 s, Git 2.52.0. His four
 points on the branch panel went into 0.12.1. He has no DOORS/Jama to try ReqIF: exports are validated against the
 official schema in `tests/reqif.test.ts` (`tests/fixtures/reqif-schema/`, xmllint-wasm).
 
-Automated tests: 187 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
+Automated tests: 191 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
 repository and two clones ("PC A", "PC B"), the release self-test itself, the sandbox's chapter-9 promises
-(`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `branches` (create, switch by clicking the name, Compare with… / Pull from…, the uncommitted-changes question, 41 branches: panel size, search, Esc), `excel` (new project from the sample file, chosen-items export, update the file, ReqIF round trip,
+(`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `language` (Arabic switch, right-to-left, unsaved edit kept, restart), `branches` (create, switch by clicking the name, pull from a branch → uncommitted, delete, Compare with… / Pull from…, the uncommitted-changes question, 41 branches: panel size, search, Esc), `excel` (new project from the sample file, chosen-items export, update the file, ReqIF round trip,
 publish), `journey` (~75 checks, the
 whole user story, incl. the Changes view, ↶, Keep/Unlink window, push offer) and `fixes` (renamed file, lazy Expand all,
 column width drag, Changes view layout + split difference, second start, release self-test in the window).
@@ -311,6 +316,11 @@ Everything else must be automated (unit tests, e2e in CI, the in-app release sel
   `getByRole('button', { name: 'Pull' })` find two buttons. Keep labels of new buttons free of other buttons' words.
 - **Drop-down panels inside the Git bar:** anchor them to `.gitbar--anchor` (the bar row), not the whole region — the
   notices below the bar would push them down. Close on Esc and on a click outside (BranchMenu shows how).
+- **Language switch:** a module-level `const X = [{ label: T.… }]` keeps the old language forever (hit in
+  ThemeToggle, FieldsPanel, columns) — build such lists inside the component/function. Arabic plural forms: use the
+  `pl()` helper in `text-ar.ts`. Test new screens once in Arabic (e2e `language`).
+- **E2E after 0.13.0:** filters are in a pop-up — use the journey's `filters()` helper; the Git region lives inside
+  the top bar; success notices close themselves after 9 s (wait for them right after the action).
 - **Git bar state lags a save by ~250 ms:** panels that decide on `state.changes` right after a save (branch switch
   question) must ask `getGitState()` again (BranchMenu does).
 - **Dependabot:** read each proposal before merging (CI must be green; see the ignore list in `.github/dependabot.yml`).

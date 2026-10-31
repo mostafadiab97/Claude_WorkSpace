@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import type { GitResult, GitState, ItemChange } from '../../../shared/api'
 import { errorMessage } from '../lib/hooks'
 import { BranchMenu } from './BranchMenu'
@@ -16,6 +17,8 @@ export interface GitNotice {
  * Only the requirements folder is ever committed.
  */
 export function GitBar(props: {
+  /** The top bar's slot (0.13.0): the Git controls live there, so the workspace has one bar less. */
+  slot?: HTMLElement | null
   state: GitState | null
   busy: string | null
   /** Why actions that change files are blocked right now (unsaved edits), or null. */
@@ -37,8 +40,16 @@ export function GitBar(props: {
   onPullFrom: (name: string) => Promise<boolean>
   onCompareBranch: (name: string) => void
   onCommitFirst: () => void
+  onDeleteBranch: (name: string, force: boolean) => Promise<{ ok: boolean; unmerged?: boolean; message: string }>
 }) {
-  const { state, busy, blockedReason, notice } = props
+  const { state, busy, blockedReason, notice, onDismiss } = props
+  // a success message goes away by itself after a while; errors stay until dismissed
+  useEffect(() => {
+    if (!notice?.ok) return
+    const t = window.setTimeout(onDismiss, 9000)
+    return () => window.clearTimeout(t)
+  }, [notice, onDismiss])
+  const place = (node: ReactNode): ReactNode => (props.slot ? createPortal(node, props.slot) : node)
   const [publishing, setPublishing] = useState<string | null>(null)
   const [branches, setBranches] = useState(false)
   const closeAfter = (p: Promise<boolean>): void => {
@@ -46,15 +57,15 @@ export function GitBar(props: {
   }
   if (!state) return null
   if (!state.available) {
-    return (
+    return place(
       <div className="gitbar gitbar--off" role="region" aria-label={T.git.region}>
         <span className="muted-inline">{state.reason}</span>
       </div>
     )
   }
   const n = state.changes.length
-  return (
-    <div role="region" aria-label={T.git.region}>
+  return place(
+    <div role="region" aria-label={T.git.region} className="gitbar-region">
       <div className="gitbar gitbar--anchor">
         {branches && (
           <BranchMenu
@@ -75,6 +86,7 @@ export function GitBar(props: {
               setBranches(false)
               props.onCommitFirst()
             }}
+            onDelete={props.onDeleteBranch}
           />
         )}
         <button
@@ -93,7 +105,7 @@ export function GitBar(props: {
             {state.upstream ? `↑${state.ahead} ↓${state.behind}` : T.git.notPushed}
           </span>
         )}
-        {!state.hasRemote && <span className="muted-inline">{T.git.noRemote}</span>}
+        {!state.hasRemote && <span className="muted-inline gitbar__noremote" title={T.git.noRemote}>{T.git.noRemoteShort}</span>}
         {!state.hasRemote && publishing === null && (
           <button type="button" className="link-btn" disabled={busy !== null} onClick={() => setPublishing('')} title={T.git.publishTooltip}>
             {T.git.publish}
@@ -125,6 +137,7 @@ export function GitBar(props: {
           {T.git.push(state.ahead)}
         </button>
       </div>
+      <div className="gitbar__float">
       {publishing !== null && !state.hasRemote && (
         <form
           className="gitbar__notice gitbar__publish"
@@ -186,6 +199,7 @@ export function GitBar(props: {
           </button>
         </div>
       )}
+      </div>
     </div>
   )
 }

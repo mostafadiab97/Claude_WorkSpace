@@ -203,7 +203,7 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       return `${r.durationMs} ms`
     })
 
-    await step('Branches: create, switch, pull from a branch', async () => {
+    await step('Branches: create, switch, pull from a branch, delete', async () => {
       const made = await W().createBranch('self-test/feature')
       expect(made.ok && made.state.branch === 'self-test/feature', made.message)
       await edit('test', (it) => (it.title = 'Check accuracy (feature)'))
@@ -217,6 +217,11 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       const pulled = await W().pullFrom('self-test/feature')
       expect(pulled.ok, pulled.message)
       expect((await W().getItem(id('test')))?.item.title === 'Check accuracy (feature)', 'Pull from the branch did not bring its change.')
+      const st = await W().gitState()
+      expect(st.changes.some((c) => c.id === id('test')), 'Pull from a branch should leave its changes uncommitted for review.')
+      expect((await W().commit('Take the feature work')).ok, 'Committing what the branch brought failed.')
+      const gone = await W().deleteBranch('self-test/feature', false)
+      expect(gone.ok, `Deleting the merged branch failed: ${gone.message}`)
     })
 
     await step('Changes view: take back one part of a change', async () => {

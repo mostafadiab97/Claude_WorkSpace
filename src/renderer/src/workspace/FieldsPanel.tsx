@@ -130,12 +130,12 @@ interface Draft {
   default: string
 }
 
-const TYPES: { id: FieldType; label: string }[] = (['text', 'enum', 'list', 'number', 'date'] as const).map((id) => ({ id, label: T.fields.kinds[id] }))
+const fieldTypes = (): { id: FieldType; label: string }[] => (['text', 'enum', 'list', 'number', 'date'] as const).map((id) => ({ id, label: T.fields.kinds[id] }))
 
 let nextKey = 0
 
 /** Parts of every item that are not schema fields. */
-const BUILT_IN = ['id', 'title', 'type', 'parent', 'text', 'links'].map((key) => ({ key, name: T.fields.builtInNames[key] ?? key }))
+const builtInFields = () => ['id', 'title', 'type', 'parent', 'text', 'links'].map((key) => ({ key, name: T.fields.builtInNames[key] ?? key }))
 
 const kebab = (s: string): string =>
   s
@@ -183,7 +183,7 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
   withIds.forEach((r, i) => {
     const label = r.name.trim() || T.fields.fieldN(i + 1)
     if (!r.name.trim()) problems.push(T.fields.needsName(i + 1))
-    const builtIn = BUILT_IN.find((b) => b.name.toLowerCase() === r.name.trim().toLowerCase() || (!r.isNew && b.key === r.id))
+    const builtIn = builtInFields().find((b) => b.name.toLowerCase() === r.name.trim().toLowerCase() || (!r.isNew && b.key === r.id))
     if (builtIn) problems.push(T.fields.isBuiltIn(r.name.trim()))
     if (withIds.some((x, k) => k < i && x.name.trim().toLowerCase() === r.name.trim().toLowerCase() && r.name.trim())) problems.push(T.fields.duplicate(r.name.trim()))
     if (r.type === 'enum' && splitOptions(r.options).length === 0) problems.push(T.fields.needsOption(label))
@@ -257,7 +257,7 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
 
         <div className="modal__body scroll">
           <p className="fields-builtin">
-            <strong>{T.fields.builtInLead}</strong> {BUILT_IN.map((b) => b.name).join(', ')}
+            <strong>{T.fields.builtInLead}</strong> {builtInFields().map((b) => b.name).join(', ')}
             {T.fields.builtInAfter}
             <em>{T.fields.builtInColumns}</em>.
           </p>
@@ -279,7 +279,7 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
                   </span>
                   <span>
                     <select className="input" aria-label={T.fields.kindOf(i + 1)} value={r.type} onChange={(e) => patch(r.key, { type: e.target.value as FieldType })}>
-                      {TYPES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+                      {fieldTypes().map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
                     </select>
                     {was && was.type !== r.type && <span className="field__error">{T.fields.kindChanged}</span>}
                   </span>

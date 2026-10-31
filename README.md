@@ -7,12 +7,12 @@ Requirements live as plain-text files (one Markdown file per requirement) in a f
 repository; ReqMan is the Windows desktop app to view, edit, structure, link, compare, merge, import and export them.
 No server, no accounts — access is whatever the Git host (e.g. GitHub) allows.
 
-**What it does today (v0.12.1):** tree table with calculated outline numbers, editor, custom fields, typed links with
+**What it does today (v0.13.0):** tree table with calculated outline numbers, editor, custom fields, typed links with
 suspect-link review (Keep / Unlink), commit / pull / push of the requirements folder only (never forced), branches
 (create, switch, pull from any branch, compare a branch like a pull request), a pull that combines changes field by
 field and asks only about real clashes, a Changes view per requirement with side-by-side differences and ↶ per part,
 per-item history, Excel / CSV / ReqIF import (wizard) and export, writing changes back into the original Excel file,
-an in-app release self-test, light/dark themes, automatic updates.
+an in-app release self-test, light/dark themes, **English / Arabic** (right-to-left), automatic updates.
 
 ## Try it (Windows 11)
 

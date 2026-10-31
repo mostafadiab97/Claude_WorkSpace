@@ -326,6 +326,23 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
       }
     },
 
+    async restoreFrom(root, ref, paths) {
+      // a few hundred paths per call keeps the command line short enough for Windows
+      for (let i = 0; i < paths.length; i += 200) await git(root, ['restore', `--source=${ref}`, '--worktree', '--', ...paths.slice(i, i + 200)])
+    },
+
+    async treeOf(root, ref) {
+      try {
+        return (await git(root, ['rev-parse', '--verify', '--quiet', `${ref}^{tree}`])).trim() || null
+      } catch {
+        return null
+      }
+    },
+
+    async deleteBranch(root, name, force) {
+      await git(root, ['branch', force ? '-D' : '-d', name])
+    },
+
     async checkBranchName(root, name) {
       try {
         await git(root, ['check-ref-format', '--branch', name])

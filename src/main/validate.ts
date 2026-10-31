@@ -62,7 +62,7 @@ const HASH = /^[0-9a-f]{0,64}$/
 /** Finishing a pull uses only which commits were planned; everything else is worked out again (M8). */
 export function mergePlan(v: unknown): MergePlan {
   if (!isObj(v) || typeof v.head !== 'string' || !HASH.test(v.head) || typeof v.theirs !== 'string' || !HASH.test(v.theirs) || !v.theirs) return bad('pull plan')
-  return { source: str(v.source, 'branch'), head: v.head, theirs: v.theirs, incoming: 0, combined: [], questions: [], duplicates: [] }
+  return { source: str(v.source, 'branch'), head: v.head, theirs: v.theirs, incoming: 0, combined: [], questions: [], duplicates: [], uncommitted: v.uncommitted === true }
 }
 
 export function mergeAnswers(v: unknown): MergeAnswers {

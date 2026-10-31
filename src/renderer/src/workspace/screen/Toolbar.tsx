@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Schema } from '../../../../shared/domain'
 import { T } from '../../../../shared/text'
 import { ColumnsMenu } from '../FieldsPanel'
@@ -22,10 +23,12 @@ export function Toolbar(props: {
   const { schema, filters: f } = props
   const enumFields = schema.fields.filter((d) => d.type === 'enum' || d.type === 'list')
   const tw = T.workspace
+  const activeCount = (f.types ? 1 : 0) + Object.values(f.fieldFilters).filter(Boolean).length + (f.linkFilter ? 1 : 0)
   return (
     <div className="toolbar">
       <input className="input toolbar__search" type="search" placeholder={tw.searchPlaceholder} value={f.text} onChange={(e) => f.setText(e.target.value)} aria-label={tw.search} />
-      <select className="input toolbar__filter" value={f.types} onChange={(e) => f.setTypes(e.target.value)} aria-label={tw.typeFilter}>
+      <FilterMenu active={activeCount}>
+      <select className="input" value={f.types} onChange={(e) => f.setTypes(e.target.value)} aria-label={tw.typeFilter}>
         <option value="">{tw.allTypes}</option>
         {schema.itemTypes.map((t) => (
           <option key={t.id} value={t.id}>
@@ -36,7 +39,7 @@ export function Toolbar(props: {
       {enumFields.map((d) => (
         <select
           key={d.id}
-          className="input toolbar__filter"
+          className="input"
           value={f.fieldFilters[d.id] ?? ''}
           aria-label={d.name}
           onChange={(e) => f.setField(d.id, e.target.value)}
@@ -51,11 +54,12 @@ export function Toolbar(props: {
           ))}
         </select>
       ))}
-      <select className="input toolbar__filter" value={f.linkFilter} onChange={(e) => f.setLinkFilter(e.target.value as LinkFilter)} aria-label={tw.linksFilter}>
+      <select className="input" value={f.linkFilter} onChange={(e) => f.setLinkFilter(e.target.value as LinkFilter)} aria-label={tw.linksFilter}>
         <option value="">{tw.linksAny}</option>
         <option value="suspect">{tw.linksSuspect}</option>
         <option value="none">{tw.linksNone}</option>
       </select>
+      </FilterMenu>
       {f.filtered && (
         <button type="button" className="btn" onClick={f.clear}>
           {tw.clearFilters}
@@ -71,11 +75,11 @@ export function Toolbar(props: {
       <span className="toolbar__spacer" />
       {!f.filtered && (
         <>
-          <button type="button" className="btn" disabled={props.expanding} onClick={props.onExpandAll} title={tw.expandAllTooltip}>
-            {props.expanding ? tw.expanding : tw.expandAll}
+          <button type="button" className="icon-btn" disabled={props.expanding} onClick={props.onExpandAll} aria-label={tw.expandAll} title={props.expanding ? tw.expanding : tw.expandAllTooltip}>
+            ⊞
           </button>
-          <button type="button" className="btn" onClick={props.onCollapseAll} title={tw.collapseAllTooltip}>
-            {tw.collapseAll}
+          <button type="button" className="icon-btn" onClick={props.onCollapseAll} aria-label={tw.collapseAll} title={tw.collapseAllTooltip}>
+            ⊟
           </button>
         </>
       )}
@@ -87,6 +91,40 @@ export function Toolbar(props: {
           </option>
         ))}
       </select>
+    </div>
+  )
+}
+
+/** The filters in a pop-up (0.13.0: the toolbar fits in one row); the button shows how many are active. */
+function FilterMenu({ active, children }: { active: number; children: ReactNode }) {
+  const [open, setOpen] = useState(false)
+  const box = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent): void => {
+      if (!box.current?.contains(e.target as Node)) setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+  return (
+    <div className="filters" ref={box}>
+      <button type="button" className={open ? 'btn btn--active' : 'btn'} aria-expanded={open} onClick={() => setOpen((v) => !v)} title={T.workspace.filtersTooltip}>
+        {T.workspace.filters}
+        {active > 0 && <span className="filters__count">{active}</span>}
+      </button>
+      {open && (
+        <div className="filters__panel" role="group" aria-label={T.workspace.filters}>
+          {children}
+        </div>
+      )}
     </div>
   )
 }

@@ -3,6 +3,32 @@
 Each version was installed and tried by the product owner on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.13.0 — 31 Oct 2026 — Arabic, fewer bars, pull from a branch for review, delete a branch
+- **Owner (31 Oct 2026) on 0.12.1:** steps 1, 2, 3, 5 passed; self-test 21/21 in 50.7 s. Step 4: "Pull from" another
+  branch committed the result at once (Push (1)) — he wants to decide first. Plus three requests, all here:
+- **Pull from another branch → uncommitted changes.** The combined result is written into the working folder and
+  Changes opens on it: keep (Commit) or take back (Discard / ↶). Nothing is committed. A normal Pull of the branch's
+  own GitHub branch still commits (otherwise the next Push would be refused). Cause of the old behaviour: "Pull from"
+  reused the normal pull's last step (fast-forward to the merge commit).
+- **Delete a branch** (🗑 next to each branch on this PC in the branch panel): asks first; never the current branch;
+  never on GitHub; a branch whose work exists nowhere else asks a second time. A branch whose changes were already
+  taken over with "Pull from" (same content, different commits) is deleted without the second question.
+- **Fewer bars (two less):** the Git controls moved into the top bar (repository name, branch, ↑↓, Changes, Pull,
+  Push); "Close repository" is a small ✕; the toolbar is one row — the filters open in a pop-up behind **Filters**
+  (with the number of active filters), Expand/Collapse all are icons ⊞ ⊟; Git messages float under the top bar and
+  success messages close themselves after a few seconds.
+- **Arabic** (the "brave move"): an **English | العربية** switch next to Light/Dark. Every text of the window and of
+  the core (Git, saving, import messages) in Arabic — 860 lines, checked by the compiler against the English keys;
+  the window mirrors to right-to-left (all spacing rules turned into start/end rules; column resizing follows the
+  direction; IDs and paths stay left-to-right inside Arabic lines); unsaved edits survive the switch; the choice is
+  remembered. Data stays as written.
+- Also recorded: the complete feature catalogue (163 features from ~190 tools, `docs/reviews/2026-10-31-feature-catalogue.md`);
+  decisions: the rename also renames the `.reqman` folder in projects (a Git rename) and uninstalls the old app; no
+  Rust migration now.
+- Tests: 191 unit tests (new: Arabic texts complete and switchable; pull from a branch leaves uncommitted changes;
+  delete branch incl. unmerged and current); e2e: new `language` scenario (switch, right-to-left, unsaved edit kept,
+  restart); `branches` (uncommitted pull, delete); journey uses the Filters pop-up; self-test step 13 deletes a branch.
+
 ## 0.12.1 — 31 Oct 2026 — The branch drop-down (owner's points on 0.12.0)
 - **Owner (31 Oct 2026) on 0.12.0:** all 5 steps passed (the two-folder trial), self-test 21/21 in 44.6 s (Git 2.52.0).
   Four points on the branch panel, all done here:

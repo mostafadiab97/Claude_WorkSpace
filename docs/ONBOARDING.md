@@ -34,7 +34,9 @@ version (zoom, dark mode, and each box links to the source lines it is drawn fro
    and connected, so a module can be swapped in one line.
 4. **The window cannot touch files or Git.** The UI (renderer) runs sandboxed; it only calls `window.reqman.*`,
    defined in `src/shared/api.ts`. All file, Git and database work happens in the main process, which checks
-   every argument it receives (`src/main/validate.ts`). Every word on screen comes from `src/shared/text.ts`.
+   every argument it receives (`src/main/validate.ts`). Every word on screen comes from `src/shared/text.ts`, with the Arabic copy in `src/shared/text-ar.ts`
+   (the compiler refuses a missing key — add both). The window can be right-to-left: use only logical CSS
+   properties (`margin-inline-start`, not `margin-left`).
 5. **One theme file.** Colours, fonts, sizes, radii and spacing come from `config/theme.json` as CSS variables
    (`--rm-*`). Hard-coded colours in the UI fail a test.
 

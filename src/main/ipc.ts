@@ -10,7 +10,7 @@ import { writeFileAtomic } from '../modules/safe-files'
 import { createImportFiles, loadImportFile, writeSourceUpdate } from './importFiles'
 import type { Paths, Services } from './composition'
 import * as v from './validate'
-import { T } from '../shared/text'
+import { setLanguage, T } from '../shared/text'
 
 type Handlers = {
   [K in InvokeMethod]: (e: IpcMainInvokeEvent, ...args: unknown[]) => Awaited<ReturnType<ReqManApi[K]>> | ReturnType<ReqManApi[K]>
@@ -208,6 +208,8 @@ export function registerIpc(services: Services, paths: Paths): void {
     createBranch: (_e, name) => ws.createBranch(v.str(name, 'branch name', 250)),
     switchBranch: (_e, name, changes) => ws.switchBranch(v.str(name, 'branch', 300), v.oneOf(changes, ['take', 'discard'] as const, 'choice')),
     branchRange: (_e, name) => ws.branchRange(v.str(name, 'branch', 300)),
+    setLanguage: async (_e, lang) => setLanguage(v.oneOf(lang, ['en', 'ar'] as const, 'language')),
+    deleteBranch: (_e, name, force) => ws.deleteBranch(v.str(name, 'branch', 300), force === true),
     push: () => ws.push(),
     discardChanges: (_e, paths) => ws.discardChanges(v.strings(paths, 'files')),
     setGitIdentity: (_e, name, email) => ws.setGitIdentity(v.text(name, 'name', 200), v.text(email, 'e-mail', 200)),

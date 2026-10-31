@@ -302,10 +302,17 @@ describe('Branches (M8)', { timeout: 180_000 }, () => {
     expect(cmp.entries.map((e) => [e.id, e.kind])).toEqual([[sys, 'modified']])
     await edit(b.ws, tc, (i) => (i.fields['status'] = 'Review'))
     await b.ws.commit('Bob on main')
+    const headBefore = sh(b.root, 'rev-parse', 'HEAD')
     const pulled = await b.ws.pullFrom('origin/feature/x')
-    expect(pulled).toMatchObject({ ok: true, message: 'Pulled: 1 item changed.' })
+    // 0.13.0 (owner, 31 Oct): another branch's changes arrive as uncommitted changes to review
+    expect(pulled).toMatchObject({ ok: true, message: expect.stringMatching(/^Brought 1 changed item from origin\/feature\/x into your working folder — nothing is committed/) })
+    expect(sh(b.root, 'rev-parse', 'HEAD')).toBe(headBefore)
+    expect(pulled.state.changes.map((c) => c.id)).toEqual([sys])
     expect((await b.ws.getItem(sys))?.item.text).toBe('Feature text')
     expect(sh(b.root, 'branch', '--show-current').trim()).toBe('main')
+    // pulling again would overwrite the uncommitted result: refused
+    expect(await b.ws.pullFrom('origin/feature/x')).toMatchObject({ ok: false, message: expect.stringMatching(/not committed/) })
+    expect((await b.ws.commit('Take the feature text')).ok).toBe(true)
     expect(await b.ws.pullFrom('origin/feature/x')).toMatchObject({ ok: true, message: expect.stringMatching(/Already up to date/) })
     expect(await b.ws.pullFrom('nope')).toMatchObject({ ok: false, message: 'There is no branch "nope".' })
 
@@ -317,5 +324,17 @@ describe('Branches (M8)', { timeout: 180_000 }, () => {
     expect(await readFile(join(b.root, '.git', 'HEAD'), 'utf8')).toContain('feature/x')
     await writeFile(join(b.root, 'notes.txt'), 'outside requirements') // untracked files outside never matter
     expect((await b.ws.switchBranch('main', 'take')).ok).toBe(true)
+
+    // delete a branch (0.13.0): never the current one; unmerged commits need a second "yes"
+    expect(await b.ws.deleteBranch('main', false)).toMatchObject({ ok: false, message: expect.stringMatching(/current branch/) })
+    expect((await b.ws.createBranch('scratch')).ok).toBe(true)
+    await edit(b.ws, tc, (i) => (i.title = 'Scratch only'))
+    await b.ws.commit('Scratch work')
+    await b.ws.switchBranch('main', 'take')
+    const refused = await b.ws.deleteBranch('scratch', false)
+    expect(refused).toMatchObject({ ok: false, unmerged: true })
+    expect(await b.ws.deleteBranch('scratch', true)).toMatchObject({ ok: true, message: 'Deleted the branch "scratch" on this PC.' })
+    expect(sh(b.root, 'branch', '--list', 'scratch').trim()).toBe('')
+    expect((await b.ws.deleteBranch('feature/x', false)).ok).toBe(true) // fully merged: no question
   })
 })

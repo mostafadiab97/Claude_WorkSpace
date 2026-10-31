@@ -275,7 +275,7 @@ code {
 
 .warnings {
   margin: var(--rm-space-sm) 0 0;
-  padding-left: var(--rm-space-lg);
+  padding-inline-start: var(--rm-space-lg);
   color: var(--rm-color-warning);
   font-size: var(--rm-font-size-small);
 }
@@ -369,7 +369,7 @@ code {
   background: none;
   color: var(--rm-color-primary);
   cursor: pointer;
-  text-align: left;
+  text-align: start;
 }
 
 .link-btn:hover {
@@ -394,7 +394,7 @@ code {
 }
 
 .input--button {
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
@@ -526,7 +526,7 @@ code {
 
 .results th,
 .results td {
-  text-align: left;
+  text-align: start;
   font-weight: var(--rm-font-weight-normal);
   padding: var(--rm-space-xs) 0;
   border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
@@ -537,7 +537,7 @@ code {
 }
 
 .results td {
-  text-align: right;
+  text-align: end;
   white-space: nowrap;
 }
 
@@ -573,7 +573,7 @@ code {
   background: transparent;
   color: var(--rm-color-text);
   cursor: pointer;
-  text-align: left;
+  text-align: start;
 }
 
 .recent__open:hover:not(:disabled) {
@@ -666,7 +666,7 @@ code {
   font-size: var(--rm-font-size-small);
   font-weight: var(--rm-font-weight-strong);
   color: var(--rm-color-text-muted);
-  text-align: left;
+  text-align: start;
   padding: var(--rm-space-sm) var(--rm-space-md);
   border: 0;
   background: transparent;
@@ -692,20 +692,20 @@ code {
 .table__resize {
   position: absolute;
   top: 0;
-  right: 0;
+  inset-inline-end: 0;
   bottom: 0;
   width: var(--rm-space-sm);
   cursor: col-resize;
   touch-action: none;
-  border-right: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-inline-end: var(--rm-shape-border-width) solid var(--rm-color-border);
 }
 
 .table__resize:hover,
 .table__resize:focus-visible,
 .table__resize--active {
   outline: none;
-  border-right-width: calc(var(--rm-shape-border-width) * 3);
-  border-right-color: var(--rm-color-primary);
+  border-inline-end-width: calc(var(--rm-shape-border-width) * 3);
+  border-inline-end-color: var(--rm-color-primary);
 }
 
 .table__th--sorted {
@@ -715,7 +715,7 @@ code {
 .table__row {
   position: absolute;
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
   width: 100%;
   display: grid;
   align-items: center;
@@ -758,7 +758,7 @@ code {
 
 .row-menu__item {
   font: inherit;
-  text-align: left;
+  text-align: start;
   padding: var(--rm-space-sm) var(--rm-space-md);
   border: 0;
   border-radius: var(--rm-shape-radius-small);
@@ -774,7 +774,7 @@ code {
 }
 
 .check--nested {
-  margin-left: var(--rm-space-lg);
+  margin-inline-start: var(--rm-space-lg);
 }
 
 .table__td {
@@ -793,7 +793,7 @@ code {
 .table__td--id,
 .table__th--id {
   position: sticky;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 1;
   align-self: stretch;
   display: flex;
@@ -843,7 +843,7 @@ code {
 
 .table__count {
   flex-shrink: 0;
-  margin-left: var(--rm-space-sm);
+  margin-inline-start: var(--rm-space-sm);
   padding: 0 6px;
   border-radius: 999px;
   font-size: var(--rm-font-size-small);
@@ -922,7 +922,7 @@ code {
 .popover__panel {
   position: absolute;
   z-index: 6;
-  left: 0;
+  inset-inline-start: 0;
   top: calc(100% + 4px);
   min-width: 240px;
   max-height: 60vh;
@@ -1137,7 +1137,7 @@ code {
 
 .editor {
   width: clamp(330px, 30vw, 500px);
-  border-left: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-inline-start: var(--rm-shape-border-width) solid var(--rm-color-border);
   background: var(--rm-color-surface);
   display: flex;
   flex-direction: column;
@@ -1171,7 +1171,7 @@ code {
 }
 
 .editor__number {
-  margin-right: var(--rm-space-sm);
+  margin-inline-end: var(--rm-space-sm);
   user-select: none;
 }
 
@@ -1227,8 +1227,8 @@ code {
 .picker__menu {
   position: absolute;
   z-index: 5;
-  left: 0;
-  right: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
   top: calc(100% + 2px);
   list-style: none;
   margin: 0;
@@ -1243,7 +1243,7 @@ code {
 .picker__option {
   font: inherit;
   width: 100%;
-  text-align: left;
+  text-align: start;
   border: 0;
   border-radius: var(--rm-shape-radius-small);
   padding: var(--rm-space-xs) var(--rm-space-sm);
@@ -1387,7 +1387,7 @@ code {
 
 .guard {
   position: absolute;
-  right: var(--rm-space-lg);
+  inset-inline-end: var(--rm-space-lg);
   bottom: var(--rm-space-xl);
   z-index: 10;
   max-width: 420px;
@@ -1440,13 +1440,13 @@ code {
   padding: var(--rm-space-sm) var(--rm-space-md);
   border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
   background: var(--rm-color-surface);
-  border-left: 3px solid var(--rm-color-success);
+  border-inline-start: 3px solid var(--rm-color-success);
   font-size: var(--rm-font-size-small);
 }
 
 .gitbar__notice--error {
   color: var(--rm-color-danger);
-  border-left-color: var(--rm-color-danger);
+  border-inline-start-color: var(--rm-color-danger);
 }
 
 .gitbar__notice-text {
@@ -1456,7 +1456,7 @@ code {
 
 .gitbar__items {
   margin: var(--rm-space-xs) 0 0;
-  padding-left: var(--rm-space-lg);
+  padding-inline-start: var(--rm-space-lg);
   color: var(--rm-color-text);
 }
 
@@ -1563,7 +1563,7 @@ code {
   border-radius: var(--rm-shape-radius-small);
   background: transparent;
   color: var(--rm-color-text);
-  text-align: left;
+  text-align: start;
   cursor: pointer;
 }
 
@@ -1636,13 +1636,13 @@ code {
 .compare__pull {
   margin: 0;
   padding: var(--rm-space-xs) var(--rm-space-sm);
-  border-left: 3px solid var(--rm-color-success);
+  border-inline-start: 3px solid var(--rm-color-success);
   font-size: var(--rm-font-size-small);
   background: var(--rm-color-surface-alt);
 }
 
 .compare__pull--error {
-  border-left-color: var(--rm-color-warning);
+  border-inline-start-color: var(--rm-color-warning);
 }
 
 .compare__range {
@@ -1721,7 +1721,7 @@ code {
   border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
   background: transparent;
   color: var(--rm-color-text);
-  text-align: left;
+  text-align: start;
   cursor: pointer;
 }
 
@@ -1793,7 +1793,7 @@ code {
 }
 
 .table-notice--ok {
-  border-left: 3px solid var(--rm-color-success);
+  border-inline-start: 3px solid var(--rm-color-success);
   overflow-wrap: anywhere;
 }
 
@@ -1958,9 +1958,9 @@ code {
 .diff__no {
   padding: 1px var(--rm-space-xs);
   color: var(--rm-color-text-muted);
-  text-align: right;
+  text-align: end;
   user-select: none;
-  border-right: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-inline-end: var(--rm-shape-border-width) solid var(--rm-color-border);
 }
 
 .diff__src {
@@ -2100,7 +2100,7 @@ code {
 
 .import__rowno {
   color: var(--rm-color-text-muted);
-  text-align: right;
+  text-align: end;
 }
 
 .import__headerrow {
@@ -2234,7 +2234,7 @@ code {
 .branches {
   position: absolute;
   top: 100%;
-  left: var(--rm-space-sm);
+  inset-inline-start: var(--rm-space-sm);
   z-index: 30;
   width: min(460px, calc(100% - 2 * var(--rm-space-sm)));
   max-height: min(70vh, 560px);
@@ -2295,10 +2295,25 @@ code {
   padding: 0;
 }
 
+.branches__item {
+  display: flex;
+  align-items: center;
+}
+
+.branches__delete {
+  opacity: 0.4;
+}
+
+.branches__item:hover .branches__delete,
+.branches__delete:focus-visible {
+  opacity: 1;
+}
+
 .branches__pick {
   display: block;
-  width: 100%;
-  text-align: left;
+  flex: 1;
+  min-width: 0;
+  text-align: start;
   padding: var(--rm-space-xs) var(--rm-space-sm);
   border: 0;
   border-radius: var(--rm-shape-radius-small);
@@ -2367,12 +2382,12 @@ code {
   gap: var(--rm-space-xs);
   padding: var(--rm-space-sm) 0;
   border-top: var(--rm-shape-border-width) solid var(--rm-color-border);
-  border-left: 3px solid var(--rm-color-danger);
-  padding-left: var(--rm-space-sm);
+  border-inline-start: 3px solid var(--rm-color-danger);
+  padding-inline-start: var(--rm-space-sm);
 }
 
 .merge__part--done {
-  border-left-color: var(--rm-color-success);
+  border-inline-start-color: var(--rm-color-success);
 }
 
 .merge__part-head {
@@ -2414,4 +2429,113 @@ code {
 
 .merge__edit {
   width: 100%;
+}
+
+/* 0.13.0: the Git controls live in the top bar (one bar less); their messages float under it */
+
+.topbar__git {
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar__git .gitbar-region {
+  position: relative;
+}
+
+.topbar__git .gitbar {
+  border-bottom: 0;
+  background: transparent;
+  padding: 0;
+  flex-wrap: nowrap;
+}
+
+.gitbar__noremote {
+  white-space: nowrap;
+}
+
+.gitbar__float {
+  position: absolute;
+  top: calc(100% + var(--rm-space-sm));
+  inset-inline-end: 0;
+  z-index: 25;
+  width: min(560px, 90vw);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-xs);
+}
+
+.gitbar__float > * {
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius-medium);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--rm-color-text) 18%, transparent);
+}
+
+/* compact toolbar: one row; filters in a pop-up */
+
+.toolbar {
+  flex-wrap: nowrap;
+}
+
+.toolbar__search {
+  min-width: 120px;
+}
+
+.filters {
+  position: relative;
+}
+
+.filters__panel {
+  position: absolute;
+  top: calc(100% + var(--rm-space-xs));
+  inset-inline-start: 0;
+  z-index: 30;
+  display: grid;
+  gap: var(--rm-space-sm);
+  min-width: 260px;
+  padding: var(--rm-space-sm);
+  background: var(--rm-color-surface);
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius-medium);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--rm-color-text) 18%, transparent);
+}
+
+.filters__panel .input {
+  width: 100%;
+}
+
+.filters__count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  margin-inline-start: var(--rm-space-xs);
+  border-radius: 9px;
+  background: var(--rm-color-primary);
+  color: var(--rm-color-primary-text);
+  font-size: var(--rm-font-size-small);
+}
+
+.segmented--icons .segmented__item {
+  padding: var(--rm-space-xs) var(--rm-space-sm);
+}
+
+/* 0.13.0 Arabic (right to left): IDs, paths and branch names are left-to-right text inside a right-to-left line —
+   isolate them so "1 REQ-…" or "/tmp/…" are not reordered */
+.editor__id,
+.editor__number,
+.statusbar__path,
+.topbar__repo,
+.tree__id,
+.table__th--id,
+.branches__name,
+.branches__pick,
+.gitbar__branch,
+.gitbar__sync {
+  unicode-bidi: isolate;
+}
+
+[dir='rtl'] .statusbar__path,
+[dir='rtl'] .branches__pick,
+[dir='rtl'] .gitbar__sync {
+  direction: ltr;
 }

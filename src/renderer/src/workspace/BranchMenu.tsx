@@ -24,6 +24,8 @@ export function BranchMenu(props: {
   onPullFrom: (name: string) => void
   onCompare: (name: string) => void
   onCommitFirst: () => void
+  /** Deletes a branch on this PC; resolves to the result so the panel can ask again for unmerged branches. */
+  onDelete: (name: string, force: boolean) => Promise<{ ok: boolean; unmerged?: boolean; message: string }>
 }) {
   const { state, blockedReason } = props
   const [list, setList] = useState<BranchInfo[] | null>(null)
@@ -32,6 +34,8 @@ export function BranchMenu(props: {
   const [filter, setFilter] = useState('')
   const [mode, setMode] = useState<Mode>('switch')
   const [asking, setAsking] = useState<string | null>(null)
+  /** Branch whose deletion is being confirmed; `unmerged` after Git said it has commits found nowhere else. */
+  const [deleting, setDeleting] = useState<{ name: string; unmerged: boolean; busy: boolean } | null>(null)
   const current = state.branch ?? ''
   // the Git bar's state may lag a fresh save by a moment: count uncommitted changes again when the panel opens
   const [fresh, setFresh] = useState<number | null>(null)
@@ -90,15 +94,50 @@ export function BranchMenu(props: {
         <h3 className="branches__group">{title}</h3>
         <ul className="branches__list" aria-label={title}>
           {items.map((b) => (
-            <li key={`${b.kind}-${b.name}`}>
+            <li key={`${b.kind}-${b.name}`} className="branches__item">
               <button type="button" className="branches__pick" disabled={locked && mode !== 'compare'} title={tip(b.name)} onClick={() => pick(b.name)}>
                 {b.name}
               </button>
+              {b.kind === 'branch' && mode === 'switch' && (
+                <button type="button" className="icon-btn icon-btn--small branches__delete" aria-label={T.branches.deleteLabel(b.name)} title={T.branches.deleteLabel(b.name)} disabled={locked} onClick={() => setDeleting({ name: b.name, unmerged: false, busy: false })}>
+                  🗑
+                </button>
+              )}
             </li>
           ))}
         </ul>
       </>
     )
+
+  if (deleting) {
+    const confirm = async (force: boolean): Promise<void> => {
+      setDeleting({ ...deleting, busy: true })
+      const r = await props.onDelete(deleting.name, force)
+      if (r.ok) {
+        setDeleting(null)
+        setList((l) => (l ? l.filter((x) => !(x.kind === 'branch' && x.name === deleting.name)) : l))
+      } else if (r.unmerged) setDeleting({ name: deleting.name, unmerged: true, busy: false })
+      else {
+        setError(r.message)
+        setDeleting(null)
+      }
+    }
+    return (
+      <div ref={box} className="branches" role="dialog" aria-label={T.branches.label}>
+        <div className="branches__ask" role="alertdialog" aria-label={T.branches.deleteAskLabel}>
+          <p>{deleting.unmerged ? T.branches.deleteUnmerged(deleting.name) : T.branches.deleteAsk(deleting.name)}</p>
+          <span className="actions actions--wrap">
+            <button type="button" className="btn btn--small btn--danger" disabled={deleting.busy} onClick={() => void confirm(deleting.unmerged)}>
+              {deleting.unmerged ? T.branches.deleteAnyway : T.branches.delete}
+            </button>
+            <button type="button" className="btn btn--small" onClick={() => setDeleting(null)}>
+              {T.common.cancel}
+            </button>
+          </span>
+        </div>
+      </div>
+    )
+  }
 
   if (asking) {
     return (

@@ -1,13 +1,13 @@
 import type { ThemeMode } from '../theme/applyTheme'
 import { T } from '../../../shared/text'
 
-const OPTIONS: { value: ThemeMode; label: string }[] = [
-  { value: 'light', label: T.app.theme.light },
-  { value: 'dark', label: T.app.theme.dark },
-  { value: 'system', label: T.app.theme.system }
-]
-
 export function ThemeToggle({ mode, onChange }: { mode: ThemeMode; onChange: (m: ThemeMode) => void }) {
+  // built at render time, so the labels follow the language
+  const OPTIONS: { value: ThemeMode; label: string }[] = [
+    { value: 'light', label: T.app.theme.light },
+    { value: 'dark', label: T.app.theme.dark },
+    { value: 'system', label: T.app.theme.system }
+  ]
   return (
     <div className="segmented" role="radiogroup" aria-label={T.app.theme.label}>
       {OPTIONS.map((o) => (

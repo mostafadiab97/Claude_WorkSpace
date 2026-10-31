@@ -1,6 +1,6 @@
 // The Git bar's state and actions (review S-03: grouped out of WorkspaceScreen). No automatic pulls: Push first
 // offers to pull (owner's decision O-06).
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { GitResult, GitState, MergePlan } from '../../../../shared/api'
 import { T } from '../../../../shared/text'
 import { errorMessage } from '../../lib/hooks'
@@ -31,6 +31,7 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
   }, [dataVersion])
 
   const blocked = dirty ? T.git.blocked : null
+  const dismiss = useCallback(() => setNotice(null), [])
 
   /** Runs a Git action that may change files and shows its outcome; true when it worked. */
   const perform = async (label: string, op: () => Promise<GitResult>): Promise<boolean> => {
@@ -107,7 +108,7 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
     reload: () => void window.reqman.getGitState().then(setState),
     busy,
     notice,
-    dismiss: () => setNotice(null),
+    dismiss,
     blocked,
     run,
     onPanelResult,
@@ -119,6 +120,18 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
     mergeDone,
     pullFrom: (name: string) => perform(T.git.pulling, () => window.reqman.pullFrom(name)),
     createBranch: (name: string) => perform(T.git.switching, () => window.reqman.createBranch(name)),
-    switchBranch: (name: string, changes: 'take' | 'discard') => perform(T.git.switching, () => window.reqman.switchBranch(name, changes))
+    switchBranch: (name: string, changes: 'take' | 'discard') => perform(T.git.switching, () => window.reqman.switchBranch(name, changes)),
+    /** Delete a branch: the panel asks again when Git says it has unmerged commits (no notice for that question). */
+    deleteBranch: async (name: string, force: boolean): Promise<{ ok: boolean; unmerged?: boolean; message: string }> => {
+      try {
+        const r = await window.reqman.deleteBranch(name, force)
+        setState(r.state)
+        const unmerged = !r.ok && r.unmerged === true
+        if (!unmerged) setNotice({ ok: r.ok, message: r.message })
+        return { ok: r.ok, message: r.message, ...(unmerged ? { unmerged } : {}) }
+      } catch (e) {
+        return { ok: false, message: errorMessage(e) }
+      }
+    }
   }
 }

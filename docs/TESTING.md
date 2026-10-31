@@ -53,7 +53,19 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.12.1 (the branch drop-down you asked for)
+## Manual test checklist — v0.13.0 (Arabic, fewer bars, pull from a branch for review, delete a branch)
+
+Your points on 0.12.1 and the Arabic switch. Use folder **B** (branches `main` and `trial-one`). Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.13.0**, then **⚙ → Run release self-test**. | App shows 0.13.0; **All steps passed**, 21 ✓ (step 13 now also deletes a branch). |
+| 2 | Open folder **B** and look at the top of the window. | **Two bars less:** the branch button, Changes, Pull and Push sit in the top bar next to the repository name; one toolbar row: search, **Filters** (opens a small panel with Type / Status / Priority / Links; the button shows how many are active), Columns, Import, Export, ⊞ / ⊟ (expand / collapse all), New item. Git messages appear as a floating note under the top bar and success notes disappear by themselves. |
+| 3 | On `main`: **⎇ → Pull from… → trial-one** (after changing something on `trial-one` first, or use any branch with a difference). | **Nothing is committed** — Push keeps its old number. Changes opens on **Uncommitted changes** with what the branch brought: keep it (Commit) or take it back (Discard / ↶). |
+| 4 | **⎇**, hover a branch you no longer need (e.g. make one: **New branch** `test-delete`, then switch back) → 🗑 → **Delete**. | It asks first ("…on this PC — the branch on GitHub is not touched") and the branch disappears. The current branch has no 🗑. A branch with work found nowhere else asks a second time ("Delete anyway?"). |
+| 5 | Click **العربية** (next to Light / Dark). Look around: table, editor, Changes, a Git message. Then **English**. | The whole window turns **right-to-left in Arabic** (logo on the right, menus mirrored); an edit you had not saved is still there; after a restart it is still Arabic; English switches everything back. Data (titles, field names from your schema) stays as written. Report any word still in English or any Arabic that reads wrongly. |
+
+## Previous checklist — v0.12.1 (the branch drop-down you asked for)
 
 Your four points on the branch panel. Use folder **B** from the 0.12.0 trial (it has `main` and `trial-one`).
 Report by step number.

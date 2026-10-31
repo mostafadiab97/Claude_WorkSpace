@@ -5,6 +5,7 @@ import { T } from '../../../shared/text'
 import { clampWidth, columnTemplate, columnsFor, linkTitle, tableMinWidth, type ColumnPrefs } from './table/columns'
 import { useRowDrag } from './table/drag'
 import { useFlatRows, useTreeRows, type Row } from './table/rows'
+import { isRtlDocument, useLanguage } from '../lib/language'
 
 export { optionalColumns, orderColumns, shownColumnKeys, columnsFor, withWidth, linkSummary, type Column, type ColumnPrefs } from './table/columns'
 export type { Row } from './table/rows'
@@ -50,7 +51,9 @@ export function ItemTable(props: {
 }) {
   const { schema, prefs, mode, query, dataVersion, selectedId, onSelect, onSort, onTotal, onMove, controlsRef, revealNonce, emptyText, onResize, chosen, onChoose, onRowMenu } = props
   const anchor = useRef<number | null>(null)
-  const saved = useMemo(() => columnsFor(schema, prefs), [schema, prefs])
+  const lang = useLanguage()
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- the column labels follow the language
+  const saved = useMemo(() => columnsFor(schema, prefs), [schema, prefs, lang])
   // while a column edge is dragged, its width lives here and is saved when the mouse is released
   const [live, setLive] = useState<{ key: string; width: number } | null>(null)
   const columns = live ? saved.map((c) => (c.key === live.key ? { ...c, width: live.width } : c)) : saved
@@ -66,7 +69,7 @@ export function ItemTable(props: {
     let width = start
     handle.setPointerCapture(e.pointerId)
     const move = (ev: PointerEvent): void => {
-      width = clampWidth(start + ev.clientX - startX)
+      width = clampWidth(start + (ev.clientX - startX) * (isRtlDocument() ? -1 : 1))
       setLive({ key, width })
     }
     const up = (): void => {
@@ -241,7 +244,7 @@ export function ItemTable(props: {
                 return (
                   <div key={v.key} role="row" className={`table__row table__row--more${row.kind === 'loading' ? ' table__row--loading' : ''}`} style={style}>
                     <span className="table__td table__td--id" />
-                    <span className="table__td" style={{ paddingLeft: `${8 + row.depth * INDENT + INDENT}px` }}>
+                    <span className="table__td" style={{ paddingInlineStart: `${8 + row.depth * INDENT + INDENT}px` }}>
                       {row.kind === 'more' ? (
                         <button type="button" className="link-btn" onClick={() => tree.showMore(row.parent)}>
                           {T.table.showMore(row.hidden)}
@@ -305,7 +308,7 @@ export function ItemTable(props: {
                   {row && item
                     ? columns.map((c) =>
                         c.key === 'title' && isTree ? (
-                          <span key={c.key} role="gridcell" className="table__td table__td--tree" style={{ paddingLeft: `${4 + row.depth * INDENT}px` }} title={c.value(item)}>
+                          <span key={c.key} role="gridcell" className="table__td table__td--tree" style={{ paddingInlineStart: `${4 + row.depth * INDENT}px` }} title={c.value(item)}>
                             {item.childCount > 0 ? (
                               <button
                                 type="button"

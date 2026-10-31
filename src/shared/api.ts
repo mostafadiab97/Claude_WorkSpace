@@ -143,6 +143,8 @@ export type GitResult =
       items?: ItemChange[]
       /** A pull needs the user's decisions first (M8): answer the questions and call finishPull. */
       plan?: MergePlan
+      /** deleteBranch: the branch has commits no other branch has; ask before deleting with `force`. */
+      unmerged?: boolean
       state: GitState
     }
 
@@ -195,6 +197,11 @@ export interface MergePlan {
   questions: MergeQuestion[]
   /** Items created on both sides with the same ID (review D-09): this branch's item gets a new ID. */
   duplicates: ItemChange[]
+  /**
+   * Pull from another branch (owner, 31 Oct 2026): the result is written as uncommitted changes to review in
+   * Changes (keep or discard, then commit). False for a pull of the branch's own remote branch (that one commits).
+   */
+  uncommitted: boolean
 }
 
 export interface HistoryEntry {
@@ -526,6 +533,10 @@ export interface ReqManApi {
    * other branch has a different version of those files); `discard` throws them away first.
    */
   switchBranch(name: string, changes: 'take' | 'discard'): Promise<GitResult>
+  /** The window's language (0.13.0): core messages follow it. */
+  setLanguage(lang: 'en' | 'ar'): Promise<void>
+  /** Deletes a branch on this PC (never the current one, never on the remote). `force` also when it has unmerged commits. */
+  deleteBranch(name: string, force: boolean): Promise<GitResult>
   /** What a branch would bring into the current one, like a pull request: common ancestor → that branch. */
   branchRange(name: string): Promise<{ from: string; to: string } | null>
   /** Never forces. Publishes the branch if it is not on the remote yet. */
@@ -647,6 +658,8 @@ export const Channels = {
   createBranch: 'git:createBranch',
   switchBranch: 'git:switchBranch',
   branchRange: 'git:branchRange',
+  deleteBranch: 'git:deleteBranch',
+  setLanguage: 'app:setLanguage',
   push: 'git:push',
   discardChanges: 'git:discard',
   setGitIdentity: 'git:setIdentity',

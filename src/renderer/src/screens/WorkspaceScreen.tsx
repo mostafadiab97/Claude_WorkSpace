@@ -22,7 +22,7 @@ import { useGit } from '../workspace/screen/useGit'
  * and the editor on the right. State is grouped by area: filters (useFilters), Git (useGit), the Changes view
  * (useChanges), editor.
  */
-export function WorkspaceScreen({ info, onInfo, importFile }: { info: RepoInfo; onInfo: (i: RepoInfo) => void; importFile?: ImportFile | null }) {
+export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { info: RepoInfo; onInfo: (i: RepoInfo) => void; importFile?: ImportFile | null; gitSlot?: HTMLElement | null }) {
   const schema = info.schema
   const filters = useFilters(schema)
   const { query, filtered } = filters
@@ -159,6 +159,7 @@ export function WorkspaceScreen({ info, onInfo, importFile }: { info: RepoInfo; 
     <div className="workspace">
       <section className="workspace__main" aria-label={T.workspace.items}>
         <GitBar
+          slot={gitSlot}
           state={git.state}
           busy={git.busy}
           blockedReason={git.blocked}
@@ -178,7 +179,16 @@ export function WorkspaceScreen({ info, onInfo, importFile }: { info: RepoInfo; 
             if (ok && !dirty) setTarget(null)
             return ok
           }}
-          onPullFrom={git.pullFrom}
+          onPullFrom={async (name) => {
+            const ok = await git.pullFrom(name)
+            // another branch's changes arrive uncommitted (0.13.0): show them for review right away
+            if (ok && !showChanges) {
+              changes.reset()
+              setShowChanges(true)
+            }
+            return ok
+          }}
+          onDeleteBranch={git.deleteBranch}
           onCompareBranch={(name) => {
             if (!showChanges) git.reload()
             setShowChanges(true)

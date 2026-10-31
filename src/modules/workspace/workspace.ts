@@ -263,6 +263,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     createBranch: q((name: string) => merging.createBranch(need(), name)),
     switchBranch: q((name: string, changes: 'take' | 'discard') => merging.switchBranch(need(), name, changes)),
     branchRange: (name: string) => merging.branchRange(need(), name),
+    deleteBranch: q((name: string, force: boolean) => merging.deleteBranch(need(), name, force)),
     push: q(() => gitOps.push(need())),
     discardChanges: q((paths: string[]) => gitOps.discard(need(), paths)),
     setGitIdentity: q((name: string, email: string) => gitOps.setIdentity(need(), name, email)),

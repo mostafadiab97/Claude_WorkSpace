@@ -4,6 +4,7 @@ Each version was installed and tried by the product owner on Windows 11; his fee
 version it was about, and what it led to.
 
 ## 0.13.1 — 31 Oct 2026 — Owner's points on 0.13.0
+- **Owner (31 Oct 2026):** all 4 steps passed; self-test 21/21 in 66.8 s.
 - **Owner (31 Oct 2026) on 0.13.0:** all 5 steps passed; self-test 21/21 in 63.6 s. Three points, all here:
   1. The floating Git note was hardly noticed → it is now tinted by its meaning (green success, red problem, blue
      question) with a coloured frame and glow, in Light and Dark; the text is centred in both languages.

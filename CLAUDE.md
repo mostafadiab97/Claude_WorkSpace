@@ -139,9 +139,10 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | 0.12.1 owner's points on 0.12.0 — branch drop-down under the button, click a name to switch, Pull from… / Compare with… on the current branch, search + scrolling for tens of branches | Done (v0.12.1) |
 | 0.13.0 owner's points on 0.12.1 — pull from another branch = uncommitted changes for review, delete branch, Git controls in the top bar + one-row toolbar (Filters pop-up), **Arabic / English with right-to-left** | Done (v0.13.0) |
 | 0.13.1 owner's points on 0.13.0 — floating note tinted green/red/blue with frame and glow, centred text; red Delete button per branch; right-to-left mark on every Arabic text (word order in tooltips/dialogs) | Done (v0.13.1) |
-| **Next** | owner's 0.13.1 checklist; then the **long planning discussion** (feature catalogue) and the new name; Arabic wording review later (owner: "not 100% accurate, don't change it yet") | — |
+| **Next** | the **long planning discussion** (feature catalogue) and the new name; Arabic wording review later (owner: "not 100% accurate, don't change it yet") | — |
 
-Owner's last report (31 Oct 2026): 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
+Owner's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
+Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
 Before: 0.12.1 steps 1–3, 5 passed, 21/21 (50.7 s); step 4 (pull from a branch
 committed at once) and three requests → 0.13.0. Before: **0.12.0 all 5 steps passed** — that was the two-folder trial (two clones of the
 sandbox, `Claude_SandBox` and `Claude_SandBox_B`, still on his PC) — self-test 21/21 in 44.6 s, Git 2.52.0. His four
@@ -193,9 +194,9 @@ scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 5
 
 ## Where we are right now (31 Oct 2026) — read this first
 
-- **Built and accepted by the owner:** everything up to 0.12.0 (prototype M0–M6, clean page 0.8.0, new data format
-  0.9.0, Changes view 0.10.0, Excel + ReqIF 0.11.x, branches + per-requirement merge 0.12.0). **0.12.1** (branch
-  drop-down) is released and waits for his 5-step checklist.
+- **Built and accepted by the owner:** everything up to **0.13.1** (prototype M0–M6, clean page 0.8.0, new data
+  format 0.9.0, Changes view 0.10.0, Excel + ReqIF 0.11.x, branches + per-requirement merge 0.12.x, Arabic + fewer
+  bars + delete branch 0.13.x). No open bugs or requests.
 - **Waiting for his decisions** (walk him through them with the `owner-decision-walkthrough` skill, recommendation
   first, record answers in the file and in DESIGN.md):
   1. **New product name** — "ReqMan" is used by INNEO's requirements tool. Branchwise turned out to be taken (owner,

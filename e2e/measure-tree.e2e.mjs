@@ -71,6 +71,7 @@ try {
   })
   await win.screenshot({ path: join(outDir, 'measure-reveal.png') })
   await time('filter "With suspect links"', async () => {
+    await win.getByRole('button', { name: /^Filters/ }).click() // 0.13.0: filters live in a pop-up
     await win.getByLabel('Links filter').selectOption('suspect')
     await win.locator('.table-mode').waitFor()
     await win.waitForTimeout(300)

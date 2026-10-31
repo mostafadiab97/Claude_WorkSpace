@@ -26,7 +26,9 @@ version (zoom, dark mode, and each box links to the source lines it is drawn fro
    else (the SQLite index, the UI state) can be thrown away and rebuilt from the files.
 2. **Never lose or overwrite someone's work.** Every write checks that the file is still the version that was read
    (a *revision* hash); otherwise it refuses with a clear message. Writes are atomic (temp file + rename). Unknown
-   header keys are kept. Git pushes are never forced; a pull that would clash stops before changing anything.
+   header keys are kept. Git pushes are never forced. A pull combines items field by field and asks only about real
+   clashes; until every question is answered, nothing in the folder changes (the merge commit is built in a
+   temporary Git index first).
 3. **Modules with one front door.** Each folder in `src/modules/<name>/` has an `index.ts` — the only file other code
    may import (ESLint enforces it). `src/main/composition.ts` is the one place where implementations are created
    and connected, so a module can be swapped in one line.
@@ -42,19 +44,19 @@ The architecture picture in section 1 shows these parts and how calls travel bet
 
 | Part | Role in one sentence | Main files | Used by |
 | --- | --- | --- | --- |
-| **Renderer** (`src/renderer/src`) | Everything on screen: start screen, tree table, editor, links, Git bar, Changes view, History, Fields, Export | `app/App.tsx`, `screens/WorkspaceScreen.tsx`, `workspace/*.tsx`, `styles.css` | the user |
+| **Renderer** (`src/renderer/src`) | Everything on screen: start screen, tree table, editor, links, Git bar with the branch drop-down, pull decision window, Changes view, History, Fields, Import wizard, Export | `app/App.tsx`, `screens/WorkspaceScreen.tsx`, `workspace/*.tsx`, `styles.css` | the user |
 | **Preload** (`src/preload/index.ts`) | The bridge: exposes `window.reqman`, turning each call into an IPC message | one file | renderer |
 | **Contract** (`src/shared/api.ts`, `domain.ts`) | The types both sides agree on: every call, every data shape, every channel name | two files | everyone |
 | **main/ipc.ts** | Receives calls, checks inputs, shows native dialogs (open folder, save file), forwards to modules | one file | preload |
 | **main/composition.ts** | Builds all modules and wires them together — the only place to swap an implementation | one file | `main/index.ts` |
-| **workspace** | "The open repository": opens/creates it and runs every user operation with the rules that need the whole set (no parent loops, conflict-safe saves, links, moves, schema fields, export). `workspace.ts` is the facade and runs every write and Git action through one queue (one at a time, like a mutex); the work is in small files: `itemOps`, `links`, `structure`, `schemaFields`, `exporting`, `gitOps` (commit/pull/push/history), `compare`, `watcher` (which files changed) | `workspace.ts` + the files named | ipc |
+| **workspace** | "The open repository": opens/creates it and runs every user operation with the rules that need the whole set (no parent loops, conflict-safe saves, links, moves, schema fields, export). `workspace.ts` is the facade and runs every write and Git action through one queue (one at a time, like a mutex); the work is in small files: `itemOps`, `links`, `structure`, `schemaFields`, `importing`, `exporting`, `revert`, `gitOps` (commit/push/discard/history), `merging` (pull, pull from a branch, decisions, branches, duplicate-ID repair), `compare`, `watcher` (which files changed) | `workspace.ts` + the files named | ipc |
 | **safe-files** | Writes files atomically and retries while Windows briefly locks a file | `index.ts` | store, workspace, ipc |
 | **self-test** | The release self-test the owner runs in the app: the main actions on a practice repository | `index.ts` | composition |
 | **repository-store** | Reads and writes the files in `requirements/` — atomic, revision-checked | `fileStore.ts` | workspace |
 | **index-cache** | A local SQLite copy of all items for fast search, filters, counts, suspect links and problems; re-reads only changed files | `sqliteIndex.ts` | workspace |
 | **git-adapter** | Runs the installed `git` (argument arrays, no shell, timeouts) and parses its output | `systemGit.ts` | workspace |
-| **import-export** | Pure functions that turn items or a comparison into CSV (Excel) or Markdown; M7 adds Excel and import | `csv.ts`, `items.ts`, `compare.ts` | workspace |
-| **items** | The domain core: item file format, IDs, validation, content fingerprint, field-level diff | `itemFile.ts`, `ids.ts`, `validate.ts`, `diff.ts` | store, index, workspace |
+| **import-export** | Pure functions: items or a comparison → CSV, Markdown, Excel, ReqIF; Excel/CSV/ReqIF files → rows → an import plan (column mapping guessed, preview, update by ID) | `csv.ts`, `items.ts`, `compare.ts`, `xlsx.ts`, `reqif.ts`, `importPlan.ts` | workspace, main |
+| **items** | The domain core: item file format, IDs, validation, content fingerprint, order keys, field-level diff, field-level 3-way merge | `itemFile.ts`, `ids.ts`, `validate.ts`, `diff.ts`, `orderKey.ts`, `merge.ts` | store, index, workspace |
 | **schema** | Reads `schema.yaml` (item types, fields, link types) and reports problems | `parse.ts` | store, items |
 | **logger / theme / updater** | Log file with rotation · layered theme file · automatic updates from GitHub Releases | one implementation each | main |
 | **sample-data** | Fictional requirement sets for tests and the in-app self-test | `generate.ts`, `benchmark.ts` | tests, ipc |
@@ -99,7 +101,7 @@ The main PCB shall limit access tokens in all supported languages.
 
 ![Save flow](images/save-flow.png)
 
-**Pull** (stops safely before anything changes) — [interactive version](diagrams/pull-flow.html):
+**Pull** (works it out in memory, asks only about real clashes, then updates the folder in one step) — [interactive version](diagrams/pull-flow.html):
 
 ![Pull flow](images/pull-flow.png)
 
@@ -128,8 +130,9 @@ Example: a new operation "mark several items as Approved".
    in the workspace queue (`q(...)`).
 4. **UI:** call `window.reqman.<name>()` from a component; use only `--rm-*` CSS variables for styling and
    put every text in `src/shared/text.ts`.
-5. **Tests:** a unit test in `tests/` (real temp folders and real Git, no mocks for files), and extend
-   `e2e/journey.e2e.mjs` when the user can see the feature.
+5. **Tests:** a unit test in `tests/` (real temp folders and real Git, no mocks for files), and extend an e2e
+   scenario in `e2e/scenarios/` (`journey`, `fixes`, `excel`, `branches`) when the user can see the feature; add a
+   step to the release self-test (`src/modules/self-test/index.ts`) when it touches Git or files on the owner's PC.
 6. **Docs and release:** the owner's checklist in `docs/TESTING.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`
    (module map/UI table), the status in `CLAUDE.md`; bump `version` in `package.json` and push — the Windows build
    and release run on GitHub Actions.
@@ -162,6 +165,10 @@ that opens an old cache file.
 | Revision | Short hash of a file's content when it was read; writes are refused if it changed meanwhile |
 | Index cache | The SQLite file in `%APPDATA%\ReqMan\cache` — fast search; rebuildable at any time |
 | Upstream | The remote branch a local branch pulls from / pushes to (e.g. `origin/main`) |
+| Branch | A separate line of commits (`main`, `feature/door`); switching changes which versions of the files are in the folder |
+| Merge base | The newest commit two branches share — the "base" of a 3-way merge |
+| 3-way merge | Comparing base, mine and theirs: a part only one side changed takes that side; a part both changed differently is a conflict |
+| Merge plan | What a pull will do, worked out without changing anything (`MergePlan`): combined items, questions, duplicate IDs |
 | Reflog | Git's local record of where the branch pointed over time — used to find "what the last pull brought in" |
 | Working folder | The files on disk, including changes not committed yet |
 
@@ -171,5 +178,6 @@ that opens an old cache file.
 - `docs/design/DESIGN.md` — domain analysis of five RM tools, every product decision, requirements, roadmap.
 - `docs/ARCHITECTURE.md` — module map, rules, data format, UI structure.
 - `docs/TESTING.md` — the owner's manual checklists and the two-PC trial.
-- `docs/reviews/` — project reviews with known risks and proposed improvements.
+- `docs/reviews/` — project reviews and analyses (see its README): the project review, the feature-gap analysis
+  against other tools, the rename impact, the Rust evaluation.
 - `CHANGELOG.md` — what changed in each version and what testing found.

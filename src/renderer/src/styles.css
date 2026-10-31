@@ -2225,35 +2225,65 @@ code {
   font-size: var(--rm-font-size-small);
 }
 
-/* Branches (M8): the panel under the Git bar */
+/* Branches (M8; drop-down since 0.12.1): anchored under the branch button, scrolls inside, never covers the window */
 
-.branches {
-  flex-direction: column;
-  align-items: stretch;
-  border-left-color: var(--rm-color-primary);
+.gitbar--anchor {
+  position: relative;
 }
 
-.branches__new {
+.branches {
+  position: absolute;
+  top: 100%;
+  left: var(--rm-space-sm);
+  z-index: 30;
+  width: min(460px, calc(100% - 2 * var(--rm-space-sm)));
+  max-height: min(70vh, 560px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-xs);
+  padding: var(--rm-space-sm);
+  background: var(--rm-color-surface);
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius-medium);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--rm-color-text) 18%, transparent);
+  font-size: var(--rm-font-size-small);
+}
+
+.branches__current {
   display: flex;
   align-items: center;
   gap: var(--rm-space-sm);
 }
 
-.branches__new .input {
-  width: min(320px, 50%);
+.branches__name {
+  font-family: var(--rm-font-family-mono);
+  font-weight: var(--rm-font-weight-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 45%;
+}
+
+.branches__hint {
+  margin: 0;
+  color: var(--rm-color-text-muted);
 }
 
 .branches__filter {
-  width: 200px;
+  width: 100%;
 }
 
 .branches__lists {
-  max-height: 320px;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: auto;
+  border-top: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
+  padding: var(--rm-space-xs) 0;
 }
 
 .branches__group {
-  margin: var(--rm-space-sm) 0 var(--rm-space-xs);
+  margin: var(--rm-space-xs) 0;
   font-size: var(--rm-font-size-small);
   color: var(--rm-color-text-muted);
   font-weight: var(--rm-font-weight-strong);
@@ -2263,31 +2293,51 @@ code {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: 2px;
 }
 
-.branches__row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--rm-space-sm);
-  align-items: center;
-  min-height: 30px;
-}
-
-.branches__row--current .branches__name {
-  font-weight: var(--rm-font-weight-strong);
-}
-
-.branches__name {
+.branches__pick {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--rm-space-xs) var(--rm-space-sm);
+  border: 0;
+  border-radius: var(--rm-shape-radius-small);
+  background: transparent;
+  color: var(--rm-color-text);
+  font: inherit;
   font-family: var(--rm-font-family-mono);
+  cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.branches__pick:hover:not(:disabled),
+.branches__pick:focus-visible {
+  background: var(--rm-color-selection);
+}
+
+.branches__pick:disabled {
+  color: var(--rm-color-text-muted);
+  cursor: default;
+}
+
+.branches__new {
+  display: flex;
+  gap: var(--rm-space-sm);
+}
+
+.branches__new .input {
+  flex: 1;
+  min-width: 0;
+}
+
 .branches__ask p {
   margin: 0 0 var(--rm-space-sm);
+}
+
+.actions--wrap {
+  flex-wrap: wrap;
 }
 
 /* Pull decisions (M8): one card per item, yours and theirs side by side */

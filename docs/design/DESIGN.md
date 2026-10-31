@@ -628,7 +628,7 @@ The prototype is built in seven milestones, each ending with a Windows build you
 | M5 Compare | Pick two commits/branches/tags; per-item and per-link difference view | Journey step 6 works |
 | M6 Export and hardening | CSV export; end-to-end tests of the whole journey; bug fixes from your trials | The full 8-step journey passes on two Windows PCs; success measures met |
 
-**Progress:** M0–M6 are complete (v0.7.0) — the prototype scope FR-01 to FR-10 is built; 0.8.0 (review fixes), 0.9.0 (new data format), 0.10.0 (Changes view), 0.11.0 (Excel + ReqIF) and 0.12.0 (M8 branches, per-requirement pull) are released. The current version and next step are kept in `CLAUDE.md` ("Status") and `CHANGELOG.md` only (review T-04); the plan for the next versions is "Release plan" below.
+**Progress:** M0–M6 are complete (v0.7.0) — the prototype scope FR-01 to FR-10 is built; 0.8.0 (review fixes), 0.9.0 (new data format), 0.10.0 (Changes view), 0.11.0 (Excel + ReqIF), 0.12.0 (M8 branches, per-requirement pull) and 0.12.1 (branch drop-down) are released. The current version and next step are kept in `CLAUDE.md` ("Status") and `CHANGELOG.md` only (review T-04); the plan for the next versions is "Release plan" below.
 
 **How we work:** I write the code, tests and architecture notes in a Git repository; after each milestone you install the build, try it and comment here or in chat. Specs and decisions stay in this document and the repo, so work continues across sessions.
 
@@ -649,24 +649,27 @@ after his test round and the project review (`docs/reviews/2026-10-25-project-re
 
 ### Where each requirement stands
 
-| ID | Requirement | Status (v0.7.0) |
+| ID | Requirement | Status (v0.12.1, 31 Oct 2026) |
 | --- | --- | --- |
 | FR-01 – FR-06 | Open repo, default schema, items with stable IDs, hierarchy, typed links, table/filter/search | Done |
 | FR-07 | Item history from Git | Done (History tab with field-level comparison) |
-| FR-08 | Commit, pull, push | Done (only `requirements/`, never forced, stops on clashes) |
-| FR-09 | Compare two versions per requirement and link | Done (basic and most of full; pulls first) |
-| FR-10 | Export to CSV | Done (+ Markdown; Compare export) |
+| FR-08 | Commit, pull, push | Done (only `requirements/`, never forced; since 0.12.0 a pull combines items field by field) |
+| FR-09 | Compare two versions per requirement and link | Done (Changes view, 0.10.0; no automatic pulls) |
+| FR-10 | Export to CSV | Done (+ Markdown, Excel, ReqIF; Compare export) |
 | FR-11 | Schema editor | Partly — fields done; item types and link types still in `schema.yaml` |
-| FR-12 | Branches and tag baselines | Branch shown only → M8 |
-| FR-13 | Merge and resolve conflicts per requirement | Pull stops safely → M8 |
-| FR-14 | Word, PDF, Excel and Markdown export | Markdown done; Excel → M7; Word/PDF → later |
-| FR-15 | Excel/CSV import with column mapping | → M7 |
-| FR-16 | Coverage view and rule warnings | Not started |
+| FR-12 | Branches and tag baselines | Branches done (0.12.0); tag baselines delayed by the owner (29 Oct 2026) |
+| FR-13 | Merge and resolve conflicts per requirement | Done (0.12.0): field-level 3-way merge, decision window, duplicate-ID repair |
+| FR-14 | Word, PDF, Excel and Markdown export | Markdown, Excel (and ReqIF) done; Word/PDF → proposed 0.14.0 |
+| FR-15 | Excel/CSV import with column mapping | Done (0.11.0, also ReqIF) |
+| FR-16 | Coverage view and rule warnings | Not started → proposed 0.13.0 |
 | FR-17 | Suspect links | Done (v0.4.0) |
-| FR-18 | GitHub pull-request view per requirement (stage 1) | Not started |
-| FR-19, FR-20 | PR create/approve/merge in the tool; Word import, ReqIF | Later |
+| FR-18 | GitHub pull-request view per requirement (stage 1) | Local PR review done (Compare a branch, 0.12.0); PR status/approval → proposed 0.15.0 |
+| FR-19, FR-20 | PR create/approve/merge in the tool; Word import, ReqIF | ReqIF done (0.11.0); the rest later |
 
 ### What is still missing compared with the analysed tools
+
+> **Superseded 31 Oct 2026** by the ranked analysis of ten tools in
+> `docs/reviews/2026-10-31-feature-gap-analysis.md` (kept below for the record).
 
 | Feature (from "B. Common features") | In ReqMan today | Proposal |
 | --- | --- | --- |
@@ -732,7 +735,12 @@ X-02).
 | **0.11.0** | **M7 Excel + ReqIF** (ReqIF merged in, owner 29 Oct 2026) | ReqIF import/export (DOORS, Jama, Polarion) through the same wizard; Excel export (ExcelJS); import wizard for Excel/CSV (update by ID with preview, links, outline numbers → hierarchy); "New project from a file", "Update the Excel file", "Publish to GitHub"; **export of chosen items**: Ctrl/Shift+click to select several rows, right-click "Export this item and everything below it", export window choice "Selected items and everything below them" (all levels; tick box "Include the items below", ticked by default; overlaps exported once; document order; full outline numbers) |
 | **0.12.0** | **M8 Branches** | Create/switch branches (commit / discard / take changes along), compare two branches per requirement (local PR review), "Pull from branch" (any visible branch) and pull with per-requirement (field-level 3-way) merge (S-05), automatic duplicate-ID repair (D-09), D-05. Tag baselines delayed (owner, 29 Oct 2026) |
 | ~~0.13.0~~ | ~~ReqIF~~ | merged into 0.11.0 (owner, 29 Oct 2026: fewer test rounds; same wizard and export pipeline) |
-| later | — | Item and link types in the GUI, coverage view and matrix, saved views, bulk edit (M9); Word/PDF export, rich text editor (M10); GitHub PR view (M11); Windows 10 build. **No milestone yet:** tables in text, code signing (X-02), private update channel (S-08) |
+| **0.12.1** | Owner's points on 0.12.0 | Branch drop-down: compact, anchored under the button, click a name to switch, Pull from… / Compare with… on the current branch, search and scrolling for tens of branches |
+| *0.13.0 (R)* | *New name + traceability* | *Proposed 31 Oct 2026, awaiting the owner:* the rename (`docs/reviews/2026-10-31-rename-impact.md`) once the name is chosen; traceability matrix and coverage; item and link types in the GUI; saved views; bulk edit |
+| *0.14.0 (R)* | *Documents out* | Word and PDF export, HTML publishing, Markdown preview |
+| *0.15.0 (R)* | *Review and quality* | PR approval status and PR view per requirement, comments (design choice first), requirement quality hints |
+| *0.16.0 (R)* | *Engineering traceability* | Links to code and tests in the same repository, impact chain and graph, command line / GitHub Action check |
+| later | — | Tag baselines (delayed), rich text editor with images and tables, templates, macOS/Linux, dashboard, integrations / MCP / AI, compliance; Windows 10 build. **No milestone yet:** tables in text, code signing (X-02), private update channel (S-08). Ranked list: `docs/reviews/2026-10-31-feature-gap-analysis.md` |
 
 Settled owner decisions on the review (27–28 Oct 2026): UI texts in one central file (S-06, yes); one requirement
 set per repository (S-07, discarded); private update channel and code signing later (S-08, X-02).

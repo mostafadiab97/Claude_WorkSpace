@@ -53,7 +53,20 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.12.0 (branches, pull with decisions — the two-folder trial)
+## Manual test checklist — v0.12.1 (the branch drop-down you asked for)
+
+Your four points on the branch panel. Use folder **B** from the 0.12.0 trial (it has `main` and `trial-one`).
+Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.12.1**, then **⚙ → Run release self-test**. | App shows 0.12.1; **All steps passed**, 21 ✓. |
+| 2 | Click the branch button **⎇ … ▾**. | A small panel opens **right under the button** (not across the window): the current branch on top with **Pull from…** and **Compare with…** next to it, the other branches below, "New branch" at the bottom. |
+| 3 | Click the **name** of the other branch. | It switches (no separate Switch button); with uncommitted changes the Commit first / Take it along / Discard question comes first. |
+| 4 | Open the panel again → **Compare with…** → click a branch. Then **Pull from…** → click a branch. | Each button turns the list into "Compare … with which branch?" / "Pull into … from which branch?"; the click opens Changes on what that branch would bring in, or pulls it. **Esc** goes back; a click outside the panel closes it. |
+| 5 | (Many branches) In PowerShell in folder B: `1..30 | % { git branch test-$_ }`, then open the panel. Afterwards remove them: `1..30 | % { git branch -D test-$_ }`. | The panel keeps its size and **scrolls inside**; a **Find a branch** box appears and narrows the list as you type. |
+
+## Previous checklist — v0.12.0 (branches, pull with decisions — the two-folder trial)
 
 0.12.0 brings branches and a pull that decides **per requirement** instead of stopping. Steps 2–5 are the two-PC
 trial you chose, with two folders on your PC: **A** = your sandbox clone, **B** = a second clone. Make B once:

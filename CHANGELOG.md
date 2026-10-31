@@ -3,6 +3,20 @@
 Each version was installed and tried by the product owner on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.12.1 — 31 Oct 2026 — The branch drop-down (owner's points on 0.12.0)
+- **Owner (31 Oct 2026) on 0.12.0:** all 5 steps passed (the two-folder trial), self-test 21/21 in 44.6 s (Git 2.52.0).
+  Four points on the branch panel, all done here:
+  1. The buttons were far from the branch names (panel stretched across the window) → the panel is now a small
+     drop-down **under the branch button** (at most 460 × 560 px).
+  2. **Click a branch name to switch** — the Switch buttons are gone.
+  3. **Pull from…** and **Compare with…** appear only next to the **current** branch; each turns the list into a
+     chooser ("Pull into main from which branch?"). Esc goes back, a click outside closes.
+  4. **Tens of branches:** the list scrolls inside the panel and a "Find a branch" box appears from 7 other branches —
+     tested in the e2e scenario with 41 branches.
+- Analyses written for the owner's decisions (`docs/reviews/`): features other tools have and we don't (ranked, with a
+  proposed plan 0.13–0.16), the impact of renaming "ReqMan" (the name is taken by another RM tool), and whether Rust
+  would make the tool faster (recommendation: no rewrite). Documentation brought up to date for a hand-over.
+
 ## 0.12.0 — 29 Oct 2026 — Branches and a pull that decides per requirement (M8)
 - **Pull no longer stops** when you and someone else changed the same item. Each item is combined part by part
   (title, type, place in the document, text, every field, links): a part only one side changed is taken from that

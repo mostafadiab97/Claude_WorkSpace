@@ -22,7 +22,7 @@ cloud session from v0.5.0. Nothing lives outside this repository and `Claude_San
 | What | Where |
 | --- | --- |
 | **Onboarding for new engineers** (system diagrams, module roles, data flow, first change end to end) | `docs/ONBOARDING.md` (diagrams: navigator `docs/diagrams/index.html`; Archify sources `docs/diagrams/archify/*.json`, interactive `docs/diagrams/*.html`, pictures `docs/images/`; regenerate with `node tools/diagrams.mjs`, see `docs/diagrams/README.md`) |
-| Project reviews (defects, structure, performance, risks — proposals awaiting the owner's decision) | `docs/reviews/2026-10-25-project-review.md` |
+| Project reviews and analyses awaiting decisions (index: `docs/reviews/README.md`) | `docs/reviews/2026-10-25-project-review.md` (whole project, all decided), `2026-10-31-feature-gap-analysis.md` (ranked features of 10 other tools + proposed 0.13–0.16), `2026-10-31-rename-impact.md` (the name ReqMan is taken), `2026-10-31-rust-evaluation.md` (no rewrite) |
 | Domain analysis of 5 RM tools, every product question with the owner's answer, product definition, FR/NFR list, journey, scope by stage, architecture, technology choices, milestone plan | `docs/design/DESIGN.md` (**source of truth for decisions**; tags C = confirmed by owner, R = recommendation, I = inference) |
 | Module map, rules, data format, UI structure, decisions changed during build | `docs/ARCHITECTURE.md` |
 | Manual test checklist per version (the owner tests with it), log/data locations, bug reporting | `docs/TESTING.md` |
@@ -116,7 +116,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.12.0, 29 Oct 2026) — prototype complete; Changes view; Excel + ReqIF; branches + per-requirement pull
+## Status (v0.12.1, 31 Oct 2026) — prototype complete; Changes view; Excel + ReqIF; branches + per-requirement pull
 
 | Milestone | State |
 | --- | --- |
@@ -133,17 +133,17 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | 0.11.0 M7 Excel + ReqIF — import wizard (xlsx/csv/reqif), Excel + ReqIF export, chosen items, update the Excel file, new project from a file, publish to GitHub | Done (v0.11.0) |
 | 0.11.1 owner's requests — non-empty folder asks again, move several chosen items, auto-scroll while dragging, discard chosen/all in Changes, one export entry in the row menu, ReqIF validated against the official schema in tests | Done (v0.11.1) |
 | 0.12.0 M8 branches — create/switch (commit / take along / discard), pull and "pull from branch" with field-level 3-way merge + decision window (S-05), compare a branch like a PR, duplicate-ID repair (D-09), D-05; tag baselines delayed | Done (v0.12.0) |
-| **Next** | owner's 0.12.0 checklist (= the two-folder trial); then plan with him (candidates from the ReqView comparison: traceability matrix / coverage M9, Word/PDF export, comments, baselines) | — |
+| 0.12.1 owner's points on 0.12.0 — branch drop-down under the button, click a name to switch, Pull from… / Compare with… on the current branch, search + scrolling for tens of branches | Done (v0.12.1) |
+| **Next** | owner's 0.12.1 checklist; his decisions on the three analyses (new name, order of the gap-analysis features, Rust); proposed 0.13.0 = rename + traceability matrix/coverage + types in the GUI + saved views + bulk edit | — |
 
-**0.12.0 released (29 Oct 2026)** — waiting for the owner's checklist (it is the two-folder trial: clone the sandbox a
-second time as `Claude_SandBox_B`). Owner's last report (29 Oct 2026): 0.11.1 all 5 steps passed, self-test 20/20 (62 s — Git steps slower on his PC).
-Before that 0.11.0 passed too; his five requests went into 0.11.1. He has no
-DOORS/Jama to try ReqIF: exports are validated against the official schema in `tests/reqif.test.ts`
-(`tests/fixtures/reqif-schema/`, xmllint-wasm). Two-PC trial postponed (needed for 0.12.0).
+Owner's last report (31 Oct 2026): **0.12.0 all 5 steps passed** — that was the two-folder trial (two clones of the
+sandbox, `Claude_SandBox` and `Claude_SandBox_B`, still on his PC) — self-test 21/21 in 44.6 s, Git 2.52.0. His four
+points on the branch panel went into 0.12.1. He has no DOORS/Jama to try ReqIF: exports are validated against the
+official schema in `tests/reqif.test.ts` (`tests/fixtures/reqif-schema/`, xmllint-wasm).
 
 Automated tests: 187 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
 repository and two clones ("PC A", "PC B"), the release self-test itself, the sandbox's chapter-9 promises
-(`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `branches` (create, switch back, compare like a PR, pull into main, the uncommitted-changes question), `excel` (new project from the sample file, chosen-items export, update the file, ReqIF round trip,
+(`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `branches` (create, switch by clicking the name, Compare with… / Pull from…, the uncommitted-changes question, 41 branches: panel size, search, Esc), `excel` (new project from the sample file, chosen-items export, update the file, ReqIF round trip,
 publish), `journey` (~75 checks, the
 whole user story, incl. the Changes view, ↶, Keep/Unlink window, push offer) and `fixes` (renamed file, lazy Expand all,
 column width drag, Changes view layout + split difference, second start, release self-test in the window).
@@ -184,27 +184,33 @@ scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 5
   `readBlobs()` (one `git cat-file --batch`). Naming objects `<rev>:<path>` instead was 40× slower with 10k files in
   one folder (tree lookups). Files that differ only in `confirmed:` lines are skipped before parsing.
 
-## Where we are right now (28 Oct 2026) — read this first
+## Where we are right now (31 Oct 2026) — read this first
 
-The owner's tests of 0.5.0–0.7.0 all passed (27 Oct). His requests O-01–O-07 and the whole project review
-(`docs/reviews/2026-10-25-project-review.md`, section H = every answer) have been discussed and decided. The
-**release plan is confirmed** (DESIGN.md → "Release plan"):
-
-0.8.0 clean page (all review fixes, refactors S-01–S-03, central GUI text file S-06, tests T-01–T-05, in-app
-**release self-test**, checklist ≤ 5 steps) → 0.9.0 new data format (`REQ-` + 7 chars, order keys, outline numbers,
-sandbox converted) → 0.10.0 Changes view (O-04/O-05/O-06) → 0.11.0 M7 Excel + ReqIF (ReqIF merged in, owner 29 Oct
-2026) → 0.12.0 M8 branches.
-
-**0.12.0 released (29 Oct 2026)** — M8 done (decisions 1–7 in the review file, section F). Waiting for his checklist
-(the two-folder trial). Next: ask him what comes after M8 (owner-decision-walkthrough); the ReqView comparison
-(answered in chat 29 Oct) listed the gaps: traceability matrix/coverage, Word/PDF export, comments, rich text,
-baselines (delayed by him).
-The owner is a C developer new to this field: explain from first principles, short, C analogies where useful.
-Record decisions in the review file / DESIGN.md.
+- **Built and accepted by the owner:** everything up to 0.12.0 (prototype M0–M6, clean page 0.8.0, new data format
+  0.9.0, Changes view 0.10.0, Excel + ReqIF 0.11.x, branches + per-requirement merge 0.12.0). **0.12.1** (branch
+  drop-down) is released and waits for his 5-step checklist.
+- **Waiting for his decisions** (walk him through them with the `owner-decision-walkthrough` skill, recommendation
+  first, record answers in the file and in DESIGN.md):
+  1. **New product name** — "ReqMan" is used by INNEO's requirements tool. Candidates discussed 29–30 Oct: Branchwise
+     (recommended: names the difference — parallel work on branches), Mergewell, Plaintrace, Tracewell; concept for the
+     tagline: a "lens" on your Git repository. Trademark/domain check not done yet. How to rename safely:
+     `docs/reviews/2026-10-31-rename-impact.md` (keep `appId`, migrate `%APPDATA%`, read old `.reqman/` folders).
+  2. **Order of new features** — `docs/reviews/2026-10-31-feature-gap-analysis.md` ranks 23 features of 10 tools and
+     proposes 0.13.0 rename + traceability (matrix/coverage, types in the GUI, saved views, bulk edit), 0.14.0 Word/PDF
+     + HTML publishing, 0.15.0 PR approval status + comments + quality hints, 0.16.0 code/test traceability + impact
+     graph + CLI check. Baselines stay delayed until he says otherwise.
+  3. **Rust** — `docs/reviews/2026-10-31-rust-evaluation.md`: no rewrite (the waits are Git processes, antivirus and
+     network); cheaper wins in TypeScript first; Tauri only if installer size matters commercially.
+- Comparisons answered in chat (not stored as files): GitHub vs RM tools (28 Oct), ReqView (29 Oct), Reqord (30 Oct;
+  AGPL — never copy its code), naming (29–30 Oct). The gap analysis file summarises what matters from them.
+- The owner is a C developer new to this field: explain from first principles, short, C analogies where useful.
 
 **Testing rule from 0.8.0 (owner, 28 Oct 2026):** the manual checklist per version has **at most 5 steps** (update
 arrives, release self-test, open the sandbox, one real push only when Git changed, the version's new feature).
 Everything else must be automated (unit tests, e2e in CI, the in-app release self-test).
+
+**History of the release plan:** 0.8.0 clean page → 0.9.0 data format → 0.10.0 Changes view → 0.11.0 Excel + ReqIF
+(ReqIF merged in, 29 Oct) → 0.12.0 branches (decisions M8-1…7 in the review file, section F; baselines delayed).
 
 ## M6 decisions (owner, 25 Oct 2026) — already built
 
@@ -298,6 +304,8 @@ Everything else must be automated (unit tests, e2e in CI, the in-app release sel
   virtual table reuses row elements, so the drag starts on another item. Drag to a row that is on screen.
 - **E2E role names are substring matches:** a branch button labelled "…pull from other branches" made
   `getByRole('button', { name: 'Pull' })` find two buttons. Keep labels of new buttons free of other buttons' words.
+- **Drop-down panels inside the Git bar:** anchor them to `.gitbar--anchor` (the bar row), not the whole region — the
+  notices below the bar would push them down. Close on Esc and on a click outside (BranchMenu shows how).
 - **Git bar state lags a save by ~250 ms:** panels that decide on `state.changes` right after a save (branch switch
   question) must ask `getGitState()` again (BranchMenu does).
 - **Dependabot:** read each proposal before merging (CI must be green; see the ignore list in `.github/dependabot.yml`).

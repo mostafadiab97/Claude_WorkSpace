@@ -1,9 +1,18 @@
 # ReqMan
 
-ReqMan (working name) is a local, Git-based requirements management tool — proof of concept.
+ReqMan (working name — a new name is being chosen, see `docs/reviews/2026-10-31-rename-impact.md`) is a local,
+Git-based requirements management tool — internal proof of concept, likely a commercial product later.
 
-Requirements live as plain-text files in a folder of a project's own Git repository; ReqMan is the
-desktop GUI to view, edit, link, compare and export them. No server, no accounts.
+Requirements live as plain-text files (one Markdown file per requirement) in a folder of a project's own Git
+repository; ReqMan is the Windows desktop app to view, edit, structure, link, compare, merge, import and export them.
+No server, no accounts — access is whatever the Git host (e.g. GitHub) allows.
+
+**What it does today (v0.12.1):** tree table with calculated outline numbers, editor, custom fields, typed links with
+suspect-link review (Keep / Unlink), commit / pull / push of the requirements folder only (never forced), branches
+(create, switch, pull from any branch, compare a branch like a pull request), a pull that combines changes field by
+field and asks only about real clashes, a Changes view per requirement with side-by-side differences and ↶ per part,
+per-item history, Excel / CSV / ReqIF import (wizard) and export, writing changes back into the original Excel file,
+an in-app release self-test, light/dark themes, automatic updates.
 
 ## Try it (Windows 11)
 
@@ -14,16 +23,17 @@ desktop GUI to view, edit, link, compare and export them. No server, no accounts
 
 ## Status
 
-The prototype (milestones M0–M6) is complete. What each version changed is in `CHANGELOG.md`; the current
-state and the next step are in `CLAUDE.md` ("Status"), and the release plan in `docs/design/DESIGN.md`
-("Release plan"). (The status is kept in those places only, so it cannot drift — review T-04.)
+Prototype (M0–M6), Excel/ReqIF exchange (M7) and branches with per-requirement merge (M8) are complete. What
+each version changed is in `CHANGELOG.md`; the current state and the next step are in `CLAUDE.md` ("Status"), and the
+release plan in `docs/design/DESIGN.md` ("Release plan"). (The status is kept in those places only, so it cannot drift
+— review T-04.)
 
 ## Develop
 
-Requires Node.js 22 and Git.
+Requires Node.js 22 and Git (Windows: `docs/DEVELOPING.md`, also without admin rights).
 
 ```
-npm install
+npm ci
 npm run dev        # run the app with live reload
 npm run check      # type-check + lint (incl. module-boundary rules) + tests
 npm run test:perf  # performance tests with 10,000 items (test:perf:all adds 50,000)
@@ -39,7 +49,7 @@ builds the installer and publishes it as a GitHub Release; installed copies pick
 
 - `CLAUDE.md` — project memory and working agreement (start here)
 - `docs/ONBOARDING.md` — onboarding guide for engineers, with system diagrams
-- `docs/reviews/` — project reviews (known risks, proposed improvements)
+- `docs/reviews/` — project review and analyses awaiting decisions (feature gaps vs other tools, rename, Rust) — index in its README
 - `docs/design/DESIGN.md` — domain analysis, product decisions, requirements, architecture, milestone plan
 - `CHANGELOG.md` — what each version changed and what testing found
 - `docs/DEVELOPING.md` — setting up a Windows PC for development
@@ -47,4 +57,5 @@ builds the installer and publishes it as a GitHub Release; installed copies pick
 - `docs/TESTING.md` — manual test checklist, log file location, bug reporting
 - `docs/THEMING.md` — customising colours, fonts, shapes, logo, light/dark
 - `samples/sample-requirements.xlsx` — fictional smart-thermostat requirements (59 items) for testing
-- `tools/make_sample_xlsx.py` — regenerates the sample file
+- `tools/README.md` — every script and the working procedures (Claude Code skills in `.claude/skills/`)
+- Test data: GitHub `mostafadiab97/Claude_SandBox` (10,005 fictional items) — clone it next to this repository

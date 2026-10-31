@@ -55,7 +55,28 @@ export function GitBar(props: {
   const n = state.changes.length
   return (
     <div role="region" aria-label={T.git.region}>
-      <div className="gitbar">
+      <div className="gitbar gitbar--anchor">
+        {branches && (
+          <BranchMenu
+            state={state}
+            blockedReason={blockedReason}
+            onClose={() => setBranches(false)}
+            onCreate={(n) => closeAfter(props.onCreateBranch(n))}
+            onSwitch={(n, c) => closeAfter(props.onSwitchBranch(n, c))}
+            onPullFrom={(n) => {
+              setBranches(false)
+              void props.onPullFrom(n)
+            }}
+            onCompare={(n) => {
+              setBranches(false)
+              props.onCompareBranch(n)
+            }}
+            onCommitFirst={() => {
+              setBranches(false)
+              props.onCommitFirst()
+            }}
+          />
+        )}
         <button
           type="button"
           className={branches ? 'btn btn--small btn--active gitbar__branch' : 'btn btn--small gitbar__branch'}
@@ -104,27 +125,6 @@ export function GitBar(props: {
           {T.git.push(state.ahead)}
         </button>
       </div>
-      {branches && (
-        <BranchMenu
-          state={state}
-          blockedReason={blockedReason}
-          onClose={() => setBranches(false)}
-          onCreate={(n) => closeAfter(props.onCreateBranch(n))}
-          onSwitch={(n, c) => closeAfter(props.onSwitchBranch(n, c))}
-          onPullFrom={(n) => {
-            setBranches(false)
-            void props.onPullFrom(n)
-          }}
-          onCompare={(n) => {
-            setBranches(false)
-            props.onCompareBranch(n)
-          }}
-          onCommitFirst={() => {
-            setBranches(false)
-            props.onCommitFirst()
-          }}
-        />
-      )}
       {publishing !== null && !state.hasRemote && (
         <form
           className="gitbar__notice gitbar__publish"

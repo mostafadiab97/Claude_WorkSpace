@@ -58,3 +58,16 @@ Better value, in order:
    PCs; it is a 4–6 week project, not a rewrite from scratch.
 4. If a single core part ever becomes a real bottleneck (e.g. 100k-item repositories), it can be moved into a Rust
    module called from Node.js (napi-rs) without touching the rest.
+
+## 5. Owner's answer (31 Oct 2026) — open, to discuss with the plan
+
+The question is **performance and maintainability**: the future engineering team may not know JavaScript/TypeScript;
+Rust and Python are common in his field (Python not a good fit). Points for that discussion (R):
+- The middle path keeps both benefits: **Tauri** — core (files, Git, SQLite, merge, import/export) in Rust, the
+  window in TypeScript/React. A pure-Rust UI (egui, Slint, Iced) for a large table/tree/editor app is still
+  immature; most Rust desktop apps draw their UI with web technology.
+- Hiring: TypeScript is among the most widely known languages; Rust developers are fewer but strong in embedded/
+  systems teams — which matches the owner's world (C developers move to Rust more easily than to React).
+- Cost: core rewrite ≈ 9,600 lines + tests; the module boundaries and the `ReqManApi` contract make it possible
+  module by module, keeping the app working throughout.
+- Decide together with the rename (one "big" version) or right after it — not in the middle of feature work.

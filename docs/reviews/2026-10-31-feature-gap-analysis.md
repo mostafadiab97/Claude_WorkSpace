@@ -6,8 +6,9 @@ don't, ordered by relevance and importance, added to the planned updates.
 **Which tools.** The tool list of the owner's other chat ("ReqMan project naming") cannot be read from this session,
 so the list is built from: the five platforms analysed in `docs/design/DESIGN.md` (IBM DOORS Next, Jama Connect,
 Siemens Polarion, PTC Codebeamer, Visure), **ReqView** (compared 29 Oct), **Reqord** (compared 30 Oct), and the
-Git/"docs-as-code" tools closest to ReqMan: **StrictDoc**, **sphinx-needs**, **Doorstop**. If the other chat named
-further tools, they can be added here as rows.
+Git/"docs-as-code" tools closest to ReqMan: **StrictDoc**, **sphinx-needs**, **Doorstop**. The owner later supplied the
+full market list from that chat (about 190 tools): `2026-10-31-rm-tools-market-list.md` — to be used in the planning
+discussion (owner, 31 Oct 2026: the plan gets a long discussion later; keep this analysis in mind).
 
 Tags: **F** = checked against the vendor's page/documentation or source this week (see Sources), **K** = established
 public product knowledge, not re-checked line by line, **R** = recommendation (the order and the release plan are the

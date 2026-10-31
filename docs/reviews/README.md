@@ -10,3 +10,4 @@ recorded in `docs/design/DESIGN.md` (source of truth) and in the review file's d
 | 31 Oct 2026 | `2026-10-31-feature-gap-analysis.md` | What 10 other requirements tools have and ReqMan does not, ranked; proposed placement in versions 0.13–0.16 | **Awaiting the owner's order** |
 | 31 Oct 2026 | `2026-10-31-rename-impact.md` | What changing the name "ReqMan" touches (599 places in 122 files) and how to do it without breaking updates, settings or existing projects | **Awaiting the new name** |
 | 31 Oct 2026 | `2026-10-31-rust-evaluation.md` | Would a Rust rewrite make ReqMan faster? Measurements, costs, recommendation (no rewrite; Tauri later if size matters) | **Awaiting the owner's decision** |
+| 31 Oct 2026 | `2026-10-31-rm-tools-market-list.md` | About 190 RM tools by kind (from the owner's naming chat), with sources | Reference |

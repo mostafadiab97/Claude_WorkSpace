@@ -72,3 +72,17 @@ never meet two names — **except** `appId`.
 
 Total: about 2–3 days of work, one test round. Keeping `appId` means the owner's installed copy simply updates to the
 new name.
+
+## 5. Owner's answers (31 Oct 2026)
+
+- **Branchwise is taken** (an HR tool, an iOS Git game, a Polish service company, an AI decision tool). The owner is
+  looking for a new name himself. Logo/name ideas he showed: reqoin, reqouple, reqochet, reqnote (red and green
+  dots in the letters). Note: his market list (`2026-10-31-rm-tools-market-list.md`) found "Req-" names crowded.
+- **Clean switch wanted:** the version with the new name should **uninstall the old app and install the new one**,
+  removing all files under the old name. This replaces recommendation 3.1 (keep `appId`): give the new name its own
+  `appId`; the new installer (NSIS `customInit` in `electron-builder`) finds the old ReqMan uninstaller in the
+  registry and runs it silently. **Still to keep (R):** copy the user's own settings (`theme.json`, recent list,
+  export/import memory) from `%APPDATA%\ReqMan` to the new folder *before* the old one is removed, then delete it;
+  the cache is rebuilt. `requirements/.reqman/` folders inside project repositories are the user's data, not app
+  files — they are read as before and never deleted by the installer. Last update of the old app should be a
+  ReqMan version that points to the new installer (the old feed cannot install a different `appId` by itself).

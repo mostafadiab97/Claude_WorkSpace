@@ -191,16 +191,22 @@ scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 5
   drop-down) is released and waits for his 5-step checklist.
 - **Waiting for his decisions** (walk him through them with the `owner-decision-walkthrough` skill, recommendation
   first, record answers in the file and in DESIGN.md):
-  1. **New product name** — "ReqMan" is used by INNEO's requirements tool. Candidates discussed 29–30 Oct: Branchwise
-     (recommended: names the difference — parallel work on branches), Mergewell, Plaintrace, Tracewell; concept for the
-     tagline: a "lens" on your Git repository. Trademark/domain check not done yet. How to rename safely:
+  1. **New product name** — "ReqMan" is used by INNEO's requirements tool. Branchwise turned out to be taken (owner,
+     31 Oct); **the owner is choosing a name himself** (ideas: reqoin, reqouple, reqochet, reqnote — logo with red/green
+     dots; tagline concept: a "lens" on your Git repository). He wants the new-name version to **uninstall the old app
+     and install the new one** (see section 5 of the rename file). Trademark/domain check not done yet. How to rename safely:
      `docs/reviews/2026-10-31-rename-impact.md` (keep `appId`, migrate `%APPDATA%`, read old `.reqman/` folders).
-  2. **Order of new features** — `docs/reviews/2026-10-31-feature-gap-analysis.md` ranks 23 features of 10 tools and
+  2. **Order of new features** — the owner wants a **long planning discussion** like the first one (DESIGN.md
+     questions) before deciding; use the gap analysis and the 190-tool market list (`2026-10-31-rm-tools-market-list.md`).
+     Proposal so far — `docs/reviews/2026-10-31-feature-gap-analysis.md` ranks 23 features of 10 tools and
      proposes 0.13.0 rename + traceability (matrix/coverage, types in the GUI, saved views, bulk edit), 0.14.0 Word/PDF
      + HTML publishing, 0.15.0 PR approval status + comments + quality hints, 0.16.0 code/test traceability + impact
      graph + CLI check. Baselines stay delayed until he says otherwise.
-  3. **Rust** — `docs/reviews/2026-10-31-rust-evaluation.md`: no rewrite (the waits are Git processes, antivirus and
-     network); cheaper wins in TypeScript first; Tauri only if installer size matters commercially.
+  3. **Rust** — `docs/reviews/2026-10-31-rust-evaluation.md`: not for speed (the waits are Git processes, antivirus,
+     network), but the owner also weighs **maintainability** (a future team may know Rust, not TypeScript). Still open;
+     the Tauri middle path (Rust core, TypeScript window) is the option to discuss.
+- The owner's monthly usage ran out on 31 Oct 2026; work resumes when it resets. Nothing is half-done: 0.12.1 is
+  released and every analysis is in `docs/reviews/`.
 - Comparisons answered in chat (not stored as files): GitHub vs RM tools (28 Oct), ReqView (29 Oct), Reqord (30 Oct;
   AGPL — never copy its code), naming (29–30 Oct). The gap analysis file summarises what matters from them.
 - The owner is a C developer new to this field: explain from first principles, short, C analogies where useful.

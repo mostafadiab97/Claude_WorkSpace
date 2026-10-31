@@ -23,7 +23,7 @@ const srcDir = join(root, 'docs', 'diagrams', 'archify')
 const ABOUT = {
   architecture: 'Every part of ReqMan, what it may talk to, and where data lives.',
   'save-flow': 'What happens between clicking Save and the file on disk — and how a newer version is never overwritten.',
-  'pull-flow': 'How Pull checks for clashes in memory first and stops before anything changes.'
+  'pull-flow': 'How Pull works the merge out in memory, asks only about parts both sides changed differently, then updates the folder in one step.'
 }
 const KIND = { architecture: 'Architecture', sequence: 'Sequence', workflow: 'Workflow' }
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])

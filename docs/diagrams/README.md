@@ -9,7 +9,7 @@ add its one-line description to `ABOUT` in the script.
 | --- | --- | --- | --- |
 | How the parts connect (architecture) | `architecture.html` | `../images/architecture.png` | `archify/architecture.json` |
 | Saving an item — conflict-safe (sequence) | `save-flow.html` | `../images/save-flow.png` | `archify/save-flow.json` |
-| Pull — stops safely before anything changes (workflow) | `pull-flow.html` | `../images/pull-flow.png` | `archify/pull-flow.json` |
+| Pull — works it out first, asks only about real clashes (workflow, 0.12.0) | `pull-flow.html` | `../images/pull-flow.png` | `archify/pull-flow.json` |
 
 Made with [Archify](https://github.com/tt-a1i/archify) (Apache-2.0; owner's choice, 28 Oct 2026). The HTML pages are
 self-contained (no internet needed): zoom, light/dark, and every box links to the source lines it was drawn from.

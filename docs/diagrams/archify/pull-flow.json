@@ -2,7 +2,7 @@
   "schema_version": 2,
   "diagram_type": "workflow",
   "meta": {
-    "title": "Pull — stops safely before anything changes",
+    "title": "Pull — works it out first, asks only about real clashes",
     "quality_profile": "showcase",
     "locale": "en",
     "output": "docs/diagrams/pull-flow.html",
@@ -10,7 +10,7 @@
       "url": "https://github.com/mostafadiab97/claude_workspace",
       "provider": "github",
       "link_mode": "web",
-      "revision": "a6e78ce3ef1e6606dcdeb613efd7b3a16df8bc95"
+      "revision": "3e37acaf2eaf92dc52b0544b34e4a97aac89a0ec"
     },
     "legend": {
       "entries": {
@@ -60,15 +60,21 @@
     },
     {
       "id": "check",
-      "label": "Check without touching files",
+      "label": "Work it out without touching files",
       "fromCol": 2,
       "toCol": 3,
       "variant": "emphasis"
     },
     {
-      "id": "apply",
-      "label": "Apply",
+      "id": "decide",
+      "label": "Decide (only real clashes)",
       "fromCol": 4,
+      "toCol": 4
+    },
+    {
+      "id": "apply",
+      "label": "Apply in one step",
+      "fromCol": 5,
       "toCol": 5
     }
   ],
@@ -76,9 +82,9 @@
     "click",
     "precheck",
     "fetch",
-    "clash",
-    "merge",
-    "resync",
+    "plan",
+    "build",
+    "forward",
     "done"
   ],
   "nodes": [
@@ -88,12 +94,12 @@
       "col": 0,
       "type": "external",
       "label": "Pull",
-      "sublabel": "Git bar button",
+      "sublabel": "or Pull from… a branch",
       "sources": [
         {
           "path": "src/renderer/src/workspace/screen/useGit.ts",
-          "line": 33,
-          "end_line": 47
+          "line": 36,
+          "end_line": 55
         }
       ]
     },
@@ -107,8 +113,8 @@
       "sources": [
         {
           "path": "src/modules/workspace/gitOps.ts",
-          "line": 167,
-          "end_line": 181
+          "line": 170,
+          "end_line": 183
         }
       ]
     },
@@ -121,93 +127,106 @@
       "sublabel": "download only",
       "sources": [
         {
-          "path": "src/modules/workspace/gitOps.ts",
-          "line": 222,
-          "end_line": 222
+          "path": "src/modules/workspace/merging.ts",
+          "line": 51,
+          "end_line": 79
         },
         {
           "path": "src/modules/git-adapter/systemGit.ts",
-          "line": 250,
-          "end_line": 252
+          "line": 266,
+          "end_line": 268
         }
       ]
     },
     {
-      "id": "clash",
+      "id": "plan",
       "lane": "reqman",
       "col": 3,
       "type": "security",
-      "label": "Clash check",
-      "sublabel": "merge in memory",
+      "label": "Merge plan",
+      "sublabel": "in memory, field by field",
       "tag": "git merge-tree",
       "sources": [
         {
-          "path": "src/modules/workspace/gitOps.ts",
-          "line": 233,
-          "end_line": 245
+          "path": "src/modules/workspace/merging.ts",
+          "line": 82,
+          "end_line": 160
         },
         {
-          "path": "src/modules/git-adapter/systemGit.ts",
-          "line": 254,
-          "end_line": 267
-        }
-      ]
-    },
-    {
-      "id": "both",
-      "lane": "stop",
-      "col": 3,
-      "type": "security",
-      "label": "Changed on both sides",
-      "sublabel": "lists the items"
-    },
-    {
-      "id": "merge",
-      "lane": "git",
-      "col": 4,
-      "type": "backend",
-      "label": "merge",
-      "sublabel": "updates the branch",
-      "sources": [
-        {
-          "path": "src/modules/workspace/gitOps.ts",
-          "line": 248,
-          "end_line": 248
-        },
-        {
-          "path": "src/modules/git-adapter/systemGit.ts",
-          "line": 269,
-          "end_line": 271
+          "path": "src/modules/items/merge.ts",
+          "line": 72,
+          "end_line": 90
         }
       ]
     },
     {
       "id": "overwrite",
       "lane": "stop",
-      "col": 4,
+      "col": 3,
       "type": "security",
       "label": "Would overwrite",
       "sublabel": "your uncommitted items",
       "sources": [
         {
-          "path": "src/modules/workspace/gitOps.ts",
-          "line": 251,
-          "end_line": 257
+          "path": "src/modules/workspace/merging.ts",
+          "line": 164,
+          "end_line": 168
         }
       ]
     },
     {
-      "id": "resync",
-      "lane": "reqman",
-      "col": 5,
-      "type": "backend",
-      "label": "Re-read changed files",
-      "sublabel": "index up to date",
+      "id": "decide",
+      "lane": "you",
+      "col": 4,
+      "type": "frontend",
+      "label": "Your decision",
+      "sublabel": "yours / theirs / write it",
       "sources": [
         {
-          "path": "src/modules/workspace/gitOps.ts",
-          "line": 270,
-          "end_line": 270
+          "path": "src/renderer/src/workspace/MergeDialog.tsx",
+          "line": 12,
+          "end_line": 45
+        }
+      ]
+    },
+    {
+      "id": "build",
+      "lane": "git",
+      "col": 4,
+      "type": "backend",
+      "label": "Merge commit",
+      "sublabel": "temporary index",
+      "tag": "commit-tree",
+      "sources": [
+        {
+          "path": "src/modules/workspace/merging.ts",
+          "line": 204,
+          "end_line": 232
+        },
+        {
+          "path": "src/modules/git-adapter/systemGit.ts",
+          "line": 307,
+          "end_line": 330
+        }
+      ]
+    },
+    {
+      "id": "forward",
+      "lane": "git",
+      "col": 5,
+      "type": "backend",
+      "label": "Folder moves to it",
+      "sublabel": "fast-forward, all or nothing",
+      "sources": [
+        {
+          "path": "src/modules/workspace/merging.ts",
+          "line": 213,
+          "end_line": 213
+        },
+        {
+          "path": "src/modules/workspace/merging.ts",
+          "line": 232,
+          "end_line": 232
         }
       ]
     },
@@ -217,7 +236,14 @@
       "col": 5,
       "type": "frontend",
       "label": "Table updated",
-      "sublabel": "“Pulled: 3 items changed”"
+      "sublabel": "“2 combined, 1 decided by you”",
+      "sources": [
+        {
+          "path": "src/modules/workspace/merging.ts",
+          "line": 240,
+          "end_line": 244
+        }
+      ]
     }
   ],
   "edges": [
@@ -236,41 +262,45 @@
     {
       "id": "e3",
       "from": "fetch",
-      "to": "clash",
+      "to": "plan",
       "variant": "emphasis"
     },
     {
       "id": "e4",
-      "from": "clash",
-      "to": "merge",
-      "label": "clean",
+      "from": "plan",
+      "to": "build",
+      "label": "no questions",
       "variant": "emphasis"
     },
     {
       "id": "e5",
-      "from": "clash",
-      "to": "both",
-      "label": "same items",
-      "variant": "security",
-      "role": "error"
+      "from": "plan",
+      "to": "decide",
+      "label": "real clash"
     },
     {
       "id": "e6",
-      "from": "merge",
+      "from": "decide",
+      "to": "build",
+      "label": "finish"
+    },
+    {
+      "id": "e7",
+      "from": "plan",
       "to": "overwrite",
       "label": "refused",
       "variant": "security",
       "role": "error"
     },
     {
-      "id": "e7",
-      "from": "merge",
-      "to": "resync",
+      "id": "e8",
+      "from": "build",
+      "to": "forward",
       "variant": "emphasis"
     },
     {
-      "id": "e8",
-      "from": "resync",
+      "id": "e9",
+      "from": "forward",
       "to": "done",
       "variant": "emphasis"
     }
@@ -278,18 +308,18 @@
   "cards": [
     {
       "dot": "rose",
-      "title": "When it stops",
+      "title": "Nothing changes until the end",
       "items": [
-        "Your files and the branch stay exactly as they were",
-        "The message names the items, so you can open them"
+        "Cancel in the decision window leaves files and branch as they were",
+        "Git refuses the last step if it would overwrite uncommitted edits"
       ]
     },
     {
       "dot": "cyan",
-      "title": "Taking their version (until M8)",
+      "title": "Field by field (0.12.0)",
       "items": [
-        "Undo your last commit (if not pushed), Discard those items, then Pull",
-        "Choosing per item inside ReqMan comes with branches and merge (0.12.0)"
+        "A part only one side changed is taken from that side; links and tags are merged as sets",
+        "Same ID created on both sides: yours gets a new ID, your links follow"
       ]
     }
   ]

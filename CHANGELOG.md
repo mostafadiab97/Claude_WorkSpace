@@ -3,6 +3,16 @@
 Each version was installed and tried by the product owner on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.13.1 — 31 Oct 2026 — Owner's points on 0.13.0
+- **Owner (31 Oct 2026) on 0.13.0:** all 5 steps passed; self-test 21/21 in 63.6 s. Three points, all here:
+  1. The floating Git note was hardly noticed → it is now tinted by its meaning (green success, red problem, blue
+     question) with a coloured frame and glow, in Light and Dark; the text is centred in both languages.
+  2. The branch delete icon was too small → a red **🗑 Delete** button next to each branch (fills red on hover).
+  3. In Arabic, a sentence containing an English word ("ReqMan", "Git") sometimes showed its words in reverse
+     order. Cause: tooltips and Windows dialogs guess the direction from the first letter and treated such sentences as
+     left-to-right. Every Arabic text now starts with an invisible right-to-left mark, so they always read right to left
+     (a unit test checks every text). The translation wording stays as it is for now (owner).
+
 ## 0.13.0 — 31 Oct 2026 — Arabic, fewer bars, pull from a branch for review, delete a branch
 - **Owner (31 Oct 2026) on 0.12.1:** steps 1, 2, 3, 5 passed; self-test 21/21 in 50.7 s. Step 4: "Pull from" another
   branch committed the result at once (Push (1)) — he wants to decide first. Plus three requests, all here:

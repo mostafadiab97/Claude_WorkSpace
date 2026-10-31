@@ -2300,15 +2300,6 @@ code {
   align-items: center;
 }
 
-.branches__delete {
-  opacity: 0.4;
-}
-
-.branches__item:hover .branches__delete,
-.branches__delete:focus-visible {
-  opacity: 1;
-}
-
 .branches__pick {
   display: block;
   flex: 1;
@@ -2538,4 +2529,57 @@ code {
 [dir='rtl'] .branches__pick,
 [dir='rtl'] .gitbar__sync {
   direction: ltr;
+}
+
+/* 0.13.1 (owner on 0.13.0 step 2): the floating Git note must be noticed — tinted with its meaning (green = done,
+   red = problem, blue = question), a coloured frame and glow, and the text centred in both languages */
+.gitbar__float > .gitbar__notice {
+  background: color-mix(in srgb, var(--rm-color-success) 16%, var(--rm-color-surface));
+  border: 2px solid var(--rm-color-success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rm-color-success) 25%, transparent), 0 8px 28px color-mix(in srgb, var(--rm-color-success) 30%, transparent);
+  font-size: var(--rm-font-size-base);
+  align-items: center;
+}
+
+.gitbar__float > .gitbar__notice--error {
+  background: color-mix(in srgb, var(--rm-color-danger) 14%, var(--rm-color-surface));
+  border-color: var(--rm-color-danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rm-color-danger) 25%, transparent), 0 8px 28px color-mix(in srgb, var(--rm-color-danger) 30%, transparent);
+}
+
+.gitbar__float > .gitbar__offer,
+.gitbar__float > .gitbar__publish {
+  background: color-mix(in srgb, var(--rm-color-primary) 12%, var(--rm-color-surface));
+  border-color: var(--rm-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rm-color-primary) 22%, transparent), 0 8px 28px color-mix(in srgb, var(--rm-color-primary) 25%, transparent);
+}
+
+.gitbar__float .gitbar__notice-text {
+  text-align: center;
+}
+
+.gitbar__float .gitbar__items {
+  list-style-position: inside;
+  padding-inline-start: 0;
+}
+
+/* 0.13.1 (owner on 0.13.0 step 4): a red "Delete" button, easy to see and hit */
+.branches__delete {
+  opacity: 1;
+  flex: none;
+  margin-inline-start: var(--rm-space-xs);
+  padding: 1px var(--rm-space-sm);
+  border: var(--rm-shape-border-width) solid color-mix(in srgb, var(--rm-color-danger) 55%, transparent);
+  border-radius: var(--rm-shape-button-radius);
+  background: transparent;
+  color: var(--rm-color-danger);
+  font: inherit;
+  font-size: var(--rm-font-size-small);
+  cursor: pointer;
+}
+
+.branches__delete:hover:not(:disabled),
+.branches__delete:focus-visible {
+  background: var(--rm-color-danger);
+  color: var(--rm-color-primary-text);
 }

@@ -53,7 +53,18 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.13.0 (Arabic, fewer bars, pull from a branch for review, delete a branch)
+## Manual test checklist — v0.13.1 (your three points on 0.13.0)
+
+Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.13.1**, then **⚙ → Run release self-test**. | App shows 0.13.1; **All steps passed**, 21 ✓. |
+| 2 | In folder **B**, do something that gives a Git message (e.g. ⎇ → create a branch `note-test`), in **Light** and in **Dark**. | The floating note is easy to see: **green tint, green frame and glow** for success (red for a problem, blue for a question such as "Pull first?"); the text is **centred** in English and in Arabic. |
+| 3 | Open **⎇**. | Every branch on this PC has a red **🗑 Delete** button next to it (fills red when you point at it). Delete `note-test` (switch back to `main` first). |
+| 4 | Switch to **العربية** and point at buttons whose tooltip mixes Arabic with an English word (e.g. the branch button, Push, Pull, Changes, the release self-test). | Arabic sentences that contain "ReqMan", "Git", "GitHub", "Excel"… keep their word order everywhere — in the window, in tooltips and in Windows dialogs. |
+
+## Previous checklist — v0.13.0 (Arabic, fewer bars, pull from a branch for review, delete a branch)
 
 Your points on 0.12.1 and the Arabic switch. Use folder **B** (branches `main` and `trial-one`). Report by step number.
 

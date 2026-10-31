@@ -119,7 +119,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.13.0, 31 Oct 2026) — prototype complete; Changes view; Excel + ReqIF; branches + per-requirement pull
+## Status (v0.13.1, 31 Oct 2026) — prototype complete; Changes view; Excel + ReqIF; branches + per-requirement pull
 
 | Milestone | State |
 | --- | --- |
@@ -138,15 +138,17 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 | 0.12.0 M8 branches — create/switch (commit / take along / discard), pull and "pull from branch" with field-level 3-way merge + decision window (S-05), compare a branch like a PR, duplicate-ID repair (D-09), D-05; tag baselines delayed | Done (v0.12.0) |
 | 0.12.1 owner's points on 0.12.0 — branch drop-down under the button, click a name to switch, Pull from… / Compare with… on the current branch, search + scrolling for tens of branches | Done (v0.12.1) |
 | 0.13.0 owner's points on 0.12.1 — pull from another branch = uncommitted changes for review, delete branch, Git controls in the top bar + one-row toolbar (Filters pop-up), **Arabic / English with right-to-left** | Done (v0.13.0) |
-| **Next** | owner's 0.13.0 checklist (incl. reading the Arabic); then the **long planning discussion** (feature catalogue) and the new name | — |
+| 0.13.1 owner's points on 0.13.0 — floating note tinted green/red/blue with frame and glow, centred text; red Delete button per branch; right-to-left mark on every Arabic text (word order in tooltips/dialogs) | Done (v0.13.1) |
+| **Next** | owner's 0.13.1 checklist; then the **long planning discussion** (feature catalogue) and the new name; Arabic wording review later (owner: "not 100% accurate, don't change it yet") | — |
 
-Owner's last report (31 Oct 2026): 0.12.1 steps 1–3, 5 passed, 21/21 (50.7 s); step 4 (pull from a branch
+Owner's last report (31 Oct 2026): 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
+Before: 0.12.1 steps 1–3, 5 passed, 21/21 (50.7 s); step 4 (pull from a branch
 committed at once) and three requests → 0.13.0. Before: **0.12.0 all 5 steps passed** — that was the two-folder trial (two clones of the
 sandbox, `Claude_SandBox` and `Claude_SandBox_B`, still on his PC) — self-test 21/21 in 44.6 s, Git 2.52.0. His four
 points on the branch panel went into 0.12.1. He has no DOORS/Jama to try ReqIF: exports are validated against the
 official schema in `tests/reqif.test.ts` (`tests/fixtures/reqif-schema/`, xmllint-wasm).
 
-Automated tests: 191 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
+Automated tests: 192 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
 repository and two clones ("PC A", "PC B"), the release self-test itself, the sandbox's chapter-9 promises
 (`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `language` (Arabic switch, right-to-left, unsaved edit kept, restart), `branches` (create, switch by clicking the name, pull from a branch → uncommitted, delete, Compare with… / Pull from…, the uncommitted-changes question, 41 branches: panel size, search, Esc), `excel` (new project from the sample file, chosen-items export, update the file, ReqIF round trip,
 publish), `journey` (~75 checks, the
@@ -319,6 +321,8 @@ Everything else must be automated (unit tests, e2e in CI, the in-app release sel
 - **Language switch:** a module-level `const X = [{ label: T.… }]` keeps the old language forever (hit in
   ThemeToggle, FieldsPanel, columns) — build such lists inside the component/function. Arabic plural forms: use the
   `pl()` helper in `text-ar.ts`. Test new screens once in Arabic (e2e `language`).
+- **Arabic texts carry a leading U+200F (RLM)** (0.13.1, added by `marked()` in `text-ar.ts`): e2e lookups of Arabic
+  names must allow it (`/^\u200F?حفظ$/`, or substring matches); never strip it when building Arabic strings.
 - **E2E after 0.13.0:** filters are in a pop-up — use the journey's `filters()` helper; the Git region lives inside
   the top bar; success notices close themselves after 9 s (wait for them right after the action).
 - **Git bar state lags a save by ~250 ms:** panels that decide on `state.changes` right after a save (branch switch

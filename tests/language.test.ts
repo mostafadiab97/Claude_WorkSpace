@@ -17,6 +17,14 @@ describe('Arabic texts', () => {
     expect(getLanguage()).toBe('ar')
     expect(isRtl('ar')).toBe(true)
   })
+  it('every Arabic text starts with a right-to-left mark (tooltips and dialogs keep the word order)', () => {
+    setLanguage('ar')
+    const unmarked = leaves(T as unknown as Node).filter(([, v]) => typeof v === 'string' && v !== '' && !v.startsWith('\u200F'))
+    expect(unmarked).toEqual([])
+    expect(T.git.changes(3).startsWith('\u200F')).toBe(true)
+    setLanguage('en')
+    expect(T.git.changes(3).startsWith('\u200F')).toBe(false)
+  })
   it('texts with values are Arabic, with Western digits', () => {
     setLanguage('ar')
     expect(T.git.changes(3)).toMatch(/[؀-ۿ]/)

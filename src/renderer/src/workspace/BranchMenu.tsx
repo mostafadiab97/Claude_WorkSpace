@@ -99,8 +99,9 @@ export function BranchMenu(props: {
                 {b.name}
               </button>
               {b.kind === 'branch' && mode === 'switch' && (
-                <button type="button" className="icon-btn icon-btn--small branches__delete" aria-label={T.branches.deleteLabel(b.name)} title={T.branches.deleteLabel(b.name)} disabled={locked} onClick={() => setDeleting({ name: b.name, unmerged: false, busy: false })}>
-                  🗑
+                <button type="button" className="branches__delete" aria-label={T.branches.deleteLabel(b.name)} title={T.branches.deleteLabel(b.name)} disabled={locked} onClick={() => setDeleting({ name: b.name, unmerged: false, busy: false })}>
+                  <span aria-hidden="true">🗑 </span>
+                  {T.branches.delete}
                 </button>
               )}
             </li>

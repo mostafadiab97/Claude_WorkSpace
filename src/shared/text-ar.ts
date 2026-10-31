@@ -21,7 +21,7 @@ const rows = (c: number): string => pl(c, 'صف واحد', 'صفان', 'صفوف
 const lines = (c: number): string => pl(c, 'سطر واحد', 'سطران', 'أسطر', 'سطرًا')
 const choices = (c: number): string => pl(c, 'اختيار واحد', 'اختياران', 'اختيارات', 'اختيارًا')
 
-export const ar: Texts = {
+const raw: Texts = {
   common: {
     loading: 'جارٍ التحميل…',
     checking: 'جارٍ الفحص…',
@@ -858,3 +858,18 @@ export const ar: Texts = {
     revertNothing: (id: string) => `لا شيء للتراجع عنه: هذا الجزء من ${id} كما في آخر إيداع بالفعل.`
   }
 }
+
+/**
+ * Every Arabic text starts with an invisible RIGHT-TO-LEFT MARK (U+200F). Places that guess a text's direction from
+ * its first letter — Windows tooltips, native dialogs, some lists — would otherwise lay out a sentence that starts
+ * with (or contains) an English word like "ReqMan" or "Git" from left to right, reversing its word order (owner on
+ * 0.13.0, step 5). Inside the window (dir="rtl") the mark changes nothing.
+ */
+const RLM = '\u200F'
+function marked<V>(v: V): V {
+  if (typeof v === 'string') return (v && !v.startsWith(RLM) ? RLM + v : v) as V
+  if (typeof v === 'function') return ((...a: unknown[]) => marked((v as (...x: unknown[]) => unknown)(...a))) as V
+  if (typeof v === 'object' && v !== null) return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, marked(x)])) as V
+  return v
+}
+export const ar: Texts = marked(raw)

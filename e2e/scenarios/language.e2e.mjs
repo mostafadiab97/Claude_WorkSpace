@@ -29,8 +29,8 @@ await scenario('E2E language', async (ctx) => {
   const view = win.viewportSize()
   check(brand !== null && view !== null && brand.x > view.width / 2, 'the logo moved to the right side')
   await t.shot('language-1-arabic')
-  await win.getByRole('button', { name: 'حفظ', exact: true }).click()
-  await win.getByRole('button', { name: 'تم الحفظ ✓' }).waitFor()
+  await win.getByRole('button', { name: /^\u200F?حفظ$/ }).click()
+  await win.getByRole('button', { name: /تم الحفظ ✓/ }).waitFor()
   // a message made by the core (Git), not the window
   gitIn(repo, 'config', 'user.name', 'Alice')
   const gitbar = win.getByRole('region', { name: 'Git' })

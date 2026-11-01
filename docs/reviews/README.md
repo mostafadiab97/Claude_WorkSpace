@@ -12,3 +12,4 @@ recorded in `docs/design/DESIGN.md` (source of truth) and in the review file's d
 | 31 Oct 2026 | `2026-10-31-rust-evaluation.md` | Would a Rust rewrite make ReqMan faster? Measurements, costs, recommendation (no rewrite; Tauri later if size matters) | Decided 31 Oct 2026: no migration to Rust now |
 | 31 Oct 2026 | `2026-10-31-rm-tools-market-list.md` | About 190 RM tools by kind (from the owner's naming chat), with sources | Reference |
 | 31 Oct 2026 | `2026-10-31-feature-catalogue.md` | **Complete catalogue: 163 features** found across the ~190 tools, in 15 areas — what each is, how it works, what it adds, whether ReqMan has it, how we would build it, size and proposed timing | **Input for the planning discussion** |
+| 1 Nov 2026 | `2026-11-01-planning-discussion.md` | The planning discussion for the versions after 0.13 (open points P-01…, answers, name candidates checked) | **In progress** |

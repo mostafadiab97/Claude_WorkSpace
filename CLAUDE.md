@@ -19,26 +19,30 @@ cloud session from v0.5.0. Nothing lives outside this repository and `Claude_San
 
 ## Where everything is
 
+Map of all documents: **`docs/README.md`**. Starting a new chat or handing over: **`docs/HANDOVER.md`**.
+
 | What | Where |
 | --- | --- |
-| **Onboarding for new engineers** (system diagrams, module roles, data flow, first change end to end) | `docs/ONBOARDING.md` (diagrams: navigator `docs/diagrams/index.html`; Archify sources `docs/diagrams/archify/*.json`, interactive `docs/diagrams/*.html`, pictures `docs/images/`; regenerate with `node tools/diagrams.mjs`, see `docs/diagrams/README.md`) |
-| Project reviews and analyses awaiting decisions (index: `docs/reviews/README.md`) | `docs/reviews/2026-10-25-project-review.md` (whole project, all decided), `2026-10-31-feature-gap-analysis.md` (ranked features of 10 other tools + proposed 0.13–0.16), `2026-10-31-rename-impact.md` (the name ReqMan is taken), `2026-10-31-rust-evaluation.md` (no rewrite) |
-| Domain analysis of 5 RM tools, every product question with the owner's answer, product definition, FR/NFR list, journey, scope by stage, architecture, technology choices, milestone plan | `docs/design/DESIGN.md` (**source of truth for decisions**; tags C = confirmed by owner, R = recommendation, I = inference) |
-| Module map, rules, data format, UI structure, decisions changed during build | `docs/ARCHITECTURE.md` |
-| Manual test checklist per version (the owner tests with it), log/data locations, bug reporting | `docs/TESTING.md` |
-| Theme file and customisation | `docs/THEMING.md` |
-| What changed in each version and what the owner reported | `CHANGELOG.md` |
-| Local development setup (Windows) | `docs/DEVELOPING.md` |
-| Import/export formats (Excel, CSV, ReqIF) and the import plan | `docs/ARCHITECTURE.md` (import-export, importing.ts, Import wizard) |
-| Every script in `tools/` and the working procedures (skills) | `tools/README.md`; skills in `.claude/skills/` (`release-to-owner` — use it for every release, `whole-project-review`, `owner-decision-walkthrough`) |
-| Test data repository (10,005 fictional items) | GitHub `mostafadiab97/Claude_SandBox` — clone it **next to** this repo, never inside |
+| Decisions (source of truth): product questions + answers, technical design, per-milestone decisions, owner's small preferences | `docs/design/decisions.md` |
+| Product definition, FR/NFR, scope | `docs/design/requirements.md` |
+| What has been built, where each requirement stands, release plan | `docs/design/roadmap.md` |
+| The 5-tool domain study (frozen) | `docs/design/analysis.md` |
+| **Planning discussion in progress** (open points P-xx with answers) and other analyses | `docs/reviews/` (index: its README); finished reviews in `docs/reviews/done/` |
+| Module map, rules, data format, UI structure | `docs/ARCHITECTURE.md` |
+| Onboarding for engineers (diagrams, first change end to end) | `docs/ONBOARDING.md`, diagrams in `docs/diagrams/` |
+| Pitfalls already hit — read before changing an area | `docs/PITFALLS.md` |
+| Owner's current checklist, log/data locations, bug reporting | `docs/TESTING.md` (older checklists: `docs/testing/past-checklists.md`) |
+| What changed per version + owner's reports | `CHANGELOG.md` |
+| Theme · local setup · scripts and skills | `docs/THEMING.md` · `docs/DEVELOPING.md` · `tools/README.md` (skills in `.claude/skills/`: `release-to-owner` for every release, `owner-decision-walkthrough` for every question round, `whole-project-review`) |
+| Test data (10,005 fictional items) | GitHub `mostafadiab97/Claude_SandBox` — clone **next to** this repo |
 | Releases (installers + auto-update feed) | GitHub Releases of `mostafadiab97/Claude_WorkSpace` |
 
 ## How to work with the owner
 
 - He tests each **release**, not branches: every change he should try ends with a version bump, a green CI release
   and a short checklist in `docs/TESTING.md` ("Manual test checklist — vX.Y.Z", numbered steps, expected results;
-  move the previous one down as "Previous checklist"). He refers to checklist step numbers in feedback
+  move the previous one down as "Previous checklist"; only the current and the previous one stay — older ones go
+  to `docs/testing/past-checklists.md`). He refers to checklist step numbers in feedback
   ("test 6 failed").
 - Explain in plain language, short. He asks "explain this further" when he wants depth. No jargon without a
   one-line explanation.
@@ -103,7 +107,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 
 1. Bump `version` in `package.json` (semver: milestone = minor, fix = patch).
 2. Update `docs/TESTING.md` checklist, `CHANGELOG.md`, README status table if a milestone finished, and the
-   progress line in `docs/design/DESIGN.md` (section "Prototype implementation plan").
+   progress line and release-plan row in `docs/design/roadmap.md`.
 3. `npm run check`, `npm run build`, `npm run test:e2e` locally.
 4. Commit and push to `main`. Two workflows run on `windows-latest`:
    - `build.yml` (every push): check, perf tests, build, e2e, installer artifact.
@@ -121,25 +125,16 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 
 ## Status (v0.13.1, 31 Oct 2026) — prototype complete; Changes view; Excel + ReqIF; branches + per-requirement pull
 
+Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
+plan: `docs/design/roadmap.md`. Latest:
+
 | Milestone | State |
 | --- | --- |
-| M0 Foundations — skeleton, modules, theme, installer, logs, diagnostics | Done (v0.0.1–0.0.4) |
-| M1 Data layer — schema, item files, store, SQLite index, perf, auto-update, data self-test | Done (v0.1.0) |
-| M2 Core UI — open/create folder, table, hierarchy, editor; then owner feedback: tree inside the table, drag & drop, parent picker, fields dialog, columns menu | Done (v0.2.0, v0.3.0) |
-| M3 Links — add/remove both directions, suspect links + confirm, Text/Links columns, link filters, built-in fields protected, column order | Done (v0.4.0, fix v0.4.1) |
-| M4 Git — Git bar, per-item changes, commit (requirements/ only), pull that stops safely on items changed on both sides, push (never forced), discard, undo unpushed commit, name/e-mail form, per-item history with field-level comparison | Done (v0.5.0) |
-| M5 Compare — pulls first; default "what the last pull brought in" (reflog); uncommitted / last commit / any two versions; per item (added/changed/moved/deleted + summary + suspect-impact warning) and per link; schema changes; fast via `cat-file --batch` by blob ID | Done (v0.6.0) |
-| M6 Export and hardening — table and Compare export to CSV (comma, UTF-8 BOM) and Markdown; error boundary; old-Git warning; CI smoke test with 10k generated items; combined checklist + two-PC trial script | Done (v0.7.0) |
-| 0.8.0 clean page — all review fixes (D-01–D-08, D-10, P-01/02/04/05, S-01/02/03/06, X-01, T-01–05), release self-test, 5-step checklist | Done (v0.8.0) |
-| 0.9.0 new data format — `REQ-` + 7 chars, type editable, order keys (S-04), outline numbers, sandbox converted | Done (v0.9.0) |
-| 0.10.0 Changes view — one view for uncommitted + compare, split difference with ↶ per part, Keep/Unlink window, no automatic pulls, column widths | Done (v0.10.0) |
-| 0.11.0 M7 Excel + ReqIF — import wizard (xlsx/csv/reqif), Excel + ReqIF export, chosen items, update the Excel file, new project from a file, publish to GitHub | Done (v0.11.0) |
-| 0.11.1 owner's requests — non-empty folder asks again, move several chosen items, auto-scroll while dragging, discard chosen/all in Changes, one export entry in the row menu, ReqIF validated against the official schema in tests | Done (v0.11.1) |
 | 0.12.0 M8 branches — create/switch (commit / take along / discard), pull and "pull from branch" with field-level 3-way merge + decision window (S-05), compare a branch like a PR, duplicate-ID repair (D-09), D-05; tag baselines delayed | Done (v0.12.0) |
 | 0.12.1 owner's points on 0.12.0 — branch drop-down under the button, click a name to switch, Pull from… / Compare with… on the current branch, search + scrolling for tens of branches | Done (v0.12.1) |
 | 0.13.0 owner's points on 0.12.1 — pull from another branch = uncommitted changes for review, delete branch, Git controls in the top bar + one-row toolbar (Filters pop-up), **Arabic / English with right-to-left** | Done (v0.13.0) |
 | 0.13.1 owner's points on 0.13.0 — floating note tinted green/red/blue with frame and glow, centred text; red Delete button per branch; right-to-left mark on every Arabic text (word order in tooltips/dialogs) | Done (v0.13.1) |
-| **Next** | the **long planning discussion** (feature catalogue) and the new name; Arabic wording review later (owner: "not 100% accurate, don't change it yet") | — |
+| **Next** | finish the **planning discussion** (`docs/reviews/2026-11-01-planning-discussion.md`: themes 2–5 still to detail), then the rename version (when the owner has the name), then the theme 1 version; Arabic wording review later (owner: "not 100% accurate, don't change it yet") | — |
 
 Owner's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
 Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
@@ -149,187 +144,43 @@ sandbox, `Claude_SandBox` and `Claude_SandBox_B`, still on his PC) — self-test
 points on the branch panel went into 0.12.1. He has no DOORS/Jama to try ReqIF: exports are validated against the
 official schema in `tests/reqif.test.ts` (`tests/fixtures/reqif-schema/`, xmllint-wasm).
 
-Automated tests: 192 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
-repository and two clones ("PC A", "PC B"), the release self-test itself, the sandbox's chapter-9 promises
-(`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `language` (Arabic switch, right-to-left, unsaved edit kept, restart), `branches` (create, switch by clicking the name, pull from a branch → uncommitted, delete, Compare with… / Pull from…, the uncommitted-changes question, 41 branches: panel size, search, Esc), `excel` (new project from the sample file, chosen-items export, update the file, ReqIF round trip,
-publish), `journey` (~75 checks, the
-whole user story, incl. the Changes view, ↶, Keep/Unlink window, push offer) and `fixes` (renamed file, lazy Expand all,
-column width drag, Changes view layout + split difference, second start, release self-test in the window).
-0.8.0 measurements (10k scenario repo, Linux): refresh after a save 0.37 → 0.09 s; Expand all first screen 0.26 s.
-Compare on the sandbox: 9,118 changed files (confirmations only) 0.4 s; 3,000 real edits 1.8 s (engine).
-Export of all 10,005 sandbox items: CSV 0.46 s (3.1 MB), Markdown 0.43 s. CI runs `measure:ui` on a generated 10k repo.
-Measured on the sandbox (10,005 items, Linux container): open incl. first indexing 5–8 s, expand all 0.4–0.6 s,
-scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 50k first index 18–73 s (Defender).
+Automated tests: 192 unit tests + 5 e2e scenarios (`journey`, `fixes`, `excel`, `branches`, `language`) + the
+21-step in-app release self-test; what each covers and every speed measurement: `docs/TESTING.md` → "Automated
+checks in detail".
 
-## M8 notes (0.12.0) — built
+## Where we are right now (1 Nov 2026) — read this first
 
-- `items/merge.ts` = pure 3-way merge per item; `workspace/merging.ts` = pull / pullFrom / finishPull / branches.
-  `pull()` returns `{ ok:false, plan }` when questions remain; `finishPull(plan, answers)` re-analyses with the
-  planned commit hashes (refuses if HEAD moved). Merge commit built with `commitTree` (temporary `GIT_INDEX_FILE`),
-  then `merge --ff-only <commit>` with `GIT_REFLOG_ACTION="pull <source>"` (so lastPull finds it).
-- The old "pull stops on a clash" path and its texts are gone; Undo last commit + Discard still exist.
-- Skills: use `release-to-owner` for every release and `owner-decision-walkthrough` for every question round
-  (owner asked 29 Oct how much the skills helped: honest answer — they were not loaded before; CLAUDE.md duplicated them).
-
-## M4 decisions (owner, 25 Oct 2026) — already built
-
-- ~~Pull that finds items changed on both sides stops~~ — replaced in 0.12.0 by per-requirement decisions (M8-7).
-- ~~Branch is shown only~~ — create/switch since 0.12.0.
-- ReqMan commits **only `requirements/`** (`git add --all -- requirements` + `git commit --only -- requirements`).
-- Implementation notes: `src/modules/workspace/gitOps.ts` (rules + messages), `src/modules/git-adapter/systemGit.ts`
-  (commands). In-memory conflict check = `git merge-tree --write-tree` (Git ≥ 2.38; owner has 2.47); if it is
-  unavailable the merge runs and is aborted on conflicts (safety net). Sign-in only via Git Credential Manager
-  (`GIT_TERMINAL_PROMPT=0` so nothing hangs on an invisible prompt).
-
-## M5 decisions (owner, 25 Oct 2026) — already built
-
-- Default comparison = "since my last pull" = what the last pull brought in (HEAD before → after the newest
-  `pull…`/`merge <remote>/<branch>…` step in the reflog; pulls outside ReqMan count too).
-- ~~ReqMan pulls right before any comparison~~ — **replaced 27 Oct 2026 (O-06): no automatic pulls; ReqMan offers to
-  pull before remote-related actions.** Built in 0.10.0 (last-pull view and Push offer "Pull first").
-- Exporting the comparison list → M6.
-- Implementation: `src/modules/workspace/compare.ts`; `git diff --raw -z -M` gives blob IDs; contents come from
-  `readBlobs()` (one `git cat-file --batch`). Naming objects `<rev>:<path>` instead was 40× slower with 10k files in
-  one folder (tree lookups). Files that differ only in `confirmed:` lines are skipped before parsing.
-
-## Where we are right now (31 Oct 2026) — read this first
-
-- **Built and accepted by the owner:** everything up to **0.13.1** (prototype M0–M6, clean page 0.8.0, new data
-  format 0.9.0, Changes view 0.10.0, Excel + ReqIF 0.11.x, branches + per-requirement merge 0.12.x, Arabic + fewer
-  bars + delete branch 0.13.x). No open bugs or requests.
-- **Waiting for his decisions** (walk him through them with the `owner-decision-walkthrough` skill, recommendation
-  first, record answers in the file and in DESIGN.md):
-  1. **New product name** — "ReqMan" is used by INNEO's requirements tool. Branchwise turned out to be taken (owner,
-     31 Oct); **the owner is choosing a name himself** (ideas: reqoin, reqouple, reqochet, reqnote — logo with red/green
-     dots; tagline concept: a "lens" on your Git repository). He wants the new-name version to **uninstall the old app
-     and install the new one**, and the `.reqman` folder in projects **renamed too** (a Git rename) — section 5 of
-     the rename file. He likes reqochet but wants a name without "req". Trademark/domain check not done yet. How to rename safely:
-     `docs/reviews/2026-10-31-rename-impact.md` (keep `appId`, migrate `%APPDATA%`, read old `.reqman/` folders).
-  2. **Order of new features** — the owner wants a **long planning discussion** like the first one (DESIGN.md
-     questions) before deciding; use **`docs/reviews/2026-10-31-feature-catalogue.md`** (163 features, 15 areas, have/missing, how to build, when) and the
-     190-tool market list (`2026-10-31-rm-tools-market-list.md`).
-     Proposal so far — `docs/reviews/2026-10-31-feature-gap-analysis.md` ranks 23 features of 10 tools and
-     proposes 0.13.0 rename + traceability (matrix/coverage, types in the GUI, saved views, bulk edit), 0.14.0 Word/PDF
-     + HTML publishing, 0.15.0 PR approval status + comments + quality hints, 0.16.0 code/test traceability + impact
-     graph + CLI check. Baselines stay delayed until he says otherwise.
-  3. **Rust — decided 31 Oct 2026: no migration now** (a pure-Rust window can't carry this interface); TypeScript
-     stays. Tauri remains a possible later step.
-- Comparisons answered in chat (not stored as files): GitHub vs RM tools (28 Oct), ReqView (29 Oct), Reqord (30 Oct;
-  AGPL — never copy its code), naming (29–30 Oct). The gap analysis file summarises what matters from them.
+- **Built and accepted by the owner:** everything up to **0.13.1**. No open bugs or requests.
+- **Planning discussion in progress** — `docs/reviews/2026-11-01-planning-discussion.md` (method: the
+  `owner-decision-walkthrough` skill; record every answer there and, when it changes the product, in
+  `docs/design/decisions.md` / `roadmap.md`). Decided so far (1 Nov 2026):
+  - P-01 next phase = **a pilot team** (~50 users, embedded devices, ISO 26262 + ASPICE, today DOORS/Jama, Excel
+    without licence, one client wants Word; all know Git/GitHub).
+  - P-02/P-03 six themes, one per minor version, fixes as patches: **1 traceability you can see** → 2 daily comfort →
+    3 documents out → 4 review on GitHub → 5 engineering traceability → 6 later/commercial (details per theme still to
+    discuss: themes 2–5).
+  - P-04 the **rename gets its own version before the pilot** starts.
+  - **Theme 1 version contents:** item and link types editable in the window, required fields, coverage view (rules
+    shared in `schema.yaml`), impact chain, traceability matrix (rows/columns by type, current filter, Excel export),
+    completeness warnings, **documents** (several specifications in one repository, each with its own tree and
+    outline numbers — replaces "one tree per repository"; cross-repository links later with a repository alias before
+    the ID), **baselines** (Git tags with note, list, compare with baseline, open read-only).
+  - P-11 **no Word import**. Import: Excel, ReqIF, CSV, ReqMan repositories. Export: Excel, ReqIF, CSV, ReqMan
+    repositories, Markdown, Word, PDF.
+- **New name:** the owner is still choosing. Shortlist checked 1 Nov (planning file): reqochet (owner likes it;
+  recommended), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:
+  uninstall old → install new, `.reqman` folder renamed by Git rename, copy the user's settings first).
+- **Rust: no migration now** (31 Oct). Feature input: `docs/reviews/2026-10-31-feature-catalogue.md` (163 features),
+  market list `docs/reviews/2026-10-31-rm-tools-market-list.md`.
 - The owner is a C developer new to this field: explain from first principles, short, C analogies where useful.
+- **Owner's wish (1 Nov):** when this chat reaches its limit, send him a short farewell with feedback on the work
+  together; continue in a new chat with `docs/HANDOVER.md`.
 
 **Testing rule from 0.8.0 (owner, 28 Oct 2026):** the manual checklist per version has **at most 5 steps** (update
 arrives, release self-test, open the sandbox, one real push only when Git changed, the version's new feature).
 Everything else must be automated (unit tests, e2e in CI, the in-app release self-test).
 
-**History of the release plan:** 0.8.0 clean page → 0.9.0 data format → 0.10.0 Changes view → 0.11.0 Excel + ReqIF
-(ReqIF merged in, 29 Oct) → 0.12.0 branches (decisions M8-1…7 in the review file, section F; baselines delayed).
+## Pitfalls
 
-## M6 decisions (owner, 25 Oct 2026) — already built
-
-- CSV separator: **comma** (his Excel). Files: UTF-8 with BOM, CRLF; cells starting with `= + @` get a leading `'`.
-- Next milestones in this order: **M7 Excel export + import**, then **M8 branches + per-requirement conflict
-  resolution**.
-- Export lives in `src/modules/import-export` (pure); `workspace.exportItems/exportCompare` build the content;
-  `main/ipc.ts` shows the save dialog (last folder in `%APPDATA%\ReqMan\export-settings.json`). E2E mocks
-  `dialog.showSaveDialog` (`saveAs()` helper in the journey).
-
-## M7 notes (0.11.0) — built
-
-- Excel export with ExcelJS (MIT; check size); import wizard (file → sheet → header row → column mapping guessed →
-  type per row → preview with problems) writing uncommitted changes; update existing items by ID; read links; foreign
-  IDs kept as `source-id`; outline numbers rebuild the hierarchy. Round trip test with the sandbox and
-  `samples/sample-requirements.xlsx` (59 items).
-- Plus "New project from a file", "Update the Excel file", "Publish to GitHub" and **export of chosen items**
-  (Ctrl/Shift+click multi-select, right-click "Export this item and everything below it", tick box "Include the items
-  below" ticked by default, overlaps once, document order, full outline numbers).
-
-## Small things the owner has asked for or accepted along the way
-
-- Light-mode success green `#22c55e` (brighter than first proposal).
-- Scrollbars: at the right edge of their area, thumb only, no track.
-- `theme.json` in `%APPDATA%` starts as an override-only file with a `_help` key (a full copy froze values).
-- Table = tree when not searching/filtering; flat list (best match first) when searching or filtering.
-- Header sort: ascending → descending → back to document order.
-- Column widths: drag the header edge (double-click = automatic); personal like hidden/ordered columns (0.10.0).
-- Hidden/ordered columns are personal (per repo, per PC, localStorage) — not shared through Git; field
-  definitions are shared (schema.yaml).
-- Type is editable in the editor since 0.9.0 (IDs no longer contain the type).
-- Link edits are saved immediately and locked while the item has unsaved edits.
-- Delete offers to remove incoming links (ticked by default).
-
-## Pitfalls already hit (don't repeat)
-
-- **Cache upgrade:** `CREATE TABLE IF NOT EXISTS` kept old columns → "table items has no column named fp" for
-  every user who had opened a repo with 0.3.x. E2E runs start with a fresh profile and cannot see this — add a unit
-  test with an old cache file whenever the layout changes (see `tests/index-cache.test.ts`).
-- Build output is CommonJS (no `"type": "module"`); configs are `.mts`/`.mjs`; preload is sandboxed CJS.
-- Windows temp paths can be short names (`RUNNER~1`) — compare with `realpathSync.native`.
-- React lint (`react-hooks`): no synchronous `setState` inside effects; no ref writes during render. Use keyed
-  components or derived values.
-- E2E: Playwright `getByLabel` is a substring match and finds `aria-label`s too — keep labels unique (e.g.
-  "Type filter" vs editor "Type"), use `getByRole('checkbox', { name })` or `{ exact: true }`.
-- E2E must exit with `app.exit(0)`; closing normally can hang on the "unsaved changes" dialog.
-- The sandbox's `RSK-RENAMD.md` is deliberately renamed — scripts that rewrite items must not write it under its
-  ID (would create a duplicate).
-- Changing sandbox data: keep IDs stable (migrate in place, like `tools/confirm-sandbox-links.mts`), update its
-  README, tell the owner to `git pull` / `git reset --hard origin/main` there.
-- Release via tag push is not used; the version change in `package.json` triggers the release.
-- `electron-builder --publish always` failed in CI before; publishing uses `gh release create` instead.
-- The Changes view (0.10.0) replaces the table and the editor column, but both stay **mounted** (hidden) so unsaved
-  edits and the tree's open levels survive; opening any item closes the view. In e2e, open it only if it is not
-  visible (the button toggles) — see `openChanges()` in the journey.
-- E2E `save()` closes the "Check the links to this item" window (Decide later) when a save opens it; pass
-  `{ review: 'check' }` where the window itself is tested. `getByLabel('Show')` also matched the chip group
-  ("Show only…") — use `{ exact: true }`.
-- Real-Git tests are slow on the Windows runner (antivirus): give those `describe` blocks a long timeout. The runner
-  has `core.autocrlf=true`, so files Git checks out may have CRLF — compare with line endings normalised (item files
-  in real repositories are protected by `requirements/.gitattributes`).
-- If a release run fails after the version bump, fix, push, then start it by hand: `gh workflow run release.yml`
-  (a push without a `package.json` change does not trigger it).
-- Git tests that need "no identity" must isolate `HOME` and `GIT_CONFIG_GLOBAL` (see `tests/workspace-git.test.ts`).
-- A clone of an empty remote has an upstream configured but no remote branch: treat that as "no upstream" (status
-  has no `branch.ab` line) so the first push publishes with `-u`.
-- **Folder watch timing (P-01):** the OS reports file changes a few ms after they happen; `refresh()` waits 60 ms
-  before taking the watcher's list. Code that changes files and refreshes right away (tests, the self-test) must
-  not assume the change is seen without that wait.
-- **Window logic tests** live in `tests/ui/` and are type-checked with `tsconfig.web.json` (DOM types); the node
-  project excludes that folder. Tests may import modules only through their `index.ts` (ESLint).
-- **Single-instance lock:** two ReqMan processes with the same `--user-data-dir` cannot run; e2e scenarios each use
-  their own profile (`launch()` in `e2e/harness.mjs`), so they can run side by side.
-- **From this cloud session:** `gh workflow run` and other GraphQL calls are refused (403) — start a release with
-  `gh api -X POST repos/mostafadiab97/Claude_WorkSpace/actions/workflows/release.yml/dispatches -f ref=main`.
-  Run logs and artifacts cannot be downloaded either; failed e2e scenarios are therefore written as GitHub
-  annotations (`gh api repos/.../check-runs/<job id>/annotations`).
-- **Order keys are compared byte-wise.** `localeCompare` sorts `a0` / `aA` / `aa` differently from SQLite and
-  `keyBetween` → wrong order (hit in the sandbox conversion). Use `<`/`>` (see `cmp` in the conversion tool).
-- **IDs that change** (conversion): Compare pairs items by `former-id`; code that maps "before" items must look them
-  up by the old ID (`beforeId` map in `compare.ts`).
-- **ExcelJS 4.4 and absolute part paths:** files written by openpyxl (e.g. `samples/sample-requirements.xlsx`) point
-  to tables with "/xl/tables/…"; ExcelJS crashes ("reading 'name'"). `loadWorkbook()` in `import-export/xlsx.ts`
-  rewrites them first — always read through `readXlsx`/`updateXlsx`, never `new Workbook().xlsx.load` directly.
-- **XML attribute values lose line breaks** unless written as `&#10;` (`escAttr` in `reqif.ts`).
-- **Import round trips:** a column that is mapped must not get the field's default for new items (an empty cell
-  = no value), the text cell is taken exactly (trailing spaces are data), lists compare as sets, and references the
-  file cannot hold (missing parents/targets, values outside an enum) stay as they were. The sandbox test of both
-  round trips (10,005 unchanged) is the check — `previewImport` only returns the first 300 rows.
-- **E2E drag to a row off screen:** Playwright's `dragTo` scrolls the table between pressing and moving; the
-  virtual table reuses row elements, so the drag starts on another item. Drag to a row that is on screen.
-- **E2E role names are substring matches:** a branch button labelled "…pull from other branches" made
-  `getByRole('button', { name: 'Pull' })` find two buttons. Keep labels of new buttons free of other buttons' words.
-- **Drop-down panels inside the Git bar:** anchor them to `.gitbar--anchor` (the bar row), not the whole region — the
-  notices below the bar would push them down. Close on Esc and on a click outside (BranchMenu shows how).
-- **Language switch:** a module-level `const X = [{ label: T.… }]` keeps the old language forever (hit in
-  ThemeToggle, FieldsPanel, columns) — build such lists inside the component/function. Arabic plural forms: use the
-  `pl()` helper in `text-ar.ts`. Test new screens once in Arabic (e2e `language`).
-- **Arabic texts carry a leading U+200F (RLM)** (0.13.1, added by `marked()` in `text-ar.ts`): e2e lookups of Arabic
-  names must allow it (`/^\u200F?حفظ$/`, or substring matches); never strip it when building Arabic strings.
-- **E2E after 0.13.0:** filters are in a pop-up — use the journey's `filters()` helper; the Git region lives inside
-  the top bar; success notices close themselves after 9 s (wait for them right after the action).
-- **Git bar state lags a save by ~250 ms:** panels that decide on `state.changes` right after a save (branch switch
-  question) must ask `getGitState()` again (BranchMenu does).
-- **Dependabot:** read each proposal before merging (CI must be green; see the ignore list in `.github/dependabot.yml`).
-  TypeScript majors wait for typescript-eslint support (PR #5: `npm ci` ERESOLVE); `@types/node` follows the Node.js
-  inside Electron (Electron 45 = Node 24, so `^24`; PR #6). Merging/closing PRs needs the owner's yes (his repo).
-- **Electron downloads its program on first use:** two scenarios starting at once failed on Windows ("file in
-  use") — `e2e/run.mjs` imports `electron` once before starting them.
+`docs/PITFALLS.md` lists every mistake that already cost time (cache upgrades, byte-wise order keys, e2e label matching,
+language switch, Windows runner quirks, cloud-session limits…). **Read the entries for the area you change.**

@@ -1,4 +1,4 @@
-// Tests for the fixes of the project review (docs/reviews/2026-10-25-project-review.md), released in 0.8.0.
+// Tests for the fixes of the project review (docs/reviews/done/2026-10-25-project-review.md), released in 0.8.0.
 import { execFileSync } from 'node:child_process'
 import { mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'

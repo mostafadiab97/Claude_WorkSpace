@@ -5,7 +5,7 @@
 one is, how it works, what it adds, whether ReqMan has it, how we would add it, and when. This is the input for the
 long planning discussion; **nothing here is decided** — the "When" column is a proposal (R).
 
-Replaces the shorter `2026-10-31-feature-gap-analysis.md` (23 features), which stays as the first summary.
+Replaces the shorter `done/2026-10-31-feature-gap-analysis.md` (23 features), which stays as the first summary.
 
 ## How to read it
 
@@ -20,8 +20,8 @@ Replaces the shorter `2026-10-31-feature-gap-analysis.md` (23 features), which s
 - **Size** — S (days), M (one to two weeks), L (several weeks), XL (a product area of its own).
 - **When (R)** — **N** = next versions (0.13–0.16 as proposed), **M** = MVP later in 2027, **C** = commercial stage,
   **D** = only on customer demand, **—** = out of scope for this product.
-- Evidence: the tool features come from `docs/design/DESIGN.md` (sources there), the ReqView/Reqord comparisons of
-  29–30 Oct (sources in `2026-10-31-feature-gap-analysis.md`) and established product knowledge of the listed tools
+- Evidence: the tool features come from `docs/design/decisions.md` (sources there), the ReqView/Reqord comparisons of
+  29–30 Oct (sources in `done/2026-10-31-feature-gap-analysis.md`) and established product knowledge of the listed tools
   (K). Vendor details change often; treat individual cells as indicative.
 
 ## Summary

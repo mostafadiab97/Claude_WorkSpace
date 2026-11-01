@@ -4,7 +4,7 @@
 don't, ordered by relevance and importance, added to the planned updates.
 
 **Which tools.** The tool list of the owner's other chat ("ReqMan project naming") cannot be read from this session,
-so the list is built from: the five platforms analysed in `docs/design/DESIGN.md` (IBM DOORS Next, Jama Connect,
+so the list is built from: the five platforms analysed in `docs/design/decisions.md` (IBM DOORS Next, Jama Connect,
 Siemens Polarion, PTC Codebeamer, Visure), **ReqView** (compared 29 Oct), **Reqord** (compared 30 Oct), and the
 Git/"docs-as-code" tools closest to ReqMan: **StrictDoc**, **sphinx-needs**, **Doorstop**. The owner later supplied the
 full market list from that chat (about 190 tools): `2026-10-31-rm-tools-market-list.md` — to be used in the planning
@@ -83,7 +83,7 @@ validated against the official schema · in-app release self-test · free (no li
 
 ## Sources
 
-- Domain analysis of DOORS Next, Jama, Polarion, Codebeamer, Visure: `docs/design/DESIGN.md` (sections 1–5, B, C, D, with its own sources).
+- Domain analysis of DOORS Next, Jama, Polarion, Codebeamer, Visure: `docs/design/decisions.md` (sections 1–5, B, C, D, with its own sources).
 - ReqView: [Git collaboration](https://www.reqview.com/doc/git-collaboration/), [home](https://www.reqview.com/), [Capterra](https://www.capterra.com/p/145388/ReqView/) (29 Oct 2026).
 - Reqord: [github.com/kicchann/reqord](https://github.com/kicchann/reqord) (README, CLI reference, schemas; 30 Oct 2026).
 - StrictDoc: [documentation](https://strictdoc.readthedocs.io/en/stable/stable/docs/strictdoc_24_development_plan.html); sphinx-needs: [GitHub](https://github.com/useblocks/sphinxcontrib-needs/); Doorstop: [documentation](https://doorstop.readthedocs.io).

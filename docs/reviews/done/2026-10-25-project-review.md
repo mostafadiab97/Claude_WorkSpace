@@ -349,7 +349,7 @@ all fine. The two-PC trial is postponed (only one user for now).
   security alerts/updates must be switched on by the owner in the repository settings (the API is not reachable
   from the cloud session).
 
-- **Plan confirmed (28 Oct 2026):** release plan in `docs/design/DESIGN.md` → "Release plan". Owner additions:
+- **Plan confirmed (28 Oct 2026):** release plan in `docs/design/roadmap.md` → "Release plan". Owner additions:
   **export of chosen items** (one item or several selected items + everything below them) in 0.11.0 with the Excel
   export; **testing reduced**: a release self-test inside ReqMan (temporary practice repository, never the user's
   data) plus at most 5 manual steps per version, from 0.8.0. Dependabot alerts stay off (weekly updates are enough;
@@ -393,5 +393,5 @@ all fine. The two-PC trial is postponed (only one user for now).
 
 ## G. Order (confirmed 28 Oct 2026)
 
-See `docs/design/DESIGN.md` → "Release plan": 0.8.0 clean page (all fixes of this review) → 0.9.0 new data format →
+See `docs/design/roadmap.md` → "Release plan": 0.8.0 clean page (all fixes of this review) → 0.9.0 new data format →
 0.10.0 Changes view → 0.11.0 M7 Excel → 0.12.0 M8 branches → 0.13.0 ReqIF.

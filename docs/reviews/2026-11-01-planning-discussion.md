@@ -3,7 +3,7 @@
 The owner asked for a long planning discussion "like the ones we had when we first started" before the next versions
 are fixed. Input: `2026-10-31-feature-catalogue.md` (163 features, IDs A1…O5) and `2026-10-31-rm-tools-market-list.md`.
 Method: the `owner-decision-walkthrough` skill — one small group of questions at a time, recommendation first, every
-answer recorded here (and in `docs/design/DESIGN.md` as C when it changes the product).
+answer recorded here (and in `docs/design/decisions.md` as C when it changes the product).
 
 ## Open points
 

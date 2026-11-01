@@ -177,9 +177,11 @@ that opens an old cache file.
 ## 10. Where to read more
 
 - `CLAUDE.md` — project memory and working agreement (status, decisions, pitfalls). Keep it current.
-- `docs/design/DESIGN.md` — domain analysis of five RM tools, every product decision, requirements, roadmap.
+- `docs/design/` — `decisions.md` (every product decision), `requirements.md`, `roadmap.md`, `analysis.md` (five RM tools).
+- `docs/PITFALLS.md` — mistakes that already cost time; read the entries for the area you change.
+- `docs/README.md` — the map of all documentation.
 - `docs/ARCHITECTURE.md` — module map, rules, data format, UI structure.
 - `docs/TESTING.md` — the owner's manual checklists and the two-PC trial.
-- `docs/reviews/` — project reviews and analyses (see its README): the project review, the feature-gap analysis
-  against other tools, the rename impact, the Rust evaluation.
+- `docs/reviews/` — the planning discussion and open analyses (see its README; finished ones in `done/`): feature catalogue,
+  market list, rename impact.
 - `CHANGELOG.md` — what changed in each version and what testing found.

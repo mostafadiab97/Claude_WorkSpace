@@ -25,7 +25,7 @@ an in-app release self-test, light/dark themes, **English / Arabic** (right-to-l
 
 Prototype (M0–M6), Excel/ReqIF exchange (M7) and branches with per-requirement merge (M8) are complete. What
 each version changed is in `CHANGELOG.md`; the current state and the next step are in `CLAUDE.md` ("Status"), and the
-release plan in `docs/design/DESIGN.md` ("Release plan"). (The status is kept in those places only, so it cannot drift
+release plan in `docs/design/roadmap.md` ("Release plan"). (The status is kept in those places only, so it cannot drift
 — review T-04.)
 
 ## Develop
@@ -49,8 +49,11 @@ builds the installer and publishes it as a GitHub Release; installed copies pick
 
 - `CLAUDE.md` — project memory and working agreement (start here)
 - `docs/ONBOARDING.md` — onboarding guide for engineers, with system diagrams
-- `docs/reviews/` — project review and analyses awaiting decisions (feature gaps vs other tools, rename, Rust) — index in its README
-- `docs/design/DESIGN.md` — domain analysis, product decisions, requirements, architecture, milestone plan
+- **`docs/README.md` — map of all documentation (which file answers which question)**
+- `docs/HANDOVER.md` — starting a new chat or team: one message to paste
+- `docs/design/` — `decisions.md` (every decision), `requirements.md` (FR/NFR), `roadmap.md` (release plan), `analysis.md` (5-tool study)
+- `docs/reviews/` — the planning discussion and analyses awaiting decisions (finished ones in `done/`) — index in its README
+- `docs/PITFALLS.md` — mistakes that already cost time
 - `CHANGELOG.md` — what each version changed and what testing found
 - `docs/DEVELOPING.md` — setting up a Windows PC for development
 - `docs/ARCHITECTURE.md` — modules, rules, module map

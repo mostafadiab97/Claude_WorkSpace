@@ -9,7 +9,7 @@ Three kinds of checks protect each version:
 2. **The release self-test** (from 0.8.0) — on *your* PC, inside ReqMan: **⚙ Settings & diagnostics → Run
    release self-test**. It does the main actions on a practice repository in a temporary folder (never your
    data) and shows ✓/✗ per step. It checks what only your PC has: your Git, Windows Defender, your disk.
-3. **A short manual checklist** — at most 5 steps per version (owner's rule, 28 Oct 2026): the update
+3. **A short manual checklist** — at most 5 steps per version (Mostafa's rule, 28 Oct 2026): the update
    arrives, the self-test passes, the sandbox opens, one real push when the Git parts changed, and a quick look
    at what is new.
 
@@ -25,7 +25,7 @@ column width drag, Changes view layout + split difference, second start, release
 Compare on the sandbox: 9,118 changed files (confirmations only) 0.4 s; 3,000 real edits 1.8 s (engine).
 Export of all 10,005 sandbox items: CSV 0.46 s (3.1 MB), Markdown 0.43 s. CI runs `measure:ui` on a generated 10k repo.
 Measured on the sandbox (10,005 items, Linux container): open incl. first indexing 5–8 s, expand all 0.4–0.6 s,
-scroll to bottom 65 ms, suspect filter 0.3 s. Owner's PC: 10k queries < 15 ms; 50k first index 18–73 s (Defender).
+scroll to bottom 65 ms, suspect filter 0.3 s. Mostafa's PC: 10k queries < 15 ms; 50k first index 18–73 s (Defender).
 
 ## Where things are on Windows
 

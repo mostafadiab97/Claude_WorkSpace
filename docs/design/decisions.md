@@ -3,8 +3,8 @@
 > Part of the design documents (split from `DESIGN.md` on 1 Nov 2026; content unchanged). Tags: **C** = confirmed by the
 > product owner, **R** = recommendation, **I** = inference, **F/K** = evidence (see `analysis.md` → Sources).
 
-**What this is:** every question that defined the product with the owner's answer, the technical design chosen at the
-start, the decisions taken per milestone, and the small preferences the owner gave along the way. Newer decisions from
+**What this is:** every question that defined the product with Mostafa's answer, the technical design chosen at the
+start, the decisions taken per milestone, and the small preferences Mostafa gave along the way. Newer decisions from
 the planning discussion are in `docs/reviews/2026-11-01-planning-discussion.md` and summarised in `roadmap.md`.
 
 ## Questions to define your product
@@ -35,7 +35,7 @@ The five questions marked ★ shape the architecture most; the rest refine scope
 | Confirmed requirement | Audit trail for v1 = normal Git history (author, time, message, change per commit), shown per requirement in the tool. Teams wanting stricter control can enable branch protection and signed commits in GitHub; tamper-proof audit is part of the deferred compliance features. |
 | Confirmed scope decision (25 Oct 2026) | M4 Git: when a pull finds items changed on both sides, ReqMan stops without changing anything and lists them (choosing per item comes with FR-13); M4 shows the current branch only (creating/switching branches stays FR-12, MVP); ReqMan commits only the `requirements/` folder, never other project files. |
 | Confirmed scope decision (25 Oct 2026) | M5 Compare: the default comparison is "since my last pull" (what the last pull brought in); ReqMan pulls right before any comparison; exporting the comparison list comes with the M6 exports. |
-| Confirmed decision (25 Oct 2026) | CSV exports use a comma separator (the owner's Excel setting). After the prototype (M6), the order is: Excel export and import (M7), then branches and per-requirement conflict resolution (M8); Word/PDF export, PR view and coverage rules later. |
+| Confirmed decision (25 Oct 2026) | CSV exports use a comma separator (Mostafa's Excel setting). After the prototype (M6), the order is: Excel export and import (M7), then branches and per-requirement conflict resolution (M8); Word/PDF export, PR view and coverage rules later. |
 | Confirmed decision (25 Oct 2026) | M7 import: rows whose ID already exists **update** those items (with a preview of what changes); links are **read too** (from a Links column like the export writes). |
 | Confirmed decision (27 Oct 2026) | Item IDs are independent of the item type: one prefix `REQ-` for all items + random part; the type can change without changing the ID. Existing sandbox data is converted directly in the sandbox repository (no conversion feature in the tool). |
 | Confirmed decision (27 Oct 2026) | No ID pool: IDs use 7 random characters (`REQ-K7Q3XMB`); duplicate IDs created on different branches are repaired automatically at pull/merge (the local, unshared item is renamed with its links). |
@@ -218,17 +218,17 @@ The main trade-off is accepting a larger app download (Electron, roughly 100+ MB
 
 ## Decisions and notes per milestone (moved from `CLAUDE.md`, 1 Nov 2026)
 
-### M4 decisions (owner, 25 Oct 2026) — already built
+### M4 decisions (Mostafa, 25 Oct 2026) — already built
 
 - ~~Pull that finds items changed on both sides stops~~ — replaced in 0.12.0 by per-requirement decisions (M8-7).
 - ~~Branch is shown only~~ — create/switch since 0.12.0.
 - ReqMan commits **only `requirements/`** (`git add --all -- requirements` + `git commit --only -- requirements`).
 - Implementation notes: `src/modules/workspace/gitOps.ts` (rules + messages), `src/modules/git-adapter/systemGit.ts`
-  (commands). In-memory conflict check = `git merge-tree --write-tree` (Git ≥ 2.38; owner has 2.47); if it is
+  (commands). In-memory conflict check = `git merge-tree --write-tree` (Git ≥ 2.38; Mostafa has 2.47); if it is
   unavailable the merge runs and is aborted on conflicts (safety net). Sign-in only via Git Credential Manager
   (`GIT_TERMINAL_PROMPT=0` so nothing hangs on an invisible prompt).
 
-### M5 decisions (owner, 25 Oct 2026) — already built
+### M5 decisions (Mostafa, 25 Oct 2026) — already built
 
 - Default comparison = "since my last pull" = what the last pull brought in (HEAD before → after the newest
   `pull…`/`merge <remote>/<branch>…` step in the reflog; pulls outside ReqMan count too).
@@ -239,9 +239,9 @@ The main trade-off is accepting a larger app download (Electron, roughly 100+ MB
   `readBlobs()` (one `git cat-file --batch`). Naming objects `<rev>:<path>` instead was 40× slower with 10k files in
   one folder (tree lookups). Files that differ only in `confirmed:` lines are skipped before parsing.
 
-### M6 decisions (owner, 25 Oct 2026) — already built
+### M6 decisions (Mostafa, 25 Oct 2026) — already built
 
-- CSV separator: **comma** (his Excel). Files: UTF-8 with BOM, CRLF; cells starting with `= + @` get a leading `'`.
+- CSV separator: **comma**. Files: UTF-8 with BOM, CRLF; cells starting with `= + @` get a leading `'`.
 - Next milestones in this order: **M7 Excel export + import**, then **M8 branches + per-requirement conflict
   resolution**.
 - Export lives in `src/modules/import-export` (pure); `workspace.exportItems/exportCompare` build the content;
@@ -266,9 +266,9 @@ The main trade-off is accepting a larger app download (Electron, roughly 100+ MB
   then `merge --ff-only <commit>` with `GIT_REFLOG_ACTION="pull <source>"` (so lastPull finds it).
 - The old "pull stops on a clash" path and its texts are gone; Undo last commit + Discard still exist.
 - Skills: use `release-to-owner` for every release and `owner-decision-walkthrough` for every question round
-  (owner asked 29 Oct how much the skills helped: honest answer — they were not loaded before; CLAUDE.md duplicated them).
+  (Mostafa asked 29 Oct how much the skills helped: honest answer — they were not loaded before; CLAUDE.md duplicated them).
 
-## Small things the owner has asked for or accepted along the way
+## Small things Mostafa has asked for or accepted along the way
 
 - Light-mode success green `#22c55e` (brighter than first proposal).
 - Scrollbars: at the right edge of their area, thumb only, no track.

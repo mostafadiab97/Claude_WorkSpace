@@ -227,7 +227,7 @@ export function createGitOps(deps: GitOpsDeps) {
       if (st.upstream && st.ahead === 0) {
         return done(s, st.changes.length > 0 ? T.gitMsg.notCommittedYet : T.gitMsg.remoteHasAll)
       }
-      // owner's rule (28 Oct 2026): keep order keys short, but only in groups this user changed
+      // Mostafa's rule (28 Oct 2026): keep order keys short, but only in groups this user changed
       const tidied = st.upstream && deps.tidyBeforePush ? await deps.tidyBeforePush(s, st.upstream).catch((e: unknown) => (log.warn(`Tidying positions skipped: ${String(e)}`), 0)) : 0
       try {
         await git.push(s.repo.root, st.upstream || !remote || !st.branch ? undefined : { remote, branch: st.branch })

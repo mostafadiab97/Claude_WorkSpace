@@ -53,7 +53,7 @@ The architecture picture in section 1 shows these parts and how calls travel bet
 | **main/composition.ts** | Builds all modules and wires them together — the only place to swap an implementation | one file | `main/index.ts` |
 | **workspace** | "The open repository": opens/creates it and runs every user operation with the rules that need the whole set (no parent loops, conflict-safe saves, links, moves, schema fields, export). `workspace.ts` is the facade and runs every write and Git action through one queue (one at a time, like a mutex); the work is in small files: `itemOps`, `links`, `structure`, `schemaFields`, `importing`, `exporting`, `revert`, `gitOps` (commit/push/discard/history), `merging` (pull, pull from a branch, decisions, branches, duplicate-ID repair), `compare`, `watcher` (which files changed) | `workspace.ts` + the files named | ipc |
 | **safe-files** | Writes files atomically and retries while Windows briefly locks a file | `index.ts` | store, workspace, ipc |
-| **self-test** | The release self-test the owner runs in the app: the main actions on a practice repository | `index.ts` | composition |
+| **self-test** | The release self-test Mostafa runs in the app: the main actions on a practice repository | `index.ts` | composition |
 | **repository-store** | Reads and writes the files in `requirements/` — atomic, revision-checked | `fileStore.ts` | workspace |
 | **index-cache** | A local SQLite copy of all items for fast search, filters, counts, suspect links and problems; re-reads only changed files | `sqliteIndex.ts` | workspace |
 | **git-adapter** | Runs the installed `git` (argument arrays, no shell, timeouts) and parses its output | `systemGit.ts` | workspace |
@@ -134,8 +134,8 @@ Example: a new operation "mark several items as Approved".
    put every text in `src/shared/text.ts`.
 5. **Tests:** a unit test in `tests/` (real temp folders and real Git, no mocks for files), and extend an e2e
    scenario in `e2e/scenarios/` (`journey`, `fixes`, `excel`, `branches`) when the user can see the feature; add a
-   step to the release self-test (`src/modules/self-test/index.ts`) when it touches Git or files on the owner's PC.
-6. **Docs and release:** the owner's checklist in `docs/TESTING.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`
+   step to the release self-test (`src/modules/self-test/index.ts`) when it touches Git or files on Mostafa's PC.
+6. **Docs and release:** Mostafa's checklist in `docs/TESTING.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`
    (module map/UI table), the status in `CLAUDE.md`; bump `version` in `package.json` and push — the Windows build
    and release run on GitHub Actions.
 
@@ -181,7 +181,7 @@ that opens an old cache file.
 - `docs/PITFALLS.md` — mistakes that already cost time; read the entries for the area you change.
 - `docs/README.md` — the map of all documentation.
 - `docs/ARCHITECTURE.md` — module map, rules, data format, UI structure.
-- `docs/TESTING.md` — the owner's manual checklists and the two-PC trial.
+- `docs/TESTING.md` — Mostafa's manual checklists and the two-PC trial.
 - `docs/reviews/` — the planning discussion and open analyses (see its README; finished ones in `done/`): feature catalogue,
   market list, rename impact.
 - `CHANGELOG.md` — what changed in each version and what testing found.

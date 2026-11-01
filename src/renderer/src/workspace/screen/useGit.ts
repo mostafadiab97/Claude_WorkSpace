@@ -1,5 +1,5 @@
 // The Git bar's state and actions (review S-03: grouped out of WorkspaceScreen). No automatic pulls: Push first
-// offers to pull (owner's decision O-06).
+// offers to pull (Mostafa's decision O-06).
 import { useCallback, useEffect, useState } from 'react'
 import type { GitResult, GitState, MergePlan } from '../../../../shared/api'
 import { T } from '../../../../shared/text'

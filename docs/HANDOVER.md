@@ -31,11 +31,10 @@ product owner: I decide the product, install every release on my Windows 11 PC a
 | Every decision with its date and reason | `docs/design/decisions.md`, `docs/design/roadmap.md`, discussion logs in `docs/reviews/` |
 | Working procedures (how releases and decision rounds are done) | `.claude/skills/` |
 | Mistakes not to repeat | `docs/PITFALLS.md` |
-| How the owner likes to work | `CLAUDE.md` → "How to work with the owner" |
+| Working agreement (how releases are tested, how decisions are asked) | `CLAUDE.md` → "How to work with Mostafa" |
 
 ## Before the old chat ends (checklist for the outgoing session)
 
 - Everything committed and pushed (`git status` clean, `git log origin/main..` empty).
-- `CLAUDE.md` "Where we are right now" names the last version, the owner's last report and the next open point.
+- `CLAUDE.md` "Where we are right now" names the last version, Mostafa's last report and the next open point.
 - Any half-finished work is either finished, or described in "Where we are right now" with the branch/files.
-- A short farewell to the owner with feedback on the work together (his wish, 1 Nov 2026).

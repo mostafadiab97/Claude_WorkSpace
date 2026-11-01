@@ -1,4 +1,4 @@
-// Pull, pull from another branch, and branches (M8). Rules decided with the product owner (29 Oct 2026):
+// Pull, pull from another branch, and branches (M8). Rules decided with the product Mostafa (29 Oct 2026):
 //  - Items both sides changed are combined field by field (3-way: base / mine / theirs). Only a part changed
 //    differently on both sides — or an item deleted on one side and changed on the other — is a question
 //    "mine / theirs / edit". Until every question is answered nothing changes (M8-3, M8-7).
@@ -189,7 +189,7 @@ export function createMerging(deps: MergingDeps) {
     const clash = await overwritten(s, await ops.state(s), a.kind === 'merge' ? (a.base ?? head) : head, theirs)
     if (clash.length > 0) return fail(s, T.gitMsg.wouldOverwrite, clash)
     const entries = a.kind === 'merge' ? a.entries : []
-    // Pull from another branch (owner, 31 Oct 2026): its changes arrive as uncommitted changes to review, keep or
+    // Pull from another branch (Mostafa, 31 Oct 2026): its changes arrive as uncommitted changes to review, keep or
     // discard. A pull of this branch's own remote branch still commits (otherwise the next push would be refused).
     const upstream = source === undefined ? null : (await remoteBranch(s, st)).ref
     const uncommitted = source !== undefined && src.ref !== upstream

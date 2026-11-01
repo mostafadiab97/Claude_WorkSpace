@@ -57,7 +57,7 @@ await scenario('E2E fixes', async (ctx) => {
   check((await win.locator('.table__row[data-id]').count()) === 21, 'all 21 items have a row (3 levels)')
   await t.shot('fixes-expanded')
 
-  console.log('Column width — drag the edge of the No. column (owner, 28 Oct 2026)')
+  console.log('Column width — drag the edge of the No. column (Mostafa, 28 Oct 2026)')
   const numberHead = win.locator('[data-column="number"]')
   const before = await numberHead.boundingBox()
   const grip = await win.getByRole('separator', { name: /Width of the No\. column/ }).boundingBox()
@@ -116,7 +116,7 @@ await scenario('E2E fixes', async (ctx) => {
   await win.locator('.table__row[data-id]').first().waitFor({ timeout: 10_000 })
   check((await view.count()) === 0, 'closing shows the table again')
 
-  console.log('Move several chosen items at once, then discard them together (owner, 0.11.0)')
+  console.log('Move several chosen items at once, then discard them together (Mostafa, 0.11.0)')
   const row = (title) => win.locator('.table__row[data-id]', { hasText: title }).first()
   await row('Requirement 2.1.1').click()
   await row('Requirement 2.1.2').click({ modifiers: ['Control'] })

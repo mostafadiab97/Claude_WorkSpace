@@ -1,4 +1,4 @@
-// State of the Changes view (owner's decision O-06): which versions are shown, the result, the selected item.
+// State of the Changes view (Mostafa's decision O-06): which versions are shown, the result, the selected item.
 // Shared by the middle area (ChangesView) and the side panel (ChangesSide), so it lives in WorkspaceScreen.
 import { useEffect, useMemo, useState } from 'react'
 import type { CompareEntry, CompareOptions, CompareResult } from '../../../../shared/api'

@@ -16,7 +16,7 @@
 - The sandbox's `RSK-RENAMD.md` is deliberately renamed — scripts that rewrite items must not write it under its
   ID (would create a duplicate).
 - Changing sandbox data: keep IDs stable (migrate in place, like `tools/confirm-sandbox-links.mts`), update its
-  README, tell the owner to `git pull` / `git reset --hard origin/main` there.
+  README, tell Mostafa to `git pull` / `git reset --hard origin/main` there.
 - Release via tag push is not used; the version change in `package.json` triggers the release.
 - `electron-builder --publish always` failed in CI before; publishing uses `gh release create` instead.
 - The Changes view (0.10.0) replaces the table and the editor column, but both stay **mounted** (hidden) so unsaved
@@ -73,6 +73,6 @@
   question) must ask `getGitState()` again (BranchMenu does).
 - **Dependabot:** read each proposal before merging (CI must be green; see the ignore list in `.github/dependabot.yml`).
   TypeScript majors wait for typescript-eslint support (PR #5: `npm ci` ERESOLVE); `@types/node` follows the Node.js
-  inside Electron (Electron 45 = Node 24, so `^24`; PR #6). Merging/closing PRs needs the owner's yes (his repo).
+  inside Electron (Electron 45 = Node 24, so `^24`; PR #6). Merging/closing PRs needs Mostafa's yes (his repo).
 - **Electron downloads its program on first use:** two scenarios starting at once failed on Windows ("file in
   use") — `e2e/run.mjs` imports `electron` once before starting them.

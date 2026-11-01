@@ -6,7 +6,7 @@ description: "Discuss open product questions or review findings with a non-speci
 # Owner decision walkthrough
 
 Use when a product owner must decide several things (feature requests, review findings, a release plan) and is
-not a specialist in this field (e.g. an embedded C developer building a desktop tool). Product decisions are
+not a specialist in this field. Product decisions are
 the owner's; technical decisions are yours, explained in a sentence.
 
 ## Before starting

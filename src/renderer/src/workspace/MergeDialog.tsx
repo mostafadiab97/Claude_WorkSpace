@@ -5,7 +5,7 @@ import { decidedCount, isDecided } from './mergeAnswers'
 import { T } from '../../../shared/text'
 
 /**
- * A pull found items both sides changed in the same part (owner's decisions M8-3 / M8-7). Everything else was
+ * A pull found items both sides changed in the same part (Mostafa's decisions M8-3 / M8-7). Everything else was
  * combined automatically; here the user decides each highlighted part: keep yours, take theirs, or write the
  * value yourself. Nothing changes until "Finish the pull"; Cancel leaves everything as it was.
  */

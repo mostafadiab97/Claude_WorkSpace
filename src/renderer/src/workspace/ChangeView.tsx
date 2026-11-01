@@ -6,7 +6,7 @@ import { linkName } from '../lib/schema'
 import { T } from '../../../shared/text'
 
 /**
- * What one change did to one item, GitHub style (owner's decision O-05): three blocks — Fields, Text, Links —
+ * What one change did to one item, GitHub style (Mostafa's decision O-05): three blocks — Fields, Text, Links —
  * each with the old version on the left (red) and the new one on the right (green), changed words marked and
  * unchanged text lines folded. With `onRevert` (uncommitted changes only) every field row, the text and every
  * link get a ↶ arrow that takes back just that part. In a narrow column the old version sits above the new one.

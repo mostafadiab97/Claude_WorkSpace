@@ -24,4 +24,4 @@ loads them automatically from this folder; a person can read them as checklists)
 | --- | --- |
 | `release-to-owner` | shipping a version: bump, ≤ 5-step checklist, changelog, CI, release, short report |
 | `whole-project-review` | reviewing the whole codebase and writing a findings report without changing code |
-| `owner-decision-walkthrough` | discussing open questions or findings with the owner one point at a time, recording each answer |
+| `owner-decision-walkthrough` | discussing open questions or findings with Mostafa one point at a time, recording each answer |

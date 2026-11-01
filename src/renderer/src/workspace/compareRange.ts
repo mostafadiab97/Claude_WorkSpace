@@ -5,7 +5,7 @@ import { T } from '../../../shared/text'
 export const WORKING = 'WORKING'
 /** "Before the first commit" (the core compares with Git's empty tree). */
 export const EMPTY = 'EMPTY'
-/** What the Changes view shows; it opens on uncommitted changes (owner's decision O-06). */
+/** What the Changes view shows; it opens on uncommitted changes (Mostafa's decision O-06). */
 /** `branch`: what a branch would bring in, like a pull request (M8-2). */
 export type Preset = 'uncommitted' | 'lastPull' | 'lastCommit' | 'custom' | 'branch'
 

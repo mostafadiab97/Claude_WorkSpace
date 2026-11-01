@@ -32,7 +32,7 @@ The UI ↔ core contract is **one file**: `src/shared/api.ts`. Adding a capabili
    next to the installed app.
 6. **All texts in one file.** Every word the user sees comes from `src/shared/text.ts` (`T.<area>.<key>`;
    texts with values are small functions). A test (`tests/ui-texts.test.ts`) fails the build if screen code
-   contains literal words. Messages the core sends (Git, saving) come from the same file. (Owner's decision
+   contains literal words. Messages the core sends (Git, saving) come from the same file. (Mostafa's decision
    S-06, 27 Oct 2026: a later translation is a copy of that one object.)
 7. **Every window call is checked.** `src/main/ipc.ts` has one handler per `ReqManApi` call (the compiler
    reports a missing one) and checks every argument with `src/main/validate.ts` first; `src/preload` builds
@@ -104,8 +104,8 @@ requirements/
 | Metadata folder `.reqtool/` | `.reqman/` | Matches the product name |
 | Requirement text in field `description` | Built-in property `text` (the Markdown body) | The body of the file is the text; keeps the header small |
 | Suspect links in the MVP (FR-17) | Built in M3 (v0.4.0) | Cheap once links existed; the format already had `confirmed` |
-| Per-requirement merge in the MVP (FR-13) | M4 (0.5.0–0.11.x): pull stopped on items changed on both sides. **0.12.0 (M8):** field-level 3-way merge, a decision window only for parts changed differently on both sides (`items/merge.ts`, `workspace/merging.ts`) | Owner's decisions 25 Oct (stop safely first) and 29 Oct 2026 (M8-3, M8-7) |
-| Branches shown only (FR-12) | 0.12.0: create, switch (commit first / take along / discard), pull from any branch, compare a branch like a pull request; merging branches stays on GitHub | Owner's decisions M8-1, M8-2, M8-6 (29 Oct 2026) |
+| Per-requirement merge in the MVP (FR-13) | M4 (0.5.0–0.11.x): pull stopped on items changed on both sides. **0.12.0 (M8):** field-level 3-way merge, a decision window only for parts changed differently on both sides (`items/merge.ts`, `workspace/merging.ts`) | Mostafa's decisions 25 Oct (stop safely first) and 29 Oct 2026 (M8-3, M8-7) |
+| Branches shown only (FR-12) | 0.12.0: create, switch (commit first / take along / discard), pull from any branch, compare a branch like a pull request; merging branches stays on GitHub | Mostafa's decisions M8-1, M8-2, M8-6 (29 Oct 2026) |
 
 ## Folder layout
 

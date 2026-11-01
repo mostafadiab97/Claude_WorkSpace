@@ -11,7 +11,7 @@ add its one-line description to `ABOUT` in the script.
 | Saving an item — conflict-safe (sequence) | `save-flow.html` | `../images/save-flow.png` | `archify/save-flow.json` |
 | Pull — works it out first, asks only about real clashes (workflow, 0.12.0) | `pull-flow.html` | `../images/pull-flow.png` | `archify/pull-flow.json` |
 
-Made with [Archify](https://github.com/tt-a1i/archify) (Apache-2.0; owner's choice, 28 Oct 2026). The HTML pages are
+Made with [Archify](https://github.com/tt-a1i/archify) (Apache-2.0; Mostafa's choice, 28 Oct 2026). The HTML pages are
 self-contained (no internet needed): zoom, light/dark, and every box links to the source lines it was drawn from.
 On GitHub, download an `.html` file and open it, or look at the PNG.
 

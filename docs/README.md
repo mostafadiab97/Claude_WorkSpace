@@ -15,7 +15,7 @@ Which file answers which question. Every file starts with a short "what this is"
 | Question | File |
 | --- | --- |
 | Rules, commands, current status, next step (project memory) | `CLAUDE.md` |
-| What did the owner decide, and why? | `docs/design/decisions.md` |
+| What did Mostafa decide, and why? | `docs/design/decisions.md` |
 | What is the product and what must it do (FR/NFR)? | `docs/design/requirements.md` |
 | What is built, where each requirement stands, what comes next? | `docs/design/roadmap.md` |
 | How do the big RM tools work? (frozen study, 24–25 Oct 2026) | `docs/design/analysis.md` |
@@ -24,7 +24,7 @@ Which file answers which question. Every file starts with a short "what this is"
 | How does data move through the system (diagrams)? | `docs/ONBOARDING.md`, `docs/diagrams/index.html` |
 | Which mistakes already cost time? | `docs/PITFALLS.md` |
 | How is ReqMan tested (automated, self-test, manual checklist, logs, bug reports)? | `docs/TESTING.md`; older checklists in `docs/testing/past-checklists.md` |
-| What changed in each version, and what did the owner report? | `CHANGELOG.md` |
+| What changed in each version, and what did Mostafa report? | `CHANGELOG.md` |
 | How do I set up a Windows PC for development? | `docs/DEVELOPING.md` |
 | How do I change colours, fonts, logo? | `docs/THEMING.md` |
 | What does each script do? Which working procedures (skills) exist? | `tools/README.md`, `.claude/skills/` |

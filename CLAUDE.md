@@ -10,12 +10,11 @@ release on his Windows 11 PC and reports back. A team may take the code over lat
 tested and documented (NFR-10).
 
 This file is the project memory and hand-over note: whoever continues (a cloud session, Claude Code in VS Code on
-the owner's PC, or a future team) reads it fully first, then the documents it points to when a task touches them.
+Mostafa's PC, or a future team) reads it fully first, then the documents it points to when a task touches them.
 **Keep it current with every release** (status, next step, decisions, pitfalls).
 
-Where development happens: planned to move to Claude Code in VS Code on the owner's PC (25 Oct 2026), but he could
-not install Node.js (no admin rights; the no-admin zip route is in `docs/DEVELOPING.md`), so work continued in the
-cloud session from v0.5.0. Nothing lives outside this repository and `Claude_SandBox`.
+Where development happens: in a cloud session; a local Windows setup is described in `docs/DEVELOPING.md`.
+Nothing lives outside this repository and `Claude_SandBox`.
 
 ## Where everything is
 
@@ -23,7 +22,7 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
 
 | What | Where |
 | --- | --- |
-| Decisions (source of truth): product questions + answers, technical design, per-milestone decisions, owner's small preferences | `docs/design/decisions.md` |
+| Decisions (source of truth): product questions + answers, technical design, per-milestone decisions, Mostafa's small preferences | `docs/design/decisions.md` |
 | Product definition, FR/NFR, scope | `docs/design/requirements.md` |
 | What has been built, where each requirement stands, release plan | `docs/design/roadmap.md` |
 | The 5-tool domain study (frozen) | `docs/design/analysis.md` |
@@ -31,13 +30,13 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
 | Module map, rules, data format, UI structure | `docs/ARCHITECTURE.md` |
 | Onboarding for engineers (diagrams, first change end to end) | `docs/ONBOARDING.md`, diagrams in `docs/diagrams/` |
 | Pitfalls already hit — read before changing an area | `docs/PITFALLS.md` |
-| Owner's current checklist, log/data locations, bug reporting | `docs/TESTING.md` (older checklists: `docs/testing/past-checklists.md`) |
-| What changed per version + owner's reports | `CHANGELOG.md` |
+| Mostafa's current checklist, log/data locations, bug reporting | `docs/TESTING.md` (older checklists: `docs/testing/past-checklists.md`) |
+| What changed per version + Mostafa's reports | `CHANGELOG.md` |
 | Theme · local setup · scripts and skills | `docs/THEMING.md` · `docs/DEVELOPING.md` · `tools/README.md` (skills in `.claude/skills/`: `release-to-owner` for every release, `owner-decision-walkthrough` for every question round, `whole-project-review`) |
 | Test data (10,005 fictional items) | GitHub `mostafadiab97/Claude_SandBox` — clone **next to** this repo |
 | Releases (installers + auto-update feed) | GitHub Releases of `mostafadiab97/Claude_WorkSpace` |
 
-## How to work with the owner
+## How to work with Mostafa
 
 - He tests each **release**, not branches: every change he should try ends with a version bump, a green CI release
   and a short checklist in `docs/TESTING.md` ("Manual test checklist — vX.Y.Z", numbered steps, expected results;
@@ -117,7 +116,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 5. Installed copies auto-update from that feed (electron-updater, GitHub provider in `electron-builder.yml`).
    The repository **must stay public** for auto-update to work without a token (tested: private → 404).
 6. Watch with `node tools/ci.mjs status | wait | failures | release | released` (REST only — works in the cloud
-   session where `gh run …`/`gh workflow run` are refused). Tell the owner the version and the checklist location
+   session where `gh run …`/`gh workflow run` are refused). Tell Mostafa the version and the checklist location
    when it is green.
 
 Commit messages: imperative summary with version, blank line, bullet details. End with
@@ -125,18 +124,18 @@ Commit messages: imperative summary with version, blank line, bullet details. En
 
 ## Status (v0.13.1, 31 Oct 2026) — prototype complete; Changes view; Excel + ReqIF; branches + per-requirement pull
 
-Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
+Every version, what it brought and what Mostafa reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
 
 | Milestone | State |
 | --- | --- |
 | 0.12.0 M8 branches — create/switch (commit / take along / discard), pull and "pull from branch" with field-level 3-way merge + decision window (S-05), compare a branch like a PR, duplicate-ID repair (D-09), D-05; tag baselines delayed | Done (v0.12.0) |
-| 0.12.1 owner's points on 0.12.0 — branch drop-down under the button, click a name to switch, Pull from… / Compare with… on the current branch, search + scrolling for tens of branches | Done (v0.12.1) |
-| 0.13.0 owner's points on 0.12.1 — pull from another branch = uncommitted changes for review, delete branch, Git controls in the top bar + one-row toolbar (Filters pop-up), **Arabic / English with right-to-left** | Done (v0.13.0) |
-| 0.13.1 owner's points on 0.13.0 — floating note tinted green/red/blue with frame and glow, centred text; red Delete button per branch; right-to-left mark on every Arabic text (word order in tooltips/dialogs) | Done (v0.13.1) |
-| **Next** | finish the **planning discussion** (`docs/reviews/2026-11-01-planning-discussion.md`: themes 2–5 still to detail), then the rename version (when the owner has the name), then the theme 1 version; Arabic wording review later (owner: "not 100% accurate, don't change it yet") | — |
+| 0.12.1 Mostafa's points on 0.12.0 — branch drop-down under the button, click a name to switch, Pull from… / Compare with… on the current branch, search + scrolling for tens of branches | Done (v0.12.1) |
+| 0.13.0 Mostafa's points on 0.12.1 — pull from another branch = uncommitted changes for review, delete branch, Git controls in the top bar + one-row toolbar (Filters pop-up), **Arabic / English with right-to-left** | Done (v0.13.0) |
+| 0.13.1 Mostafa's points on 0.13.0 — floating note tinted green/red/blue with frame and glow, centred text; red Delete button per branch; right-to-left mark on every Arabic text (word order in tooltips/dialogs) | Done (v0.13.1) |
+| **Next** | finish the **planning discussion** (`docs/reviews/2026-11-01-planning-discussion.md`: themes 2–5 still to detail), then the rename version (when Mostafa has the name), then the theme 1 version; Arabic wording review later (Mostafa: "not 100% accurate, don't change it yet") | — |
 
-Owner's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
+Mostafa's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
 Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
 Before: 0.12.1 steps 1–3, 5 passed, 21/21 (50.7 s); step 4 (pull from a branch
 committed at once) and three requests → 0.13.0. Before: **0.12.0 all 5 steps passed** — that was the two-folder trial (two clones of the
@@ -150,7 +149,7 @@ checks in detail".
 
 ## Where we are right now (1 Nov 2026) — read this first
 
-- **Built and accepted by the owner:** everything up to **0.13.1**. No open bugs or requests.
+- **Built and accepted by Mostafa:** everything up to **0.13.1**. No open bugs or requests.
 - **Planning discussion in progress** — `docs/reviews/2026-11-01-planning-discussion.md` (method: the
   `owner-decision-walkthrough` skill; record every answer there and, when it changes the product, in
   `docs/design/decisions.md` / `roadmap.md`). Decided so far (1 Nov 2026):
@@ -167,16 +166,12 @@ checks in detail".
     the ID), **baselines** (Git tags with note, list, compare with baseline, open read-only).
   - P-11 **no Word import**. Import: Excel, ReqIF, CSV, ReqMan repositories. Export: Excel, ReqIF, CSV, ReqMan
     repositories, Markdown, Word, PDF.
-- **New name:** the owner is still choosing. Shortlist checked 1 Nov (planning file): reqochet (owner likes it;
-  recommended), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:
+- **New name:** Mostafa is still choosing. Shortlist checked 1 Nov (planning file): reqochet (recommended), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:
   uninstall old → install new, `.reqman` folder renamed by Git rename, copy the user's settings first).
 - **Rust: no migration now** (31 Oct). Feature input: `docs/reviews/2026-10-31-feature-catalogue.md` (163 features),
   market list `docs/reviews/2026-10-31-rm-tools-market-list.md`.
-- The owner is a C developer new to this field: explain from first principles, short, C analogies where useful.
-- **Owner's wish (1 Nov):** when this chat reaches its limit, send him a short farewell with feedback on the work
-  together; continue in a new chat with `docs/HANDOVER.md`.
 
-**Testing rule from 0.8.0 (owner, 28 Oct 2026):** the manual checklist per version has **at most 5 steps** (update
+**Testing rule from 0.8.0 (Mostafa, 28 Oct 2026):** the manual checklist per version has **at most 5 steps** (update
 arrives, release self-test, open the sandbox, one real push only when Git changed, the version's new feature).
 Everything else must be automated (unit tests, e2e in CI, the in-app release self-test).
 

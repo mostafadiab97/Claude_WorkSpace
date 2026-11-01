@@ -1,4 +1,4 @@
-// ALL TEXTS SHOWN TO THE USER, in one place (review S-06, owner's decision 27 Oct 2026).
+// ALL TEXTS SHOWN TO THE USER, in one place (review S-06, Mostafa's decision 27 Oct 2026).
 // Change a label or message here and it changes everywhere. Translations are copies of this object with the same
 // keys: Arabic in text-ar.ts (0.13.0) — the compiler refuses a translation with a missing or extra key.
 // Texts with values are small functions: T.table.showMore(12).

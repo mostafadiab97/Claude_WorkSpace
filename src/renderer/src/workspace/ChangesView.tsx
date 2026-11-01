@@ -21,7 +21,7 @@ const when = (iso: string): string => {
 }
 
 /**
- * The Changes view (owner's decision O-06), in the wide middle area: one place for uncommitted changes and for
+ * The Changes view (Mostafa's decision O-06), in the wide middle area: one place for uncommitted changes and for
  * comparing versions. "Show" picks what (uncommitted changes by default, what the last pull brought in, the last
  * commit, any two versions); the changed items are listed on top — per requirement and per link, not file lines —
  * and the selected item's difference is shown below, old and new side by side (O-05). For uncommitted changes
@@ -37,7 +37,7 @@ export function ChangesView(props: {
   onPull: () => void
   onRevert: (id: string, part: RevertPart) => Promise<void>
   onDiscard: (entry: CompareEntry) => Promise<void>
-  /** Discards these files (several chosen items, or everything) — owner, 0.11.0. */
+  /** Discards these files (several chosen items, or everything) — Mostafa, 0.11.0. */
   onDiscardPaths: (paths: string[]) => Promise<void>
   onOpenItem: (id: string) => void
   onClose: () => void

@@ -2531,7 +2531,7 @@ code {
   direction: ltr;
 }
 
-/* 0.13.1 (owner on 0.13.0 step 2): the floating Git note must be noticed — tinted with its meaning (green = done,
+/* 0.13.1 (Mostafa on 0.13.0 step 2): the floating Git note must be noticed — tinted with its meaning (green = done,
    red = problem, blue = question), a coloured frame and glow, and the text centred in both languages */
 .gitbar__float > .gitbar__notice {
   background: color-mix(in srgb, var(--rm-color-success) 16%, var(--rm-color-surface));
@@ -2563,7 +2563,7 @@ code {
   padding-inline-start: 0;
 }
 
-/* 0.13.1 (owner on 0.13.0 step 4): a red "Delete" button, easy to see and hit */
+/* 0.13.1 (Mostafa on 0.13.0 step 4): a red "Delete" button, easy to see and hit */
 .branches__delete {
   opacity: 1;
   flex: none;

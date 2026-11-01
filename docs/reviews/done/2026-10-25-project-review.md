@@ -90,7 +90,7 @@ change; they make M7/M8 smaller). **Recommended before M8:** S-04 (ordering form
 - **Evidence:** `atomicWrite()` in `fileStore.ts` does `writeFile(tmp)` then `rename(tmp, file)` once. On Windows,
   antivirus scanners, the search indexer, OneDrive/Dropbox or an editor that has the file open often cause
   `EPERM`/`EBUSY` for a few milliseconds.
-- **Effect:** occasional "Saving failed" or a failed move/link on the owner's PCs (Defender is active — the 50k
+- **Effect:** occasional "Saving failed" or a failed move/link on Mostafa's PCs (Defender is active — the 50k
   first index took 18–73 s there).
 - **R:** retry rename (and delete) a few times with a short back-off (the approach `graceful-fs` uses); keep the
   temp file on final failure for recovery. **S.**
@@ -197,7 +197,7 @@ change; they make M7/M8 smaller). **Recommended before M8:** S-04 (ordering form
   shown for a choice "mine / theirs / edit". Use `git merge-tree` output to know which files need it; write the
   merged result and complete the merge commit. **L** (the core of M8).
 
-### S-06 — UI texts are hard-coded English (F) — owner decision
+### S-06 — UI texts are hard-coded English (F) — Mostafa's decision
 - Messages and labels are written directly in about 20 components and in `gitOps.ts`. If an Arabic or German UI is
   wanted later, extracting them is easier now (I: a few hundred strings) than after M10. **R:** decide whether translation is
   ever needed; if yes, introduce a simple message table soon (no library needed). Right-to-left layout would be a
@@ -231,7 +231,7 @@ change; they make M7/M8 smaller). **Recommended before M8:** S-04 (ordering form
   `saveSchemaFields`, `saveItem`). The renderer is our own code, so this is a robustness, not a security, issue.
   **R:** a validator per channel as part of S-02. **S.**
 - **X-02 (F):** the installer is not code-signed, so Windows SmartScreen warns and some company policies block it.
-  Signing certificates cost money (conflicts with "free only" for the proof of concept). **Owner decision** for the
+  Signing certificates cost money (conflicts with "free only" for the proof of concept). **Mostafa's decision** for the
   commercial version.
 - **X-03 (F):** no automatic dependency update checks. **R:** enable GitHub's free Dependabot for npm and
   GitHub Actions (security updates for Electron arrive every few weeks). **S.**
@@ -258,7 +258,7 @@ change; they make M7/M8 smaller). **Recommended before M8:** S-04 (ordering form
 - Git integration tested against real repositories (bare remote + two clones), including conflicts.
 - The theme rule (no hard-coded colours) held through seven releases.
 - Performance at 10k items is comfortable; the measurements are recorded and repeatable.
-- Owner-facing checklists per release, and `CLAUDE.md` as project memory, made the hand-over possible.
+- Checklists for Mostafa per release, and `CLAUDE.md` as project memory, made the hand-over possible.
 
 ## H. Product owner's test results and feature requests (27 Oct 2026)
 
@@ -267,7 +267,7 @@ all fine. The two-PC trial is postponed (only one user for now).
 
 **New requests (to discuss one by one before planning; recommendations are added as each is discussed):**
 
-| # | Request (owner's words, condensed) | Touches | Related findings |
+| # | Request (Mostafa's words, condensed) | Touches | Related findings |
 | --- | --- | --- | --- |
 | O-01 | **ID without type prefix:** an item's type may change over time, so the ID must not contain the type — only the random part | data format, IDs, editor (type becomes editable), migration of existing IDs | D-09 |
 | O-02 | **ID pool per branch:** instead of relying on low collision probability, keep a pool of pre-generated IDs; each branch gets a share; when used up, sync with GitHub for more; unused IDs of merged/deleted branches return to the pool | IDs, Git/branches (M8), offline use | D-09 |
@@ -282,7 +282,7 @@ all fine. The two-PC trial is postponed (only one user for now).
 - **O-01 decided (27 Oct 2026):** IDs no longer contain the type. Format: one fixed prefix **`REQ-`** for every item,
   plus the random part. The type becomes an ordinary, editable field. Existing items are **converted** — not by a
   conversion feature in ReqMan, but by changing the sandbox repository's data directly (new IDs, all links
-  rewritten, files renamed so Git keeps history, old ID kept as `former-id`); the owner just pulls. To be done in the
+  rewritten, files renamed so Git keeps history, old ID kept as `former-id`); Mostafa just pulls. To be done in the
   same release that introduces the new format (the current app would warn that `REQ-` does not match the type).
 - **O-02 decided (27 Oct 2026):** no ID pool. IDs get **7 random characters** (`REQ-K7Q3XMB`, ~34 billion values)
   and ReqMan **repairs duplicates automatically at pull/merge** (renames the local, not-yet-shared item and its links,
@@ -313,7 +313,7 @@ all fine. The two-PC trial is postponed (only one user for now).
 - **O-07 decided in part (27 Oct 2026):** phases agreed — (1) M7 Excel/CSV import wizard + Excel export; (2) ReqIF
   import/export for two-way exchange; (3) later: Excel "work on this file" mode and Word export/round-trip for
   ReqMan's own documents; no general editor for foreign Word files. Tools to test exchange against: **DOORS and Jama**
-  (used in the company's previous projects). Owner's real concern behind the Excel mode: starting a project from an
+  (used in the company's previous projects). Mostafa's real concern behind the Excel mode: starting a project from an
   Excel file should not require creating a Git repository by hand first — proposal "start a project from a file"
   under discussion.
 - **O-07 completed (27 Oct 2026):** instead of a separate file-editing mode: **"New project from a file"** (choose an
@@ -324,9 +324,9 @@ all fine. The two-PC trial is postponed (only one user for now).
   file" mode stays a possible later item, not planned.
 - **Group 1 — defects D-01 to D-10 approved (27 Oct 2026):** fix all in the first release of the next round
   (D-09 comes with branches, as decided in O-02).
-- **Group 2 — speed approved (27 Oct 2026):** owner wants **all** fixes now, "to start the next versions on a clear
+- **Group 2 — speed approved (27 Oct 2026):** Mostafa wants **all** fixes now, "to start the next versions on a clear
   page": P-01, P-02, P-04 and P-05 in the fix round (P-03 needs no action).
-- **Deleted items (27 Oct 2026):** owner only wanted to be sure deleted files are removed (no "zombie" files) — they
+- **Deleted items (27 Oct 2026):** Mostafa only wanted to be sure deleted files are removed (no "zombie" files) — they
   are (the file is removed; Git history keeps old versions). No restore button / deleted-items list wanted.
 - **Group 3 (27 Oct 2026):** S-06 **yes** — all GUI texts in one central file now (future languages + easy label
   changes; "better to have a tool you don't need than need a tool you don't have"). S-07 **discarded** (one
@@ -334,10 +334,10 @@ all fine. The two-PC trial is postponed (only one user for now).
   explained; S-10 becomes a feature discussion: **rich text** in the item text (images, tables, hyperlinks, links to
   other items, bold/italic/underline, bullet points, highlight …).
 - **S-10 rich text (27 Oct 2026):** agreed: Markdown stays the stored format + a Word-like editor (toolbar, images in
-  `requirements/attachments/<ID>/`, `@` references to items) — **in a later version** (owner: "this is extra").
+  `requirements/attachments/<ID>/`, `@` references to items) — **in a later version** (Mostafa: "this is extra").
   Item references inside text are **references only**, not traceability links. Tables: question about merged cells
   open.
-- **S-03 agreed; S-04 agreed (27–28 Oct 2026)**, owner suggests re-spacing order values regularly (e.g. when pushing)
+- **S-03 agreed; S-04 agreed (27–28 Oct 2026)**, Mostafa suggests re-spacing order values regularly (e.g. when pushing)
   so values stay small — proposal: at push time, re-space only sibling groups whose values got long, and only groups
   the user changed himself (to avoid clashes with colleagues' work). **Confirmed with a 4-character maximum**: at push,
   groups the user changed whose order values are longer than 4 characters are re-spaced.
@@ -345,11 +345,11 @@ all fine. The two-PC trial is postponed (only one user for now).
   covers formatting (bold, italic, underline, highlight, lists, links, images) but no tables for now.
 - **Group 4 approved (28 Oct 2026):** X-01, T-01 – T-05 in the fix round; X-02 (code signing) later. X-03 **done (28 Oct 2026)**:
   `.github/dependabot.yml` (npm weekly, Actions monthly) and `npm run check:deps` (audit + outdated), which also runs
-  before every `npm run build` (locally and in CI) and **only warns, never blocks** (owner's decision). Dependabot
-  security alerts/updates must be switched on by the owner in the repository settings (the API is not reachable
+  before every `npm run build` (locally and in CI) and **only warns, never blocks** (Mostafa's decision). Dependabot
+  security alerts/updates must be switched on by Mostafa in the repository settings (the API is not reachable
   from the cloud session).
 
-- **Plan confirmed (28 Oct 2026):** release plan in `docs/design/roadmap.md` → "Release plan". Owner additions:
+- **Plan confirmed (28 Oct 2026):** release plan in `docs/design/roadmap.md` → "Release plan". Mostafa's additions:
   **export of chosen items** (one item or several selected items + everything below them) in 0.11.0 with the Excel
   export; **testing reduced**: a release self-test inside ReqMan (temporary practice repository, never the user's
   data) plus at most 5 manual steps per version, from 0.8.0. Dependabot alerts stay off (weekly updates are enough;
@@ -365,12 +365,12 @@ all fine. The two-PC trial is postponed (only one user for now).
 - **Done in 0.10.0 (28 Oct 2026):** O-04 (Keep / Unlink window after a save; Keep / Unlink in the editor), O-05 (split
   difference with word marks, folded text, ↶ per field / text / link for uncommitted changes, stacked when narrow),
   O-06 (one Changes view, uncommitted by default, side panel follows the view; no automatic pulls — "Pull first"
-  offers before the last-pull view and Push). Owner's extra request: draggable column widths.
-- **Owner on 0.10.0 (29 Oct 2026):** all 5 steps passed; dark-mode diff colours too faint and "Changes (1)" with an empty
+  offers before the last-pull view and Push). Mostafa's extra request: draggable column widths.
+- **Mostafa on 0.10.0 (29 Oct 2026):** all 5 steps passed; dark-mode diff colours too faint and "Changes (1)" with an empty
   list (a kept link's confirmation was hidden) — both fixed in 0.11.0. **Decision: ReqIF is merged into 0.11.0**
   (fewer test rounds); branches stay alone in 0.12.0 (two-PC trial). Asked for a GitHub-vs-RM-tool comparison
   (answered in chat, not stored).
-- **M8 / 0.12.0 decisions (owner, 29 Oct 2026):**
+- **M8 / 0.12.0 decisions (Mostafa, 29 Oct 2026):**
   1. *Switching branches with uncommitted changes:* offer **Commit first**, **Discard**, or **Take the changes along**
      (common in his team: new branch from the current one, changes move with it). "Take along" only when it is safe:
      every changed file is the same on both branches (always true for a new branch from the current one); otherwise

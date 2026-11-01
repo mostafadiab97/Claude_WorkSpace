@@ -29,7 +29,7 @@ export function GitBar(props: {
   notice: GitNotice | null
   onDismiss: () => void
   onOpenItem: (id: string) => void
-  /** Push was clicked: "pull first?" is shown until answered (owner's decision O-06: no automatic pulls). */
+  /** Push was clicked: "pull first?" is shown until answered (Mostafa's decision O-06: no automatic pulls). */
   pushOffer: boolean
   onPushOffer: (choice: 'pull-first' | 'push' | 'cancel') => void
   /** "Publish to GitHub" (M7): connect a repository without a remote to an empty GitHub repository. */

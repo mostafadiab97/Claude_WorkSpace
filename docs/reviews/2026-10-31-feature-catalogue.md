@@ -1,6 +1,6 @@
 # Complete feature catalogue — every feature found in requirements tools, and where ReqMan stands (31 Oct 2026)
 
-**Asked by the owner (31 Oct 2026):** after reading the market list of about 190 tools
+**Asked by Mostafa (31 Oct 2026):** after reading the market list of about 190 tools
 (`2026-10-31-rm-tools-market-list.md`), a *complete* list of the features that exist in requirements tools: what each
 one is, how it works, what it adds, whether ReqMan has it, how we would add it, and when. This is the input for the
 long planning discussion; **nothing here is decided** — the "When" column is a proposal (R).
@@ -61,7 +61,7 @@ web version) belong to later stages.
 | A2 | Item types (requirement, test, risk, heading…) | All | ◐ | Each item has a type with its own meaning and allowed fields. Separates needs, requirements, tests, risks. | Types exist and can be changed per item; **editing the list of types in the window is missing** → a Types tab in the Fields window. | S · N |
 | A3 | Headings / information items | All document tools | ✅ | Items that structure a document (chapters, notes) but are not requirements — excluded from coverage. | Done (`requirement: false` types). | — |
 | A4 | Rich text: bold, italic, lists, links | ENT, MID, JIRA | ◐ | Formatted text instead of plain text. Readers expect documents to look like documents. | Text is Markdown already, so formatting is *stored*; missing: a **preview** and a toolbar editor (decided 27 Oct 2026 as a later version). Markdown preview first, then a Word-like editor writing Markdown. | M · N (preview), M (editor) |
-| A5 | Tables inside the text | ENT, MID | ✗ | Tables of values (limits, modes) inside a requirement. Common in hardware and interface specs. | Markdown tables for simple grids; complex tables (merged cells) as HTML in the Markdown. Editor support with A4. Owner left this for a future decision (28 Oct). | M · M |
+| A5 | Tables inside the text | ENT, MID | ✗ | Tables of values (limits, modes) inside a requirement. Common in hardware and interface specs. | Markdown tables for simple grids; complex tables (merged cells) as HTML in the Markdown. Editor support with A4. Mostafa left this for a future decision (28 Oct). | M · M |
 | A6 | Images and attachments | ENT, MID, MED | ✗ | Pictures, drawings, PDFs attached to an item. Needed for interface drawings, screenshots, datasheets. | Files in `requirements/attachments/<ID>/` (decided 27 Oct), referenced from the Markdown; Git LFS for large files later. Shown in preview and exports. | M · M |
 | A7 | Equations | ENT (Polarion, DOORS), ReqView | ✗ | Formulas (MathML/LaTeX) in the text. Used in control and signal requirements. | LaTeX in Markdown (`$…$`) rendered with KaTeX (MIT). Comes almost free with the preview. | S · M |
 | A8 | Item templates per type | ENT, MID, ReqView | ✗ | A new item of a type starts with prepared text ("The system shall…", acceptance criteria section). Consistent writing, faster authoring. | `template:` per type in `schema.yaml`; the editor fills it into new items. | S · N |
@@ -80,7 +80,7 @@ web version) belong to later stages.
 | --- | --- | --- | --- | --- | --- | --- |
 | B1 | Hierarchy / document tree | All | ✅ | Items in chapters and sub-chapters, like a specification document. | Done: parent + order keys, drag & drop, multi-move. | — |
 | B2 | Automatic outline numbers (1.2.3) | All document tools | ✅ | Numbers follow the position and update after moves. | Done (calculated, never stored — no renumbering conflicts). | — |
-| B3 | Several documents / modules per project | ENT (DOORS modules, Polarion LiveDocs), ReqView | ✗ | One project holds several specifications (customer spec, system spec, test spec), each with its own tree. | Owner decided one requirement set per repository (S-07, 27 Oct). Within it, **top-level headings act as documents**; a "document" filter + export per top-level chapter would give most of the benefit. | S · N (filter), ⊘ separate sets |
+| B3 | Several documents / modules per project | ENT (DOORS modules, Polarion LiveDocs), ReqView | ✗ | One project holds several specifications (customer spec, system spec, test spec), each with its own tree. | Mostafa decided one requirement set per repository (S-07, 27 Oct). Within it, **top-level headings act as documents**; a "document" filter + export per top-level chapter would give most of the benefit. | S · N (filter), ⊘ separate sets |
 | B4 | One requirement in several documents (reuse by reference) | DOORS Next (base artifacts), Visure | ✗ | The same item appears in two documents without copying. | Would need references instead of one parent; conflicts with the simple file model. Only on demand. | L · D |
 | B5 | Full-text search | All | ✅ | Find items by words in ID, title, text. | Done (SQLite full text, best match first). | — |
 | B6 | Filters by type, field, links | All | ✅ | Narrow the table to what matters. | Done. | — |
@@ -108,7 +108,7 @@ web version) belong to later stages.
 | C10 | Links to source code | DAC (StrictDoc, OpenFastTrace, mantra, duvet), Reqtify | ✗ | Code comments or test names mention requirement IDs (`// REQ-K7Q3XMB`); the tool shows which requirements are implemented where. **Natural for a Git tool** — the code is in the same repository. | Scan the repository (outside `requirements/`) for IDs with `git grep`; show "Implemented in: file:line" per item; coverage rule "implemented". Optional, per project. | M · N |
 | C11 | Links to test results | DAC, TEST, ENT | ✗ | Test reports (JUnit XML…) are read; each requirement shows passed/failed/not run. Closes the V-model loop. | Read JUnit XML files from a folder or a CI artifact; match test names/IDs to requirement IDs; "Verification status" column. | M · M |
 | C12 | Links to external items (URLs, issues) | Most | ✗ | A link to a Jira issue, a GitHub issue, a document URL. | A `references:` list in the item (URL + title), clickable; no syncing. | S · N |
-| C13 | Cross-project / cross-repository links | ENT, ReqView (linked projects) | ✗ | A requirement in project A traces to one in project B (system → subsystem specs). | Owner decided no cross-repo links for now (C). Later: `repo:` prefix in targets, read-only resolution through a second clone. | L · C |
+| C13 | Cross-project / cross-repository links | ENT, ReqView (linked projects) | ✗ | A requirement in project A traces to one in project B (system → subsystem specs). | Mostafa decided no cross-repo links for now (C). Later: `repo:` prefix in targets, read-only resolution through a second clone. | L · C |
 | C14 | Cross-tool links (OSLC) | DOORS Next, Polarion, codebeamer | ✗ | Links to items in other tools without copying them, via the OSLC standard. | Only with a server; not for a serverless desktop tool. | XL · — |
 | C15 | Link attributes / rationale | DOORS, Jama | ✗ | A note on a link ("why this test verifies this requirement"). | Optional `note:` per link in the file; shown in the Links section. | S · M |
 
@@ -120,7 +120,7 @@ web version) belong to later stages.
 | D2 | Compare any two versions | All | ✅ | What changed between two points, per requirement. | Done (Changes view). | — |
 | D3 | Requirement-level difference view | ENT, ReqView | ✅ | Field and text differences, not file lines. | Done (split view, words marked). | — |
 | D4 | Take back part of a change | Few (we are ahead) | ✅ | Undo one field/text/link of an uncommitted change. | Done (↶). | — |
-| D5 | **Baselines (named frozen versions)** | All ENT/MID, ReqView, StrictDoc | ✗ | "Release 1.0" = the exact state of all requirements at a moment; compare today against it; deliver it. Every audit asks "which baseline?". | Git tags (`baseline/1.0`) created and listed in ReqMan; Compare offers "since baseline…"; export of a baseline. **Delayed by the owner (29 Oct).** | S · M |
+| D5 | **Baselines (named frozen versions)** | All ENT/MID, ReqView, StrictDoc | ✗ | "Release 1.0" = the exact state of all requirements at a moment; compare today against it; deliver it. Every audit asks "which baseline?". | Git tags (`baseline/1.0`) created and listed in ReqMan; Compare offers "since baseline…"; export of a baseline. **Delayed by Mostafa (29 Oct).** | S · M |
 | D6 | Branches / streams | DOORS Next, codebeamer, Polarion | ✅ | Parallel versions (a variant, a change in progress). | Done (0.12.0). | — |
 | D7 | Merge per requirement | DOORS Next, codebeamer | ✅ | Combining branches item by item with conflict decisions. | Done (field-level 3-way merge). | — |
 | D8 | Restore an old version of an item | Most | ◐ | Bring back an item as it was in an older version. | History shows old versions; add "Restore this version" (writes it as an uncommitted change). | S · N |
@@ -138,7 +138,7 @@ web version) belong to later stages.
 | E2 | Several people editing at the same time | ENT web tools, us | ✅ | No waiting for locks. | Done (files + merge). | — |
 | E3 | **Comments / discussion threads per item** | ENT, MID, JIRA | ✗ | Questions and answers attached to a requirement, resolved when done. Keeps the "why" next to the item. | Two designs to decide: (a) comments as files `requirements/comments/<ID>.md` (offline, versioned, reviewed through Git), or (b) GitHub PR/issue comments shown in ReqMan (needs sign-in). Recommendation: (a) first. | M · N |
 | E4 | @mentions and notifications | ENT, WM | ✗ | Tell a colleague; they get notified. | With E3(a): mentions highlighted, a "Mentions of me" list after a pull; e-mail/Teams needs a server → later. | S · M (list), C (push notifications) |
-| E5 | **Approval status / sign-off** | All ENT, Reqord (PR-based) | ◐ | A requirement is "approved" only after the right people agree; who/when is recorded. | Status field exists; add PR-based approval (owner's decision: approval happens on GitHub): show per item "approved in PR #12 by X on date"; optional rule "Approved only via merged PR". | M · N |
+| E5 | **Approval status / sign-off** | All ENT, Reqord (PR-based) | ◐ | A requirement is "approved" only after the right people agree; who/when is recorded. | Status field exists; add PR-based approval (Mostafa's decision: approval happens on GitHub): show per item "approved in PR #12 by X on date"; optional rule "Approved only via merged PR". | M · N |
 | E6 | Formal review sessions | Jama Review Center, Polarion, DOORS | ✗ | A review package (a set of items) sent to reviewers who mark each item accepted/rejected/commented, with a summary. | A review = a branch + PR; ReqMan shows the PR's items with per-item verdicts stored as comments (E3). | L · M |
 | E7 | Cheap reviewer access (no full licence) | Jama, Polarion | ✗ | Reviewers read and comment without being authors. | Free tool already; HTML publishing (J7) lets non-users read. | — |
 | E8 | Owner / assignee per item | All | ✅ | Who is responsible. | Done (Owner field). | — |
@@ -156,7 +156,7 @@ web version) belong to later stages.
 | F3 | Who may change what (roles) | ENT, MED | ◐ | Read/write rights per project, type or field. | Git host rights already decide who can push; branch protection + CODEOWNERS decide who approves. Field-level rights would need a server. | — |
 | F4 | Field permissions by role and state | codebeamer | ✗ | E.g. only QA may set "Verified". | CODEOWNERS on file paths can't express fields; a pre-push check (CLI, K10) can enforce rules in CI. | M · C |
 | F5 | Required fields / validation rules | All | ◐ | A requirement can't be saved/approved without priority, owner… | Enum and type checks exist; add `required: true` per field and per status. | S · N |
-| F6 | Mandatory review before merge | GitHub, ENT | ✅ | Changes reach main only after approval. | GitHub branch protection (owner's decision M8-2). | — |
+| F6 | Mandatory review before merge | GitHub, ENT | ✅ | Changes reach main only after approval. | GitHub branch protection (Mostafa's decision M8-2). | — |
 | F7 | Process templates (ASPICE, ISO 26262, DO-178C) | codebeamer, Visure, StrictDoc | ✗ | Ready types, links, fields and rules for a standard. | Schema templates offered at "New project" (see I-area). | M · M |
 | F8 | Electronic signatures (21 CFR Part 11) | MED, ENT | ✗ | Legally binding approvals with re-authentication. | Commercial; signed commits + approval records are the base. | L · C |
 
@@ -295,7 +295,7 @@ web version) belong to later stages.
 
 ## Proposed order for the planning discussion (R)
 
-The discussion should decide the order; this is a starting point, grouped so each version gives the owner something
+The discussion should decide the order; this is a starting point, grouped so each version gives Mostafa something
 testable in five steps.
 
 1. **Traceability you can see** — C5 matrix, C6 coverage, C7 rules, C8 impact chain, C4 link types and A2 item types in

@@ -206,7 +206,7 @@ export function createCompare(git: GitAdapter) {
         for (const l of diff.linksAdded) links.push({ source: id, type: l.type, target: l.target, change: 'added' })
         for (const l of diff.linksRemoved) links.push({ source: id, type: l.type, target: l.target, change: 'removed' })
       }
-      // Outline numbers on both sides ("1.2 → 3.5.1", owner's decision O-03). The newer side comes from the index
+      // Outline numbers on both sides ("1.2 → 3.5.1", Mostafa's decision O-03). The newer side comes from the index
       // when it is the working folder; a commit's tree is read through one ls-tree and one cat-file process.
       // The older side is read only when something moved, appeared or disappeared — otherwise it is the same.
       if (entries.length > 0) {

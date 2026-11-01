@@ -43,7 +43,7 @@ ReqMan creates the folder.
 
 - `npm run check:deps` lists known security problems (`npm audit`) and available updates (`npm outdated`). It runs
   automatically before every `npm run build` and in every GitHub build. It only **warns** — it never stops a build
-  (owner's decision, 28 Oct 2026); without network it says so and carries on.
+  (Mostafa's decision, 28 Oct 2026); without network it says so and carries on.
 - **Dependabot** (GitHub) proposes updates as pull requests: security fixes as soon as they are published, other
   updates weekly (`.github/dependabot.yml`). Review and merge them like any change; the build tests them.
 - Users of ReqMan never update libraries themselves: they are packed into the installer and arrive with ReqMan

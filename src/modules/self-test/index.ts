@@ -1,5 +1,5 @@
 // PUBLIC ENTRY of the self-test module. Other code may import only from this file.
-// Responsibility: the RELEASE SELF-TEST the owner runs on his own PC after each update (Diagnostics →
+// Responsibility: the RELEASE SELF-TEST Mostafa runs on his own PC after each update (Diagnostics →
 // "Run release self-test"). It does the main things a user does — create, edit, move, link, suspect links,
 // commit, push, a colleague's change, a pull that asks per requirement, branches, compare, history,
 // export, a renamed file — on a PRACTICE repository with a fake "GitHub" (a bare repository) in a temporary

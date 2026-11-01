@@ -7,7 +7,7 @@ import { T } from '../../../shared/text'
 type Choice = 'keep' | 'unlink'
 
 /**
- * After a save changed an item's type, title or text (owner's decision O-04): the items that link to it may no
+ * After a save changed an item's type, title or text (Mostafa's decision O-04): the items that link to it may no
  * longer fit. For each link the user decides Keep (still holds — confirmed against the new version) or Unlink,
  * or all at once; "Decide later" leaves the ⚠ marks, to review with the "With suspect links" filter.
  * Not shown for changes that arrive by pull — those only mark links suspect.

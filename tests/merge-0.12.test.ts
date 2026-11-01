@@ -304,7 +304,7 @@ describe('Branches (M8)', { timeout: 180_000 }, () => {
     await b.ws.commit('Bob on main')
     const headBefore = sh(b.root, 'rev-parse', 'HEAD')
     const pulled = await b.ws.pullFrom('origin/feature/x')
-    // 0.13.0 (owner, 31 Oct): another branch's changes arrive as uncommitted changes to review
+    // 0.13.0 (Mostafa, 31 Oct): another branch's changes arrive as uncommitted changes to review
     expect(pulled).toMatchObject({ ok: true, message: expect.stringMatching(/^Brought 1 changed item from origin\/feature\/x into your working folder — nothing is committed/) })
     expect(sh(b.root, 'rev-parse', 'HEAD')).toBe(headBefore)
     expect(pulled.state.changes.map((c) => c.id)).toEqual([sys])

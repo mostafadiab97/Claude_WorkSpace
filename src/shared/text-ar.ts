@@ -1,4 +1,4 @@
-// ARABIC TEXTS (0.13.0, owner's request 31 Oct 2026) — the same keys as the English texts in text.ts.
+// ARABIC TEXTS (0.13.0, Mostafa's request 31 Oct 2026) — the same keys as the English texts in text.ts.
 // The type `Texts` makes the compiler refuse a missing or extra key, so a new English text cannot be forgotten here.
 // Product, tool and format names stay in Latin letters (ReqMan, Git, GitHub, Excel, ReqIF, CSV, Markdown, IDs).
 // Numbers are written with Western digits (as in the data); plurals follow Arabic number agreement (pl()).
@@ -862,7 +862,7 @@ const raw: Texts = {
 /**
  * Every Arabic text starts with an invisible RIGHT-TO-LEFT MARK (U+200F). Places that guess a text's direction from
  * its first letter — Windows tooltips, native dialogs, some lists — would otherwise lay out a sentence that starts
- * with (or contains) an English word like "ReqMan" or "Git" from left to right, reversing its word order (owner on
+ * with (or contains) an English word like "ReqMan" or "Git" from left to right, reversing its word order (Mostafa on
  * 0.13.0, step 5). Inside the window (dir="rtl") the mark changes nothing.
  */
 const RLM = '\u200F'

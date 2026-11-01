@@ -18,8 +18,8 @@ answer recorded here (and in `docs/design/DESIGN.md` as C when it changes the pr
 | P-07 | Where coverage rules live | in `schema.yaml` (shared through Git, like fields) — everyone sees the same gaps | **C 1 Nov: a) shared in schema.yaml** |
 | P-08 | Matrix view: what it shows by default | rows = one item type, columns = another, filtered to the current filter; export to Excel | **C 1 Nov: as recommended** |
 | P-09 | Documents (DOORS modules / Jama sets) as a first-class idea: several specifications in one project, each with its own tree and outline numbers, links between them | yes, inside one repository, in the theme 1 version (a revisit of the 26 Oct rule "one tree per repository"); cross-repository links later | **C 1 Nov: a) documents inside one repository in theme 1; cross-repository links planned for later** — owner's idea: a repository tag before the ID (IDs are unique only within one repository); R: a short alias per linked repository declared in the schema (alias → address), so renaming a GitHub repository does not break links |
-| P-10 | Baselines again: ASPICE (SUP.8) and ISO 26262 expect named, frozen baselines | un-delay: Git tags as baselines, compare against a baseline — in theme 4 or earlier | open |
-| P-11 | Word: the pilot has a client who wants Word | keep "Documents out" (Word/PDF export) as theme 3; Word **import** of that client's documents as part of it | open |
+| P-10 | Baselines again: ASPICE (SUP.8) and ISO 26262 expect named, frozen baselines | un-delay: Git tags as baselines, compare against a baseline — in theme 4 or earlier | **C 1 Nov: a) un-delayed, in the theme 1 version** (create with name + note → annotated tag pushed; Baselines list; "compare with baseline" in Changes; open a baseline read-only; GitHub tag protection) |
+| P-11 | Word: the pilot has a client who wants Word | keep "Documents out" (Word/PDF export) as theme 3; Word **import** of that client's documents as part of it | **C 1 Nov: no Word import** (foreign Word files cannot be guaranteed to follow rules — would be buggy). Formats: **import** Excel, ReqIF, CSV, ReqMan repositories; **export** Excel, ReqIF, CSV, ReqMan repositories, Markdown, Word, PDF |
 
 ## Name candidates checked 1 Nov 2026 (web search for the exact word; not a trademark check)
 
@@ -46,3 +46,6 @@ answer recorded here (and in `docs/design/DESIGN.md` as C when it changes the pr
 - 1 Nov 2026 — P-09 a, with cross-repository links later (repository prefix before the ID). P-10: owner asked what a
   baseline is (branch that is never deleted, or a stored commit?) → explained (a tag); P-11: owner recalled that Word
   import was promised only for ReqMan-generated files → clarified (round trip vs import by rules).
+- 1 Nov 2026 — P-10 a (baselines back, theme 1). P-11: no Word import at all; import = Excel, ReqIF, CSV, ReqMan
+  repositories; export = Excel, ReqIF, CSV, ReqMan repositories, Markdown, Word, PDF. Owner asked about the chat's
+  length limit and a smooth hand-over, and about reorganising the Markdown documentation.

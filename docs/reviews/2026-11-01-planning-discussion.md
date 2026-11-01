@@ -13,10 +13,13 @@ answer recorded here (and in `docs/design/DESIGN.md` as C when it changes the pr
 | P-02 | Order of the six themes (catalogue, last section) | 1 traceability views → 2 daily comfort → 3 documents out → 4 review on GitHub → 5 engineering traceability → 6 later/commercial | **C 1 Nov: as recommended; details per theme to be discussed** |
 | P-03 | Release rhythm | One theme per minor version (≈ 1–2 weeks each), fixes as patch versions in between, ≤ 5-step checklists | **C 1 Nov: yes** |
 | P-04 | The new name: when | Rename in its own version as soon as the name is chosen, before a pilot team starts | **C 1 Nov: yes** |
-| P-05 | Who is the pilot team (size, field, what they write requirements for, what they use today)? | — (information) | open |
-| P-06 | Theme 1 scope: types + link types in the window, required fields, matrix, coverage rules + gaps, impact chain | all six in one version (0.14.0), matrix last if it grows | open |
-| P-07 | Where coverage rules live | in `schema.yaml` (shared through Git, like fields) — everyone sees the same gaps | open |
-| P-08 | Matrix view: what it shows by default | rows = one item type, columns = another, filtered to the current filter; export to Excel | open |
+| P-05 | Who is the pilot team (size, field, what they write requirements for, what they use today)? | — (information) | **1 Nov: ~50 users; embedded devices; ISO 26262 + ASPICE; today DOORS and Jama, Excel when no licence, one client wants Word; all know Git/GitHub** |
+| P-06 | Theme 1 scope: types + link types in the window, required fields, matrix, coverage rules + gaps, impact chain | all six in one version (0.14.0), matrix last if it grows | **C 1 Nov: keep all six** (owner asked how this fits document-to-document traceability → P-09) |
+| P-07 | Where coverage rules live | in `schema.yaml` (shared through Git, like fields) — everyone sees the same gaps | **C 1 Nov: a) shared in schema.yaml** |
+| P-08 | Matrix view: what it shows by default | rows = one item type, columns = another, filtered to the current filter; export to Excel | **C 1 Nov: as recommended** |
+| P-09 | Documents (DOORS modules / Jama sets) as a first-class idea: several specifications in one project, each with its own tree and outline numbers, links between them | yes, inside one repository, in the theme 1 version (a revisit of the 26 Oct rule "one tree per repository"); cross-repository links later | open |
+| P-10 | Baselines again: ASPICE (SUP.8) and ISO 26262 expect named, frozen baselines | un-delay: Git tags as baselines, compare against a baseline — in theme 4 or earlier | open |
+| P-11 | Word: the pilot has a client who wants Word | keep "Documents out" (Word/PDF export) as theme 3; Word **import** of that client's documents as part of it | open |
 
 ## Name candidates checked 1 Nov 2026 (web search for the exact word; not a trademark check)
 
@@ -36,3 +39,7 @@ answer recorded here (and in `docs/design/DESIGN.md` as C when it changes the pr
   genereq. Recommendation: reqochet (reqtie sounds like Reqtify; reqlace like "replace").
 - 1 Nov 2026 — P-01 a (pilot team first), P-02 order as recommended (details per theme later), P-03 yes (one theme per
   minor version, fixes as patches), P-04 yes (rename in its own version before the pilot starts).
+- 1 Nov 2026 — P-05 pilot: ~50 users, embedded devices, ISO 26262 + ASPICE, DOORS/Jama today (Excel without licence,
+  one client on Word), all know Git/GitHub. P-06 keep all six; P-07 a (shared rules); P-08 as recommended. Owner's
+  question: "doesn't traceability work by linking SW requirements (one document) to system requirements (another
+  document)?" → answered, new points P-09 (documents), P-10 (baselines), P-11 (Word).

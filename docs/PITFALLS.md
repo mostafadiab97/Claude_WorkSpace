@@ -76,3 +76,16 @@
   inside Electron (Electron 45 = Node 24, so `^24`; PR #6). Merging/closing PRs needs Mostafa's yes (his repo).
 - **Electron downloads its program on first use:** two scenarios starting at once failed on Windows ("file in
   use") — `e2e/run.mjs` imports `electron` once before starting them.
+
+## Cold Windows runner: the first two e2e scenarios time out on the start screen (0.14.0)
+The release run of 0.14.0 lost `branches` and `excel` (the first pair) waiting 30 s for "Open repository…", while the
+Build run of the same commit passed. A freshly unpacked Electron is scanned by Windows Defender, so the first windows
+load slowly. `launch()` in `e2e/harness.mjs` now waits up to 120 s for the page and the splash before any step. If it
+happens again, re-run the release (`node tools/ci.mjs release`) before suspecting the code.
+
+## Acceptance run (P-41) — how it reaches the installed app
+`e2e/acceptance.mjs` drives `%LOCALAPPDATA%\Programs\ReqMan\ReqMan.exe` with Playwright (works because the packaged app
+keeps Electron's default fuses). The update test overwrites the installed `resources\app-update.yml` with a generic
+feed on `http://127.0.0.1:8765/` serving `dist/` — never change `publish:` for this. The push uses
+`x-access-token:${GITHUB_TOKEN}` (workflow permission `contents: write`) and always deletes `ci/acceptance-*` in a
+`finally`; messages are scrubbed of the URL before they are printed.

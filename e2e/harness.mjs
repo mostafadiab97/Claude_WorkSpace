@@ -44,6 +44,10 @@ export async function launch({ openPath, userData = temp('user'), prefix = '' } 
   }
   const win = await app.firstWindow()
   await win.setViewportSize({ width: 1400, height: 860 })
+  // A cold Windows build machine (virus scanner on a freshly unpacked Electron) can take more than the default
+  // 30 s for the first window to finish loading — 0.14.0's release run lost its first two scenarios to that.
+  await win.waitForLoadState('domcontentloaded', { timeout: 120_000 }).catch(() => {})
+  await win.locator('.splash').waitFor({ state: 'detached', timeout: 120_000 }).catch(() => {})
   let failures = 0
   return {
     app,

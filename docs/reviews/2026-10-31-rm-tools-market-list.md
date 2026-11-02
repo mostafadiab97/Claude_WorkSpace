@@ -196,6 +196,7 @@ These are not dedicated RM tools, but buyer guides list them because many teams 
 | Tool | What it is | Interface | Source |
 | --- | --- | --- | --- |
 | Doorstop | Requirements as YAML/Markdown files in version control | CLI, Python API | [gist](https://gist.github.com/stanislaw/aa40eb7de9f522ad482e5d239c435ff8) |
+| Requiem (`requirements-manager`) | Rust successor to Doorstop: Markdown + YAML files, several parents, suspect links by fingerprint (0.1.1, Nov 2025; analysis `2026-11-02-requiem-analysis.md`) | CLI | [docs.rs](https://docs.rs/crate/requirements-manager/latest) |
 | Doorhole | Graphical editor for Doorstop | GUI | [awesome-requirements-system-ai](https://github.com/shvyac/awesome-requirements-system-ai) |
 | StrictDoc | Requirements specifications in SDoc/Markdown | Local web UI, CLI | [gist](https://gist.github.com/stanislaw/aa40eb7de9f522ad482e5d239c435ff8) |
 | Sphinx-Needs | Requirements objects inside Sphinx docs | Docs build | [gist](https://gist.github.com/stanislaw/aa40eb7de9f522ad482e5d239c435ff8) |

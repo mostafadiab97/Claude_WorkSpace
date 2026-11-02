@@ -174,9 +174,11 @@ checks in detail".
   - **Theme 4 (2 Nov, P-25…P-29):** github.com, other hosts via a host adapter; browser sign-in; approvals per item;
     PRs created/approved/merged in the app; change requests; comment files in the repo; optional "Approved only via
     merged PR"; review sessions. Split 4a → 4b.
-  - **Theme 5 (2 Nov):** 5a verification (code links from code folder / Doxygen / trace list — code is in other repos;
+  - **Theme 5 (2 Nov):** 5a verification (code links from a code folder or Doxygen output — code is in other repos;
     JUnit + manual test results; check on demand, locally, chosen branch) → 5b sharing (spec website, JSON, graph,
-    external refs, AI export + MCP); built-in user guide. **Next: P-37 (AI guide file), then the final plan table.**
+    external refs); built-in user guide. All AI parts (AI guide, AI export, MCP) → last versions.
+    **Next: answers to P-38 (approval rule), P-39 (one HTML file instead of a website), P-40 (keeping the project
+    healthy: feature switches, stabilisation patches, coverage floor, report-a-problem), then the final plan table.**
   - P-11 **no Word import**. Import: Excel, ReqIF, CSV, ReqMan repositories. Export: Excel, ReqIF, CSV, ReqMan
     repositories, Markdown, Word, PDF.
 - **New name:** Mostafa is still choosing. Shortlist checked 1 Nov (planning file): reqochet (recommended), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:

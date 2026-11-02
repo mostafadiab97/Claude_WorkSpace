@@ -169,7 +169,9 @@ checks in detail".
     version; external references → theme 5. 
   - **Theme 3 (2 Nov):** Word (company template in the repo; AI prompt `docs/guides/word-template-prompt.md`), PDF,
     Markdown, CSV; document = title page with baseline/commit, contents, items, optional trace table; HTML site +
-    JSON → theme 5. **Next: answers to P-21…P-24 (diagrams, rich text, images in compare, split theme 3), then themes 4–5.**
+    JSON → theme 5. Split: **3a rich text** (toolbar editor storing Markdown, tables, images + diagrams as files
+    beside the item, equations) → **3b documents out**. **Next: theme 4 answers (P-25…P-29), then theme 5, then the
+    final plan table.**
   - P-11 **no Word import**. Import: Excel, ReqIF, CSV, ReqMan repositories. Export: Excel, ReqIF, CSV, ReqMan
     repositories, Markdown, Word, PDF.
 - **New name:** Mostafa is still choosing. Shortlist checked 1 Nov (planning file): reqochet (recommended), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:

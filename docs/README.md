@@ -27,6 +27,7 @@ Which file answers which question. Every file starts with a short "what this is"
 | What changed in each version, and what did Mostafa report? | `CHANGELOG.md` |
 | How do I set up a Windows PC for development? | `docs/DEVELOPING.md` |
 | How do I change colours, fonts, logo? | `docs/THEMING.md` |
+| How do I make the company Word template with an AI model? | `docs/guides/word-template-prompt.md` |
 | What does each script do? Which working procedures (skills) exist? | `tools/README.md`, `.claude/skills/` |
 
 ## Keeping it tidy

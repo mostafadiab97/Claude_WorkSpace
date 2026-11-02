@@ -177,8 +177,9 @@ checks in detail".
   - **Theme 5 (2 Nov):** 5a verification (code links from a code folder or Doxygen output — code is in other repos;
     JUnit + manual test results; check on demand, locally, chosen branch) → 5b sharing (spec website, JSON, graph,
     external refs); built-in user guide. All AI parts (AI guide, AI export, MCP) → last versions.
-    **Next: answers to P-38 (approval rule), P-39 (one HTML file instead of a website), P-40 (keeping the project
-    healthy: feature switches, stabilisation patches, coverage floor, report-a-problem), then the final plan table.**
+    P-38 approval: status of an edited Approved item changes only when pushed; P-39 one-file HTML instead of a
+    website; P-40 feature switches + stabilisation patch per theme + coverage floor + report-a-problem.
+    **Next: Mostafa confirms the release plan table in the planning file (0.14 rename+health … 0.24 AI).**
   - P-11 **no Word import**. Import: Excel, ReqIF, CSV, ReqMan repositories. Export: Excel, ReqIF, CSV, ReqMan
     repositories, Markdown, Word, PDF.
 - **New name:** Mostafa is still choosing. Shortlist checked 1 Nov (planning file): reqochet (recommended), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:

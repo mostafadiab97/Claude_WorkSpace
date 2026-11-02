@@ -8,6 +8,7 @@ import { ChangesSide, ChangesView } from '../workspace/ChangesView'
 import { GitBar } from '../workspace/GitPanels'
 import { MergeDialog } from '../workspace/MergeDialog'
 import { ExportDialog } from '../workspace/ExportDialog'
+import { setTeamFeatures } from '../lib/features'
 import { ImportDialog } from '../workspace/ImportDialog'
 import { RowMenu } from '../workspace/RowMenu'
 import { ItemTable, shownColumnKeys, withWidth, type TreeControls } from '../workspace/ItemTable'
@@ -33,6 +34,11 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
   const tree = useRef<TreeControls | null>(null)
   const [revealNonce, setRevealNonce] = useState(0)
   const [showChanges, setShowChanges] = useState(false)
+  // the team's feature switches from schema.yaml (P-40a); cleared when the repository closes
+  useEffect(() => {
+    setTeamFeatures(info.schema.features)
+    return () => setTeamFeatures(undefined)
+  }, [info.schema.features])
   const [exportOpen, setExportOpen] = useState<false | { chosen?: string[] }>(false)
   // items chosen with Ctrl/Shift+click, and the right-click menu (M7)
   const [chosen, setChosen] = useState<ReadonlySet<string>>(new Set())

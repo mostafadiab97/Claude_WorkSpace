@@ -7,6 +7,7 @@ import { dirname, join } from 'node:path'
 import { Channels, type AppInfo, type ExportFormat, type ExportResult, type InvokeMethod, type ReqManApi } from '../shared/api'
 import { runDataBenchmark } from '../modules/sample-data'
 import { writeFileAtomic } from '../modules/safe-files'
+import { buildProblemReport, problemReportName } from '../modules/logger'
 import { createImportFiles, loadImportFile, writeSourceUpdate } from './importFiles'
 import type { Paths, Services } from './composition'
 import * as v from './validate'
@@ -97,6 +98,23 @@ export function registerIpc(services: Services, paths: Paths): void {
     }
   }
 
+  const diagnostics = async (): Promise<string> => {
+    const a = appInfo()
+    const git = await services.git.getGitInfo()
+    const theme = await services.theme.load()
+    return [
+      `ReqMan ${a.version}`,
+      `OS: ${a.platform} (${process.arch})`,
+      `Electron: ${a.electronVersion}, Chrome: ${process.versions.chrome ?? ''}, Node: ${process.versions.node}`,
+      `Git: ${git.installed ? git.version : `not available (${git.reason})`}`,
+      `Theme: ${theme.source}; your theme file: ${a.themeFile}; app theme: ${join(paths.configDir, 'theme.json')}`,
+      `Theme warnings: ${theme.warnings.length}`,
+      ...theme.warnings.map((w) => `  - ${w}`),
+      `Updates: ${JSON.stringify(services.updater.current())}`,
+      `Log file: ${a.logFile}`
+    ].join('\n')
+  }
+
   const handlers: Handlers = {
     // ---------- app, theme, diagnostics, updates
     getAppInfo: appInfo,
@@ -130,21 +148,29 @@ export function registerIpc(services: Services, paths: Paths): void {
       log.info('Restarting to install update')
       services.updater.installAndRestart()
     },
-    getDiagnostics: async () => {
-      const a = appInfo()
-      const git = await services.git.getGitInfo()
-      const theme = await services.theme.load()
-      return [
-        `ReqMan ${a.version}`,
-        `OS: ${a.platform} (${process.arch})`,
-        `Electron: ${a.electronVersion}, Chrome: ${process.versions.chrome ?? ''}, Node: ${process.versions.node}`,
-        `Git: ${git.installed ? git.version : `not available (${git.reason})`}`,
-        `Theme: ${theme.source}; your theme file: ${a.themeFile}; app theme: ${join(paths.configDir, 'theme.json')}`,
-        `Theme warnings: ${theme.warnings.length}`,
-        ...theme.warnings.map((w) => `  - ${w}`),
-        `Updates: ${JSON.stringify(services.updater.current())}`,
-        `Log file: ${a.logFile}`
-      ].join('\n')
+    getDiagnostics: () => diagnostics(),
+    saveProblemReport: async (e, description) => {
+      try {
+        const text = v.text(description, 'description', 20_000)
+        const readLog = (p: string): Promise<string> => readFile(p, 'utf8').catch(() => '')
+        const report = buildProblemReport({
+          description: text,
+          diagnostics: await diagnostics(),
+          log: await readLog(log.filePath),
+          olderLog: await readLog(join(dirname(log.filePath), 'reqman.old.log'))
+        })
+        const win = BrowserWindow.fromWebContents(e.sender)
+        const opts = { title: T.settings.report.title, defaultPath: join(app.getPath('downloads'), problemReportName()), filters: [{ name: 'Text', extensions: ['txt'] }] }
+        const r = win ? await dialog.showSaveDialog(win, opts) : await dialog.showSaveDialog(opts)
+        if (r.canceled || !r.filePath) return { ok: false, canceled: true }
+        await writeFileAtomic(r.filePath, report)
+        log.info(`Problem report saved to ${r.filePath}`)
+        shell.showItemInFolder(r.filePath)
+        return { ok: true, path: r.filePath }
+      } catch (err) {
+        log.error('Problem report failed', err)
+        return { ok: false, message: (err as Error).message }
+      }
     },
     runDataSelfTest: (_e, count) => {
       const n = Math.min(Math.max(Math.round(Number(count) || 0), 100), 50_000)

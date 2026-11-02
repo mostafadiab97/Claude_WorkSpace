@@ -56,6 +56,23 @@ jobs:
         if: steps.version.outputs.exists == 'false'
         run: npx electron-builder --win --publish never
 
+      - name: Acceptance run on the installed app (P-41 — replaces Mostafa's manual checklist steps)
+        if: steps.version.outputs.exists == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          prev=""
+          if gh release download --pattern "ReqMan-Setup-*.exe" --dir "$RUNNER_TEMP/previous" 2>/dev/null; then
+            prev="$(ls "$RUNNER_TEMP"/previous/ReqMan-Setup-*.exe | head -1)"
+          fi
+          git clone --quiet --depth 1 https://github.com/mostafadiab97/Claude_SandBox.git "$RUNNER_TEMP/sandbox"
+          node e2e/acceptance.mjs \
+            --installer "$(ls dist/ReqMan-Setup-*.exe | head -1)" --feed dist \
+            ${prev:+--previous "$prev"} \
+            --sandbox "$RUNNER_TEMP/sandbox" \
+            --push-url "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" \
+            --branch "ci/acceptance-${{ github.run_id }}-${{ github.run_attempt }}"
       - name: List build output
         if: steps.version.outputs.exists == 'false'
         shell: bash

@@ -580,6 +580,11 @@ export interface ReqManApi {
   reportUiError(message: string): void
   /** A plain-text summary (versions, paths, checks) to paste into a bug report. */
   getDiagnostics(): Promise<string>
+  /**
+   * "Report a problem" (P-40d): asks where to save, writes one text file with the description, the diagnostics and
+   * the end of the log, and shows it in Explorer. Nothing is sent anywhere.
+   */
+  saveProblemReport(description: string): Promise<{ ok: true; path: string } | { ok: false; canceled?: boolean; message?: string }>
   /** Measures the data layer on this PC with `count` generated items in a temporary folder. */
   runDataSelfTest(count: number): Promise<DataSelfTestResult>
   /**
@@ -618,6 +623,7 @@ export const Channels = {
   openThemeFolder: 'diag:openThemeFolder',
   reportUiError: 'diag:reportUiError',
   getDiagnostics: 'diag:get',
+  saveProblemReport: 'diag:saveProblemReport',
   runDataSelfTest: 'diag:runDataSelfTest',
   runReleaseSelfTest: 'diag:runReleaseSelfTest',
   getUpdateStatus: 'update:getStatus',

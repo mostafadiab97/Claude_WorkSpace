@@ -35,6 +35,8 @@ export interface Schema {
   itemTypes: ItemTypeDef[]
   fields: FieldDef[]
   linkTypes: LinkTypeDef[]
+  /** Features the team turned off (or on) for this repository: `features: { branches: false }` (P-40a). */
+  features?: Record<string, boolean>
 }
 
 export interface SchemaProblem {

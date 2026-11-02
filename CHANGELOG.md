@@ -1,7 +1,24 @@
 # Changelog
 
-Each version was installed and tried by the product Mostafa on Windows 11; his feedback is recorded under the
+Each version was installed and tried by Mostafa (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
+
+## 0.14.0 — 2 Nov 2026 — Health tools and the automatic acceptance run (planning decisions P-40, P-41)
+- **Planning (1–2 Nov 2026):** the release plan up to 0.24 is decided (`docs/reviews/2026-11-01-planning-discussion.md`).
+  This version brings the tools that keep the project healthy as it grows (Mostafa's concern, P-40); the new name
+  follows in its own version as soon as Mostafa has chosen it.
+- **Feature switches** (P-40a): Settings → **Features** turns Branches, Import or Export off on this PC; a team can turn a
+  feature off for one repository with `features: { branches: false }` in `schema.yaml`, and Settings then says so. New
+  features will start here as "Preview". File-format changes are never behind a switch.
+- **Report a problem** (P-40d): Settings → describe what happened → **Save report…** writes one text file (your
+  description, the diagnostics, the last 400 log lines) and shows it in Explorer. Nothing is sent by itself.
+- **Coverage floor** (P-40c): `npm run check` now measures how much of the core the tests exercise (88 % of statements
+  today) and fails below 85 % statements / 72 % branches / 85 % functions / 88 % lines.
+- **Automatic acceptance run** (P-41): on GitHub's Windows machine, for every build and before every release, with the
+  *installed* app: install the previous release and let it update itself to the new build (from a local feed), run the
+  release self-test, open the 10,000-item sandbox, push one real commit to a scratch branch `ci/acceptance-…` and delete
+  it again. The job summary lists, numbered, everything the run did. Mostafa can now test in batches.
+- New end-to-end scenario `health` (switches, team switch, report file); 6 scenarios in all.
 
 ## 0.13.1 — 31 Oct 2026 — Mostafa's points on 0.13.0
 - **Mostafa (31 Oct 2026):** all 4 steps passed; self-test 21/21 in 66.8 s.

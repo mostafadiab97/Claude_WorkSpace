@@ -2583,3 +2583,28 @@ code {
   background: var(--rm-color-danger);
   color: var(--rm-color-primary-text);
 }
+
+/* 0.14.0 (P-40): Settings → Features list and Report a problem */
+.features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--rm-space-xs);
+}
+.features__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rm-space-sm);
+}
+.badge {
+  border: 1px solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius);
+  padding-inline: var(--rm-space-xs);
+  color: var(--rm-color-text-muted);
+}
+.report__text {
+  resize: vertical;
+  inline-size: 100%;
+}

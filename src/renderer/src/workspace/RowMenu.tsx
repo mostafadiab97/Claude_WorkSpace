@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { T } from '../../../shared/text'
+import { useFeature } from '../lib/features'
 
 /**
  * Right-click menu of a table row (M7). Right-clicking one of several chosen items acts on all of them; right-clicking
@@ -9,6 +10,7 @@ import { T } from '../../../shared/text'
  */
 export function RowMenu(props: { id: string; x: number; y: number; chosenCount: number; onExportItem: () => void; onExportChosen: () => void; onOpen: () => void; onClose: () => void }) {
   const ref = useRef<HTMLDivElement>(null)
+  const exportOn = useFeature('export')
   useEffect(() => {
     ref.current?.querySelector('button')?.focus()
     const close = (e: Event): void => {
@@ -37,7 +39,7 @@ export function RowMenu(props: { id: string; x: number; y: number; chosenCount: 
       <button type="button" role="menuitem" className="row-menu__item" onClick={act(props.onOpen)}>
         {T.rowMenu.open}
       </button>
-      {props.chosenCount > 1 ? (
+      {!exportOn ? null : props.chosenCount > 1 ? (
         <button type="button" role="menuitem" className="row-menu__item" onClick={act(props.onExportChosen)}>
           {T.rowMenu.exportChosen(props.chosenCount)}
         </button>

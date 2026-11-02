@@ -4,6 +4,7 @@ import { T } from '../../../../shared/text'
 import { ColumnsMenu } from '../FieldsPanel'
 import type { ColumnPrefs } from '../ItemTable'
 import type { Filters, LinkFilter } from './useFilters'
+import { useFeature } from '../../lib/features'
 
 /** Search, filters, columns, export, expand/collapse and "New item" above the table. */
 export function Toolbar(props: {
@@ -23,6 +24,8 @@ export function Toolbar(props: {
   const { schema, filters: f } = props
   const enumFields = schema.fields.filter((d) => d.type === 'enum' || d.type === 'list')
   const tw = T.workspace
+  const importOn = useFeature('import')
+  const exportOn = useFeature('export')
   const activeCount = (f.types ? 1 : 0) + Object.values(f.fieldFilters).filter(Boolean).length + (f.linkFilter ? 1 : 0)
   return (
     <div className="toolbar">
@@ -66,12 +69,16 @@ export function Toolbar(props: {
         </button>
       )}
       <ColumnsMenu schema={schema} prefs={props.prefs} onChange={props.onPrefs} onEditFields={props.onEditFields} />
-      <button type="button" className="btn" onClick={props.onImport} title={T.importDialog.buttonTooltip}>
-        {T.importDialog.button}
-      </button>
-      <button type="button" className="btn" onClick={props.onExport} disabled={!props.canExport} title={T.exportDialog.buttonTooltip}>
-        {tw.export}
-      </button>
+      {importOn && (
+        <button type="button" className="btn" onClick={props.onImport} title={T.importDialog.buttonTooltip}>
+          {T.importDialog.button}
+        </button>
+      )}
+      {exportOn && (
+        <button type="button" className="btn" onClick={props.onExport} disabled={!props.canExport} title={T.exportDialog.buttonTooltip}>
+          {tw.export}
+        </button>
+      )}
       <span className="toolbar__spacer" />
       {!f.filtered && (
         <>

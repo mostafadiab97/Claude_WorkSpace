@@ -78,6 +78,22 @@ const en = {
       updates: 'Updates',
       app: 'App'
     },
+    features: {
+      title: 'Features',
+      intro: 'Turn a feature off if it causes trouble — the rest of ReqMan keeps working. This choice is remembered on this PC. A team can also turn a feature off for one repository (features: in schema.yaml).',
+      names: { branches: 'Branches (create, switch, compare, pull from, delete)', import: 'Import from Excel and ReqIF', export: 'Export (Excel, ReqIF, CSV, Markdown)' } as Record<string, string>,
+      preview: 'Preview',
+      teamOff: 'Turned off for this repository by the team (schema.yaml)'
+    },
+    report: {
+      title: 'Report a problem',
+      intro: 'Describe what happened. ReqMan saves one text file with your description, the diagnostics and the end of the log — send that file. Nothing is sent by itself.',
+      label: 'What happened?',
+      placeholder: 'What did you do, what did you expect, what happened instead?',
+      save: 'Save report…',
+      saved: (path: string) => `Report saved: ${path}`,
+      failed: (message: string) => `Could not save the report: ${message}`
+    },
     diag: {
       title: 'Diagnostics',
       logFile: 'Log file',

@@ -1,6 +1,8 @@
 import type { AppInfo, GitInfo, LoadedTheme, UpdateStatus } from '../../../shared/api'
 import { DiagnosticsCard } from '../components/DiagnosticsCard'
 import { EnvironmentCard } from '../components/EnvironmentCard'
+import { FeaturesCard } from '../components/FeaturesCard'
+import { ProblemReportCard } from '../components/ProblemReportCard'
 import { ReleaseSelfTestCard } from '../components/ReleaseSelfTestCard'
 import { SelfTestCard } from '../components/SelfTestCard'
 import { T } from '../../../shared/text'
@@ -17,7 +19,9 @@ export function SettingsScreen(props: { theme: LoadedTheme; git: GitInfo | null;
           <h1 className="page__title">{T.settings.title}</h1>
         </div>
         <EnvironmentCard theme={props.theme} git={props.git} update={props.update} appInfo={props.appInfo} />
+        <ProblemReportCard />
         <DiagnosticsCard appInfo={props.appInfo} />
+        <FeaturesCard />
         <ReleaseSelfTestCard />
         <SelfTestCard />
       </div>

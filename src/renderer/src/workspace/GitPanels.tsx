@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import type { GitResult, GitState, ItemChange } from '../../../shared/api'
 import { errorMessage } from '../lib/hooks'
 import { BranchMenu } from './BranchMenu'
+import { useFeature } from '../lib/features'
 import { T } from '../../../shared/text'
 
 /** Last Git action's outcome, shown under the Git bar until dismissed. */
@@ -52,6 +53,7 @@ export function GitBar(props: {
   const place = (node: ReactNode): ReactNode => (props.slot ? createPortal(node, props.slot) : node)
   const [publishing, setPublishing] = useState<string | null>(null)
   const [branches, setBranches] = useState(false)
+  const branchesOn = useFeature('branches')
   const closeAfter = (p: Promise<boolean>): void => {
     void p.then((ok) => ok && setBranches(false))
   }
@@ -67,7 +69,7 @@ export function GitBar(props: {
   return place(
     <div role="region" aria-label={T.git.region} className="gitbar-region">
       <div className="gitbar gitbar--anchor">
-        {branches && (
+        {branches && branchesOn && (
           <BranchMenu
             state={state}
             blockedReason={blockedReason}
@@ -95,7 +97,7 @@ export function GitBar(props: {
           aria-expanded={branches}
           aria-label={T.branches.open(state.branch ?? '')}
           title={`${T.branches.open(state.branch ?? '')}\n${state.upstream ? T.git.remoteBranch(state.upstream) : T.git.notOnRemote}`}
-          disabled={busy !== null || state.detached || state.mergeInProgress}
+          disabled={busy !== null || state.detached || state.mergeInProgress || !branchesOn}
           onClick={() => setBranches((v) => !v)}
         >
           <span aria-hidden="true">⎇</span> {state.detached ? T.git.noBranch : (state.branch ?? '—')} <span aria-hidden="true">▾</span>

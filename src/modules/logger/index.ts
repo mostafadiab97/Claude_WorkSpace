@@ -14,3 +14,4 @@ export interface Logger {
 }
 
 export { createFileLogger }
+export { buildProblemReport, problemReportName, REPORT_LOG_LINES } from './report'

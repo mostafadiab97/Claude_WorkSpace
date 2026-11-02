@@ -1,5 +1,6 @@
 # On every push: type-check, lint (including module-boundary rules), run tests,
-# then build the Windows installer and attach it to the run as a downloadable artifact.
+# then build the Windows installer, run the acceptance run on the installed app (P-41) and attach the installer
+# to the run as a downloadable artifact.
 name: Build
 
 on:
@@ -7,6 +8,10 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+
+# contents: write — only for the acceptance run's scratch branch ci/acceptance-*, which it deletes again (P-41)
+permissions:
+  contents: write
 
 jobs:
   windows:
@@ -42,6 +47,22 @@ jobs:
           path: e2e/out/*.png
           if-no-files-found: ignore
       - run: npm run dist:win
+      - name: Acceptance run on the installed app (P-41 — replaces Mostafa's manual checklist steps)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          prev=""
+          if gh release download --pattern "ReqMan-Setup-*.exe" --dir "$RUNNER_TEMP/previous" 2>/dev/null; then
+            prev="$(ls "$RUNNER_TEMP"/previous/ReqMan-Setup-*.exe | head -1)"
+          fi
+          git clone --quiet --depth 1 https://github.com/mostafadiab97/Claude_SandBox.git "$RUNNER_TEMP/sandbox"
+          node e2e/acceptance.mjs \
+            --installer "$(ls dist/ReqMan-Setup-*.exe | head -1)" --feed dist \
+            ${prev:+--previous "$prev"} \
+            --sandbox "$RUNNER_TEMP/sandbox" \
+            --push-url "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" \
+            --branch "ci/acceptance-${{ github.run_id }}-${{ github.run_attempt }}"
 
       - uses: actions/upload-artifact@v7
         with:

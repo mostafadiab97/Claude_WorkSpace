@@ -41,9 +41,9 @@ the paths and has buttons to open them.
 
 ## Reporting a problem
 
-1. In ReqMan, click **Copy diagnostics** and paste the text into your report.
-2. Click **Open log folder** and attach `reqman.log`.
-3. Describe what you did, what you expected and what happened (a screenshot helps).
+From 0.14.0: **⚙ → Report a problem** — describe what happened and click **Save report…**; send the saved text file
+(it holds your description, the diagnostics and the end of the log). Before 0.14.0: **Copy diagnostics**, attach
+`reqman.log` (**Open log folder**) and describe what you did, expected and saw.
 
 ## Getting a version to test
 
@@ -67,7 +67,19 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.13.1 (your three points on 0.13.0)
+## Manual test checklist — v0.14.0 (health tools; acceptance run)
+
+The automatic acceptance run already did the update, the self-test, the sandbox and a real push on GitHub's Windows
+machine — see the run's summary (Actions → Build → the run → Summary). These steps are for your eyes. Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.14.0**, then **⚙ → Run release self-test**. | App shows 0.14.0; **All steps passed**, 21 ✓. |
+| 2 | **⚙ → Features**: untick **Export**, click **← Back**. Then tick it again. | The **Export…** button disappears from the toolbar (also from the right-click menu of a row) and comes back when ticked. Import and the branch button stay. |
+| 3 | **⚙ → Report a problem**: type a sentence, **Save report…**, save it anywhere. | Explorer opens with the file selected; it holds your sentence, the diagnostics and the end of the log. |
+| 4 | Optional: open the latest **Build** run on GitHub (Actions) → **Summary**. | "Acceptance run — ReqMan 0.14.0 — Result: passed" with a numbered list of what it did (installed, updated, self-test, sandbox, push to `ci/acceptance-…`, deleted). |
+
+## Previous checklist — v0.13.1 (your three points on 0.13.0)
 
 Report by step number.
 
@@ -77,18 +89,6 @@ Report by step number.
 | 2 | In folder **B**, do something that gives a Git message (e.g. ⎇ → create a branch `note-test`), in **Light** and in **Dark**. | The floating note is easy to see: **green tint, green frame and glow** for success (red for a problem, blue for a question such as "Pull first?"); the text is **centred** in English and in Arabic. |
 | 3 | Open **⎇**. | Every branch on this PC has a red **🗑 Delete** button next to it (fills red when you point at it). Delete `note-test` (switch back to `main` first). |
 | 4 | Switch to **العربية** and point at buttons whose tooltip mixes Arabic with an English word (e.g. the branch button, Push, Pull, Changes, the release self-test). | Arabic sentences that contain "ReqMan", "Git", "GitHub", "Excel"… keep their word order everywhere — in the window, in tooltips and in Windows dialogs. |
-
-## Previous checklist — v0.13.0 (Arabic, fewer bars, pull from a branch for review, delete a branch)
-
-Your points on 0.12.1 and the Arabic switch. Use folder **B** (branches `main` and `trial-one`). Report by step number.
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Update to **0.13.0**, then **⚙ → Run release self-test**. | App shows 0.13.0; **All steps passed**, 21 ✓ (step 13 now also deletes a branch). |
-| 2 | Open folder **B** and look at the top of the window. | **Two bars less:** the branch button, Changes, Pull and Push sit in the top bar next to the repository name; one toolbar row: search, **Filters** (opens a small panel with Type / Status / Priority / Links; the button shows how many are active), Columns, Import, Export, ⊞ / ⊟ (expand / collapse all), New item. Git messages appear as a floating note under the top bar and success notes disappear by themselves. |
-| 3 | On `main`: **⎇ → Pull from… → trial-one** (after changing something on `trial-one` first, or use any branch with a difference). | **Nothing is committed** — Push keeps its old number. Changes opens on **Uncommitted changes** with what the branch brought: keep it (Commit) or take it back (Discard / ↶). |
-| 4 | **⎇**, hover a branch you no longer need (e.g. make one: **New branch** `test-delete`, then switch back) → 🗑 → **Delete**. | It asks first ("…on this PC — the branch on GitHub is not touched") and the branch disappears. The current branch has no 🗑. A branch with work found nowhere else asks a second time ("Delete anyway?"). |
-| 5 | Click **العربية** (next to Light / Dark). Look around: table, editor, Changes, a Git message. Then **English**. | The whole window turns **right-to-left in Arabic** (logo on the right, menus mirrored); an edit you had not saved is still there; after a restart it is still Arabic; English switches everything back. Data (titles, field names from your schema) stays as written. Report any word still in English or any Arabic that reads wrongly. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

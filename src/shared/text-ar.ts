@@ -82,6 +82,22 @@ const raw: Texts = {
       updates: 'التحديثات',
       app: 'التطبيق'
     },
+    features: {
+      title: 'الميزات',
+      intro: 'أوقِف أي ميزة تسبّب مشكلة — يستمر باقي ReqMan في العمل. يُحفظ هذا الاختيار على هذا الجهاز. ويمكن للفريق أيضًا إيقاف ميزة لمستودع واحد (features: في schema.yaml).',
+      names: { branches: 'الفروع (إنشاء، تبديل، مقارنة، سحب من، حذف)', import: 'الاستيراد من Excel وReqIF', export: 'التصدير (Excel وReqIF وCSV وMarkdown)' } as Record<string, string>,
+      preview: 'معاينة',
+      teamOff: 'أوقفها الفريق لهذا المستودع (schema.yaml)'
+    },
+    report: {
+      title: 'الإبلاغ عن مشكلة',
+      intro: 'صِف ما حدث. يحفظ ReqMan ملفًا نصيًا واحدًا فيه وصفك ومعلومات التشخيص ونهاية السجلّ — أرسل هذا الملف. لا يُرسَل شيء تلقائيًا.',
+      label: 'ماذا حدث؟',
+      placeholder: 'ماذا فعلت، وماذا توقّعت، وماذا حدث بدلًا من ذلك؟',
+      save: 'حفظ التقرير…',
+      saved: (path: string) => `حُفظ التقرير: ${path}`,
+      failed: (message: string) => `تعذّر حفظ التقرير: ${message}`
+    },
     diag: {
       title: 'التشخيص',
       logFile: 'ملف السجلّ',

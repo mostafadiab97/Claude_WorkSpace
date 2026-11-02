@@ -87,6 +87,21 @@ export function parseSchema(text: string): ParsedSchema {
     linkTypes.push({ id, name, reverseName: str(v.reverseName) ?? `${name} (reverse)` })
   })
 
+  // ---- feature switches set by the team (P-40a): `features: { branches: false }`; unknown names are kept (a newer
+  // ReqMan may know them), values other than true/false/on/off are reported
+  let features: Record<string, boolean> | undefined
+  if (root.features !== undefined) {
+    if (!isObj(root.features)) add('features', 'Must be a mapping, e.g. "features: { branches: false }".')
+    else {
+      features = {}
+      for (const [k, val] of Object.entries(root.features)) {
+        const b = val === true || val === 'on' ? true : val === false || val === 'off' ? false : undefined
+        if (b === undefined) add(`features.${k}`, 'Must be true or false.')
+        else features[k] = b
+      }
+    }
+  }
+
   const version = typeof root.version === 'number' ? root.version : 1
-  return { schema: { version, itemTypes, fields, linkTypes }, problems }
+  return { schema: { version, itemTypes, fields, linkTypes, ...(features ? { features } : {}) }, problems }
 }

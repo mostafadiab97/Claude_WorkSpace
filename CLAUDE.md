@@ -179,7 +179,8 @@ checks in detail".
     external refs); built-in user guide. All AI parts (AI guide, AI export, MCP) → last versions.
     P-38 approval: status of an edited Approved item changes only when pushed; P-39 one-file HTML instead of a
     website; P-40 feature switches + stabilisation patch per theme + coverage floor + report-a-problem.
-    **Next: Mostafa confirms the release plan table in the planning file (0.14 rename+health … 0.24 AI).**
+    **Release plan confirmed 2 Nov** (planning file / roadmap: 0.14 rename+health … 0.24 AI). Open: P-41 automated
+    acceptance run (CI push to scratch branches needs Mostafa's OK) and the name.
   - P-11 **no Word import**. Import: Excel, ReqIF, CSV, ReqMan repositories. Export: Excel, ReqIF, CSV, ReqMan
     repositories, Markdown, Word, PDF.
 - **New name:** Mostafa is still choosing. Shortlist checked 1 Nov (planning file): reqochet (recommended), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:

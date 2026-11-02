@@ -20,6 +20,11 @@ answer recorded here (and in `docs/design/decisions.md` as C when it changes the
 | P-09 | Documents (DOORS modules / Jama sets) as a first-class idea: several specifications in one project, each with its own tree and outline numbers, links between them | yes, inside one repository, in the theme 1 version (a revisit of the 26 Oct rule "one tree per repository"); cross-repository links later | **C 1 Nov: a) documents inside one repository in theme 1; cross-repository links planned for later** — Mostafa's idea: a repository tag before the ID (IDs are unique only within one repository); R: a short alias per linked repository declared in the schema (alias → address), so renaming a GitHub repository does not break links |
 | P-10 | Baselines again: ASPICE (SUP.8) and ISO 26262 expect named, frozen baselines | un-delay: Git tags as baselines, compare against a baseline — in theme 4 or earlier | **C 1 Nov: a) un-delayed, in the theme 1 version** (create with name + note → annotated tag pushed; Baselines list; "compare with baseline" in Changes; open a baseline read-only; GitHub tag protection) |
 | P-11 | Word: the pilot has a client who wants Word | keep "Documents out" (Word/PDF export) as theme 3; Word **import** of that client's documents as part of it | **C 1 Nov: no Word import** (foreign Word files cannot be guaranteed to follow rules — would be buggy). Formats: **import** Excel, ReqIF, CSV, ReqMan repositories; **export** Excel, ReqIF, CSV, ReqMan repositories, Markdown, Word, PDF |
+| P-12 | Theme 2 (daily comfort) core: A14 bulk edit, A13 duplicate, B7 saved views, A8 templates per type, D8 restore an older version of one item | all five in the theme 2 version | *asked 2 Nov* |
+| P-13 | Duplicate (A13): what is copied | fields + text with new IDs; children only if ticked; links **not** copied (a copy would claim traces nobody checked) | *asked 2 Nov* |
+| P-14 | Saved views (B7): personal or shared | both: personal on this PC, "share with the team" writes `requirements/.reqman/views.yaml` (travels through Git) | *asked 2 Nov* |
+| P-15 | Writing help: A9 EARS / user-story patterns, G1 wording hints (vague words, missing "shall", two "shall" in one sentence, passive voice), A11 spell check | patterns offered as templates; hints shown in yellow, never block saving, word list editable in `schema.yaml`; spell check = the free one built into the window (English) | *asked 2 Nov* |
+| P-16 | C12 external references (a Jira ticket, a datasheet PDF, a web page) | move to theme 5 (engineering traceability, next to links to code and tests) | *asked 2 Nov* |
 
 ## Name candidates checked 1 Nov 2026 (web search for the exact word; not a trademark check)
 
@@ -49,3 +54,4 @@ answer recorded here (and in `docs/design/decisions.md` as C when it changes the
 - 1 Nov 2026 — P-10 a (baselines back, theme 1). P-11: no Word import at all; import = Excel, ReqIF, CSV, ReqMan
   repositories; export = Excel, ReqIF, CSV, ReqMan repositories, Markdown, Word, PDF. Documentation reorganised
   for hand-over (`docs/README.md`, `docs/HANDOVER.md`).
+- 2 Nov 2026 — theme 2 (daily comfort) opened: P-12 … P-16 asked.

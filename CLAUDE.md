@@ -179,11 +179,14 @@ checks in detail".
     external refs); built-in user guide. All AI parts (AI guide, AI export, MCP) → last versions.
     P-38 approval: status of an edited Approved item changes only when pushed; P-39 one-file HTML instead of a
     website; P-40 feature switches + stabilisation patch per theme + coverage floor + report-a-problem.
-    **Release plan confirmed 2 Nov** (planning file / roadmap: 0.14 rename+health … 0.24 AI). Open: P-41 automated
-    acceptance run (CI push to scratch branches needs Mostafa's OK) and the name.
+    **Release plan confirmed 2 Nov** (planning file / roadmap: 0.14 rename+health … 0.24 AI). P-41 **yes**: automated Windows
+    acceptance run in CI (install previous → update → self-test → 10k sandbox → real push to `ci/acceptance-*`, deleted
+    after → version e2e); every run/report lists numbered what it did. **Next: build 0.14 health parts (feature switches,
+    coverage floor, Report a problem) + the acceptance run now; apply the rename when Mostafa picks the name**
+    (considering ShallWe, Plumbline, Keelson).
   - P-11 **no Word import**. Import: Excel, ReqIF, CSV, ReqMan repositories. Export: Excel, ReqIF, CSV, ReqMan
     repositories, Markdown, Word, PDF.
-- **New name:** Mostafa is still choosing. Shortlist checked 1 Nov (planning file): reqochet (recommended), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:
+- **New name:** Mostafa is still choosing. Latest candidates (2 Nov): ShallWe (recommended), Plumbline, Keelson; earlier: reqochet (felt long, "misses the target"), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:
   uninstall old → install new, `.reqman` folder renamed by Git rename, copy the user's settings first).
 - **Rust: no migration now** (31 Oct). Feature input: `docs/reviews/2026-10-31-feature-catalogue.md` (163 features),
   market list `docs/reviews/2026-10-31-rm-tools-market-list.md`.

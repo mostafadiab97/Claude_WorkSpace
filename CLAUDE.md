@@ -164,6 +164,9 @@ checks in detail".
     completeness warnings, **documents** (several specifications in one repository, each with its own tree and
     outline numbers — replaces "one tree per repository"; cross-repository links later with a repository alias before
     the ID), **baselines** (Git tags with note, list, compare with baseline, open read-only).
+  - **Theme 2 (2 Nov, P-12…P-16, all as recommended):** bulk edit, duplicate (no links copied), saved views
+    (personal + shared), templates with EARS/user-story patterns, wording hints, spell check, restore an older item
+    version; external references → theme 5. **Next: theme 3 answers (P-17…P-20), then themes 4–5.**
   - P-11 **no Word import**. Import: Excel, ReqIF, CSV, ReqMan repositories. Export: Excel, ReqIF, CSV, ReqMan
     repositories, Markdown, Word, PDF.
 - **New name:** Mostafa is still choosing. Shortlist checked 1 Nov (planning file): reqochet (recommended), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:

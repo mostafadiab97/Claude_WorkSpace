@@ -29,3 +29,6 @@ export function splitGuide(text: string): { id: string; title: string; md: strin
 
 /** The quick-start page, opened from the start screen (UX-24); a test checks the guide still has it. */
 export const QUICK_START_PAGE = '1-quick-start-15-minutes'
+
+/** The keyboard shortcuts page, opened with Ctrl+/ (UX-25). */
+export const SHORTCUTS_PAGE = '18-keyboard-shortcuts'

@@ -29,6 +29,7 @@ accounts — who may read or change requirements is decided by your GitHub repos
 15. [File format reference](#15-file-format-reference)
 16. [What ReqMan can do — specification](#16-what-reqman-can-do--specification)
 17. [Troubleshooting and questions](#17-troubleshooting-and-questions)
+18. [Keyboard shortcuts](#18-keyboard-shortcuts)
 
 ---
 
@@ -400,3 +401,22 @@ code and test results; AI access.
 | Where is the log? | `%APPDATA%\ReqMan\logs\reqman.log` — or Settings → Diagnostics → Open log folder. |
 | Can I edit the files by hand or with a script? | Yes — they are plain text. Keep the header format; ReqMan checks everything when it opens and lists what it cannot read. |
 | Does ReqMan send data anywhere? | No. It talks only to your Git remote (GitHub) and checks GitHub Releases for updates. |
+
+---
+
+## 18. Keyboard shortcuts
+
+Press **Ctrl+/** in the main window to open this page. Buttons show their shortcut in the tooltip.
+
+| Keys | What it does |
+| --- | --- |
+| **Ctrl+S** | Save the open item. |
+| **Ctrl+F** | Go to the search box. |
+| **Ctrl+N** | New item: opens the list of types. |
+| **Alt+↑ / Alt+↓** | Move the open item up or down among its siblings (after saving). |
+| **↑ / ↓** (in the table) | Previous / next row; the editor follows. |
+| **→ / ←** (in the table) | Open a level / close it, or go to the parent. |
+| **Ctrl+click / Shift+click** | Choose several rows (to move, export or change them together). |
+| **Ctrl+Shift+C** | Open or close Changes. |
+| **Esc** | Close a pop-up, a menu or a question. |
+| **Ctrl+/** | This page. |

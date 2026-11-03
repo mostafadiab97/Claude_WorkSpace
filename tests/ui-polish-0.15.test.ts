@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { importPath } from '../src/main/validate'
-import { QUICK_START_PAGE, splitGuide } from '../src/shared/guide'
+import { QUICK_START_PAGE, SHORTCUTS_PAGE, splitGuide } from '../src/shared/guide'
 import { mkdtemp, readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -15,6 +15,7 @@ const guide = readFileSync('docs/USER-GUIDE.md', 'utf8')
 describe('user guide (UX-12, UX-24)', () => {
   it('the start screen link leads to the quick start page', () => {
     expect(splitGuide(guide).some((p) => p.id === QUICK_START_PAGE)).toBe(true)
+    expect(splitGuide(guide).some((p) => p.id === SHORTCUTS_PAGE)).toBe(true) // Ctrl+/ (UX-25)
   })
   it('has no placeholder links such as <owner>', () => {
     expect(guide).not.toMatch(/github\.com\/<owner>|\(<owner>|%3Cowner%3E/i)

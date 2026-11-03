@@ -1,5 +1,5 @@
 import { fieldLabel, optionLabel, typeLabel } from '../../lib/schema'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 import type { Schema } from '../../../../shared/domain'
 import { T } from '../../../../shared/text'
 import { ColumnsMenu } from '../FieldsPanel'
@@ -8,7 +8,10 @@ import type { Filters, LinkFilter } from './useFilters'
 import { useFeature } from '../../lib/features'
 
 /** Search, filters, columns, export, expand/collapse and "New item" above the table. */
-export function Toolbar(props: {
+export function Toolbar({ searchRef, newRef, ...props }: {
+  /** For the keyboard: Ctrl+F focuses the search, Ctrl+N opens "New item" (UX-25). */
+  searchRef?: RefObject<HTMLInputElement | null>
+  newRef?: RefObject<HTMLSelectElement | null>
   schema: Schema
   filters: Filters
   prefs: ColumnPrefs
@@ -30,7 +33,7 @@ export function Toolbar(props: {
   const activeCount = (f.types ? 1 : 0) + Object.values(f.fieldFilters).filter(Boolean).length + (f.linkFilter ? 1 : 0)
   return (
     <div className="toolbar">
-      <input className="input toolbar__search" type="search" placeholder={tw.searchPlaceholder} value={f.text} onChange={(e) => f.setText(e.target.value)} aria-label={tw.search} />
+      <input ref={searchRef} className="input toolbar__search" type="search" placeholder={tw.searchPlaceholder} value={f.text} onChange={(e) => f.setText(e.target.value)} aria-label={tw.search} title={tw.searchTooltip} />
       {/* UX-28: expand/collapse act on the tree, so they sit by the search */}
       {!f.filtered && (
         <>
@@ -92,7 +95,7 @@ export function Toolbar(props: {
         </button>
       )}
       <span className="toolbar__spacer" />
-      <select className="select-btn select-btn--primary select-btn--fit" value="" onChange={(e) => props.onNewItem(e.target.value)} aria-label={tw.newItem}>
+      <select ref={newRef} title={tw.newItemTooltip} className="select-btn select-btn--primary select-btn--fit" value="" onChange={(e) => props.onNewItem(e.target.value)} aria-label={tw.newItem}>
         <option value="">{tw.newItemOption}</option>
         {schema.itemTypes.map((t) => (
           <option key={t.id} value={t.id}>

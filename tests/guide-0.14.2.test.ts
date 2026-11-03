@@ -12,7 +12,7 @@ describe('user guide pages', () => {
     expect(pages[0]?.md).toContain('## Contents')
     expect(pages[1]?.title).toMatch(/^1\. Quick start/)
     expect(pages.slice(1).every((p) => /^\d+\. /.test(p.title))).toBe(true)
-    expect(pages.length).toBe(18)
+    expect(pages.length).toBe(19) // 0.15: 18. Keyboard shortcuts
   })
   it('every contents link points to a page', () => {
     const ids = new Set(splitGuide(text).map((p) => p.id))

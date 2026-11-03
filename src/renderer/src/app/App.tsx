@@ -1,4 +1,4 @@
-import { QUICK_START_PAGE } from '../../../shared/guide'
+import { QUICK_START_PAGE, SHORTCUTS_PAGE } from '../../../shared/guide'
 import { useCallback, useEffect, useState } from 'react'
 import type { AppInfo, GitInfo, LoadedTheme, RepoInfo, UpdateStatus, ImportFile } from '../../../shared/api'
 import { applyTheme, loadSavedMode, saveMode, type ThemeMode } from '../theme/applyTheme'
@@ -118,7 +118,16 @@ export function App() {
         {repo && (
           <div className="main__view" hidden={showSettings}>
             <ErrorBoundary area={T.app.workspaceArea} key={repo.root}>
-              <WorkspaceScreen info={repo} onInfo={onInfo} importFile={pendingImport} gitSlot={gitSlot} />
+              <WorkspaceScreen
+                info={repo}
+                onInfo={onInfo}
+                importFile={pendingImport}
+                gitSlot={gitSlot}
+                onShortcuts={() => {
+                  setSettingsStart(SHORTCUTS_PAGE)
+                  setShowSettings(true)
+                }}
+              />
             </ErrorBoundary>
           </div>
         )}

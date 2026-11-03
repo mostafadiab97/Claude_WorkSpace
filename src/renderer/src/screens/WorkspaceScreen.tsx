@@ -25,7 +25,20 @@ import { useGit } from '../workspace/screen/useGit'
  * and the editor on the right. State is grouped by area: filters (useFilters), Git (useGit), the Changes view
  * (useChanges), editor.
  */
-export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { info: RepoInfo; onInfo: (i: RepoInfo) => void; importFile?: ImportFile | null; gitSlot?: HTMLElement | null }) {
+export function WorkspaceScreen({
+  info,
+  onInfo,
+  importFile,
+  gitSlot = null,
+  onShortcuts
+}: {
+  info: RepoInfo
+  onInfo: (i: RepoInfo) => void
+  importFile?: ImportFile | null
+  gitSlot?: HTMLElement | null
+  /** Ctrl+/ — the keyboard shortcuts page of the user guide. */
+  onShortcuts?: () => void
+}) {
   const schema = info.schema
   const filters = useFilters(schema)
   const { query, filtered } = filters
@@ -107,6 +120,38 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
     return () => window.removeEventListener('beforeunload', onUnload)
   }, [dirty])
 
+  // Keyboard shortcuts (UX-25; listed in the user guide, section 18). Ctrl+S and Alt+↑/↓ live in the editor.
+  const searchRef = useRef<HTMLInputElement>(null)
+  const newRef = useRef<HTMLSelectElement>(null)
+  const toggleRef = useRef<() => void>(() => {})
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return
+      const k = e.key.toLowerCase()
+      if (k === 'f' && !e.shiftKey) {
+        e.preventDefault()
+        searchRef.current?.focus()
+        searchRef.current?.select()
+      } else if (k === 'n' && !e.shiftKey) {
+        e.preventDefault()
+        newRef.current?.focus()
+        try {
+          newRef.current?.showPicker()
+        } catch {
+          // showPicker needs a user gesture in some cases; the focused list still opens with Alt+↓
+        }
+      } else if (k === 'c' && e.shiftKey) {
+        e.preventDefault()
+        toggleRef.current()
+      } else if (e.key === '/' && onShortcuts) {
+        e.preventDefault()
+        onShortcuts()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onShortcuts])
+
   const toggleChanges = (): void => {
     if (!showChanges) {
       git.reload()
@@ -114,6 +159,9 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
     }
     setShowChanges((v) => !v)
   }
+  useEffect(() => {
+    toggleRef.current = toggleChanges
+  })
   const revert = async (id: string, part: RevertPart): Promise<void> => {
     const r = await window.reqman.revertChange(id, part)
     if (!r.ok) changes.setError(r.message)
@@ -234,6 +282,8 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
         {/* The table stays mounted while the Changes view is open, so its opened levels and scroll position survive. */}
         <div className={showChanges && git.state?.available ? 'is-hidden' : 'workspace__items'}>
           <Toolbar
+            searchRef={searchRef}
+            newRef={newRef}
             schema={schema}
             filters={filters}
             prefs={columnPrefs}

@@ -35,7 +35,7 @@ export function ItemEditor(props: {
   /** Hands the parent this editor's save function (null when the editor goes away) — for "Save and continue". */
   onSaveReady?: (save: (() => Promise<boolean>) | null) => void
 }) {
-  const { schema, target, onDirtyChange, reloadToken } = props
+  const { schema, target, onDirtyChange, reloadToken, onMoved } = props
   // The editor is re-created (keyed) for every target, so a draft can start its state directly.
   const [details, setDetails] = useState<ItemDetails | null>(null)
   const [base, setBase] = useState<Item | null>(null)
@@ -148,11 +148,20 @@ export function ItemEditor(props: {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
         e.preventDefault()
         if (dirty) void save()
+      } else if (e.altKey && !e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && !dirty && !isNew) {
+        // Alt+↑ / Alt+↓ moves the open item among its siblings (UX-25)
+        e.preventDefault()
+        if (!form) return
+        void window.reqman.moveItem(form.id, e.key === 'ArrowUp' ? 'up' : 'down').then(async (r) => {
+          if (!r.ok) return setStatus({ kind: 'error', message: r.message })
+          await load()
+          onMoved()
+        })
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [dirty, save])
+  }, [dirty, save, isNew, form, load, onMoved])
 
   if (target.kind === 'item' && details === null && form === null) {
     return (

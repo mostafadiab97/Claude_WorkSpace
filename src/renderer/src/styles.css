@@ -2638,12 +2638,16 @@ code {
   overflow-x: hidden;
 }
 .settings-nav {
-  inline-size: 260px;
+  inline-size: 270px;
   flex: none;
   overflow-y: auto;
   border-inline-end: 1px solid var(--rm-color-border);
-  background: var(--rm-color-surface);
+  /* its own shade (Mostafa on 0.14.2 step 2): darker in Light, lighter in Dark */
+  background: color-mix(in srgb, var(--rm-color-surface) 94%, var(--rm-color-text));
   padding: var(--rm-space-md) var(--rm-space-sm);
+}
+.settings-nav__back {
+  margin: 0 var(--rm-space-sm) var(--rm-space-sm);
 }
 .settings-nav ul {
   list-style: none;
@@ -2656,12 +2660,6 @@ code {
   text-transform: uppercase;
   margin: var(--rm-space-sm) 0 var(--rm-space-xs);
   padding-inline-start: var(--rm-space-sm);
-}
-.settings-nav__group .settings-nav__item {
-  text-transform: uppercase;
-  color: var(--rm-color-text-muted);
-  font-size: var(--rm-font-size-small);
-  padding-inline-start: 0;
 }
 .settings-nav__item {
   display: block;
@@ -2680,7 +2678,7 @@ code {
   padding-inline-start: var(--rm-space-md);
 }
 .settings-nav__item:hover {
-  background: color-mix(in srgb, var(--rm-color-surface) 90%, var(--rm-color-text));
+  background: color-mix(in srgb, var(--rm-color-surface) 84%, var(--rm-color-text));
 }
 .settings-nav__item.is-active {
   background: color-mix(in srgb, var(--rm-color-primary) 14%, var(--rm-color-surface));
@@ -2718,4 +2716,7 @@ code {
   font-size: var(--rm-font-size-title);
   margin-block-start: var(--rm-space-xl);
   scroll-margin-block-start: var(--rm-space-md);
+}
+.guide__body > :first-child {
+  margin-block-start: 0;
 }

@@ -82,13 +82,11 @@ const en = {
       label: 'Settings and help',
       settings: 'Settings',
       guide: 'User guide',
-      env: 'Environment',
-      versions: 'Versions',
-      report: 'Report a problem',
-      diag: 'Diagnostics',
+      guideHome: 'Introduction and contents',
+      env: 'Environment and versions',
+      report: 'Report a problem and diagnostics',
       features: 'Features',
-      releaseTest: 'Release self-test',
-      dataTest: 'Data self-test',
+      tests: 'Self-tests',
       guideNote: 'The user guide is in English for now.'
     },
     versions: {

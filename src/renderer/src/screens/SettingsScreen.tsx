@@ -7,56 +7,52 @@ import { ProblemReportCard } from '../components/ProblemReportCard'
 import { ReleaseSelfTestCard } from '../components/ReleaseSelfTestCard'
 import { SelfTestCard } from '../components/SelfTestCard'
 import { VersionsCard } from '../components/VersionsCard'
-import { guideHtml, guideSections } from '../lib/guide'
+import { guidePages } from '../lib/guide'
 import { useLanguage } from '../lib/language'
 import { T } from '../../../shared/text'
 
-type View = { kind: 'settings'; target: string } | { kind: 'guide'; target: string }
+type SettingsPage = 'env' | 'report' | 'features' | 'tests'
+type View = { kind: 'settings'; page: SettingsPage } | { kind: 'guide'; page: string; anchor?: string }
 
 /**
- * Settings and help (Mostafa on 0.14.1 step 4): a left panel to move between the settings cards and the user guide
- * (docs/USER-GUIDE.md, bundled into the app) with one entry per guide section.
+ * Settings and help (Mostafa on 0.14.1 step 4 and 0.14.2 step 2): a left panel (its own shade, Back on top) that
+ * switches between pages — related settings grouped on one page, and the user guide one section per page.
  */
-export function SettingsScreen(props: { theme: LoadedTheme; git: GitInfo | null; update: UpdateStatus | null; appInfo: AppInfo | null; onBack: () => void; startWith?: 'guide' }) {
+export function SettingsScreen(props: { theme: LoadedTheme; git: GitInfo | null; update: UpdateStatus | null; appInfo: AppInfo | null; onBack: () => void }) {
   const lang = useLanguage()
-  const [view, setView] = useState<View>(props.startWith === 'guide' ? { kind: 'guide', target: '' } : { kind: 'settings', target: '' })
+  const [view, setView] = useState<View>({ kind: 'settings', page: 'env' })
   const main = useRef<HTMLDivElement>(null)
-  const sections = useMemo(() => guideSections().filter((s) => /^\d+\./.test(s.title)), [])
-  const html = useMemo(() => guideHtml(), [])
-  // read the texts when rendering (the language switch swaps T in place)
-  const cards = useMemo(
-    () => [
-      { id: 'settings-env', label: T.settings.nav.env },
-      { id: 'settings-versions', label: T.settings.nav.versions },
-      { id: 'settings-report', label: T.settings.nav.report },
-      { id: 'settings-diag', label: T.settings.nav.diag },
-      { id: 'settings-features', label: T.settings.nav.features },
-      { id: 'settings-release-test', label: T.settings.nav.releaseTest },
-      { id: 'settings-data-test', label: T.settings.nav.dataTest }
-    ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- recompute when the language changes
-    [lang]
-  )
+  const pages = useMemo(() => guidePages(), [])
+  const nav = T.settings.nav
+  const settingsPages: { id: SettingsPage; label: string }[] = [
+    { id: 'env', label: nav.env },
+    { id: 'report', label: nav.report },
+    { id: 'features', label: nav.features },
+    { id: 'tests', label: nav.tests }
+  ]
+  const guidePage = view.kind === 'guide' ? (pages.find((p) => p.id === view.page) ?? pages[0]) : undefined
 
+  // a new page starts at its top (or at the sub-section a link pointed to)
   useEffect(() => {
-    const el = view.target ? document.getElementById(view.target) : null
+    const el = view.kind === 'guide' && view.anchor ? document.getElementById(view.anchor) : null
     if (el) el.scrollIntoView({ block: 'start' })
     else main.current?.scrollTo({ top: 0 })
   }, [view])
 
-  // links inside the guide: "#section" stays in the guide; other links are handled by the window (https → browser)
+  // links inside the guide: "#section" opens that section's page; other links are handled by the window (https → browser)
   const onGuideClick = (e: React.MouseEvent): void => {
-    const a = (e.target as Element).closest('a')
-    const href = a?.getAttribute('href') ?? ''
+    const href = (e.target as Element).closest('a')?.getAttribute('href') ?? ''
     if (href.startsWith('#')) {
       e.preventDefault()
-      setView({ kind: 'guide', target: href.slice(1) })
+      const id = href.slice(1)
+      const target = pages.find((p) => p.id === id) ?? pages.find((p) => p.anchors.includes(id))
+      if (target) setView({ kind: 'guide', page: target.id, ...(target.id !== id ? { anchor: id } : {}) })
     } else if (href && !href.startsWith('https://')) e.preventDefault()
   }
 
-  const item = (active: boolean, label: string, onClick: () => void, sub = false): ReactNode => (
-    <li key={label}>
-      <button type="button" className={`settings-nav__item${sub ? ' settings-nav__item--sub' : ''}${active ? ' is-active' : ''}`} aria-current={active ? 'true' : undefined} onClick={onClick}>
+  const entry = (key: string, label: string, active: boolean, onClick: () => void, sub = false): ReactNode => (
+    <li key={key}>
+      <button type="button" className={`settings-nav__item${sub ? ' settings-nav__item--sub' : ''}${active ? ' is-active' : ''}`} aria-current={active ? 'page' : undefined} onClick={onClick}>
         {label}
       </button>
     </li>
@@ -64,52 +60,43 @@ export function SettingsScreen(props: { theme: LoadedTheme; git: GitInfo | null;
 
   return (
     <div className="page page--split">
-      <nav className="settings-nav" aria-label={T.settings.nav.label}>
-        <h2 className="settings-nav__group">{T.settings.nav.settings}</h2>
-        <ul>{cards.map((c) => item(view.kind === 'settings' && view.target === c.id, c.label, () => setView({ kind: 'settings', target: c.id })))}</ul>
-        <h2 className="settings-nav__group">
-          <button type="button" className={`settings-nav__item${view.kind === 'guide' && !view.target ? ' is-active' : ''}`} onClick={() => setView({ kind: 'guide', target: '' })}>
-            {T.settings.nav.guide}
-          </button>
-        </h2>
-        <ul aria-label={T.settings.nav.guide}>{sections.map((s) => item(view.kind === 'guide' && view.target === s.id, s.title, () => setView({ kind: 'guide', target: s.id }), true))}</ul>
+      <nav className="settings-nav" aria-label={nav.label}>
+        <button type="button" className="btn settings-nav__back" onClick={props.onBack}>
+          {T.settings.back}
+        </button>
+        <h2 className="settings-nav__group">{nav.settings}</h2>
+        <ul>{settingsPages.map((p) => entry(p.id, p.label, view.kind === 'settings' && view.page === p.id, () => setView({ kind: 'settings', page: p.id })))}</ul>
+        <h2 className="settings-nav__group">{nav.guide}</h2>
+        <ul aria-label={nav.guide}>
+          {pages.map((p) => entry(`g-${p.id}`, p.id === '' ? nav.guideHome : p.title, guidePage?.id === p.id, () => setView({ kind: 'guide', page: p.id }), true))}
+        </ul>
       </nav>
       <div className="settings-main" ref={main}>
         <div className="page__inner">
-          <div className="page__header">
-            <button type="button" className="btn" onClick={props.onBack}>
-              {T.settings.back}
-            </button>
-            <h1 className="page__title">{view.kind === 'guide' ? T.settings.nav.guide : T.settings.title}</h1>
-          </div>
-          {view.kind === 'settings' ? (
+          <h1 className="page__title">{view.kind === 'guide' ? nav.guide : (settingsPages.find((p) => p.id === view.page)?.label ?? T.settings.title)}</h1>
+          {view.kind === 'settings' && view.page === 'env' && (
             <>
-              <div id="settings-env">
-                <EnvironmentCard theme={props.theme} git={props.git} update={props.update} appInfo={props.appInfo} />
-              </div>
-              <div id="settings-versions">
-                <VersionsCard appInfo={props.appInfo} update={props.update} />
-              </div>
-              <div id="settings-report">
-                <ProblemReportCard />
-              </div>
-              <div id="settings-diag">
-                <DiagnosticsCard appInfo={props.appInfo} />
-              </div>
-              <div id="settings-features">
-                <FeaturesCard />
-              </div>
-              <div id="settings-release-test">
-                <ReleaseSelfTestCard />
-              </div>
-              <div id="settings-data-test">
-                <SelfTestCard />
-              </div>
+              <EnvironmentCard theme={props.theme} git={props.git} update={props.update} appInfo={props.appInfo} />
+              <VersionsCard appInfo={props.appInfo} update={props.update} />
             </>
-          ) : (
-            <article className="card guide" aria-label={T.settings.nav.guide} dir="ltr" lang="en" onClick={onGuideClick}>
-              {lang !== 'en' && <p className="hint hint--flush">{T.settings.nav.guideNote}</p>}
-              <div className="guide__body" dangerouslySetInnerHTML={{ __html: html }} />
+          )}
+          {view.kind === 'settings' && view.page === 'report' && (
+            <>
+              <ProblemReportCard />
+              <DiagnosticsCard appInfo={props.appInfo} />
+            </>
+          )}
+          {view.kind === 'settings' && view.page === 'features' && <FeaturesCard />}
+          {view.kind === 'settings' && view.page === 'tests' && (
+            <>
+              <ReleaseSelfTestCard />
+              <SelfTestCard />
+            </>
+          )}
+          {guidePage && (
+            <article key={guidePage.id} className="card guide" aria-label={nav.guide} dir="ltr" lang="en" onClick={onGuideClick}>
+              {lang !== 'en' && <p className="hint hint--flush">{nav.guideNote}</p>}
+              <div className="guide__body" dangerouslySetInnerHTML={{ __html: guidePage.html }} />
             </article>
           )}
         </div>

@@ -3,7 +3,20 @@
 Each version was installed and tried by Mostafa (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.14.3 — 3 Nov 2026 — Settings and help as pages
+- **Mostafa (3 Nov 2026) on 0.14.2:** steps 1, 3, 4 passed; step 2: one page per settings group and per guide section
+  instead of one long scroll, Back on top of the left panel, the panel in its own shade; step 5 (global Git e-mail)
+  not possible — it would change his commits to company repositories.
+- **Settings pages:** Environment and versions · Report a problem and diagnostics · Features · Self-tests — each
+  entry in the left panel opens its own page.
+- **User guide pages:** "Introduction and contents" plus one page per section; links in the contents open the
+  section's page.
+- **Left panel:** **← Back** at its top; its own shade (darker in Light, lighter in Dark).
+- **Private e-mail only for the sandbox** (instead of step 5): `git config user.email …` *inside* each sandbox clone
+  (no `--global`), so company repositories keep the work address.
+
 ## 0.14.2 — 3 Nov 2026 — Settings and help with the user guide inside; privacy guard
+- **Mostafa (3 Nov 2026):** steps 1, 3, 4 passed; step 2 → pages (0.14.3); step 5 not possible globally → per-repository command (0.14.3).
 - **Mostafa (3 Nov 2026):** 0.14.1 self-test 21/21 (73.5 s); acceptance runs of 0.14.0 and 0.14.1 passed. 0.14.0 step 2
   and 3 worked with two remarks, 0.14.1 steps 2–3 passed; step 4: put the user guide into the app with a left panel;
   step 5: never again, and remove the work e-mail from the sandbox history (he re-clones). All here:

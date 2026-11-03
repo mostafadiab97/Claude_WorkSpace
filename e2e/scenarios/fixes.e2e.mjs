@@ -140,6 +140,7 @@ await scenario('E2E fixes', async (ctx) => {
 
   console.log('Release self-test')
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
+  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Self-tests' }).click()
   await win.getByRole('button', { name: 'Run release self-test' }).click()
   await win.getByText(/All steps passed|steps failed/).waitFor({ timeout: 180_000 })
   const passed = await win.getByText(/All steps passed/).count()

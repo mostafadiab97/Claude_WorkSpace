@@ -1,6 +1,6 @@
 # ReqMan — User Guide
 
-Version 0.14.1 · November 2026 · *ReqMan is a working name; the product gets its final name in the next version.*
+Version 0.14.3 · November 2026 · *ReqMan is a working name; the product gets its final name in the next version.*
 
 ReqMan is a Windows desktop application for writing, structuring and tracing requirements. Every requirement is a
 small text file in your project's own Git repository, so requirements get the same history, branches, reviews and
@@ -264,7 +264,9 @@ name**). ReqMan never guesses silently and never deletes data to "fix" something
 
 ## 13. Settings
 
-Open with **⚙** (top right).
+Open with **⚙** (top right). The left panel switches between pages: **Environment and versions**, **Report a problem and
+diagnostics**, **Features**, **Self-tests**, and this **User guide** (one page per section). **← Back** at the top of the
+panel returns to your repository.
 
 | Card | What it does |
 | --- | --- |

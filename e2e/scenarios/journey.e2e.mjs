@@ -537,7 +537,7 @@ await scenario('E2E journey', async (ctx) => {
   await shot('07-dark')
   await win.setViewportSize({ width: 1920, height: 1000 })
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
-  await win.getByText('Settings & diagnostics').waitFor()
+  await win.getByRole('navigation', { name: 'Settings and help' }).waitFor()
   const page = await win.locator('.page').boundingBox()
   check(page !== null && Math.abs(page.x + page.width - 1920) < 2, 'settings page scroll area reaches the right window edge')
   await shot('08-settings-wide')

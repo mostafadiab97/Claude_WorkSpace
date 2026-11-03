@@ -447,7 +447,7 @@ function LinkList({ schema, links, filter, onOpen }: { schema: Schema; links: Li
  * The side panel next to the Changes view (O-06): commit tools for uncommitted changes; for other comparisons
  * what is compared and the export.
  */
-export function ChangesSide(props: { changes: ChangesState; git: GitState; blocked: string | null; onResult: (r: GitResult) => void }) {
+export function ChangesSide(props: { changes: ChangesState; git: GitState; blocked: string | null; onResult: (r: GitResult) => void; onPush: () => void }) {
   const { changes: c } = props
   const [exported, setExported] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -466,13 +466,13 @@ export function ChangesSide(props: { changes: ChangesState; git: GitState; block
     <aside className="editor changes scroll" aria-label={uncommitted ? T.changesView.commitLabel : T.changesView.compareLabel}>
       <header className="editor__header">
         <div>
-          <div className="editor__id">{uncommitted ? T.changesView.commitTitle : T.changesView.compareTitle}</div>
+          <h2 className="editor__heading">{uncommitted ? T.changesView.commitTitle : T.changesView.compareTitle}</h2>
           <div className="editor__type">{uncommitted ? T.changesPanel.subtitle : T.changesView.compareSubtitle}</div>
         </div>
       </header>
       <div className="editor__body">
         {uncommitted && props.git.available ? (
-          <CommitTools state={props.git} blockedReason={props.blocked} onResult={props.onResult} />
+          <CommitTools state={props.git} blockedReason={props.blocked} onResult={props.onResult} onPush={props.onPush} />
         ) : (
           <>
             {c.data && (

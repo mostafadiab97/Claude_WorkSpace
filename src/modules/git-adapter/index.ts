@@ -150,7 +150,7 @@ export interface GitAdapter {
   blobIds(root: string, ref: string, paths: string[]): Promise<Map<string, string>>
   /** Every file under `dir` in a commit, path → blob ID (one `ls-tree -r` process). */
   treeBlobs(root: string, ref: string, dir: string): Promise<Map<string, string>>
-  /** Sets user.name and user.email in the user's global Git configuration. */
+  /** Sets user.name and user.email for this repository only (its .git/config), never globally. */
   setIdentity(root: string, name: string, email: string): Promise<void>
   /** Makes `root` a new Git repository with the branch `main` (M7: "New project from a file"). */
   init(root: string): Promise<void>

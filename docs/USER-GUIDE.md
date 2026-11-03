@@ -81,7 +81,7 @@ On the start screen:
 
 1. Click **Changes** in the top bar: every requirement you changed is listed, field by field, old and new side by side.
 2. Write a commit message on the right ("Add door lock requirements") and click **Commit**.
-3. Click **Push**: your colleagues get the change with **Pull**.
+3. Click **Push**: your colleagues get the change with **Pull**. (Or use **▾ → Commit and push** next to Commit.)
 
 ### 1.7 If something goes wrong
 
@@ -115,12 +115,12 @@ with a message; **Push** shares them.
 
 | Area | What is there |
 | --- | --- |
-| **Top bar** | Repository name and ✕ (close), branch button ⎇ with ↑ (commits to push) and ↓ (commits to pull), **Changes**, **Pull**, **Push**, English / العربية, Light / Dark / System, ⚙ Settings. |
+| **Top bar** | Repository name and ✕ (close), branch button ⎇, **Changes**, **Pull** and **Push** (with the number of commits to get or send), ⚙ Settings. Language and colours: **Settings → Appearance** (and on the start screen). |
 | **Toolbar** | Search box, ⊞ expand all, ⊟ collapse all, **Filters**, **Columns**, **Import…**, **Export…**, **+ New item**. |
 | **Table** | One row per item, in document order; ▸ opens a branch of the tree; numbers in the title show how many children. |
-| **Editor (right)** | Details (title, type, fields, parent, text, links) and **History**; Save, ↑ ↓ (move), + Child…, Delete. |
-| **Status bar** | Number of items, problems found (click to see them), hints. |
-| **Floating messages** | Results of Git actions under the top bar: green frame = done, red = problem, blue = nothing to do / a question. Success messages close by themselves. |
+| **Editor (right)** | Details (title, type, fields, parent, text, links) and **History**; Save, ↑ ↓ (move), + Child…, Delete. The text is shown formatted; click it to edit. Drag the left edge to make the editor wider. |
+| **Status bar** | Number of items, problems found (click to see them, grouped by kind), how many rows are chosen, what the table is filtered by (✕ clears it), the time of your last pull. |
+| **Floating messages** | Results of Git actions under the top bar: green frame = done, red = problem, blue = nothing to do. Success messages close by themselves. A question (e.g. "pull first?") opens under the buttons; Esc closes it. |
 
 ---
 
@@ -182,8 +182,9 @@ added/removed, and which links became suspect.
 
 - Take back one part with **↶** (a field, the text, one link), one item with **Discard this item's changes**, chosen
   items with **Discard N chosen**, or everything with **Discard all changes**.
-- **Commit:** message on the right → **Commit N changes**. Only the `requirements/` folder is committed — never your
-  code.
+- **Commit:** message on the right → **Commit N changes** (or **▾ → Commit and push**). Only the `requirements/`
+  folder is committed — never your code. **Author: …** shows the name Git writes into your commits; **Change…** sets
+  it for this repository only.
 
 ### Push
 

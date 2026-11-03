@@ -561,8 +561,9 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
     },
 
     async setIdentity(root, name, email) {
-      await git(root, ['config', '--global', 'user.name', name])
-      await git(root, ['config', '--global', 'user.email', email])
+      // this repository only (0.15): a global name/address would also sign the user's other (e.g. company) repositories
+      await git(root, ['config', '--local', 'user.name', name])
+      await git(root, ['config', '--local', 'user.email', email])
     },
 
     async discard(root, paths) {

@@ -46,7 +46,7 @@ export function ItemEditor(props: {
   const [tab, setTab] = useState<'details' | 'history'>('details')
   const [removeIncoming, setRemoveIncoming] = useState(true)
   /** Links from other items to review after a save changed the type, title or text (O-04). */
-  const [review, setReview] = useState<LinkInfo[] | null>(null)
+  const [review, setReview] = useState<{ incoming: LinkInfo[]; before: Item; after: Item } | null>(null)
   const isNew = target.kind === 'draft'
 
   const load = useCallback(async () => {
@@ -117,7 +117,7 @@ export function ItemEditor(props: {
         const before = base
         const saved = r.details.item
         const content = before !== null && (before.title !== saved.title || before.text !== saved.text || before.type !== saved.type)
-        if (!isNew && content && r.details.incoming.length > 0) setReview(r.details.incoming)
+        if (!isNew && content && before && r.details.incoming.length > 0) setReview({ incoming: r.details.incoming, before, after: saved })
         setDetails(r.details)
         setBase(r.details.item)
         setForm(r.details.item)
@@ -392,7 +392,9 @@ export function ItemEditor(props: {
         <SuspectLinksDialog
           schema={schema}
           itemId={form.id}
-          incoming={review}
+          incoming={review.incoming}
+          before={review.before}
+          after={review.after}
           onOpen={props.onOpen}
           onDone={(changed) => {
             setReview(null)

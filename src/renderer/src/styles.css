@@ -3149,3 +3149,144 @@ code {
   font-size: var(--rm-font-size-base);
   margin-block: var(--rm-space-sm) var(--rm-space-xs);
 }
+
+/* Suspect links: what changed, one segmented choice per link, the linking item's text on click (UX-16) */
+.suspect__changed {
+  width: 100%;
+  padding: var(--rm-space-sm);
+  margin-block-end: var(--rm-space-sm);
+  background: var(--rm-color-surface-alt);
+  border-radius: var(--rm-shape-radius-medium);
+}
+
+.suspect__line {
+  margin: 0 0 var(--rm-space-xs);
+  font-size: var(--rm-font-size-small);
+  unicode-bidi: plaintext;
+}
+
+.suspect__old {
+  text-decoration: line-through;
+  background: var(--rm-color-diff-old-bg);
+}
+
+.suspect__new {
+  text-decoration: none;
+  background: var(--rm-color-diff-new-bg);
+}
+
+.suspect__old .suspect__mark {
+  background: var(--rm-color-diff-old-mark);
+}
+
+.suspect__new .suspect__mark {
+  background: var(--rm-color-diff-new-mark);
+}
+
+.suspect__name.link-btn {
+  text-align: start;
+  color: var(--rm-color-text);
+}
+
+.suspect__text {
+  grid-column: 1 / -1;
+  margin: 0 0 var(--rm-space-xs);
+  font-size: var(--rm-font-size-small);
+  unicode-bidi: plaintext;
+}
+
+.segmented {
+  display: inline-flex;
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-radius: var(--rm-shape-button-radius);
+  overflow: hidden;
+}
+
+.segmented__part {
+  font: inherit;
+  font-size: var(--rm-font-size-small);
+  min-block-size: 26px;
+  padding: 0 var(--rm-space-sm);
+  border: 0;
+  background: var(--rm-color-surface);
+  color: var(--rm-color-text);
+  cursor: pointer;
+}
+
+.segmented__part + .segmented__part {
+  border-inline-start: var(--rm-shape-border-width) solid var(--rm-color-border);
+}
+
+.segmented__part--keep {
+  background: var(--rm-color-primary);
+  color: var(--rm-color-primary-text);
+}
+
+.segmented__part--unlink {
+  background: var(--rm-color-danger);
+  color: var(--rm-color-primary-text);
+}
+
+/* the inline Keep / Unlink under a suspect link: small real buttons, not bold text links */
+.links__suspect .btn {
+  min-block-size: 24px;
+  padding-block: 0;
+  font-weight: normal;
+}
+
+/* Changes side panel heading in the normal font (UX-18) */
+.editor__heading {
+  margin: 0;
+  font-size: var(--rm-font-size-large);
+  font-weight: var(--rm-font-weight-strong);
+}
+
+/* Commit | ▾ Commit and push (UX-18) */
+.split {
+  position: relative;
+  display: inline-flex;
+  align-self: flex-start;
+}
+
+.split__main {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.split__toggle {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  border-inline-start: var(--rm-shape-border-width) solid color-mix(in srgb, var(--rm-color-primary-text) 30%, transparent);
+  padding-inline: var(--rm-space-sm);
+}
+
+.split__menu {
+  position: absolute;
+  top: calc(100% + 2px);
+  inset-inline-start: 0;
+  z-index: 6;
+  min-inline-size: 100%;
+  padding: var(--rm-space-xs);
+  background: var(--rm-color-surface);
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius-medium);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--rm-color-text) 18%, transparent);
+}
+
+.split__item {
+  font: inherit;
+  display: block;
+  inline-size: 100%;
+  white-space: nowrap;
+  text-align: start;
+  padding: var(--rm-space-xs) var(--rm-space-sm);
+  border: 0;
+  border-radius: var(--rm-shape-radius-small);
+  background: transparent;
+  color: var(--rm-color-text);
+  cursor: pointer;
+}
+
+.split__item:hover {
+  background: var(--rm-color-row-hover);
+}

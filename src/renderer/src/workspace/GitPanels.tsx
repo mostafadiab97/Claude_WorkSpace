@@ -241,7 +241,7 @@ export function GitBar(props: {
  * e-mail form when Git does not know the user yet, and Undo last commit while it is not pushed.
  * The changed items themselves are listed in the middle area (ChangesView).
  */
-export function CommitTools(props: { state: GitState; blockedReason: string | null; onResult: (r: GitResult) => void }) {
+export function CommitTools(props: { state: GitState; blockedReason: string | null; onResult: (r: GitResult) => void; /** "Commit and push" (UX-18): push the way the Git bar does. */ onPush?: () => void }) {
   const { state, blockedReason } = props
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
@@ -249,7 +249,9 @@ export function CommitTools(props: { state: GitState; blockedReason: string | nu
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const needsIdentity = !state.identity.name || !state.identity.email
+  const [changingIdentity, setChangingIdentity] = useState(false)
+  const [menu, setMenu] = useState(false)
+  const needsIdentity = !state.identity.name || !state.identity.email || changingIdentity
 
   const run = async (op: () => Promise<GitResult>, after?: (r: GitResult) => void): Promise<void> => {
     setBusy(true)
@@ -276,10 +278,10 @@ export function CommitTools(props: { state: GitState; blockedReason: string | nu
             className="changes__identity"
             onSubmit={(e) => {
               e.preventDefault()
-              void run(() => window.reqman.setGitIdentity(name, email))
+              void run(() => window.reqman.setGitIdentity(name, email), (r) => r.ok && setChangingIdentity(false))
             }}
           >
-            <p className="notice notice--warn">{T.changesPanel.whoAreYou}</p>
+            <p className={changingIdentity ? 'muted' : 'notice notice--warn'}>{changingIdentity ? T.changesPanel.changeIdentityHint : T.changesPanel.whoAreYou}</p>
             <label className="field">
               <span className="field__label">{T.changesPanel.yourName}</span>
               <input className="input" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
@@ -288,9 +290,16 @@ export function CommitTools(props: { state: GitState; blockedReason: string | nu
               <span className="field__label">{T.changesPanel.yourEmail}</span>
               <input className="input" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
             </label>
-            <button type="submit" className="btn" disabled={busy}>
-              {T.common.save}
-            </button>
+            <span className="actions">
+              <button type="submit" className="btn" disabled={busy}>
+                {T.common.save}
+              </button>
+              {changingIdentity && (
+                <button type="button" className="btn" onClick={() => setChangingIdentity(false)}>
+                  {T.common.cancel}
+                </button>
+              )}
+            </span>
           </form>
         ) : (
           state.changes.length > 0 && (
@@ -299,6 +308,9 @@ export function CommitTools(props: { state: GitState; blockedReason: string | nu
               onSubmit={(e) => {
                 e.preventDefault()
                 void run(() => window.reqman.commit(message), (r) => r.ok && setMessage(''))
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') setMenu(false)
               }}
             >
               <label className="field">
@@ -311,12 +323,60 @@ export function CommitTools(props: { state: GitState; blockedReason: string | nu
                   onChange={(e) => setMessage(e.target.value)}
                 />
               </label>
+              {/* UX-18: the name only (the address in the tooltip), and a way to change it right here */}
               <p className="muted-inline">
-                {T.changesPanel.as(state.identity.name ?? '', state.identity.email ?? '')}
+                <span title={state.identity.email ?? undefined}>{T.changesPanel.author(state.identity.name ?? '')}</span>{' '}
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={() => {
+                    setName(state.identity.name ?? '')
+                    setEmail(state.identity.email ?? '')
+                    setChangingIdentity(true)
+                  }}
+                >
+                  {T.changesPanel.changeIdentity}
+                </button>
               </p>
-              <button type="submit" className="btn btn--primary" disabled={locked || !message.trim()} title={blockedReason ?? undefined}>
-                {busy ? T.changesPanel.committing : T.changesPanel.commit(state.changes.length)}
-              </button>
+              <span className="split">
+                <button type="submit" className="btn btn--primary split__main" disabled={locked || !message.trim()} title={blockedReason ?? undefined}>
+                  {busy ? T.changesPanel.committing : T.changesPanel.commit(state.changes.length)}
+                </button>
+                {props.onPush && state.hasRemote && (
+                  <button
+                    type="button"
+                    className="btn btn--primary split__toggle"
+                    aria-haspopup="menu"
+                    aria-expanded={menu}
+                    aria-label={T.changesPanel.moreCommit}
+                    title={T.changesPanel.moreCommit}
+                    disabled={locked || !message.trim()}
+                    onClick={() => setMenu((m) => !m)}
+                  >
+                    ▾
+                  </button>
+                )}
+                {menu && props.onPush && (
+                  <span className="split__menu" role="menu">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="split__item"
+                      onClick={() => {
+                        setMenu(false)
+                        const push = props.onPush
+                        void run(() => window.reqman.commit(message), (r) => {
+                          if (!r.ok) return
+                          setMessage('')
+                          push?.()
+                        })
+                      }}
+                    >
+                      {T.changesPanel.commitAndPush(state.changes.length)}
+                    </button>
+                  </span>
+                )}
+              </span>
               {blockedReason && <p className="muted-inline">{blockedReason}</p>}
             </form>
           )

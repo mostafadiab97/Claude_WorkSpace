@@ -1,4 +1,8 @@
 import { useState } from 'react'
+import type { Item } from '../../../shared/domain'
+import { textRows, wordDiff, type Segment, type TextRow } from '../lib/textDiff'
+import { plainText } from '../lib/markdown'
+import { typeName } from '../lib/schema'
 import type { LinkDecision, LinkInfo } from '../../../shared/api'
 import type { Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
@@ -12,8 +16,34 @@ type Choice = 'keep' | 'unlink'
  * or all at once; "Decide later" leaves the ⚠ marks, to review with the "With suspect links" filter.
  * Not shown for changes that arrive by pull — those only mark links suspect.
  */
-export function SuspectLinksDialog(props: { schema: Schema; itemId: string; incoming: LinkInfo[]; onDone: (changed: boolean) => void; onOpen: (id: string) => void }) {
+export function SuspectLinksDialog(props: {
+  schema: Schema
+  itemId: string
+  incoming: LinkInfo[]
+  /** The item before and after the save, to show what changed (UX-16). */
+  before: Item
+  after: Item
+  onDone: (changed: boolean) => void
+  onOpen: (id: string) => void
+}) {
   const { schema, itemId, incoming } = props
+  const [open, setOpen] = useState<ReadonlyMap<string, string | null>>(new Map())
+  const toggle = (l: LinkInfo): void => {
+    const k = key(l)
+    if (open.has(k)) {
+      setOpen((m) => {
+        const next = new Map(m)
+        next.delete(k)
+        return next
+      })
+      return
+    }
+    setOpen((m) => new Map(m).set(k, null))
+    void window.reqman.getItem(l.id).then(
+      (d) => setOpen((m) => (m.has(k) ? new Map(m).set(k, plainText(d?.item.text ?? '').slice(0, 400) || T.suspect.noText) : m)),
+      () => setOpen((m) => (m.has(k) ? new Map(m).set(k, T.suspect.noText) : m))
+    )
+  }
   const [choice, setChoice] = useState<ReadonlyMap<string, Choice>>(new Map())
   const [askUnlinkAll, setAskUnlinkAll] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -56,6 +86,7 @@ export function SuspectLinksDialog(props: { schema: Schema; itemId: string; inco
           </div>
         </header>
         <div className="modal__body">
+          <WhatChanged schema={schema} itemId={itemId} before={props.before} after={props.after} />
           <ul className="suspect__list" aria-label={T.suspect.list}>
             {incoming.map((l) => {
               const c = choice.get(key(l))
@@ -65,15 +96,19 @@ export function SuspectLinksDialog(props: { schema: Schema; itemId: string; inco
                   <button type="button" className="link-btn tree__id" onClick={() => props.onOpen(l.id)}>
                     {l.id}
                   </button>
-                  <span className="suspect__name">{l.title || T.common.noTitle}</span>
-                  <span className="actions suspect__choice" role="group" aria-label={T.suspect.choiceFor(l.id)}>
-                    <button type="button" className={c === 'keep' ? 'btn btn--small btn--active' : 'btn btn--small'} aria-pressed={c === 'keep'} onClick={() => set(l, 'keep')} title={T.suspect.keepTooltip}>
+                  <button type="button" className="link-btn suspect__name" aria-expanded={open.has(key(l))} title={T.suspect.showText} onClick={() => toggle(l)}>
+                    {open.has(key(l)) ? '▾' : '▸'} {l.title || T.common.noTitle}
+                  </button>
+                  {/* UX-16: one segmented control per link; the chosen half is filled */}
+                  <span className="segmented suspect__choice" role="group" aria-label={T.suspect.choiceFor(l.id)}>
+                    <button type="button" className={c === 'keep' ? 'segmented__part segmented__part--keep' : 'segmented__part'} aria-pressed={c === 'keep'} onClick={() => set(l, 'keep')} title={T.suspect.keepTooltip}>
                       {T.suspect.keep}
                     </button>
-                    <button type="button" className={c === 'unlink' ? 'btn btn--small btn--active btn--danger' : 'btn btn--small'} aria-pressed={c === 'unlink'} onClick={() => set(l, 'unlink')} title={T.suspect.unlinkTooltip(l.id)}>
+                    <button type="button" className={c === 'unlink' ? 'segmented__part segmented__part--unlink' : 'segmented__part'} aria-pressed={c === 'unlink'} onClick={() => set(l, 'unlink')} title={T.suspect.unlinkTooltip(l.id)}>
                       {T.suspect.unlink}
                     </button>
                   </span>
+                  {open.has(key(l)) && <p className="suspect__text muted">{open.get(key(l)) ?? T.common.ellipsis}</p>}
                 </li>
               )
             })}
@@ -102,6 +137,9 @@ export function SuspectLinksDialog(props: { schema: Schema; itemId: string; inco
                 </button>
               </span>
               <span className="actions">
+                <span className="muted-inline" role="status">
+                  {T.mergeDialog.progress(choice.size, incoming.length)}
+                </span>
                 <button type="button" className="btn" disabled={busy} onClick={() => props.onDone(false)} title={T.suspect.laterTooltip}>
                   {T.suspect.later}
                 </button>
@@ -114,5 +152,51 @@ export function SuspectLinksDialog(props: { schema: Schema; itemId: string; inco
         </footer>
       </div>
     </div>
+  )
+}
+
+/** What the save changed in the item: title and type in one line each, the text as a few changed lines (UX-16). */
+function WhatChanged({ schema, itemId, before, after }: { schema: Schema; itemId: string; before: Item; after: Item }) {
+  const [all, setAll] = useState(false)
+  const lines = before.text === after.text ? [] : textRows(before.text, after.text, 0).filter((r): r is Exclude<TextRow, { kind: 'same' } | { kind: 'fold' }> => r.kind !== 'same' && r.kind !== 'fold')
+  const shown = all ? lines : lines.slice(0, 6)
+  const marks = (segs: Segment[], cls: string) =>
+    segs.map((s, i) =>
+      s.mark ? (
+        <span key={i} className={cls}>
+          {s.text}
+        </span>
+      ) : (
+        <span key={i}>{s.text}</span>
+      )
+    )
+  return (
+    <section className="suspect__changed" aria-label={T.suspect.whatChanged(itemId)}>
+      <h3 className="links__title">{T.suspect.whatChanged(itemId)}</h3>
+      {before.title !== after.title && (
+        <p className="suspect__line">
+          <span className="muted-inline">{T.merge.title}</span> <del className="suspect__old">{marks(wordDiff(before.title, after.title).left, 'suspect__mark')}</del>{' '}
+          <span aria-hidden="true">→</span> <ins className="suspect__new">{marks(wordDiff(before.title, after.title).right, 'suspect__mark')}</ins>
+        </p>
+      )}
+      {before.type !== after.type && (
+        <p className="suspect__line">
+          <span className="muted-inline">{T.merge.type}</span> <del className="suspect__old">{typeName(schema, before.type)}</del> <span aria-hidden="true">→</span>{' '}
+          <ins className="suspect__new">{typeName(schema, after.type)}</ins>
+        </p>
+      )}
+      {shown.map((r, i) => (
+        <p key={i} className="suspect__line">
+          {r.kind !== 'added' && <del className="suspect__old">{r.kind === 'change' ? marks(r.left, 'suspect__mark') : r.text}</del>}
+          {r.kind === 'change' && <span aria-hidden="true"> → </span>}
+          {r.kind !== 'removed' && <ins className="suspect__new">{r.kind === 'change' ? marks(r.right, 'suspect__mark') : r.text}</ins>}
+        </p>
+      ))}
+      {lines.length > 6 && !all && (
+        <button type="button" className="link-btn" onClick={() => setAll(true)}>
+          {T.suspect.showAll(lines.length)}
+        </button>
+      )}
+    </section>
   )
 }

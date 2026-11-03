@@ -176,10 +176,10 @@ export function LinksSection(props: {
                     <span title={e.dir === 'out' ? T.links.suspectOutTooltip(e.link.id) : T.links.suspectInTooltip(e.link.id)}>
                       ⚠ {e.dir === 'out' ? T.links.changed : T.links.thisChanged}
                     </span>
-                    <button type="button" className="link-btn" disabled={locked} onClick={() => decide(e, true)} title={T.links.confirmTooltip}>
+                    <button type="button" className="btn btn--small" disabled={locked} onClick={() => decide(e, true)} title={T.links.confirmTooltip}>
                       {T.links.keep}
                     </button>
-                    <button type="button" className="link-btn" disabled={locked} onClick={() => decide(e, false)} title={T.links.unlinkTooltip}>
+                    <button type="button" className="btn btn--small" disabled={locked} onClick={() => decide(e, false)} title={T.links.unlinkTooltip}>
                       {T.links.unlink}
                     </button>
                   </span>

@@ -263,6 +263,7 @@ await scenario('E2E journey', async (ctx) => {
   const ask = win.getByRole('dialog', { name: 'Check the links to this item' })
   await ask.waitFor()
   check((await ask.locator('.suspect__row').count()) === 2, 'saving a changed text asks about the 2 items that link to it')
+  check((await ask.locator('.suspect__changed .suspect__new').allTextContents()).some((x) => x.includes('0.3')), '…and shows what changed in the text (UX-16)')
   await shot('09a-check-links')
   await ask.getByRole('button', { name: 'Decide later' }).click()
   check((await ask.count()) === 0, '"Decide later" closes the window and keeps the ⚠ marks')

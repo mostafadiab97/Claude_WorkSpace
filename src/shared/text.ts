@@ -371,6 +371,10 @@ const en = {
   },
 
   suspect: {
+    whatChanged: (id: string) => `What changed in ${id}`,
+    showAll: (count: number) => `Show all ${count} changed lines`,
+    showText: 'Show the text of this item',
+    noText: '(no text)',
     title: 'Check the links to this item',
     intro: (id: string, count: number) =>
       `You changed ${id}. ${count === 1 ? '1 item links' : `${count} items link`} to it and may no longer fit. Keep the links that still hold, unlink the others — or decide later (they stay marked ⚠).`,
@@ -623,9 +627,14 @@ const en = {
   },
 
   changesPanel: {
+    author: (name: string) => `Author: ${name}`,
+    changeIdentity: 'Change…',
+    changeIdentityHint: 'The name and e-mail address Git writes into your commits in this repository (only here, not for your other repositories).',
+    moreCommit: 'More ways to commit',
+    commitAndPush: (count: number) => `Commit ${count} change${s(count)} and push`,
     label: 'Changes',
     title: 'Changes',
-    subtitle: 'Not committed yet · only the requirements folder is committed',
+    subtitle: 'Only the requirements folder is committed — never your code.',
     close: 'Close changes',
     none: 'No uncommitted changes. Everything you saved is committed.',
     list: 'Changed items',
@@ -635,7 +644,7 @@ const en = {
     discardNewTooltip: 'Delete this new, never committed item',
     discardTooltip: 'Go back to the last committed version',
     discard: 'Discard',
-    whoAreYou: 'Git does not know who you are yet. Your name and e-mail are stored in your Git settings and appear in the history of every change you commit.',
+    whoAreYou: 'Git does not know who you are yet. Your name and e-mail are stored for this repository only and appear in the history of every change you commit.',
     yourName: 'Your name',
     yourEmail: 'Your e-mail',
     message: 'Commit message',

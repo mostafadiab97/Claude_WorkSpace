@@ -146,7 +146,7 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.14.3 Settings and help as pages — one page per settings group and per guide section (`src/shared/guide.ts` splits the guide; `renderer/lib/guide.ts` renders it); Back on top of the shaded panel. The owner cannot set a global private Git e-mail (company repos) → per-repository config in the sandbox clones only | Released (v0.14.3) |
 | 0.14.4 no personal data in the tool's files — the owner's name → "the owner"; no account name anywhere (workflows use `github.repository_owner`, CI passes `-c.publish.owner/repo`, the app reads `app-update.yml`, `tools/ci.mjs` reads the Git remote); `tools/check-privacy.mjs` checks current files only (names as hashes); Check for updates on the Updates line; blue Back | Released (v0.14.4) |
 | 0.14.5 blue Check for updates; folding User guide topics; UI review prompt `docs/guides/ui-review-prompt.md` (the owner may send back a review file to apply) | Released (v0.14.5) |
-| **Next** | the rename version as soon as the owner picks the name, then 1a structure (plan in `docs/reviews/2026-11-01-planning-discussion.md` → "Release plan"); Arabic wording review later | — |
+| **Next (decided 3 Nov)** | **UI polish version** from the UI/UX review (`docs/reviews/agents/0.14.5-ui-ux.md` → Decisions: 7 High + 15 quick wins + questions 1–5 as recommended; remaining findings listed to the owner), then the rename version as soon as the owner picks the name, then 1a structure (plan in `docs/reviews/2026-11-01-planning-discussion.md` → "Release plan"); Arabic wording review later | — |
 
 The owner's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
 Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.

@@ -1,3 +1,4 @@
+import { fieldLabel, optionLabel, typeLabel } from '../../lib/schema'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Schema } from '../../../../shared/domain'
 import { T } from '../../../../shared/text'
@@ -46,7 +47,7 @@ export function Toolbar(props: {
         <option value="">{tw.allTypes}</option>
         {schema.itemTypes.map((t) => (
           <option key={t.id} value={t.id}>
-            {t.name}
+            {typeLabel(t)}
           </option>
         ))}
       </select>
@@ -55,15 +56,15 @@ export function Toolbar(props: {
           key={d.id}
           className="input"
           value={f.fieldFilters[d.id] ?? ''}
-          aria-label={d.name}
+          aria-label={fieldLabel(d)}
           onChange={(e) => f.setField(d.id, e.target.value)}
           disabled={d.type === 'list' && !d.options}
           hidden={d.type === 'list' && !d.options}
         >
-          <option value="">{tw.fieldAny(d.name)}</option>
+          <option value="">{tw.fieldAny(fieldLabel(d))}</option>
           {d.options?.map((o) => (
             <option key={o} value={o}>
-              {o}
+              {optionLabel(d, o)}
             </option>
           ))}
         </select>
@@ -95,7 +96,7 @@ export function Toolbar(props: {
         <option value="">{tw.newItemOption}</option>
         {schema.itemTypes.map((t) => (
           <option key={t.id} value={t.id}>
-            {t.name}
+            {typeLabel(t)}
           </option>
         ))}
       </select>

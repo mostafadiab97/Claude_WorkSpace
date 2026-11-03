@@ -89,7 +89,10 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
             name: f.name,
             type: f.type,
             ...(f.type === 'enum' && f.options ? { options: f.options } : {}),
-            ...(f.default !== undefined && f.default !== '' ? { default: f.default } : {})
+            ...(f.default !== undefined && f.default !== '' ? { default: f.default } : {}),
+            // translated names (UX-22) are kept when the fields are edited in the window
+            ...(f.labels && Object.keys(f.labels).length > 0 ? { labels: f.labels } : {}),
+            ...(f.type === 'enum' && f.optionLabels && Object.keys(f.optionLabels).length > 0 ? { optionLabels: f.optionLabels } : {})
           }))
         )
         const text = doc.toString({ lineWidth: 0 })

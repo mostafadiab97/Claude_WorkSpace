@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest'
 import type { Schema } from '../../src/shared/domain'
 import { filterSummary } from '../../src/renderer/src/workspace/screen/useFilters'
 import { middleEllipsis } from '../../src/renderer/src/lib/statusbar'
-import { isHeading, typeShort } from '../../src/renderer/src/lib/schema'
+import { fieldLabel, formatValue, isHeading, linkName, optionLabel, typeName, typeShort } from '../../src/renderer/src/lib/schema'
+import { setLanguage } from '../../src/shared/text'
 import { plainText, renderItemText } from '../../src/renderer/src/lib/markdown'
 import { groupProblems, problemsOf } from '../../src/renderer/src/workspace/screen/problemList'
 
@@ -80,5 +81,27 @@ describe('problems panel (UX-11)', () => {
       ['file-name', 1]
     ])
     expect(p[1]).toMatchObject({ severity: 'warning', message: 'renamed', id: 'REQ-2' })
+  })
+})
+
+describe('schema names in the window language (UX-22)', () => {
+  const s: Schema = {
+    version: 1,
+    itemTypes: [{ id: 'sys', name: 'System Requirement', short: 'SysReq', requirement: true, labels: { ar: 'متطلب نظام' } }],
+    fields: [{ id: 'status', name: 'Status', type: 'enum', options: ['Draft'], labels: { ar: 'الحالة' }, optionLabels: { ar: { Draft: 'مسودة' } } }],
+    linkTypes: [{ id: 'verifies', name: 'verifies', reverseName: 'verified by', reverseLabels: { ar: 'متحقَّق منه بـ' } }]
+  }
+  const f = s.fields[0]!
+  it('English shows the names from schema.yaml; Arabic shows the labels, and the stored value stays the choice', () => {
+    setLanguage('en')
+    expect([typeName(s, 'sys'), typeShort(s, 'sys'), fieldLabel(f), optionLabel(f, 'Draft'), linkName(s, 'verifies', true)]).toEqual(['System Requirement', 'SysReq', 'Status', 'Draft', 'verified by'])
+    setLanguage('ar')
+    try {
+      expect([typeName(s, 'sys'), typeShort(s, 'sys'), fieldLabel(f), optionLabel(f, 'Draft'), linkName(s, 'verifies', true), linkName(s, 'verifies')]).toEqual(['متطلب نظام', 'متطلب نظام', 'الحالة', 'مسودة', 'متحقَّق منه بـ', 'verifies'])
+      expect(formatValue('Draft', f)).toBe('مسودة')
+      expect(optionLabel(f, 'Unknown')).toBe('Unknown')
+    } finally {
+      setLanguage('en')
+    }
   })
 })

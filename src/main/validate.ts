@@ -153,6 +153,14 @@ export function item(v: unknown): Item {
 
 const FIELD_TYPES = ['text', 'enum', 'list', 'number', 'date'] as const
 
+/** Texts per language (`{ ar: '…' }`), as in schema.yaml (UX-22). */
+function labels(v: unknown, what: string): Record<string, string> {
+  if (!isObj(v)) return bad(what)
+  const entries = Object.entries(v)
+  if (entries.length > 1000) return bad(what)
+  return Object.fromEntries(entries.map(([k, t]) => [str(k, what, 200), str(t, what, 500)]))
+}
+
 export function fieldDefs(v: unknown): FieldDef[] {
   if (!Array.isArray(v)) return bad('field list')
   return v.map((f) => {
@@ -160,6 +168,11 @@ export function fieldDefs(v: unknown): FieldDef[] {
     const def: FieldDef = { id: str(f.id, 'field ID', 64), name: str(f.name, 'field name', 200), type: oneOf(f.type, FIELD_TYPES, 'field kind') }
     if (f.options !== undefined) def.options = strings(f.options, 'field choices', 1000)
     if (f.default !== undefined && f.default !== '') def.default = str(f.default, 'default value')
+    if (f.labels !== undefined) def.labels = labels(f.labels, 'field labels')
+    if (f.optionLabels !== undefined) {
+      if (!isObj(f.optionLabels)) return bad('choice labels')
+      def.optionLabels = Object.fromEntries(Object.entries(f.optionLabels).map(([lang, m]) => [str(lang, 'language', 16), labels(m, 'choice labels')]))
+    }
     return def
   })
 }

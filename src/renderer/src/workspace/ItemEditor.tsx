@@ -3,7 +3,7 @@ import type { ItemDetails, LinkInfo } from '../../../shared/api'
 import type { FieldDef, FieldValue, Item, ItemIssue, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { renderItemText } from '../lib/markdown'
-import { typeName } from '../lib/schema'
+import { fieldLabel, optionLabel, typeLabel, typeName } from '../lib/schema'
 import { HistoryView } from './HistoryView'
 import { LinksSection } from './LinksSection'
 import { ParentPicker } from './ParentPicker'
@@ -241,7 +241,7 @@ export function ItemEditor(props: {
             <select className="input" aria-label={T.editor.type} value={form.type} title={T.editor.typeTooltip} onChange={(e) => set({ type: e.target.value })}>
               {schema.itemTypes.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.name}
+                  {typeLabel(t)}
                 </option>
               ))}
               {!schema.itemTypes.some((t) => t.id === form.type) && <option value={form.type}>{form.type}</option>}
@@ -377,7 +377,7 @@ export function ItemEditor(props: {
                 >
                   <option value="">{T.editor.addChildOption}</option>
                   {schema.itemTypes.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
+                    <option key={t.id} value={t.id}>{typeLabel(t)}</option>
                   ))}
                 </select>
                 <button type="button" className="btn btn--quiet-danger" onClick={() => setConfirmDelete(true)} disabled={dirty}>
@@ -427,7 +427,7 @@ function FieldInput({ def, value, error, onChange }: { def: FieldDef; value: Fie
       control = (
         <select className="input" value={str} onChange={(e) => onChange(e.target.value || undefined)}>
           <option value="">—</option>
-          {def.options?.map((o) => <option key={o} value={o}>{o}</option>)}
+          {def.options?.map((o) => <option key={o} value={o}>{optionLabel(def, o)}</option>)}
           {str && !def.options?.includes(str) && <option value={str}>{T.editor.notAllowed(str)}</option>}
         </select>
       )
@@ -466,7 +466,7 @@ function FieldInput({ def, value, error, onChange }: { def: FieldDef; value: Fie
   }
   return (
     <label className={def.type === 'list' ? 'field field--wide' : 'field'}>
-      <span className="field__label">{def.name}</span>
+      <span className="field__label">{fieldLabel(def)}</span>
       {control}
       {error && <span className="field__error">{error}</span>}
     </label>

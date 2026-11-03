@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Item } from '../../../shared/domain'
 import { textRows, wordDiff, type Segment, type TextRow } from '../lib/textDiff'
 import { plainText } from '../lib/markdown'
-import { typeName } from '../lib/schema'
+import { linkName, typeName } from '../lib/schema'
 import type { LinkDecision, LinkInfo } from '../../../shared/api'
 import type { Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
@@ -49,7 +49,7 @@ export function SuspectLinksDialog(props: {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const key = (l: LinkInfo): string => `${l.id}\u0000${l.type}`
-  const relation = (type: string): string => schema.linkTypes.find((t) => t.id === type)?.reverseName ?? type
+  const relation = (type: string): string => linkName(schema, type, true)
 
   const apply = async (decisions: LinkDecision[]): Promise<void> => {
     if (decisions.length === 0) return props.onDone(false)

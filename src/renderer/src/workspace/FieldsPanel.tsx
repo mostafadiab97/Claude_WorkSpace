@@ -215,7 +215,10 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
         name: r.name.trim(),
         type: r.type,
         ...((r.type === 'enum' || r.type === 'list') && options.length > 0 ? { options } : {}),
-        ...(r.default.trim() ? { default: r.default.trim() } : {})
+        ...(r.default.trim() ? { default: r.default.trim() } : {}),
+        // translated names (UX-22) are not edited here yet, but must survive a save
+        ...(original.get(r.id)?.labels ? { labels: original.get(r.id)?.labels } : {}),
+        ...(original.get(r.id)?.optionLabels ? { optionLabels: original.get(r.id)?.optionLabels } : {})
       }
     })
     setSaving(true)

@@ -3,6 +3,7 @@ import type { ImportFile, ImportPreview, ImportResult, ImportSettings, ImportTar
 import type { Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { T } from '../../../shared/text'
+import { fieldLabel, linkLabel, typeLabel } from '../lib/schema'
 
 type Step = 'file' | 'columns' | 'check'
 
@@ -210,7 +211,7 @@ export function ImportDialog(props: { schema: Schema; file: ImportFile | null; n
                 <select className="input" value={defaultType} onChange={(e) => setDefaultType(e.target.value)}>
                   {schema.itemTypes.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.name}
+                      {typeLabel(t)}
                     </option>
                   ))}
                 </select>
@@ -383,15 +384,15 @@ function targetOptions(schema: Schema): { label: string; options: { value: Impor
         { value: 'level', label: o.level }
       ]
     },
-    { label: o.groupFields, options: schema.fields.map((f) => ({ value: `field:${f.id}` as ImportTarget, label: f.name })) },
+    { label: o.groupFields, options: schema.fields.map((f) => ({ value: `field:${f.id}` as ImportTarget, label: fieldLabel(f) })) },
     {
       label: o.groupLinks,
       options: [
         { value: 'links', label: o.links },
         { value: 'linkedFrom', label: o.linkedFrom },
         ...schema.linkTypes.flatMap((l) => [
-          { value: `link:${l.id}` as ImportTarget, label: o.linkOut(l.name) },
-          { value: `linkFrom:${l.id}` as ImportTarget, label: o.linkIn(l.reverseName) }
+          { value: `link:${l.id}` as ImportTarget, label: o.linkOut(linkLabel(l)) },
+          { value: `linkFrom:${l.id}` as ImportTarget, label: o.linkIn(linkLabel(l, true)) }
         ])
       ]
     }

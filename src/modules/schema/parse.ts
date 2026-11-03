@@ -10,6 +10,23 @@ const ID_RE = /^[a-z][a-z0-9-]*$/
 type Obj = Record<string, unknown>
 const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v)
 const str = (v: unknown): string | undefined => (typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined)
+const LANG_RE = /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/
+
+/** Translated names (UX-22): `{ ar: 'الحالة' }`. Anything else is reported and left out. */
+function labelsOf(v: unknown, path: string, add: (path: string, message: string) => void, keysAreLanguages = true): Record<string, string> | undefined {
+  if (v === undefined) return undefined
+  if (!isObj(v)) {
+    add(path, 'Must be a mapping of language to text, e.g. "{ ar: الحالة }".')
+    return undefined
+  }
+  const out: Record<string, string> = {}
+  for (const [lang, text] of Object.entries(v)) {
+    const t = str(text)
+    if ((keysAreLanguages && !LANG_RE.test(lang)) || t === undefined) add(`${path}.${lang}`, keysAreLanguages ? 'Must be a language code (e.g. ar) with a text.' : 'Must be a text.')
+    else out[lang] = t
+  }
+  return Object.keys(out).length > 0 ? out : undefined
+}
 
 export function parseSchema(text: string): ParsedSchema {
   const problems: SchemaProblem[] = []
@@ -47,7 +64,8 @@ export function parseSchema(text: string): ParsedSchema {
     if (itemTypes.some((t) => t.id === id)) return add(`${p}.id`, `Duplicate item type "${id}".`)
     // Since 0.9.0 IDs do not depend on the type (all are REQ-…), so a "prefix" in older schemas is ignored.
     const short = str(v.short)
-    itemTypes.push({ id, name: str(v.name) ?? id, requirement: v.requirement !== false, ...(short ? { short } : {}) })
+    const labels = labelsOf(v.labels, `${p}.labels`, add)
+    itemTypes.push({ id, name: str(v.name) ?? id, requirement: v.requirement !== false, ...(short ? { short } : {}), ...(labels ? { labels } : {}) })
   })
   if (itemTypes.length === 0) add('itemTypes', 'At least one valid item type is needed.')
 
@@ -68,6 +86,19 @@ export function parseSchema(text: string): ParsedSchema {
       if (options.length === 0) return add(`${p}.options`, 'An enum field needs a list of options.')
       field.options = [...new Set(options)]
     }
+    const labels = labelsOf(v.labels, `${p}.labels`, add)
+    if (labels) field.labels = labels
+    if (v.optionLabels !== undefined) {
+      if (!isObj(v.optionLabels)) add(`${p}.optionLabels`, 'Must be a mapping of language to choices, e.g. "{ ar: { Draft: مسودة } }".')
+      else {
+        const byLang: Record<string, Record<string, string>> = {}
+        for (const [lang, m] of Object.entries(v.optionLabels)) {
+          const l = LANG_RE.test(lang) ? labelsOf(m, `${p}.optionLabels.${lang}`, add, false) : (add(`${p}.optionLabels.${lang}`, 'Must be a language code, e.g. ar.'), undefined)
+          if (l) byLang[lang] = l
+        }
+        if (Object.keys(byLang).length > 0) field.optionLabels = byLang
+      }
+    }
     if (v.default !== undefined) {
       const d = String(v.default)
       if (field.options && !field.options.includes(d)) add(`${p}.default`, `Default "${d}" is not one of the options; ignored.`)
@@ -85,7 +116,9 @@ export function parseSchema(text: string): ParsedSchema {
     if (!id || !ID_RE.test(id)) return add(`${p}.id`, 'Must be lower-case letters, digits and dashes, e.g. "verifies".')
     if (linkTypes.some((l) => l.id === id)) return add(`${p}.id`, `Duplicate link type "${id}".`)
     const name = str(v.name) ?? id
-    linkTypes.push({ id, name, reverseName: str(v.reverseName) ?? `${name} (reverse)` })
+    const labels = labelsOf(v.labels, `${p}.labels`, add)
+    const reverseLabels = labelsOf(v.reverseLabels, `${p}.reverseLabels`, add)
+    linkTypes.push({ id, name, reverseName: str(v.reverseName) ?? `${name} (reverse)`, ...(labels ? { labels } : {}), ...(reverseLabels ? { reverseLabels } : {}) })
   })
 
   // ---- feature switches set by the team (P-40a): `features: { branches: false }`; unknown names are kept (a newer

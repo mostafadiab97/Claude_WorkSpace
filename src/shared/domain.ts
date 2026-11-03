@@ -12,7 +12,12 @@ export interface ItemTypeDef {
   requirement: boolean
   /** Optional short label for narrow places such as the table's Type column ("SysReq"); 0.15 UI polish (UX-03). */
   short?: string
+  /** The name in other window languages, e.g. `{ ar: 'متطلب نظام' }` (UX-22); `name` is the default. */
+  labels?: Labels
 }
+
+/** A text per window language (`ar`, …); missing languages use the default name. */
+export type Labels = Record<string, string>
 
 export interface FieldDef {
   id: string
@@ -22,6 +27,10 @@ export interface FieldDef {
   options?: string[]
   /** Value given to new items. */
   default?: string
+  /** The field name in other window languages (UX-22). */
+  labels?: Labels
+  /** How choices are shown in other window languages: `{ ar: { Draft: 'مسودة' } }`. Files keep the choice itself. */
+  optionLabels?: Record<string, Labels>
 }
 
 export interface LinkTypeDef {
@@ -30,6 +39,9 @@ export interface LinkTypeDef {
   name: string
   /** Read from the target: "SYS-1 is verified by TC-1". */
   reverseName: string
+  /** Both names in other window languages (UX-22). */
+  labels?: Labels
+  reverseLabels?: Labels
 }
 
 export interface Schema {

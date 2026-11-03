@@ -1,7 +1,7 @@
 // Table columns: which exist, their order and visibility (personal, per repository on this PC).
 import { plainText } from '../../lib/markdown'
 import type { IndexedItem, Schema, SortKey } from '../../../../shared/domain'
-import { formatValue, isHeading, typeName, typeShort } from '../../lib/schema'
+import { fieldLabel, formatValue, isHeading, typeName, typeShort } from '../../lib/schema'
 import { T } from '../../../../shared/text'
 
 export interface Column {
@@ -42,7 +42,7 @@ export function optionalColumns(schema: Schema): { key: string; label: string; b
     { ...BUILT_IN_OPTIONAL[0], builtIn: true },
     { ...BUILT_IN_OPTIONAL[1], builtIn: true },
     { ...BUILT_IN_OPTIONAL[3], builtIn: true },
-    ...schema.fields.map((f) => ({ key: `field:${f.id}`, label: f.name, builtIn: false })),
+    ...schema.fields.map((f) => ({ key: `field:${f.id}`, label: fieldLabel(f), builtIn: false })),
     { ...BUILT_IN_OPTIONAL[2], builtIn: true }
   ]
 }
@@ -116,10 +116,10 @@ export function columnsFor(schema: Schema, prefs: ColumnPrefs = { hidden: new Se
     { key: 'links', label: T.columns.links, minPx: 72, grow: 0, value: linkSummary, warn: (i) => i.suspectCount > 0 },
     ...schema.fields.map<Column>((f) => ({
       key: `field:${f.id}`,
-      label: f.name,
+      label: fieldLabel(f),
       minPx: f.type === 'list' ? 110 : f.id === 'priority' ? 80 : 96,
       grow: f.type === 'list' ? 1 : 0.6,
-      value: (i) => formatValue(i.fields[f.id])
+      value: (i) => formatValue(i.fields[f.id], f)
     })),
     { key: 'id', label: T.columns.id, minPx: 110, grow: 0, value: (i) => i.id },
     // UX-08: one line without Markdown markers (the first 400 characters are plenty for a cell)

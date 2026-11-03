@@ -3,7 +3,7 @@ import { useState } from 'react'
 import type { ItemQuery, Schema, SortKey } from '../../../../shared/domain'
 import { useDebounced } from '../../lib/hooks'
 import { T } from '../../../../shared/text'
-import { typeName } from '../../lib/schema'
+import { fieldLabel, optionLabel, typeName } from '../../lib/schema'
 
 export type LinkFilter = '' | 'suspect' | 'none'
 
@@ -21,7 +21,7 @@ export function filterSummary(schema: Schema, f: { search: string; types: string
   if (f.types) parts.push(T.workspace.filterIs(T.editor.type, typeName(schema, f.types)))
   for (const d of schema.fields) {
     const v = f.fieldFilters[d.id]
-    if (v) parts.push(T.workspace.filterIs(d.name, v))
+    if (v) parts.push(T.workspace.filterIs(fieldLabel(d), optionLabel(d, v)))
   }
   if (f.linkFilter) parts.push(f.linkFilter === 'suspect' ? T.workspace.linksSuspect : T.workspace.linksNone)
   return parts.join(', ')

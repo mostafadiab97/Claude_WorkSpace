@@ -1,3 +1,4 @@
+import { linkLabel } from '../lib/schema'
 import { useState } from 'react'
 import type { ItemDetails, LinkInfo } from '../../../shared/api'
 import type { Schema } from '../../../shared/domain'
@@ -35,7 +36,7 @@ export function LinksSection(props: {
   const linkType = (id: string) => schema.linkTypes.find((t) => t.id === id)
   const label = (dir: Direction, type: string): string => {
     const t = linkType(type)
-    return t ? (dir === 'out' ? t.name : t.reverseName) : T.links.unknownType(type)
+    return t ? linkLabel(t, dir !== 'out') : T.links.unknownType(type)
   }
   const entries: Entry[] = [
     ...(details?.outgoing ?? []).map((link) => ({ dir: 'out' as const, link })),
@@ -136,10 +137,10 @@ export function LinksSection(props: {
         <div className="links__add">
           <select className="input" aria-label={T.links.linkType} value={relation} onChange={(e) => setRelation(e.target.value)}>
             <optgroup label={T.links.thisItem}>
-              {schema.linkTypes.map((t) => <option key={`out-${t.id}`} value={`out:${t.id}`}>{t.name}</option>)}
+              {schema.linkTypes.map((t) => <option key={`out-${t.id}`} value={`out:${t.id}`}>{linkLabel(t)}</option>)}
             </optgroup>
             <optgroup label={T.links.thisItemIs}>
-              {schema.linkTypes.map((t) => <option key={`in-${t.id}`} value={`in:${t.id}`}>{t.reverseName}</option>)}
+              {schema.linkTypes.map((t) => <option key={`in-${t.id}`} value={`in:${t.id}`}>{linkLabel(t, true)}</option>)}
             </optgroup>
           </select>
           <ItemSearch

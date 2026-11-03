@@ -224,6 +224,8 @@ const raw: Texts = {
     introNew: 'يحصل المشروع الجديد على هذه المتطلبات كأول إيداع له.',
     steps: 'الخطوات',
     stepNames: { file: 'الملف', columns: 'الأعمدة', check: 'المراجعة والاستيراد' },
+    dropHere: 'أفلت ملف Excel أو CSV أو ReqIF هنا، أو',
+    formats: 'Excel (.xlsx) · CSV (.csv) · ReqIF (.reqif, .reqifz — من DOORS وJama وPolarion)',
     chooseFile: 'اختيار ملف…',
     otherFile: 'اختيار ملف آخر…',
     chooseAnother: 'اختيار مجلد آخر…',
@@ -330,6 +332,8 @@ const raw: Texts = {
   },
 
   parentPicker: {
+    change: 'تغيير…',
+    show: 'عرض',
     none: 'لا شيء (المستوى الأعلى)',
     notFound: (id: string) => `${id} (غير موجود)`,
     label: 'البحث عن أصل',
@@ -390,6 +394,7 @@ const raw: Texts = {
   },
 
   history: {
+    slow: 'سجل كبير — ما زال Git يقرأ…',
     loading: 'جارٍ تحميل السجلّ…',
     none: 'لا سجلّ بعد — لم يُودَع هذا العنصر قط.',
     versions: 'الإصدارات',
@@ -593,13 +598,14 @@ const raw: Texts = {
   },
 
   mergeDialog: {
-    title: (source: string) => `السحب من ${source}: قرارك`,
+    title: (source: string) => (source.startsWith('origin/') ? `جلب التغييرات من GitHub (${source.slice(7)}): قراراتك` : `جلب التغييرات من ${source}: قراراتك`),
     intro: (incoming: number, combined: number, questions: number) =>
       `تغيّر هناك ${items(incoming)}. ${combined > 0 ? `${items(combined)} تغيّرت على الطرفين في أجزاء مختلفة ودُمجت تلقائيًا. ` : ''}${items(questions)} تغيّر فيها الجزء نفسه بشكل مختلف — قرّر أدناه. لا يتغير شيء حتى تنتهي.`,
     duplicates: (labels: string) => `أُنشئت على الطرفين بالمعرّف نفسه (سيحصل عنصرك على معرّف جديد): ${labels}`,
     openTooltip: 'إظهار هذا العنصر في الجدول (إصدارك)',
     partLabel: (label: string) => `قرار: ${label}`,
-    before: (base: string) => `قبل تغيير الطرفين: ${base}`,
+    before: (base: string) => `قبل: ${base}`,
+    pickHint: 'انقر على النسخة التي تريد الاحتفاظ بها.',
     yours: 'نسختك (هذا الفرع)',
     theirs: 'نسختهم (القادمة بالسحب)',
     empty: '(فارغ)',
@@ -758,11 +764,11 @@ const raw: Texts = {
     export: 'تصدير…',
     expandAll: 'توسيع الكل',
     expanding: 'جارٍ التوسيع…',
-    expandAllTooltip: 'فتح كل مستويات التسلسل الهرمي',
+    expandAllTooltip: 'توسيع الكل — فتح كل مستويات التسلسل الهرمي',
     collapseAll: 'طيّ الكل',
-    collapseAllTooltip: 'إظهار عناصر المستوى الأعلى فقط',
+    collapseAllTooltip: 'طيّ الكل — إظهار عناصر المستوى الأعلى فقط',
     newItem: 'عنصر جديد',
-    newItemOption: '+ عنصر جديد…',
+    newItemOption: '+ عنصر جديد',
     searchMode: 'نتائج البحث — يعود التسلسل الهرمي عند مسح البحث والتصفية.',
     emptyRepo: 'لا عناصر بعد. استخدم «عنصر جديد» لإضافة أول عنصر.',
     emptyFilter: 'لا عناصر تطابق التصفية.',
@@ -776,6 +782,10 @@ const raw: Texts = {
     fixFileNameTooltip: (id: string) => `إعادة تسمية الملف إلى ${id}.md (يراها Git إعادة تسمية، فيبقى السجلّ)`,
     fixFailed: (why: string) => `تعذّر إصلاح اسم الملف: ${why}`,
     of: (shown: number, all: number) => `${n(shown)} من ${n(all)} عنصر`,
+    searchFor: (text: string) => `«${text}»`,
+    filterIs: (name: string, value: string) => `${name} = ${value}`,
+    filteredBy: (what: string) => `مُصفّى: ${what}`,
+    lastPull: (time: string) => `آخر سحب: ${time}`,
     dragHint: 'اسحب صفًا فوق صف آخر لنقله إليه، مع كل ما تحته',
     notGit: 'ليس مستودع Git',
     refreshFailed: (why: string) => `فشل التحديث: ${why}`,

@@ -1,3 +1,4 @@
+import { QUICK_START_PAGE } from '../../../shared/guide'
 import { useCallback, useEffect, useState } from 'react'
 import type { AppInfo, GitInfo, LoadedTheme, RepoInfo, UpdateStatus, ImportFile } from '../../../shared/api'
 import { applyTheme, loadSavedMode, saveMode, type ThemeMode } from '../theme/applyTheme'
@@ -147,7 +148,7 @@ export function App() {
             brand={brand}
             git={git}
             onQuickStart={() => {
-              setSettingsStart('1-quick-start-15-minutes')
+              setSettingsStart(QUICK_START_PAGE)
               setShowSettings(true)
             }}
             onOpened={(info, file) => {

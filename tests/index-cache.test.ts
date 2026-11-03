@@ -51,6 +51,13 @@ describe('index cache', () => {
     expect(ctx.cache.get(ctx.items.sys!.id)).toEqual({ ...expected, path: `items/${ctx.items.sys!.id}.md`, childCount: 0, incomingCount: 1, suspectCount: 0 })
   })
 
+  it('lists the values a field already has, most used first (Owner suggestions, UX-27)', () => {
+    expect(ctx.cache.fieldValues('owner', 10)).toEqual(['A. Hassan'])
+    expect(ctx.cache.fieldValues('status', 10)).toEqual(['Draft', 'Approved']) // new items start as Draft
+    expect(ctx.cache.fieldValues('tags', 2)).toHaveLength(2)
+    expect(ctx.cache.fieldValues('nothing', 10)).toEqual([])
+  })
+
   it('finds words in title and text, with prefix matching and without accents', () => {
     const ids = (text: string): string[] => ctx.cache.query({ text }).items.map((i) => i.id)
     expect(ids('accur')).toEqual([ctx.items.sys!.id, ctx.items.tc!.id].sort())

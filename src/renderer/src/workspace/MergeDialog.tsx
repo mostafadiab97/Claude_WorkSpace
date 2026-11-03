@@ -108,23 +108,28 @@ function PartRow(props: { part: MergePart; choice: MergeChoice | undefined; onCh
         <strong>{part.label}</strong>
         {part.base && <span className="muted-inline">{T.mergeDialog.before(part.base)}</span>}
       </div>
+      {/* UX-32: the two versions are the choices themselves — click one; the chosen one is framed and ticked */}
       <div className="merge__sides">
-        <div className={choice === 'mine' ? 'merge__side merge__side--picked' : 'merge__side'}>
-          <span className="merge__who">{T.mergeDialog.yours}</span>
-          <div className="merge__value">{part.mine || T.mergeDialog.empty}</div>
-        </div>
-        <div className={choice === 'theirs' ? 'merge__side merge__side--picked' : 'merge__side'}>
-          <span className="merge__who">{T.mergeDialog.theirs}</span>
-          <div className="merge__value">{part.theirs || T.mergeDialog.empty}</div>
-        </div>
+        {(['mine', 'theirs'] as const).map((side) => (
+          <button
+            key={side}
+            type="button"
+            className={choice === side ? 'merge__side merge__side--picked' : 'merge__side'}
+            aria-pressed={choice === side}
+            aria-label={side === 'mine' ? T.mergeDialog.keepYours : T.mergeDialog.takeTheirs}
+            title={side === 'mine' ? T.mergeDialog.keepYours : T.mergeDialog.takeTheirs}
+            onClick={() => props.onChoose(choice === side ? undefined : side)}
+          >
+            <span className="merge__who">
+              {side === 'mine' ? T.mergeDialog.yours : T.mergeDialog.theirs}
+              {choice === side && <span className="merge__tick">✓</span>}
+            </span>
+            <span className="merge__value">{(side === 'mine' ? part.mine : part.theirs) || T.mergeDialog.empty}</span>
+          </button>
+        ))}
       </div>
       <div className="actions">
-        <button type="button" className={cls(choice === 'mine')} aria-pressed={choice === 'mine'} onClick={() => props.onChoose(choice === 'mine' ? undefined : 'mine')}>
-          {T.mergeDialog.keepYours}
-        </button>
-        <button type="button" className={cls(choice === 'theirs')} aria-pressed={choice === 'theirs'} onClick={() => props.onChoose(choice === 'theirs' ? undefined : 'theirs')}>
-          {T.mergeDialog.takeTheirs}
-        </button>
+        {!isDecided(choice) && <span className="muted-inline">{T.mergeDialog.pickHint}</span>}
         {part.editable && (
           <button type="button" className={cls(editing)} aria-pressed={editing} onClick={() => props.onChoose(editing ? undefined : { edit: part.mine })}>
             {T.mergeDialog.edit}

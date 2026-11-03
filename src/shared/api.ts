@@ -508,6 +508,8 @@ export interface ReqManApi {
   reparentItems(ids: string[], parent: string | null, before?: string | null): Promise<{ ok: true } | { ok: false; message: string }>
   /** IDs from the top-level item down to the item's parent (empty for a top-level item). */
   getAncestors(id: string): Promise<string[]>
+  /** Values a field already has in this repository, most used first (suggestions, UX-27). */
+  getFieldValues(field: string): Promise<string[]>
   /** Replaces the project's field definitions in schema.yaml and re-opens the repository. */
   saveSchemaFields(fields: FieldDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   /** Adds a link stored in `source` ("source verifies target"); confirmed against the target as it is now. */
@@ -570,6 +572,10 @@ export interface ReqManApi {
   // --- Excel / CSV import (M7)
   /** Asks for an .xlsx or .csv file and reads it; null when the user cancels. */
   chooseImportFile(): Promise<ImportFile | null>
+  /** Reads a file dropped on the import window (UX-23); the path comes from `pathOfDroppedFile`. */
+  openImportFile(path: string): Promise<ImportFile>
+  /** The path on disk of a file dropped on the window (answered by the preload, no round trip). */
+  pathOfDroppedFile(file: File): string
   /** What importing the chosen sheet would do (nothing is written). */
   previewImport(settings: ImportSettings): Promise<ImportPreview>
   /** Imports it as uncommitted changes; with `commitMessage` (new project) commits right away. */
@@ -607,7 +613,7 @@ export interface ReqManApi {
 }
 
 /** Calls that go through `ipcRenderer.invoke` (all except the event subscription and the fire-and-forget log). */
-export type InvokeMethod = Exclude<keyof ReqManApi, 'onUpdateStatus' | 'reportUiError'>
+export type InvokeMethod = Exclude<keyof ReqManApi, 'onUpdateStatus' | 'reportUiError' | 'pathOfDroppedFile'>
 
 export interface ReleaseSelfTestStep {
   name: string
@@ -662,6 +668,7 @@ export const Channels = {
   reparentItem: 'ws:reparentItem',
   reparentItems: 'ws:reparentItems',
   getAncestors: 'ws:ancestors',
+  getFieldValues: 'ws:fieldValues',
   saveSchemaFields: 'ws:saveSchemaFields',
   addLink: 'ws:addLink',
   removeLink: 'ws:removeLink',
@@ -690,6 +697,7 @@ export const Channels = {
   getCompareOptions: 'compare:options',
   compareVersions: 'compare:versions',
   chooseImportFile: 'import:choose',
+  openImportFile: 'import:open',
   previewImport: 'import:preview',
   runImport: 'import:run',
   newProjectFromFile: 'import:newProject',
@@ -699,4 +707,4 @@ export const Channels = {
   exportItems: 'export:items',
   exportCompare: 'export:compare',
   showInFolder: 'app:showInFolder'
-} as const satisfies Record<Exclude<keyof ReqManApi, 'onUpdateStatus'> | 'updateStatusChanged', string>
+} as const satisfies Record<Exclude<keyof ReqManApi, 'onUpdateStatus' | 'pathOfDroppedFile'> | 'updateStatusChanged', string>

@@ -14,6 +14,8 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
   const [pushOffer, setPushOffer] = useState(false)
   /** A pull that needs decisions (M8): the merge window is open while this is set. */
   const [plan, setPlan] = useState<MergePlan | null>(null)
+  /** When the last pull in this window worked (status bar, UX-36). */
+  const [lastPull, setLastPull] = useState<Date | null>(null)
 
   // Git status follows every change of the data (saves, moves, links, refresh on window focus).
   useEffect(() => {
@@ -55,7 +57,11 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
     }
   }
   /** Runs pull or push; true when it worked. */
-  const run = (action: 'pull' | 'push'): Promise<boolean> => perform(action === 'pull' ? T.git.pulling : T.git.pushing, () => window.reqman[action]())
+  const run = async (action: 'pull' | 'push'): Promise<boolean> => {
+    const ok = await perform(action === 'pull' ? T.git.pulling : T.git.pushing, () => window.reqman[action]())
+    if (ok && action === 'pull') setLastPull(new Date())
+    return ok
+  }
 
   /** The merge window closed: finished (result) or cancelled (null). */
   const mergeDone = (r: GitResult | null): void => {
@@ -63,7 +69,10 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
     if (!r) return
     setState(r.state)
     setNotice({ ok: r.ok, message: r.message, ...(r.neutral ? { neutral: true } : {}), ...(!r.ok && r.items ? { items: r.items } : {}) })
-    if (r.ok) void afterChange()
+    if (r.ok) {
+      setLastPull(new Date())
+      void afterChange()
+    }
   }
 
   /** "Publish to GitHub": add the remote and push for the first time. */
@@ -105,6 +114,7 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
 
   return {
     state,
+    lastPull,
     reload: () => void window.reqman.getGitState().then(setState),
     busy,
     notice,

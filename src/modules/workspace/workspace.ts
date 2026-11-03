@@ -243,6 +243,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     deleteItem: q(items.deleteItem),
     fixFileName: q(items.fixFileName),
     ancestors: structure.ancestors,
+    fieldValues: (field) => need().index.fieldValues(field, 200),
     reparentItem: q(structure.reparentItem),
     reparentItems: q(structure.reparentItems),
     moveItem: q(structure.moveItem),

@@ -2,6 +2,8 @@
 import { useState } from 'react'
 import type { ItemQuery, Schema, SortKey } from '../../../../shared/domain'
 import { useDebounced } from '../../lib/hooks'
+import { T } from '../../../../shared/text'
+import { typeName } from '../../lib/schema'
 
 export type LinkFilter = '' | 'suspect' | 'none'
 
@@ -10,6 +12,19 @@ export function nextSort(s: { by: SortKey; descending: boolean }, key: SortKey):
   if (s.by !== key) return { by: key, descending: false }
   if (!s.descending) return { by: key, descending: true }
   return { by: 'order', descending: false }
+}
+
+/** The active filters in words for the status bar ("Status = Draft, “door”") — UX-36. Pure; empty when none. */
+export function filterSummary(schema: Schema, f: { search: string; types: string; linkFilter: LinkFilter; fieldFilters: Record<string, string> }): string {
+  const parts: string[] = []
+  if (f.search.trim()) parts.push(T.workspace.searchFor(f.search.trim()))
+  if (f.types) parts.push(T.workspace.filterIs(T.editor.type, typeName(schema, f.types)))
+  for (const d of schema.fields) {
+    const v = f.fieldFilters[d.id]
+    if (v) parts.push(T.workspace.filterIs(d.name, v))
+  }
+  if (f.linkFilter) parts.push(f.linkFilter === 'suspect' ? T.workspace.linksSuspect : T.workspace.linksNone)
+  return parts.join(', ')
 }
 
 /** The index query for the table. A search without a chosen column sorts by best match. Pure. */
@@ -48,6 +63,7 @@ export function useFilters(schema: Schema) {
     linkFilter,
     setLinkFilter,
     fieldFilters,
+    summary: filterSummary(schema, { search, types, linkFilter, fieldFilters }),
     setField: (id: string, value: string) => setFieldFilters((ff) => ({ ...ff, [id]: value })),
     query,
     filtered,

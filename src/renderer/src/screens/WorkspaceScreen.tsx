@@ -16,6 +16,7 @@ import { ItemTable, shownColumnKeys, withWidth, type TreeControls } from '../wor
 import { ProblemList, problemsOf } from '../workspace/screen/Problems'
 import { Toolbar } from '../workspace/screen/Toolbar'
 import { useFilters } from '../workspace/screen/useFilters'
+import { middleEllipsis, showDragTip } from '../lib/statusbar'
 import { useChanges } from '../workspace/screen/useChanges'
 import { useGit } from '../workspace/screen/useGit'
 
@@ -323,14 +324,23 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
                 {T.rowMenu.clearChosen}
               </button>
             </span>
+          ) : filtered ? (
+            // UX-36: what the table is filtered by, with a quick way out
+            <span className="statusbar__hint statusbar__filter" title={filters.summary}>
+              {T.workspace.filteredBy(filters.summary)}{' '}
+              <button type="button" className="link-btn" onClick={filters.clear} aria-label={T.workspace.clearFilters} title={T.workspace.clearFilters}>
+                ✕
+              </button>
+            </span>
           ) : (
-            !filtered && info.itemCount > 1 && <span className="statusbar__hint">{T.workspace.dragHint}</span>
+            info.itemCount > 1 && showDragTip() && <span className="statusbar__hint">{T.workspace.dragHint}</span>
           )}
           {!info.isGitRepository && <span className="statusbar__warn">{T.workspace.notGit}</span>}
           {refreshError && <span className="statusbar__warn">{T.workspace.refreshFailed(refreshError)}</span>}
           <span className="toolbar__spacer" />
+          {git.lastPull && <span className="statusbar__hint">{T.workspace.lastPull(git.lastPull.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }))}</span>}
           <span className="statusbar__path" title={info.root}>
-            {info.root}
+            {middleEllipsis(info.root, 60)}
           </span>
         </footer>
       </section>

@@ -65,7 +65,7 @@ On the start screen:
 
 ### 1.4 Write your first requirements
 
-1. **+ New item…** (top right) → choose a type, e.g. *Heading / Information* for a chapter, then *System Requirement*.
+1. **+ New item** (top right) → choose a type, e.g. *Heading / Information* for a chapter, then *System Requirement*.
 2. Type a **Title** and the **Text** ("The system shall…") in the editor on the right, then **Save**.
 3. To put an item under another one: select the parent, then **+ Child…** at the bottom of the editor — or drag a row
    onto another row.
@@ -116,7 +116,7 @@ with a message; **Push** shares them.
 | Area | What is there |
 | --- | --- |
 | **Top bar** | Repository name and ✕ (close), branch button ⎇ with ↑ (commits to push) and ↓ (commits to pull), **Changes**, **Pull**, **Push**, English / العربية, Light / Dark / System, ⚙ Settings. |
-| **Toolbar** | Search box, **Filters**, **Columns**, **Import…**, **Export…**, ⊞ expand all, ⊟ collapse all, **+ New item…**. |
+| **Toolbar** | Search box, ⊞ expand all, ⊟ collapse all, **Filters**, **Columns**, **Import…**, **Export…**, **+ New item**. |
 | **Table** | One row per item, in document order; ▸ opens a branch of the tree; numbers in the title show how many children. |
 | **Editor (right)** | Details (title, type, fields, parent, text, links) and **History**; Save, ↑ ↓ (move), + Child…, Delete. |
 | **Status bar** | Number of items, problems found (click to see them), hints. |
@@ -126,7 +126,7 @@ with a message; **Push** shares them.
 
 ## 4. Writing and structuring requirements
 
-- **Create:** **+ New item…** adds at the top level (or next to the selected item); **+ Child…** adds under the
+- **Create:** **+ New item** adds at the top level (or next to the selected item); **+ Child…** adds under the
   selected item.
 - **Edit:** select a row, change anything in the editor, **Save**. Leaving an item with unsaved changes asks first.
   If a colleague's newer version arrived meanwhile, ReqMan refuses to overwrite it and tells you.
@@ -193,8 +193,8 @@ added/removed, and which links became suspect.
 
 **Pull** brings your colleagues' commits. ReqMan combines both sides **field by field**: if you changed the priority and
 a colleague changed the text of the same requirement, both are kept automatically. Only when you both changed the
-**same field** of the same requirement, a window asks per field: **Keep yours**, **Take theirs**, or **Write it
-myself**. Nothing changes until you click **Finish the pull**.
+**same field** of the same requirement, a window shows both versions side by side: click the one to keep (it gets a
+frame and a ✓), or choose **Write it myself**. Nothing changes until you click **Finish the pull**.
 
 ---
 

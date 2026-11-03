@@ -14,6 +14,9 @@ import type { Paths, Services } from './composition'
 import * as v from './validate'
 import { setLanguage, T } from '../shared/text'
 
+/** The file types import reads (the dialog filter and the drop zone). */
+const IMPORT_EXTENSIONS = ['xlsx', 'xlsm', 'csv', 'txt', 'reqif', 'reqifz']
+
 type Handlers = {
   [K in InvokeMethod]: (e: IpcMainInvokeEvent, ...args: unknown[]) => Awaited<ReturnType<ReqManApi[K]>> | ReturnType<ReqManApi[K]>
 }
@@ -81,8 +84,11 @@ export function registerIpc(services: Services, paths: Paths): void {
     return r.canceled ? null : (r.filePaths[0] ?? null)
   }
   const chooseFile = async (e: IpcMainInvokeEvent) => {
-    const path = await openDialog(e, { title: T.importDialog.chooseTitle, properties: ['openFile'], filters: [{ name: T.importDialog.fileFilter, extensions: ['xlsx', 'xlsm', 'csv', 'txt', 'reqif', 'reqifz'] }] })
+    const path = await openDialog(e, { title: T.importDialog.chooseTitle, properties: ['openFile'], filters: [{ name: T.importDialog.fileFilter, extensions: IMPORT_EXTENSIONS }] })
     if (!path) return null
+    return readImportFile(path)
+  }
+  const readImportFile = async (path: string) => {
     const f = await loadImportFile(path)
     log.info(`Import file chosen: ${path} (${f.sheets.length} sheet(s))`)
     return importFiles.add(f)
@@ -237,6 +243,7 @@ export function registerIpc(services: Services, paths: Paths): void {
     reparentItem: (_e, id, parent, before) => ws.reparentItem(v.str(id, 'ID'), v.optStr(parent, 'parent') ?? null, v.optStr(before, 'position') ?? null),
     reparentItems: (_e, ids, parent, before) => ws.reparentItems(v.strings(ids, 'items', 100_000), v.optStr(parent, 'parent') ?? null, v.optStr(before, 'position') ?? null),
     getAncestors: (_e, id) => ws.ancestors(v.str(id, 'ID')),
+    getFieldValues: (_e, field) => ws.fieldValues(v.str(field, 'field')),
     saveSchemaFields: (_e, fields, revision) => ws.saveSchemaFields(v.fieldDefs(fields), v.str(revision, 'revision')),
     checkFields: (_e, fields) => ws.checkFields(v.fieldDefs(fields)),
     addLink: (_e, source, type, target) => ws.addLink(v.str(source, 'source'), v.str(type, 'link type'), v.str(target, 'target')),
@@ -269,6 +276,7 @@ export function registerIpc(services: Services, paths: Paths): void {
 
     // ---------- import (M7)
     chooseImportFile: (e) => chooseFile(e),
+    openImportFile: (_e, path) => readImportFile(v.importPath(path, IMPORT_EXTENSIONS)),
     previewImport: (_e, settings) => {
       const s = v.importSettings(settings)
       return ws.previewImport(sheetOf(s.token, s.sheet).rows, s)

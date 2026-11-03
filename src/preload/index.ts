@@ -1,6 +1,7 @@
 // Bridges the UI and the core: exposes exactly the ReqManApi from src/shared/api.ts as window.reqman.
-// Every call is built from the `Channels` table (review S-02): adding a call needs no change here.
-import { contextBridge, ipcRenderer } from 'electron'
+// Every call is built from the `Channels` table (review S-02): adding a call needs no change here — except calls
+// answered here without the core (`pathOfDroppedFile`, which only Electron's preload can answer).
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import { Channels, type InvokeMethod, type ReqManApi, type UpdateStatus } from '../shared/api'
 
 const special = new Set<string>(['onUpdateStatus', 'reportUiError', 'updateStatusChanged'])
@@ -13,6 +14,7 @@ const invokers = Object.fromEntries(
 const api: ReqManApi = {
   ...invokers,
   reportUiError: (message) => ipcRenderer.send(Channels.reportUiError, message),
+  pathOfDroppedFile: (file) => webUtils.getPathForFile(file),
   onUpdateStatus: (listener) => {
     const handler = (_e: Electron.IpcRendererEvent, status: UpdateStatus): void => listener(status)
     ipcRenderer.on(Channels.updateStatusChanged, handler)

@@ -11,6 +11,29 @@ const when = (iso: string): string => {
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
+/** While Git reads the history: three placeholder rows, and after 5 s a word that it is still working (UX-26). */
+function HistoryLoading() {
+  const [slow, setSlow] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setSlow(true), 5000)
+    return () => clearTimeout(t)
+  }, [])
+  return (
+    <div className="history-loading" role="status">
+      <p className="muted-inline">
+        <span className="spinner" aria-hidden="true" /> {slow ? T.history.slow : T.history.loading}
+      </p>
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="history-loading__row" aria-hidden="true">
+          <span className="skeleton skeleton--short" />
+          <span className="skeleton skeleton--short" />
+          <span className="skeleton" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 /**
  * Who changed this item, when and why (from Git), and what each change did — field by field, not file lines.
  * Journey step 7.
@@ -49,7 +72,7 @@ export function HistoryView({ schema, itemId, reloadToken }: { schema: Schema; i
   }, [itemId, selected, reloadToken])
 
   if (error) return <p className="notice notice--error">{error}</p>
-  if (!entries) return <p className="muted-inline">{T.history.loading}</p>
+  if (!entries) return <HistoryLoading />
   if (entries.length === 0) return <p className="muted">{T.history.none}</p>
 
   const shown = compare && compare.hash === selected ? compare.data : null

@@ -54,10 +54,12 @@ export function ImportDialog(props: { schema: Schema; file: ImportFile | null; n
   // the guessed mapping, until the user changes a column
   const shownMapping = mapping ?? data?.mapping ?? null
 
-  const choose = async (): Promise<void> => {
+  const choose = (dropped?: File): Promise<void> => take(() => (dropped ? window.reqman.openImportFile(window.reqman.pathOfDroppedFile(dropped)) : window.reqman.chooseImportFile()))
+  const [dragOver, setDragOver] = useState(false)
+  const take = async (read: () => Promise<ImportFile | null>): Promise<void> => {
     setError(null)
     try {
-      const f = await window.reqman.chooseImportFile()
+      const f = await read()
       if (!f) return
       setFile(f)
       setSheet(f.sheets.find((s) => s.rowCount > 0)?.name ?? f.sheets[0]?.name ?? '')
@@ -102,20 +104,41 @@ export function ImportDialog(props: { schema: Schema; file: ImportFile | null; n
           </button>
         </header>
         <ol className="import__steps" aria-label={T.importDialog.steps}>
-          {(['file', 'columns', 'check'] as const).map((s, i) => (
-            <li key={s} className={s === step ? 'import__step import__step--on' : 'import__step'} aria-current={s === step ? 'step' : undefined}>
-              {i + 1}. {T.importDialog.stepNames[s]}
-            </li>
-          ))}
+          {/* UX-23: a stepper — done steps ✓, the current one filled */}
+          {(['file', 'columns', 'check'] as const).map((s, i, all) => {
+            const state = s === step ? 'on' : i < all.indexOf(step) ? 'done' : 'next'
+            return (
+              <li key={s} className={`import__step import__step--${state}`} aria-current={s === step ? 'step' : undefined}>
+                <span className="import__dot" aria-hidden="true">
+                  {state === 'done' ? '✓' : i + 1}
+                </span>
+                {T.importDialog.stepNames[s]}
+              </li>
+            )
+          })}
         </ol>
         <div className="modal__body import__body">
           {step === 'file' && (
             <>
-              <div className="actions">
+              <div
+                className={`import__drop${file ? ' import__drop--compact' : ''}${dragOver ? ' import__drop--over' : ''}`}
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  setDragOver(true)
+                }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  setDragOver(false)
+                  const f = e.dataTransfer.files[0]
+                  if (f) void choose(f)
+                }}
+              >
+                {file ? <span className="import__file">{file.name}</span> : <span>{T.importDialog.dropHere}</span>}
                 <button type="button" className="btn" onClick={() => void choose()}>
                   {file ? T.importDialog.otherFile : T.importDialog.chooseFile}
                 </button>
-                {file && <span className="import__file">{file.name}</span>}
+                {!file && <span className="muted-inline">{T.importDialog.formats}</span>}
               </div>
               {file && (
                 <>

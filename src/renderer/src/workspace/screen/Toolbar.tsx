@@ -30,6 +30,17 @@ export function Toolbar(props: {
   return (
     <div className="toolbar">
       <input className="input toolbar__search" type="search" placeholder={tw.searchPlaceholder} value={f.text} onChange={(e) => f.setText(e.target.value)} aria-label={tw.search} />
+      {/* UX-28: expand/collapse act on the tree, so they sit by the search */}
+      {!f.filtered && (
+        <>
+          <button type="button" className="icon-btn" disabled={props.expanding} onClick={props.onExpandAll} aria-label={tw.expandAll} title={props.expanding ? tw.expanding : tw.expandAllTooltip}>
+            ⊞
+          </button>
+          <button type="button" className="icon-btn" onClick={props.onCollapseAll} aria-label={tw.collapseAll} title={tw.collapseAllTooltip}>
+            ⊟
+          </button>
+        </>
+      )}
       <FilterMenu active={activeCount}>
       <select className="input" value={f.types} onChange={(e) => f.setTypes(e.target.value)} aria-label={tw.typeFilter}>
         <option value="">{tw.allTypes}</option>
@@ -80,17 +91,7 @@ export function Toolbar(props: {
         </button>
       )}
       <span className="toolbar__spacer" />
-      {!f.filtered && (
-        <>
-          <button type="button" className="icon-btn" disabled={props.expanding} onClick={props.onExpandAll} aria-label={tw.expandAll} title={props.expanding ? tw.expanding : tw.expandAllTooltip}>
-            ⊞
-          </button>
-          <button type="button" className="icon-btn" onClick={props.onCollapseAll} aria-label={tw.collapseAll} title={tw.collapseAllTooltip}>
-            ⊟
-          </button>
-        </>
-      )}
-      <select className="select-btn select-btn--primary" value="" onChange={(e) => props.onNewItem(e.target.value)} aria-label={tw.newItem}>
+      <select className="select-btn select-btn--primary select-btn--fit" value="" onChange={(e) => props.onNewItem(e.target.value)} aria-label={tw.newItem}>
         <option value="">{tw.newItemOption}</option>
         {schema.itemTypes.map((t) => (
           <option key={t.id} value={t.id}>

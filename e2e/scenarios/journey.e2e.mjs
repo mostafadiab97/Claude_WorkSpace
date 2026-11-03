@@ -393,7 +393,7 @@ await scenario('E2E journey', async (ctx) => {
   const headBefore = gitIn(repo, 'rev-parse', 'HEAD')
   await gitbar.getByRole('button', { name: 'Pull' }).click()
   // 0.12.0 (M8-3/M8-7): both changed the title — the pull asks, field by field, before changing anything
-  const decide = win.getByRole('dialog', { name: 'Pull from origin/main: your decision' })
+  const decide = win.getByRole('dialog', { name: 'Get changes from GitHub (main): your decisions' })
   await decide.waitFor()
   const titlePart = decide.getByRole('group', { name: 'Decision: Title' })
   check((await titlePart.locator('.merge__side').nth(0).textContent()).includes('Comfortable temperature (Alice)') && (await titlePart.locator('.merge__side').nth(1).textContent()).includes('Comfortable temperature (Bob)'), 'conflict: the pull asks about the title, yours and theirs side by side')

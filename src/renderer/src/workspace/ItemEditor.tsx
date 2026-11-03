@@ -250,7 +250,7 @@ export function ItemEditor(props: {
 
         <div className="field">
           <span className="field__label">{T.editor.parent}</span>
-          <ParentPicker schema={schema} value={form.parent} selfId={form.id} onChange={(p) => set(p ? { parent: p } : { parent: undefined })} />
+          <ParentPicker schema={schema} value={form.parent} selfId={form.id} onChange={(p) => set(p ? { parent: p } : { parent: undefined })} onShow={props.onOpen} />
           {issueFor('parent') && <span className="field__error">{issueFor('parent')}</span>}
         </div>
 
@@ -366,6 +366,11 @@ export function ItemEditor(props: {
 
 function FieldInput({ def, value, error, onChange }: { def: FieldDef; value: FieldValue | undefined; error: string | undefined; onChange: (v: FieldValue | undefined) => void }) {
   const str = value === undefined ? '' : Array.isArray(value) ? value.join(', ') : String(value)
+  const [suggestions, setSuggestions] = useState<string[] | null>(null)
+  const loadSuggestions = (): void => {
+    if (suggestions) return
+    void window.reqman.getFieldValues(def.id).then(setSuggestions, () => setSuggestions([]))
+  }
   let control
   switch (def.type) {
     case 'enum':
@@ -395,10 +400,22 @@ function FieldInput({ def, value, error, onChange }: { def: FieldDef; value: Fie
       control = <input className="input" type="date" value={str} onChange={(e) => onChange(e.target.value || undefined)} />
       break
     default:
-      control = <input className="input" value={str} onChange={(e) => onChange(e.target.value)} />
+      // UX-27: suggest the values this field already has in the repository (owners, components…)
+      control = (
+        <>
+          <input className="input" list={`values-${def.id}`} value={str} onFocus={loadSuggestions} onChange={(e) => onChange(e.target.value)} />
+          {suggestions && (
+            <datalist id={`values-${def.id}`}>
+              {suggestions.map((s) => (
+                <option key={s} value={s} />
+              ))}
+            </datalist>
+          )}
+        </>
+      )
   }
   return (
-    <label className="field">
+    <label className={def.type === 'list' ? 'field field--wide' : 'field'}>
       <span className="field__label">{def.name}</span>
       {control}
       {error && <span className="field__error">{error}</span>}

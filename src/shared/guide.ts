@@ -26,3 +26,6 @@ export function splitGuide(text: string): { id: string; title: string; md: strin
   return pages
 }
 
+
+/** The quick-start page, opened from the start screen (UX-24); a test checks the guide still has it. */
+export const QUICK_START_PAGE = '1-quick-start-15-minutes'

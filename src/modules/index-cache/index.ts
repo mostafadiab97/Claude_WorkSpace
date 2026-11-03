@@ -33,6 +33,8 @@ export interface IndexCache {
   /** Content fingerprint of an item (for confirming links), or undefined if it does not exist. */
   fingerprint(id: string): string | undefined
   count(): number
+  /** The values a field already has in the repository, most used first (suggestions, e.g. Owner — UX-27). */
+  fieldValues(field: string, limit: number): string[]
   /** Changes whenever the index changes (for caches built from it, e.g. outline numbers). */
   revision(): number
   /** Every item's ID, parent and order key, siblings in document order — small and fast (for outline numbers). */

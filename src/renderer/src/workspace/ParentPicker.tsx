@@ -8,7 +8,7 @@ import { T } from '../../../shared/text'
  * order; typing searches IDs and titles, best matches first. The item itself and the items below it are
  * shown greyed out, because choosing them would create a loop.
  */
-export function ParentPicker({ schema, value, selfId, onChange }: { schema: Schema; value: string | undefined; selfId: string; onChange: (id: string | undefined) => void }) {
+export function ParentPicker({ schema, value, selfId, onChange, onShow }: { schema: Schema; value: string | undefined; selfId: string; onChange: (id: string | undefined) => void; onShow?: (id: string) => void }) {
   const [resolved, setResolved] = useState<{ value: string; label: string } | null>(null)
   const [open, setOpen] = useState(false)
 
@@ -27,10 +27,17 @@ export function ParentPicker({ schema, value, selfId, onChange }: { schema: Sche
 
   if (!open) {
     return (
-      <div className="picker">
-        <button type="button" className="input input--button" onClick={() => setOpen(true)}>
-          {label || <span className="muted-inline">{T.parentPicker.none}</span>}
+      // UX-27: looks like a button with "Change…", so nobody tries to type into it; "Show" selects the parent
+      <div className="picker picker--closed">
+        <button type="button" className="input input--button picker__current" onClick={() => setOpen(true)} title={T.parentPicker.change}>
+          <span className="picker__label">{label || <span className="muted-inline">{T.parentPicker.none}</span>}</span>
+          <span className="picker__change">{T.parentPicker.change}</span>
         </button>
+        {value && onShow && (
+          <button type="button" className="link-btn" onClick={() => onShow(value)}>
+            {T.parentPicker.show}
+          </button>
+        )}
       </div>
     )
   }

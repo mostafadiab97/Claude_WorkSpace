@@ -428,6 +428,9 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
 
     count: () => (stmt.count.get() as { n: number }).n,
 
+    fieldValues: (field, limit) =>
+      (db.prepare('SELECT value, COUNT(*) AS n FROM item_fields WHERE field = ? AND value <> \'\' GROUP BY value ORDER BY n DESC, value LIMIT ?').all(field, limit) as { value: string }[]).map((r) => r.value),
+
     revision: () => revision,
 
     structure: () =>

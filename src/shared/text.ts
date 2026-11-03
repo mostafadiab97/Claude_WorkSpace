@@ -220,6 +220,8 @@ const en = {
     introNew: 'The new project gets these requirements as its first commit.',
     steps: 'Steps',
     stepNames: { file: 'File', columns: 'Columns', check: 'Check and import' } as Record<'file' | 'columns' | 'check', string>,
+    dropHere: 'Drop an Excel, CSV or ReqIF file here, or',
+    formats: 'Excel (.xlsx) · CSV (.csv) · ReqIF (.reqif, .reqifz — from DOORS, Jama, Polarion)',
     chooseFile: 'Choose a file…',
     otherFile: 'Choose another file…',
     chooseAnother: 'Choose another folder…',
@@ -326,6 +328,8 @@ const en = {
   },
 
   parentPicker: {
+    change: 'Change…',
+    show: 'Show',
     none: 'None (top level)',
     notFound: (id: string) => `${id} (not found)`,
     label: 'Search for a parent',
@@ -386,6 +390,7 @@ const en = {
   },
 
   history: {
+    slow: 'Large history — still reading Git…',
     loading: 'Loading history…',
     none: 'No history yet — the item has never been committed.',
     versions: 'Versions',
@@ -591,13 +596,14 @@ const en = {
 
   /** The window for decisions during a pull (M8). */
   mergeDialog: {
-    title: (source: string) => `Pull from ${source}: your decision`,
+    title: (source: string) => (source.startsWith('origin/') ? `Get changes from GitHub (${source.slice(7)}): your decisions` : `Bring in changes from ${source}: your decisions`),
     intro: (incoming: number, combined: number, questions: number) =>
       `${incoming} item${s(incoming)} changed there. ${combined > 0 ? `${combined} changed on both sides in different parts and ${combined === 1 ? 'was' : 'were'} combined automatically. ` : ''}${questions} item${s(questions)} changed the same part differently — decide below. Nothing changes until you finish.`,
     duplicates: (labels: string) => `Created on both sides with the same ID (yours will get a new ID): ${labels}`,
     openTooltip: 'Show this item in the table (your version)',
     partLabel: (label: string) => `Decision: ${label}`,
-    before: (base: string) => `before both changes: ${base}`,
+    before: (base: string) => `Before: ${base}`,
+    pickHint: 'Click the version to keep.',
     yours: 'Yours (this branch)',
     theirs: 'Theirs (being pulled in)',
     empty: '(empty)',
@@ -756,11 +762,11 @@ const en = {
     export: 'Export…',
     expandAll: 'Expand all',
     expanding: 'Expanding…',
-    expandAllTooltip: 'Open every level of the hierarchy',
+    expandAllTooltip: 'Expand all — open every level of the hierarchy',
     collapseAll: 'Collapse all',
-    collapseAllTooltip: 'Show only the top-level items',
+    collapseAllTooltip: 'Collapse all — show only the top-level items',
     newItem: 'New item',
-    newItemOption: '+ New item…',
+    newItemOption: '+ New item',
     searchMode: 'Search results — the hierarchy is shown again when the search and filters are cleared.',
     emptyRepo: 'No items yet. Use “New item” to add the first one.',
     emptyFilter: 'No items match the filters.',
@@ -774,6 +780,10 @@ const en = {
     fixFileNameTooltip: (id: string) => `Rename the file to ${id}.md (Git sees it as a rename, so the history is kept)`,
     fixFailed: (why: string) => `Could not fix the file name: ${why}`,
     of: (shown: number, all: number) => `${n(shown)} of ${n(all)} items`,
+    searchFor: (text: string) => `“${text}”`,
+    filterIs: (name: string, value: string) => `${name} = ${value}`,
+    filteredBy: (what: string) => `Filtered: ${what}`,
+    lastPull: (time: string) => `Last pull: ${time}`,
     dragHint: 'Drag a row onto another row to move it there, with everything below it',
     notGit: 'Not a Git repository',
     refreshFailed: (why: string) => `Refresh failed: ${why}`,

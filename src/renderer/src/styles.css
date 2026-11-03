@@ -2049,9 +2049,71 @@ code {
   font-size: var(--rm-font-size-small);
 }
 
+.import__step {
+  display: flex;
+  align-items: center;
+  gap: var(--rm-space-xs);
+}
+
+/* the line joining one step to the next (UX-23) */
+.import__step + .import__step::before {
+  content: '';
+  inline-size: var(--rm-space-xl);
+  border-block-start: var(--rm-shape-border-width) solid var(--rm-color-border);
+  margin-inline-end: var(--rm-space-sm);
+}
+
+.import__dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 22px;
+  block-size: 22px;
+  border-radius: 50%;
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  font-weight: var(--rm-font-weight-strong);
+}
+
 .import__step--on {
   color: var(--rm-color-text);
   font-weight: var(--rm-font-weight-strong);
+}
+
+.import__step--on .import__dot {
+  background: var(--rm-color-primary);
+  border-color: var(--rm-color-primary);
+  color: var(--rm-color-primary-text);
+}
+
+.import__step--done .import__dot {
+  border-color: var(--rm-color-success);
+  color: var(--rm-color-success);
+}
+
+/* step 1: drop a file or choose one (UX-23) */
+.import__drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rm-space-sm);
+  min-block-size: 160px;
+  padding: var(--rm-space-lg);
+  border: 2px dashed var(--rm-color-border);
+  border-radius: var(--rm-shape-radius-medium);
+  text-align: center;
+}
+
+.import__drop--compact {
+  flex-direction: row;
+  justify-content: flex-start;
+  min-block-size: 0;
+  padding: var(--rm-space-sm) var(--rm-space-md);
+}
+
+.import__drop--over {
+  border-color: var(--rm-color-primary);
+  background: var(--rm-color-selection);
 }
 
 .import__body {
@@ -2396,15 +2458,34 @@ code {
 }
 
 .merge__side {
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  background: var(--rm-color-surface);
   border: var(--rm-shape-border-width) solid var(--rm-color-border);
   border-radius: var(--rm-shape-radius);
   padding: var(--rm-space-xs) var(--rm-space-sm);
   min-width: 0;
 }
 
-.merge__side--picked {
+.merge__side:hover {
   border-color: var(--rm-color-primary);
+}
+
+.merge__side--picked {
+  border: 2px solid var(--rm-color-primary);
   background: var(--rm-color-selection);
+}
+
+.merge__tick {
+  float: inline-end;
+  color: var(--rm-color-primary);
+  font-weight: var(--rm-font-weight-strong);
+}
+
+.merge__value {
+  display: block;
 }
 
 .merge__who {
@@ -2841,4 +2922,85 @@ code {
 }
 .start__git {
   color: var(--rm-color-success);
+}
+
+/* History tab while Git reads (UX-26) */
+.history-loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-sm);
+}
+
+.history-loading__row {
+  display: grid;
+  grid-template-columns: 90px 120px 1fr;
+  gap: var(--rm-space-sm);
+}
+
+.skeleton {
+  display: block;
+  block-size: 12px;
+  border-radius: var(--rm-shape-radius-small);
+  background: var(--rm-color-surface-alt);
+}
+
+.spinner {
+  display: inline-block;
+  inline-size: 12px;
+  block-size: 12px;
+  border: 2px solid var(--rm-color-border);
+  border-block-start-color: var(--rm-color-primary);
+  border-radius: 50%;
+  vertical-align: middle;
+  animation: rm-spin 0.8s linear infinite;
+}
+
+@keyframes rm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
+
+/* Editor: a list field (tags) takes a whole row; the parent is a button with "Change…" (UX-27) */
+.field-grid .field--wide {
+  grid-column: 1 / -1;
+}
+
+.picker--closed {
+  display: flex;
+  align-items: center;
+  gap: var(--rm-space-sm);
+}
+
+.picker__current {
+  display: flex;
+  align-items: center;
+  gap: var(--rm-space-sm);
+  flex: 1;
+  min-inline-size: 0;
+  background: var(--rm-color-surface-alt);
+}
+
+.picker__label {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.picker__change {
+  flex: none;
+  color: var(--rm-color-primary);
+  font-size: var(--rm-font-size-small);
+}
+
+/* "+ New item": as wide as its own label, not its longest type name (UX-28) */
+.select-btn--fit {
+  field-sizing: content;
 }

@@ -21,6 +21,15 @@ export function str(v: unknown, what: string, max = MAX): string {
   return v
 }
 
+/** An absolute path to a file with one of the allowed extensions (a file dropped on the import window). */
+export function importPath(v: unknown, extensions: readonly string[]): string {
+  const p = str(v, 'file path')
+  const absolute = /^[A-Za-z]:[\\/]/.test(p) || p.startsWith('/') || p.startsWith('\\\\')
+  const ext = p.slice(p.lastIndexOf('.') + 1).toLowerCase()
+  if (!absolute || p.includes('\0') || !extensions.includes(ext)) return bad('file')
+  return p
+}
+
 /** A string that may be empty (messages). */
 export function text(v: unknown, what: string, max = MAX_TEXT): string {
   if (v === undefined || v === null) return ''

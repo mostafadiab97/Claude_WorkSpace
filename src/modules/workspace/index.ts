@@ -70,6 +70,8 @@ export interface WorkspaceService {
   /** Several items at once, in document order, placed together (each keeps its children). */
   reparentItems(ids: string[], parent: string | null, before?: string | null): Promise<OpResult>
   ancestors(id: string): string[]
+  /** Values a field already has, most used first (suggestions while typing). */
+  fieldValues(field: string): string[]
   saveSchemaFields(fields: FieldDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   // Git (M4) — see gitOps.ts for the rules
   gitState(): Promise<GitState>

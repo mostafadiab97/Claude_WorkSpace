@@ -89,3 +89,9 @@ keeps Electron's default fuses). The update test overwrites the installed `resou
 feed on `http://127.0.0.1:8765/` serving `dist/` — never change `publish:` for this. The push uses
 `x-access-token:${GITHUB_TOKEN}` (workflow permission `contents: write`) and always deletes `ci/acceptance-*` in a
 `finally`; messages are scrubbed of the URL before they are printed.
+
+## Personal data in commit history (3 Nov 2026)
+Early sandbox commits carried a work e-mail; removing it needed a history rewrite and a force-push (with Mostafa's
+explicit approval). Prevention: `tools/check-privacy.mjs` in build.yml fails on any commit e-mail that is not a GitHub
+private / no-reply address and on real e-mail addresses in files; gitleaks scans for secrets. Test data must use
+`example.com` / `.test` / `.invalid` addresses only.

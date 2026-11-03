@@ -18,6 +18,18 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # full history for the privacy and secrets checks
+
+      - name: Privacy and secrets check (this repository and the sandbox, full history)
+        shell: bash
+        run: |
+          git clone --quiet https://github.com/mostafadiab97/Claude_SandBox.git "$RUNNER_TEMP/sandbox-full"
+          node tools/check-privacy.mjs . "$RUNNER_TEMP/sandbox-full"
+          curl -sSL -o "$RUNNER_TEMP/gitleaks.zip" https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_windows_x64.zip
+          unzip -q -o "$RUNNER_TEMP/gitleaks.zip" -d "$RUNNER_TEMP/gitleaks"
+          "$RUNNER_TEMP/gitleaks/gitleaks.exe" git . --no-banner --redact
+          "$RUNNER_TEMP/gitleaks/gitleaks.exe" git "$RUNNER_TEMP/sandbox-full" --no-banner --redact
 
       - uses: actions/setup-node@v7
         with:

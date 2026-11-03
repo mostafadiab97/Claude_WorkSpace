@@ -3,7 +3,23 @@
 Each version was installed and tried by Mostafa (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.14.2 — 3 Nov 2026 — Settings and help with the user guide inside; privacy guard
+- **Mostafa (3 Nov 2026):** 0.14.1 self-test 21/21 (73.5 s); acceptance runs of 0.14.0 and 0.14.1 passed. 0.14.0 step 2
+  and 3 worked with two remarks, 0.14.1 steps 2–3 passed; step 4: put the user guide into the app with a left panel;
+  step 5: never again, and remove the work e-mail from the sandbox history (he re-clones). All here:
+- **Settings and help:** a left panel with the settings (Environment, Versions, Report a problem, Diagnostics,
+  Features, Release self-test, Data self-test) and the **user guide** with one entry per section; links inside the
+  guide jump to their section. The guide is the same `docs/USER-GUIDE.md`, built into the app.
+- **Report a problem:** the text box is emptied after the report is saved (0.14.0 step 3).
+- **Branches turned off:** the branch button's tooltip now says so ("Changes, Pull and Push keep working on the
+  current branch") — that is the intended behaviour he saw in 0.14.0 step 2.
+- **Privacy:** the sandbox history was rewritten (approved by Mostafa) — the work e-mail on 17 commits is replaced by
+  GitHub's private address; both branches force-pushed once. **Never again:** every build now checks the full history
+  of this repository and the sandbox — commit e-mails must be GitHub private / no-reply addresses, files may contain
+  only test addresses (`tools/check-privacy.mjs`) — and scans both for secrets (gitleaks).
+
 ## 0.14.1 — 3 Nov 2026 — User guide, going back to an earlier version, security check, calmer notes
+- **Mostafa (3 Nov 2026):** self-test 21/21; steps 2, 3 passed; guide "looks great" → into the app (0.14.2); e-mail → removed (0.14.2).
 - **Mostafa (3 Nov 2026):** the CTO approved a pilot with a complete team. Before the rename, four requests — all here:
 - **User guide** `docs/USER-GUIDE.md`: a 15-minute quick start first, then every feature, team set-up, the file
   format, a feature specification, troubleshooting. Linked from the README.
@@ -20,6 +36,7 @@ version it was about, and what it led to.
   "nothing to do"** messages (Already up to date, Nothing to commit/push/discard), which also close by themselves.
 
 ## 0.14.0 — 2 Nov 2026 — Health tools and the automatic acceptance run (planning decisions P-40, P-41)
+- **Mostafa (3 Nov 2026):** step 2 worked (asked whether a disabled branch button with Pull/Push still enabled is intended — yes; tooltip added in 0.14.2); step 3 worked (text stayed in the box → emptied in 0.14.2); step 4: acceptance summary seen, passed.
 - **Planning (1–2 Nov 2026):** the release plan up to 0.24 is decided (`docs/reviews/2026-11-01-planning-discussion.md`).
   This version brings the tools that keep the project healthy as it grows (Mostafa's concern, P-40); the new name
   follows in its own version as soon as Mostafa has chosen it.

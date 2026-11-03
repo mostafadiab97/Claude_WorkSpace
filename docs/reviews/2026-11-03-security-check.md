@@ -23,7 +23,15 @@ address in the sandbox history).
 | Libraries | `npm audit` | **F: 0 problems in what ships with the app**; 30 "moderate" in build-only tools (never installed on users' PCs). Dependabot proposes fixes; `npm run check:deps` warns before every build |
 | Installer | signature | **F:** not code-signed (known; certificate costs money) — Windows warns on first install. **R:** ask the company to sign for a 50-person pilot |
 
-## Decision for Mostafa
+## Decision for Mostafa — decided 3 Nov 2026: option 2, done
+
+Mostafa: "make sure this never happens again, and remove the work e-mail". The sandbox history was rewritten with
+`git filter-repo --mailmap` (17 commits on `main` and `trial-one` now by `mostafadiab97 <…@users.noreply.github.com>`)
+and force-pushed once with his approval. Prevention: `tools/check-privacy.mjs` + gitleaks on both repositories' full
+history in every build (build.yml). Note: GitHub may keep the old commits reachable by their exact ID for a while; they
+no longer appear in any branch or commit list.
+
+### The options that were offered
 
 **The work e-mail in the sandbox history.** Eight early commits of `Claude_SandBox` carry the author
 `MostafaNasr-SwiftAct <mostafa.nasr@…>`. Anyone can read it in the commit list. Options:

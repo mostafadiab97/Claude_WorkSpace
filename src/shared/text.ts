@@ -78,6 +78,19 @@ const en = {
       updates: 'Updates',
       app: 'App'
     },
+    nav: {
+      label: 'Settings and help',
+      settings: 'Settings',
+      guide: 'User guide',
+      env: 'Environment',
+      versions: 'Versions',
+      report: 'Report a problem',
+      diag: 'Diagnostics',
+      features: 'Features',
+      releaseTest: 'Release self-test',
+      dataTest: 'Data self-test',
+      guideNote: 'The user guide is in English for now.'
+    },
     versions: {
       title: 'Versions',
       current: (v: string) => `This is version ${v}.`,
@@ -100,7 +113,8 @@ const en = {
       intro: 'Turn a feature off if it causes trouble — the rest of ReqMan keeps working. This choice is remembered on this PC. A team can also turn a feature off for one repository (features: in schema.yaml).',
       names: { branches: 'Branches (create, switch, compare, pull from, delete)', import: 'Import from Excel and ReqIF', export: 'Export (Excel, ReqIF, CSV, Markdown)' } as Record<string, string>,
       preview: 'Preview',
-      teamOff: 'Turned off for this repository by the team (schema.yaml)'
+      teamOff: 'Turned off for this repository by the team (schema.yaml)',
+      branchesOff: 'Branches are turned off (Settings → Features). Changes, Pull and Push keep working on the current branch.'
     },
     report: {
       title: 'Report a problem',

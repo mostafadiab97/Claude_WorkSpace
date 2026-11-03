@@ -54,6 +54,18 @@ await scenario('E2E health', async (ctx) => {
 
   check((await win.getByRole('region', { name: 'Versions' }).getByRole('button', { name: 'Go back to an earlier version…' }).count()) === 1, 'Settings has Versions → go back to an earlier version')
 
+  console.log('Settings and help: the left panel and the user guide (0.14.2)')
+  const nav = win.getByRole('navigation', { name: 'Settings and help' })
+  await nav.getByRole('button', { name: '1. Quick start (15 minutes)' }).click()
+  const guide = win.getByRole('article', { name: 'User guide' })
+  await guide.getByRole('heading', { name: '1. Quick start (15 minutes)' }).waitFor()
+  check(await guide.getByRole('heading', { name: '1. Quick start (15 minutes)' }).isVisible(), 'the guide opens at the quick start')
+  await guide.getByRole('link', { name: 'Import and export (Excel, ReqIF, CSV, Markdown)' }).click()
+  await win.waitForTimeout(300)
+  check(await guide.getByRole('heading', { name: '11. Import and export' }).isVisible(), "a link in the guide's contents jumps to its section")
+  await t.shot('health-3-guide')
+  await nav.getByRole('button', { name: 'Report a problem' }).click()
+
   console.log('Report a problem')
   const file = join(temp('health-report'), 'report.txt')
   await t.saveAs(file)
@@ -65,5 +77,6 @@ await scenario('E2E health', async (ctx) => {
   check(text.includes('The branch button does nothing.'), 'the report holds the description')
   check(/ReqMan \d+\.\d+\.\d+/.test(text) && text.includes('Git:'), '…the diagnostics')
   check(text.includes('== Log (last'), '…and the end of the log')
+  check((await report.getByLabel('What happened?').inputValue()) === '', 'the text box is empty again after saving (Mostafa on 0.14.0 step 3)')
   await t.shot('health-2-report')
 })

@@ -82,6 +82,19 @@ const raw: Texts = {
       updates: 'التحديثات',
       app: 'التطبيق'
     },
+    nav: {
+      label: 'الإعدادات والمساعدة',
+      settings: 'الإعدادات',
+      guide: 'دليل المستخدم',
+      env: 'البيئة',
+      versions: 'الإصدارات',
+      report: 'الإبلاغ عن مشكلة',
+      diag: 'التشخيص',
+      features: 'الميزات',
+      releaseTest: 'الاختبار الذاتي للإصدار',
+      dataTest: 'الاختبار الذاتي للبيانات',
+      guideNote: 'دليل المستخدم بالإنجليزية حاليًا.'
+    },
     versions: {
       title: 'الإصدارات',
       current: (v: string) => `هذا هو الإصدار ${v}.`,
@@ -104,7 +117,8 @@ const raw: Texts = {
       intro: 'أوقِف أي ميزة تسبّب مشكلة — يستمر باقي ReqMan في العمل. يُحفظ هذا الاختيار على هذا الجهاز. ويمكن للفريق أيضًا إيقاف ميزة لمستودع واحد (features: في schema.yaml).',
       names: { branches: 'الفروع (إنشاء، تبديل، مقارنة، سحب من، حذف)', import: 'الاستيراد من Excel وReqIF', export: 'التصدير (Excel وReqIF وCSV وMarkdown)' } as Record<string, string>,
       preview: 'معاينة',
-      teamOff: 'أوقفها الفريق لهذا المستودع (schema.yaml)'
+      teamOff: 'أوقفها الفريق لهذا المستودع (schema.yaml)',
+      branchesOff: 'الفروع متوقفة (الإعدادات ← الميزات). تبقى التغييرات والسحب والدفع تعمل على الفرع الحالي.'
     },
     report: {
       title: 'الإبلاغ عن مشكلة',

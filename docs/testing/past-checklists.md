@@ -3,6 +3,18 @@
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
 
+## Previous checklist — v0.14.0 (health tools; acceptance run)
+
+The automatic acceptance run already did the update, the self-test, the sandbox and a real push on GitHub's Windows
+machine — see the run's summary (Actions → Build → the run → Summary). These steps are for your eyes. Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.14.0**, then **⚙ → Run release self-test**. | App shows 0.14.0; **All steps passed**, 21 ✓. |
+| 2 | **⚙ → Features**: untick **Export**, click **← Back**. Then tick it again. | The **Export…** button disappears from the toolbar (also from the right-click menu of a row) and comes back when ticked. Import and the branch button stay. |
+| 3 | **⚙ → Report a problem**: type a sentence, **Save report…**, save it anywhere. | Explorer opens with the file selected; it holds your sentence, the diagnostics and the end of the log. |
+| 4 | Optional: open the latest **Build** run on GitHub (Actions) → **Summary**. | "Acceptance run — ReqMan 0.14.0 — Result: passed" with a numbered list of what it did (installed, updated, self-test, sandbox, push to `ci/acceptance-…`, deleted). |
+
 ## Previous checklist — v0.13.1 (your three points on 0.13.0)
 
 Report by step number.

@@ -67,7 +67,21 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.14.1 (user guide, going back, calmer notes)
+## Manual test checklist — v0.14.2 (Settings and help with the guide inside)
+
+The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
+**First re-clone the sandbox** (its history was rewritten): delete your `Claude_SandBox` and `Claude_SandBox_B`
+folders and clone them again (Open in GitHub Desktop or `git clone`). Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.14.2**, then **⚙ → Run release self-test**. | App shows 0.14.2; **All steps passed**, 21 ✓. |
+| 2 | **⚙**: look at the left panel; click a few entries (Versions, Features, then **User guide → 1. Quick start**, then a link in the guide's contents). | Settings entries jump to their card; the guide opens at the section; links inside the guide jump to their section. Arabic: the panel is in Arabic, the guide stays in English with a note. |
+| 3 | **⚙ → Report a problem**: type a sentence, **Save report…**. | The file is saved and the text box is empty again. |
+| 4 | On GitHub open **Claude_SandBox → Commits**. | Your commits show **mostafadiab97** with no work e-mail. |
+| 5 | Set your own Git to GitHub's private address so new commits stay private — in a terminal: `git config --global user.email 347558874+mostafadiab97@users.noreply.github.com` | Next commits from your PC show that address (the build checks it from now on). |
+
+## Previous checklist — v0.14.1 (user guide, going back, calmer notes)
 
 The acceptance run on GitHub already did the update, self-test, sandbox and a real push (Actions → Build → Summary).
 Report by step number.
@@ -79,18 +93,6 @@ Report by step number.
 | 3 | **⚙ → Versions → Go back to an earlier version…** | It says there is no earlier version to go back to yet (going back works from 0.14.1 on — the first real test comes with the next version). |
 | 4 | Open `docs/USER-GUIDE.md` on GitHub and skim the quick start. | Tell me anything unclear or missing before the pilot team gets it. |
 | 5 | Read `docs/reviews/2026-11-03-security-check.md` → "Decision for Mostafa". | Answer: leave the work e-mail in the sandbox history, rewrite it, or make the sandbox private. |
-
-## Previous checklist — v0.14.0 (health tools; acceptance run)
-
-The automatic acceptance run already did the update, the self-test, the sandbox and a real push on GitHub's Windows
-machine — see the run's summary (Actions → Build → the run → Summary). These steps are for your eyes. Report by step number.
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Update to **0.14.0**, then **⚙ → Run release self-test**. | App shows 0.14.0; **All steps passed**, 21 ✓. |
-| 2 | **⚙ → Features**: untick **Export**, click **← Back**. Then tick it again. | The **Export…** button disappears from the toolbar (also from the right-click menu of a row) and comes back when ticked. Import and the branch button stay. |
-| 3 | **⚙ → Report a problem**: type a sentence, **Save report…**, save it anywhere. | Explorer opens with the file selected; it holds your sentence, the diagnostics and the end of the log. |
-| 4 | Optional: open the latest **Build** run on GitHub (Actions) → **Summary**. | "Acceptance run — ReqMan 0.14.0 — Result: passed" with a numbered list of what it did (installed, updated, self-test, sandbox, push to `ci/acceptance-…`, deleted). |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

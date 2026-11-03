@@ -2620,3 +2620,96 @@ code {
   gap: var(--rm-space-xs);
   margin: 0;
 }
+
+/* 0.14.2 (Mostafa on 0.14.1 step 4): Settings and help — left panel with the settings cards and the user guide */
+.page--split {
+  display: flex;
+  overflow: hidden;
+  padding: 0;
+}
+.page--main {
+  flex: 1;
+  min-inline-size: 0;
+}
+.settings-nav {
+  inline-size: 260px;
+  flex: none;
+  overflow-y: auto;
+  border-inline-end: 1px solid var(--rm-color-border);
+  background: var(--rm-color-surface);
+  padding: var(--rm-space-md) var(--rm-space-sm);
+}
+.settings-nav ul {
+  list-style: none;
+  margin: 0 0 var(--rm-space-md);
+  padding: 0;
+}
+.settings-nav__group {
+  font-size: var(--rm-font-size-small);
+  color: var(--rm-color-text-muted);
+  text-transform: uppercase;
+  margin: var(--rm-space-sm) 0 var(--rm-space-xs);
+  padding-inline-start: var(--rm-space-sm);
+}
+.settings-nav__group .settings-nav__item {
+  text-transform: uppercase;
+  color: var(--rm-color-text-muted);
+  font-size: var(--rm-font-size-small);
+  padding-inline-start: 0;
+}
+.settings-nav__item {
+  display: block;
+  inline-size: 100%;
+  text-align: start;
+  background: none;
+  border: none;
+  border-radius: var(--rm-shape-radius);
+  padding: var(--rm-space-xs) var(--rm-space-sm);
+  color: var(--rm-color-text);
+  font: inherit;
+  cursor: pointer;
+}
+.settings-nav__item--sub {
+  font-size: var(--rm-font-size-small);
+  padding-inline-start: var(--rm-space-md);
+}
+.settings-nav__item:hover {
+  background: color-mix(in srgb, var(--rm-color-surface) 90%, var(--rm-color-text));
+}
+.settings-nav__item.is-active {
+  background: color-mix(in srgb, var(--rm-color-primary) 14%, var(--rm-color-surface));
+  color: var(--rm-color-primary);
+}
+.guide__body {
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.guide__body h3 {
+  font-size: var(--rm-font-size-large);
+}
+.guide__body table {
+  border-collapse: collapse;
+  inline-size: 100%;
+  margin-block: var(--rm-space-sm);
+}
+.guide__body th,
+.guide__body td {
+  border: 1px solid var(--rm-color-border);
+  padding: var(--rm-space-xs) var(--rm-space-sm);
+  text-align: start;
+  vertical-align: top;
+}
+.guide__body pre {
+  overflow-x: auto;
+  padding: var(--rm-space-sm);
+  border: 1px solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius);
+}
+.guide__body h1 {
+  font-size: var(--rm-font-size-title);
+}
+.guide__body h2 {
+  font-size: var(--rm-font-size-title);
+  margin-block-start: var(--rm-space-xl);
+  scroll-margin-block-start: var(--rm-space-md);
+}

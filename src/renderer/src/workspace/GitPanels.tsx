@@ -98,7 +98,7 @@ export function GitBar(props: {
           className={branches ? 'btn btn--small btn--active gitbar__branch' : 'btn btn--small gitbar__branch'}
           aria-expanded={branches}
           aria-label={T.branches.open(state.branch ?? '')}
-          title={`${T.branches.open(state.branch ?? '')}\n${state.upstream ? T.git.remoteBranch(state.upstream) : T.git.notOnRemote}`}
+          title={branchesOn ? `${T.branches.open(state.branch ?? '')}\n${state.upstream ? T.git.remoteBranch(state.upstream) : T.git.notOnRemote}` : T.settings.features.branchesOff}
           disabled={busy !== null || state.detached || state.mergeInProgress || !branchesOn}
           onClick={() => setBranches((v) => !v)}
         >

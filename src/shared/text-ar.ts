@@ -812,6 +812,7 @@ const raw: Texts = {
     searchFor: (text: string) => `«${text}»`,
     filterIs: (name: string, value: string) => `${name} = ${value}`,
     filteredBy: (what: string) => `مُصفّى: ${what}`,
+    clearFiltersStatus: 'إظهار كل العناصر مجددًا',
     lastPull: (time: string) => `آخر سحب: ${time}`,
     dragHint: 'اسحب صفًا فوق صف آخر لنقله إليه، مع كل ما تحته',
     notGit: 'ليس مستودع Git',

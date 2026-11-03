@@ -5,6 +5,7 @@ import { filterSummary } from '../../src/renderer/src/workspace/screen/useFilter
 import { middleEllipsis } from '../../src/renderer/src/lib/statusbar'
 import { fieldLabel, formatValue, isHeading, linkName, optionLabel, typeName, typeShort } from '../../src/renderer/src/lib/schema'
 import { setLanguage } from '../../src/shared/text'
+import { columnsFor, defaultOrder } from '../../src/renderer/src/workspace/table/columns'
 import { plainText, renderItemText } from '../../src/renderer/src/lib/markdown'
 import { groupProblems, problemsOf } from '../../src/renderer/src/workspace/screen/problemList'
 
@@ -103,5 +104,16 @@ describe('schema names in the window language (UX-22)', () => {
     } finally {
       setLanguage('en')
     }
+  })
+})
+
+describe('column order (UX-03)', () => {
+  it('No. and Title first, then Type, Status, Links, other fields, ID, Text', () => {
+    expect(columnsFor(schema).map((c) => c.key)).toEqual(['number', 'title', 'type', 'field:status', 'links', 'id', 'text'])
+  })
+  it('a saved order keeps ID where the user put it (the Columns menu lists it)', () => {
+    const order = defaultOrder(schema)
+    const moved = [...order.filter((k) => k !== 'text').slice(0, -1), 'text', 'id']
+    expect(columnsFor(schema, { hidden: new Set(), order: moved }).map((c) => c.key).slice(-2)).toEqual(['text', 'id'])
   })
 })

@@ -68,7 +68,7 @@ await scenario('E2E fixes', async (ctx) => {
   await win.mouse.up()
   const after = await numberHead.boundingBox()
   check(Math.abs(after.width - before.width - 80) < 6, `dragging widens the column (${Math.round(before.width)} → ${Math.round(after.width)} px)`)
-  const cell = await win.locator('.table__row[data-id]').first().locator('.table__td').nth(1).boundingBox()
+  const cell = await win.locator('.table__row[data-id]').first().locator('.table__td--number').boundingBox() // No. is the first column since 0.15 (UX-03)
   check(Math.abs(cell.width - after.width) < 2, 'the rows follow the header')
   const saved = await win.evaluate(() => Object.entries(localStorage).find(([k]) => k.startsWith('reqman.columns:'))?.[1] ?? '')
   check(/"number":\d+/.test(saved), 'the width is remembered for this repository')

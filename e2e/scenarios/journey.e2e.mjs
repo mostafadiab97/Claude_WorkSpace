@@ -81,7 +81,7 @@ await scenario('E2E journey', async (ctx) => {
   await win.locator('.table__row[aria-level="2"]').first().waitFor()
   check(JSON.stringify(await level2()) === JSON.stringify(['Temperature accuracy', 'Display readability']), 'table shows the two children indented under their parent, in order')
   check((await win.locator('.tree').count()) === 0, 'no separate tree panel any more')
-  const numbers = await win.locator('.table__row[data-id] [role="gridcell"]:nth-child(2)').allTextContents()
+  const numbers = await win.locator('.table__row[data-id] .table__td--number').allTextContents()
   check(JSON.stringify(numbers.slice(0, 3)) === JSON.stringify(['1', '1.1', '1.2']), `the No. column shows outline numbers (${numbers.slice(0, 3).join(', ')})`)
   await win.getByRole('button', { name: `Collapse ${stkId}` }).click()
   check((await rows().count()) === 2, 'collapsing the parent hides its children')

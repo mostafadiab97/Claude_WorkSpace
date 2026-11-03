@@ -382,7 +382,7 @@ export function WorkspaceScreen({
             // UX-36: what the table is filtered by, with a quick way out
             <span className="statusbar__hint statusbar__filter" title={filters.summary}>
               {T.workspace.filteredBy(filters.summary)}{' '}
-              <button type="button" className="link-btn" onClick={filters.clear} aria-label={T.workspace.clearFilters} title={T.workspace.clearFilters}>
+              <button type="button" className="link-btn" onClick={filters.clear} aria-label={T.workspace.clearFiltersStatus} title={T.workspace.clearFiltersStatus}>
                 ✕
               </button>
             </span>

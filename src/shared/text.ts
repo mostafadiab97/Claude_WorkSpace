@@ -810,6 +810,7 @@ const en = {
     searchFor: (text: string) => `“${text}”`,
     filterIs: (name: string, value: string) => `${name} = ${value}`,
     filteredBy: (what: string) => `Filtered: ${what}`,
+    clearFiltersStatus: 'Show all items again',
     lastPull: (time: string) => `Last pull: ${time}`,
     dragHint: 'Drag a row onto another row to move it there, with everything below it',
     notGit: 'Not a Git repository',

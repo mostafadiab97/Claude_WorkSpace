@@ -56,7 +56,14 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields }: { schema:
     }
   }, [open])
 
-  const cols = orderColumns(optionalColumns(schema), prefs.order.length ? prefs.order : defaultOrder(schema))
+  const cols = optionalColumns(schema)
+  // the order list: every column after No. and Title, ID included (it cannot be hidden, but it can be moved —
+  // before 0.15 it was left out, so moving a column sent ID to the end); No. always stays first
+  const movable = orderColumns<{ key: string; label: string; builtIn: boolean; fixed?: boolean }>(
+    [...cols.filter((c) => c.key !== 'number'), { key: 'id', label: T.columns.id, builtIn: true, fixed: true }],
+    prefs.order.length ? prefs.order : defaultOrder(schema)
+  )
+  const numberCol = cols.find((c) => c.key === 'number')
   const { hidden } = prefs
   const shown = cols.filter((c) => !hidden.has(c.key)).length
   const toggle = (key: string): void => {
@@ -66,7 +73,7 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields }: { schema:
     onChange({ ...prefs, hidden: next })
   }
   const move = (index: number, by: number): void => {
-    const keys = cols.map((c) => c.key)
+    const keys = movable.map((c) => c.key)
     const j = index + by
     if (j < 0 || j >= keys.length) return
     ;[keys[index], keys[j]] = [keys[j] as string, keys[index] as string]
@@ -82,16 +89,25 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields }: { schema:
         <div className="popover__panel" role="dialog" aria-label={T.columnsMenu.label}>
           <p className="popover__hint">{T.columnsMenu.hint}</p>
           <ul className="popover__list">
-            {cols.map((c, i) => (
+            {numberCol && (
+              <li className="popover__row">
+                <label className="check">
+                  <input type="checkbox" checked={!hidden.has(numberCol.key)} onChange={() => toggle(numberCol.key)} />
+                  {numberCol.label}
+                  <span className="muted-inline">{T.columnsMenu.builtIn}</span>
+                </label>
+              </li>
+            )}
+            {movable.map((c, i) => (
               <li key={c.key} className="popover__row">
                 <label className="check">
-                  <input type="checkbox" checked={!hidden.has(c.key)} onChange={() => toggle(c.key)} />
+                  <input type="checkbox" checked={c.fixed === true || !hidden.has(c.key)} disabled={c.fixed} onChange={() => toggle(c.key)} />
                   {c.label}
                   {c.builtIn && <span className="muted-inline">{T.columnsMenu.builtIn}</span>}
                 </label>
                 <span className="actions">
                   <button type="button" className="icon-btn icon-btn--small" aria-label={T.columnsMenu.up(c.label)} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
-                  <button type="button" className="icon-btn icon-btn--small" aria-label={T.columnsMenu.down(c.label)} disabled={i === cols.length - 1} onClick={() => move(i, 1)}>↓</button>
+                  <button type="button" className="icon-btn icon-btn--small" aria-label={T.columnsMenu.down(c.label)} disabled={i === movable.length - 1} onClick={() => move(i, 1)}>↓</button>
                 </span>
               </li>
             ))}

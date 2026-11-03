@@ -74,7 +74,7 @@ export function SettingsScreen(props: { theme: LoadedTheme; git: GitInfo | null;
         </h2>
         <ul aria-label={T.settings.nav.guide}>{sections.map((s) => item(view.kind === 'guide' && view.target === s.id, s.title, () => setView({ kind: 'guide', target: s.id }), true))}</ul>
       </nav>
-      <div className="page page--main" ref={main}>
+      <div className="settings-main" ref={main}>
         <div className="page__inner">
           <div className="page__header">
             <button type="button" className="btn" onClick={props.onBack}>

@@ -95,3 +95,8 @@ Early sandbox commits carried a work e-mail; removing it needed a history rewrit
 explicit approval). Prevention: `tools/check-privacy.mjs` in build.yml fails on any commit e-mail that is not a GitHub
 private / no-reply address and on real e-mail addresses in files; gitleaks scans for secrets. Test data must use
 `example.com` / `.test` / `.invalid` addresses only.
+
+## Always run the full e2e suite before a release (0.14.2)
+0.14.2's first release run failed: `journey` measured `locator('.page')`, and the new Settings layout had two `.page`
+elements (strict-mode violation). Only `health` had been run locally after changing Settings. Run `npm run test:e2e`
+(all scenarios) before every version bump; the settings scroll area is `.settings-main`, the page wrapper `.page`.

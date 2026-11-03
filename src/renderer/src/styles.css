@@ -2627,9 +2627,15 @@ code {
   overflow: hidden;
   padding: 0;
 }
-.page--main {
+.page--split > .settings-nav,
+.page--split > .settings-main {
+  block-size: 100%;
+}
+.settings-main {
   flex: 1;
   min-inline-size: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .settings-nav {
   inline-size: 260px;

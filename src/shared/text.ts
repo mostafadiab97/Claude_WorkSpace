@@ -409,6 +409,7 @@ const en = {
   },
 
   editor: {
+    unsavedMark: 'Not saved yet',
     label: 'Item',
     labelFor: (id: string) => `Item ${id}`,
     unreadable: 'This item could not be read. It may have been deleted, or its file is not valid.',
@@ -728,6 +729,7 @@ const en = {
   },
 
   workspace: {
+    editorWidth: 'Drag to change the editor width (double-click: automatic)',
     filters: 'Filters',
     filtersTooltip: 'Filter by type, field values and links',
     items: 'Items',

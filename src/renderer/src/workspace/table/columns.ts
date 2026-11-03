@@ -1,6 +1,6 @@
 // Table columns: which exist, their order and visibility (personal, per repository on this PC).
 import type { IndexedItem, Schema, SortKey } from '../../../../shared/domain'
-import { formatValue, typeName } from '../../lib/schema'
+import { formatValue, isHeading, typeName, typeShort } from '../../lib/schema'
 import { T } from '../../../../shared/text'
 
 export interface Column {
@@ -14,6 +14,15 @@ export interface Column {
   value: (i: IndexedItem) => string
   /** Shown in the warning colour (e.g. suspect links). */
   warn?: (i: IndexedItem) => boolean
+  /** Tooltip, when it differs from the shown value (e.g. the full type name behind a short label). */
+  tip?: (i: IndexedItem) => string
+}
+
+/** Default column order (UX-03): Type, Status, Links, the other fields, ID, Text. */
+export function defaultOrder(schema: Schema): string[] {
+  const fields = schema.fields.map((f) => `field:${f.id}`)
+  const status = fields.filter((k) => k === 'field:status')
+  return ['type', ...status, 'links', ...fields.filter((k) => k !== 'field:status'), 'id', 'text']
 }
 
 /** Built-in columns that can be hidden (ID and Title are always shown). */
@@ -91,32 +100,35 @@ export function orderColumns<C extends { key: string }>(cols: C[], order: string
 
 /** The visible optional columns in the user's order — also what the export offers by default. */
 export function shownColumnKeys(schema: Schema, prefs: ColumnPrefs): string[] {
-  return orderColumns(optionalColumns(schema), prefs.order)
+  return orderColumns(optionalColumns(schema), prefs.order.length ? prefs.order : defaultOrder(schema))
     .filter((c) => !prefs.hidden.has(c.key))
     .map((c) => c.key)
 }
 
 export function columnsFor(schema: Schema, prefs: ColumnPrefs = { hidden: new Set(), order: [] }): Column[] {
   const all: Column[] = [
-    { key: 'id', label: T.columns.id, minPx: 130, grow: 0, value: (i) => i.id },
     // the outline number (calculated, never stored — O-03); sorting by it = document order
-    { key: 'number', label: T.columns.number, minPx: 90, grow: 0, value: (i) => i.number ?? '' },
-    { key: 'title', label: T.columns.title, minPx: 260, grow: 3, value: (i) => i.title || T.common.noTitle },
-    { key: 'type', label: T.columns.type, minPx: 130, grow: 1.2, value: (i) => typeName(schema, i.type) },
-    { key: 'links', label: T.columns.links, minPx: 90, grow: 0.6, value: linkSummary, warn: (i) => i.suspectCount > 0 },
+    { key: 'number', label: T.columns.number, minPx: 72, grow: 0, value: (i) => i.number ?? '' },
+    { key: 'title', label: T.columns.title, minPx: 280, grow: 4, value: (i) => i.title || T.common.noTitle },
+    // short type label in the table (full name in the tooltip); headings show no type — they stand out by weight (UX-03)
+    { key: 'type', label: T.columns.type, minPx: 84, grow: 0.6, value: (i) => (isHeading(schema, i.type) ? '' : typeShort(schema, i.type)), tip: (i) => typeName(schema, i.type) },
+    { key: 'links', label: T.columns.links, minPx: 72, grow: 0, value: linkSummary, warn: (i) => i.suspectCount > 0 },
     ...schema.fields.map<Column>((f) => ({
       key: `field:${f.id}`,
       label: f.name,
-      minPx: f.type === 'list' ? 120 : 100,
-      grow: f.type === 'list' ? 1.2 : 1,
+      minPx: f.type === 'list' ? 110 : f.id === 'priority' ? 80 : 96,
+      grow: f.type === 'list' ? 1 : 0.6,
       value: (i) => formatValue(i.fields[f.id])
     })),
-    { key: 'text', label: T.columns.text, minPx: 220, grow: 2.5, value: (i) => i.text }
+    { key: 'id', label: T.columns.id, minPx: 110, grow: 0, value: (i) => i.id },
+    { key: 'text', label: T.columns.text, minPx: 200, grow: 2, value: (i) => i.text }
   ]
-  // ID, No. and Title stay at the front; the rest follow the user's order
-  const [id, number, title, ...rest] = all
+  // No. and Title stay at the front; the rest follow the user's order — by default the descriptive columns first
+  // (Type, Status, Links, other fields), then ID and Text (UI review UX-03, owner's decision 3 Nov 2026)
+  const [number, title, ...rest] = all
   const widths = prefs.widths ?? {}
-  return [id as Column, number as Column, title as Column, ...orderColumns(rest, prefs.order)]
+  const order = prefs.order.length ? prefs.order : defaultOrder(schema)
+  return [number as Column, title as Column, ...orderColumns(rest, order)]
     .filter((c) => !prefs.hidden.has(c.key))
     .map((c) => (widths[c.key] !== undefined ? { ...c, width: widths[c.key] } : c))
 }

@@ -39,11 +39,12 @@ describe('column widths (table/columns.ts)', () => {
   const bare: Schema = { version: 1, itemTypes: [], fields: [], linkTypes: [] }
   it('a dragged width is fixed, other columns keep growing; double-click returns to automatic', () => {
     const auto = columnsFor(bare, { hidden: new Set(['type', 'links', 'text']), order: [] })
-    expect(columnTemplate(auto)).toBe('130px 90px minmax(260px, 3fr)')
+    // 0.15 (UI review UX-03): No. and Title first, ID after the descriptive columns
+    expect(columnTemplate(auto)).toBe('72px minmax(280px, 4fr) 110px')
     const widths = withWidth(undefined, 'number', 160.4)
     const wide = columnsFor(bare, { hidden: new Set(['type', 'links', 'text']), order: [], widths })
-    expect(columnTemplate(wide)).toBe('130px 160px minmax(260px, 3fr)')
-    expect(tableMinWidth(wide)).toBe(130 + 160 + 260)
+    expect(columnTemplate(wide)).toBe('160px minmax(280px, 4fr) 110px')
+    expect(tableMinWidth(wide)).toBe(160 + 280 + 110)
     expect(withWidth(widths, 'number', null)).toEqual({})
     // never narrower than a grip, never absurdly wide
     expect(withWidth({}, 'title', 3)).toEqual({ title: 48 })

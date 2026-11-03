@@ -8,19 +8,19 @@
 version: 1
 
 itemTypes:
-  - { id: stakeholder-need,     name: Stakeholder Need }
-  - { id: system-requirement,   name: System Requirement }
-  - { id: software-requirement, name: Software Requirement }
-  - { id: hardware-requirement, name: Hardware Requirement }
-  - { id: interface-requirement, name: Interface Requirement }
-  - { id: use-case,             name: Use Case }
-  - { id: design-element,       name: Design Element }
-  - { id: test-case,            name: Test Case }
-  - { id: defect,               name: Defect }
-  - { id: risk,                 name: Risk }
-  - { id: change-request,       name: Change Request }
+  - { id: stakeholder-need,     name: Stakeholder Need, short: Need }
+  - { id: system-requirement,   name: System Requirement, short: SysReq }
+  - { id: software-requirement, name: Software Requirement, short: SwReq }
+  - { id: hardware-requirement, name: Hardware Requirement, short: HwReq }
+  - { id: interface-requirement, name: Interface Requirement, short: IfReq }
+  - { id: use-case,             name: Use Case, short: 'Use case' }
+  - { id: design-element,       name: Design Element, short: Design }
+  - { id: test-case,            name: Test Case, short: Test }
+  - { id: defect,               name: Defect, short: Defect }
+  - { id: risk,                 name: Risk, short: Risk }
+  - { id: change-request,       name: Change Request, short: CR }
   # Headings and explanatory text that structure a specification; not counted as requirements.
-  - { id: information,          name: Heading / Information, requirement: false }
+  - { id: information,          name: Heading / Information, requirement: false, short: Heading }
 
 fields:
   - id: status

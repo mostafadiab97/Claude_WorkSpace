@@ -10,6 +10,8 @@ export interface ItemTypeDef {
   name: string
   /** False for headings/information that structure a specification but are not requirements. */
   requirement: boolean
+  /** Optional short label for narrow places such as the table's Type column ("SysReq"); 0.15 UI polish (UX-03). */
+  short?: string
 }
 
 export interface FieldDef {

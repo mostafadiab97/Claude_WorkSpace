@@ -181,6 +181,11 @@ export function ItemEditor(props: {
           <div className="editor__heading">
             {details?.number && <span className="editor__number" title={T.editor.number(details.number)}>{details.number}</span>}
             <span className="editor__id">{form.id}</span>
+            {dirty && !isNew && (
+              <span className="editor__dirty" title={T.editor.unsavedMark} aria-label={T.editor.unsavedMark}>
+                •
+              </span>
+            )}
           </div>
           <div className="editor__type">
             {typeName(schema, form.type)}

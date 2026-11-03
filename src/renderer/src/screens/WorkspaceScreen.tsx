@@ -8,6 +8,7 @@ import { ChangesSide, ChangesView } from '../workspace/ChangesView'
 import { GitBar } from '../workspace/GitPanels'
 import { MergeDialog } from '../workspace/MergeDialog'
 import { ExportDialog } from '../workspace/ExportDialog'
+import { useEditorWidth } from '../workspace/screen/EditorSplitter'
 import { setTeamFeatures } from '../lib/features'
 import { ImportDialog } from '../workspace/ImportDialog'
 import { RowMenu } from '../workspace/RowMenu'
@@ -159,10 +160,11 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
   }
 
   const selectedId = target?.kind === 'item' ? target.id : null
+  const editorWidth = useEditorWidth()
   const problems = problemsOf(info)
 
   return (
-    <div className="workspace">
+    <div className="workspace" style={editorWidth.style}>
       <section className="workspace__main" aria-label={T.workspace.items}>
         <GitBar
           slot={gitSlot}
@@ -332,7 +334,8 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
       {showChanges && git.state?.available && <ChangesSide changes={changes} git={git.state} blocked={git.blocked} onResult={git.onPanelResult} />}
 
       {target && (
-        <div className={showChanges && git.state?.available ? 'is-hidden' : 'contents'}>
+        <div className={showChanges && git.state?.available ? 'is-hidden' : 'workspace__side'}>
+          {editorWidth.handle}
           <ItemEditor
             // Same key for a draft and the saved item, so the editor stays in place when a new item is saved.
             key={target.kind === 'item' ? target.id : target.item.id}

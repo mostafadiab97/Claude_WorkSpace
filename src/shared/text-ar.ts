@@ -413,6 +413,7 @@ const raw: Texts = {
   },
 
   editor: {
+    unsavedMark: 'لم يُحفظ بعد',
     label: 'العنصر',
     labelFor: (id: string) => `العنصر ${id}`,
     unreadable: 'تعذّرت قراءة هذا العنصر. ربما حُذف، أو ملفه غير صالح.',
@@ -730,6 +731,7 @@ const raw: Texts = {
   },
 
   workspace: {
+    editorWidth: 'اسحب لتغيير عرض المحرّر (نقر مزدوج: تلقائي)',
     filters: 'التصفية',
     filtersTooltip: 'التصفية حسب النوع وقيم الحقول والروابط',
     items: 'العناصر',

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { FieldCheck, RepoInfo } from '../../../shared/api'
 import type { FieldDef, FieldType, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
-import { optionalColumns, orderColumns, type ColumnPrefs } from './ItemTable'
+import { defaultOrder, optionalColumns, orderColumns, type ColumnPrefs } from './ItemTable'
 import { T } from '../../../shared/text'
 
 // ---------------------------------------------------------------- show / hide columns
@@ -56,7 +56,7 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields }: { schema:
     }
   }, [open])
 
-  const cols = orderColumns(optionalColumns(schema), prefs.order)
+  const cols = orderColumns(optionalColumns(schema), prefs.order.length ? prefs.order : defaultOrder(schema))
   const { hidden } = prefs
   const shown = cols.filter((c) => !hidden.has(c.key)).length
   const toggle = (key: string): void => {

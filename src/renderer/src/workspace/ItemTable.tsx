@@ -2,12 +2,13 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import type { ItemQuery, Schema, SortKey } from '../../../shared/domain'
 import { T } from '../../../shared/text'
+import { isHeading } from '../lib/schema'
 import { clampWidth, columnTemplate, columnsFor, linkTitle, tableMinWidth, type ColumnPrefs } from './table/columns'
 import { useRowDrag } from './table/drag'
 import { useFlatRows, useTreeRows, type Row } from './table/rows'
 import { isRtlDocument, useLanguage } from '../lib/language'
 
-export { optionalColumns, orderColumns, shownColumnKeys, columnsFor, withWidth, linkSummary, type Column, type ColumnPrefs } from './table/columns'
+export { defaultOrder, optionalColumns, orderColumns, shownColumnKeys, columnsFor, withWidth, linkSummary, type Column, type ColumnPrefs } from './table/columns'
 export type { Row } from './table/rows'
 
 const ROW_HEIGHT = 34
@@ -324,15 +325,15 @@ export function ItemTable(props: {
                             ) : (
                               <span className="tree__toggle tree__toggle--leaf" aria-hidden="true" />
                             )}
-                            <span className="table__text">{c.value(item)}</span>
+                            <span className={isHeading(schema, item.type) ? 'table__text table__text--heading' : 'table__text'}>{c.value(item)}</span>
                             {item.childCount > 0 && !open && <span className="table__count">{item.childCount.toLocaleString('en')}</span>}
                           </span>
                         ) : (
                           <span
                             key={c.key}
                             role="gridcell"
-                            className={`table__td${c.key === 'id' ? ' table__td--id' : ''}${c.warn?.(item) ? ' table__td--warn' : ''}`}
-                            title={c.key === 'links' ? linkTitle(item) : c.value(item)}
+                            className={`table__td${c.key === 'id' ? ' table__td--id' : ''}${c.key === 'number' ? ' table__td--number' : ''}${c.key === 'links' ? ' table__td--links' : ''}${c.warn?.(item) ? ' table__td--warn' : ''}`}
+                            title={c.key === 'links' ? linkTitle(item) : (c.tip?.(item) ?? c.value(item))}
                           >
                             {c.value(item)}
                           </span>

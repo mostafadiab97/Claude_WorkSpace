@@ -30,6 +30,7 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
 | Module map, rules, data format, UI structure | `docs/ARCHITECTURE.md` |
 | Onboarding for engineers (diagrams, first change end to end) | `docs/ONBOARDING.md`, diagrams in `docs/diagrams/` |
 | Pitfalls already hit — read before changing an area | `docs/PITFALLS.md` |
+| **Helper agents (code reviewer, QA tester, UI/UX reviewer) and how conflicts are avoided** | `docs/AGENT-WORKFLOW.md` |
 | The owner's current checklist, log/data locations, bug reporting | `docs/TESTING.md` (older checklists: `docs/testing/past-checklists.md`) |
 | What changed per version + the owner's reports | `CHANGELOG.md` |
 | Theme · local setup · scripts and skills | `docs/THEMING.md` · `docs/DEVELOPING.md` · `tools/README.md` (skills in `.claude/skills/`: `release-to-owner` for every release, `owner-decision-walkthrough` for every question round, `whole-project-review`) |
@@ -53,6 +54,9 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
 - **No personal data in this repository's files** (owner, 3 Nov 2026): never write the owner's name, account name,
   user name or e-mail into any file — say "the owner"; `<owner>/Claude_SandBox` in docs; the privacy check fails the
   build otherwise. A public release repository will later start from the files without history.
+- **Helper agents (owner, 3 Nov 2026):** for every theme version, after building and before releasing, run the code
+  reviewer, QA tester and UI/UX reviewer on the frozen commit — rules in `docs/AGENT-WORKFLOW.md` (one writer; QA adds
+  new test files only, in its own worktree; reports in `docs/reviews/agents/`).
 - He asked to be asked before steps that affect his accounts/repos (e.g. repository visibility). Never change
   repo visibility, delete releases, rewrite history or force-push.
 - Only free, open-source dependencies whose licences allow commercial use (NFR-07). No paid services.

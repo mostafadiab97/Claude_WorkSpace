@@ -30,6 +30,7 @@ Which file answers which question. Every file starts with a short "what this is"
 | How do I change colours, fonts, logo? | `docs/THEMING.md` |
 | How do I make the company Word template with an AI model? | `docs/guides/word-template-prompt.md` |
 | How do I get a UI/UX review of the app from an AI agent? | `docs/guides/ui-review-prompt.md` |
+| How do the helper agents (reviewer, QA, UI/UX) work without conflicts? | `docs/AGENT-WORKFLOW.md` |
 | What does each script do? Which working procedures (skills) exist? | `tools/README.md`, `.claude/skills/` |
 
 ## Keeping it tidy

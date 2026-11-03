@@ -281,3 +281,9 @@ The main trade-off is accepting a larger app download (Electron, roughly 100+ MB
 - Type is editable in the editor since 0.9.0 (IDs no longer contain the type).
 - Link edits are saved immediately and locked while the item has unsaved edits.
 - Delete offers to remove incoming links (ticked by default).
+
+## Development workflow — helper agents (C, 3 Nov 2026)
+
+The owner added three helper agents for every theme version: code reviewer, QA tester, UI/UX reviewer (an architect
+review was discussed, not added for now). One builder writes the product; helpers check a frozen commit; the QA tester
+adds new test files only, in its own worktree. Details: `docs/AGENT-WORKFLOW.md`.

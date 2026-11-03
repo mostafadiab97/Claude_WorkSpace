@@ -189,7 +189,8 @@ checks in detail".
     (considering ShallWe, Plumbline, Keelson).
   - P-11 **no Word import**. Import: Excel, ReqIF, CSV, ReqMan repositories. Export: Excel, ReqIF, CSV, ReqMan
     repositories, Markdown, Word, PDF.
-- **New name:** Mostafa is still choosing. Latest candidates (2 Nov): ShallWe (recommended), Plumbline, Keelson; earlier: reqochet (felt long, "misses the target"), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:
+- **3 Nov 2026: the CTO approved a pilot with a complete team** — the rename must ship before the team gets the tool.
+- **New name:** Mostafa is choosing (decision expected 3 Nov). Candidates 3 Nov: reqochet, reqoin, reqornea (his), Reqoncile, Reqonnect, Reqosmos, Reqompass, Reqollect, Reqipe; avoid Reqord (existing tool). Latest candidates (2 Nov): ShallWe (recommended), Plumbline, Keelson; earlier: reqochet (felt long, "misses the target"), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:
   uninstall old → install new, `.reqman` folder renamed by Git rename, copy the user's settings first).
 - **Rust: no migration now** (31 Oct). Feature input: `docs/reviews/2026-10-31-feature-catalogue.md` (163 features),
   market list `docs/reviews/2026-10-31-rm-tools-market-list.md`.

@@ -23,9 +23,6 @@ await scenario('E2E health', async (ctx) => {
   await note.waitFor()
   check(await note.evaluate((el) => el.classList.contains('gitbar__notice--info')), '"Nothing to push yet" is shown as a neutral (blue) note')
   await t.shot('health-0-note-light')
-  await win.getByRole('radio', { name: 'Dark' }).click()
-  await t.shot('health-0-note-dark')
-  await win.getByRole('radio', { name: 'Light' }).click()
 
   console.log('Turn Export off on this PC')
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()

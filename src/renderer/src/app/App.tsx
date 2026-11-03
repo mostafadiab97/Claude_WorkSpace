@@ -28,6 +28,8 @@ export function App() {
   /** "New project from a file": the file the new workspace opens the import wizard with. */
   const [pendingImport, setPendingImport] = useState<ImportFile | null>(null)
   const [showSettings, setShowSettings] = useState(false)
+  // Settings may open straight on a user-guide page (start screen → "Read the quick start", UX-24)
+  const [settingsStart, setSettingsStart] = useState<string | undefined>(undefined)
   /** Where the workspace puts its Git controls: inside the top bar (0.13.0 — one bar less). */
   const [gitSlot, setGitSlot] = useState<HTMLDivElement | null>(null)
 
@@ -90,8 +92,13 @@ export function App() {
         </div>
         <div className="topbar__git" ref={setGitSlot} hidden={!repo || showSettings} />
         <div className="topbar__right">
-          <LanguageToggle lang={lang} onChange={changeLanguage} />
-          <ThemeToggle mode={mode} onChange={changeMode} />
+          {/* UX-13: language and colours are on the start screen and in Settings → Appearance, not beside daily Git work */}
+          {!repo && !showSettings && (
+            <>
+              <LanguageToggle lang={lang} onChange={changeLanguage} />
+              <ThemeToggle mode={mode} onChange={changeMode} />
+            </>
+          )}
           <button
             type="button"
             className={showSettings ? 'icon-btn icon-btn--active' : 'icon-btn'}
@@ -116,13 +123,33 @@ export function App() {
         )}
         {showSettings && (
           <ErrorBoundary area={T.app.settingsArea}>
-            <SettingsScreen theme={theme} git={git} update={update} appInfo={appInfo} onBack={() => setShowSettings(false)} />
+            <SettingsScreen
+              theme={theme}
+              git={git}
+              update={update}
+              appInfo={appInfo}
+              startGuidePage={settingsStart}
+              appearance={
+                <>
+                  <LanguageToggle lang={lang} onChange={changeLanguage} />
+                  <ThemeToggle mode={mode} onChange={changeMode} />
+                </>
+              }
+              onBack={() => {
+                setShowSettings(false)
+                setSettingsStart(undefined)
+              }}
+            />
           </ErrorBoundary>
         )}
         {!repo && !showSettings && (
           <StartScreen
             brand={brand}
             git={git}
+            onQuickStart={() => {
+              setSettingsStart('1-quick-start-15-minutes')
+              setShowSettings(true)
+            }}
             onOpened={(info, file) => {
               setPendingImport(file ?? null)
               setRepo(info)

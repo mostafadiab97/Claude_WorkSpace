@@ -11,16 +11,26 @@ import { guidePages } from '../lib/guide'
 import { useLanguage } from '../lib/language'
 import { T } from '../../../shared/text'
 
-type SettingsPage = 'env' | 'report' | 'features' | 'tests'
+type SettingsPage = 'env' | 'appearance' | 'report' | 'features' | 'tests'
 type View = { kind: 'settings'; page: SettingsPage } | { kind: 'guide'; page: string; anchor?: string }
 
 /**
  * Settings and help (the owner on 0.14.1 step 4 and 0.14.2 step 2): a left panel (its own shade, Back on top) that
  * switches between pages — related settings grouped on one page, and the user guide one section per page.
  */
-export function SettingsScreen(props: { theme: LoadedTheme; git: GitInfo | null; update: UpdateStatus | null; appInfo: AppInfo | null; onBack: () => void }) {
+export function SettingsScreen(props: {
+  theme: LoadedTheme
+  git: GitInfo | null
+  update: UpdateStatus | null
+  appInfo: AppInfo | null
+  onBack: () => void
+  /** The language and colour switches (UX-13: Settings → Appearance). */
+  appearance: ReactNode
+  /** Open straight on this user-guide page (start screen → quick start). */
+  startGuidePage?: string
+}) {
   const lang = useLanguage()
-  const [view, setView] = useState<View>({ kind: 'settings', page: 'env' })
+  const [view, setView] = useState<View>(props.startGuidePage !== undefined ? { kind: 'guide', page: props.startGuidePage } : { kind: 'settings', page: 'env' })
   const main = useRef<HTMLDivElement>(null)
   // the guide's topics fold under "User guide" (the owner on 0.14.4 step 2); open while a guide page is shown
   const [guideOpen, setGuideOpen] = useState(false)
@@ -28,6 +38,7 @@ export function SettingsScreen(props: { theme: LoadedTheme; git: GitInfo | null;
   const nav = T.settings.nav
   const settingsPages: { id: SettingsPage; label: string }[] = [
     { id: 'env', label: nav.env },
+    { id: 'appearance', label: nav.appearance },
     { id: 'report', label: nav.report },
     { id: 'features', label: nav.features },
     { id: 'tests', label: nav.tests }
@@ -87,6 +98,12 @@ export function SettingsScreen(props: { theme: LoadedTheme; git: GitInfo | null;
               <EnvironmentCard theme={props.theme} git={props.git} update={props.update} appInfo={props.appInfo} />
               <VersionsCard appInfo={props.appInfo} update={props.update} />
             </>
+          )}
+          {view.kind === 'settings' && view.page === 'appearance' && (
+            <section className="card" aria-label={nav.appearance}>
+              <p className="hint hint--flush">{nav.appearanceIntro}</p>
+              <div className="actions actions--wrap appearance">{props.appearance}</div>
+            </section>
           )}
           {view.kind === 'settings' && view.page === 'report' && (
             <>

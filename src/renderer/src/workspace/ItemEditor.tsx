@@ -31,7 +31,8 @@ export function ItemEditor(props: {
   /** Changes when items changed elsewhere (moved in the table, outside edits); reloads unless there are unsaved changes. */
   reloadToken: number
   /** Filled with a function that saves the open edit and tells whether it worked ("Save and continue", UX-09). */
-  saveRef?: { current: (() => Promise<boolean>) | null }
+  /** Hands the parent this editor's save function (null when the editor goes away) — for "Save and continue". */
+  onSaveReady?: (save: (() => Promise<boolean>) | null) => void
 }) {
   const { schema, target, onDirtyChange, reloadToken } = props
   // The editor is re-created (keyed) for every target, so a draft can start its state directly.
@@ -130,13 +131,12 @@ export function ItemEditor(props: {
       return false
     }
   }, [form, status.kind, isNew, details, base, props])
+  const { onSaveReady } = props
   useEffect(() => {
-    if (!props.saveRef) return
-    props.saveRef.current = save
-    return () => {
-      if (props.saveRef) props.saveRef.current = null
-    }
-  }, [props.saveRef, save])
+    if (!onSaveReady) return
+    onSaveReady(save)
+    return () => onSaveReady(null)
+  }, [onSaveReady, save])
 
   // Ctrl+S saves.
   useEffect(() => {

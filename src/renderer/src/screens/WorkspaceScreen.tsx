@@ -162,6 +162,9 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
   const selectedId = target?.kind === 'item' ? target.id : null
   const editorWidth = useEditorWidth()
   const editorSave = useRef<(() => Promise<boolean>) | null>(null)
+  const onSaveReady = useCallback((save: (() => Promise<boolean>) | null) => {
+    editorSave.current = save
+  }, [])
   const problems = problemsOf(info)
 
   return (
@@ -353,7 +356,7 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
               void afterChange()
             }}
             onMoved={() => setDataVersion((v) => v + 1)}
-            saveRef={editorSave}
+            onSaveReady={onSaveReady}
             reloadToken={dataVersion}
             onLinksChanged={() => void afterChange()}
             onNewChild={(type, parent) => void newItem(type, parent)}

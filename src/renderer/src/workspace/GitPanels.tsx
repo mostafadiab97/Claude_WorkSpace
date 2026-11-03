@@ -104,9 +104,10 @@ export function GitBar(props: {
         >
           <span aria-hidden="true">⎇</span> {state.detached ? T.git.noBranch : (state.branch ?? '—')} <span aria-hidden="true">▾</span>
         </button>
-        {state.hasRemote && (
+        {/* UX-13: the counts live on Pull and Push; only "not pushed yet" stays here */}
+        {state.hasRemote && !state.upstream && (
           <span className="gitbar__sync" title={T.git.syncTooltip}>
-            {state.upstream ? `↑${state.ahead} ↓${state.behind}` : T.git.notPushed}
+            {T.git.notPushed}
           </span>
         )}
         {!state.hasRemote && <span className="muted-inline gitbar__noremote" title={T.git.noRemote}>{T.git.noRemoteShort}</span>}
@@ -124,16 +125,16 @@ export function GitBar(props: {
         </button>
         <button
           type="button"
-          className="btn"
+          className={state.behind > 0 ? 'btn btn--accent' : 'btn'}
           disabled={busy !== null || blockedReason !== null || !state.hasRemote}
           title={blockedReason ?? T.git.pullTooltip}
           onClick={() => props.onRun('pull')}
         >
-          {T.git.pull}
+          {T.git.pullN(state.behind)}
         </button>
         <button
           type="button"
-          className="btn"
+          className={state.ahead > 0 ? 'btn btn--accent' : 'btn'}
           disabled={busy !== null || !state.hasRemote}
           title={T.git.pushTooltip}
           onClick={() => props.onRun('push')}

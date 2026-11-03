@@ -6,7 +6,7 @@ import { T } from '../../../shared/text'
 type Pending = { kind: 'idle' } | { kind: 'busy'; label: string } | { kind: 'confirm-init'; check: FolderCheck } | { kind: 'error'; message: string }
 
 /** Opening screen: open or create a requirements repository, or reopen a recent one. */
-export function StartScreen({ brand, git, onOpened }: { brand: string; git: GitInfo | null; onOpened: (info: RepoInfo, importFile?: ImportFile) => void }) {
+export function StartScreen({ brand, git, onOpened, onQuickStart }: { brand: string; git: GitInfo | null; onOpened: (info: RepoInfo, importFile?: ImportFile) => void; onQuickStart: () => void }) {
   const [recent, setRecent] = useState<RecentRepository[]>([])
   const [pending, setPending] = useState<Pending>({ kind: 'idle' })
 
@@ -72,8 +72,13 @@ export function StartScreen({ brand, git, onOpened }: { brand: string; git: GitI
             <button type="button" className="btn" onClick={() => void fromFile()} disabled={busy} title={T.start.fromFileTooltip}>
               {T.start.fromFile}
             </button>
+            <button type="button" className="link-btn" onClick={onQuickStart}>
+              {T.start.quickStart}
+            </button>
           </span>
-          {git && !git.installed && <p className="hint">{T.start.noGit}</p>}
+          {/* UX-24: the Git check right where the first step happens */}
+          {git && !git.installed && <p className="hint notice--warn">{T.start.noGit}</p>}
+          {git?.installed && <p className="hint start__git">{T.start.gitFound(git.version)}</p>}
         </section>
 
         {pending.kind === 'busy' && <p className="notice">{pending.label}</p>}

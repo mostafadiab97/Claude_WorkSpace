@@ -2821,3 +2821,24 @@ code {
   align-items: center;
   gap: var(--rm-space-sm);
 }
+.status-row__state {
+  font-weight: var(--rm-font-weight-strong);
+  margin-inline-end: var(--rm-space-xs);
+}
+.status-row__state--ok {
+  color: var(--rm-color-success);
+}
+.status-row__state--warn {
+  color: var(--rm-color-warning);
+}
+.status-row__state--error {
+  color: var(--rm-color-danger);
+}
+/* UX-13: Pull / Push stand out when there is something to pull or push */
+.btn--accent {
+  border-color: var(--rm-color-primary);
+  color: var(--rm-color-primary);
+}
+.start__git {
+  color: var(--rm-color-success);
+}

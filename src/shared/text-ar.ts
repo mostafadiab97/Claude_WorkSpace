@@ -47,6 +47,8 @@ const raw: Texts = {
   },
 
   start: {
+    quickStart: 'اقرأ البداية السريعة (15 دقيقة)',
+    gitFound: (version: string) => `✓ تم العثور على Git ${version}`,
     fromFile: 'مشروع جديد من ملف…',
     fromFileTooltip: 'ابدأ من ملف Excel أو CSV: ينشئ ReqMan المجلد ومستودع Git ويستورد الملف',
     headline: 'متطلبات بإصدارات، مثل الكود تمامًا.',
@@ -78,6 +80,7 @@ const raw: Texts = {
       downloadGit: 'تنزيل Git لنظام Windows',
       theme: 'المظهر',
       themeSource: { user: 'ملف theme.json الخاص بك', file: 'مظهر التطبيق', default: 'المظهر الافتراضي المدمج' },
+      tone: { ok: 'سليم:', warn: 'تنبيه:', error: 'مشكلة:' } as Record<'ok' | 'warn' | 'error', string>,
       themeWarnings: (count: number) => ` — ${n(count)} تحذير`,
       updates: 'التحديثات',
       app: 'التطبيق',
@@ -85,6 +88,8 @@ const raw: Texts = {
       releasesPage: 'صفحة الإصدارات (كل الإصدارات وملفات التثبيت)'
     },
     nav: {
+      appearance: 'المظهر',
+      appearanceIntro: 'لغة النافذة والألوان. يُحفظ اختيارك على هذا الجهاز.',
       label: 'الإعدادات والمساعدة',
       settings: 'الإعدادات',
       guide: 'دليل المستخدم',
@@ -292,7 +297,7 @@ const raw: Texts = {
     which: 'أي العناصر',
     all: (count: number) => `كل العناصر (${n(count)})، بترتيب المستند (التسلسل الهرمي)`,
     filtered: (count: number) => `فقط عناصر البحث / التصفية الحالية (${n(count)})`,
-    filteredNone: 'فقط نتيجة البحث / التصفية الحالية (لا بحث ولا تصفية حاليًا)',
+    filteredNone: 'فقط العناصر التي يجدها البحث أو التصفية الحالية — ابحث أو صفِّ الجدول أولًا لاستخدام هذا',
     columns: 'الأعمدة — المعرّف والعنوان والأعمدة الظاهرة في الجدول، إضافة إلى:',
     hierarchy: 'المستوى والأصل (التسلسل الهرمي)',
     fullText: 'النص الكامل',
@@ -542,6 +547,7 @@ const raw: Texts = {
     publishRun: 'نشر',
     changes: (count: number) => `التغييرات${count > 0 ? ` (${n(count)})` : ''}`,
     pull: 'سحب',
+    pullN: (behind: number) => `سحب${behind > 0 ? ` (${n(behind)})` : ''}`,
     pullTooltip: 'جلب التغييرات التي دفعها الآخرون',
     push: (ahead: number) => `دفع${ahead > 0 ? ` (${n(ahead)})` : ''}`,
     pushTooltip: 'إرسال إيداعاتك إلى الخادم البعيد (دون إجبار أبدًا)',

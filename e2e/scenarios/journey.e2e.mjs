@@ -340,7 +340,7 @@ await scenario('E2E journey', async (ctx) => {
   check(gitIn(repo, 'status', '--porcelain', '--', 'requirements').trim() === '', 'nothing left uncommitted under requirements/')
   await gitbar.getByRole('button', { name: /^Push/ }).click()
   await gitbar.locator('.gitbar__notice', { hasText: 'Pushed' }).waitFor()
-  check((await gitbar.locator('.gitbar__sync').textContent()).trim() === '↑0 ↓0', 'pushed: nothing to push or pull')
+  check((await gitbar.getByRole('button', { name: /^Push/ }).textContent()).trim() === 'Push' && (await gitbar.locator('.gitbar__sync').count()) === 0, 'pushed: nothing to push or pull')
 
   // PC B (a colleague) clones, renames the test case and pushes
   const pcB = temp('pcb')
@@ -532,8 +532,12 @@ await scenario('E2E journey', async (ctx) => {
   await win.getByRole('button', { name: 'Clear filters' }).click()
   await shot('14-export')
 
-  console.log('Look — dark mode, wide window, settings page scrollbar')
+  console.log('Look — dark mode (Settings → Appearance), wide window, settings page scrollbar')
+  check((await win.getByRole('radio', { name: 'Dark' }).count()) === 0, 'no colour switch in the top bar while a repository is open (UX-13)')
+  await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
+  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Appearance' }).click()
   await win.getByRole('radio', { name: 'Dark' }).click()
+  await win.getByRole('button', { name: '← Back' }).click()
   await shot('07-dark')
   await win.setViewportSize({ width: 1920, height: 1000 })
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()

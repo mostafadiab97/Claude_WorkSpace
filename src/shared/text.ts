@@ -43,6 +43,8 @@ const en = {
   },
 
   start: {
+    quickStart: 'Read the quick start (15 minutes)',
+    gitFound: (version: string) => `✓ Git ${version} found`,
     fromFile: 'New project from a file…',
     fromFileTooltip: 'Start from an Excel or CSV file: ReqMan creates the folder, the Git repository and imports the file',
     headline: 'Requirements, versioned like code.',
@@ -73,7 +75,8 @@ const en = {
       gitInstalled: (version: string) => `Installed — version ${version}`,
       downloadGit: 'Download Git for Windows',
       theme: 'Theme',
-      themeSource: { user: 'Your theme.json', file: 'App theme', default: 'Built-in default' } as Record<'user' | 'file' | 'default', string>,
+      themeSource: { user: 'Your own theme file (theme.json)', file: 'Built-in theme', default: 'Built-in theme (defaults)' } as Record<'user' | 'file' | 'default', string>,
+      tone: { ok: 'OK:', warn: 'Warning:', error: 'Problem:' } as Record<'ok' | 'warn' | 'error', string>,
       themeWarnings: (count: number) => ` — ${count} warning(s)`,
       updates: 'Updates',
       app: 'App',
@@ -81,6 +84,8 @@ const en = {
       releasesPage: 'Releases page (all versions, installers)'
     },
     nav: {
+      appearance: 'Appearance',
+      appearanceIntro: 'Language of the window and colours. Your choice is remembered on this PC.',
       label: 'Settings and help',
       settings: 'Settings',
       guide: 'User guide',
@@ -288,7 +293,7 @@ const en = {
     which: 'Which items',
     all: (count: number) => `All ${n(count)} items, in document order (the hierarchy)`,
     filtered: (count: number) => `Only the ${n(count)} items of the current search / filters`,
-    filteredNone: 'Only the current search / filter result (no search or filter active)',
+    filteredNone: 'Only the items found by the current search or filters — search or filter the table first to use this',
     columns: 'Columns — ID, Title and the columns shown in the table, plus:',
     hierarchy: 'Level and Parent (the hierarchy)',
     fullText: 'The full text',
@@ -538,9 +543,10 @@ const en = {
     publishRun: 'Publish',
     changes: (count: number) => `Changes${count > 0 ? ` (${count})` : ''}`,
     pull: 'Pull',
-    pullTooltip: 'Get the changes others pushed',
+    pullN: (behind: number) => `Pull${behind > 0 ? ` (${behind})` : ''}`,
+    pullTooltip: 'Get your colleagues\' commits',
     push: (ahead: number) => `Push${ahead > 0 ? ` (${ahead})` : ''}`,
-    pushTooltip: 'Send your commits to the remote (never forced)',
+    pushTooltip: 'Send your commits to GitHub (never forced)',
     blocked: 'Save or discard your edit first.'
   },
 

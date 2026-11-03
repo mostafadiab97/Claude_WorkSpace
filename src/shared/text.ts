@@ -78,6 +78,23 @@ const en = {
       updates: 'Updates',
       app: 'App'
     },
+    versions: {
+      title: 'Versions',
+      current: (v: string) => `This is version ${v}.`,
+      intro: 'If a new version causes trouble, go back to an earlier one. ReqMan downloads it, installs it over this one and opens again; automatic updates then pause until you resume them. Your repositories are not touched.',
+      goBack: 'Go back to an earlier version…',
+      loading: 'Looking for earlier versions…',
+      none: 'There is no earlier version to go back to yet (going back works from version 0.14.1 on).',
+      listFailed: 'Could not read the list of versions (offline or GitHub unreachable).',
+      pick: 'Choose a version',
+      released: (date: string) => `released ${date}`,
+      warning: 'Files changed by a newer version may need that newer version; going back is meant for a few days, until a fix arrives.',
+      install: (v: string) => `Install version ${v}`,
+      installing: (v: string) => `Downloading version ${v} — ReqMan will close and open again…`,
+      held: (v: string) => `Automatic updates are paused at version ${v} (you went back to it).`,
+      resume: 'Resume automatic updates',
+      cancel: 'Cancel'
+    },
     features: {
       title: 'Features',
       intro: 'Turn a feature off if it causes trouble — the rest of ReqMan keeps working. This choice is remembered on this PC. A team can also turn a feature off for one repository (features: in schema.yaml).',
@@ -138,7 +155,8 @@ const en = {
     off: (reason: string) => `Off (${reason})`,
     upToDate: (time: string) => `Up to date (checked ${time})`,
     downloadingShort: (version: string, percent: number) => `Downloading ${version} — ${percent}%`,
-    readyShort: (version: string) => `Version ${version} ready — restart to install`
+    readyShort: (version: string) => `Version ${version} ready — restart to install`,
+    heldShort: (version: string) => `Paused at version ${version} (you went back)`
   },
 
   errorBoundary: {

@@ -40,5 +40,7 @@ export function describeUpdate(status: UpdateStatus | null): string {
       return T.updates.readyShort(status.version)
     case 'error':
       return status.message
+    case 'held':
+      return T.updates.heldShort(status.version)
   }
 }

@@ -1,17 +1,43 @@
+import { spawn } from 'node:child_process'
+import { readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { app, net } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import type { UpdateStatus } from '../../shared/api'
 import type { UpdateService } from './index'
+import { parseReleases, revertTargets, type ReleaseInfo } from './versions'
 
 interface Deps {
   /** Only an installed build can update itself; in development the updater is inert. */
   enabled: boolean
   log: { info(m: string): void; warn(m: string): void; error(m: string, e?: unknown): void }
+  /** Where "updates paused at version X" is remembered (survives reinstalling; 0.14.1). */
+  holdFile: string
+  /** GitHub "list releases" address of the release feed. */
+  releasesUrl: string
 }
 
 const SIX_HOURS = 6 * 60 * 60 * 1000
 
-export function createGithubUpdater({ enabled, log }: Deps): UpdateService {
-  let status: UpdateStatus = enabled ? { state: 'idle' } : { state: 'disabled', reason: 'only the installed Windows app updates itself' }
+export function createGithubUpdater({ enabled, log, holdFile, releasesUrl }: Deps): UpdateService {
+  // Going back to an earlier version (0.14.1) writes a hold file first, so the installed older version does not update
+  // itself straight back. A hold for another version than the running one is stale (the user installed by hand): drop it.
+  const readHold = (): string | null => {
+    try {
+      const v = (JSON.parse(readFileSync(holdFile, 'utf8')) as { version?: unknown }).version
+      return typeof v === 'string' ? v : null
+    } catch {
+      return null
+    }
+  }
+  let held = readHold()
+  if (held && held !== app.getVersion()) {
+    rmSync(holdFile, { force: true })
+    held = null
+  }
+
+  let status: UpdateStatus = !enabled ? { state: 'disabled', reason: 'only the installed Windows app updates itself' } : held ? { state: 'held', version: held } : { state: 'idle' }
   let notify: (s: UpdateStatus) => void = () => {}
   const set = (s: UpdateStatus): void => {
     status = s
@@ -38,12 +64,20 @@ export function createGithubUpdater({ enabled, log }: Deps): UpdateService {
   }
 
   const checkNow = async (): Promise<void> => {
-    if (!enabled) return
+    if (!enabled || held) return
     try {
       await autoUpdater.checkForUpdates()
     } catch {
       /* reported through the 'error' event */
     }
+  }
+
+  let releases: ReleaseInfo[] = []
+  const listEarlier = async (): Promise<ReleaseInfo[]> => {
+    const res = await net.fetch(releasesUrl, { headers: { Accept: 'application/vnd.github+json' } })
+    if (!res.ok) throw new Error(`GitHub answered ${res.status}`)
+    releases = parseReleases(await res.json())
+    return revertTargets(releases, app.getVersion())
   }
 
   return {
@@ -57,6 +91,35 @@ export function createGithubUpdater({ enabled, log }: Deps): UpdateService {
     installAndRestart() {
       if (status.state === 'ready') autoUpdater.quitAndInstall(true, true)
     },
-    current: () => status
+    current: () => status,
+    listEarlier,
+    async installEarlier(version) {
+      if (!enabled) return { ok: false, message: 'Only the installed Windows app can change its version.' }
+      try {
+        const target = (releases.length ? revertTargets(releases, app.getVersion()) : await listEarlier()).find((r) => r.version === version)
+        if (!target) return { ok: false, message: `Version ${version} is not one you can go back to.` }
+        log.info(`Going back to version ${version}: downloading ${target.installerUrl}`)
+        const res = await net.fetch(target.installerUrl)
+        if (!res.ok) throw new Error(`download failed (${res.status})`)
+        const file = join(tmpdir(), `ReqMan-Setup-${version}.exe`)
+        writeFileSync(file, Buffer.from(await res.arrayBuffer()))
+        writeFileSync(holdFile, JSON.stringify({ version, since: new Date().toISOString() }))
+        log.info(`Updates paused at ${version}; starting the installer`)
+        // silent install over the current version, then start ReqMan again (electron-builder's NSIS options)
+        spawn(file, ['/S', '--force-run'], { detached: true, stdio: 'ignore' }).unref()
+        setTimeout(() => app.quit(), 500)
+        return { ok: true }
+      } catch (e) {
+        log.error(`Going back to ${version} failed`, e)
+        return { ok: false, message: (e as Error).message }
+      }
+    },
+    async resume() {
+      rmSync(holdFile, { force: true })
+      held = null
+      log.info('Automatic updates resumed')
+      set(enabled ? { state: 'idle' } : status)
+      await checkNow()
+    }
   }
 }

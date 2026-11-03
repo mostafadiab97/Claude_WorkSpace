@@ -13,7 +13,7 @@ export default defineConfig({
       provider: 'v8',
       include: ['src/modules/**', 'src/shared/**'],
       // texts are data; the sample generator is a tool; the updater only runs inside the installed app
-      exclude: ['src/shared/text*.ts', 'src/modules/sample-data/**', 'src/modules/updater/**'],
+      exclude: ['src/shared/text*.ts', 'src/modules/sample-data/**', 'src/modules/updater/githubUpdater.ts'],
       reporter: ['text-summary'],
       thresholds: { statements: 85, branches: 72, functions: 85, lines: 88 }
     }

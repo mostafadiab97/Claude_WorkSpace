@@ -144,6 +144,16 @@ export function registerIpc(services: Services, paths: Paths): void {
     },
     getUpdateStatus: () => services.updater.current(),
     checkForUpdates: () => services.updater.checkNow(),
+    listEarlierVersions: async () => {
+      try {
+        return { ok: true, versions: (await services.updater.listEarlier()).map((r) => ({ version: r.version, date: r.date })) }
+      } catch (err) {
+        log.warn(`Could not list earlier versions: ${(err as Error).message}`)
+        return { ok: false, message: T.settings.versions.listFailed }
+      }
+    },
+    installEarlierVersion: (_e, version) => services.updater.installEarlier(v.str(version, 'version', 40)),
+    resumeUpdates: () => services.updater.resume(),
     installUpdate: () => {
       log.info('Restarting to install update')
       services.updater.installAndRestart()

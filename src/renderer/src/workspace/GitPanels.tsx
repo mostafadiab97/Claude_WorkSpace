@@ -10,6 +10,8 @@ import { T } from '../../../shared/text'
 export interface GitNotice {
   ok: boolean
   message: string
+  /** Nothing happened / nothing to do: blue, neither success nor problem (0.14.1). */
+  neutral?: boolean
   items?: ItemChange[]
 }
 
@@ -44,9 +46,9 @@ export function GitBar(props: {
   onDeleteBranch: (name: string, force: boolean) => Promise<{ ok: boolean; unmerged?: boolean; message: string }>
 }) {
   const { state, busy, blockedReason, notice, onDismiss } = props
-  // a success message goes away by itself after a while; errors stay until dismissed
+  // a success or neutral message goes away by itself after a while; errors stay until dismissed
   useEffect(() => {
-    if (!notice?.ok) return
+    if (!notice?.ok && !notice?.neutral) return
     const t = window.setTimeout(onDismiss, 9000)
     return () => window.clearTimeout(t)
   }, [notice, onDismiss])
@@ -177,7 +179,7 @@ export function GitBar(props: {
         </div>
       )}
       {notice && (
-        <div className={notice.ok ? 'gitbar__notice' : 'gitbar__notice gitbar__notice--error'} role={notice.ok ? 'status' : 'alert'}>
+        <div className={notice.neutral ? 'gitbar__notice gitbar__notice--info' : notice.ok ? 'gitbar__notice' : 'gitbar__notice gitbar__notice--error'} role={notice.ok || notice.neutral ? 'status' : 'alert'}>
           <div className="gitbar__notice-text">
             <span>{notice.message}</span>
             {notice.items && notice.items.length > 0 && (

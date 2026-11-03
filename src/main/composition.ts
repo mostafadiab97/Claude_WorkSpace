@@ -46,7 +46,12 @@ export function createServices(paths: Paths, version = '0.0.0'): Services {
     repositories,
     theme: createFileThemeService(paths.configDir, paths.resourceDir, paths.userDir),
     // Self-updating is supported for the installed Windows app (per-user NSIS installer).
-    updater: createGithubUpdater({ enabled: paths.packaged && process.platform === 'win32', log }),
+    updater: createGithubUpdater({
+      enabled: paths.packaged && process.platform === 'win32',
+      log,
+      holdFile: join(paths.userDir, 'update-hold.json'),
+      releasesUrl: 'https://api.github.com/repos/mostafadiab97/Claude_WorkSpace/releases?per_page=100'
+    }),
     releaseSelfTest: () =>
       runReleaseSelfTest({
         version,

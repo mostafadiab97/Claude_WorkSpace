@@ -44,7 +44,7 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
         setPlan(r.plan) // the merge window asks; nothing changed yet
         return false
       }
-      setNotice({ ok: r.ok, message: r.message, ...(!r.ok && r.items ? { items: r.items } : {}) })
+      setNotice({ ok: r.ok, message: r.message, ...(r.neutral ? { neutral: true } : {}), ...(!r.ok && r.items ? { items: r.items } : {}) })
       if (r.ok) await afterChange() // a pull or a switch changes items; a push may tidy positions
       return r.ok
     } catch (e) {
@@ -62,7 +62,7 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
     setPlan(null)
     if (!r) return
     setState(r.state)
-    setNotice({ ok: r.ok, message: r.message, ...(!r.ok && r.items ? { items: r.items } : {}) })
+    setNotice({ ok: r.ok, message: r.message, ...(r.neutral ? { neutral: true } : {}), ...(!r.ok && r.items ? { items: r.items } : {}) })
     if (r.ok) void afterChange()
   }
 
@@ -73,7 +73,7 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
     try {
       const r = await window.reqman.publishToRemote(url)
       setState(r.state)
-      setNotice({ ok: r.ok, message: r.message })
+      setNotice({ ok: r.ok, message: r.message, ...(r.neutral ? { neutral: true } : {}) })
     } catch (e) {
       setNotice({ ok: false, message: errorMessage(e) })
     } finally {

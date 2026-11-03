@@ -56,6 +56,13 @@ function createWindow(services: ReturnType<typeof createServices>): void {
     if (url.startsWith('https://')) void shell.openExternal(url)
     return { action: 'deny' }
   })
+  // Security check 3 Nov 2026: the window never navigates away from ReqMan's own page (a link or a file dropped on it
+  // would otherwise load a foreign page that could reach window.reqman). External https links go to the browser.
+  win.webContents.on('will-navigate', (event, url) => {
+    if (url === win.webContents.getURL()) return
+    event.preventDefault()
+    if (url.startsWith('https://')) void shell.openExternal(url)
+  })
 
   // The UI blocks closing while it has unsaved changes; ask the user instead of silently refusing.
   win.webContents.on('will-prevent-unload', (event) => {

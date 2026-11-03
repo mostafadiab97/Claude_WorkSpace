@@ -19,7 +19,8 @@ an in-app release self-test, light/dark themes, **English / Arabic** (right-to-l
 1. Install [Git for Windows](https://git-scm.com/downloads/win) if you don't have it.
 2. Open the repository's **Releases** page → latest release → **Assets** → download `ReqMan-Setup-<version>.exe`.
 3. Run it. It installs for your user only — no admin rights needed. Installed copies update themselves from new releases.
-4. Follow the checklist in `docs/TESTING.md`; it also explains where the log file is and how to report a problem.
+4. Read the **[user guide](docs/USER-GUIDE.md)** — it starts with a 15-minute quick start.
+5. Testers: follow the checklist in `docs/TESTING.md`.
 
 ## Status
 
@@ -47,6 +48,7 @@ builds the installer and publishes it as a GitHub Release; installed copies pick
 
 ## Docs
 
+- **`docs/USER-GUIDE.md` — user guide: quick start, every feature, team setup, file format, specification**
 - `CLAUDE.md` — project memory and working agreement (start here)
 - `docs/ONBOARDING.md` — onboarding guide for engineers, with system diagrams
 - **`docs/README.md` — map of all documentation (which file answers which question)**

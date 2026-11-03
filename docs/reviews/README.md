@@ -9,6 +9,7 @@ recorded in `docs/design/decisions.md` and `docs/design/roadmap.md` (source of t
 | Date | File | What it is | State |
 | --- | --- | --- | --- |
 | 1 Nov 2026 | `2026-11-01-planning-discussion.md` | The planning discussion for the versions after 0.13: open points P-xx with answers, name candidates checked | **In progress** — themes 2–5 still to detail |
+| 3 Nov 2026 | `2026-11-03-security-check.md` | Security check before sharing: secrets in all history (none), personal data, app hardening, pipeline, libraries | Two fixes in 0.14.1; **one decision for Mostafa** (work e-mail in the sandbox history) |
 | 2 Nov 2026 | `2026-11-02-requiem-analysis.md` | Requiem (`requirements-manager`, Rust command-line tool, Markdown + YAML in Git): how it works, side by side with ReqMan, ideas worth taking | Reference — ideas placed in themes 1, 2, 5 |
 | 31 Oct 2026 | `2026-10-31-feature-catalogue.md` | **Complete catalogue: 163 features** of ~190 tools in 15 areas — have / missing, how it works, how we would build it, when | Input for the planning discussion |
 | 31 Oct 2026 | `2026-10-31-rm-tools-market-list.md` | About 190 RM tools by kind (from Mostafa's naming chat), with sources | Reference |

@@ -185,7 +185,7 @@ export function createMerging(deps: MergingDeps) {
     }
     const a = await analyse(s, head, theirs)
     if (a.kind === 'outside') return fail(s, T.merge.outside(a.files.join(', ')))
-    if (a.kind === 'upToDate') return done(s, source === undefined ? T.gitMsg.upToDate : T.merge.nothingToPull(src.ref))
+    if (a.kind === 'upToDate') return done(s, source === undefined ? T.gitMsg.upToDate : T.merge.nothingToPull(src.ref), true)
     const clash = await overwritten(s, await ops.state(s), a.kind === 'merge' ? (a.base ?? head) : head, theirs)
     if (clash.length > 0) return fail(s, T.gitMsg.wouldOverwrite, clash)
     const entries = a.kind === 'merge' ? a.entries : []
@@ -215,12 +215,12 @@ export function createMerging(deps: MergingDeps) {
     let decided = 0
     let repaired = ''
     try {
-      if (a.kind === 'upToDate') return done(s, T.gitMsg.upToDate)
+      if (a.kind === 'upToDate') return done(s, T.gitMsg.upToDate, true)
       if (a.kind === 'fastForward') {
         if (p.uncommitted) {
           const r = await bringIn(s, p.theirs)
           if (typeof r !== 'number') return r
-          if (r === 0) return done(s, T.merge.nothingToPull(p.source))
+          if (r === 0) return done(s, T.merge.nothingToPull(p.source), true)
         } else await git.merge(root, p.theirs, true, action)
       } else {
         const files: Resolved[] = []
@@ -243,7 +243,7 @@ export function createMerging(deps: MergingDeps) {
         if (p.uncommitted) {
           const r = await bringIn(s, commit)
           if (typeof r !== 'number') return r
-          if (r === 0) return done(s, T.merge.nothingToPull(p.source))
+          if (r === 0) return done(s, T.merge.nothingToPull(p.source), true)
         } else await git.merge(root, commit, true, action)
       }
     } catch (e) {

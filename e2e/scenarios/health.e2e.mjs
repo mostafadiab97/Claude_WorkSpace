@@ -17,6 +17,16 @@ await scenario('E2E health', async (ctx) => {
   await gitbar.locator('.gitbar__branch').waitFor()
   check((await exportBtn.count()) === 1, 'Export is there at first')
 
+  console.log('A "nothing to do" message is blue, not red (0.14.1)')
+  await gitbar.getByRole('button', { name: /^Push/ }).click()
+  const note = gitbar.locator('.gitbar__notice', { hasText: 'Nothing to push yet' })
+  await note.waitFor()
+  check(await note.evaluate((el) => el.classList.contains('gitbar__notice--info')), '"Nothing to push yet" is shown as a neutral (blue) note')
+  await t.shot('health-0-note-light')
+  await win.getByRole('radio', { name: 'Dark' }).click()
+  await t.shot('health-0-note-dark')
+  await win.getByRole('radio', { name: 'Light' }).click()
+
   console.log('Turn Export off on this PC')
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
   const features = win.getByRole('region', { name: 'Features' })
@@ -41,6 +51,8 @@ await scenario('E2E health', async (ctx) => {
   check(await gitbar.locator('.gitbar__branch').isDisabled(), 'the branch button no longer opens the branch panel')
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
   check((await features.textContent()).includes('Turned off for this repository by the team'), 'Settings says the team turned it off')
+
+  check((await win.getByRole('region', { name: 'Versions' }).getByRole('button', { name: 'Go back to an earlier version…' }).count()) === 1, 'Settings has Versions → go back to an earlier version')
 
   console.log('Report a problem')
   const file = join(temp('health-report'), 'report.txt')

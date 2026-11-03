@@ -3,6 +3,22 @@
 Each version was installed and tried by Mostafa (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.14.1 — 3 Nov 2026 — User guide, going back to an earlier version, security check, calmer notes
+- **Mostafa (3 Nov 2026):** the CTO approved a pilot with a complete team. Before the rename, four requests — all here:
+- **User guide** `docs/USER-GUIDE.md`: a 15-minute quick start first, then every feature, team set-up, the file
+  format, a feature specification, troubleshooting. Linked from the README.
+- **Go back to an earlier version** — Settings → **Versions** → *Go back to an earlier version…* lists the published
+  versions older than this one; *Install version X* downloads it, installs it and reopens ReqMan. Automatic updates
+  then **pause** at that version (otherwise it would update itself straight back) until *Resume automatic updates*.
+  Works for versions from 0.14.1 on (older ones do not know the pause).
+- **Security check before sharing** (`docs/reviews/2026-11-03-security-check.md`): no secrets in either repository
+  or their history (gitleaks); no stored tokens; 0 library problems in what ships. Two fixes: the window can no
+  longer be navigated to a foreign page (a dropped link); the acceptance run's real push no longer runs for pull
+  requests. One decision for Mostafa: a work e-mail in the sandbox's commit history.
+- **Floating Git notes calmer** (Mostafa: "very glowy"): the background is the theme's own colour again, one shade
+  darker in Light and lighter in Dark; the coloured frame and glow stay — green done, red problem, and now **blue for
+  "nothing to do"** messages (Already up to date, Nothing to commit/push/discard), which also close by themselves.
+
 ## 0.14.0 — 2 Nov 2026 — Health tools and the automatic acceptance run (planning decisions P-40, P-41)
 - **Planning (1–2 Nov 2026):** the release plan up to 0.24 is decided (`docs/reviews/2026-11-01-planning-discussion.md`).
   This version brings the tools that keep the project healthy as it grows (Mostafa's concern, P-40); the new name

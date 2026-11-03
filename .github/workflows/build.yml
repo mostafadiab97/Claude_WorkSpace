@@ -53,6 +53,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           prev=""
+          # the real push only for pushes to main and manual runs — never for pull requests (security check 3 Nov)
+          PUSH=""; if [ "${{ github.event_name }}" != "pull_request" ]; then PUSH=1; fi
           if gh release download --pattern "ReqMan-Setup-*.exe" --dir "$RUNNER_TEMP/previous" 2>/dev/null; then
             prev="$(ls "$RUNNER_TEMP"/previous/ReqMan-Setup-*.exe | head -1)"
           fi
@@ -61,7 +63,7 @@ jobs:
             --installer "$(ls dist/ReqMan-Setup-*.exe | head -1)" --feed dist \
             ${prev:+--previous "$prev"} \
             --sandbox "$RUNNER_TEMP/sandbox" \
-            --push-url "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" \
+            ${PUSH:+--push-url "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"} \
             --branch "ci/acceptance-${{ github.run_id }}-${{ github.run_attempt }}"
 
       - uses: actions/upload-artifact@v7

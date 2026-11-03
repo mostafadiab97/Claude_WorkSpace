@@ -158,13 +158,14 @@ export function createGitOps(deps: GitOpsDeps) {
     }
   }
 
-  const fail = async (s: GitSession, message: string, items?: ItemChange[]): Promise<GitResult> => ({
+  const fail = async (s: GitSession, message: string, items?: ItemChange[], neutral?: true): Promise<GitResult> => ({
     ok: false,
     message,
     ...(items ? { items } : {}),
+    ...(neutral ? { neutral } : {}),
     state: await state(s)
   })
-  const done = async (s: GitSession, message: string): Promise<GitResult> => ({ ok: true, message, state: await state(s) })
+  const done = async (s: GitSession, message: string, neutral?: true): Promise<GitResult> => ({ ok: true, message, ...(neutral ? { neutral } : {}), state: await state(s) })
 
   /** Common refusals before changing anything. */
   async function precheck(s: GitSession): Promise<GitResult | null> {
@@ -205,7 +206,7 @@ export function createGitOps(deps: GitOpsDeps) {
       const st = await state(s)
       const text = message.trim()
       if (!text) return fail(s, T.gitMsg.needMessage)
-      if (st.changes.length === 0) return fail(s, T.gitMsg.nothingToCommit)
+      if (st.changes.length === 0) return fail(s, T.gitMsg.nothingToCommit, undefined, true)
       if (!st.identity.name || !st.identity.email) return fail(s, T.gitMsg.needIdentity)
       try {
         const hash = await git.commit(s.repo.root, reqPath(s.repo), text)
@@ -222,7 +223,7 @@ export function createGitOps(deps: GitOpsDeps) {
       if (blocked) return blocked
       const st = await state(s)
       if (!st.hasRemote) return fail(s, T.gitMsg.noRemotePush)
-      if (!(await git.head(s.repo.root))) return fail(s, T.gitMsg.nothingToPushYet)
+      if (!(await git.head(s.repo.root))) return fail(s, T.gitMsg.nothingToPushYet, undefined, true)
       const { remote } = await remoteBranch(s, st)
       if (st.upstream && st.ahead === 0) {
         return done(s, st.changes.length > 0 ? T.gitMsg.notCommittedYet : T.gitMsg.remoteHasAll)
@@ -246,7 +247,7 @@ export function createGitOps(deps: GitOpsDeps) {
       const allowed = new Set(st.changes.map((c) => c.path))
       // also restore the old name of a renamed file
       const wanted = paths.filter((p) => allowed.has(p))
-      if (wanted.length === 0) return fail(s, T.gitMsg.nothingToDiscard)
+      if (wanted.length === 0) return fail(s, T.gitMsg.nothingToDiscard, undefined, true)
       try {
         await git.discard(s.repo.root, wanted)
         await deps.resync()

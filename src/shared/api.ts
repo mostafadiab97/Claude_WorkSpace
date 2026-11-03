@@ -47,6 +47,8 @@ export type UpdateStatus =
   | { state: 'downloading'; version: string; percent: number }
   | { state: 'ready'; version: string }
   | { state: 'error'; message: string }
+  /** The user went back to an earlier version: automatic updates are paused until resumed (0.14.1). */
+  | { state: 'held'; version: string }
 
 /** Result of the built-in data self-test (generates, indexes and queries a temporary repository). */
 export interface DataSelfTestResult {
@@ -135,10 +137,12 @@ export interface GitState {
 }
 
 export type GitResult =
-  | { ok: true; message: string; state: GitState }
+  | { ok: true; message: string; state: GitState; /** Nothing happened ("Already up to date"): shown in blue (0.14.1). */ neutral?: true }
   | {
       ok: false
       message: string
+      /** Nothing to do ("There is nothing to commit"): shown in blue, not as a problem (0.14.1). */
+      neutral?: true
       /** The items the message is about (e.g. changed on both sides). */
       items?: ItemChange[]
       /** A pull needs the user's decisions first (M8): answer the questions and call finishPull. */
@@ -462,6 +466,12 @@ export interface ReqManApi {
   checkForUpdates(): Promise<void>
   /** Restarts ReqMan to install a downloaded update. */
   installUpdate(): Promise<void>
+  /** Published versions one can go back to (older than this one, from GitHub Releases) — 0.14.1. */
+  listEarlierVersions(): Promise<{ ok: true; versions: { version: string; date: string }[] } | { ok: false; message: string }>
+  /** Downloads that version's installer, pauses automatic updates and installs it (ReqMan closes and reopens). */
+  installEarlierVersion(version: string): Promise<{ ok: false; message: string } | { ok: true }>
+  /** Ends the pause after going back: automatic updates run again. */
+  resumeUpdates(): Promise<void>
   /** Subscribes to update status changes; returns an unsubscribe function. */
   onUpdateStatus(listener: (status: UpdateStatus) => void): () => void
 
@@ -627,6 +637,9 @@ export const Channels = {
   runDataSelfTest: 'diag:runDataSelfTest',
   runReleaseSelfTest: 'diag:runReleaseSelfTest',
   getUpdateStatus: 'update:getStatus',
+  listEarlierVersions: 'update:listEarlier',
+  installEarlierVersion: 'update:installEarlier',
+  resumeUpdates: 'update:resume',
   checkForUpdates: 'update:check',
   installUpdate: 'update:install',
   updateStatusChanged: 'update:statusChanged',

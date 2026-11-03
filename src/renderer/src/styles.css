@@ -2534,7 +2534,9 @@ code {
 /* 0.13.1 (Mostafa on 0.13.0 step 2): the floating Git note must be noticed — tinted with its meaning (green = done,
    red = problem, blue = question), a coloured frame and glow, and the text centred in both languages */
 .gitbar__float > .gitbar__notice {
-  background: color-mix(in srgb, var(--rm-color-success) 16%, var(--rm-color-surface));
+  /* 0.14.1 (Mostafa, 3 Nov): the theme's own colour again, one shade apart from the page — mixing the surface with the
+     text colour makes it darker in Light and lighter in Dark; the coloured frame and glow carry the meaning */
+  background: color-mix(in srgb, var(--rm-color-surface) 90%, var(--rm-color-text));
   border: 2px solid var(--rm-color-success);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--rm-color-success) 25%, transparent), 0 8px 28px color-mix(in srgb, var(--rm-color-success) 30%, transparent);
   font-size: var(--rm-font-size-base);
@@ -2542,14 +2544,14 @@ code {
 }
 
 .gitbar__float > .gitbar__notice--error {
-  background: color-mix(in srgb, var(--rm-color-danger) 14%, var(--rm-color-surface));
   border-color: var(--rm-color-danger);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--rm-color-danger) 25%, transparent), 0 8px 28px color-mix(in srgb, var(--rm-color-danger) 30%, transparent);
 }
 
+.gitbar__float > .gitbar__notice--info,
 .gitbar__float > .gitbar__offer,
 .gitbar__float > .gitbar__publish {
-  background: color-mix(in srgb, var(--rm-color-primary) 12%, var(--rm-color-surface));
+  background: color-mix(in srgb, var(--rm-color-surface) 90%, var(--rm-color-text));
   border-color: var(--rm-color-primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--rm-color-primary) 22%, transparent), 0 8px 28px color-mix(in srgb, var(--rm-color-primary) 25%, transparent);
 }
@@ -2607,4 +2609,14 @@ code {
 .report__text {
   resize: vertical;
   inline-size: 100%;
+}
+
+/* 0.14.1: Settings → Versions (go back to an earlier version) */
+.versions {
+  border: 1px solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius);
+  padding: var(--rm-space-sm) var(--rm-space-md);
+  display: grid;
+  gap: var(--rm-space-xs);
+  margin: 0;
 }

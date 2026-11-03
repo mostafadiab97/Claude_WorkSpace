@@ -122,7 +122,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.14.0, 2 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.14.1, 3 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what Mostafa reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -134,7 +134,8 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.13.0 Mostafa's points on 0.12.1 — pull from another branch = uncommitted changes for review, delete branch, Git controls in the top bar + one-row toolbar (Filters pop-up), **Arabic / English with right-to-left** | Done (v0.13.0) |
 | 0.13.1 Mostafa's points on 0.13.0 — floating note tinted green/red/blue with frame and glow, centred text; red Delete button per branch; right-to-left mark on every Arabic text (word order in tooltips/dialogs) | Done (v0.13.1) |
 | 0.14.0 health (P-40/P-41) — feature switches (Settings → Features; team `features:` in schema.yaml; `src/shared/features.ts`, `renderer/lib/features.ts`), Report a problem (one text file), coverage floor (`vitest.config.mts` thresholds, part of `npm run check`), **automatic acceptance run** (`e2e/acceptance.mjs` in build.yml + release.yml: install previous → update from local feed → self-test → 10k sandbox → real push to `ci/acceptance-*`, deleted) | Released (v0.14.0) |
-| **Next** | the rename version as soon as Mostafa picks the name (candidates ShallWe, Plumbline, Keelson), then 1a structure (plan in `docs/reviews/2026-11-01-planning-discussion.md` → "Release plan"); Arabic wording review later | — |
+| 0.14.1 before the pilot — `docs/USER-GUIDE.md` (quick start + everything); Settings → Versions: go back to an earlier version (`src/modules/updater/versions.ts`, `update-hold.json` pauses updates; `OLDEST_REVERT_TARGET` must be raised at the rename); security check `docs/reviews/2026-11-03-security-check.md` (no secrets; navigation guard; no push on PRs); floating notes theme-coloured, blue `neutral` Git results | Released (v0.14.1) |
+| **Next** | the rename version as soon as Mostafa picks the name, then 1a structure (plan in `docs/reviews/2026-11-01-planning-discussion.md` → "Release plan"); Arabic wording review later | — |
 
 Mostafa's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
 Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
@@ -144,7 +145,7 @@ sandbox, `Claude_SandBox` and `Claude_SandBox_B`, still on his PC) — self-test
 points on the branch panel went into 0.12.1. He has no DOORS/Jama to try ReqIF: exports are validated against the
 official schema in `tests/reqif.test.ts` (`tests/fixtures/reqif-schema/`, xmllint-wasm).
 
-Automated tests: 200 unit tests (with a coverage floor) + 6 e2e scenarios (`journey`, `fixes`, `excel`, `branches`,
+Automated tests: 203 unit tests (with a coverage floor) + 6 e2e scenarios (`journey`, `fixes`, `excel`, `branches`,
 `language`, `health`) + the 21-step in-app release self-test + the CI acceptance run on the installed app; what each covers and every speed measurement: `docs/TESTING.md` → "Automated
 checks in detail".
 
@@ -152,7 +153,9 @@ checks in detail".
 
 - **Built and accepted by Mostafa:** everything up to **0.13.1**. **0.14.0 released 2 Nov** (health tools +
   acceptance run; its first acceptance run passed: update 0.13.1 → 0.14.0, self-test, 10,005-item sandbox, real push
-  to `ci/acceptance-*` and delete) — waiting for Mostafa's checklist (`docs/TESTING.md`, 4 steps).
+  to `ci/acceptance-*` and delete) — **0.14.1 released 3 Nov** (user guide, go back to an earlier version, security check, calmer notes) —
+  waiting for Mostafa's checklist (`docs/TESTING.md`, 5 steps; step 5 = his decision on the work e-mail in the
+  sandbox history).
 - **Planning discussion in progress** — `docs/reviews/2026-11-01-planning-discussion.md` (method: the
   `owner-decision-walkthrough` skill; record every answer there and, when it changes the product, in
   `docs/design/decisions.md` / `roadmap.md`). Decided so far (1 Nov 2026):

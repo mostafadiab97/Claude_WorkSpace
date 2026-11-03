@@ -161,6 +161,7 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
 
   const selectedId = target?.kind === 'item' ? target.id : null
   const editorWidth = useEditorWidth()
+  const editorSave = useRef<(() => Promise<boolean>) | null>(null)
   const problems = problemsOf(info)
 
   return (
@@ -352,6 +353,7 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
               void afterChange()
             }}
             onMoved={() => setDataVersion((v) => v + 1)}
+            saveRef={editorSave}
             reloadToken={dataVersion}
             onLinksChanged={() => void afterChange()}
             onNewChild={(type, parent) => void newItem(type, parent)}
@@ -419,23 +421,42 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
       )}
 
       {pending !== undefined && (
-        <div className="guard" role="alertdialog" aria-label={T.workspace.unsaved}>
-          <p>{T.workspace.unsavedAsk}</p>
-          <div className="actions">
-            <button
-              type="button"
-              className="btn btn--danger"
-              onClick={() => {
-                setDirty(false)
-                setTarget(pending)
-                setPending(undefined)
-              }}
-            >
-              {T.workspace.discard}
-            </button>
-            <button type="button" className="btn" onClick={() => setPending(undefined)}>
-              {T.workspace.keepEditing}
-            </button>
+        // UI review UX-09: a centred question with "Save and continue" first; Discard is outlined, not filled
+        <div className="modal" role="presentation">
+          <div className="guard" role="alertdialog" aria-label={T.workspace.unsaved}>
+            <p>{T.workspace.unsavedAsk}</p>
+            <div className="actions">
+              <button
+                type="button"
+                className="btn btn--primary"
+                autoFocus
+                onClick={() => {
+                  const next = pending
+                  void (editorSave.current?.() ?? Promise.resolve(false)).then((ok) => {
+                    if (!ok) return setPending(undefined) // the editor shows why it could not save
+                    setDirty(false)
+                    setTarget(next)
+                    setPending(undefined)
+                  })
+                }}
+              >
+                {T.workspace.saveAndContinue}
+              </button>
+              <button
+                type="button"
+                className="btn btn--danger-outline"
+                onClick={() => {
+                  setDirty(false)
+                  setTarget(pending)
+                  setPending(undefined)
+                }}
+              >
+                {T.workspace.discard}
+              </button>
+              <button type="button" className="btn" onClick={() => setPending(undefined)}>
+                {T.workspace.keepEditing}
+              </button>
+            </div>
           </div>
         </div>
       )}

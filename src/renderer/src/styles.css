@@ -1392,11 +1392,7 @@ code {
 /* unsaved-changes guard */
 
 .guard {
-  position: absolute;
-  inset-inline-end: var(--rm-space-lg);
-  bottom: var(--rm-space-xl);
-  z-index: 10;
-  max-width: 420px;
+  max-width: 460px;
   background: var(--rm-color-surface);
   border: var(--rm-shape-border-width) solid var(--rm-color-warning);
   border-radius: var(--rm-shape-radius-large);
@@ -2800,4 +2796,28 @@ code {
 }
 .editor-splitter:hover {
   background: var(--rm-color-focus);
+}
+/* UX-07/UX-21: outlined danger for choices that remove something; filled danger only inside a confirmation */
+.btn--danger-outline {
+  color: var(--rm-color-danger);
+  border-color: var(--rm-color-danger);
+}
+.btn--warn {
+  color: var(--rm-color-warning);
+  border-color: var(--rm-color-warning);
+}
+/* UX-14: footer controls are real targets (at least 32 px) with a frame */
+.editor__footer .icon-btn,
+.editor__footer .select-btn,
+.editor__footer .btn {
+  min-block-size: 32px;
+}
+.editor__footer .icon-btn {
+  min-inline-size: 32px;
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+}
+.changes-view__bulk {
+  display: flex;
+  align-items: center;
+  gap: var(--rm-space-sm);
 }

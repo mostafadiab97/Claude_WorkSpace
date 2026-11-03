@@ -2,6 +2,7 @@
 // `handlers` must name every invoke call of ReqManApi with the matching result type — the compiler reports a
 // missing or wrong one. Every input is checked by src/main/validate.ts before it reaches a module (X-01).
 import { app, BrowserWindow, dialog, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
+import { readFileSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { Channels, type AppInfo, type ExportFormat, type ExportResult, type InvokeMethod, type ReqManApi } from '../shared/api'
@@ -22,13 +23,24 @@ export function registerIpc(services: Services, paths: Paths): void {
   const ws = services.workspace
   const themeFile = services.theme.userThemeFile
 
+  // the releases page, read once from the installed app's update settings (no account name in the source — 0.14.4)
+  let releasesPage: string | undefined
+  try {
+    const feed = readFileSync(join(dirname(paths.resourceDir), 'app-update.yml'), 'utf8')
+    const owner = feed.match(/^owner:\s*(\S+)/m)?.[1]
+    const repo = feed.match(/^repo:\s*(\S+)/m)?.[1]
+    if (owner && repo) releasesPage = `https://github.com/${owner}/${repo}/releases`
+  } catch {
+    // development, or an installer without a GitHub feed
+  }
   const appInfo = (): AppInfo => ({
     name: app.getName(),
     version: app.getVersion(),
     platform: `${process.platform} ${process.getSystemVersion()}`,
     electronVersion: process.versions.electron ?? '',
     logFile: log.filePath,
-    themeFile
+    themeFile,
+    ...(releasesPage ? { releasesPage } : {})
   })
 
   // ---------- export: build the content, ask where to save (remembering the last folder), write it

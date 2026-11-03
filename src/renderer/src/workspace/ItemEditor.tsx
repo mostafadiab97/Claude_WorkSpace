@@ -30,6 +30,8 @@ export function ItemEditor(props: {
   onClose: () => void
   /** Changes when items changed elsewhere (moved in the table, outside edits); reloads unless there are unsaved changes. */
   reloadToken: number
+  /** Filled with a function that saves the open edit and tells whether it worked ("Save and continue", UX-09). */
+  saveRef?: { current: (() => Promise<boolean>) | null }
 }) {
   const { schema, target, onDirtyChange, reloadToken } = props
   // The editor is re-created (keyed) for every target, so a draft can start its state directly.
@@ -101,8 +103,8 @@ export function ItemEditor(props: {
   }, [reloadToken, target])
   useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange])
 
-  const save = useCallback(async () => {
-    if (!form || status.kind === 'saving') return
+  const save = useCallback(async (): Promise<boolean> => {
+    if (!form || status.kind === 'saving') return false
     setStatus({ kind: 'saving' })
     try {
       const r = await window.reqman.saveItem(form, isNew ? null : (details?.revision ?? null))
@@ -117,14 +119,24 @@ export function ItemEditor(props: {
         setIssues(r.details.issues)
         setStatus({ kind: 'saved' })
         props.onSaved(r.details.item.id)
+        return true
       } else {
         setIssues(r.issues ?? [])
         setStatus({ kind: 'error', message: r.message, conflict: r.reason === 'conflict' })
+        return false
       }
     } catch (e) {
       setStatus({ kind: 'error', message: errorMessage(e) })
+      return false
     }
   }, [form, status.kind, isNew, details, base, props])
+  useEffect(() => {
+    if (!props.saveRef) return
+    props.saveRef.current = save
+    return () => {
+      if (props.saveRef) props.saveRef.current = null
+    }
+  }, [props.saveRef, save])
 
   // Ctrl+S saves.
   useEffect(() => {

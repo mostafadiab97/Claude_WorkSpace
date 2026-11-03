@@ -221,7 +221,8 @@ export function ChangesView(props: {
             </p>
           )}
           <div className="compare__chips" role="group" aria-label={T.compare.show}>
-            {(Object.keys(KIND_LABEL) as Kind[]).map((k) => (
+            {/* UX-17: only the kinds that occur (no "Added 0") */}
+            {(Object.keys(KIND_LABEL) as Kind[]).filter((k) => counts[k] > 0).map((k) => (
               <button key={k} type="button" className={kinds.has(k) ? `chip chip--${k} chip--on` : `chip chip--${k}`} aria-pressed={kinds.has(k)} disabled={counts[k] === 0} onClick={() => toggleKind(k)}>
                 {KIND_LABEL[k]} {counts[k]}
               </button>
@@ -269,10 +270,13 @@ export function ChangesView(props: {
                     />
                     {T.changesView.pickAll}
                   </label>
-                  <button type="button" className="btn btn--small" disabled={picked.size === 0 || locked !== null} title={locked ?? undefined} onClick={() => setConfirmMany('picked')}>
-                    {T.changesView.discardPicked(picked.size)}
-                  </button>
-                  <button type="button" className="btn btn--small" disabled={locked !== null} title={locked ?? undefined} onClick={() => setConfirmMany('all')}>
+                  {picked.size > 0 && (
+                    <button type="button" className="btn btn--small btn--danger-outline" disabled={locked !== null} title={locked ?? undefined} onClick={() => setConfirmMany('picked')}>
+                      {T.changesView.discardPicked(picked.size)}
+                    </button>
+                  )}
+                  <span className="toolbar__spacer" />
+                  <button type="button" className="btn btn--small btn--danger-outline" disabled={locked !== null} title={locked ?? undefined} onClick={() => setConfirmMany('all')}>
                     {T.changesView.discardAll}
                   </button>
                 </>

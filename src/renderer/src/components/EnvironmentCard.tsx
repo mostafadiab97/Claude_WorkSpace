@@ -43,6 +43,14 @@ export function EnvironmentCard(props: {
       <StatusRow label={T.settings.env.app} tone="neutral">
         {appInfo ? `${brand} ${appInfo.version} · Electron ${appInfo.electronVersion} · ${appInfo.platform}` : '…'}
       </StatusRow>
+      {appInfo?.releasesPage && (
+        <StatusRow label={T.settings.env.releases} tone="neutral">
+          <a href={appInfo.releasesPage} target="_blank" rel="noreferrer">
+            {T.settings.env.releasesPage}
+          </a>{' '}
+          <span className="muted-inline">{appInfo.releasesPage}</span>
+        </StatusRow>
+      )}
       {theme.warnings.length > 0 && (
         <ul className="warnings">
           {theme.warnings.map((w) => (

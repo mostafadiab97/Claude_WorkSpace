@@ -210,7 +210,7 @@ export function ItemTable(props: {
                 type="button"
                 className={sortBy === c.key ? 'table__th table__th--sorted' : 'table__th'}
                 onClick={() => onSort(c.key)}
-                title={isTree ? T.table.sortTreeTooltip(c.label) : T.table.sortTooltip(c.label)}
+                title={`${c.key === 'links' ? `${T.table.linksLegend}\n` : ''}${isTree ? T.table.sortTreeTooltip(c.label) : T.table.sortTooltip(c.label)}`}
               >
                 {c.label}
                 {sortBy === c.key && <span aria-hidden="true">{desc ? ' ▾' : ' ▴'}</span>}

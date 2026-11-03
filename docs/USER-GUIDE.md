@@ -43,7 +43,8 @@ accounts — who may read or change requirements is decided by your GitHub repos
 
 ### 1.2 Install
 
-1. Open the releases page: <https://github.com/<owner>/Claude_WorkSpace/releases>.
+1. Open the ReqMan **releases page** — your team lead gives you the link; in an installed ReqMan it is under
+   **⚙ → Environment and versions → Releases page**.
 2. Under the newest version → **Assets**, download `ReqMan-Setup-<version>.exe` (or the `.zip` if your browser blocks
    `.exe` files — extract it, then run the `.exe`).
 3. Run it. Windows may say *"Windows protected your PC"* because the installer is not yet code-signed: click
@@ -209,12 +210,12 @@ myself**. Nothing changes until you click **Finish the pull**.
 
 Click the branch button **⎇ main ▾**:
 
-- **Click a branch name** to switch to it. With uncommitted changes, ReqMan asks: **Commit first**, **Take it along**,
+- **Click a branch name** to switch to it. With uncommitted changes, ReqMan asks: **Commit it first**, **Move it to** *(the branch)*,
   or **Discard it**.
 - **Create and switch:** type a name at the bottom (e.g. `cr/door-lock-timeout`).
 - **Compare with…** a branch: see what it would change, requirement by requirement, before taking it — like a pull
   request.
-- **Pull from…** a branch: its changes arrive in your current branch as **uncommitted changes** to review, keep
+- **Bring in changes from…** a branch: its changes arrive in your current branch as **uncommitted changes** to review, keep
   (Commit) or discard. Nothing is committed for you.
 - **🗑 Delete** a branch on this PC (never on GitHub). A branch whose work exists nowhere else asks twice.
 - Many branches: a search box appears; the list scrolls.
@@ -293,7 +294,7 @@ written. **Colours:** Light / Dark / System; a company can change colours, fonts
 3. **Everyone clones the repository**, installs ReqMan and opens the clone.
 4. **Daily work:** Pull in the morning → edit → Changes → Commit → Push. Pull before a big edit session.
 5. **Bigger changes** (a change request, a review package): a branch per change; compare it with `main`; bring it in
-   with a pull request on GitHub or **Pull from…**.
+   with a pull request on GitHub or **Bring in changes from…**.
 6. **Team-wide feature switches:** add to `schema.yaml`, e.g.
 
    ```yaml
@@ -389,7 +390,7 @@ code and test results; AI access.
 
 | Question | Answer |
 | --- | --- |
-| Windows or the browser blocks the installer | It is not code-signed yet. Browser: keep the download (Ctrl+J → Keep). Windows: More info → Run anyway. Or use the `.zip`. If nothing works, IT must allow `github.com/<owner>/Claude_WorkSpace/releases`. |
+| Windows or the browser blocks the installer | It is not code-signed yet. Browser: keep the download (Ctrl+J → Keep). Windows: More info → Run anyway. Or use the `.zip`. If nothing works, IT must allow the releases page (⚙ → Environment and versions shows its address). |
 | "Git is not installed" | Install Git for Windows, restart ReqMan. Settings → Environment shows the version found. |
 | Push is refused | Someone pushed first: Pull, then Push again. ReqMan offers this itself. |
 | A pull asks about fields | You and a colleague changed the same field of the same requirement: choose per field, then **Finish the pull**. |

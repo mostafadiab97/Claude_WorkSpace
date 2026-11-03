@@ -15,6 +15,8 @@ export interface AppInfo {
   logFile: string
   /** Full path of the user's own theme.json (in %APPDATA%\\ReqMan; survives updates). */
   themeFile: string
+  /** The GitHub releases page of the update feed (from the installed app-update.yml), when known. */
+  releasesPage?: string
 }
 
 export type GitInfo =

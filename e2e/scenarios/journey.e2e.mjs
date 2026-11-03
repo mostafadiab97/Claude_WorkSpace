@@ -296,7 +296,7 @@ await scenario('E2E journey', async (ctx) => {
   console.log('Safety — unsaved changes and outside edits')
   await win.getByPlaceholder('Short name of the requirement').fill('Temperature accuracy (edited)')
   await rows().nth(0).click()
-  check(await win.getByText('You have unsaved changes. Discard them?').isVisible(), 'switching items with unsaved changes asks first')
+  check(await win.getByText('You have unsaved changes. Save them before you go on?').isVisible(), 'switching items with unsaved changes asks first')
   await shot('06-unsaved-guard')
   await win.getByRole('button', { name: 'Keep editing' }).click()
   await win.getByRole('button', { name: 'Discard changes' }).first().click()

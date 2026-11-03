@@ -95,8 +95,8 @@ export function BranchMenu(props: {
         <ul className="branches__list" aria-label={title}>
           {items.map((b) => (
             <li key={`${b.kind}-${b.name}`} className="branches__item">
-              <button type="button" className="branches__pick" disabled={locked && mode !== 'compare'} title={tip(b.name)} onClick={() => pick(b.name)}>
-                {b.name}
+              <button type="button" className="branches__pick" disabled={locked && mode !== 'compare'} title={`${tip(b.name)}${b.kind === 'branch' ? '' : `\n${b.name}`}`} onClick={() => pick(b.name)}>
+                {b.kind === 'branch' ? b.name : b.name.replace(/^[^/]+\//, '')}
               </button>
               {b.kind === 'branch' && mode === 'switch' && (
                 <button type="button" className="branches__delete" aria-label={T.branches.deleteLabel(b.name)} title={T.branches.deleteLabel(b.name)} disabled={locked} onClick={() => setDeleting({ name: b.name, unmerged: false, busy: false })}>
@@ -150,9 +150,9 @@ export function BranchMenu(props: {
               {T.branches.commitFirst}
             </button>
             <button type="button" className="btn btn--small" title={T.branches.takeTooltip} onClick={() => props.onSwitch(asking, 'take')}>
-              {T.branches.take(pending)}
+              {T.branches.take(pending, asking)}
             </button>
-            <button type="button" className="btn btn--small btn--danger" onClick={() => props.onSwitch(asking, 'discard')}>
+            <button type="button" className="btn btn--small btn--danger-outline" onClick={() => props.onSwitch(asking, 'discard')}>
               {T.branches.discard(pending)}
             </button>
             <button type="button" className="btn btn--small" onClick={() => setAsking(null)}>

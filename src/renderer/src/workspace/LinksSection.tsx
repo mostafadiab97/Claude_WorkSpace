@@ -27,6 +27,7 @@ export function LinksSection(props: {
 }) {
   const { schema, itemId, details, lockedReason } = props
   const [adding, setAdding] = useState(false)
+  const [checking, setChecking] = useState(false)
   const [relation, setRelation] = useState(() => `out:${schema.linkTypes[0]?.id ?? ''}`)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -103,15 +104,24 @@ export function LinksSection(props: {
                 {T.suspect.back}
               </button>
             </span>
-          ) : (
+          ) : checking ? (
+            // UI review UX-07: bulk decisions only after asking for them, as buttons — never as plain links
             <span className="actions">
-              <button type="button" className="link-btn" disabled={locked} onClick={() => decideAll(true)} title={T.links.confirmTooltip}>
+              <button type="button" className="btn btn--small" disabled={locked} onClick={() => decideAll(true)} title={T.links.confirmTooltip}>
                 {T.links.keepAll(suspects.length)}
               </button>
-              <button type="button" className="link-btn" disabled={locked} onClick={() => setAskUnlinkAll(true)}>
+              <button type="button" className="btn btn--small btn--danger-outline" disabled={locked} onClick={() => setAskUnlinkAll(true)}>
                 {T.links.unlinkAll(suspects.length)}
               </button>
+              <button type="button" className="btn btn--small" onClick={() => setChecking(false)}>
+                {T.suspect.back}
+              </button>
             </span>
+          ) : (
+            <button type="button" className="btn btn--small btn--warn" disabled={locked} onClick={() => setChecking(true)}>
+              <span aria-hidden="true">⚠ </span>
+              {T.links.checkSuspects(suspects.length)}
+            </button>
           ))}
         {!adding && (
           <button type="button" className="btn btn--small" disabled={locked || schema.linkTypes.length === 0} onClick={() => setAdding(true)} title={lockedReason ?? undefined}>

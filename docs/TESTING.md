@@ -67,7 +67,17 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.14.4 (no personal data in the files; Settings touches)
+## Manual test checklist — v0.14.5 (visible Check for updates, folding guide topics)
+
+The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
+Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.14.5**, then **⚙ → Self-tests → Run release self-test**. | App shows 0.14.5; **All steps passed**, 21 ✓. |
+| 2 | **⚙ → Environment and versions**; then in the panel click **▸ User guide**, open a topic, go back to a settings page. | **Check for updates** is a blue button on the Updates line. The guide topics are hidden until you click ▸ User guide; they stay open while a guide page is shown. |
+
+## Previous checklist — v0.14.4 (no personal data in the files; Settings touches)
 
 The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
 Re-clone the sandbox first if you have not yet (its history was rewritten in 0.14.2). Report by step number.
@@ -77,17 +87,6 @@ Re-clone the sandbox first if you have not yet (its history was rewritten in 0.1
 | 1 | Update to **0.14.4**, then **⚙ → Self-tests → Run release self-test**. | App shows 0.14.4; **All steps passed**, 21 ✓. |
 | 2 | **⚙ → Environment and versions**: next to "Updates", click **Check for updates**. Look at **← Back**. | The button sits on the Updates line and checks; Back is blue like the other main buttons. |
 | 3 | **⚙ → Environment and versions → Go back to an earlier version…** | It lists **0.14.3, 0.14.2, 0.14.1** (going back works from 0.14.1 on). Don't install one now — unless you want to try it: install 0.14.3, check that updates say "paused", then **Resume automatic updates** to come back to 0.14.4. |
-
-## Previous checklist — v0.14.3 (Settings and help as pages)
-
-The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
-Report by step number.
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Update to **0.14.3**, then **⚙ → Self-tests → Run release self-test**. | App shows 0.14.3; **All steps passed**, 21 ✓. |
-| 2 | **⚙**: click each entry in the left panel (the four settings pages, then a few guide sections, then a link on "Introduction and contents"). | Each entry opens its own page — no long scroll; a contents link opens that section's page. **← Back** sits at the top of the panel; the panel has its own shade in Light and Dark. |
-| 3 | Optional, instead of last version's step 5 — only inside your sandbox clones, so company repositories are not affected: open a terminal **in each sandbox folder** and run `git config user.email <id>+<username>@users.noreply.github.com` (no `--global`). | New commits in the sandbox show the private address; your other repositories keep the work address. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

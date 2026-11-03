@@ -22,6 +22,8 @@ export function SettingsScreen(props: { theme: LoadedTheme; git: GitInfo | null;
   const lang = useLanguage()
   const [view, setView] = useState<View>({ kind: 'settings', page: 'env' })
   const main = useRef<HTMLDivElement>(null)
+  // the guide's topics fold under "User guide" (the owner on 0.14.4 step 2); open while a guide page is shown
+  const [guideOpen, setGuideOpen] = useState(false)
   const pages = useMemo(() => guidePages(), [])
   const nav = T.settings.nav
   const settingsPages: { id: SettingsPage; label: string }[] = [
@@ -66,10 +68,16 @@ export function SettingsScreen(props: { theme: LoadedTheme; git: GitInfo | null;
         </button>
         <h2 className="settings-nav__group">{nav.settings}</h2>
         <ul>{settingsPages.map((p) => entry(p.id, p.label, view.kind === 'settings' && view.page === p.id, () => setView({ kind: 'settings', page: p.id })))}</ul>
-        <h2 className="settings-nav__group">{nav.guide}</h2>
-        <ul aria-label={nav.guide}>
-          {pages.map((p) => entry(`g-${p.id}`, p.id === '' ? nav.guideHome : p.title, guidePage?.id === p.id, () => setView({ kind: 'guide', page: p.id }), true))}
-        </ul>
+        <h2 className="settings-nav__group">
+          <button type="button" className="settings-nav__fold" aria-expanded={guideOpen || view.kind === 'guide'} onClick={() => setGuideOpen((o) => !(o || view.kind === 'guide'))}>
+            <span aria-hidden="true">{guideOpen || view.kind === 'guide' ? '▾' : '▸'}</span> {nav.guide}
+          </button>
+        </h2>
+        {(guideOpen || view.kind === 'guide') && (
+          <ul aria-label={nav.guide}>
+            {pages.map((p) => entry(`g-${p.id}`, p.id === '' ? nav.guideHome : p.title, guidePage?.id === p.id, () => setView({ kind: 'guide', page: p.id }), true))}
+          </ul>
+        )}
       </nav>
       <div className="settings-main" ref={main}>
         <div className="page__inner">

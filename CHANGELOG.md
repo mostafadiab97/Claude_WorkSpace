@@ -3,7 +3,18 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.14.5 — 3 Nov 2026 — Visible "Check for updates", folding guide topics, UI review prompt
+- **Owner (3 Nov 2026) on 0.14.4:** self-test 21/21 (53.0 s); steps 1, 3 passed; step 2: the Check for updates button
+  is hard to see (make it blue) and the user-guide topics should fold under "User guide". Extra: a prompt for an AI
+  UI/UX review. All here:
+- **Check for updates** is a blue button.
+- **User guide** in the Settings panel folds: ▸ User guide shows the topics when clicked (open while a guide page is shown).
+- **`docs/guides/ui-review-prompt.md`:** a prompt that makes an AI agent review the screens as a senior product
+  designer and write numbered findings (problem, proposal in theme tokens and English wording, severity, effort) into
+  one Markdown file to hand back for applying.
+
 ## 0.14.4 — 3 Nov 2026 — No personal data in the tool's files; small Settings touches
+- **Owner (3 Nov 2026):** steps 1, 3 passed; step 2: Check for updates hard to see, fold the guide topics → 0.14.5.
 - **Owner (3 Nov 2026) on 0.14.3:** self-test 21/21 (53.9 s); steps 1, 2 passed; step 3 not needed. Decisions:
   - **Requirement repositories** (and the sandbox) may hold their authors' names and e-mails as usual — the privacy
     check no longer looks at the sandbox or at commit authors.

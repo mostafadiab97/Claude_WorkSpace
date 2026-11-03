@@ -57,10 +57,13 @@ await scenario('E2E health', async (ctx) => {
   check((await features.textContent()).includes('Turned off for this repository by the team'), 'Settings says the team turned it off')
   check((await win.getByRole('region', { name: 'Versions' }).count()) === 0, 'each settings page shows only its own cards (the owner on 0.14.2 step 2)')
   await nav.getByRole('button', { name: 'Environment and versions' }).click()
+  await t.shot('health-4-env')
 
   check((await win.getByRole('region', { name: 'Versions' }).getByRole('button', { name: 'Go back to an earlier version…' }).count()) === 1, 'Settings has Versions → go back to an earlier version')
 
   console.log('Settings and help: the user guide, one page per section (0.14.2, 0.14.3)')
+  check((await nav.getByRole('button', { name: '1. Quick start (15 minutes)' }).count()) === 0, 'the guide topics are folded at first (0.14.5)')
+  await nav.getByRole('button', { name: /User guide/ }).click()
   await nav.getByRole('button', { name: '1. Quick start (15 minutes)' }).click()
   const guide = win.getByRole('article', { name: 'User guide' })
   await guide.getByRole('heading', { name: '1. Quick start (15 minutes)' }).waitFor()

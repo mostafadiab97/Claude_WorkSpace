@@ -3,6 +3,17 @@
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
 
+## Previous checklist — v0.14.3 (Settings and help as pages)
+
+The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
+Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.14.3**, then **⚙ → Self-tests → Run release self-test**. | App shows 0.14.3; **All steps passed**, 21 ✓. |
+| 2 | **⚙**: click each entry in the left panel (the four settings pages, then a few guide sections, then a link on "Introduction and contents"). | Each entry opens its own page — no long scroll; a contents link opens that section's page. **← Back** sits at the top of the panel; the panel has its own shade in Light and Dark. |
+| 3 | Optional, instead of last version's step 5 — only inside your sandbox clones, so company repositories are not affected: open a terminal **in each sandbox folder** and run `git config user.email <id>+<username>@users.noreply.github.com` (no `--global`). | New commits in the sandbox show the private address; your other repositories keep the work address. |
+
 ## Previous checklist — v0.14.2 (Settings and help with the guide inside)
 
 The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).

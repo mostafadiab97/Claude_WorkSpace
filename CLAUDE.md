@@ -125,7 +125,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.14.4, 3 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.14.5, 3 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -141,6 +141,7 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.14.2 Settings and help — left panel (`SettingsScreen.tsx`), user guide built in (`renderer/lib/guide.ts`, `docs/USER-GUIDE.md?raw`, marked); privacy guard in build.yml (`tools/check-privacy.mjs` + gitleaks, both repos, full history); sandbox history rewritten (work e-mail removed, approved) | Released (v0.14.2) |
 | 0.14.3 Settings and help as pages — one page per settings group and per guide section (`src/shared/guide.ts` splits the guide; `renderer/lib/guide.ts` renders it); Back on top of the shaded panel. The owner cannot set a global private Git e-mail (company repos) → per-repository config in the sandbox clones only | Released (v0.14.3) |
 | 0.14.4 no personal data in the tool's files — the owner's name → "the owner"; no account name anywhere (workflows use `github.repository_owner`, CI passes `-c.publish.owner/repo`, the app reads `app-update.yml`, `tools/ci.mjs` reads the Git remote); `tools/check-privacy.mjs` checks current files only (names as hashes); Check for updates on the Updates line; blue Back | Released (v0.14.4) |
+| 0.14.5 blue Check for updates; folding User guide topics; UI review prompt `docs/guides/ui-review-prompt.md` (the owner may send back a review file to apply) | Released (v0.14.5) |
 | **Next** | the rename version as soon as the owner picks the name, then 1a structure (plan in `docs/reviews/2026-11-01-planning-discussion.md` → "Release plan"); Arabic wording review later | — |
 
 The owner's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
@@ -163,7 +164,7 @@ checks in detail".
   the owner's report 3 Nov: 0.14.0/0.14.1 passed with small points → **0.14.2 released 3 Nov** (Settings and help with the
   guide inside, privacy guard, sandbox history cleaned) — 0.14.2: steps 1, 3, 4 passed; step 2 → **0.14.3** (pages) —
   0.14.3 passed → **0.14.4 released 3 Nov** (no personal data in files; Check for updates on the Updates line; blue Back)
-  — waiting for his 0.14.4 checklist (3 steps). History question settled: not rewritten; a public release repository
+  — 0.14.4 passed with two touches → **0.14.5 released 3 Nov** — waiting for his 0.14.5 checklist (2 steps). History question settled: not rewritten; a public release repository
   will start from the files without history.
 - **Planning discussion in progress** — `docs/reviews/2026-11-01-planning-discussion.md` (method: the
   `owner-decision-walkthrough` skill; record every answer there and, when it changes the product, in

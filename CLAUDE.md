@@ -162,8 +162,9 @@ checks in detail".
   to `ci/acceptance-*` and delete) — **0.14.1 released 3 Nov** (user guide, go back to an earlier version, security check, calmer notes) —
   the owner's report 3 Nov: 0.14.0/0.14.1 passed with small points → **0.14.2 released 3 Nov** (Settings and help with the
   guide inside, privacy guard, sandbox history cleaned) — 0.14.2: steps 1, 3, 4 passed; step 2 → **0.14.3** (pages) —
-  waiting for his 0.14.3 checklist. Open question to him: rewrite the code repo's history too (the 0.14.1 security
-  report named his old work identity in two commits; I recommended leaving it).
+  0.14.3 passed → **0.14.4 released 3 Nov** (no personal data in files; Check for updates on the Updates line; blue Back)
+  — waiting for his 0.14.4 checklist (3 steps). History question settled: not rewritten; a public release repository
+  will start from the files without history.
 - **Planning discussion in progress** — `docs/reviews/2026-11-01-planning-discussion.md` (method: the
   `owner-decision-walkthrough` skill; record every answer there and, when it changes the product, in
   `docs/design/decisions.md` / `roadmap.md`). Decided so far (1 Nov 2026):

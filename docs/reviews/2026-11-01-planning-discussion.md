@@ -121,3 +121,4 @@ review every two themes. New features start as switchable "preview" features (P-
   steps). Name: still open — reqochet felt long and could suggest "missing the target"; new candidates proposed
   (ShallWe, Plumbline, Keelson; search found no tool with these names).
 - 2 Nov 2026 — P-41 yes (numbered list of what each run did, in every report). Name: Mostafa is considering ShallWe / Plumbline / Keelson. Next work: start 0.14 with the health parts and the acceptance run (they do not need the name); the rename is applied as soon as the name is chosen.
+- 3 Nov 2026 — name: ShallWe is taken (Mostafa). Back to reqochet, reqoin and Mostafa's reqornea (cornea). New "req + word" puns proposed: Reqoncile (reconcile = merge differences), Reqonnect (links), Reqosmos (cosmos — everything in one tool), Reqompass (keeps a project on course), Reqollect (history), Reqipe (recipe). Web search found none of them in use; avoid Reqord (an existing tool). Not a trademark check.

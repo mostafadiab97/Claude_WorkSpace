@@ -1,12 +1,12 @@
 # Security check before sharing the repositories (3 Nov 2026)
 
-Mostafa asked for a check before the pilot team gets access: tokens, passwords or other information that would make
+The owner asked for a check before the pilot team gets access: tokens, passwords or other information that would make
 the repositories vulnerable. Checked: `Claude_WorkSpace` (code, 99 commits, full history) and `Claude_SandBox` (test
 data, 14 commits). **F** = fact found, **R** = recommendation.
 
 ## Result in one line
 
-No secrets in either repository or their history. Two weaknesses fixed in 0.14.1; one decision for Mostafa (an e-mail
+No secrets in either repository or their history. Two weaknesses fixed in 0.14.1; one decision for the owner (an e-mail
 address in the sandbox history).
 
 ## What was checked
@@ -23,10 +23,10 @@ address in the sandbox history).
 | Libraries | `npm audit` | **F: 0 problems in what ships with the app**; 30 "moderate" in build-only tools (never installed on users' PCs). Dependabot proposes fixes; `npm run check:deps` warns before every build |
 | Installer | signature | **F:** not code-signed (known; certificate costs money) — Windows warns on first install. **R:** ask the company to sign for a 50-person pilot |
 
-## Decision for Mostafa — decided 3 Nov 2026: option 2, done
+## Decision for the owner — decided 3 Nov 2026: option 2, done
 
-Mostafa: "make sure this never happens again, and remove the work e-mail". The sandbox history was rewritten with
-`git filter-repo --mailmap` (17 commits on `main` and `trial-one` now by `mostafadiab97 <…@users.noreply.github.com>`)
+the owner: "make sure this never happens again, and remove the work e-mail". The sandbox history was rewritten with
+`git filter-repo --mailmap` (17 commits on `main` and `trial-one` now by `<owner> <…@users.noreply.github.com>`)
 and force-pushed once with his approval. Prevention: `tools/check-privacy.mjs` + gitleaks on both repositories' full
 history in every build (build.yml). Note: GitHub may keep the old commits reachable by their exact ID for a while; they
 no longer appear in any branch or commit list.
@@ -51,3 +51,9 @@ private"; then use the `…@users.noreply.github.com` address in Git).
 - Pilot requirement data lives in the **team's own** repository, never in these two.
 - Run gitleaks before making any repository public or sharing it with a new group
   (`gitleaks git . --redact`; free, MIT licence).
+
+## Owner's follow-up decision (3 Nov 2026)
+
+Requirement repositories (and the sandbox) may hold their authors' names and e-mails as usual. What matters is the
+tool repository: no personal data in its **files** (done in 0.14.4; `tools/check-privacy.mjs` keeps it so). Its history
+is not rewritten: when the tool is published, a new repository is created from the files only, without history.

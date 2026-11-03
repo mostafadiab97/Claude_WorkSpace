@@ -1,4 +1,4 @@
-// 0.14.0 health tools (P-40, Mostafa 2 Nov 2026): feature switches (personal + team), team switches in schema.yaml,
+// 0.14.0 health tools (P-40, the owner 2 Nov 2026): feature switches (personal + team), team switches in schema.yaml,
 // and the "Report a problem" file.
 import { describe, expect, it } from 'vitest'
 import { FEATURE_IDS, featureOn, isFeatureId } from '../src/shared/features'

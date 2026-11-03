@@ -3,6 +3,20 @@
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
 
+## Previous checklist — v0.14.2 (Settings and help with the guide inside)
+
+The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
+**First re-clone the sandbox** (its history was rewritten): delete your `Claude_SandBox` and `Claude_SandBox_B`
+folders and clone them again (Open in GitHub Desktop or `git clone`). Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.14.2**, then **⚙ → Run release self-test**. | App shows 0.14.2; **All steps passed**, 21 ✓. |
+| 2 | **⚙**: look at the left panel; click a few entries (Versions, Features, then **User guide → 1. Quick start**, then a link in the guide's contents). | Settings entries jump to their card; the guide opens at the section; links inside the guide jump to their section. Arabic: the panel is in Arabic, the guide stays in English with a note. |
+| 3 | **⚙ → Report a problem**: type a sentence, **Save report…**. | The file is saved and the text box is empty again. |
+| 4 | On GitHub open **Claude_SandBox → Commits**. | Your commits show **<owner>** with no work e-mail. |
+| 5 | Set your own Git to GitHub's private address so new commits stay private — in a terminal: `git config --global user.email <id>+<username>@users.noreply.github.com` | Next commits from your PC show that address (the build checks it from now on). |
+
 ## Previous checklist — v0.14.1 (user guide, going back, calmer notes)
 
 The acceptance run on GitHub already did the update, self-test, sandbox and a real push (Actions → Build → Summary).
@@ -14,7 +28,7 @@ Report by step number.
 | 2 | In your sandbox folder click **Push** with nothing to push (or **Pull** when up to date), in **Light** and **Dark**. | The floating note has the theme's colour (a shade darker in Light, lighter in Dark) with a **blue** frame and soft glow; it closes by itself. Errors still have a red frame, successes green. |
 | 3 | **⚙ → Versions → Go back to an earlier version…** | It says there is no earlier version to go back to yet (going back works from 0.14.1 on — the first real test comes with the next version). |
 | 4 | Open `docs/USER-GUIDE.md` on GitHub and skim the quick start. | Tell me anything unclear or missing before the pilot team gets it. |
-| 5 | Read `docs/reviews/2026-11-03-security-check.md` → "Decision for Mostafa". | Answer: leave the work e-mail in the sandbox history, rewrite it, or make the sandbox private. |
+| 5 | Read `docs/reviews/2026-11-03-security-check.md` → "Decision for the owner". | Answer: leave the work e-mail in the sandbox history, rewrite it, or make the sandbox private. |
 
 ## Previous checklist — v0.14.0 (health tools; acceptance run)
 
@@ -68,7 +82,7 @@ Report by step number.
 
 0.12.0 brings branches and a pull that decides **per requirement** instead of stopping. Steps 2–5 are the two-PC
 trial you chose, with two folders on your PC: **A** = your sandbox clone, **B** = a second clone. Make B once:
-in a terminal in the folder above your sandbox, `git clone https://github.com/mostafadiab97/Claude_SandBox.git Claude_SandBox_B`.
+in a terminal in the folder above your sandbox, `git clone https://github.com/<owner>/Claude_SandBox.git Claude_SandBox_B`.
 Report by step number.
 
 | # | Do this | Expected result |
@@ -96,7 +110,7 @@ Small release with the five things you asked for after 0.11.0. Report by step nu
 0.11.0 brings Excel and ReqIF: import with a wizard, export of everything or of chosen items, writing changes
 back into the Excel file you imported, starting a project from a file, and publishing to GitHub. It also fixes the
 two things you found in 0.10.0. For steps 3–5 download the sample file:
-https://github.com/mostafadiab97/Claude_WorkSpace/raw/main/samples/sample-requirements.xlsx (or use an Excel file of
+https://github.com/<owner>/Claude_WorkSpace/raw/main/samples/sample-requirements.xlsx (or use an Excel file of
 your own). Report by step number.
 
 | # | Do this | Expected result |

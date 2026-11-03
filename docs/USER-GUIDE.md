@@ -43,7 +43,7 @@ accounts — who may read or change requirements is decided by your GitHub repos
 
 ### 1.2 Install
 
-1. Open the releases page: <https://github.com/mostafadiab97/Claude_WorkSpace/releases>.
+1. Open the releases page: <https://github.com/<owner>/Claude_WorkSpace/releases>.
 2. Under the newest version → **Assets**, download `ReqMan-Setup-<version>.exe` (or the `.zip` if your browser blocks
    `.exe` files — extract it, then run the `.exe`).
 3. Run it. Windows may say *"Windows protected your PC"* because the installer is not yet code-signed: click
@@ -270,10 +270,10 @@ panel returns to your repository.
 
 | Card | What it does |
 | --- | --- |
-| **Environment** | Git version, theme in use, update state, app version. |
+| **Environment** | Git version, theme in use, update state with **Check for updates**, app version. |
 | **Versions** | Go back to an earlier version if a new one causes trouble: **Go back to an earlier version…** → choose → **Install version X**. ReqMan downloads it, installs it and opens again; automatic updates then **pause** until you click **Resume automatic updates**. Works for versions from 0.14.1 on. Files changed by a newer version may need that newer version — going back is meant for a few days, until a fix arrives. |
 | **Report a problem** | Saves one text file with your description, the diagnostics and the end of the log. |
-| **Diagnostics** | Log file and theme file locations, **Open log folder**, **Edit my theme…**, **Check for updates**, **Copy diagnostics**. |
+| **Diagnostics** | Log file and theme file locations, **Open log folder**, **Edit my theme…**, **Copy diagnostics**. |
 | **Features** | Turn off a feature on this PC (Branches, Import, Export) if it causes trouble; the rest keeps working. If the team turned one off for the repository, it says so. |
 | **Release self-test** | Runs the main actions (create, edit, move, link, commit, push, a colleague's change, a pull with decisions, branches, compare, history, export, import) on a practice repository in a temporary folder, then deletes it — about a minute; your data is not touched. |
 | **Data self-test** | Measures speed on this PC with generated requirements in a temporary folder. |
@@ -389,7 +389,7 @@ code and test results; AI access.
 
 | Question | Answer |
 | --- | --- |
-| Windows or the browser blocks the installer | It is not code-signed yet. Browser: keep the download (Ctrl+J → Keep). Windows: More info → Run anyway. Or use the `.zip`. If nothing works, IT must allow `github.com/mostafadiab97/Claude_WorkSpace/releases`. |
+| Windows or the browser blocks the installer | It is not code-signed yet. Browser: keep the download (Ctrl+J → Keep). Windows: More info → Run anyway. Or use the `.zip`. If nothing works, IT must allow `github.com/<owner>/Claude_WorkSpace/releases`. |
 | "Git is not installed" | Install Git for Windows, restart ReqMan. Settings → Environment shows the version found. |
 | Push is refused | Someone pushed first: Pull, then Push again. ReqMan offers this itself. |
 | A pull asks about fields | You and a colleague changed the same field of the same requirement: choose per field, then **Finish the pull**. |

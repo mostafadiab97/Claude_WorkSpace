@@ -1,4 +1,4 @@
-// Order keys: the position of an item among its siblings (review S-04, Mostafa's decision 27–28 Oct 2026).
+// Order keys: the position of an item among its siblings (review S-04, the owner's decision 27–28 Oct 2026).
 //
 // A key is a short text that sorts like a number with an unlimited number of decimals: between any two keys
 // there is always room for another one ("a0" < "a0V" < "a1"). Moving an item therefore rewrites exactly one
@@ -173,5 +173,5 @@ export function keyOfNumber(value: number): string {
   return String.fromCharCode('a'.charCodeAt(0) + digits.length - 1) + digits
 }
 
-/** Sibling groups with a key longer than this are re-spaced at push time (Mostafa's rule: at most 4 characters). */
+/** Sibling groups with a key longer than this are re-spaced at push time (the owner's rule: at most 4 characters). */
 export const MAX_ORDER_KEY_LENGTH = 4

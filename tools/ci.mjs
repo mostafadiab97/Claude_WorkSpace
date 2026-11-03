@@ -9,7 +9,13 @@
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 
-const REPO = 'mostafadiab97/Claude_WorkSpace'
+// owner/name of this repository, read from the Git remote (no account name stored in the files)
+const REPO =
+  process.env.CI_REPO ??
+  execFileSync('git', ['remote', 'get-url', 'origin'], { encoding: 'utf8' })
+    .trim()
+    .replace(/\.git$/, '')
+    .match(/[/:]([^/:]+\/[^/]+)$/)?.[1]
 const api = (path, ...args) => JSON.parse(execFileSync('gh', ['api', ...args, `repos/${REPO}/${path}`], { encoding: 'utf8' }) || 'null')
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const runs = (n = 5) => api(`actions/runs?per_page=${n}`).workflow_runs

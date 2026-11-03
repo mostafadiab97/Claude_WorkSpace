@@ -25,8 +25,8 @@ nsis:
   shortcutName: ReqMan
 linux:
   target: [dir]
-# Release feed for automatic updates: GitHub Releases of this repository.
+# Release feed for automatic updates: GitHub Releases of this repository. Owner and repository name are not stored
+# here (no account names in the files): CI passes them (-c.publish.owner / -c.publish.repo), and a local build
+# reads them from the Git remote. electron-builder writes them into the installed app's app-update.yml.
 publish:
   provider: github
-  owner: mostafadiab97
-  repo: Claude_WorkSpace

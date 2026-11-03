@@ -1,4 +1,4 @@
-// Mostafa's requests on 0.11.0: move several chosen items at once (they keep their order and children), and
+// the owner's requests on 0.11.0: move several chosen items at once (they keep their order and children), and
 // discard the changes of several items.
 import { execFileSync } from 'node:child_process'
 import { mkdtemp } from 'node:fs/promises'

@@ -8,10 +8,10 @@ import { T } from '../../../shared/text'
 type Mode = 'switch' | 'pull' | 'compare'
 
 /**
- * The branch drop-down under the branch button (M8, reworked in 0.12.1 after Mostafa's test):
+ * The branch drop-down under the branch button (M8, reworked in 0.12.1 after the owner's test):
  * a compact panel, not a full-width bar. The current branch is on top with its two actions, "Pull from…" and
  * "Compare with…", which turn the list below into a chooser. Otherwise clicking a branch name switches to it
- * (asking about uncommitted changes — Mostafa's decision M8-1). The list has a search box and scrolls inside the
+ * (asking about uncommitted changes — the owner's decision M8-1). The list has a search box and scrolls inside the
  * panel, so tens of branches never cover the window. A new branch is created at the bottom.
  */
 export function BranchMenu(props: {

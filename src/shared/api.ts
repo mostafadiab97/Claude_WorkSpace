@@ -162,7 +162,7 @@ export interface BranchInfo {
   current: boolean
 }
 
-/** One part of an item both sides changed differently (Mostafa's decision M8-3: field by field). */
+/** One part of an item both sides changed differently (the owner's decision M8-3: field by field). */
 export interface MergePart {
   /** "title", "type", "position", "text", "field:<id>", "extra:<key>", "item" (deleted vs changed), "file" */
   key: string
@@ -202,7 +202,7 @@ export interface MergePlan {
   /** Items created on both sides with the same ID (review D-09): this branch's item gets a new ID. */
   duplicates: ItemChange[]
   /**
-   * Pull from another branch (Mostafa, 31 Oct 2026): the result is written as uncommitted changes to review in
+   * Pull from another branch (the owner, 31 Oct 2026): the result is written as uncommitted changes to review in
    * Changes (keep or discard, then commit). False for a pull of the branch's own remote branch (that one commits).
    */
   uncommitted: boolean
@@ -530,7 +530,7 @@ export interface ReqManApi {
    * changed differently on both sides, nothing is changed yet and the result carries a `plan` with the questions.
    */
   pull(): Promise<GitResult>
-  /** Like pull, from any branch (local or remote) into the current one (Mostafa's decision M8-6). */
+  /** Like pull, from any branch (local or remote) into the current one (the owner's decision M8-6). */
   pullFrom(source: string): Promise<GitResult>
   /** Completes a pull with the user's answers to the plan's questions. */
   finishPull(plan: MergePlan, answers: MergeAnswers): Promise<GitResult>

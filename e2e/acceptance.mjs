@@ -1,4 +1,4 @@
-// Acceptance run (P-41, Mostafa 2 Nov 2026): what Mostafa's manual checklist did, done on GitHub's Windows machine
+// Acceptance run (P-41, the owner 2 Nov 2026): what the owner's manual checklist did, done on GitHub's Windows machine
 // with the INSTALLED app. Windows only. Writes a numbered list of everything it did to the job summary.
 //
 //   node e2e/acceptance.mjs --installer dist/ReqMan-Setup-X.exe --feed dist [--previous old-setup.exe]

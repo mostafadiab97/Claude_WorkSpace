@@ -63,4 +63,4 @@ builds the installer and publishes it as a GitHub Release; installed copies pick
 - `docs/THEMING.md` — customising colours, fonts, shapes, logo, light/dark
 - `samples/sample-requirements.xlsx` — fictional smart-thermostat requirements (59 items) for testing
 - `tools/README.md` — every script and the working procedures (Claude Code skills in `.claude/skills/`)
-- Test data: GitHub `mostafadiab97/Claude_SandBox` (10,005 fictional items) — clone it next to this repository
+- Test data: GitHub `<owner>/Claude_SandBox` (10,005 fictional items) — clone it next to this repository

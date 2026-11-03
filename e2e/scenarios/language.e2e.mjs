@@ -1,4 +1,4 @@
-// 0.13.0 in the window: the English / العربية switch (Mostafa, 31 Oct 2026). The whole window flips to right-to-left,
+// 0.13.0 in the window: the English / العربية switch (the owner, 31 Oct 2026). The whole window flips to right-to-left,
 // texts from the window and from the core (Git messages) follow, an unsaved edit survives the switch, and the choice
 // is remembered at the next start.
 import { gitIn, gitRepo, launch, scenario, temp } from '../harness.mjs'

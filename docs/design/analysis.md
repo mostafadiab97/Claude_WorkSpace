@@ -12,7 +12,7 @@ as the record; newer comparisons are in `docs/reviews/` (feature catalogue, mark
 > update it here as decisions change. Tags used throughout: C = confirmed by the product owner, R = recommendation,
 > I = inference; evidence letters refer to the Sources section.
 
-Oct 24, 2026 · @Mostafa
+Oct 24, 2026 · @the owner
 
 ## Scope and evidence legend
 

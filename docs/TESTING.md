@@ -9,7 +9,7 @@ Three kinds of checks protect each version:
 2. **The release self-test** (from 0.8.0) — on *your* PC, inside ReqMan: **⚙ Settings & diagnostics → Run
    release self-test**. It does the main actions on a practice repository in a temporary folder (never your
    data) and shows ✓/✗ per step. It checks what only your PC has: your Git, Windows Defender, your disk.
-3. **A short manual checklist** — at most 5 steps per version (Mostafa's rule, 28 Oct 2026): the update
+3. **A short manual checklist** — at most 5 steps per version (the owner's rule, 28 Oct 2026): the update
    arrives, the self-test passes, the sandbox opens, one real push when the Git parts changed, and a quick look
    at what is new.
 
@@ -25,7 +25,7 @@ column width drag, Changes view layout + split difference, second start, release
 Compare on the sandbox: 9,118 changed files (confirmations only) 0.4 s; 3,000 real edits 1.8 s (engine).
 Export of all 10,005 sandbox items: CSV 0.46 s (3.1 MB), Markdown 0.43 s. CI runs `measure:ui` on a generated 10k repo.
 Measured on the sandbox (10,005 items, Linux container): open incl. first indexing 5–8 s, expand all 0.4–0.6 s,
-scroll to bottom 65 ms, suspect filter 0.3 s. Mostafa's PC: 10k queries < 15 ms; 50k first index 18–73 s (Defender).
+scroll to bottom 65 ms, suspect filter 0.3 s. The owner's PC: 10k queries < 15 ms; 50k first index 18–73 s (Defender).
 
 ## Where things are on Windows
 
@@ -48,7 +48,7 @@ From 0.14.0: **⚙ → Report a problem** — describe what happened and click *
 ## Getting a version to test
 
 Each tested version is published on the repository's **Releases** page
-(`https://github.com/mostafadiab97/Claude_WorkSpace/releases`). Download `ReqMan-Setup-<version>.exe` from
+(`https://github.com/<owner>/Claude_WorkSpace/releases`). Download `ReqMan-Setup-<version>.exe` from
 the release's **Assets** and run it — there is no zip and no GitHub sign-in needed. From v0.0.3 onwards,
 an installed ReqMan also finds newer releases by itself and offers **Restart and update**.
 
@@ -63,11 +63,22 @@ so browsers treat the installer as unknown:
 - From v0.0.4, each release also has a **.zip** of the installer, which browsers block less often:
   download it, right-click → **Extract All**, run the `.exe`.
 - If there is no "keep" option at all, your company manages the browser: ask IT to allow downloads from
-  `github.com/mostafadiab97/Claude_WorkSpace/releases`.
+  `github.com/<owner>/Claude_WorkSpace/releases`.
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.14.3 (Settings and help as pages)
+## Manual test checklist — v0.14.4 (no personal data in the files; Settings touches)
+
+The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
+Re-clone the sandbox first if you have not yet (its history was rewritten in 0.14.2). Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.14.4**, then **⚙ → Self-tests → Run release self-test**. | App shows 0.14.4; **All steps passed**, 21 ✓. |
+| 2 | **⚙ → Environment and versions**: next to "Updates", click **Check for updates**. Look at **← Back**. | The button sits on the Updates line and checks; Back is blue like the other main buttons. |
+| 3 | **⚙ → Environment and versions → Go back to an earlier version…** | It lists **0.14.3, 0.14.2, 0.14.1** (going back works from 0.14.1 on). Don't install one now — unless you want to try it: install 0.14.3, check that updates say "paused", then **Resume automatic updates** to come back to 0.14.4. |
+
+## Previous checklist — v0.14.3 (Settings and help as pages)
 
 The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
 Report by step number.
@@ -76,21 +87,7 @@ Report by step number.
 | --- | --- | --- |
 | 1 | Update to **0.14.3**, then **⚙ → Self-tests → Run release self-test**. | App shows 0.14.3; **All steps passed**, 21 ✓. |
 | 2 | **⚙**: click each entry in the left panel (the four settings pages, then a few guide sections, then a link on "Introduction and contents"). | Each entry opens its own page — no long scroll; a contents link opens that section's page. **← Back** sits at the top of the panel; the panel has its own shade in Light and Dark. |
-| 3 | Optional, instead of last version's step 5 — only inside your sandbox clones, so company repositories are not affected: open a terminal **in each sandbox folder** and run `git config user.email 347558874+mostafadiab97@users.noreply.github.com` (no `--global`). | New commits in the sandbox show the private address; your other repositories keep the work address. |
-
-## Previous checklist — v0.14.2 (Settings and help with the guide inside)
-
-The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
-**First re-clone the sandbox** (its history was rewritten): delete your `Claude_SandBox` and `Claude_SandBox_B`
-folders and clone them again (Open in GitHub Desktop or `git clone`). Report by step number.
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Update to **0.14.2**, then **⚙ → Run release self-test**. | App shows 0.14.2; **All steps passed**, 21 ✓. |
-| 2 | **⚙**: look at the left panel; click a few entries (Versions, Features, then **User guide → 1. Quick start**, then a link in the guide's contents). | Settings entries jump to their card; the guide opens at the section; links inside the guide jump to their section. Arabic: the panel is in Arabic, the guide stays in English with a note. |
-| 3 | **⚙ → Report a problem**: type a sentence, **Save report…**. | The file is saved and the text box is empty again. |
-| 4 | On GitHub open **Claude_SandBox → Commits**. | Your commits show **mostafadiab97** with no work e-mail. |
-| 5 | Set your own Git to GitHub's private address so new commits stay private — in a terminal: `git config --global user.email 347558874+mostafadiab97@users.noreply.github.com` | Next commits from your PC show that address (the build checks it from now on). |
+| 3 | Optional, instead of last version's step 5 — only inside your sandbox clones, so company repositories are not affected: open a terminal **in each sandbox folder** and run `git config user.email <id>+<username>@users.noreply.github.com` (no `--global`). | New commits in the sandbox show the private address; your other repositories keep the work address. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

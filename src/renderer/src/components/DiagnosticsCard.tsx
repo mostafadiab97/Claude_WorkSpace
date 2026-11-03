@@ -36,9 +36,6 @@ export function DiagnosticsCard({ appInfo }: { appInfo: AppInfo | null }) {
         <button type="button" className="btn" onClick={() => void window.reqman.openThemeFolder()}>
           {T.settings.diag.editTheme}
         </button>
-        <button type="button" className="btn" onClick={() => void window.reqman.checkForUpdates()}>
-          {T.settings.diag.checkUpdates}
-        </button>
         <button type="button" className="btn" onClick={() => void copy()}>
           {copied === 'done' ? T.common.copied : copied === 'failed' ? T.common.copyFailed : T.settings.diag.copy}
         </button>

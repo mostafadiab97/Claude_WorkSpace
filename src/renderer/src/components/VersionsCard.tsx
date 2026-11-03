@@ -5,7 +5,7 @@ import { T } from '../../../shared/text'
 type List = { state: 'closed' } | { state: 'loading' } | { state: 'failed'; message: string } | { state: 'open'; versions: { version: string; date: string }[] }
 
 /**
- * Settings → Versions (Mostafa, 3 Nov 2026): go back to an earlier published version when a new one causes trouble.
+ * Settings → Versions (the owner, 3 Nov 2026): go back to an earlier published version when a new one causes trouble.
  * Automatic updates pause at that version until "Resume" — otherwise it would update itself straight back.
  */
 export function VersionsCard({ appInfo, update }: { appInfo: AppInfo | null; update: UpdateStatus | null }) {

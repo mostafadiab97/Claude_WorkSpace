@@ -62,7 +62,7 @@ export function documentOrderOf(all: IndexedItem[]): ExportItem[] {
 type Placed = { id: string; order?: string }
 
 /**
- * Outline numbers ("1", "1.2", "2.3.1") from parent + position (Mostafa's decision O-03): calculated whenever they are
+ * Outline numbers ("1", "1.2", "2.3.1") from parent + position (the owner's decision O-03): calculated whenever they are
  * shown, never stored, so a move changes one file and every number follows at once. `rows` must list siblings
  * in document order (as `IndexCache.structure()` does). Items whose parent is missing, or that sit in a parent
  * loop, are not in the hierarchy and get no number. Pure.
@@ -149,7 +149,7 @@ export function planSwap(sibs: Placed[], i: number, j: number): { id: string; or
 }
 
 /**
- * Sibling groups whose keys got long (Mostafa's rule, 28 Oct 2026: more than 4 characters) get short, evenly
+ * Sibling groups whose keys got long (the owner's rule, 28 Oct 2026: more than 4 characters) get short, evenly
  * spaced keys again. Returns the new keys of the items that change. Pure.
  */
 export function planTidy(sibs: Placed[]): { id: string; order: string }[] {
@@ -225,7 +225,7 @@ export function createStructureOps(ctx: WorkspaceContext) {
     },
 
     /**
-     * Moves several items at once (Mostafa, 0.11.0): they keep their document order, land together before `before`
+     * Moves several items at once (the owner, 0.11.0): they keep their document order, land together before `before`
      * (or last) under `parent`, and each keeps its children. An item whose parent is moved too stays under it.
      */
     async reparentItems(ids: string[], parent: string | null, before?: string | null): Promise<OpResult> {

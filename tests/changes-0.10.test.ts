@@ -147,7 +147,7 @@ describe('Changes view data', () => {
   })
 })
 
-describe('report by Mostafa on 0.10.0: "Changes (1)" while the list was empty', () => {
+describe('report by the owner on 0.10.0: "Changes (1)" while the list was empty', () => {
   it('lists an item whose only uncommitted change is a link confirmation (Keep), so it can be committed or discarded', async () => {
     const { ws } = await setup()
     const target = await add(ws, 'Target', { text: 'old' })

@@ -14,7 +14,7 @@ export function ProblemReportCard() {
       const r = await window.reqman.saveProblemReport(text)
       if (r.ok) {
         setResult({ ok: true, message: T.settings.report.saved(r.path) })
-        setText('') // Mostafa on 0.14.0 step 3: the description is in the file now; start empty for the next report
+        setText('') // the owner on 0.14.0 step 3: the description is in the file now; start empty for the next report
       }
       else if (!r.canceled) setResult({ ok: false, message: T.settings.report.failed(r.message ?? '') })
     } catch (e) {

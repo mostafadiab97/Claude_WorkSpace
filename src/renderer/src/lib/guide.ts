@@ -1,4 +1,4 @@
-// The user guide inside the app (Mostafa on 0.14.1 step 4 and 0.14.2 step 2): docs/USER-GUIDE.md is bundled at build
+// The user guide inside the app (the owner on 0.14.1 step 4 and 0.14.2 step 2): docs/USER-GUIDE.md is bundled at build
 // time and shown in Settings and help, one page per "## " section, with the sections in the left panel. The file is
 // ours (no user content), rendered with marked (MIT).
 import { Marked } from 'marked'

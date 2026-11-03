@@ -2531,10 +2531,10 @@ code {
   direction: ltr;
 }
 
-/* 0.13.1 (Mostafa on 0.13.0 step 2): the floating Git note must be noticed — tinted with its meaning (green = done,
+/* 0.13.1 (the owner on 0.13.0 step 2): the floating Git note must be noticed — tinted with its meaning (green = done,
    red = problem, blue = question), a coloured frame and glow, and the text centred in both languages */
 .gitbar__float > .gitbar__notice {
-  /* 0.14.1 (Mostafa, 3 Nov): the theme's own colour again, one shade apart from the page — mixing the surface with the
+  /* 0.14.1 (the owner, 3 Nov): the theme's own colour again, one shade apart from the page — mixing the surface with the
      text colour makes it darker in Light and lighter in Dark; the coloured frame and glow carry the meaning */
   background: color-mix(in srgb, var(--rm-color-surface) 90%, var(--rm-color-text));
   border: 2px solid var(--rm-color-success);
@@ -2565,7 +2565,7 @@ code {
   padding-inline-start: 0;
 }
 
-/* 0.13.1 (Mostafa on 0.13.0 step 4): a red "Delete" button, easy to see and hit */
+/* 0.13.1 (the owner on 0.13.0 step 4): a red "Delete" button, easy to see and hit */
 .branches__delete {
   opacity: 1;
   flex: none;
@@ -2621,7 +2621,7 @@ code {
   margin: 0;
 }
 
-/* 0.14.2 (Mostafa on 0.14.1 step 4): Settings and help — left panel with the settings cards and the user guide */
+/* 0.14.2 (the owner on 0.14.1 step 4): Settings and help — left panel with the settings cards and the user guide */
 .page--split {
   display: flex;
   overflow: hidden;
@@ -2642,7 +2642,7 @@ code {
   flex: none;
   overflow-y: auto;
   border-inline-end: 1px solid var(--rm-color-border);
-  /* its own shade (Mostafa on 0.14.2 step 2): darker in Light, lighter in Dark */
+  /* its own shade (the owner on 0.14.2 step 2): darker in Light, lighter in Dark */
   background: color-mix(in srgb, var(--rm-color-surface) 94%, var(--rm-color-text));
   padding: var(--rm-space-md) var(--rm-space-sm);
 }

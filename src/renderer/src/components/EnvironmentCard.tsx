@@ -34,7 +34,11 @@ export function EnvironmentCard(props: {
         label={T.settings.env.updates}
         tone={update?.state === 'error' ? 'warn' : update?.state === 'ready' || update?.state === 'up-to-date' ? 'ok' : 'neutral'}
       >
-        {describeUpdate(update)}
+        {describeUpdate(update)}{' '}
+        {/* moved here from Diagnostics (the owner on 0.14.3) — next to the line it changes */}
+        <button type="button" className="btn btn--small" onClick={() => void window.reqman.checkForUpdates()}>
+          {T.settings.diag.checkUpdates}
+        </button>
       </StatusRow>
       <StatusRow label={T.settings.env.app} tone="neutral">
         {appInfo ? `${brand} ${appInfo.version} · Electron ${appInfo.electronVersion} · ${appInfo.platform}` : '…'}

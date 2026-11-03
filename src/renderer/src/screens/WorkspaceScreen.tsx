@@ -135,7 +135,7 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
       setNotice(T.workspace.moveFirst(target.id))
       return
     }
-    // several chosen rows move together (Mostafa, 0.11.0); they stay chosen
+    // several chosen rows move together (the owner, 0.11.0); they stay chosen
     const r = ids.length > 1 ? await window.reqman.reparentItems(ids, parent, before) : await window.reqman.reparentItem(id, parent, before)
     setNotice(r.ok ? null : T.workspace.moveFailed(ids.length > 1 ? T.workspace.items : id, r.message))
     if (r.ok && ids.length > 1) {

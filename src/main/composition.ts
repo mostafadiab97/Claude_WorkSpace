@@ -1,6 +1,6 @@
 // COMPOSITION ROOT — the single place where modules are created and connected.
 // To swap a module for another implementation, change its line here; nothing else needs to know.
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { createSystemGitAdapter, type GitAdapter } from '../modules/git-adapter'
 import { createSqliteIndexCache } from '../modules/index-cache'
 import { createFileLogger, type Logger } from '../modules/logger'
@@ -50,7 +50,8 @@ export function createServices(paths: Paths, version = '0.0.0'): Services {
       enabled: paths.packaged && process.platform === 'win32',
       log,
       holdFile: join(paths.userDir, 'update-hold.json'),
-      releasesUrl: 'https://api.github.com/repos/mostafadiab97/Claude_WorkSpace/releases?per_page=100'
+      // owner/repository come from the installed app's app-update.yml (written by electron-builder), not from the source
+      updateConfigFile: join(dirname(paths.resourceDir), 'app-update.yml')
     }),
     releaseSelfTest: () =>
       runReleaseSelfTest({

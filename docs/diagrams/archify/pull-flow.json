@@ -7,7 +7,7 @@
     "locale": "en",
     "output": "docs/diagrams/pull-flow.html",
     "repository": {
-      "url": "https://github.com/mostafadiab97/claude_workspace",
+      "url": "https://github.com/<owner>/claude_workspace",
       "provider": "github",
       "link_mode": "web",
       "revision": "3e37acaf2eaf92dc52b0544b34e4a97aac89a0ec"

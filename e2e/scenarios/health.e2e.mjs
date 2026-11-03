@@ -1,4 +1,4 @@
-// 0.14.0 health tools in the window (P-40, Mostafa 2 Nov 2026): a feature turned off in Settings disappears from the
+// 0.14.0 health tools in the window (P-40, the owner 2 Nov 2026): a feature turned off in Settings disappears from the
 // window and comes back when turned on; a team switch in schema.yaml turns it off for the repository and Settings says
 // so; "Report a problem" saves one text file with the description, diagnostics and log.
 import { appendFileSync, existsSync, readFileSync } from 'node:fs'
@@ -55,7 +55,7 @@ await scenario('E2E health', async (ctx) => {
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
   await nav.getByRole('button', { name: 'Features' }).click()
   check((await features.textContent()).includes('Turned off for this repository by the team'), 'Settings says the team turned it off')
-  check((await win.getByRole('region', { name: 'Versions' }).count()) === 0, 'each settings page shows only its own cards (Mostafa on 0.14.2 step 2)')
+  check((await win.getByRole('region', { name: 'Versions' }).count()) === 0, 'each settings page shows only its own cards (the owner on 0.14.2 step 2)')
   await nav.getByRole('button', { name: 'Environment and versions' }).click()
 
   check((await win.getByRole('region', { name: 'Versions' }).getByRole('button', { name: 'Go back to an earlier version…' }).count()) === 1, 'Settings has Versions → go back to an earlier version')
@@ -83,6 +83,6 @@ await scenario('E2E health', async (ctx) => {
   check(text.includes('The branch button does nothing.'), 'the report holds the description')
   check(/ReqMan \d+\.\d+\.\d+/.test(text) && text.includes('Git:'), '…the diagnostics')
   check(text.includes('== Log (last'), '…and the end of the log')
-  check((await report.getByLabel('What happened?').inputValue()) === '', 'the text box is empty again after saving (Mostafa on 0.14.0 step 3)')
+  check((await report.getByLabel('What happened?').inputValue()) === '', 'the text box is empty again after saving (the owner on 0.14.0 step 3)')
   await t.shot('health-2-report')
 })

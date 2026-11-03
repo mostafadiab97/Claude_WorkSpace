@@ -1,4 +1,4 @@
-// The window's language (0.13.0, Mostafa's request 31 Oct 2026): English or Arabic, switched like light/dark.
+// The window's language (0.13.0, the owner's request 31 Oct 2026): English or Arabic, switched like light/dark.
 // setLanguage() swaps the texts of T in place; the document direction flips for Arabic (right to left); the choice
 // is remembered on this PC (local storage) and sent to the core, whose messages (Git, saving…) follow too.
 import { createContext, useContext } from 'react'

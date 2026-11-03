@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { app, net } from 'electron'
 import { autoUpdater } from 'electron-updater'
+import { parse as parseYaml } from 'yaml'
 import type { UpdateStatus } from '../../shared/api'
 import type { UpdateService } from './index'
 import { parseReleases, revertTargets, type ReleaseInfo } from './versions'
@@ -14,13 +15,13 @@ interface Deps {
   log: { info(m: string): void; warn(m: string): void; error(m: string, e?: unknown): void }
   /** Where "updates paused at version X" is remembered (survives reinstalling; 0.14.1). */
   holdFile: string
-  /** GitHub "list releases" address of the release feed. */
-  releasesUrl: string
+  /** The installed app's app-update.yml (provider github, owner, repo) — the release feed to list versions from. */
+  updateConfigFile: string
 }
 
 const SIX_HOURS = 6 * 60 * 60 * 1000
 
-export function createGithubUpdater({ enabled, log, holdFile, releasesUrl }: Deps): UpdateService {
+export function createGithubUpdater({ enabled, log, holdFile, updateConfigFile }: Deps): UpdateService {
   // Going back to an earlier version (0.14.1) writes a hold file first, so the installed older version does not update
   // itself straight back. A hold for another version than the running one is stale (the user installed by hand): drop it.
   const readHold = (): string | null => {
@@ -74,6 +75,9 @@ export function createGithubUpdater({ enabled, log, holdFile, releasesUrl }: Dep
 
   let releases: ReleaseInfo[] = []
   const listEarlier = async (): Promise<ReleaseInfo[]> => {
+    const feed = parseYaml(readFileSync(updateConfigFile, 'utf8')) as { owner?: unknown; repo?: unknown } | null
+    if (typeof feed?.owner !== 'string' || typeof feed.repo !== 'string') throw new Error('no GitHub release feed configured')
+    const releasesUrl = `https://api.github.com/repos/${encodeURIComponent(feed.owner)}/${encodeURIComponent(feed.repo)}/releases?per_page=100`
     const res = await net.fetch(releasesUrl, { headers: { Accept: 'application/vnd.github+json' } })
     if (!res.ok) throw new Error(`GitHub answered ${res.status}`)
     releases = parseReleases(await res.json())

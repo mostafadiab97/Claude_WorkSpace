@@ -15,7 +15,7 @@ type SettingsPage = 'env' | 'report' | 'features' | 'tests'
 type View = { kind: 'settings'; page: SettingsPage } | { kind: 'guide'; page: string; anchor?: string }
 
 /**
- * Settings and help (Mostafa on 0.14.1 step 4 and 0.14.2 step 2): a left panel (its own shade, Back on top) that
+ * Settings and help (the owner on 0.14.1 step 4 and 0.14.2 step 2): a left panel (its own shade, Back on top) that
  * switches between pages — related settings grouped on one page, and the user guide one section per page.
  */
 export function SettingsScreen(props: { theme: LoadedTheme; git: GitInfo | null; update: UpdateStatus | null; appInfo: AppInfo | null; onBack: () => void }) {
@@ -61,7 +61,7 @@ export function SettingsScreen(props: { theme: LoadedTheme; git: GitInfo | null;
   return (
     <div className="page page--split">
       <nav className="settings-nav" aria-label={nav.label}>
-        <button type="button" className="btn settings-nav__back" onClick={props.onBack}>
+        <button type="button" className="btn btn--primary settings-nav__back" onClick={props.onBack}>
           {T.settings.back}
         </button>
         <h2 className="settings-nav__group">{nav.settings}</h2>

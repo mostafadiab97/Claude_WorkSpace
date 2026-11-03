@@ -1,4 +1,4 @@
-// Field-level 3-way merge of one item (review S-05, Mostafa's decisions M8-3 and M8-7, 29 Oct 2026).
+// Field-level 3-way merge of one item (review S-05, the owner's decisions M8-3 and M8-7, 29 Oct 2026).
 // base = the version both sides started from, mine = this PC's branch, theirs = the branch being pulled in.
 // Each part of an item is merged on its own: a part changed on one side only takes that side's value; a part
 // changed on both sides to the same value is fine; only a part changed differently on both sides is a conflict

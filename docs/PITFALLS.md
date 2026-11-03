@@ -16,7 +16,7 @@
 - The sandbox's `RSK-RENAMD.md` is deliberately renamed — scripts that rewrite items must not write it under its
   ID (would create a duplicate).
 - Changing sandbox data: keep IDs stable (migrate in place, like `tools/confirm-sandbox-links.mts`), update its
-  README, tell Mostafa to `git pull` / `git reset --hard origin/main` there.
+  README, tell the owner to `git pull` / `git reset --hard origin/main` there.
 - Release via tag push is not used; the version change in `package.json` triggers the release.
 - `electron-builder --publish always` failed in CI before; publishing uses `gh release create` instead.
 - The Changes view (0.10.0) replaces the table and the editor column, but both stay **mounted** (hidden) so unsaved
@@ -41,7 +41,7 @@
 - **Single-instance lock:** two ReqMan processes with the same `--user-data-dir` cannot run; e2e scenarios each use
   their own profile (`launch()` in `e2e/harness.mjs`), so they can run side by side.
 - **From this cloud session:** `gh workflow run` and other GraphQL calls are refused (403) — start a release with
-  `gh api -X POST repos/mostafadiab97/Claude_WorkSpace/actions/workflows/release.yml/dispatches -f ref=main`.
+  `gh api -X POST repos/<owner>/Claude_WorkSpace/actions/workflows/release.yml/dispatches -f ref=main`.
   Run logs and artifacts cannot be downloaded either; failed e2e scenarios are therefore written as GitHub
   annotations (`gh api repos/.../check-runs/<job id>/annotations`).
 - **Order keys are compared byte-wise.** `localeCompare` sorts `a0` / `aA` / `aa` differently from SQLite and
@@ -73,7 +73,7 @@
   question) must ask `getGitState()` again (BranchMenu does).
 - **Dependabot:** read each proposal before merging (CI must be green; see the ignore list in `.github/dependabot.yml`).
   TypeScript majors wait for typescript-eslint support (PR #5: `npm ci` ERESOLVE); `@types/node` follows the Node.js
-  inside Electron (Electron 45 = Node 24, so `^24`; PR #6). Merging/closing PRs needs Mostafa's yes (his repo).
+  inside Electron (Electron 45 = Node 24, so `^24`; PR #6). Merging/closing PRs needs the owner's yes (his repo).
 - **Electron downloads its program on first use:** two scenarios starting at once failed on Windows ("file in
   use") — `e2e/run.mjs` imports `electron` once before starting them.
 
@@ -91,7 +91,7 @@ feed on `http://127.0.0.1:8765/` serving `dist/` — never change `publish:` for
 `finally`; messages are scrubbed of the URL before they are printed.
 
 ## Personal data in commit history (3 Nov 2026)
-Early sandbox commits carried a work e-mail; removing it needed a history rewrite and a force-push (with Mostafa's
+Early sandbox commits carried a work e-mail; removing it needed a history rewrite and a force-push (with the owner's
 explicit approval). Prevention: `tools/check-privacy.mjs` in build.yml fails on any commit e-mail that is not a GitHub
 private / no-reply address and on real e-mail addresses in files; gitleaks scans for secrets. Test data must use
 `example.com` / `.test` / `.invalid` addresses only.

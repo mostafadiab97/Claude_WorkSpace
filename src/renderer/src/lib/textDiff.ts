@@ -1,4 +1,4 @@
-// Side-by-side differences for the Changes view (Mostafa's decision O-05): old version on the left, new on the
+// Side-by-side differences for the Changes view (the owner's decision O-05): old version on the left, new on the
 // right, changed words marked, long runs of unchanged lines folded. Pure functions, unit-tested (tests/ui).
 // Line and word comparison come from the `diff` library (jsdiff, BSD-3-Clause).
 import { diffLines, diffWordsWithSpace } from 'diff'

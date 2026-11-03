@@ -1,4 +1,4 @@
-// Taking back one part of an uncommitted change (the ↶ arrows of the Changes view, Mostafa's decision O-05):
+// Taking back one part of an uncommitted change (the ↶ arrows of the Changes view, the owner's decision O-05):
 // a field, the position, the text or one link becomes as it is in the last commit; everything else the user
 // changed in that item stays. The result is saved like any edit (checked, conflict-safe).
 import { relative } from 'node:path'

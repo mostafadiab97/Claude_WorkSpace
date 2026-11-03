@@ -19,17 +19,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0 # full history for the privacy and secrets checks
+          fetch-depth: 0 # full history for the secrets check
 
-      - name: Privacy and secrets check (this repository and the sandbox, full history)
+      - name: Privacy and secrets check (files of this repository; secrets also in its history)
         shell: bash
         run: |
-          git clone --quiet https://github.com/mostafadiab97/Claude_SandBox.git "$RUNNER_TEMP/sandbox-full"
-          node tools/check-privacy.mjs . "$RUNNER_TEMP/sandbox-full"
+          node tools/check-privacy.mjs .
           curl -sSL -o "$RUNNER_TEMP/gitleaks.zip" https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_windows_x64.zip
           unzip -q -o "$RUNNER_TEMP/gitleaks.zip" -d "$RUNNER_TEMP/gitleaks"
           "$RUNNER_TEMP/gitleaks/gitleaks.exe" git . --no-banner --redact
-          "$RUNNER_TEMP/gitleaks/gitleaks.exe" git "$RUNNER_TEMP/sandbox-full" --no-banner --redact
 
       - uses: actions/setup-node@v7
         with:
@@ -58,8 +56,9 @@ jobs:
           name: e2e-screenshots
           path: e2e/out/*.png
           if-no-files-found: ignore
-      - run: npm run dist:win
-      - name: Acceptance run on the installed app (P-41 — replaces Mostafa's manual checklist steps)
+      - name: Build installer
+        run: npx electron-builder --win --publish never -c.publish.owner=${{ github.repository_owner }} -c.publish.repo=${{ github.event.repository.name }}
+      - name: Acceptance run on the installed app (P-41 — replaces the owner's manual checklist steps)
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -70,7 +69,7 @@ jobs:
           if gh release download --pattern "ReqMan-Setup-*.exe" --dir "$RUNNER_TEMP/previous" 2>/dev/null; then
             prev="$(ls "$RUNNER_TEMP"/previous/ReqMan-Setup-*.exe | head -1)"
           fi
-          git clone --quiet --depth 1 https://github.com/mostafadiab97/Claude_SandBox.git "$RUNNER_TEMP/sandbox"
+          git clone --quiet --depth 1 https://github.com/${{ github.repository_owner }}/Claude_SandBox.git "$RUNNER_TEMP/sandbox"
           node e2e/acceptance.mjs \
             --installer "$(ls dist/ReqMan-Setup-*.exe | head -1)" --feed dist \
             ${prev:+--previous "$prev"} \

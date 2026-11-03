@@ -1,5 +1,5 @@
 // Checks the libraries ReqMan uses: known security problems (npm audit) and available updates (npm outdated).
-// Runs before every build (npm run build) and in CI. It only WARNS — it never stops a build (Mostafa's decision,
+// Runs before every build (npm run build) and in CI. It only WARNS — it never stops a build (the owner's decision,
 // 28 Oct 2026). Without network it says so and carries on.
 //   npm run check:deps
 import { spawnSync } from 'node:child_process'

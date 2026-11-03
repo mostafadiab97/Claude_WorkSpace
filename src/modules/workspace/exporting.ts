@@ -72,7 +72,7 @@ export function createExportOps(ctx: WorkspaceContext, structure: StructureOps, 
 }
 
 /**
- * The chosen items in document order (Mostafa's request, M7): with `below`, everything under a chosen item too; an
+ * The chosen items in document order (the owner's request, M7): with `below`, everything under a chosen item too; an
  * item chosen twice (itself and through its parent) appears once. Depths stay the real ones (Level column).
  */
 export function chosenRows(order: ExportItem[], chosen: ReadonlySet<string>, below: boolean): ExportItem[] {

@@ -1,4 +1,4 @@
-// 0.14.1 "go back to an earlier version" (Mostafa, 3 Nov 2026): which published versions can be offered.
+// 0.14.1 "go back to an earlier version" (the owner, 3 Nov 2026): which published versions can be offered.
 import { describe, expect, it } from 'vitest'
 import { compareVersions, OLDEST_REVERT_TARGET, parseReleases, revertTargets } from '../src/modules/updater'
 

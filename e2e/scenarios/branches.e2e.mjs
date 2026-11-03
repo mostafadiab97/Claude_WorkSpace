@@ -73,7 +73,7 @@ await scenario('E2E branches', async (ctx) => {
   await panel.getByRole('button', { name: 'feature/door', exact: true }).click()
   const headBeforePull = gitIn(repo, 'rev-parse', 'HEAD')
   await gitbar.locator('.gitbar__notice', { hasText: 'Brought 1 changed item from feature/door' }).waitFor()
-  check(gitIn(repo, 'rev-parse', 'HEAD') === headBeforePull, 'pull from another branch commits nothing (Mostafa, 0.12.1 step 4)')
+  check(gitIn(repo, 'rev-parse', 'HEAD') === headBeforePull, 'pull from another branch commits nothing (the owner, 0.12.1 step 4)')
   await changesView.locator('.compare__row', { hasText: 'Door lock (feature)' }).waitFor()
   check((await changesView.getByLabel('Show', { exact: true }).inputValue()) === 'uncommitted', '…its changes open in Changes as uncommitted changes, to keep or discard')
   await commit('Take the feature rename')

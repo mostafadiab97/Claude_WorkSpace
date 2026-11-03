@@ -1,4 +1,4 @@
-// "Go back to an earlier version" (Mostafa, 3 Nov 2026): which published versions a user may install instead of the
+// "Go back to an earlier version" (the owner, 3 Nov 2026): which published versions a user may install instead of the
 // current one. Pure functions, unit-tested in tests/versions-0.14.1.test.ts.
 
 /**

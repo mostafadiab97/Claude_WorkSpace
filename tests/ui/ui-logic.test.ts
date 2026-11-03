@@ -71,7 +71,7 @@ describe('tree rows (table/rows.ts) — lazy "Expand all" (P-04)', () => {
   })
 })
 
-describe('dragging several rows and scrolling while dragging (Mostafa, 0.11.0)', () => {
+describe('dragging several rows and scrolling while dragging (the owner, 0.11.0)', () => {
   it('no row of the dragged set, nor anything below them, is a drop target', () => {
     const row = (id: string, path: string[]): Row & { kind: 'item' } => ({ kind: 'item', item: it_(id), depth: path.length, path })
     const set = new Set(['A', 'C'])

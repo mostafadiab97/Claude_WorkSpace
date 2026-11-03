@@ -4,7 +4,7 @@ import { useFeature } from '../lib/features'
 
 /**
  * Right-click menu of a table row (M7). Right-clicking one of several chosen items acts on all of them; right-clicking
- * any other row acts on that row only — one export entry, never both (Mostafa, 0.11.0: two entries were confusing).
+ * any other row acts on that row only — one export entry, never both (the owner, 0.11.0: two entries were confusing).
  * The export dialog has "Include the items below" (ticked) to export only the items themselves.
  * Closes on Escape, on a click elsewhere and when the window scrolls.
  */

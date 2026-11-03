@@ -1,10 +1,25 @@
 # Changelog
 
-Each version was installed and tried by Mostafa (product owner) on Windows 11; his feedback is recorded under the
+Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.14.4 — 3 Nov 2026 — No personal data in the tool's files; small Settings touches
+- **Owner (3 Nov 2026) on 0.14.3:** self-test 21/21 (53.9 s); steps 1, 2 passed; step 3 not needed. Decisions:
+  - **Requirement repositories** (and the sandbox) may hold their authors' names and e-mails as usual — the privacy
+    check no longer looks at the sandbox or at commit authors.
+  - **The tool repository:** no personal data in any file — no names, account names, user names or e-mail
+    addresses. Its history stays as it is: when the tool is published, a new repository starts from the files only.
+- **Personal data removed from every file:** the owner's name → "the owner" everywhere; the account name is gone
+  from documents (`<owner>/…`), workflows (`github.repository_owner`), `electron-builder.yml` (CI passes owner and
+  repository; a local build reads them from the Git remote), the app (it reads the release feed from its own
+  installed `app-update.yml`) and `tools/ci.mjs` (reads the Git remote). A fictional data name that matched was changed.
+- **Privacy check now checks only the current files** of this repository (e-mail addresses and personal/account
+  names, the latter stored only as hashes); gitleaks still scans for secrets.
+- **Settings:** **Check for updates** moved next to the Updates line (Environment and versions); **← Back** is blue.
+
 ## 0.14.3 — 3 Nov 2026 — Settings and help as pages
-- **Mostafa (3 Nov 2026) on 0.14.2:** steps 1, 3, 4 passed; step 2: one page per settings group and per guide section
+- **Owner (3 Nov 2026):** steps 1, 2 passed (Back should be blue → 0.14.4); step 3 not needed (see 0.14.4).
+- **Owner (3 Nov 2026) on 0.14.2:** steps 1, 3, 4 passed; step 2: one page per settings group and per guide section
   instead of one long scroll, Back on top of the left panel, the panel in its own shade; step 5 (global Git e-mail)
   not possible — it would change his commits to company repositories.
 - **Settings pages:** Environment and versions · Report a problem and diagnostics · Features · Self-tests — each
@@ -16,8 +31,8 @@ version it was about, and what it led to.
   (no `--global`), so company repositories keep the work address.
 
 ## 0.14.2 — 3 Nov 2026 — Settings and help with the user guide inside; privacy guard
-- **Mostafa (3 Nov 2026):** steps 1, 3, 4 passed; step 2 → pages (0.14.3); step 5 not possible globally → per-repository command (0.14.3).
-- **Mostafa (3 Nov 2026):** 0.14.1 self-test 21/21 (73.5 s); acceptance runs of 0.14.0 and 0.14.1 passed. 0.14.0 step 2
+- **Owner (3 Nov 2026):** steps 1, 3, 4 passed; step 2 → pages (0.14.3); step 5 not possible globally → per-repository command (0.14.3).
+- **Owner (3 Nov 2026):** 0.14.1 self-test 21/21 (73.5 s); acceptance runs of 0.14.0 and 0.14.1 passed. 0.14.0 step 2
   and 3 worked with two remarks, 0.14.1 steps 2–3 passed; step 4: put the user guide into the app with a left panel;
   step 5: never again, and remove the work e-mail from the sandbox history (he re-clones). All here:
 - **Settings and help:** a left panel with the settings (Environment, Versions, Report a problem, Diagnostics,
@@ -26,14 +41,14 @@ version it was about, and what it led to.
 - **Report a problem:** the text box is emptied after the report is saved (0.14.0 step 3).
 - **Branches turned off:** the branch button's tooltip now says so ("Changes, Pull and Push keep working on the
   current branch") — that is the intended behaviour he saw in 0.14.0 step 2.
-- **Privacy:** the sandbox history was rewritten (approved by Mostafa) — the work e-mail on 17 commits is replaced by
+- **Privacy:** the sandbox history was rewritten (approved by the owner) — the work e-mail on 17 commits is replaced by
   GitHub's private address; both branches force-pushed once. **Never again:** every build now checks the full history
   of this repository and the sandbox — commit e-mails must be GitHub private / no-reply addresses, files may contain
   only test addresses (`tools/check-privacy.mjs`) — and scans both for secrets (gitleaks).
 
 ## 0.14.1 — 3 Nov 2026 — User guide, going back to an earlier version, security check, calmer notes
-- **Mostafa (3 Nov 2026):** self-test 21/21; steps 2, 3 passed; guide "looks great" → into the app (0.14.2); e-mail → removed (0.14.2).
-- **Mostafa (3 Nov 2026):** the CTO approved a pilot with a complete team. Before the rename, four requests — all here:
+- **Owner (3 Nov 2026):** self-test 21/21; steps 2, 3 passed; guide "looks great" → into the app (0.14.2); e-mail → removed (0.14.2).
+- **Owner (3 Nov 2026):** the CTO approved a pilot with a complete team. Before the rename, four requests — all here:
 - **User guide** `docs/USER-GUIDE.md`: a 15-minute quick start first, then every feature, team set-up, the file
   format, a feature specification, troubleshooting. Linked from the README.
 - **Go back to an earlier version** — Settings → **Versions** → *Go back to an earlier version…* lists the published
@@ -43,16 +58,16 @@ version it was about, and what it led to.
 - **Security check before sharing** (`docs/reviews/2026-11-03-security-check.md`): no secrets in either repository
   or their history (gitleaks); no stored tokens; 0 library problems in what ships. Two fixes: the window can no
   longer be navigated to a foreign page (a dropped link); the acceptance run's real push no longer runs for pull
-  requests. One decision for Mostafa: a work e-mail in the sandbox's commit history.
-- **Floating Git notes calmer** (Mostafa: "very glowy"): the background is the theme's own colour again, one shade
+  requests. One decision for the owner: a work e-mail in the sandbox's commit history.
+- **Floating Git notes calmer** (the owner: "very glowy"): the background is the theme's own colour again, one shade
   darker in Light and lighter in Dark; the coloured frame and glow stay — green done, red problem, and now **blue for
   "nothing to do"** messages (Already up to date, Nothing to commit/push/discard), which also close by themselves.
 
 ## 0.14.0 — 2 Nov 2026 — Health tools and the automatic acceptance run (planning decisions P-40, P-41)
-- **Mostafa (3 Nov 2026):** step 2 worked (asked whether a disabled branch button with Pull/Push still enabled is intended — yes; tooltip added in 0.14.2); step 3 worked (text stayed in the box → emptied in 0.14.2); step 4: acceptance summary seen, passed.
+- **Owner (3 Nov 2026):** step 2 worked (asked whether a disabled branch button with Pull/Push still enabled is intended — yes; tooltip added in 0.14.2); step 3 worked (text stayed in the box → emptied in 0.14.2); step 4: acceptance summary seen, passed.
 - **Planning (1–2 Nov 2026):** the release plan up to 0.24 is decided (`docs/reviews/2026-11-01-planning-discussion.md`).
-  This version brings the tools that keep the project healthy as it grows (Mostafa's concern, P-40); the new name
-  follows in its own version as soon as Mostafa has chosen it.
+  This version brings the tools that keep the project healthy as it grows (the owner's concern, P-40); the new name
+  follows in its own version as soon as the owner has chosen it.
 - **Feature switches** (P-40a): Settings → **Features** turns Branches, Import or Export off on this PC; a team can turn a
   feature off for one repository with `features: { branches: false }` in `schema.yaml`, and Settings then says so. New
   features will start here as "Preview". File-format changes are never behind a switch.
@@ -63,22 +78,22 @@ version it was about, and what it led to.
 - **Automatic acceptance run** (P-41): on GitHub's Windows machine, for every build and before every release, with the
   *installed* app: install the previous release and let it update itself to the new build (from a local feed), run the
   release self-test, open the 10,000-item sandbox, push one real commit to a scratch branch `ci/acceptance-…` and delete
-  it again. The job summary lists, numbered, everything the run did. Mostafa can now test in batches.
+  it again. The job summary lists, numbered, everything the run did. The owner can now test in batches.
 - New end-to-end scenario `health` (switches, team switch, report file); 6 scenarios in all.
 
-## 0.13.1 — 31 Oct 2026 — Mostafa's points on 0.13.0
-- **Mostafa (31 Oct 2026):** all 4 steps passed; self-test 21/21 in 66.8 s.
-- **Mostafa (31 Oct 2026) on 0.13.0:** all 5 steps passed; self-test 21/21 in 63.6 s. Three points, all here:
+## 0.13.1 — 31 Oct 2026 — the owner's points on 0.13.0
+- **Owner (31 Oct 2026):** all 4 steps passed; self-test 21/21 in 66.8 s.
+- **Owner (31 Oct 2026) on 0.13.0:** all 5 steps passed; self-test 21/21 in 63.6 s. Three points, all here:
   1. The floating Git note was hardly noticed → it is now tinted by its meaning (green success, red problem, blue
      question) with a coloured frame and glow, in Light and Dark; the text is centred in both languages.
   2. The branch delete icon was too small → a red **🗑 Delete** button next to each branch (fills red on hover).
   3. In Arabic, a sentence containing an English word ("ReqMan", "Git") sometimes showed its words in reverse
      order. Cause: tooltips and Windows dialogs guess the direction from the first letter and treated such sentences as
      left-to-right. Every Arabic text now starts with an invisible right-to-left mark, so they always read right to left
-     (a unit test checks every text). The translation wording stays as it is for now (Mostafa).
+     (a unit test checks every text). The translation wording stays as it is for now (the owner).
 
 ## 0.13.0 — 31 Oct 2026 — Arabic, fewer bars, pull from a branch for review, delete a branch
-- **Mostafa (31 Oct 2026) on 0.12.1:** steps 1, 2, 3, 5 passed; self-test 21/21 in 50.7 s. Step 4: "Pull from" another
+- **Owner (31 Oct 2026) on 0.12.1:** steps 1, 2, 3, 5 passed; self-test 21/21 in 50.7 s. Step 4: "Pull from" another
   branch committed the result at once (Push (1)) — he wants to decide first. Plus three requests, all here:
 - **Pull from another branch → uncommitted changes.** The combined result is written into the working folder and
   Changes opens on it: keep (Commit) or take back (Discard / ↶). Nothing is committed. A normal Pull of the branch's
@@ -103,8 +118,8 @@ version it was about, and what it led to.
   delete branch incl. unmerged and current); e2e: new `language` scenario (switch, right-to-left, unsaved edit kept,
   restart); `branches` (uncommitted pull, delete); journey uses the Filters pop-up; self-test step 13 deletes a branch.
 
-## 0.12.1 — 31 Oct 2026 — The branch drop-down (Mostafa's points on 0.12.0)
-- **Mostafa (31 Oct 2026) on 0.12.0:** all 5 steps passed (the two-folder trial), self-test 21/21 in 44.6 s (Git 2.52.0).
+## 0.12.1 — 31 Oct 2026 — The branch drop-down (the owner's points on 0.12.0)
+- **Owner (31 Oct 2026) on 0.12.0:** all 5 steps passed (the two-folder trial), self-test 21/21 in 44.6 s (Git 2.52.0).
   Four points on the branch panel, all done here:
   1. The buttons were far from the branch names (panel stretched across the window) → the panel is now a small
      drop-down **under the branch button** (at most 460 × 560 px).
@@ -113,7 +128,7 @@ version it was about, and what it led to.
      chooser ("Pull into main from which branch?"). Esc goes back, a click outside closes.
   4. **Tens of branches:** the list scrolls inside the panel and a "Find a branch" box appears from 7 other branches —
      tested in the e2e scenario with 41 branches.
-- Analyses written for Mostafa's decisions (`docs/reviews/`): features other tools have and we don't (ranked, with a
+- Analyses written for the owner's decisions (`docs/reviews/`): features other tools have and we don't (ranked, with a
   proposed plan 0.13–0.16), the impact of renaming "ReqMan" (the name is taken by another RM tool), and whether Rust
   would make the tool faster (recommendation: no rewrite). Documentation brought up to date for a hand-over.
 
@@ -126,7 +141,7 @@ version it was about, and what it led to.
 - **Branches** (the ⎇ button in the Git bar): create a branch from the current one (uncommitted changes come
   along), switch branches (with uncommitted changes: Commit first / Take them along — only when the other branch has
   the same version of those items, otherwise ReqMan lists them / Discard), **Pull into …** any branch on this PC or on
-  GitHub (Mostafa's decision 6), and **Compare** = what a branch would bring in, like a pull request on GitHub (merging
+  GitHub (the owner's decision 6), and **Compare** = what a branch would bring in, like a pull request on GitHub (merging
   into main stays on GitHub, where code owners approve — decision 2). The Changes view has this as a new choice too.
 - **Same ID created on both sides** (review D-09): fixed automatically during the pull — your item gets a new ID and
   the links/parents you added to it follow; the notice says which.
@@ -139,13 +154,13 @@ version it was about, and what it led to.
   edited answer, stale plan, duplicate-ID repair, uncommitted edits, branches create/switch/take along/discard,
   pull from a remote branch, the rebase case), a new e2e scenario `branches`, the journey now decides a conflict in
   the window, and the release self-test has 21 steps (pull with a decision, branches).
-- **Mostafa's decisions (29 Oct 2026):** 1 switch with Commit / Discard / Take along (safe only when both branches
+- **The owner's decisions (29 Oct 2026):** 1 switch with Commit / Discard / Take along (safe only when both branches
   have the same version); 2 merging branches only on GitHub, ReqMan shows the differences; 3 conflicts field by field;
   4 baselines (tags) delayed; 5 two-PC trial with two folders on his PC; 6 "Pull from branch" from any visible
   branch; 7 pull on the same branch resolves per requirement.
 
-## 0.11.1 — 29 Oct 2026 — Mostafa's requests on 0.11.0
-- **Mostafa (29 Oct 2026):** all 5 steps passed; release self-test 20/20 in 62.4 s (twice the usual: the Git steps
+## 0.11.1 — 29 Oct 2026 — the owner's requests on 0.11.0
+- **Owner (29 Oct 2026):** all 5 steps passed; release self-test 20/20 in 62.4 s (twice the usual: the Git steps
   were slower on his PC that time, e.g. step 11 25.8 s instead of 7 s — nothing failed).
 - **New project from a file:** a folder that is not empty is refused right away with "Choose another folder…"; the
   folder dialog opens again instead of the whole process stopping.
@@ -157,7 +172,7 @@ version it was about, and what it led to.
   them…", on any other item "Export this item and everything below it…".
 - **ReqIF checked against the official schema:** every ReqIF file ReqMan writes is now validated in the automated
   tests with the OMG ReqIF schema (as published by Eclipse RMF) — the check DOORS, Jama and other tools make first.
-- **Mostafa (29 Oct 2026) on 0.11.0:** all 5 steps passed, self-test 20/20 (30.5 s); asked for the points above; no
+- **Owner (29 Oct 2026) on 0.11.0:** all 5 steps passed, self-test 20/20 (30.5 s); asked for the points above; no
   DOORS/Jama access to try the ReqIF file (hence the schema check; ReqIF Studio is a free viewer).
 
 ## 0.11.0 — 29 Oct 2026 — Excel and ReqIF (M7)
@@ -167,7 +182,7 @@ version it was about, and what it led to.
   by row). Writes uncommitted changes. IDs from other tools are kept as `source-id`, so importing the file again
   updates the same items; the hierarchy comes from a parent column, outline numbers (3.2.1) or a level column.
   Separators `,` `;` and tab, UTF-8 or Windows-1252 CSV.
-- **ReqIF** (DOORS, Jama, Polarion …, merged into this release — Mostafa, 29 Oct 2026): import through the same wizard
+- **ReqIF** (DOORS, Jama, Polarion …, merged into this release — the owner, 29 Oct 2026): import through the same wizard
   (one sheet per specification; XHTML text becomes Markdown, enumerations by name, relations by type), export with
   the hierarchy, every field, links as relations and the exact Markdown text for ReqMan itself. Objects that came
   from ReqIF keep their identifier on export.
@@ -182,11 +197,11 @@ version it was about, and what it led to.
   **Publish to GitHub…** in the Git bar for repositories without a remote.
 - Round trips measured on the 10,005-item sandbox: Excel export 1.8 s, ReqIF export 4.9 s, import of all items into
   a new project 11.7 s; importing either export again finds **10,005 unchanged** (broken references stay as they were).
-- **Fixes (Mostafa, 0.10.0):** the Changes view's red and green were hardly visible in dark mode (own theme colours
+- **Fixes (the owner, 0.10.0):** the Changes view's red and green were hardly visible in dark mode (own theme colours
   now, `diffOldBg` …); "Changes (1)" with an empty list — a kept link changes only a confirmation, which is now listed.
 - Libraries added (all free for commercial use): ExcelJS (MIT), JSZip (MIT), saxes (ISC); uuid pinned to 11 (security
   advisory). Release self-test: 20 steps. 165 unit tests; new e2e scenario `excel`.
-- **Mostafa (29 Oct 2026) on 0.10.0:** all 5 steps passed, self-test 18/18 (33.7 s); found the two issues above.
+- **Owner (29 Oct 2026) on 0.10.0:** all 5 steps passed, self-test 18/18 (33.7 s); found the two issues above.
   Decision: ReqIF merged into 0.11.0; branches stay alone as 0.12.0.
 
 ## 0.10.0 — 28 Oct 2026 — Changes view
@@ -205,7 +220,7 @@ version it was about, and what it led to.
   Suspect links in the editor have Keep / Unlink and Keep all / Unlink all. Pulled changes only mark links ⚠.
 - **No automatic pulls** (O-06, replaces "Compare pulls first"): "What the last pull brought in" and Push *offer*
   to pull first.
-- **Column widths** (Mostafa's request on 0.9.0): drag the edge of a column header; double-click = automatic;
+- **Column widths** (the owner's request on 0.9.0): drag the edge of a column header; double-click = automatic;
   remembered per repository on this PC. The No. column starts wider.
 - Docs: `docs/diagrams/index.html` navigates all diagrams; skills (`release-to-owner`, `whole-project-review`,
   `owner-decision-walkthrough`) and `tools/README.md` are in the repository.
@@ -213,7 +228,7 @@ version it was about, and what it led to.
   (jsdiff, BSD-3-Clause) for line and word comparison. 154 unit tests.
 
 ## 0.9.0 — 28 Oct 2026 — New data format
-- **Mostafa (28 Oct 2026):** all 5 checklist steps passed; release self-test 17/17 in 26.7 s; the Compare + Changes
+- **Owner (28 Oct 2026):** all 5 checklist steps passed; release self-test 17/17 in 26.7 s; the Compare + Changes
   bug is fixed. New request: the No. column cuts deep numbers ("2.1.1....") → column widths can be dragged
   (0.10.0). Also asked for a navigator page for the diagrams and the skills in the repository (done).
 - **IDs:** every new item gets `REQ-` + 7 random characters, whatever its type (O-01, O-02). The type can now be
@@ -235,7 +250,7 @@ version it was about, and what it led to.
 - Index cache format 4 (rebuilt once on first open). Diagrams in `docs/` redrawn with Archify. 145 unit tests.
 
 ## 0.8.0 — 28 Oct 2026 — Clean page (all fixes of the project review)
-- **Mostafa (28 Oct 2026):** update installed; release self-test on his PC **passed all 17 steps** in 32.7 s
+- **Owner (28 Oct 2026):** update installed; release self-test on his PC **passed all 17 steps** in 32.7 s
   (Git 2.52.0). Git steps take 2–10 s each there (vs. < 0.5 s on Linux) — process start-up with antivirus.
   Checklist steps 3–5 passed (Expand all "shows instantly"); found the Compare + Changes overlap (fixed in 0.9.0).
 - **Fixes:** an item whose file was renamed by hand opens, saves and deletes in place, is listed as a problem
@@ -256,14 +271,14 @@ version it was about, and what it led to.
   side by side (T-01); window logic has unit tests (T-02); the sandbox's broken-data promises are tested (T-03);
   the status is kept only in `CLAUDE.md` and this file (T-04); the 50,000-item test runs for releases only
   (T-05). 130 unit tests.
-- Mostafa's decisions (28 Oct 2026): release plan 0.8.0 → 0.13.0 confirmed; export of chosen items added to M7;
+- The owner's decisions (28 Oct 2026): release plan 0.8.0 → 0.13.0 confirmed; export of chosen items added to M7;
   testing reduced to a self-test + 5 steps; Dependabot weekly is enough (alerts stay off).
 
 ## 0.7.0 — 25 Oct 2026 — M6 Export and hardening (prototype complete)
-- **Mostafa (27 Oct 2026):** combined checklist for 0.5.0, 0.6.0 and 0.7.0 — all passed. Two-PC trial postponed.
+- **Owner (27 Oct 2026):** combined checklist for 0.5.0, 0.6.0 and 0.7.0 — all passed. Two-PC trial postponed.
 - **Export…** in the table toolbar: all items in document order, or only the current search/filter result;
   columns = ID, Title and the table's visible columns, plus optional Level + Parent, full text, links in both
-  directions. **CSV** for Excel (comma — Mostafa's Excel setting —, UTF-8 with BOM, CRLF, multi-line cells
+  directions. **CSV** for Excel (comma — the owner's Excel setting —, UTF-8 with BOM, CRLF, multi-line cells
   quoted, formula-like cells prefixed with `'`) or **Markdown** (one document, headings follow the hierarchy —
   the agreed format for AI tools). 10,005 items export in about half a second.
 - **Compare → Export CSV / Export Markdown**: one row per changed item and per change (field, before, after),
@@ -274,11 +289,11 @@ version it was about, and what it led to.
   window, and logs the error); warning in the Git bar for Git older than 2.38; CI now also opens a generated
   10,000-item repository in the real app on every build.
 - Testing: one combined checklist for 0.5.0–0.7.0 and a two-PC trial script (journey steps 1–8).
-- Mostafa's decisions (25 Oct 2026): CSV with commas; after M6 → Excel export/import (M7), then branches and
+- The owner's decisions (25 Oct 2026): CSV with commas; after M6 → Excel export/import (M7), then branches and
   per-requirement conflict resolution (M8).
 
 ## 0.6.0 — 25 Oct 2026 — M5 Compare
-- **Compare** button in the Git bar: pulls first (Mostafa's decision), then shows by default **what the last pull
+- **Compare** button in the Git bar: pulls first (the owner's decision), then shows by default **what the last pull
   brought in** (taken from Git's own record of where the branch was before and after the pull, so pulls made outside
   ReqMan count too). Other choices: uncommitted changes, the last commit, or any two versions (commits that changed
   requirements, branches, tags, the working folder).
@@ -289,7 +304,7 @@ version it was about, and what it led to.
 - Schema changes are reported (fields / item types / link types added or removed); other files are named.
 - Fast for big ranges: all file versions are read through one `git cat-file` process by blob ID; files whose only
   difference is a link confirmation are skipped. Measured: 9,118 changed files → 0.4 s; 3,000 real edits → 1.8 s.
-- Mostafa's decisions (25 Oct 2026): default = since the last pull; pull right before any comparison; exporting the
+- The owner's decisions (25 Oct 2026): default = since the last pull; pull right before any comparison; exporting the
   list waits for M6.
 
 ## 0.5.0 — 25 Oct 2026 — M4 Git
@@ -303,7 +318,7 @@ version it was about, and what it led to.
 - History tab in the editor: commits of the item (author, date, message) plus "Not committed yet", and a
   field-by-field comparison of what each one changed (text before/after, links added/removed).
 - Clear messages for sign-in, network, timeouts and hooks; sign-in happens through Git's own credential window.
-- Mostafa's decisions (25 Oct 2026): stop on conflicts (resolve per item later), show the branch only (no
+- The owner's decisions (25 Oct 2026): stop on conflicts (resolve per item later), show the branch only (no
   create/switch yet), commit only `requirements/`.
 - Development continues in the cloud session; `docs/DEVELOPING.md` describes a local setup, including a
   Node.js option that needs no admin rights.
@@ -311,7 +326,7 @@ version it was about, and what it led to.
 ## 0.4.1 — 25 Oct 2026
 - Fix: opening a repository failed with "table items has no column named fp" when its index cache had been
   created by 0.3.x. The cache now stores its format version and is dropped and rebuilt when it changes.
-- **Mostafa:** "all works fine."
+- **Owner:** "all works fine."
 
 ## 0.4.0 — 25 Oct 2026 — M3 Links
 - Links section in the editor: add links in either direction ("verifies" / "is verified by" — always stored in
@@ -320,10 +335,10 @@ version it was about, and what it led to.
   marks it ⚠ until **Confirm** / **Confirm all**. Status/owner/order changes don't count.
 - Filters "With suspect links" / "Without any links"; sort by number of links; Links column `→out ←in ⚠suspect`.
 - Delete offers to remove the links other items have to the deleted item.
-- Mostafa's 0.3.0 feedback fixed: Type shown in the editor (read-only); Text and Links columns; Columns menu lists
+- The owner's 0.3.0 feedback fixed: Type shown in the editor (read-only); Text and Links columns; Columns menu lists
   built-in columns and can reorder columns; Fields dialog refuses names of built-in parts.
 - Sandbox data: confirmations added to all links, 175 suspect (IDs unchanged).
-- **Mostafa:** reported the cache error fixed in 0.4.1.
+- **Owner:** reported the cache error fixed in 0.4.1.
 
 ## 0.3.0 — 25 Oct 2026 — M2 feedback
 - The table itself is the hierarchy (expand/collapse, Expand all / Collapse all, child counts, reveal the selected
@@ -333,15 +348,15 @@ version it was about, and what it led to.
 - Parent picker: lists top-level items when empty, relevance search, greys out the item and its descendants.
 - Columns menu (show/hide, per repo on this PC) and Fields dialog (add/rename/reorder/remove fields in
   schema.yaml, comments preserved, conflict-safe).
-- **Mostafa:** all fixed and working, except: Type not visible in the item panel; Text and Links not available as
+- **Owner:** all fixed and working, except: Type not visible in the item panel; Text and Links not available as
   table columns or in the Columns menu, and adding them as fields created new, different fields → done in 0.4.0.
 
 ## 0.2.0 — 25 Oct 2026 — M2 Core UI
 - Start screen with Open repository / recent repositories; create `requirements/` with the default schema.
 - Item table (virtual scrolling, filters, search, sort), side hierarchy tree, schema-driven editor with Ctrl+S,
   unsaved-changes guard, conflict detection for outside edits, move up/down, add child, delete.
-- Scrollbars at the right window edge, thumb only (Mostafa's request after 0.1.0).
-- **Mostafa:** all tests passed except test 6 — could not select a top-level parent and could not move a sub-group
+- Scrollbars at the right window edge, thumb only (the owner's request after 0.1.0).
+- **Owner:** all tests passed except test 6 — could not select a top-level parent and could not move a sub-group
   (the picker only showed the first 8 items by ID). Requested: tree view inside the table (flat only while
   searching) and GUI control to show/hide fields → done in 0.3.0. Also asked for the test-data repository
   Claude_SandBox (10,000 items).
@@ -349,14 +364,14 @@ version it was about, and what it led to.
 ## 0.1.0 — 25 Oct 2026 — M1 Data layer
 - Schema, item file format, repository store, SQLite index with full-text search, performance tests, data
   self-test in the app, automatic updates.
-- **Mostafa:** self-test 10k: all queries < 15 ms; 50k: first index 18–73 s (Windows Defender), queries ≤ 105 ms.
+- **Owner:** self-test 10k: all queries < 15 ms; 50k: first index 18–73 s (Windows Defender), queries ≤ 105 ms.
   Auto-update tested and working. Asked to align scrollbars to the window's right edge and show only the thumb.
-  Making the repository private broke auto-update (404) → Mostafa chose to keep it public.
+  Making the repository private broke auto-update (404) → the owner chose to keep it public.
 
 ## 0.0.4 — 25 Oct 2026
-- Brighter light-mode success green (`#22c55e`) — Mostafa feedback on 0.0.3 test step 4.
+- Brighter light-mode success green (`#22c55e`) — the owner feedback on 0.0.3 test step 4.
 - `%APPDATA%\ReqMan\theme.json` now starts as an override-only file (a full copy froze every value).
-- Zipped installer in each release (Chrome blocked the .exe download for Mostafa).
+- Zipped installer in each release (Chrome blocked the .exe download for the owner).
 
 ## 0.0.3 — 25 Oct 2026
 - Automatic updates from GitHub Releases; user theme file survives updates.

@@ -1,5 +1,5 @@
 // Drag and drop of table rows: dropping onto a row (child), its upper/lower edge (before/after), or the empty
-// space below the rows (top level). Dragging one of several chosen rows moves all of them (Mostafa, 0.11.0); near the
+// space below the rows (top level). Dragging one of several chosen rows moves all of them (the owner, 0.11.0); near the
 // top or bottom edge the table scrolls. The rules are pure functions so they are unit-tested (review T-02).
 import { useRef, useState, type DragEvent } from 'react'
 import { ROOT, type Level, type Row } from './rows'

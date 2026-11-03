@@ -1,9 +1,9 @@
 # Renaming ReqMan — impact analysis (31 Oct 2026)
 
-**Why:** Mostafa found that "ReqMan" is already the name of another requirements tool (INNEO's ReqMan, an ALM
+**Why:** the owner found that "ReqMan" is already the name of another requirements tool (INNEO's ReqMan, an ALM
 add-on sold in Germany — [inneo.com](https://inneo.com/en/product-development/application-lifecycle-management-alm/reqman.html);
 an older SourceForge project "ReqMan" also exists). The product needs a new name before any public or commercial use.
-The new name itself is Mostafa's decision (candidates discussed 29–30 Oct: Branchwise, Mergewell, Plaintrace,
+The new name itself is the owner's decision (candidates discussed 29–30 Oct: Branchwise, Mergewell, Plaintrace,
 Tracewell; trademark and domain check still to do).
 
 Tags: **F** = counted in the repository today, **I** = inference, **R** = recommendation.
@@ -22,10 +22,10 @@ Tags: **F** = counted in the repository today, **I** = inference, **R** = recomm
 | Exported files | ReqIF header `REQ-IF-TOOL-ID`/`SOURCE-TOOL-ID` = "ReqMan", identifiers `reqman-dt-…`, attribute names `ReqMan.Markdown`, `ReqMan.Type`, `ReqMan.Number` | Yes, to other tools | S, but must keep **reading** the old names (files exported before the rename) |
 | Per-user data on Windows | `%APPDATA%\ReqMan\` (theme.json, logs, cache, recent repositories, import memory, export settings) — the folder name comes from the product name | Indirectly | **M — needs migration** (see 3) |
 | Install folder | `%LOCALAPPDATA%\Programs\ReqMan\` | Indirectly | S (follows the product name) |
-| App identity / update chain | `appId: com.reqman.app`; update feed = GitHub Releases of `mostafadiab97/Claude_WorkSpace` | No | **Keep unchanged** (see 3) |
+| App identity / update chain | `appId: com.reqman.app`; update feed = GitHub Releases of `<owner>/Claude_WorkSpace` | No | **Keep unchanged** (see 3) |
 | Code identifiers | `window.reqman` (83 uses), package name `reqman`, temp-folder prefixes `reqman-…`, `ReqManApi` type, log tags | No | S–M (optional) |
 | Tests and e2e | expectations of texts, `.reqman` paths, temp names (18 test files) | No | S (follow the code) |
-| Repositories | `Claude_WorkSpace` (code), `Claude_SandBox` (test data) | Mostafa only | None needed (names do not contain ReqMan) |
+| Repositories | `Claude_WorkSpace` (code), `Claude_SandBox` (test data) | The owner only | None needed (names do not contain ReqMan) |
 
 ## 2. What must change vs what may stay (R)
 
@@ -43,7 +43,7 @@ never meet two names — **except** `appId`.
 
 1. **Auto-update chain (`appId`).** Electron-builder's Windows installer identifies the installed app by `appId`. A new
    `appId` makes the new version a *different* app: the old one would not update itself, both would be installed side
-   by side, and Mostafa would have to uninstall by hand. **R:** keep `appId: com.reqman.app` (nobody sees it) until
+   by side, and the owner would have to uninstall by hand. **R:** keep `appId: com.reqman.app` (nobody sees it) until
    the commercial launch, where a fresh install is expected anyway. Keep the same release feed.
 2. **Per-user data.** Changing `productName` moves Electron's user-data folder from `%APPDATA%\ReqMan` to
    `%APPDATA%\<NewName>`: theme, recent repositories and import memory would look lost, and every repository would be
@@ -57,25 +57,25 @@ never meet two names — **except** `appId`.
 4. **Exported ReqIF and Excel files.** Files exported before the rename carry `ReqMan.Markdown` etc. **R:** import
    accepts both names forever; export writes the new names. The ReqIF schema test stays as is.
 
-## 4. Plan (R) — one release, after Mostafa picks the name
+## 4. Plan (R) — one release, after the owner picks the name
 
 | Step | Work | Size |
 | --- | --- | --- |
-| 0 | Mostafa chooses the name; trademark/domain/GitHub search (a lawyer for the commercial launch) | Mostafa |
+| 0 | The owner chooses the name; trademark/domain/GitHub search (a lawyer for the commercial launch) | The owner |
 | 1 | Visible rename: productName, installer, window title, `text.ts`, README/docs, diagrams, logo text | S |
 | 2 | `%APPDATA%` migration (copy old folder once) + unit test | S |
 | 3 | Schema folder: read new and old name, write new for new projects; optional "Update folder name"; sandbox `git mv` | M |
 | 4 | ReqIF/Excel: write new attribute and tool names, read both | S |
 | 5 | Code identifiers (`window.reqman`, types, temp prefixes, package name) — mechanical | S–M |
 | 6 | Tests: update expectations, add tests for both folder names, the APPDATA copy and old ReqIF files; self-test step "opens a project with the old folder name" | S |
-| 7 | Checklist for Mostafa: update arrives (same app, new name), his theme/recent list are still there, the sandbox opens, an old export imports | — |
+| 7 | Checklist for the owner: update arrives (same app, new name), his theme/recent list are still there, the sandbox opens, an old export imports | — |
 
-Total: about 2–3 days of work, one test round. Keeping `appId` means Mostafa's installed copy simply updates to the
+Total: about 2–3 days of work, one test round. Keeping `appId` means the owner's installed copy simply updates to the
 new name.
 
-## 5. Mostafa's answers (31 Oct 2026)
+## 5. The owner's answers (31 Oct 2026)
 
-- **Branchwise is taken** (an HR tool, an iOS Git game, a Polish service company, an AI decision tool). Mostafa is
+- **Branchwise is taken** (an HR tool, an iOS Git game, a Polish service company, an AI decision tool). The owner is
   looking for a new name himself. Logo/name ideas he showed: reqoin, reqouple, reqochet, reqnote (red and green
   dots in the letters). Note: his market list (`2026-10-31-rm-tools-market-list.md`) found "Req-" names crowded.
 - **Clean switch wanted:** the version with the new name should **uninstall the old app and install the new one**,
@@ -86,7 +86,7 @@ new name.
   the cache is rebuilt. `requirements/.reqman/` folders inside project repositories are the user's data, not app
   files — they are read as before and never deleted by the installer. Last update of the old app should be a
   ReqMan version that points to the new installer (the old feed cannot install a different `appId` by itself).
-- **Mostafa, 31 Oct 2026 (later):** the `.reqman` folder **goes too** — the new-name version creates the folder with the
+- **The owner, 31 Oct 2026 (later):** the `.reqman` folder **goes too** — the new-name version creates the folder with the
   new name and removes the old one, as a **Git rename** (`git mv requirements/.reqman requirements/.<newname>`,
   committed like any change, visible on GitHub as a rename). This replaces "read both, never automatic" in 3.3.
   **R for the build:** ReqMan offers the rename when it opens a project with the old folder ("Update this project to

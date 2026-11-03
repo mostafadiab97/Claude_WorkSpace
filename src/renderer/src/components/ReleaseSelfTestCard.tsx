@@ -3,7 +3,7 @@ import type { ReleaseSelfTestResult } from '../../../shared/api'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
 
-/** The plain-text report Mostafa pastes into his test feedback. */
+/** The plain-text report the owner pastes into his test feedback. */
 export function selfTestReport(r: ReleaseSelfTestResult): string {
   return [
     T.settings.releaseTest.reportTitle(r.version),
@@ -14,7 +14,7 @@ export function selfTestReport(r: ReleaseSelfTestResult): string {
 
 /**
  * The release self-test (Settings & diagnostics): the main actions on a practice repository in a temporary
- * folder, on Mostafa's own PC, with pass/fail per step and a report to copy.
+ * folder, on the owner's own PC, with pass/fail per step and a report to copy.
  */
 export function ReleaseSelfTestCard() {
   const [state, setState] = useState<{ kind: 'idle' } | { kind: 'running' } | { kind: 'done'; r: ReleaseSelfTestResult } | { kind: 'failed'; message: string }>({ kind: 'idle' })

@@ -37,7 +37,7 @@ The prototype is built in seven milestones, each ending with a Windows build you
 
 The prototype scope (FR-01 to FR-10) is built (v0.7.0). This section plans the next versions: where each
 requirement stands, what is still missing compared with the five analysed products, the preferred new features, and
-a proposed version sequence. Everything here is a recommendation (R) unless marked C; Mostafa decides the order
+a proposed version sequence. Everything here is a recommendation (R) unless marked C; the owner decides the order
 after his test round and the project review (`docs/reviews/done/2026-10-25-project-review.md`).
 
 ### Where each requirement stands
@@ -50,7 +50,7 @@ after his test round and the project review (`docs/reviews/done/2026-10-25-proje
 | FR-09 | Compare two versions per requirement and link | Done (Changes view, 0.10.0; no automatic pulls) |
 | FR-10 | Export to CSV | Done (+ Markdown, Excel, ReqIF; Compare export) |
 | FR-11 | Schema editor | Partly — fields done; item types and link types still in `schema.yaml` |
-| FR-12 | Branches and tag baselines | Branches done (0.12.0); tag baselines delayed by Mostafa (29 Oct 2026) |
+| FR-12 | Branches and tag baselines | Branches done (0.12.0); tag baselines delayed by the owner (29 Oct 2026) |
 | FR-13 | Merge and resolve conflicts per requirement | Done (0.12.0): field-level 3-way merge, decision window, duplicate-ID repair |
 | FR-14 | Word, PDF, Excel and Markdown export | Markdown, Excel (and ReqIF) done; Word/PDF → proposed (planning discussion) |
 | FR-15 | Excel/CSV import with column mapping | Done (0.11.0, also ReqIF) |
@@ -67,7 +67,7 @@ after his test round and the project review (`docs/reviews/done/2026-10-25-proje
 | Feature (from "B. Common features") | In ReqMan today | Proposal |
 | --- | --- | --- |
 | Word and Excel import/export, round trip | CSV + Markdown export | **M7**: Excel export + import (update existing items by ID, read links — C, 25 Oct 2026); Word/PDF export M10 |
-| Baselines | Any commit can be compared | Later (delayed by Mostafa 29 Oct 2026): tags as named baselines ("Release 1.0") |
+| Baselines | Any commit can be compared | Later (delayed by the owner 29 Oct 2026): tags as named baselines ("Release 1.0") |
 | Branches / parallel versions | Shown only | **M8**: create, switch, compare branches |
 | Merge and conflict resolution per requirement | Pull stops and lists clashes | **M8**: field-level 3-way merge, choose mine/theirs/edit only for real conflicts |
 | Traceability matrix and coverage views | Link filters ("without links", "suspect") | **M9**: coverage view (e.g. which system requirements have no verifying test) and a matrix (rows × columns by link type) |
@@ -118,18 +118,18 @@ X-02).
 | Word (.docx) | Planned — M10 | Later: ReqMan-generated files (round trip); other Word files only by rules (e.g. headings → items) | No general editing of foreign Word files |
 | PDF | Planned — M10 | Not planned | Printable document |
 
-### Release plan (C, confirmed by Mostafa 28 Oct 2026)
+### Release plan (C, confirmed by the owner 28 Oct 2026)
 
 | Version | Name | Contents |
 | --- | --- | --- |
-| **0.8.0** | Clean page | All review fixes D-01 – D-08, D-10, P-01, P-02, P-04, P-05, X-01; restructuring S-01 – S-03; all GUI texts in one central file (S-06); tests T-01 – T-05; **release self-test** inside ReqMan (runs the main actions on a temporary practice repository with a fake "GitHub" folder on Mostafa's PC, pass/fail per step, copy report); Mostafa's checklist shrinks to **at most 5 steps per version** from now on |
+| **0.8.0** | Clean page | All review fixes D-01 – D-08, D-10, P-01, P-02, P-04, P-05, X-01; restructuring S-01 – S-03; all GUI texts in one central file (S-06); tests T-01 – T-05; **release self-test** inside ReqMan (runs the main actions on a temporary practice repository with a fake "GitHub" folder on the owner's PC, pass/fail per step, copy report); the owner's checklist shrinks to **at most 5 steps per version** from now on |
 | **0.9.0** | New data format | IDs `REQ-` + 7 random characters (O-01, O-02), type editable; fractional order keys (S-04; at push, groups the user changed whose values are longer than 4 characters are re-spaced); calculated outline numbers (O-03) in table ("No."), editor, picker, Compare and every export; sandbox converted directly in its repository |
 | **0.10.0** | Changes view | One Changes view instead of Changes + Compare (O-06), no automatic pulls ("Pull first" offer); GitHub-style split difference with highlighted words and revert arrows (O-05); Keep/Unlink window for suspect links (O-04) |
-| **0.11.0** | **M7 Excel + ReqIF** (ReqIF merged in, Mostafa 29 Oct 2026) | ReqIF import/export (DOORS, Jama, Polarion) through the same wizard; Excel export (ExcelJS); import wizard for Excel/CSV (update by ID with preview, links, outline numbers → hierarchy); "New project from a file", "Update the Excel file", "Publish to GitHub"; **export of chosen items**: Ctrl/Shift+click to select several rows, right-click "Export this item and everything below it", export window choice "Selected items and everything below them" (all levels; tick box "Include the items below", ticked by default; overlaps exported once; document order; full outline numbers) |
-| **0.12.0** | **M8 Branches** | Create/switch branches (commit / discard / take changes along), compare two branches per requirement (local PR review), "Pull from branch" (any visible branch) and pull with per-requirement (field-level 3-way) merge (S-05), automatic duplicate-ID repair (D-09), D-05. Tag baselines delayed (Mostafa, 29 Oct 2026) |
-| ~~0.13.0~~ | ~~ReqIF~~ | merged into 0.11.0 (Mostafa, 29 Oct 2026: fewer test rounds; same wizard and export pipeline) |
-| **0.12.1** | Mostafa's points on 0.12.0 | Branch drop-down: compact, anchored under the button, click a name to switch, Pull from… / Compare with… on the current branch, search and scrolling for tens of branches |
-| **0.13.0** | Mostafa's points on 0.12.1 + Arabic | Pull from another branch arrives as uncommitted changes; delete a branch; Git controls in the top bar and a one-row toolbar (filters in a pop-up); **Arabic / English switch** with right-to-left layout |
+| **0.11.0** | **M7 Excel + ReqIF** (ReqIF merged in, the owner 29 Oct 2026) | ReqIF import/export (DOORS, Jama, Polarion) through the same wizard; Excel export (ExcelJS); import wizard for Excel/CSV (update by ID with preview, links, outline numbers → hierarchy); "New project from a file", "Update the Excel file", "Publish to GitHub"; **export of chosen items**: Ctrl/Shift+click to select several rows, right-click "Export this item and everything below it", export window choice "Selected items and everything below them" (all levels; tick box "Include the items below", ticked by default; overlaps exported once; document order; full outline numbers) |
+| **0.12.0** | **M8 Branches** | Create/switch branches (commit / discard / take changes along), compare two branches per requirement (local PR review), "Pull from branch" (any visible branch) and pull with per-requirement (field-level 3-way) merge (S-05), automatic duplicate-ID repair (D-09), D-05. Tag baselines delayed (the owner, 29 Oct 2026) |
+| ~~0.13.0~~ | ~~ReqIF~~ | merged into 0.11.0 (the owner, 29 Oct 2026: fewer test rounds; same wizard and export pipeline) |
+| **0.12.1** | The owner's points on 0.12.0 | Branch drop-down: compact, anchored under the button, click a name to switch, Pull from… / Compare with… on the current branch, search and scrolling for tens of branches |
+| **0.13.0** | The owner's points on 0.12.1 + Arabic | Pull from another branch arrives as uncommitted changes; delete a branch; Git controls in the top bar and a one-row toolbar (filters in a pop-up); **Arabic / English switch** with right-to-left layout |
 | **Baselines and formats (C, 1 Nov 2026)** | — | Baselines un-delayed: Git tags with a note, Baselines list, compare with a baseline, open one read-only — in the theme 1 version. **No Word import** (replaces the 27 Oct plan for rule-based Word import). Import: Excel, ReqIF, CSV, ReqMan repositories. Export: Excel, ReqIF, CSV, ReqMan repositories, Markdown, Word, PDF |
 | **Documents (C, 1 Nov 2026)** | — | Several documents (specifications, like DOORS modules) in one repository, each with its own tree and outline numbers, links across them — built with theme 1. Replaces "one tree per repository". Cross-repository links later, with a repository alias before the ID |
 | **Plan frame (C, 1 Nov 2026)** | — | Next phase = **a pilot team uses ReqMan** (P-01); the rename gets its own version before the pilot (P-04); themes in this order, one per minor version, fixes as patches (P-02, P-03) — details per theme in `docs/reviews/2026-11-01-planning-discussion.md` |
@@ -141,12 +141,13 @@ X-02).
 | **0.14.1** | Before the pilot | User guide (`docs/USER-GUIDE.md`), go back to an earlier version (Settings → Versions, updates paused), security check + two fixes, calmer floating notes with a blue "nothing to do" kind |
 | **0.14.2** | Settings and help | Left panel in Settings with the user guide built in (one entry per section), privacy guard in every build (commit e-mails + secrets, both repositories), sandbox history cleaned |
 | **0.14.3** | Settings and help as pages | One page per settings group (Environment and versions, Report a problem and diagnostics, Features, Self-tests) and per guide section; Back on top of the shaded left panel |
+| **0.14.4** | No personal data in files | Owner's name and account removed from every file of the tool repository (feed owner/repo passed by CI / read from app-update.yml); privacy check on current files only; Check for updates next to Updates; blue Back. Decided: a public release repository will start from the files without history |
 | **Release plan (C, 2 Nov 2026)** | — | 0.14 rename + health → 0.15 1a structure → 0.16 1b traceability views (pilot can start) → 0.17 daily comfort → 0.18 rich text → 0.19 documents out → 0.20 review basics → 0.21 pull requests in the app → 0.22 verification → 0.23 sharing + help → 0.24 AI → later commercial; a stabilisation patch after every theme; details in `docs/reviews/2026-11-01-planning-discussion.md` |
-| *Proposal A (R)* | *New name + traceability* | *Proposed 31 Oct 2026; order to be settled in the planning discussion (Mostafa, 31 Oct):* the rename (`docs/reviews/2026-10-31-rename-impact.md`) once the name is chosen; traceability matrix and coverage; item and link types in the GUI; saved views; bulk edit |
+| *Proposal A (R)* | *New name + traceability* | *Proposed 31 Oct 2026; order to be settled in the planning discussion (the owner, 31 Oct):* the rename (`docs/reviews/2026-10-31-rename-impact.md`) once the name is chosen; traceability matrix and coverage; item and link types in the GUI; saved views; bulk edit |
 | *Proposal B (R)* | *Documents out* | Word and PDF export, HTML publishing, Markdown preview |
 | *Proposal C (R)* | *Review and quality* | PR approval status and PR view per requirement, comments (design choice first), requirement quality hints |
 | *Proposal D (R)* | *Engineering traceability* | Links to code and tests in the same repository, impact chain and graph, command line / GitHub Action check |
 | later | — | Tag baselines (delayed), rich text editor with images and tables, templates, macOS/Linux, dashboard, integrations / MCP / AI, compliance; Windows 10 build. **No milestone yet:** tables in text, code signing (X-02), private update channel (S-08). Ranked list: `docs/reviews/done/2026-10-31-feature-gap-analysis.md` |
 
-Settled decisions (Mostafa) on the review (27–28 Oct 2026): UI texts in one central file (S-06, yes); one requirement
+Settled decisions (the owner) on the review (27–28 Oct 2026): UI texts in one central file (S-06, yes); one requirement
 set per repository (S-07, discarded); private update channel and code signing later (S-08, X-02).

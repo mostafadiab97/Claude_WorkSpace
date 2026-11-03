@@ -1,4 +1,4 @@
-// Enforces Mostafa's decision S-06 (27 Oct 2026): every text the user sees lives in src/shared/text.ts.
+// Enforces the owner's decision S-06 (27 Oct 2026): every text the user sees lives in src/shared/text.ts.
 // Screen code must not contain English words between JSX tags or in aria-label / title / placeholder / label
 // attributes. (Data shown from the repository — titles, field names — is fine: it is never a literal.)
 import { readdirSync, readFileSync, statSync } from 'node:fs'

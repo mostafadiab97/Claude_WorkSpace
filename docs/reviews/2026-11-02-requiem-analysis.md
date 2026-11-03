@@ -1,6 +1,6 @@
 # Requiem (`requirements-manager`) — analysis of a similar tool (2 Nov 2026)
 
-Mostafa found this tool and asked for an analysis: it looked very similar to ReqMan. Sources are listed at the end.
+The owner found this tool and asked for an analysis: it looked very similar to ReqMan. Sources are listed at the end.
 **F** = fact from its documentation, **I** = inference, **R** = recommendation.
 
 ## 1. What it is (F)

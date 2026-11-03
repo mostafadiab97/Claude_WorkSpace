@@ -25,7 +25,7 @@ await scenario('E2E excel', async (ctx) => {
   const { win, check } = t
 
   console.log('New project from a file — the import wizard')
-  // a folder that is not empty is refused at once and the folder dialog opens again (Mostafa, 0.11.0)
+  // a folder that is not empty is refused at once and the folder dialog opens again (the owner, 0.11.0)
   await t.openFiles(source, work, project)
   await t.answerMessageBox(0)
   await win.getByRole('button', { name: 'New project from a file…' }).click()

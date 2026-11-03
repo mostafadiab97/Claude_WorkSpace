@@ -78,7 +78,7 @@ describe('D-01 — an item whose file name differs from its ID', () => {
     await expect(readFile(join(itemsDir(root), 'X-1.md'), 'utf8')).rejects.toThrow()
   })
 
-  it('a fixed file name can be undone with Discard (Mostafa checklist 0.8.0 step 3)', async () => {
+  it('a fixed file name can be undone with Discard (the owner checklist 0.8.0 step 3)', async () => {
     const { ws, root } = await setup({ git: true })
     const id = await add(ws, 'risk', 'Renamed risk')
     await rename(join(itemsDir(root), `${id}.md`), join(itemsDir(root), 'RSK-RENAMD.md'))

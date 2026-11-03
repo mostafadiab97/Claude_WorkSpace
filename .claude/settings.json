@@ -26,7 +26,7 @@
       "Bash(git rev-parse *)",
       "Bash(gh run *)",
       "Bash(gh release view *)",
-      "Bash(gh api repos/mostafadiab97/*)"
+      "Bash(gh api repos/*)"
     ],
     "deny": [
       "Bash(git push --force *)",

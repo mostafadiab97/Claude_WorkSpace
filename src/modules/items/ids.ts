@@ -6,7 +6,7 @@ import { randomInt } from 'node:crypto'
  */
 export const ID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'
 /**
- * Every item gets `REQ-` + 7 random characters (Mostafa's decisions O-01/O-02, 27 Oct 2026): the ID does not
+ * Every item gets `REQ-` + 7 random characters (the owner's decisions O-01/O-02, 27 Oct 2026): the ID does not
  * depend on the type, so the type can change; 32^7 ≈ 34 billion values make a clash between people working on
  * different branches very unlikely (a clash found at merge time is repaired automatically, M8).
  */

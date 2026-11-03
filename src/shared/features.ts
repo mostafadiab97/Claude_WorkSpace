@@ -1,4 +1,4 @@
-// Feature switches (P-40a, Mostafa 2 Nov 2026): every switchable feature can be turned off by a person on this PC
+// Feature switches (P-40a, the owner 2 Nov 2026): every switchable feature can be turned off by a person on this PC
 // (Settings → Features) or by the team for one repository (`features:` in requirements/.reqman/schema.yaml).
 // A feature is on only when neither turned it off. New features start as `preview` until a pilot cycle has used
 // them without problems; if one shows a defect it can be turned off and work goes on while it is fixed.

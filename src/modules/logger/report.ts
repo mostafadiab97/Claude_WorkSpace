@@ -1,4 +1,4 @@
-// The "Report a problem" file (P-40d, Mostafa 2 Nov 2026): the user's description, the diagnostics and the end of
+// The "Report a problem" file (P-40d, the owner 2 Nov 2026): the user's description, the diagnostics and the end of
 // the log in one plain-text file the user saves and sends. Nothing is sent by the app itself.
 
 /** How many log lines go into a report (the newest ones). */

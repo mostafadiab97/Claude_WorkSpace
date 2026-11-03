@@ -5,12 +5,12 @@ files in a `requirements/` folder of a project's own Git repository; ReqMan is t
 (table, hierarchy, links, suspect links) and, from M4 on, does the Git work at requirement level.
 Internal proof of concept first; likely a commercial product later.
 
-**Claude writes all of the code, tests and docs.** The product owner (Mostafa) decides the product, installs every
+**Claude writes all of the code, tests and docs.** The product owner decides the product, installs every
 release on his Windows 11 PC and reports back. A team may take the code over later, so it must stay conventional,
 tested and documented (NFR-10).
 
 This file is the project memory and hand-over note: whoever continues (a cloud session, Claude Code in VS Code on
-Mostafa's PC, or a future team) reads it fully first, then the documents it points to when a task touches them.
+the owner's PC, or a future team) reads it fully first, then the documents it points to when a task touches them.
 **Keep it current with every release** (status, next step, decisions, pitfalls).
 
 Where development happens: in a cloud session; a local Windows setup is described in `docs/DEVELOPING.md`.
@@ -22,7 +22,7 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
 
 | What | Where |
 | --- | --- |
-| Decisions (source of truth): product questions + answers, technical design, per-milestone decisions, Mostafa's small preferences | `docs/design/decisions.md` |
+| Decisions (source of truth): product questions + answers, technical design, per-milestone decisions, the owner's small preferences | `docs/design/decisions.md` |
 | Product definition, FR/NFR, scope | `docs/design/requirements.md` |
 | What has been built, where each requirement stands, release plan | `docs/design/roadmap.md` |
 | The 5-tool domain study (frozen) | `docs/design/analysis.md` |
@@ -30,13 +30,13 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
 | Module map, rules, data format, UI structure | `docs/ARCHITECTURE.md` |
 | Onboarding for engineers (diagrams, first change end to end) | `docs/ONBOARDING.md`, diagrams in `docs/diagrams/` |
 | Pitfalls already hit — read before changing an area | `docs/PITFALLS.md` |
-| Mostafa's current checklist, log/data locations, bug reporting | `docs/TESTING.md` (older checklists: `docs/testing/past-checklists.md`) |
-| What changed per version + Mostafa's reports | `CHANGELOG.md` |
+| The owner's current checklist, log/data locations, bug reporting | `docs/TESTING.md` (older checklists: `docs/testing/past-checklists.md`) |
+| What changed per version + the owner's reports | `CHANGELOG.md` |
 | Theme · local setup · scripts and skills | `docs/THEMING.md` · `docs/DEVELOPING.md` · `tools/README.md` (skills in `.claude/skills/`: `release-to-owner` for every release, `owner-decision-walkthrough` for every question round, `whole-project-review`) |
-| Test data (10,005 fictional items) | GitHub `mostafadiab97/Claude_SandBox` — clone **next to** this repo |
-| Releases (installers + auto-update feed) | GitHub Releases of `mostafadiab97/Claude_WorkSpace` |
+| Test data (10,005 fictional items) | GitHub `<owner>/Claude_SandBox` — clone **next to** this repo |
+| Releases (installers + auto-update feed) | GitHub Releases of `<owner>/Claude_WorkSpace` |
 
-## How to work with Mostafa
+## How to work with the owner
 
 - He tests each **release**, not branches: every change he should try ends with a version bump, a green CI release
   and a short checklist in `docs/TESTING.md` ("Manual test checklist — vX.Y.Z", numbered steps, expected results;
@@ -50,6 +50,9 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
 - When he reports a bug: reproduce it in a test first, fix, explain the cause in one or two sentences, release.
 - Bundle small fixes he asks for into the next milestone release when he says so ("add this fix in the same
   version as M3").
+- **No personal data in this repository's files** (owner, 3 Nov 2026): never write the owner's name, account name,
+  user name or e-mail into any file — say "the owner"; `<owner>/Claude_SandBox` in docs; the privacy check fails the
+  build otherwise. A public release repository will later start from the files without history.
 - He asked to be asked before steps that affect his accounts/repos (e.g. repository visibility). Never change
   repo visibility, delete releases, rewrite history or force-push.
 - Only free, open-source dependencies whose licences allow commercial use (NFR-07). No paid services.
@@ -116,30 +119,31 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 5. Installed copies auto-update from that feed (electron-updater, GitHub provider in `electron-builder.yml`).
    The repository **must stay public** for auto-update to work without a token (tested: private → 404).
 6. Watch with `node tools/ci.mjs status | wait | failures | release | released` (REST only — works in the cloud
-   session where `gh run …`/`gh workflow run` are refused). Tell Mostafa the version and the checklist location
+   session where `gh run …`/`gh workflow run` are refused). Tell the owner the version and the checklist location
    when it is green.
 
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.14.3, 3 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.14.4, 3 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
-Every version, what it brought and what Mostafa reported: `CHANGELOG.md`; the full list of milestones and the
+Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
 
 | Milestone | State |
 | --- | --- |
 | 0.12.0 M8 branches — create/switch (commit / take along / discard), pull and "pull from branch" with field-level 3-way merge + decision window (S-05), compare a branch like a PR, duplicate-ID repair (D-09), D-05; tag baselines delayed | Done (v0.12.0) |
-| 0.12.1 Mostafa's points on 0.12.0 — branch drop-down under the button, click a name to switch, Pull from… / Compare with… on the current branch, search + scrolling for tens of branches | Done (v0.12.1) |
-| 0.13.0 Mostafa's points on 0.12.1 — pull from another branch = uncommitted changes for review, delete branch, Git controls in the top bar + one-row toolbar (Filters pop-up), **Arabic / English with right-to-left** | Done (v0.13.0) |
-| 0.13.1 Mostafa's points on 0.13.0 — floating note tinted green/red/blue with frame and glow, centred text; red Delete button per branch; right-to-left mark on every Arabic text (word order in tooltips/dialogs) | Done (v0.13.1) |
+| 0.12.1 the owner's points on 0.12.0 — branch drop-down under the button, click a name to switch, Pull from… / Compare with… on the current branch, search + scrolling for tens of branches | Done (v0.12.1) |
+| 0.13.0 the owner's points on 0.12.1 — pull from another branch = uncommitted changes for review, delete branch, Git controls in the top bar + one-row toolbar (Filters pop-up), **Arabic / English with right-to-left** | Done (v0.13.0) |
+| 0.13.1 the owner's points on 0.13.0 — floating note tinted green/red/blue with frame and glow, centred text; red Delete button per branch; right-to-left mark on every Arabic text (word order in tooltips/dialogs) | Done (v0.13.1) |
 | 0.14.0 health (P-40/P-41) — feature switches (Settings → Features; team `features:` in schema.yaml; `src/shared/features.ts`, `renderer/lib/features.ts`), Report a problem (one text file), coverage floor (`vitest.config.mts` thresholds, part of `npm run check`), **automatic acceptance run** (`e2e/acceptance.mjs` in build.yml + release.yml: install previous → update from local feed → self-test → 10k sandbox → real push to `ci/acceptance-*`, deleted) | Released (v0.14.0) |
 | 0.14.1 before the pilot — `docs/USER-GUIDE.md` (quick start + everything); Settings → Versions: go back to an earlier version (`src/modules/updater/versions.ts`, `update-hold.json` pauses updates; `OLDEST_REVERT_TARGET` must be raised at the rename); security check `docs/reviews/2026-11-03-security-check.md` (no secrets; navigation guard; no push on PRs); floating notes theme-coloured, blue `neutral` Git results | Released (v0.14.1) |
 | 0.14.2 Settings and help — left panel (`SettingsScreen.tsx`), user guide built in (`renderer/lib/guide.ts`, `docs/USER-GUIDE.md?raw`, marked); privacy guard in build.yml (`tools/check-privacy.mjs` + gitleaks, both repos, full history); sandbox history rewritten (work e-mail removed, approved) | Released (v0.14.2) |
-| 0.14.3 Settings and help as pages — one page per settings group and per guide section (`src/shared/guide.ts` splits the guide; `renderer/lib/guide.ts` renders it); Back on top of the shaded panel. Mostafa cannot set a global private Git e-mail (company repos) → per-repository config in the sandbox clones only | Released (v0.14.3) |
-| **Next** | the rename version as soon as Mostafa picks the name, then 1a structure (plan in `docs/reviews/2026-11-01-planning-discussion.md` → "Release plan"); Arabic wording review later | — |
+| 0.14.3 Settings and help as pages — one page per settings group and per guide section (`src/shared/guide.ts` splits the guide; `renderer/lib/guide.ts` renders it); Back on top of the shaded panel. The owner cannot set a global private Git e-mail (company repos) → per-repository config in the sandbox clones only | Released (v0.14.3) |
+| 0.14.4 no personal data in the tool's files — the owner's name → "the owner"; no account name anywhere (workflows use `github.repository_owner`, CI passes `-c.publish.owner/repo`, the app reads `app-update.yml`, `tools/ci.mjs` reads the Git remote); `tools/check-privacy.mjs` checks current files only (names as hashes); Check for updates on the Updates line; blue Back | Released (v0.14.4) |
+| **Next** | the rename version as soon as the owner picks the name, then 1a structure (plan in `docs/reviews/2026-11-01-planning-discussion.md` → "Release plan"); Arabic wording review later | — |
 
-Mostafa's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
+The owner's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
 Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
 Before: 0.12.1 steps 1–3, 5 passed, 21/21 (50.7 s); step 4 (pull from a branch
 committed at once) and three requests → 0.13.0. Before: **0.12.0 all 5 steps passed** — that was the two-folder trial (two clones of the
@@ -153,10 +157,10 @@ checks in detail".
 
 ## Where we are right now (2 Nov 2026) — read this first
 
-- **Built and accepted by Mostafa:** everything up to **0.13.1**. **0.14.0 released 2 Nov** (health tools +
+- **Built and accepted by the owner:** everything up to **0.13.1**. **0.14.0 released 2 Nov** (health tools +
   acceptance run; its first acceptance run passed: update 0.13.1 → 0.14.0, self-test, 10,005-item sandbox, real push
   to `ci/acceptance-*` and delete) — **0.14.1 released 3 Nov** (user guide, go back to an earlier version, security check, calmer notes) —
-  Mostafa's report 3 Nov: 0.14.0/0.14.1 passed with small points → **0.14.2 released 3 Nov** (Settings and help with the
+  the owner's report 3 Nov: 0.14.0/0.14.1 passed with small points → **0.14.2 released 3 Nov** (Settings and help with the
   guide inside, privacy guard, sandbox history cleaned) — 0.14.2: steps 1, 3, 4 passed; step 2 → **0.14.3** (pages) —
   waiting for his 0.14.3 checklist. Open question to him: rewrite the code repo's history too (the 0.14.1 security
   report named his old work identity in two commits; I recommended leaving it).
@@ -192,17 +196,17 @@ checks in detail".
     **Release plan confirmed 2 Nov** (planning file / roadmap: 0.14 rename+health … 0.24 AI). P-41 **yes**: automated Windows
     acceptance run in CI (install previous → update → self-test → 10k sandbox → real push to `ci/acceptance-*`, deleted
     after → version e2e); every run/report lists numbered what it did. **Next: build 0.14 health parts (feature switches,
-    coverage floor, Report a problem) + the acceptance run now; apply the rename when Mostafa picks the name**
+    coverage floor, Report a problem) + the acceptance run now; apply the rename when the owner picks the name**
     (considering ShallWe, Plumbline, Keelson).
   - P-11 **no Word import**. Import: Excel, ReqIF, CSV, ReqMan repositories. Export: Excel, ReqIF, CSV, ReqMan
     repositories, Markdown, Word, PDF.
 - **3 Nov 2026: the CTO approved a pilot with a complete team** — the rename must ship before the team gets the tool.
-- **New name:** Mostafa is choosing (decision expected 3 Nov). Candidates 3 Nov: reqochet, reqoin, reqornea (his), Reqoncile, Reqonnect, Reqosmos, Reqompass, Reqollect, Reqipe; avoid Reqord (existing tool). Latest candidates (2 Nov): ShallWe (recommended), Plumbline, Keelson; earlier: reqochet (felt long, "misses the target"), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:
+- **New name:** the owner is choosing (decision expected 3 Nov). Candidates 3 Nov: reqochet, reqoin, reqornea (his), Reqoncile, Reqonnect, Reqosmos, Reqompass, Reqollect, Reqipe; avoid Reqord (existing tool). Latest candidates (2 Nov): ShallWe (recommended), Plumbline, Keelson; earlier: reqochet (felt long, "misses the target"), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:
   uninstall old → install new, `.reqman` folder renamed by Git rename, copy the user's settings first).
 - **Rust: no migration now** (31 Oct). Feature input: `docs/reviews/2026-10-31-feature-catalogue.md` (163 features),
   market list `docs/reviews/2026-10-31-rm-tools-market-list.md`.
 
-**Testing rule from 0.8.0 (Mostafa, 28 Oct 2026):** the manual checklist per version has **at most 5 steps** (update
+**Testing rule from 0.8.0 (the owner, 28 Oct 2026):** the manual checklist per version has **at most 5 steps** (update
 arrives, release self-test, open the sandbox, one real push only when Git changed, the version's new feature).
 Everything else must be automated (unit tests, e2e in CI, the in-app release self-test).
 

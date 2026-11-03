@@ -95,7 +95,7 @@ export function itemsToMarkdown(schema: Schema, items: ExportItem[], columns: Ex
   const out: string[] = [`# ${title}`, '', `${items.length} items · exported ${new Date().toISOString().slice(0, 10)} from ReqMan`, '']
   for (const e of items) {
     const level = Math.min(6, e.depth + 2)
-    // the outline number leads every heading (Mostafa's decision O-03): "## 2.3 REQ-K7Q3XMB — Title"
+    // the outline number leads every heading (the owner's decision O-03): "## 2.3 REQ-K7Q3XMB — Title"
     out.push(`${'#'.repeat(level)} ${e.item.number ? `${e.item.number} ` : ''}${e.item.id} — ${e.item.title || '(no title)'}`, '')
     const facts = fieldCols.map((c) => [header(schema, c), cell(schema, e, c)] as const).filter(([, v]) => v)
     if (facts.length) out.push(facts.map(([k, v]) => `**${k}:** ${v}`).join(' · '), '')

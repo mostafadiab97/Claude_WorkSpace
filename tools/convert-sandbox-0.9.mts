@@ -1,4 +1,4 @@
-// One-time conversion of the test-data repository (Claude_SandBox) to the 0.9.0 data format (Mostafa's decisions
+// One-time conversion of the test-data repository (Claude_SandBox) to the 0.9.0 data format (the owner's decisions
 // O-01 – O-03 and S-04, 27–28 Oct 2026). Kept in the repository as the record of what was done.
 //   npx tsx tools/convert-sandbox-0.9.mts <sandbox-clone>
 //

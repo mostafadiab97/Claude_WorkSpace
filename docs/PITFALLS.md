@@ -100,3 +100,7 @@ private / no-reply address and on real e-mail addresses in files; gitleaks scans
 0.14.2's first release run failed: `journey` measured `locator('.page')`, and the new Settings layout had two `.page`
 elements (strict-mode violation). Only `health` had been run locally after changing Settings. Run `npm run test:e2e`
 (all scenarios) before every version bump; the settings scroll area is `.settings-main`, the page wrapper `.page`.
+
+## electron-builder: `-c` means a config FILE (0.14.4)
+`-c.publish.owner=x` was read as "config file `.publish.owner=x`" and the release build failed. Use the long form
+`--config.publish.owner=… --config.publish.repo=…` (checked locally: the installed `app-update.yml` then holds them).

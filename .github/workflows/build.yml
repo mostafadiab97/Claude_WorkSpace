@@ -57,7 +57,7 @@ jobs:
           path: e2e/out/*.png
           if-no-files-found: ignore
       - name: Build installer
-        run: npx electron-builder --win --publish never -c.publish.owner=${{ github.repository_owner }} -c.publish.repo=${{ github.event.repository.name }}
+        run: npx electron-builder --win --publish never --config.publish.owner=${{ github.repository_owner }} --config.publish.repo=${{ github.event.repository.name }}
       - name: Acceptance run on the installed app (P-41 — replaces the owner's manual checklist steps)
         shell: bash
         env:

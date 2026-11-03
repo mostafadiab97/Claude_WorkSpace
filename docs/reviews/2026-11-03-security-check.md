@@ -17,7 +17,7 @@ address in the sandbox history).
 | Tokens used by the build | the workflows use only GitHub's own short-lived `GITHUB_TOKEN`; the acceptance run masks the address that contains it | **F: no stored secret exists** |
 | Files that should not be public | `.env`, keys, certificates, logs, screenshots | **F: none tracked**; `e2e/out/`, logs, `coverage/` and personal Claude settings are in `.gitignore` |
 | Personal data in files | e-mail addresses, phone numbers, Windows user paths, personal notes | **F: none in files** (cleaned 1 Nov) |
-| Personal data in commit authors | `git log` author names and e-mails | **F: code repository** — only "Claude" and Dependabot. **Sandbox** — 8 commits by `MostafaNasr-SwiftAct <mostafa.nasr@…>` (a work e-mail, shows the employer) — see decision below |
+| Personal data in commit authors | `git log` author names and e-mails | **F: code repository** — only "Claude" and Dependabot. **Sandbox** — 8 commits carried a work e-mail address (it showed the employer) — see decision below |
 | App: what a web page inside the window could do | Electron settings | **F:** context isolation on, sandbox on, no Node in the page, strict Content-Security-Policy, new windows refused, every window call checked (`src/main/validate.ts`). **Weakness:** the window itself could be navigated to another page (e.g. a link dropped onto it), which would then see the app's window functions → **fixed in 0.14.1** (navigation away is blocked; https links open in the browser) |
 | Build pipeline | workflows | **Weakness:** the acceptance run's real push would also run for pull requests → **fixed in 0.14.1** (push only for pushes to `main` and manual runs). Pull requests from other people's copies get a read-only token from GitHub anyway |
 | Libraries | `npm audit` | **F: 0 problems in what ships with the app**; 30 "moderate" in build-only tools (never installed on users' PCs). Dependabot proposes fixes; `npm run check:deps` warns before every build |
@@ -33,8 +33,8 @@ no longer appear in any branch or commit list.
 
 ### The options that were offered
 
-**The work e-mail in the sandbox history.** Eight early commits of `Claude_SandBox` carry the author
-`MostafaNasr-SwiftAct <mostafa.nasr@…>`. Anyone can read it in the commit list. Options:
+**The work e-mail in the sandbox history.** Early commits of `Claude_SandBox` carried a work e-mail address as the author. Anyone could read it in the commit
+list. Options:
 
 1. **Leave it** (recommended if the pilot team are colleagues — they know you and your employer anyway).
 2. **Rewrite the sandbox history** to replace the author with a neutral name. This changes every commit ID; the two

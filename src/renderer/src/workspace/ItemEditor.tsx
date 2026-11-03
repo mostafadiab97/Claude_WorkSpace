@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ItemDetails, LinkInfo } from '../../../shared/api'
 import type { FieldDef, FieldValue, Item, ItemIssue, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
+import { renderItemText } from '../lib/markdown'
 import { typeName } from '../lib/schema'
 import { HistoryView } from './HistoryView'
 import { LinksSection } from './LinksSection'
@@ -81,6 +82,9 @@ export function ItemEditor(props: {
   }, [target])
 
   const dirty = form !== null && (isNew || !same(form, base))
+  // the Text field: formatted while the saved text is shown and nobody is typing in it (UX-08)
+  const [editingText, setEditingText] = useState(false)
+  const textPreview = form !== null && base !== null && !editingText && form.text.trim() !== '' && form.text === base.text
   const dirtyRef = useRef(dirty)
   useEffect(() => {
     dirtyRef.current = dirty
@@ -254,10 +258,54 @@ export function ItemEditor(props: {
           {issueFor('parent') && <span className="field__error">{issueFor('parent')}</span>}
         </div>
 
-        <label className="field">
-          <span className="field__label">{T.editor.text}</span>
-          <textarea className="input textarea" value={form.text} onChange={(e) => set({ text: e.target.value })} placeholder={T.editor.textPlaceholder} rows={8} />
-        </label>
+        {/* UX-08: saved text is shown formatted; a click (or Enter) on it, or "Edit", opens the plain text */}
+        {textPreview ? (
+          <div className="field">
+            <span className="field__label field__label--row">
+              {T.editor.text}
+              <button type="button" className="link-btn" onClick={() => setEditingText(true)}>
+                {T.editor.editText}
+              </button>
+            </span>
+            <div
+              className="input text-preview markdown"
+              role="button"
+              tabIndex={0}
+              title={T.editor.editTextTooltip}
+              aria-label={T.editor.editTextTooltip}
+              onClick={(e) => {
+                if (!(e.target instanceof HTMLAnchorElement)) setEditingText(true)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  setEditingText(true)
+                }
+              }}
+              dangerouslySetInnerHTML={{ __html: renderItemText(form.text) }}
+            />
+          </div>
+        ) : (
+          <label className="field">
+            <span className="field__label field__label--row">
+              {T.editor.text}
+              {form.text.trim() !== '' && base !== null && form.text === base.text && (
+                <button type="button" className="link-btn" onClick={() => setEditingText(false)}>
+                  {T.editor.previewText}
+                </button>
+              )}
+            </span>
+            <textarea
+              className="input textarea"
+              value={form.text}
+              autoFocus={editingText}
+              onChange={(e) => set({ text: e.target.value })}
+              onBlur={() => setEditingText(false)}
+              placeholder={T.editor.textPlaceholder}
+              rows={8}
+            />
+          </label>
+        )}
 
         <LinksSection
           schema={schema}

@@ -423,6 +423,9 @@ const en = {
   },
 
   editor: {
+    editText: 'Edit',
+    previewText: 'Show formatted',
+    editTextTooltip: 'Click to edit the text',
     unsavedMark: 'Not saved yet',
     label: 'Item',
     labelFor: (id: string) => `Item ${id}`,
@@ -773,6 +776,19 @@ const en = {
     moveFirst: (id: string) => `Save or discard your changes to ${id} before moving it.`,
     moveFailed: (id: string, why: string) => `Could not move ${id}: ${why}`,
     problems: 'Problems',
+    problemsTitle: (count: number) => `Problems (${count})`,
+    problemGroup: {
+      schema: 'Settings file (schema.yaml)',
+      id: 'Duplicate IDs',
+      links: 'Links to missing items',
+      parent: 'Parents that do not exist',
+      file: 'Files that cannot be read',
+      'file-name': 'File name does not match the ID',
+      other: 'Other problems'
+    } as Record<'schema' | 'id' | 'links' | 'parent' | 'file' | 'file-name' | 'other', string>,
+    fixAll: (count: number) => `Fix all ${count}`,
+    severityError: 'Error',
+    severityWarning: 'Warning',
     problemCount: (count: number, open: boolean) => `${count} problem${s(count)} ${open ? '▾' : '▸'}`,
     noProblems: 'No problems',
     schemaProblem: (path: string, message: string) => `schema.yaml ${path}: ${message}`,

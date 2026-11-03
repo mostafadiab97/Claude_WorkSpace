@@ -1,6 +1,6 @@
 // 0.12.0 (M8) in the window: the branch panel — create a branch, switch back, compare a branch like a pull request,
 // pull it into main, and the question about uncommitted changes when switching.
-import { gitIn, gitRepo, launch, scenario } from '../harness.mjs'
+import { editText, gitIn, gitRepo, launch, scenario } from '../harness.mjs'
 
 await scenario('E2E branches', async (ctx) => {
   const { repo } = gitRepo('branches')
@@ -13,7 +13,7 @@ await scenario('E2E branches', async (ctx) => {
   await win.locator('.table__empty', { hasText: 'No items yet' }).waitFor()
   await win.getByLabel('New item').selectOption('system-requirement')
   await win.getByPlaceholder('Short name of the requirement').fill('Door lock')
-  await win.getByPlaceholder('The system shall…').fill('The door shall lock automatically.')
+  await editText(win, 'The door shall lock automatically.')
   await win.getByRole('button', { name: 'Save', exact: true }).click()
   await win.getByRole('button', { name: 'Saved ✓' }).waitFor()
   const gitbar = win.getByRole('region', { name: 'Git' })
@@ -82,7 +82,7 @@ await scenario('E2E branches', async (ctx) => {
 
   console.log('Switching with uncommitted changes asks first')
   await row('Door lock (feature)').click()
-  await win.getByPlaceholder('The system shall…').fill('Not committed.')
+  await editText(win, 'Not committed.')
   await win.getByRole('button', { name: 'Save', exact: true }).click()
   await win.getByRole('button', { name: 'Saved ✓' }).waitFor()
   await branchButton.click()

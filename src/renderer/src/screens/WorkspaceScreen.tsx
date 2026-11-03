@@ -307,11 +307,15 @@ export function WorkspaceScreen({ info, onInfo, importFile, gitSlot = null }: { 
           )}
         </div>
 
-        {showProblems && problems.length > 0 && <ProblemList problems={problems} onOpen={select} onFixed={() => void afterChange()} />}
+        {showProblems && problems.length > 0 && <ProblemList problems={problems} onOpen={select} onFixed={() => void afterChange()} onClose={() => setShowProblems(false)} />}
         <footer className="statusbar">
           <span>{filtered ? T.workspace.of(total, info.itemCount) : T.common.items(info.itemCount)}</span>
           {problems.length > 0 ? (
-            <button type="button" className="link-btn statusbar__problems" onClick={() => setShowProblems((s) => !s)}>
+            <button
+              type="button"
+              className={problems.some((p) => p.severity === 'error') ? 'link-btn statusbar__problems' : 'link-btn statusbar__problems statusbar__problems--warn'}
+              onClick={() => setShowProblems((s) => !s)}
+            >
               {T.workspace.problemCount(problems.length, showProblems)}
             </button>
           ) : (

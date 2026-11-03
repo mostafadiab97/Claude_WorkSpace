@@ -1,4 +1,5 @@
 // Table columns: which exist, their order and visibility (personal, per repository on this PC).
+import { plainText } from '../../lib/markdown'
 import type { IndexedItem, Schema, SortKey } from '../../../../shared/domain'
 import { formatValue, isHeading, typeName, typeShort } from '../../lib/schema'
 import { T } from '../../../../shared/text'
@@ -121,7 +122,8 @@ export function columnsFor(schema: Schema, prefs: ColumnPrefs = { hidden: new Se
       value: (i) => formatValue(i.fields[f.id])
     })),
     { key: 'id', label: T.columns.id, minPx: 110, grow: 0, value: (i) => i.id },
-    { key: 'text', label: T.columns.text, minPx: 200, grow: 2, value: (i) => i.text }
+    // UX-08: one line without Markdown markers (the first 400 characters are plenty for a cell)
+    { key: 'text', label: T.columns.text, minPx: 200, grow: 2, value: (i) => plainText(i.text.slice(0, 400)) }
   ]
   // No. and Title stay at the front; the rest follow the user's order — by default the descriptive columns first
   // (Type, Status, Links, other fields), then ID and Text (UI review UX-03, owner's decision 3 Nov 2026)

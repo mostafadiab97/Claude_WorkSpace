@@ -4,6 +4,8 @@ import type { Schema } from '../../src/shared/domain'
 import { filterSummary } from '../../src/renderer/src/workspace/screen/useFilters'
 import { middleEllipsis } from '../../src/renderer/src/lib/statusbar'
 import { isHeading, typeShort } from '../../src/renderer/src/lib/schema'
+import { plainText, renderItemText } from '../../src/renderer/src/lib/markdown'
+import { groupProblems, problemsOf } from '../../src/renderer/src/workspace/screen/problemList'
 
 const schema: Schema = {
   version: 1,
@@ -39,5 +41,44 @@ describe('type column (UX-03)', () => {
     expect(typeShort(schema, 'note')).toBe('Note')
     expect(isHeading(schema, 'heading')).toBe(true)
     expect(isHeading(schema, 'note')).toBe(false)
+  })
+})
+
+describe('item text shown formatted (UX-08)', () => {
+  it('formats Markdown', () => {
+    const html = renderItemText('**Objective:** verify\n\n- one\n- two\n\n`path/x`')
+    expect(html).toContain('<strong>Objective:</strong>')
+    expect(html).toContain('<li>one</li>')
+    expect(html).toContain('<code>path/x</code>')
+  })
+  it('never lets text from a commit run code or load anything', () => {
+    const html = renderItemText('<img src=x onerror=alert(1)> <script>alert(2)</script>\n\n![pic](http://evil/x.png) [a](javascript:alert(3)) [b](https://example.org)')
+    expect(html).not.toMatch(/<img|<script|javascript:|http:\/\/evil/i)
+    expect(html).toContain('&lt;script&gt;')
+    expect(html).toContain('<a href="https://example.org" target="_blank" rel="noreferrer">b</a>')
+  })
+  it('the table cell shows the text without markers', () => {
+    expect(plainText('**Objective:** verify `x`\n- Measured on [site](https://a)\n## Steps')).toBe('Objective: verify x Measured on site Steps')
+    expect(plainText('2 * 3 * 4 = 24')).toBe('2 * 3 * 4 = 24')
+  })
+})
+
+describe('problems panel (UX-11)', () => {
+  it('groups problems by kind in a fixed order, with severity', () => {
+    const p = problemsOf({
+      schemaProblems: [],
+      issues: [
+        { itemId: 'REQ-1', path: 'links', message: 'link to X, which does not exist.', severity: 'error' },
+        { itemId: 'REQ-2', path: 'file-name', message: 'renamed', severity: 'warning', fix: 'file-name' },
+        { itemId: 'REQ-3', path: 'links', message: 'link to Y, which does not exist.', severity: 'error' },
+        { itemId: 'REQ-4', path: 'id', message: '2 files have the ID REQ-4.', severity: 'error' }
+      ]
+    })
+    expect(groupProblems(p).map((g) => [g.group, g.problems.length])).toEqual([
+      ['id', 1],
+      ['links', 2],
+      ['file-name', 1]
+    ])
+    expect(p[1]).toMatchObject({ severity: 'warning', message: 'renamed', id: 'REQ-2' })
   })
 })

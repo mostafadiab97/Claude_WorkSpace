@@ -105,3 +105,13 @@ export async function scenario(name, body) {
   console.log(failures === 0 ? `\n${name}: passed` : `\n${name}: ${failures} failure(s)`)
   process.exit(failures === 0 ? 0 : 1)
 }
+
+/**
+ * Types into the editor's Text field. Saved text is shown formatted (UI review UX-08); a click on it opens the plain
+ * text box first. New or empty items show the box straight away.
+ */
+export async function editText(win, text) {
+  const preview = win.locator('.editor .text-preview')
+  if (await preview.isVisible()) await preview.click()
+  await win.getByPlaceholder('The system shall…').fill(text)
+}

@@ -41,8 +41,9 @@ await scenario('E2E fixes', async (ctx) => {
 
   console.log('D-01 — item in a renamed file')
   await win.getByRole('button', { name: /1 problem/ }).click()
-  check(await win.getByText(`${renamedId}: The file items/RENAMED-BY-HAND.md holds ${renamedId}`).isVisible(), 'the renamed file is listed as a problem')
-  await win.getByRole('button', { name: new RegExp(`${renamedId}: The file`) }).click()
+  check(await win.locator('.problems__row', { hasText: renamedId }).filter({ hasText: `The file items/RENAMED-BY-HAND.md holds ${renamedId}` }).isVisible(), 'the renamed file is listed as a problem')
+  check(await win.locator('.problems__group summary', { hasText: 'File name does not match the ID (1)' }).isVisible(), '…in its own group with a count (UX-11)')
+  await win.locator('.problems__row', { hasText: renamedId }).getByRole('button', { name: renamedId }).click()
   await win.locator('.editor__id', { hasText: renamedId }).waitFor()
   check((await win.getByPlaceholder('Short name of the requirement').inputValue()) === 'Requirement 3.2.2', 'it opens normally in the editor')
   await win.getByRole('button', { name: 'Fix file name' }).click()

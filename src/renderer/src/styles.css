@@ -1099,13 +1099,76 @@ code {
 /* problems + status bar */
 
 .problems {
-  max-height: 160px;
-  margin: 0;
-  padding: var(--rm-space-sm) var(--rm-space-md) var(--rm-space-sm) var(--rm-space-xl);
+  display: flex;
+  flex-direction: column;
+  max-height: 220px;
   border-top: var(--rm-shape-border-width) solid var(--rm-color-border);
   background: var(--rm-color-surface);
   font-size: var(--rm-font-size-small);
+}
+
+/* UX-11: a header with the count and a close button; groups by kind */
+.problems__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--rm-space-xs) var(--rm-space-md);
+  border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
+}
+
+.problems__body {
+  overflow: auto;
+  padding: var(--rm-space-xs) var(--rm-space-md);
+}
+
+.problems__group summary {
+  cursor: pointer;
+  font-weight: var(--rm-font-weight-strong);
+  padding-block: var(--rm-space-xs);
+}
+
+.problems__group ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 var(--rm-space-xs) var(--rm-space-md);
+}
+
+.problems__fix-all {
+  margin-inline-start: var(--rm-space-sm);
+}
+
+.problems__row {
+  display: flex;
+  align-items: center;
+  gap: var(--rm-space-sm);
+  min-block-size: 26px;
+}
+
+.problems__mark {
+  inline-size: 1em;
+  text-align: center;
+}
+
+.problems__row--error .problems__mark {
   color: var(--rm-color-danger);
+}
+
+.problems__row--warning .problems__mark {
+  color: var(--rm-color-warning);
+}
+
+.problems__id {
+  font-family: var(--rm-font-family-mono);
+  flex: none;
+}
+
+.problems__msg {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.statusbar__problems.statusbar__problems--warn {
+  color: var(--rm-color-warning);
 }
 
 .statusbar {
@@ -2527,18 +2590,32 @@ code {
   white-space: nowrap;
 }
 
-.gitbar__float {
+/*
+ * Layers (UX-01): result notes (4) < pop-overs (5–6) < questions under the Git buttons (15) < dialogs (20) <
+ * branch panel and menus (30). A note never covers a dialog or a pop-over.
+ */
+.gitbar__float,
+.gitbar__ask {
   position: absolute;
   top: calc(100% + var(--rm-space-sm));
   inset-inline-end: 0;
-  z-index: 25;
+  z-index: 4;
   width: min(560px, 90vw);
   display: flex;
   flex-direction: column;
   gap: var(--rm-space-xs);
 }
 
-.gitbar__float > * {
+.gitbar__ask {
+  z-index: 15;
+}
+
+.gitbar__ask:empty {
+  display: none;
+}
+
+.gitbar__float > *,
+.gitbar__ask > * {
   border: var(--rm-shape-border-width) solid var(--rm-color-border);
   border-radius: var(--rm-shape-radius-medium);
   box-shadow: 0 6px 24px color-mix(in srgb, var(--rm-color-text) 18%, transparent);
@@ -3003,4 +3080,72 @@ code {
 /* "+ New item": as wide as its own label, not its longest type name (UX-28) */
 .select-btn--fit {
   field-sizing: content;
+}
+
+/* Editor Text: formatted while not being edited (UX-08) */
+.field__label--row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--rm-space-sm);
+}
+
+.text-preview {
+  cursor: text;
+  min-block-size: 8lh;
+  max-block-size: 50vh;
+  overflow: auto;
+  unicode-bidi: plaintext;
+  white-space: normal;
+}
+
+.markdown > :first-child {
+  margin-block-start: 0;
+}
+
+.markdown > :last-child {
+  margin-block-end: 0;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown pre {
+  margin-block: 0 var(--rm-space-sm);
+}
+
+.markdown ul,
+.markdown ol {
+  padding-inline-start: var(--rm-space-lg);
+}
+
+.markdown code,
+.markdown pre {
+  font-family: var(--rm-font-family-mono);
+  font-size: var(--rm-font-size-small);
+  background: var(--rm-color-surface-alt);
+  border-radius: var(--rm-shape-radius-small);
+}
+
+.markdown pre {
+  padding: var(--rm-space-sm);
+  overflow-x: auto;
+}
+
+.markdown table {
+  border-collapse: collapse;
+}
+
+.markdown th,
+.markdown td {
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  padding: var(--rm-space-xs) var(--rm-space-sm);
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  font-size: var(--rm-font-size-base);
+  margin-block: var(--rm-space-sm) var(--rm-space-xs);
 }

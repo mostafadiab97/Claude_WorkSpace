@@ -4,7 +4,7 @@
 //   npm run build && npm run test:e2e            (screenshots go to e2e/out/)
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { gitIn, gitRepo, launch, scenario, temp } from '../harness.mjs'
+import { editText, gitIn, gitRepo, launch, scenario, temp } from '../harness.mjs'
 
 await scenario('E2E journey', async (ctx) => {
   const { repo, remote } = gitRepo('journey')
@@ -43,7 +43,7 @@ await scenario('E2E journey', async (ctx) => {
   }
   await win.getByLabel('New item').selectOption('stakeholder-need')
   await win.getByPlaceholder('Short name of the requirement').fill('Comfortable temperature')
-  await win.getByPlaceholder('The system shall…').fill('Users want the room to stay at the chosen temperature.')
+  await editText(win, 'Users want the room to stay at the chosen temperature.')
   await save()
   const stkId = (await win.locator('.editor__id').textContent()).trim()
   check(/^REQ-[0-9A-Z]{7}$/.test(stkId), `stakeholder need saved as ${stkId} (REQ- + 7 characters, 0.9.0)`)
@@ -58,7 +58,7 @@ await scenario('E2E journey', async (ctx) => {
     await win.locator('.editor__id', { hasText: stkId }).waitFor()
     await win.getByLabel('Add child item').selectOption('system-requirement')
     await win.getByPlaceholder('Short name of the requirement').fill(title)
-    await win.getByPlaceholder('The system shall…').fill(text)
+    await editText(win, text)
     await win.locator('.editor').getByLabel('Priority').selectOption('High')
     await save()
   }
@@ -257,7 +257,7 @@ await scenario('E2E journey', async (ctx) => {
   check(fileOf('Display readability').includes(`target: ${sysId}`) && !fileOf('Temperature accuracy').includes('Display'), '"refined by" is stored in the refining item')
 
   // change the requirement text: the test case's link becomes suspect
-  await win.getByPlaceholder('The system shall…').fill('The thermostat shall measure room temperature within ±0.3 °C.')
+  await editText(win, 'The thermostat shall measure room temperature within ±0.3 °C.')
   await save({ review: 'check' })
   // O-04: the save asks about the links from other items
   const ask = win.getByRole('dialog', { name: 'Check the links to this item' })
@@ -425,7 +425,7 @@ await scenario('E2E journey', async (ctx) => {
 
   // take back one part of an uncommitted edit (O-05), then discard the rest
   await rowOf('Display readability').click()
-  await win.getByPlaceholder('The system shall…').fill('A change we do not want')
+  await editText(win, 'A change we do not want')
   await win.locator('.editor').getByLabel('Priority').selectOption('Low')
   await save()
   await openChanges()
@@ -445,7 +445,7 @@ await scenario('E2E journey', async (ctx) => {
   await closeChanges()
   await rowOf('Display readability').click()
   await win.waitForTimeout(400)
-  check(!(await win.getByPlaceholder('The system shall…').inputValue()).includes('do not want'), '…and the editor shows it')
+  check(!(await win.locator('.editor .text-preview').textContent()).includes('do not want'), '…and the editor shows it (formatted, UX-08)')
 
   console.log('M5 / O-06 — the Changes view: what the last pull brought in (offers to pull first), any two versions')
   gitIn(pcB, 'pull', '-q')

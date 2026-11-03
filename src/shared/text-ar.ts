@@ -427,6 +427,9 @@ const raw: Texts = {
   },
 
   editor: {
+    editText: 'تحرير',
+    previewText: 'عرض منسّق',
+    editTextTooltip: 'انقر لتحرير النص',
     unsavedMark: 'لم يُحفظ بعد',
     label: 'العنصر',
     labelFor: (id: string) => `العنصر ${id}`,
@@ -775,6 +778,19 @@ const raw: Texts = {
     moveFirst: (id: string) => `احفظ تغييراتك على ${id} أو تراجع عنها قبل نقله.`,
     moveFailed: (id: string, why: string) => `تعذّر نقل ${id}: ${why}`,
     problems: 'المشكلات',
+    problemsTitle: (count: number) => `المشكلات (${n(count)})`,
+    problemGroup: {
+      schema: 'ملف الإعدادات (schema.yaml)',
+      id: 'معرّفات مكرّرة',
+      links: 'روابط إلى عناصر غير موجودة',
+      parent: 'آباء غير موجودين',
+      file: 'ملفات تتعذّر قراءتها',
+      'file-name': 'اسم الملف لا يطابق المعرّف',
+      other: 'مشكلات أخرى'
+    } as Record<'schema' | 'id' | 'links' | 'parent' | 'file' | 'file-name' | 'other', string>,
+    fixAll: (count: number) => `إصلاح الكل (${n(count)})`,
+    severityError: 'خطأ',
+    severityWarning: 'تحذير',
     problemCount: (count: number, open: boolean) => `${problems(count)} ${open ? '▾' : '◂'}`,
     noProblems: 'لا مشكلات',
     schemaProblem: (path: string, message: string) => `schema.yaml ${path}: ${message}`,

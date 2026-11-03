@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import type { GitResult, GitState, ItemChange } from '../../../shared/api'
 import { errorMessage } from '../lib/hooks'
@@ -59,6 +59,30 @@ export function GitBar(props: {
   const closeAfter = (p: Promise<boolean>): void => {
     void p.then((ok) => ok && setBranches(false))
   }
+  // UX-01: a question (push offer, publish) is a small pop-over under the buttons — Esc or a click elsewhere
+  // (e.g. opening another window) closes it as "Cancel", so two questions never compete
+  const ask = useRef<HTMLDivElement>(null)
+  const asking = props.pushOffer || publishing !== null
+  const { onPushOffer, pushOffer } = props
+  useEffect(() => {
+    if (!asking) return
+    const cancel = (): void => {
+      if (pushOffer) onPushOffer('cancel')
+      setPublishing(null)
+    }
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') cancel()
+    }
+    const onDown = (e: PointerEvent): void => {
+      if (ask.current && !ask.current.contains(e.target as Node)) cancel()
+    }
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('pointerdown', onDown)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('pointerdown', onDown)
+    }
+  }, [asking, pushOffer, onPushOffer])
   if (!state) return null
   if (!state.available) {
     return place(
@@ -142,7 +166,7 @@ export function GitBar(props: {
           {T.git.push(state.ahead)}
         </button>
       </div>
-      <div className="gitbar__float">
+      <div className="gitbar__ask" ref={ask}>
       {publishing !== null && !state.hasRemote && (
         <form
           className="gitbar__notice gitbar__publish"
@@ -179,6 +203,9 @@ export function GitBar(props: {
           </span>
         </div>
       )}
+      </div>
+      {/* result notes float below every dialog and pop-over (UX-01) */}
+      <div className="gitbar__float">
       {notice && (
         <div className={notice.neutral ? 'gitbar__notice gitbar__notice--info' : notice.ok ? 'gitbar__notice' : 'gitbar__notice gitbar__notice--error'} role={notice.ok || notice.neutral ? 'status' : 'alert'}>
           <div className="gitbar__notice-text">

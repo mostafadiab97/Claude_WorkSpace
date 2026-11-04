@@ -834,6 +834,7 @@ const en = {
     signIn: 'Git could not sign in to the remote repository. Check that you have access, then sign in once (Git for Windows shows a sign-in window, or run "git push" in a terminal) and try again.',
     offline: 'The remote repository could not be reached. Check the network connection and try again — everything else works offline.',
     pullFirst: 'The remote has changes you do not have yet. Pull first, then push again.',
+    serverError: 'GitHub had a problem on its side (server error). Nothing was lost — try again in a minute.',
     timeout: 'Git took too long to answer and was stopped. Try again.',
     hook: (line: string) => `A Git hook of this repository refused the commit: ${line}`,
     generic: 'Git reported an error.',

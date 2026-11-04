@@ -42,10 +42,15 @@ export function explainGitError(e: unknown): string {
   if (/Authentication failed|could not read Username|terminal prompts disabled|Permission denied \(publickey\)|403/i.test(text)) {
     return T.gitMsg.signIn
   }
+  // GitHub itself failed ("! [remote rejected] main -> main (Internal Server Error)") — not "pull first" (0.15.2: the
+  // acceptance run was told to pull while GitHub had an outage)
+  if (/remote rejected[^\n]*\((internal server error|.*\b5\d\d\b)|internal server error|returned error: 5\d\d|HTTP 5\d\d/i.test(text)) {
+    return T.gitMsg.serverError
+  }
   if (/Could not resolve host|Failed to connect|Connection timed out|unable to access|Network is unreachable/i.test(text)) {
     return T.gitMsg.offline
   }
-  if (/rejected|fetch first|non-fast-forward/i.test(text)) {
+  if (/\[rejected\]|fetch first|non-fast-forward/i.test(text)) {
     return T.gitMsg.pullFirst
   }
   if (/ETIMEDOUT|timed out|SIGTERM/i.test(text)) return T.gitMsg.timeout

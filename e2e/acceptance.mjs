@@ -176,7 +176,16 @@ async function step4Push() {
     await gitbar.locator('.gitbar__notice', { hasText: 'Committed' }).waitFor()
     did('In the installed app: created the requirements folder and one requirement, committed them.')
     await gitbar.getByRole('button', { name: /^Push/ }).click()
-    await gitbar.locator('.gitbar__notice', { hasText: 'Pushed' }).waitFor({ timeout: 120_000 })
+    const pushed = gitbar.locator('.gitbar__notice', { hasText: 'Pushed' })
+    const outage = gitbar.locator('.gitbar__notice', { hasText: 'GitHub had a problem' })
+    await pushed.or(outage).waitFor({ timeout: 120_000 })
+    if (await outage.isVisible()) {
+      // GitHub itself failed (server error): the app says so; try once more after a short wait, as a user would
+      did('GitHub answered the push with a server error; the app said so. Waited 30 s and pushed again.')
+      await win.waitForTimeout(30_000)
+      await gitbar.getByRole('button', { name: /^Push/ }).click()
+      await pushed.waitFor({ timeout: 120_000 })
+    }
     const remote = execFileSync('git', ['ls-remote', pushUrl, `refs/heads/${branch}`], { encoding: 'utf8' }).trim()
     if (remote) did(`Pushed from the app: branch "${branch}" arrived on GitHub.`)
     else fail(`Push: branch "${branch}" is not on GitHub.`)

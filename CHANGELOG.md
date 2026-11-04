@@ -14,6 +14,8 @@ version it was about, and what it led to.
 - **Back sits on a bar of its own** (step 4): the entries scroll under the bar instead of showing around the button.
 - **Also:** the table's Text column no longer shows a stray `*` when a text starts with bold (found by the acceptance
   run's screenshot of 0.15.1).
+- **After the release (in the next version):** a GitHub outage while pushing was reported as "Pull first"; it now says
+  that GitHub had a problem and nothing was lost. The CI acceptance run of 0.15.1/0.15.2 had failed twice on it.
 
 ## 0.15.1 — 4 Nov 2026 — The owner's points on 0.15.0
 - **Owner (4 Nov 2026) on 0.15.0:** self-test 21/21 (52.0 s); steps 2, 4 (with a point), 5 passed; step 1 and 3 with

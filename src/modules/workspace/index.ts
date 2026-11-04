@@ -114,3 +114,4 @@ export interface WorkspaceService {
 export { createWorkspace, cacheFileName, type WorkspaceDeps }
 /** Pure ordering rules, exported for tests and future tools (import, merge). */
 export { compareOutline, documentOrderOf, outlineNumbers, planInsert, planSwap, planTidy } from './structure'
+export { explainGitError } from './gitOps'

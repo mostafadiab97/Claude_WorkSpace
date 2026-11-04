@@ -121,3 +121,6 @@ elements (strict-mode violation). Only `health` had been run locally after chang
   `renderer/lib/sessionState.ts` (0.15.1, self-test).
 - **A search box that closes on blur** closes when the user moves to a sibling control (the link type list). Mark the
   form with `data-keeps-search`; `ItemSearch` ignores blurs into it (0.15.1).
+- **A GitHub outage looked like "Pull first"** (0.15.2): `! [remote rejected] main -> main (Internal Server Error)`
+  matched `/rejected/`. `explainGitError` now checks server errors first (`T.gitMsg.serverError`); the acceptance run
+  pushes once more after 30 s when the app reports one.

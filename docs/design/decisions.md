@@ -287,3 +287,13 @@ The main trade-off is accepting a larger app download (Electron, roughly 100+ MB
 The owner added three helper agents for every theme version: code reviewer, QA tester, UI/UX reviewer (an architect
 review was discussed, not added for now). One builder writes the product; helpers check a frozen commit; the QA tester
 adds new test files only, in its own worktree. Details: `docs/AGENT-WORKFLOW.md`.
+
+## The new name: reqochet (C, 4 Nov 2026)
+
+- **Name: reqochet**, written all lower case everywhere (window, installer `reqochet-Setup-x.y.z.exe`, Start menu,
+  folders `.reqochet` and `%APPDATA%\reqochet`). The brand package (logo, icon, motion) is final and used unchanged.
+- **Clean switch** as decided 31 Oct (`docs/reviews/2026-10-31-rename-impact.md` §5): new app identity, the new
+  installer removes ReqMan, the user's settings are copied, `.reqman` → `.reqochet` offered as one Git commit.
+- Top bar: icon + name; start screen: the large name logo; loading animation at start and while opening, small busy
+  icon for long waits; the assistant "eyes" are shown now; Changes / Pull / Push move next to the branch button.
+- Details and open points: `docs/reviews/2026-11-04-rename-reqochet.md`.

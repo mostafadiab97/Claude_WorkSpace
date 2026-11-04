@@ -8,6 +8,7 @@ recorded in `docs/design/decisions.md` and `docs/design/roadmap.md` (source of t
 
 | Date | File | What it is | State |
 | --- | --- | --- | --- |
+| 4 Nov 2026 | `2026-11-04-public-release-repo.md` | How files would move to a public release repository (first time and per release), which files go, options — **open, not decided** | **Open** |
 | 4 Nov 2026 | `2026-11-04-rename-reqochet.md` | Rename to reqochet: the brand package analysed, open points R-01…R-07 | **In progress** |
 | 1 Nov 2026 | `2026-11-01-planning-discussion.md` | The planning discussion for the versions after 0.13: open points P-xx with answers, name candidates checked | **In progress** — themes 2–5 still to detail |
 | 3 Nov 2026 | `2026-11-03-security-check.md` | Security check before sharing: secrets in all history (none), personal data, app hardening, pipeline, libraries | Two fixes in 0.14.1; **one decision for the owner** (work e-mail in the sandbox history) |

@@ -23,13 +23,16 @@ by a Git rename the user commits). This file collects the open points for the re
 
 | ID | Point | Recommendation | Owner |
 | --- | --- | --- | --- |
-| R-01 | How the name is written in the app, installer, Start menu, files | lower-case **reqochet** everywhere (as the logo); installer `reqochet-Setup-x.y.z.exe`; folders `.reqochet`, `%APPDATA%\reqochet` | open |
-| R-02 | The clean switch from 31 Oct still holds? (new app identity, old ReqMan removed by the new installer, settings copied, `.reqman` → `.reqochet` offered as one Git commit) | yes, as decided | open |
-| R-03 | Top bar | small-cut icon + the name (on-light / on-dark file by mode), replacing the "ReqMan" logo and text | open |
-| R-04 | Start screen and About | the full name logo (≈ 240 px) above the buttons; About line in Settings → Environment | open |
-| R-05 | Loading animation | at start (splash) and while a repository opens; the small busy icon for long waits (pull, push, self-test); small spinners elsewhere stay | open |
-| R-06 | Assistant eyes | keep the files for the AI versions (last themes); not shown now — there is no assistant yet | open |
-| R-07 | The owner's request 4 Nov: Changes, Pull, Push next to the branch button | in the rename version (one layout change of the top bar) | open |
+| R-01 | How the name is written in the app, installer, Start menu, files | lower-case **reqochet** everywhere (as the logo); installer `reqochet-Setup-x.y.z.exe`; folders `.reqochet`, `%APPDATA%\reqochet` | **C: all lower case** |
+| R-02 | The clean switch from 31 Oct still holds? (new app identity, old ReqMan removed by the new installer, settings copied, `.reqman` → `.reqochet` offered as one Git commit) | yes, as decided | **C: yes** |
+| R-03 | Top bar | small-cut icon + the name (on-light / on-dark file by mode), replacing the "ReqMan" logo and text | **C: yes** |
+| R-04 | Start screen and About | the full name logo (≈ 240 px) above the buttons; About line in Settings → Environment | **C: yes** |
+| R-05 | Loading animation | at start (splash) and while a repository opens; the small busy icon for long waits (pull, push, self-test); small spinners elsewhere stay | **C: yes to all** — the owner has not seen the animation yet: a logo adjusting step may follow |
+| R-06 | Assistant eyes | keep the files for the AI versions (last themes); not shown now — there is no assistant yet | **C: show them now** ("a beautiful interface") — where: see R-08 |
+| R-07 | The owner's request 4 Nov: Changes, Pull, Push next to the branch button | in the rename version (one layout change of the top bar) | **C: in the rename version** |
+
+| R-08 | Where the eyes appear (follows R-06) | the app's face in the top bar (small eyes instead of the plain icon): idle normally, **thinking** while the app works (opening, pull, push, self-test, import), still when the window is in the background; large eyes on the start screen beside the name | open |
+| R-09 | A brand / logo designer helper agent (owner 4 Nov) | yes: a fourth helper for brand work — reviews how logo, icon and motion sit in the app (sizes, clear space, light/dark, Arabic) and proposes adjustments; writes `docs/reviews/agents/<version>-brand.md`; runs for the rename version and when the brand changes | open |
 
 ## Technical decisions (Claude, explained)
 
@@ -46,3 +49,7 @@ by a Git rename the user commits). This file collects the open points for the re
 ## Discussion log
 
 - 4 Nov 2026 — name chosen: **reqochet**; brand package received.
+- 4 Nov 2026 — R-01 all lower case; R-02 clean switch as decided 31 Oct; R-03 icon + name in the top bar; R-04 logo on
+  the start screen; R-05 loading animation at start, while opening, small busy icon for long waits; R-06 eyes shown
+  now; R-07 Changes / Pull / Push next to the branch button in the rename version. The owner has not seen the
+  animation yet — a logo adjusting step may follow, with a brand helper agent (R-09).

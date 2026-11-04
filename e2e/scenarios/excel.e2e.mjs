@@ -47,7 +47,11 @@ await scenario('E2E excel', async (ctx) => {
   await wizard.getByText('No problems found.').waitFor()
   await t.shot('excel-2-check')
   await wizard.getByRole('button', { name: 'Import 59 items and commit' }).click()
-  await win.locator('.table-notice--ok', { hasText: 'Imported: 59 new' }).waitFor()
+  // Windows runners can be slow here (git init + 59 files + commit); on a timeout say what the window showed
+  await win.locator('.table-notice--ok', { hasText: 'Imported: 59 new' }).waitFor({ timeout: 90000 }).catch(async (e) => {
+    const shown = await win.locator('.import, .table-notice, .error, [role="alert"]').allTextContents().catch(() => [])
+    throw new Error(`import result not shown; the window showed: ${shown.join(' | ').slice(0, 600)}`, { cause: e })
+  })
   check((await win.locator('.table-notice--ok').textContent()).includes('Committed'), 'the import is the first commit')
   check(gitIn(project, 'log', '--format=%s').trim() === 'Imported from customer-requirements.xlsx', 'commit message names the file')
   await win.getByRole('button', { name: 'Expand all' }).click()

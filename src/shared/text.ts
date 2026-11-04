@@ -615,6 +615,7 @@ const en = {
     theirs: 'Theirs (being pulled in)',
     empty: '(empty)',
     keepYours: 'Keep yours',
+    sideLabel: (action: string, value: string) => `${action}: ${value}`,
     takeTheirs: 'Take theirs',
     edit: 'Write it myself',
     editLabel: (label: string) => `Your value for ${label}`,
@@ -629,7 +630,7 @@ const en = {
   changesPanel: {
     author: (name: string) => `Author: ${name}`,
     changeIdentity: 'Change…',
-    changeIdentityHint: 'The name and e-mail address Git writes into your commits in this repository (only here, not for your other repositories).',
+    changeIdentityHint: 'The name and e-mail address Git writes into your commits in this repository. Your other repositories keep their own settings.',
     moreCommit: 'More ways to commit',
     commitAndPush: (count: number) => `Commit ${count} change${s(count)} and push`,
     label: 'Changes',
@@ -644,7 +645,7 @@ const en = {
     discardNewTooltip: 'Delete this new, never committed item',
     discardTooltip: 'Go back to the last committed version',
     discard: 'Discard',
-    whoAreYou: 'Git does not know who you are yet. Your name and e-mail are stored for this repository only and appear in the history of every change you commit.',
+    whoAreYou: 'Git does not know who you are yet. Your name and e-mail are stored for this repository (and as your Git default if you have none yet) and appear in the history of every change you commit.',
     yourName: 'Your name',
     yourEmail: 'Your e-mail',
     message: 'Commit message',
@@ -757,7 +758,7 @@ const en = {
   },
 
   workspace: {
-    editorWidth: 'Drag to change the editor width (double-click: automatic)',
+    editorWidth: 'Drag or use ← → to change the editor width (double-click or Home: automatic)',
     filters: 'Filters',
     filtersTooltip: 'Filter by type, field values and links',
     items: 'Items',
@@ -811,6 +812,7 @@ const en = {
     filterIs: (name: string, value: string) => `${name} = ${value}`,
     filteredBy: (what: string) => `Filtered: ${what}`,
     clearFiltersStatus: 'Show all items again',
+    filterSep: ', ',
     lastPull: (time: string) => `Last pull: ${time}`,
     dragHint: 'Drag a row onto another row to move it there, with everything below it',
     notGit: 'Not a Git repository',

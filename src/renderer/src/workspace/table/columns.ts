@@ -101,19 +101,30 @@ export function orderColumns<C extends { key: string }>(cols: C[], order: string
 
 /** The visible optional columns in the user's order — also what the export offers by default. */
 export function shownColumnKeys(schema: Schema, prefs: ColumnPrefs): string[] {
-  return orderColumns(optionalColumns(schema), prefs.order.length ? prefs.order : defaultOrder(schema))
-    .filter((c) => !prefs.hidden.has(c.key))
-    .map((c) => c.key)
+  // No. comes first, as in the table (QA-03); the rest in the user's order
+  const rest = orderColumns(optionalColumns(schema).filter((c) => c.key !== 'number'), columnOrder(schema, prefs.order))
+  return ['number', ...rest.map((c) => c.key)].filter((k) => !prefs.hidden.has(k))
+}
+
+/**
+ * The saved order, or the default one. An order saved before 0.15 has no "id" (the Columns menu could not move it):
+ * ID then takes its default place before Text instead of falling to the very end (CR-04).
+ */
+export function columnOrder(schema: Schema, saved: string[]): string[] {
+  if (saved.length === 0) return defaultOrder(schema)
+  if (saved.includes('id')) return saved
+  const text = saved.indexOf('text')
+  return text < 0 ? [...saved, 'id'] : [...saved.slice(0, text), 'id', ...saved.slice(text)]
 }
 
 export function columnsFor(schema: Schema, prefs: ColumnPrefs = { hidden: new Set(), order: [] }): Column[] {
   const all: Column[] = [
     // the outline number (calculated, never stored — O-03); sorting by it = document order
-    { key: 'number', label: T.columns.number, minPx: 72, grow: 0, value: (i) => i.number ?? '' },
-    { key: 'title', label: T.columns.title, minPx: 280, grow: 4, value: (i) => i.title || T.common.noTitle },
+    { key: 'number', label: T.columns.number, minPx: 88, grow: 0, value: (i) => i.number ?? '' },
+    { key: 'title', label: T.columns.title, minPx: 240, grow: 4, value: (i) => i.title || T.common.noTitle },
     // short type label in the table (full name in the tooltip); headings show no type — they stand out by weight (UX-03)
     { key: 'type', label: T.columns.type, minPx: 84, grow: 0.6, value: (i) => (isHeading(schema, i.type) ? '' : typeShort(schema, i.type)), tip: (i) => typeName(schema, i.type) },
-    { key: 'links', label: T.columns.links, minPx: 72, grow: 0, value: linkSummary, warn: (i) => i.suspectCount > 0 },
+    { key: 'links', label: T.columns.links, minPx: 96, grow: 0, value: linkSummary, warn: (i) => i.suspectCount > 0 },
     ...schema.fields.map<Column>((f) => ({
       key: `field:${f.id}`,
       label: fieldLabel(f),
@@ -123,13 +134,13 @@ export function columnsFor(schema: Schema, prefs: ColumnPrefs = { hidden: new Se
     })),
     { key: 'id', label: T.columns.id, minPx: 110, grow: 0, value: (i) => i.id },
     // UX-08: one line without Markdown markers (the first 400 characters are plenty for a cell)
-    { key: 'text', label: T.columns.text, minPx: 200, grow: 2, value: (i) => plainText(i.text.slice(0, 400)) }
+    { key: 'text', label: T.columns.text, minPx: 160, grow: 2, value: (i) => plainText(i.text.slice(0, 400)) }
   ]
   // No. and Title stay at the front; the rest follow the user's order — by default the descriptive columns first
   // (Type, Status, Links, other fields), then ID and Text (UI review UX-03, owner's decision 3 Nov 2026)
   const [number, title, ...rest] = all
   const widths = prefs.widths ?? {}
-  const order = prefs.order.length ? prefs.order : defaultOrder(schema)
+  const order = columnOrder(schema, prefs.order)
   return [number as Column, title as Column, ...orderColumns(rest, order)]
     .filter((c) => !prefs.hidden.has(c.key))
     .map((c) => (widths[c.key] !== undefined ? { ...c, width: widths[c.key] } : c))

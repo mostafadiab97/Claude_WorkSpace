@@ -2,10 +2,11 @@
 
 /** Shortens a long path in the middle, so both the drive and the folder name stay visible. Pure. */
 export function middleEllipsis(text: string, max: number): string {
-  if (text.length <= max) return text
+  const chars = Array.from(text) // whole characters, so an emoji is never cut in half
+  if (chars.length <= max) return text
   const keep = max - 1
   const head = Math.ceil(keep * 0.4)
-  return `${text.slice(0, head)}…${text.slice(text.length - (keep - head))}`
+  return `${chars.slice(0, head).join('')}…${chars.slice(chars.length - (keep - head)).join('')}`
 }
 
 const SESSIONS_KEY = 'reqman.sessions'

@@ -28,8 +28,8 @@ export function problemsOf(info: Pick<RepoInfo, 'schemaProblems' | 'issues'>): P
   return [
     ...info.schemaProblems.map((p): Problem => ({ key: `s-${p.path}`, text: T.workspace.schemaProblem(p.path, p.message), message: p.message, subject: p.path, group: 'schema', severity: 'error' })),
     ...info.issues.map(
-      (i): Problem => ({
-        key: `i-${i.itemId}-${i.path}-${i.message}`,
+      (i, n): Problem => ({
+        key: `i-${n}-${i.itemId}-${i.path}-${i.message}`, // the index keeps keys unique (two files with one ID)
         text: `${i.itemId}: ${i.message}`,
         message: i.message,
         group: groupOf(i.path),

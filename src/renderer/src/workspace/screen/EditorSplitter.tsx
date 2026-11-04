@@ -40,16 +40,31 @@ export function useEditorWidth(): { style: CSSProperties; handle: ReactElement }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
   }
+  // keyboard (code review CR-10 / UXN-09): ← → change the width by 24 px (towards the table = wider), Home = default
+  const onKey = (e: React.KeyboardEvent): void => {
+    const toTable = isRtlDocument() ? 'ArrowRight' : 'ArrowLeft'
+    const toEdge = isRtlDocument() ? 'ArrowLeft' : 'ArrowRight'
+    if (e.key === 'Home') setWidth(null)
+    else if (e.key === toTable || e.key === toEdge) {
+      const now = width ?? 440
+      setWidth(Math.round(Math.max(MIN, Math.min(now + (e.key === toTable ? 24 : -24), window.innerWidth * 0.7))))
+    } else return
+    e.preventDefault()
+  }
   const handle = (
     <div
       className="editor-splitter"
       role="separator"
+      tabIndex={0}
       aria-orientation="vertical"
       aria-label={T.workspace.editorWidth}
+      aria-valuenow={width ?? undefined}
       title={T.workspace.editorWidth}
       onPointerDown={start}
+      onKeyDown={onKey}
       onDoubleClick={() => setWidth(null)}
     />
   )
-  return { style: width ? ({ '--rm-editor-width': `${width}px` } as CSSProperties) : {}, handle }
+  // never more than 60 % of the window, so a width saved on a big screen cannot squeeze the table away (CR-10)
+  return { style: width ? ({ '--rm-editor-width': `min(${width}px, 60vw)` } as CSSProperties) : {}, handle }
 }

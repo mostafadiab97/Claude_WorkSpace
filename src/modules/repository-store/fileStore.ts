@@ -96,8 +96,11 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
           }))
         )
         const text = doc.toString({ lineWidth: 0 })
+        // only the fields written here must be clean; a problem elsewhere in the file (e.g. an item type's label) is
+        // the team's to fix and must not block editing fields (QA-02 in 0.15)
         const check = parseSchema(text)
-        if (check.problems.length > 0) throw new Error(check.problems.map((p) => `${p.path}: ${p.message}`).join(' '))
+        const own = check.problems.filter((p) => p.path === 'fields' || p.path.startsWith('fields['))
+        if (own.length > 0) throw new Error(own.map((p) => `${p.path}: ${p.message}`).join(' '))
         await atomicWrite(schemaFile, text)
       },
 

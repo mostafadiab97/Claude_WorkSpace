@@ -24,7 +24,7 @@ export function str(v: unknown, what: string, max = MAX): string {
 /** An absolute path to a file with one of the allowed extensions (a file dropped on the import window). */
 export function importPath(v: unknown, extensions: readonly string[]): string {
   const p = str(v, 'file path')
-  const absolute = /^[A-Za-z]:[\\/]/.test(p) || p.startsWith('/') || p.startsWith('\\\\')
+  const absolute = /^[A-Za-z]:[\\/]/.test(p) || p.startsWith('/') || (p.startsWith('\\\\') && !/^\\\\[.?]\\/.test(p))
   const ext = p.slice(p.lastIndexOf('.') + 1).toLowerCase()
   if (!absolute || p.includes('\0') || !extensions.includes(ext)) return bad('file')
   return p
@@ -154,11 +154,12 @@ export function item(v: unknown): Item {
 const FIELD_TYPES = ['text', 'enum', 'list', 'number', 'date'] as const
 
 /** Texts per language (`{ ar: '…' }`), as in schema.yaml (UX-22). */
-function labels(v: unknown, what: string): Record<string, string> {
+const LANG = /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/ // as schema.yaml accepts (modules/schema/parse.ts)
+function labels(v: unknown, what: string, keysAreLanguages = true): Record<string, string> {
   if (!isObj(v)) return bad(what)
   const entries = Object.entries(v)
-  if (entries.length > 1000) return bad(what)
-  return Object.fromEntries(entries.map(([k, t]) => [str(k, what, 200), str(t, what, 500)]))
+  if (entries.length > (keysAreLanguages ? 50 : 1000)) return bad(what)
+  return Object.fromEntries(entries.map(([k, t]) => [keysAreLanguages && !LANG.test(k) ? bad(what) : str(k, what, 200), str(t, what, 500)]))
 }
 
 export function fieldDefs(v: unknown): FieldDef[] {
@@ -170,8 +171,8 @@ export function fieldDefs(v: unknown): FieldDef[] {
     if (f.default !== undefined && f.default !== '') def.default = str(f.default, 'default value')
     if (f.labels !== undefined) def.labels = labels(f.labels, 'field labels')
     if (f.optionLabels !== undefined) {
-      if (!isObj(f.optionLabels)) return bad('choice labels')
-      def.optionLabels = Object.fromEntries(Object.entries(f.optionLabels).map(([lang, m]) => [str(lang, 'language', 16), labels(m, 'choice labels')]))
+      if (!isObj(f.optionLabels) || Object.keys(f.optionLabels).length > 50) return bad('choice labels')
+      def.optionLabels = Object.fromEntries(Object.entries(f.optionLabels).map(([lang, m]) => [LANG.test(lang) ? lang : bad('language'), labels(m, 'choice labels', false)]))
     }
     return def
   })

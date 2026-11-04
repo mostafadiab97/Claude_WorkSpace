@@ -8,7 +8,7 @@ import { useRowDrag } from './table/drag'
 import { useFlatRows, useTreeRows, type Row } from './table/rows'
 import { isRtlDocument, useLanguage } from '../lib/language'
 
-export { defaultOrder, optionalColumns, orderColumns, shownColumnKeys, columnsFor, withWidth, linkSummary, type Column, type ColumnPrefs } from './table/columns'
+export { columnOrder, defaultOrder, optionalColumns, orderColumns, shownColumnKeys, columnsFor, withWidth, linkSummary, type Column, type ColumnPrefs } from './table/columns'
 export type { Row } from './table/rows'
 
 const ROW_HEIGHT = 34
@@ -325,7 +325,9 @@ export function ItemTable(props: {
                             ) : (
                               <span className="tree__toggle tree__toggle--leaf" aria-hidden="true" />
                             )}
-                            <span className={isHeading(schema, item.type) ? 'table__text table__text--heading' : 'table__text'}>{c.value(item)}</span>
+                            <span className={isHeading(schema, item.type) ? 'table__text table__text--heading' : 'table__text'} dir="auto">
+                              {c.value(item)}
+                            </span>
                             {item.childCount > 0 && !open && <span className="table__count">{item.childCount.toLocaleString('en')}</span>}
                           </span>
                         ) : (
@@ -334,6 +336,8 @@ export function ItemTable(props: {
                             role="gridcell"
                             className={`table__td${c.key === 'id' ? ' table__td--id' : ''}${c.key === 'number' ? ' table__td--number' : ''}${c.key === 'links' ? ' table__td--links' : ''}${c.warn?.(item) ? ' table__td--warn' : ''}`}
                             title={c.key === 'links' ? linkTitle(item) : (c.tip?.(item) ?? c.value(item))}
+                            // user content takes its own direction, so it is cut at the right end in either window (UX-02)
+                            dir={c.key === 'number' || c.key === 'id' || c.key === 'links' ? undefined : 'auto'}
                           >
                             {c.value(item)}
                           </span>

@@ -17,6 +17,7 @@ import { ProblemList, problemsOf } from '../workspace/screen/Problems'
 import { Toolbar } from '../workspace/screen/Toolbar'
 import { useFilters } from '../workspace/screen/useFilters'
 import { middleEllipsis, showDragTip } from '../lib/statusbar'
+import { workspaceHasKeyboard } from '../lib/shortcuts'
 import { useChanges } from '../workspace/screen/useChanges'
 import { useGit } from '../workspace/screen/useGit'
 
@@ -122,11 +123,12 @@ export function WorkspaceScreen({
 
   // Keyboard shortcuts (UX-25; listed in the user guide, section 18). Ctrl+S and Alt+↑/↓ live in the editor.
   const searchRef = useRef<HTMLInputElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
   const newRef = useRef<HTMLSelectElement>(null)
   const toggleRef = useRef<() => void>(() => {})
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
-      if (!(e.ctrlKey || e.metaKey) || e.altKey) return
+      if (!(e.ctrlKey || e.metaKey) || e.altKey || !workspaceHasKeyboard(rootRef.current)) return
       const k = e.key.toLowerCase()
       if (k === 'f' && !e.shiftKey) {
         e.preventDefault()
@@ -217,7 +219,7 @@ export function WorkspaceScreen({
   const problems = problemsOf(info)
 
   return (
-    <div className="workspace" style={editorWidth.style}>
+    <div className="workspace" style={editorWidth.style} ref={rootRef}>
       <section className="workspace__main" aria-label={T.workspace.items}>
         <GitBar
           slot={gitSlot}

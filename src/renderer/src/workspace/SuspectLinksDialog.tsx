@@ -96,15 +96,15 @@ export function SuspectLinksDialog(props: {
                   <button type="button" className="link-btn tree__id" onClick={() => props.onOpen(l.id)}>
                     {l.id}
                   </button>
-                  <button type="button" className="link-btn suspect__name" aria-expanded={open.has(key(l))} title={T.suspect.showText} onClick={() => toggle(l)}>
+                  <button type="button" className="link-btn suspect__name" dir="auto" aria-expanded={open.has(key(l))} title={T.suspect.showText} onClick={() => toggle(l)}>
                     {open.has(key(l)) ? '▾' : '▸'} {l.title || T.common.noTitle}
                   </button>
                   {/* UX-16: one segmented control per link; the chosen half is filled */}
-                  <span className="segmented suspect__choice" role="group" aria-label={T.suspect.choiceFor(l.id)}>
-                    <button type="button" className={c === 'keep' ? 'segmented__part segmented__part--keep' : 'segmented__part'} aria-pressed={c === 'keep'} onClick={() => set(l, 'keep')} title={T.suspect.keepTooltip}>
+                  <span className="choice-pair suspect__choice" role="group" aria-label={T.suspect.choiceFor(l.id)}>
+                    <button type="button" className={c === 'keep' ? 'choice-pair__part choice-pair__part--keep' : 'choice-pair__part'} aria-pressed={c === 'keep'} onClick={() => set(l, 'keep')} title={T.suspect.keepTooltip}>
                       {T.suspect.keep}
                     </button>
-                    <button type="button" className={c === 'unlink' ? 'segmented__part segmented__part--unlink' : 'segmented__part'} aria-pressed={c === 'unlink'} onClick={() => set(l, 'unlink')} title={T.suspect.unlinkTooltip(l.id)}>
+                    <button type="button" className={c === 'unlink' ? 'choice-pair__part choice-pair__part--unlink' : 'choice-pair__part'} aria-pressed={c === 'unlink'} onClick={() => set(l, 'unlink')} title={T.suspect.unlinkTooltip(l.id)}>
                       {T.suspect.unlink}
                     </button>
                   </span>

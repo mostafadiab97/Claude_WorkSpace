@@ -116,7 +116,7 @@ function PartRow(props: { part: MergePart; choice: MergeChoice | undefined; onCh
             type="button"
             className={choice === side ? 'merge__side merge__side--picked' : 'merge__side'}
             aria-pressed={choice === side}
-            aria-label={side === 'mine' ? T.mergeDialog.keepYours : T.mergeDialog.takeTheirs}
+            aria-label={T.mergeDialog.sideLabel(side === 'mine' ? T.mergeDialog.keepYours : T.mergeDialog.takeTheirs, (side === 'mine' ? part.mine : part.theirs) || T.mergeDialog.empty)}
             title={side === 'mine' ? T.mergeDialog.keepYours : T.mergeDialog.takeTheirs}
             onClick={() => props.onChoose(choice === side ? undefined : side)}
           >

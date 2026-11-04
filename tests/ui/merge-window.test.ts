@@ -31,7 +31,9 @@ describe('merge window', () => {
       { name: 'feature/x', kind: 'branch' as const, current: false },
       { name: 'origin/main', kind: 'remote' as const, current: false }
     ]
-    expect(branchGroups(list, '')).toEqual({ local: [list[0], list[1]], remote: [list[2]] })
+    expect(branchGroups(list, '')).toEqual({ local: [list[0], list[1]], remote: [] }) // origin/main is also here (UXN-05)
+    expect(branchGroups([list[1]!, { name: 'origin/release', kind: 'remote' as const, current: false }], '', ['main']).remote.map((b) => b.name)).toEqual(['origin/release'])
+    expect(branchGroups([list[2]!], '', ['main']).remote).toEqual([])
     expect(branchGroups(list, 'FEAT').local.map((b) => b.name)).toEqual(['feature/x'])
   })
   it('the branch preset shows the range it was given', () => {

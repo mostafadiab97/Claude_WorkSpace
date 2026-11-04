@@ -3,7 +3,8 @@ import { getLanguage } from '../../../shared/text'
 
 // Names from schema.yaml in the window's language (UI review UX-22): `labels: { ar: … }` next to `name`. Read at
 // render time — the language switch swaps the language in place (never keep the result in a module constant).
-const inLanguage = (name: string, labels: Labels | undefined): string => labels?.[getLanguage()] ?? name
+const own = (m: Labels | undefined, key: string): string | undefined => (m && Object.hasOwn(m, key) ? m[key] : undefined)
+const inLanguage = (name: string, labels: Labels | undefined): string => own(labels, getLanguage()) ?? name
 
 export const typeLabel = (t: ItemTypeDef): string => inLanguage(t.name, t.labels)
 export const typeName = (schema: Schema, id: string): string => {
@@ -14,14 +15,18 @@ export const typeName = (schema: Schema, id: string): string => {
 export const typeShort = (schema: Schema, id: string): string => {
   const t = schema.itemTypes.find((x) => x.id === id)
   if (!t) return id
-  return t.labels?.[getLanguage()] ?? t.short ?? t.name
+  return own(t.labels, getLanguage()) ?? t.short ?? t.name
 }
 /** Headings / information items (not requirements). */
 export const isHeading = (schema: Schema, id: string): boolean => schema.itemTypes.find((x) => x.id === id)?.requirement === false
 
 export const fieldLabel = (f: FieldDef): string => inLanguage(f.name, f.labels)
 /** How a choice is shown; the stored value stays the choice itself. */
-export const optionLabel = (f: FieldDef | undefined, value: string): string => f?.optionLabels?.[getLanguage()]?.[value] ?? value
+export const optionLabel = (f: FieldDef | undefined, value: string): string => {
+  const lang = getLanguage()
+  const byLang = f?.optionLabels && Object.hasOwn(f.optionLabels, lang) ? f.optionLabels[lang] : undefined
+  return own(byLang, value) ?? value
+}
 
 export const linkLabel = (t: LinkTypeDef, reverse = false): string => (reverse ? inLanguage(t.reverseName, t.reverseLabels) : inLanguage(t.name, t.labels))
 export const linkName = (schema: Schema, id: string, reverse = false): string => {

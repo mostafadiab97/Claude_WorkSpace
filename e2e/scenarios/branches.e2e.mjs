@@ -36,7 +36,8 @@ await scenario('E2E branches', async (ctx) => {
   const panel = gitbar.getByRole('dialog', { name: 'Branches' })
   await branchButton.click()
   await panel.waitFor()
-  check((await panel.getByRole('list', { name: 'Only on GitHub' }).textContent()).includes('main'), 'the panel lists the other branches (here: the one on GitHub)')
+  // 0.15 (UXN-05): main on GitHub is not "only on GitHub" — it is the current branch here, so no other branch is listed
+  check((await panel.getByRole('list', { name: 'Only on GitHub' }).count()) === 0, 'the branch on GitHub that is also here is not listed as "only on GitHub"')
   check((await panel.locator('.branches__current').textContent()).includes('main'), '…the current branch is on top with its actions')
   await panel.getByLabel('New branch name').fill('feature/door')
   await panel.getByRole('button', { name: 'Create and switch' }).click()

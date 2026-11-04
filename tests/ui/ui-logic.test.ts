@@ -40,11 +40,11 @@ describe('column widths (table/columns.ts)', () => {
   it('a dragged width is fixed, other columns keep growing; double-click returns to automatic', () => {
     const auto = columnsFor(bare, { hidden: new Set(['type', 'links', 'text']), order: [] })
     // 0.15 (UI review UX-03): No. and Title first, ID after the descriptive columns
-    expect(columnTemplate(auto)).toBe('72px minmax(280px, 4fr) 110px')
+    expect(columnTemplate(auto)).toBe('88px minmax(240px, 4fr) 110px')
     const widths = withWidth(undefined, 'number', 160.4)
     const wide = columnsFor(bare, { hidden: new Set(['type', 'links', 'text']), order: [], widths })
-    expect(columnTemplate(wide)).toBe('160px minmax(280px, 4fr) 110px')
-    expect(tableMinWidth(wide)).toBe(160 + 280 + 110)
+    expect(columnTemplate(wide)).toBe('160px minmax(240px, 4fr) 110px')
+    expect(tableMinWidth(wide)).toBe(160 + 240 + 110)
     expect(withWidth(widths, 'number', null)).toEqual({})
     // never narrower than a grip, never absurdly wide
     expect(withWidth({}, 'title', 3)).toEqual({ title: 48 })
@@ -151,7 +151,7 @@ describe('Compare default range (compareRange.ts)', () => {
 
 describe('export columns and problems list', () => {
   it('exports the visible optional columns in the user\'s order', () => {
-    expect(shownColumnKeys(schema, { hidden: new Set(['field:owner']), order: ['text', 'type'] })).toEqual(['text', 'type', 'number', 'links', 'field:status'])
+    expect(shownColumnKeys(schema, { hidden: new Set(['field:owner']), order: ['text', 'type'] })).toEqual(['number', 'text', 'type', 'links', 'field:status']) // No. first, as in the table (0.15, QA-03)
   })
   it('file problems are not clickable; renamed files offer a fix', () => {
     const p = problemsOf({

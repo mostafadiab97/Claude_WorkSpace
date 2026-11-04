@@ -202,9 +202,10 @@ describe('Git in the workspace (two PCs)', { timeout: 120_000 }, () => {
       expect(c).toMatchObject({ ok: false, message: expect.stringMatching(/name and e-mail/) })
       expect((await b.ws.setGitIdentity('Bob', 'not-an-email')).ok).toBe(false)
       expect((await b.ws.setGitIdentity('Bob', 'bob@example.com')).ok).toBe(true)
-      // this repository only — never the global settings, which also sign the user's other repositories (0.15)
+      // this repository, and — because there was no global identity yet — the global default too (0.15, CR-05);
+      // an existing global identity is never changed (tests/qa-0.15.0-core.test.ts)
       expect(await readFile(join(b.root, '.git', 'config'), 'utf8')).toMatch(/name = Bob/)
-      await expect(readFile(join(home, '.gitconfig'), 'utf8')).rejects.toThrow()
+      expect(await readFile(join(home, '.gitconfig'), 'utf8')).toMatch(/name = Bob/)
 
       await edit(a.ws, sys, (i) => (i.text = 'Alice, committed'))
       await a.ws.commit('Alice')

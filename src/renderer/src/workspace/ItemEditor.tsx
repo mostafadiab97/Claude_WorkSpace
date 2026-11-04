@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ItemDetails, LinkInfo } from '../../../shared/api'
 import type { FieldDef, FieldValue, Item, ItemIssue, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { renderItemText } from '../lib/markdown'
+import { focusUsesArrows, workspaceHasKeyboard } from '../lib/shortcuts'
 import { fieldLabel, optionLabel, typeLabel, typeName } from '../lib/schema'
 import { HistoryView } from './HistoryView'
 import { LinksSection } from './LinksSection'
@@ -47,6 +48,7 @@ export function ItemEditor(props: {
   const [removeIncoming, setRemoveIncoming] = useState(true)
   /** Links from other items to review after a save changed the type, title or text (O-04). */
   const [review, setReview] = useState<{ incoming: LinkInfo[]; before: Item; after: Item } | null>(null)
+  const rootRef = useRef<HTMLElement>(null)
   const isNew = target.kind === 'draft'
 
   const load = useCallback(async () => {
@@ -85,6 +87,9 @@ export function ItemEditor(props: {
   // the Text field: formatted while the saved text is shown and nobody is typing in it (UX-08)
   const [editingText, setEditingText] = useState(false)
   const textPreview = form !== null && base !== null && !editingText && form.text.trim() !== '' && form.text === base.text
+  // formatted once per text, not on every keystroke in another field (code review CR-09)
+  const previewText = textPreview ? form.text : ''
+  const previewHtml = useMemo(() => (previewText ? renderItemText(previewText) : ''), [previewText])
   const dirtyRef = useRef(dirty)
   useEffect(() => {
     dirtyRef.current = dirty
@@ -107,6 +112,12 @@ export function ItemEditor(props: {
     }
   }, [reloadToken, target])
   useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange])
+  // "Saved ✓" shows for 2 seconds, then the button is plain "Save" again (UX-15)
+  useEffect(() => {
+    if (status.kind !== 'saved') return
+    const t = window.setTimeout(() => setStatus((st) => (st.kind === 'saved' ? { kind: 'idle' } : st)), 2000)
+    return () => window.clearTimeout(t)
+  }, [status.kind])
 
   const save = useCallback(async (): Promise<boolean> => {
     if (!form || status.kind === 'saving') return false
@@ -117,14 +128,16 @@ export function ItemEditor(props: {
         const before = base
         const saved = r.details.item
         const content = before !== null && (before.title !== saved.title || before.text !== saved.text || before.type !== saved.type)
-        if (!isNew && content && before && r.details.incoming.length > 0) setReview({ incoming: r.details.incoming, before, after: saved })
+        const asks = !isNew && content && before !== null && r.details.incoming.length > 0
+        if (asks) setReview({ incoming: r.details.incoming, before, after: saved })
         setDetails(r.details)
         setBase(r.details.item)
         setForm(r.details.item)
         setIssues(r.details.issues)
         setStatus({ kind: 'saved' })
         props.onSaved(r.details.item.id)
-        return true
+        // saved; but when the links check opens, "Save and continue" waits for it (code review CR-03)
+        return !asks
       } else {
         setIssues(r.issues ?? [])
         setStatus({ kind: 'error', message: r.message, conflict: r.reason === 'conflict' })
@@ -148,7 +161,7 @@ export function ItemEditor(props: {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
         e.preventDefault()
         if (dirty) void save()
-      } else if (e.altKey && !e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && !dirty && !isNew) {
+      } else if (e.altKey && !e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && !dirty && !isNew && !focusUsesArrows() && workspaceHasKeyboard(rootRef.current)) {
         // Alt+↑ / Alt+↓ moves the open item among its siblings (UX-25)
         e.preventDefault()
         if (!form) return
@@ -200,7 +213,7 @@ export function ItemEditor(props: {
   }
 
   return (
-    <aside className="editor scroll" aria-label={T.editor.labelFor(form.id)}>
+    <aside className="editor scroll" aria-label={T.editor.labelFor(form.id)} ref={rootRef}>
       <header className="editor__header">
         <div>
           <div className="editor__heading">
@@ -241,7 +254,7 @@ export function ItemEditor(props: {
       <div className="editor__body">
         <label className="field">
           <span className="field__label">{T.editor.title}</span>
-          <input className="input" value={form.title} autoFocus={isNew} onChange={(e) => set({ title: e.target.value })} placeholder={T.editor.titlePlaceholder} />
+          <input className="input" dir="auto" value={form.title} autoFocus={isNew} onChange={(e) => set({ title: e.target.value })} placeholder={T.editor.titlePlaceholder} />
         </label>
 
         <div className="field-grid">
@@ -283,28 +296,34 @@ export function ItemEditor(props: {
               title={T.editor.editTextTooltip}
               aria-label={T.editor.editTextTooltip}
               onClick={(e) => {
-                if (!(e.target instanceof HTMLAnchorElement)) setEditingText(true)
+                // a click on a link (or on bold text inside one) opens the link, not the text box (CR-06)
+                if (!(e.target instanceof Element && e.target.closest('a'))) setEditingText(true)
               }}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && e.target === e.currentTarget) {
                   e.preventDefault()
                   setEditingText(true)
                 }
               }}
-              dangerouslySetInnerHTML={{ __html: renderItemText(form.text) }}
+              dangerouslySetInnerHTML={{ __html: previewHtml }}
             />
           </div>
         ) : (
-          <label className="field">
-            <span className="field__label field__label--row">
-              {T.editor.text}
+          <div className="field">
+            {/* the label names only the text box; the button sits beside it (CR-06) */}
+            <span className="field__label--row">
+              <label className="field__label" htmlFor="editor-text">
+                {T.editor.text}
+              </label>
               {form.text.trim() !== '' && base !== null && form.text === base.text && (
-                <button type="button" className="link-btn" onClick={() => setEditingText(false)}>
+                <button type="button" className="link-btn" onMouseDown={(e) => e.preventDefault()} onClick={() => setEditingText(false)}>
                   {T.editor.previewText}
                 </button>
               )}
             </span>
             <textarea
+              id="editor-text"
+              dir="auto"
               className="input textarea"
               value={form.text}
               autoFocus={editingText}
@@ -313,7 +332,7 @@ export function ItemEditor(props: {
               placeholder={T.editor.textPlaceholder}
               rows={8}
             />
-          </label>
+          </div>
         )}
 
         <LinksSection

@@ -561,9 +561,21 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
     },
 
     async setIdentity(root, name, email) {
-      // this repository only (0.15): a global name/address would also sign the user's other (e.g. company) repositories
+      // Always this repository (0.15). The global settings are written only when they are empty: an existing global
+      // name/address (e.g. for company repositories) is never changed, and new clones still know the user (CR-05).
       await git(root, ['config', '--local', 'user.name', name])
       await git(root, ['config', '--local', 'user.email', email])
+      const globalSet = async (key: string): Promise<boolean> => {
+        try {
+          return (await git(root, ['config', '--global', '--get', key])).trim() !== ''
+        } catch {
+          return false
+        }
+      }
+      if (!(await globalSet('user.name')) && !(await globalSet('user.email'))) {
+        await git(root, ['config', '--global', 'user.name', name])
+        await git(root, ['config', '--global', 'user.email', email])
+      }
     },
 
     async discard(root, paths) {

@@ -169,7 +169,7 @@ export function LinksSection(props: {
               <span className="links__rel">{groupStart ? label(e.dir, e.link.type) : ''}</span>
               <span className="links__target">
                 <button type="button" className="link-btn links__id" onClick={() => props.onOpen(e.link.id)}>{e.link.id}</button>
-                <span className="links__name" title={e.link.title}>
+                <span className="links__name" title={e.link.title} dir="auto">
                   {e.link.exists ? e.link.title || T.common.noTitle : <span className="field__error">{T.links.missing}</span>}
                 </span>
                 {e.link.suspect && (

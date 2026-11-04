@@ -1269,6 +1269,8 @@ code {
 
 .field {
   display: grid;
+  /* one column that may shrink: a long value (e.g. a parent title) is cut, never pushes buttons out (UXN-01) */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--rm-space-xs);
   min-width: 0;
 }
@@ -1559,6 +1561,11 @@ code {
   flex-direction: column;
   gap: var(--rm-space-sm);
   align-items: flex-start;
+}
+
+/* no divider above the message box when nothing is above it (UXN-11) */
+.changes__commit:not(:first-child),
+.changes__identity:not(:first-child) {
   padding-top: var(--rm-space-md);
   border-top: var(--rm-shape-border-width) solid var(--rm-color-border);
 }
@@ -2917,6 +2924,15 @@ code {
 .guide__body {
   unicode-bidi: plaintext;
 }
+/* …but every cell of a column lines up with the window's side, whatever the language of its text (UXN-02) */
+.table__td,
+.table__text,
+.picker__label,
+.links__name,
+.suspect__name,
+.compare__name {
+  text-align: match-parent;
+}
 /* UX-04: an outline number is never cut */
 .table__td--number {
   overflow: visible;
@@ -3195,14 +3211,14 @@ code {
   unicode-bidi: plaintext;
 }
 
-.segmented {
+.choice-pair {
   display: inline-flex;
   border: var(--rm-shape-border-width) solid var(--rm-color-border);
   border-radius: var(--rm-shape-button-radius);
   overflow: hidden;
 }
 
-.segmented__part {
+.choice-pair__part {
   font: inherit;
   font-size: var(--rm-font-size-small);
   min-block-size: 26px;
@@ -3213,16 +3229,16 @@ code {
   cursor: pointer;
 }
 
-.segmented__part + .segmented__part {
+.choice-pair__part + .choice-pair__part {
   border-inline-start: var(--rm-shape-border-width) solid var(--rm-color-border);
 }
 
-.segmented__part--keep {
+.choice-pair__part--keep {
   background: var(--rm-color-primary);
   color: var(--rm-color-primary-text);
 }
 
-.segmented__part--unlink {
+.choice-pair__part--unlink {
   background: var(--rm-color-danger);
   color: var(--rm-color-primary-text);
 }
@@ -3289,4 +3305,9 @@ code {
 
 .split__item:hover {
   background: var(--rm-color-row-hover);
+}
+
+/* outline numbers keep a gap to the title (UXN-03) */
+.table__td--number {
+  padding-inline-end: var(--rm-space-sm);
 }

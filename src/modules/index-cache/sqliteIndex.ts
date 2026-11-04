@@ -68,7 +68,10 @@ export function preview(text: string): string {
     .slice(0, 600)
     .replace(/```[\s\S]*?(```|$)/g, ' ')
     .replace(/^\s{0,3}(#{1,6}|[-*+]|\d+[.)]|>|\|)\s*/gm, '')
-    .replace(/[*_`|]/g, '')
+    // markers only: underscores inside words (SIG_BRAKE_REQ) and lone stars (2 * 3) stay — QA-01 of 0.15
+    .replace(/(\*\*|\*|`|~~)(?=\S)([\s\S]*?\S)\1/g, '$2')
+    .replace(/(^|[^\p{L}\p{N}_])(__|_)(?=\S)([\s\S]*?\S)\2(?![\p{L}\p{N}_])/gu, '$1$3')
+    .replace(/\|/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, 200)
@@ -429,7 +432,7 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     count: () => (stmt.count.get() as { n: number }).n,
 
     fieldValues: (field, limit) =>
-      (db.prepare('SELECT value, COUNT(*) AS n FROM item_fields WHERE field = ? AND value <> \'\' GROUP BY value ORDER BY n DESC, value LIMIT ?').all(field, limit) as { value: string }[]).map((r) => r.value),
+      (db.prepare('SELECT trim(value) AS v, COUNT(*) AS n FROM item_fields WHERE field = ? AND trim(value) <> \'\' GROUP BY trim(value) ORDER BY n DESC, v LIMIT ?').all(field, limit) as { v: string }[]).map((r) => r.v),
 
     revision: () => revision,
 

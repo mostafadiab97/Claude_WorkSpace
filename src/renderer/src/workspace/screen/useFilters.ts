@@ -24,7 +24,7 @@ export function filterSummary(schema: Schema, f: { search: string; types: string
     if (v) parts.push(T.workspace.filterIs(fieldLabel(d), optionLabel(d, v)))
   }
   if (f.linkFilter) parts.push(f.linkFilter === 'suspect' ? T.workspace.linksSuspect : T.workspace.linksNone)
-  return parts.join(', ')
+  return parts.join(T.workspace.filterSep)
 }
 
 /** The index query for the table. A search without a chosen column sorts by best match. Pure. */

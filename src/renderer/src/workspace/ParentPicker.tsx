@@ -30,7 +30,7 @@ export function ParentPicker({ schema, value, selfId, onChange, onShow }: { sche
       // UX-27: looks like a button with "Change…", so nobody tries to type into it; "Show" selects the parent
       <div className="picker picker--closed">
         <button type="button" className="input input--button picker__current" onClick={() => setOpen(true)} title={T.parentPicker.change}>
-          <span className="picker__label">{label || <span className="muted-inline">{T.parentPicker.none}</span>}</span>
+          <span className="picker__label" dir="auto">{label || <span className="muted-inline">{T.parentPicker.none}</span>}</span>
           <span className="picker__change">{T.parentPicker.change}</span>
         </button>
         {value && onShow && (

@@ -330,7 +330,9 @@ export function ChangesView(props: {
                       </span>
                       <span className="compare__number">{numberLabel(e)}</span>
                       <span className="tree__id">{e.id}</span>
-                      <span className="compare__name">{e.title || T.common.noTitle}</span>
+                      <span className="compare__name" dir="auto">
+                        {e.title || T.common.noTitle}
+                      </span>
                       <span className="compare__type">{typeName(schema, e.type)}</span>
                       <span className="compare__summary">{e.summary}</span>
                       {e.kind === 'modified' && e.contentChanged && e.incoming > 0 && (

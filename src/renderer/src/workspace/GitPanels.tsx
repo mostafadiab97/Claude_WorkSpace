@@ -356,7 +356,7 @@ export function CommitTools(props: { state: GitState; blockedReason: string | nu
                     ▾
                   </button>
                 )}
-                {menu && props.onPush && (
+                {menu && props.onPush && message.trim() !== '' && !locked && (
                   <span className="split__menu" role="menu">
                     <button
                       type="button"

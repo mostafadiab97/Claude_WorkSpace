@@ -200,5 +200,6 @@ describe('relevance ranking', () => {
   it('makes a plain-text preview of Markdown text', () => {
     expect(preview('# Heading\n\n- one **bold**\n- two\n\n```\ncode\n```\n| a | b |')).toBe('Heading one bold two a b')
     expect(preview('x'.repeat(500))).toHaveLength(200)
+    expect(preview('Set SIG_BRAKE_REQ when _really_ needed, 2 * 3')).toBe('Set SIG_BRAKE_REQ when really needed, 2 * 3') // 0.15 QA-01
   })
 })

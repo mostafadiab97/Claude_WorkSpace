@@ -14,7 +14,7 @@ const LANG_RE = /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/
 
 /** Translated names (UX-22): `{ ar: 'الحالة' }`. Anything else is reported and left out. */
 function labelsOf(v: unknown, path: string, add: (path: string, message: string) => void, keysAreLanguages = true): Record<string, string> | undefined {
-  if (v === undefined) return undefined
+  if (v === undefined || v === null) return undefined // an empty "labels:" = no labels
   if (!isObj(v)) {
     add(path, 'Must be a mapping of language to text, e.g. "{ ar: الحالة }".')
     return undefined
@@ -88,7 +88,7 @@ export function parseSchema(text: string): ParsedSchema {
     }
     const labels = labelsOf(v.labels, `${p}.labels`, add)
     if (labels) field.labels = labels
-    if (v.optionLabels !== undefined) {
+    if (v.optionLabels !== undefined && v.optionLabels !== null) {
       if (!isObj(v.optionLabels)) add(`${p}.optionLabels`, 'Must be a mapping of language to choices, e.g. "{ ar: { Draft: مسودة } }".')
       else {
         const byLang: Record<string, Record<string, string>> = {}

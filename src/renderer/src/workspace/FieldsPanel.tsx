@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { FieldCheck, RepoInfo } from '../../../shared/api'
 import type { FieldDef, FieldType, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
-import { defaultOrder, optionalColumns, orderColumns, type ColumnPrefs } from './ItemTable'
+import { columnOrder, optionalColumns, orderColumns, type ColumnPrefs } from './ItemTable'
 import { T } from '../../../shared/text'
 
 // ---------------------------------------------------------------- show / hide columns
@@ -61,7 +61,7 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields }: { schema:
   // before 0.15 it was left out, so moving a column sent ID to the end); No. always stays first
   const movable = orderColumns<{ key: string; label: string; builtIn: boolean; fixed?: boolean }>(
     [...cols.filter((c) => c.key !== 'number'), { key: 'id', label: T.columns.id, builtIn: true, fixed: true }],
-    prefs.order.length ? prefs.order : defaultOrder(schema)
+    columnOrder(schema, prefs.order)
   )
   const numberCol = cols.find((c) => c.key === 'number')
   const { hidden } = prefs

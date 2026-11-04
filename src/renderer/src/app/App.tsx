@@ -141,8 +141,15 @@ export function App() {
               startGuidePage={settingsStart}
               appearance={
                 <>
-                  <LanguageToggle lang={lang} onChange={changeLanguage} />
-                  <ThemeToggle mode={mode} onChange={changeMode} />
+                  {/* each switch with its name (UXN-08) */}
+                  <div className="field">
+                    <span className="field__label">{T.app.language.label}</span>
+                    <LanguageToggle lang={lang} onChange={changeLanguage} />
+                  </div>
+                  <div className="field">
+                    <span className="field__label">{T.app.theme.label}</span>
+                    <ThemeToggle mode={mode} onChange={changeMode} />
+                  </div>
                 </>
               }
               onBack={() => {

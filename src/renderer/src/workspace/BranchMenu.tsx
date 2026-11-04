@@ -76,7 +76,7 @@ export function BranchMenu(props: {
   }, [props, mode])
 
   const others = (list ?? []).filter((b) => !b.current)
-  const { local, remote } = branchGroups(others, filter)
+  const { local, remote } = branchGroups(others, filter, (list ?? []).filter((b) => b.current).map((b) => b.name))
   const locked = blockedReason !== null
   const pick = (b: string): void => {
     if (mode === 'pull') props.onPullFrom(b)
@@ -183,7 +183,7 @@ export function BranchMenu(props: {
         </button>
       </div>
       <p className="branches__hint" role="status">
-        {mode === 'pull' ? T.branches.choosePull(current) : mode === 'compare' ? T.branches.chooseCompare(current) : T.branches.chooseSwitch}
+        {mode === 'pull' ? T.branches.choosePull(current) : mode === 'compare' ? T.branches.chooseCompare(current) : others.length > 0 ? T.branches.chooseSwitch : ''}
       </p>
       {others.length > 6 && (
         <input className="input branches__filter" type="search" value={filter} placeholder={T.branches.filter} aria-label={T.branches.filter} onChange={(e) => setFilter(e.target.value)} autoFocus />

@@ -105,11 +105,11 @@ export function createGithubUpdater({ enabled, log, holdFile, updateConfigFile }
         log.info(`Going back to version ${version}: downloading ${target.installerUrl}`)
         const res = await net.fetch(target.installerUrl)
         if (!res.ok) throw new Error(`download failed (${res.status})`)
-        const file = join(tmpdir(), `ReqMan-Setup-${version}.exe`)
+        const file = join(tmpdir(), `${app.getName()}-Setup-${version}.exe`)
         writeFileSync(file, Buffer.from(await res.arrayBuffer()))
         writeFileSync(holdFile, JSON.stringify({ version, since: new Date().toISOString() }))
         log.info(`Updates paused at ${version}; starting the installer`)
-        // silent install over the current version, then start ReqMan again (electron-builder's NSIS options)
+        // silent install over the current version, then start the app again (electron-builder's NSIS options)
         spawn(file, ['/S', '--force-run'], { detached: true, stdio: 'ignore' }).unref()
         setTimeout(() => app.quit(), 500)
         return { ok: true }

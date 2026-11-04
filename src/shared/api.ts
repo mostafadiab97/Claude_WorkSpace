@@ -7,6 +7,7 @@ export type * from './domain'
 // one). The preload builds window.reqochet from `Channels` automatically.
 
 export interface AppInfo {
+  /** The product name: reqochet-dev (development tool) or reqochet (release tool). */
   name: string
   version: string
   platform: string

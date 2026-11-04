@@ -1,10 +1,10 @@
-# ReqMan — User Guide
+# reqochet — User Guide
 
-Version 0.14.3 · November 2026 · *ReqMan is a working name; the product gets its final name in the next version.*
+Version 0.16.0 · November 2026 · *reqochet was called ReqMan until version 0.15. The development tool is named reqochet-dev; the release tool is reqochet — they work the same.*
 
-ReqMan is a Windows desktop application for writing, structuring and tracing requirements. Every requirement is a
+reqochet is a Windows desktop application for writing, structuring and tracing requirements. Every requirement is a
 small text file in your project's own Git repository, so requirements get the same history, branches, reviews and
-backups as your code. ReqMan shows those files the way a requirements tool should: a numbered tree, attributes,
+backups as your code. reqochet shows those files the way a requirements tool should: a numbered tree, attributes,
 traceability links, suspect links, and requirement-by-requirement change control. No server, no database, no user
 accounts — who may read or change requirements is decided by your GitHub repository's permissions.
 
@@ -27,7 +27,7 @@ accounts — who may read or change requirements is decided by your GitHub repos
 13. [Settings](#13-settings)
 14. [Setting up a team](#14-setting-up-a-team)
 15. [File format reference](#15-file-format-reference)
-16. [What ReqMan can do — specification](#16-what-reqman-can-do--specification)
+16. [What reqochet can do — specification](#16-what-reqochet-can-do--specification)
 17. [Troubleshooting and questions](#17-troubleshooting-and-questions)
 18. [Keyboard shortcuts](#18-keyboard-shortcuts)
 
@@ -38,31 +38,31 @@ accounts — who may read or change requirements is decided by your GitHub repos
 ### 1.1 What you need
 
 - A Windows 10 or 11 PC. No administrator rights are needed.
-- **Git for Windows** (free): <https://git-scm.com/download/win>. ReqMan works without Git, but cannot share,
+- **Git for Windows** (free): <https://git-scm.com/download/win>. reqochet works without Git, but cannot share,
   branch or keep history.
 - A GitHub repository for your project, cloned to your PC (or an empty one — see 1.3).
 
 ### 1.2 Install
 
-1. Open the ReqMan **releases page** — your team lead gives you the link; in an installed ReqMan it is under
+1. Open the reqochet **releases page** — your team lead gives you the link; in an installed reqochet it is under
    **⚙ → Environment and versions → Releases page**.
-2. Under the newest version → **Assets**, download `ReqMan-Setup-<version>.exe` (or the `.zip` if your browser blocks
+2. Under the newest version → **Assets**, download `reqochet-Setup-<version>.exe` (`reqochet-dev-Setup-<version>.exe` for the development tool) (or the `.zip` if your browser blocks
    `.exe` files — extract it, then run the `.exe`).
 3. Run it. Windows may say *"Windows protected your PC"* because the installer is not yet code-signed: click
-   **More info → Run anyway**. ReqMan installs for your user and opens.
-4. ReqMan updates itself: when a newer version is published it downloads it in the background and offers
+   **More info → Run anyway**. reqochet installs for your user and opens.
+4. reqochet updates itself: when a newer version is published it downloads it in the background and offers
    **Restart and update**.
 
 ### 1.3 Open your project
 
 On the start screen:
 
-- **Open repository…** — choose the folder of your project's Git clone. If it has no requirements yet, ReqMan
+- **Open repository…** — choose the folder of your project's Git clone. If it has no requirements yet, reqochet
   offers **Create requirements folder**: it creates `requirements/` with default item types (system, software,
   hardware, interface requirement, test case, …), fields (Status, Priority, Owner, Tags) and link types (refines,
   verifies, satisfies, …). You can change all of them later.
 - **New project from a file…** — start from an Excel, CSV or ReqIF file (for example an export from DOORS or Jama):
-  ReqMan creates the folder and the Git repository and imports the file as the first commit (see 11).
+  reqochet creates the folder and the Git repository and imports the file as the first commit (see 11).
 
 ### 1.4 Write your first requirements
 
@@ -87,15 +87,15 @@ On the start screen:
 ### 1.7 If something goes wrong
 
 **⚙ (Settings) → Report a problem**: describe what happened and click **Save report…**; send the saved file to the
-person who supports ReqMan in your team. Nothing is sent by itself.
+person who supports reqochet in your team. Nothing is sent by itself.
 
 ---
 
 ## 2. Ideas you need to know
 
-| Idea | What it means in ReqMan |
+| Idea | What it means in reqochet |
 | --- | --- |
-| **Repository** | Your project's Git folder. ReqMan works inside its `requirements/` folder and never touches your code. |
+| **Repository** | Your project's Git folder. reqochet works inside its `requirements/` folder and never touches your code. |
 | **Item** | One requirement, heading, test case, risk… — one file `requirements/items/<ID>.md`. |
 | **ID** | `REQ-K7Q3XMB`: random, so two people (or two branches) never create the same ID. IDs never change. |
 | **Item type** | What kind of item it is (system requirement, test case, heading…). Headings / information are not counted as requirements. |
@@ -130,7 +130,7 @@ with a message; **Push** shares them.
 - **Create:** **+ New item** adds at the top level (or next to the selected item); **+ Child…** adds under the
   selected item.
 - **Edit:** select a row, change anything in the editor, **Save**. Leaving an item with unsaved changes asks first.
-  If a colleague's newer version arrived meanwhile, ReqMan refuses to overwrite it and tells you.
+  If a colleague's newer version arrived meanwhile, reqochet refuses to overwrite it and tells you.
 - **Move:** drag a row onto another row (it becomes the last child, with everything below it) or into the space between
   rows; or use ↑ ↓ in the editor. Choose several rows (Ctrl/Shift + click) to move them together — they keep their
   order.
@@ -154,7 +154,7 @@ with a message; **Push** shares them.
 
 - **Add a link:** editor → Links → **+ Add link** → type and target. The link is stored in the source item's file.
 - **Both directions:** the target shows the reverse name (*verified by*, *refined by*…).
-- **Suspect links:** when you save a change to an item's type, title or text, ReqMan lists every item that links to it:
+- **Suspect links:** when you save a change to an item's type, title or text, reqochet lists every item that links to it:
   **Keep** (still holds), **Unlink**, or **Decide later** (the link stays marked ⚠ in the table and editor until
   someone confirms it). Changes to status, owner, order or links do not make links suspect.
 - **Find them:** Filters → Links → *suspect* lists every item with a suspect link.
@@ -167,7 +167,7 @@ Coming next (theme 1): coverage view, impact chain, traceability matrix with Exc
 ## 7. Fields and item types
 
 - **Columns → Edit fields…** opens the team's fields: add a field (text, choice with options, list), rename it,
-  reorder, set a default, remove it. Saving changes `requirements/.reqman/schema.yaml`, which travels to the whole team
+  reorder, set a default, remove it. Saving changes `requirements/.reqochet/schema.yaml`, which travels to the whole team
   with the next push. Removing a field never deletes values already in the files.
 - **Item types and link types** are defined in the same `schema.yaml` (editing them in the window comes in theme 1).
 
@@ -189,11 +189,11 @@ added/removed, and which links became suspect.
 
 ### Push
 
-**Push** sends your commits to GitHub. If colleagues pushed first, ReqMan offers to pull first.
+**Push** sends your commits to GitHub. If colleagues pushed first, reqochet offers to pull first.
 
 ### Pull — with decisions per requirement
 
-**Pull** brings your colleagues' commits. ReqMan combines both sides **field by field**: if you changed the priority and
+**Pull** brings your colleagues' commits. reqochet combines both sides **field by field**: if you changed the priority and
 a colleague changed the text of the same requirement, both are kept automatically. Only when you both changed the
 **same field** of the same requirement, a window shows both versions side by side: click the one to keep (it gets a
 frame and a ✓), or choose **Write it myself**. Nothing changes until you click **Finish the pull**.
@@ -212,7 +212,7 @@ frame and a ✓), or choose **Write it myself**. Nothing changes until you click
 
 Click the branch button **⎇ main ▾**:
 
-- **Click a branch name** to switch to it. With uncommitted changes, ReqMan asks: **Commit it first**, **Move it to** *(the branch)*,
+- **Click a branch name** to switch to it. With uncommitted changes, reqochet asks: **Commit it first**, **Move it to** *(the branch)*,
   or **Discard it**.
 - **Create and switch:** type a name at the bottom (e.g. `cr/door-lock-timeout`).
 - **Compare with…** a branch: see what it would change, requirement by requirement, before taking it — like a pull
@@ -232,7 +232,7 @@ Click the branch button **⎇ main ▾**:
 
 1. **File** — choose an `.xlsx`, `.csv` or `.reqif`/`.reqifz` file (ReqIF = the exchange format of DOORS, Jama,
    Polarion and other tools).
-2. **Columns** — ReqMan maps columns to fields by their names (ID, Type, Title, Description, Status, Parent, Verified
+2. **Columns** — reqochet maps columns to fields by their names (ID, Type, Title, Description, Status, Parent, Verified
    By…); change any mapping. Rows without a type get the type you choose.
 3. **Check and import** — new / updated / unchanged rows and any problems are listed before anything is written.
 
@@ -258,10 +258,10 @@ Coming (theme 3b): Word from your company's own template, PDF, and one self-cont
 
 ## 12. Problems panel
 
-The status bar shows **N problems** when ReqMan finds something it cannot fully understand — a file edited by hand with
+The status bar shows **N problems** when reqochet finds something it cannot fully understand — a file edited by hand with
 a mistake, a link to an item that does not exist, two items with the same ID after a merge, a file whose name does not
 match its ID. Click it for the list; click a problem to open the item; many have a one-click fix (e.g. **Fix file
-name**). ReqMan never guesses silently and never deletes data to "fix" something.
+name**). reqochet never guesses silently and never deletes data to "fix" something.
 
 ---
 
@@ -274,7 +274,7 @@ panel returns to your repository.
 | Card | What it does |
 | --- | --- |
 | **Environment** | Git version, theme in use, update state with **Check for updates**, app version. |
-| **Versions** | Go back to an earlier version if a new one causes trouble: **Go back to an earlier version…** → choose → **Install version X**. ReqMan downloads it, installs it and opens again; automatic updates then **pause** until you click **Resume automatic updates**. Works for versions from 0.14.1 on. Files changed by a newer version may need that newer version — going back is meant for a few days, until a fix arrives. |
+| **Versions** | Go back to an earlier version if a new one causes trouble: **Go back to an earlier version…** → choose → **Install version X**. reqochet downloads it, installs it and opens again; automatic updates then **pause** until you click **Resume automatic updates**. Works for versions from 0.16.0 on (earlier versions were reqochet, another app). Files changed by a newer version may need that newer version — going back is meant for a few days, until a fix arrives. |
 | **Report a problem** | Saves one text file with your description, the diagnostics and the end of the log. |
 | **Diagnostics** | Log file and theme file locations, **Open log folder**, **Edit my theme…**, **Copy diagnostics**. |
 | **Features** | Turn off a feature on this PC (Branches, Import, Export) if it causes trouble; the rest keeps working. If the team turned one off for the repository, it says so. |
@@ -292,8 +292,8 @@ written. **Colours:** Light / Dark / System; a company can change colours, fonts
 1. **One GitHub repository per project** (code and requirements together, or requirements alone). Give the team write
    access; protect `main` in GitHub (Settings → Branches) if reviews must happen through pull requests.
 2. **One person creates the requirements folder** (or imports the existing DOORS/Jama export via ReqIF), adapts the
-   item types, fields and link types in `requirements/.reqman/schema.yaml`, commits and pushes.
-3. **Everyone clones the repository**, installs ReqMan and opens the clone.
+   item types, fields and link types in `requirements/.reqochet/schema.yaml`, commits and pushes.
+3. **Everyone clones the repository**, installs reqochet and opens the clone.
 4. **Daily work:** Pull in the morning → edit → Changes → Commit → Push. Pull before a big edit session.
 5. **Bigger changes** (a change request, a review package): a branch per change; compare it with `main`; bring it in
    with a pull request on GitHub or **Bring in changes from…**.
@@ -313,7 +313,7 @@ written. **Colours:** Light / Dark / System; a company can change colours, fonts
 ```
 <your repository>/
   requirements/
-    .reqman/
+    .reqochet/
       schema.yaml          item types, fields, link types, feature switches
     items/
       REQ-K7Q3XMB.md       one file per item
@@ -345,12 +345,12 @@ The door shall lock automatically within 2 s after the vehicle starts moving.
 - `order:` is a sort key among siblings; `confirmed:` is the fingerprint of the link target when the link was last
   confirmed (suspect-link detection). Do not edit these two by hand.
 - The text below the header is Markdown.
-- The files can be read and edited with any text editor; ReqMan checks them when it opens the repository and lists
+- The files can be read and edited with any text editor; reqochet checks them when it opens the repository and lists
   anything it cannot understand in the problems panel.
 
 ---
 
-## 16. What ReqMan can do — specification
+## 16. What reqochet can do — specification
 
 **Authoring and structure** — items of team-defined types in a tree with calculated outline numbers; team-defined fields
 (text, choice, list) with defaults; random collision-free IDs; drag-and-drop moves of one or many items; protection
@@ -393,14 +393,14 @@ code and test results; AI access.
 | Question | Answer |
 | --- | --- |
 | Windows or the browser blocks the installer | It is not code-signed yet. Browser: keep the download (Ctrl+J → Keep). Windows: More info → Run anyway. Or use the `.zip`. If nothing works, IT must allow the releases page (⚙ → Environment and versions shows its address). |
-| "Git is not installed" | Install Git for Windows, restart ReqMan. Settings → Environment shows the version found. |
-| Push is refused | Someone pushed first: Pull, then Push again. ReqMan offers this itself. |
+| "Git is not installed" | Install Git for Windows, restart reqochet. Settings → Environment shows the version found. |
+| Push is refused | Someone pushed first: Pull, then Push again. reqochet offers this itself. |
 | A pull asks about fields | You and a colleague changed the same field of the same requirement: choose per field, then **Finish the pull**. |
 | "N problems" in the status bar | Click it — each problem says what is wrong and opens the item; many have a one-click fix. |
 | A new version misbehaves | Settings → Features (turn the feature off) or Settings → Versions (go back). Then Settings → Report a problem. |
-| Where is the log? | `%APPDATA%\ReqMan\logs\reqman.log` — or Settings → Diagnostics → Open log folder. |
-| Can I edit the files by hand or with a script? | Yes — they are plain text. Keep the header format; ReqMan checks everything when it opens and lists what it cannot read. |
-| Does ReqMan send data anywhere? | No. It talks only to your Git remote (GitHub) and checks GitHub Releases for updates. |
+| Where is the log? | `%APPDATA%\reqochet\logs\reqochet.log` (`reqochet-dev` for the development tool) — or Settings → Diagnostics → Open log folder. |
+| Can I edit the files by hand or with a script? | Yes — they are plain text. Keep the header format; reqochet checks everything when it opens and lists what it cannot read. |
+| Does reqochet send data anywhere? | No. It talks only to your Git remote (GitHub) and checks GitHub Releases for updates. |
 
 ---
 

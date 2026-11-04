@@ -36,8 +36,11 @@ describe('versions', () => {
   })
   it('offers only older versions that know "updates paused", newest first', () => {
     const all = parseReleases(['v0.13.1', 'v0.14.0', 'v0.14.1', 'v0.14.2', 'v0.15.0', 'v0.16.0'].map((t) => release(t)))
-    expect(OLDEST_REVERT_TARGET).toBe('0.14.1')
-    expect(revertTargets(all, '0.15.0').map((x) => x.version)).toEqual(['0.14.2', '0.14.1'])
-    expect(revertTargets(all, '0.14.1')).toEqual([])
+    expect(OLDEST_REVERT_TARGET).toBe('0.16.0') // before 0.16 the app was ReqMan, another app identity
+    expect(revertTargets(all, '0.15.0', '0.14.1').map((x) => x.version)).toEqual(['0.14.2', '0.14.1'])
+    expect(revertTargets(all, '0.14.1', '0.14.1')).toEqual([])
+    // from 0.16 on: nothing before the rename (ReqMan) is offered
+    expect(revertTargets(all, '0.16.0')).toEqual([])
+    expect(revertTargets([...all, ...parseReleases([release('v0.16.1')])], '0.16.1').map((x) => x.version)).toEqual(['0.16.0'])
   })
 })

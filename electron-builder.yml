@@ -1,6 +1,8 @@
 # Packaging configuration (electron-builder).
-appId: com.reqman.app
-productName: ReqMan
+# The development tool built from this repository (owner, 4 Nov 2026): its own identity, so it can sit beside the
+# release tool "reqochet" (built from the release repository with appId com.reqochet.app, productName reqochet).
+appId: com.reqochet.dev
+productName: reqochet-dev
 directories:
   output: dist
 files:
@@ -14,6 +16,8 @@ extraResources:
   - from: resources
     to: resources
 win:
+  # the brand package's Windows icon (dark tile, 16–256 px inside)
+  icon: resources/brand/icon/reqochet.ico
   target:
     - target: nsis
       arch: [x64]
@@ -21,8 +25,10 @@ nsis:
   # One-click, per-user install: no administrator rights needed.
   oneClick: true
   perMachine: false
-  artifactName: ReqMan-Setup-${version}.exe
-  shortcutName: ReqMan
+  artifactName: ${productName}-Setup-${version}.${ext}
+  shortcutName: ${productName}
+  # removes an installed ReqMan first (the 0.16 switch) — build/installer.nsh
+  include: build/installer.nsh
 linux:
   target: [dir]
 # Release feed for automatic updates: GitHub Releases of this repository. Owner and repository name are not stored

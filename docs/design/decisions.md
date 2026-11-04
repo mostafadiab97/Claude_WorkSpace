@@ -297,3 +297,4 @@ adds new test files only, in its own worktree. Details: `docs/AGENT-WORKFLOW.md`
 - Top bar: icon + name; start screen: the large name logo; loading animation at start and while opening, small busy
   icon for long waits; the assistant "eyes" are shown now; Changes / Pull / Push move next to the branch button.
 - Details and open points: `docs/reviews/2026-11-04-rename-reqochet.md`.
+- **Two tools (4 Nov 2026):** the tool built from this development repository is **reqochet-dev** (own app identity, `%APPDATA%\reqochet-dev`, installer `reqochet-dev-Setup-x.y.z.exe`, a "dev" mark beside the logo) and updates from this repository; the release repository builds plain **reqochet** and updates from there. Both use the project folder `requirements/.reqochet`.

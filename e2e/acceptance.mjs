@@ -1,7 +1,7 @@
 // Acceptance run (P-41, the owner 2 Nov 2026): what the owner's manual checklist did, done on GitHub's Windows machine
 // with the INSTALLED app. Windows only. Writes a numbered list of everything it did to the job summary.
 //
-//   node e2e/acceptance.mjs --installer dist/ReqMan-Setup-X.exe --feed dist [--previous old-setup.exe]
+//   node e2e/acceptance.mjs --installer dist/reqochet-dev-Setup-X.exe --feed dist [--previous old-setup.exe]
 //                           [--sandbox <folder>] [--push-url <url> --branch <name>]
 //
 // 1. Installs the previous release, then lets it update itself to this build from a local feed (only when this build
@@ -11,7 +11,7 @@
 // 4. Pushes one real commit to a scratch branch, checks it arrived, deletes the branch.
 // Every action is listed, numbered, in the summary — nothing happens that is not written down there.
 import { execFileSync, spawnSync } from 'node:child_process'
-import { appendFileSync, existsSync, mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
@@ -41,15 +41,23 @@ const fail = (text) => {
 }
 const secret = (s) => (pushUrl ? s.split(pushUrl).join('<repository>') : s)
 
-const installDir = join(process.env.LOCALAPPDATA ?? '', 'Programs', 'ReqMan')
-const exe = join(installDir, 'ReqMan.exe')
-const installedVersion = () => {
-  if (!existsSync(exe)) return null
-  const r = spawnSync('powershell', ['-NoProfile', '-Command', `(Get-Item '${exe}').VersionInfo.ProductVersion`], { encoding: 'utf8' })
+// The app's name comes from package.json (reqochet-dev here); releases before 0.16 installed as ReqMan.
+const PRODUCT = JSON.parse(readFileSync('package.json', 'utf8')).productName
+const programs = join(process.env.LOCALAPPDATA ?? '', 'Programs')
+const installDir = join(programs, PRODUCT)
+const exe = join(installDir, `${PRODUCT}.exe`)
+const legacyDir = join(programs, 'ReqMan')
+const legacyExe = join(legacyDir, 'ReqMan.exe')
+const installedVersion = (file = exe) => {
+  if (!existsSync(file)) return null
+  const r = spawnSync('powershell', ['-NoProfile', '-Command', `(Get-Item '${file}').VersionInfo.ProductVersion`], { encoding: 'utf8' })
   return r.stdout.trim() || null
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
-const killApp = () => spawnSync('taskkill', ['/IM', 'ReqMan.exe', '/F'], { stdio: 'ignore' })
+const killApp = () => {
+  spawnSync('taskkill', ['/IM', `${PRODUCT}.exe`, '/F'], { stdio: 'ignore' })
+  spawnSync('taskkill', ['/IM', 'ReqMan.exe', '/F'], { stdio: 'ignore' })
+}
 const runInstaller = (file) => execFileSync(file, ['/S'], { stdio: 'ignore', timeout: 300_000 })
 const newer = (a, b) => {
   const pa = a.split('.').map(Number)
@@ -59,9 +67,9 @@ const newer = (a, b) => {
 }
 
 /** Starts the installed app; `openPath` answers the folder picker. */
-async function launchInstalled(openPath) {
-  const userData = mkdtempSync(join(tmpdir(), 'reqman-accept-'))
-  const app = await electron.launch({ executablePath: exe, args: [`--user-data-dir=${userData}`] })
+async function launchInstalled(openPath, executablePath = exe) {
+  const userData = mkdtempSync(join(tmpdir(), 'reqochet-accept-'))
+  const app = await electron.launch({ executablePath, args: [`--user-data-dir=${userData}`] })
   if (openPath) await app.evaluate(({ dialog }, p) => void (dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [p] })), openPath)
   const win = await app.firstWindow()
   await win.setViewportSize({ width: 1400, height: 860 })
@@ -80,7 +88,20 @@ async function step1Install() {
     return
   }
   runInstaller(previous)
-  did(`Installed the previous release ${prevVersion} silently (${basename(previous)}).`)
+  // before 0.16 the app was ReqMan: the update must then switch it to the new app (old one removed, settings moved)
+  const fromLegacy = !existsSync(exe) && existsSync(legacyExe)
+  const prevDir = fromLegacy ? legacyDir : installDir
+  const prevExe = fromLegacy ? legacyExe : exe
+  did(`Installed the previous release ${prevVersion} silently (${basename(previous)})${fromLegacy ? ' — still named ReqMan' : ''}.`)
+  // CI only: a stand-in for the user's ReqMan settings, to check that the new app moves them (never on a real PC)
+  const appData = process.env.APPDATA ?? ''
+  const legacySettings = join(appData, 'ReqMan')
+  if (fromLegacy && process.env.CI) {
+    mkdirSync(legacySettings, { recursive: true })
+    writeFileSync(join(legacySettings, 'theme.json'), '{"typography":{"fontSizeBase":"14px"}}')
+    writeFileSync(join(legacySettings, 'recent-repositories.json'), '[]')
+    did('Wrote a stand-in ReqMan settings folder (theme.json, recent list) to check that the settings are moved.')
+  }
   // point the installed copy at a local feed holding this build (latest.yml + installer + blockmap)
   const server = createServer((req, res) => {
     const file = join(feed, decodeURIComponent((req.url ?? '/').split('?')[0]).replace(/^\/+/, ''))
@@ -89,9 +110,9 @@ async function step1Install() {
     res.end(readFileSync(file))
   })
   await new Promise((r) => server.listen(8765, '127.0.0.1', r))
-  writeFileSync(join(installDir, 'resources', 'app-update.yml'), 'provider: generic\nurl: http://127.0.0.1:8765/\nupdaterCacheDirName: reqman-updater\n')
+  writeFileSync(join(prevDir, 'resources', 'app-update.yml'), 'provider: generic\nurl: http://127.0.0.1:8765/\nupdaterCacheDirName: reqochet-updater\n')
   did('Pointed the installed copy at a local update feed with this build (instead of GitHub Releases).')
-  const { app, win } = await launchInstalled()
+  const { app, win } = await launchInstalled(undefined, prevExe)
   let status = null
   for (let i = 0; i < 120 && status?.state !== 'ready'; i++) {
     await sleep(1000)
@@ -111,10 +132,22 @@ async function step1Install() {
     v = installedVersion()
   }
   await sleep(3000)
+  // the updater starts the new app after installing; after the switch from ReqMan give its first start time to move the settings
+  for (let i = 0; i < 30 && fromLegacy && process.env.CI && !existsSync(join(appData, PRODUCT, 'moved-from-reqman.txt')); i++) await sleep(1000)
   killApp() // the updater restarts the app after installing
   server.close()
-  if (v?.startsWith(version)) did(`Clicked "restart to update": the installed app is now ${version}.`)
+  if (v?.startsWith(version)) did(`Clicked "restart to update": the installed app is now ${PRODUCT} ${version}.`)
   else fail(`After "restart to update" the installed version is ${v ?? 'missing'}, expected ${version}.`)
+  if (fromLegacy) {
+    // the switch: ReqMan removed by the new installer; settings moved by the new app's first (auto-restarted) start
+    if (existsSync(legacyExe)) fail(`The old app is still installed (${legacyExe}).`)
+    else did('The old app ReqMan was removed by the new installer.')
+    if (process.env.CI) {
+      const moved = existsSync(join(appData, PRODUCT, 'theme.json')) && existsSync(join(appData, PRODUCT, 'recent-repositories.json'))
+      if (moved && !existsSync(legacySettings)) did(`The settings were moved to %APPDATA%\\${PRODUCT} and the old ReqMan folder removed.`)
+      else fail(`Settings move: copied=${moved}, old folder still there=${existsSync(legacySettings)}.`)
+    }
+  }
 }
 
 async function step2SelfTest() {
@@ -155,7 +188,7 @@ async function step4Push() {
   const repo = mkdtempSync(join(tmpdir(), 'reqman-accept-push-'))
   const git = (...a) => execFileSync('git', a, { cwd: repo, encoding: 'utf8' })
   git('init', '-q', '-b', branch)
-  git('config', 'user.name', 'ReqMan acceptance run')
+  git('config', 'user.name', 'reqochet acceptance run')
   git('config', 'user.email', 'acceptance@example.com')
   git('remote', 'add', 'origin', pushUrl)
   did(`Created a temporary local repository on branch "${branch}" with the project repository as its remote.`)
@@ -215,7 +248,7 @@ for (const [name, step] of [['install', step1Install], ['self-test', step2SelfTe
   }
 }
 killApp()
-const report = [`## Acceptance run — ReqMan ${version}`, '', failed ? '**Result: FAILED**' : '**Result: passed**', '', 'What this run did:', '', ...done, ''].join('\n')
+const report = [`## Acceptance run — ${PRODUCT} ${version}`, '', failed ? '**Result: FAILED**' : '**Result: passed**', '', 'What this run did:', '', ...done, ''].join('\n')
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, report)
 writeFileSync(join(tmpdir(), 'acceptance-report.md'), report)
 console.log(`\n${report}`)

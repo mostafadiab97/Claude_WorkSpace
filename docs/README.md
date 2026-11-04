@@ -23,7 +23,7 @@ Which file answers which question. Every file starts with a short "what this is"
 | How is the code organised (modules, rules, data format, UI parts)? | `docs/ARCHITECTURE.md` |
 | How does data move through the system (diagrams)? | `docs/ONBOARDING.md`, `docs/diagrams/index.html` |
 | Which mistakes already cost time? | `docs/PITFALLS.md` |
-| How is ReqMan tested (automated, self-test, manual checklist, logs, bug reports)? | `docs/TESTING.md`; older checklists in `docs/testing/past-checklists.md` |
+| How is reqochet tested (automated, self-test, manual checklist, logs, bug reports)? | `docs/TESTING.md`; older checklists in `docs/testing/past-checklists.md` |
 | What changed in each version, and what did the owner report? | `CHANGELOG.md` |
 | How do I set up a Windows PC for development? | `docs/DEVELOPING.md` |
 | How do I use the app (user guide, quick start, specification)? | `docs/USER-GUIDE.md` |

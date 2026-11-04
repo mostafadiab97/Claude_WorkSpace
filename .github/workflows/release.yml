@@ -1,6 +1,6 @@
 # Publishing a release: change "version" in package.json and push to main.
 # If no GitHub Release exists for that version yet, this builds the Windows installer and publishes it
-# as release v<version> (GitHub creates the tag). That release feed is what installed copies of ReqMan
+# as release v<version> (GitHub creates the tag). That release feed is what installed copies of reqochet-dev
 # check for automatic updates. Can also be started by hand from the Actions tab.
 name: Release
 
@@ -63,12 +63,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           prev=""
-          if gh release download --pattern "ReqMan-Setup-*.exe" --dir "$RUNNER_TEMP/previous" 2>/dev/null; then
-            prev="$(ls "$RUNNER_TEMP"/previous/ReqMan-Setup-*.exe | head -1)"
+          if gh release download --pattern "*-Setup-*.exe" --dir "$RUNNER_TEMP/previous" 2>/dev/null; then
+            prev="$(ls "$RUNNER_TEMP"/previous/*-Setup-*.exe | head -1)"
           fi
           git clone --quiet --depth 1 https://github.com/${{ github.repository_owner }}/Claude_SandBox.git "$RUNNER_TEMP/sandbox"
           node e2e/acceptance.mjs \
-            --installer "$(ls dist/ReqMan-Setup-*.exe | head -1)" --feed dist \
+            --installer "$(ls dist/*-Setup-*.exe | head -1)" --feed dist \
             ${prev:+--previous "$prev"} \
             --sandbox "$RUNNER_TEMP/sandbox" \
             --push-url "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" \
@@ -82,7 +82,7 @@ jobs:
       - name: Zip installer
         if: steps.version.outputs.exists == 'false'
         shell: pwsh
-        run: Get-ChildItem dist/ReqMan-Setup-*.exe | ForEach-Object { Compress-Archive -Path $_.FullName -DestinationPath ($_.FullName -replace '\.exe$', '.zip') }
+        run: Get-ChildItem dist/*-Setup-*.exe | ForEach-Object { Compress-Archive -Path $_.FullName -DestinationPath ($_.FullName -replace '\.exe$', '.zip') }
 
       # latest.yml + the installer + its .blockmap are what installed copies read to update themselves.
       - name: Publish GitHub Release
@@ -94,6 +94,6 @@ jobs:
           tag="${{ steps.version.outputs.tag }}"
           gh release create "$tag" \
             --target "$GITHUB_SHA" \
-            --title "ReqMan ${tag#v}" \
-            --notes "Install: download ReqMan-Setup-${tag#v}.exe below and run it (or the .zip if your browser blocks the .exe). Installed copies update automatically." \
-            dist/ReqMan-Setup-*.exe dist/ReqMan-Setup-*.exe.blockmap dist/ReqMan-Setup-*.zip dist/latest.yml
+            --title "reqochet-dev ${tag#v}" \
+            --notes "Install: download reqochet-dev-Setup-${tag#v}.exe below and run it (or the .zip if your browser blocks the .exe). Installed copies update automatically." \
+            dist/*-Setup-*.exe dist/*-Setup-*.exe.blockmap dist/*-Setup-*.zip dist/latest.yml

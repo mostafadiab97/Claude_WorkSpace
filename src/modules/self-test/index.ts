@@ -44,7 +44,7 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
   const startedAt = new Date().toISOString()
   const steps: ReleaseSelfTestStep[] = []
   const gitVersion = await deps.gitVersion()
-  const base = await mkdtemp(join(tmpdir(), 'reqman-selftest-'))
+  const base = await mkdtemp(join(tmpdir(), 'reqochet-selftest-'))
   const remote = join(base, 'github.git')
   const mine = join(base, 'my-pc')
   const colleague = join(base, 'colleague-pc')
@@ -309,6 +309,18 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       const [spec] = readReqif(xml)
       const p = await W().previewImport(spec?.rows ?? [], { token: 'self-test', sheet: spec?.name ?? '', headerRow: 0, defaultType: 'system-requirement' })
       expect(p.counts.unchanged === x.count && p.counts.create + p.counts.update === 0, `Importing the ReqIF export would change items: ${JSON.stringify(p.counts)}.`)
+    })
+
+    await step('A project made with ReqMan opens and is updated to reqochet', async () => {
+      // 0.16: requirements/.reqman (ReqMan's folder name) is still read; "Update this project" renames it in one commit
+      await rename(join(mine, 'requirements', '.reqochet'), join(mine, 'requirements', '.reqman'))
+      const c = await W().commit('Practice: a project as ReqMan left it')
+      expect(c.ok, c.message)
+      const opened = await W().open(mine)
+      expect(opened.legacyFolder === true, 'A project with the old folder name was not recognised.')
+      const r = await W().renameProjectFolder()
+      expect(r.ok && !r.info.legacyFolder, r.ok ? 'The folder was not renamed.' : r.message)
+      expect((await W().gitState()).lastCommitMessage?.includes('.reqochet'), 'The rename was not committed.')
     })
   } finally {
     ;(ws as WorkspaceService | null)?.close()

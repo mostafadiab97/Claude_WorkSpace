@@ -21,8 +21,8 @@ const en = {
   /** The product name (the logo is a drawing; this is its text for screen readers and the title bar). */
   brand: {
     name: 'reqochet',
-    /** '' for the release tool; 'dev' for the development tool built from the development repository (R-10). */
-    edition: 'dev'
+    /** The mark beside the logo in the development tool (reqochet-dev, R-10). */
+    dev: 'dev'
   },
 
   common: {

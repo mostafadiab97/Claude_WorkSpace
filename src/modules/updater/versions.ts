@@ -3,9 +3,9 @@
 
 /**
  * The oldest version one can go back to. Older versions do not know "updates paused", so they would update
- * themselves straight back to the newest one. Raise this at the rename (an older name installs as another app).
+ * themselves straight back to the newest one — and versions before 0.16 are ReqMan, another app (the rename).
  */
-export const OLDEST_REVERT_TARGET = '0.14.1'
+export const OLDEST_REVERT_TARGET = '0.16.0'
 
 export interface ReleaseInfo {
   version: string

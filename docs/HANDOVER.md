@@ -8,7 +8,7 @@ no memory of the old one — only these files.
 Copy everything in the box into the first message of the new chat:
 
 ```
-You are continuing the development of ReqMan (working name; a new name is being chosen), a serverless,
+You are continuing the development of reqochet (working name; a new name is being chosen), a serverless,
 Git-based requirements-management desktop app. You write all the code, tests and docs; I (the owner) am the
 product owner: I decide the product, install every release on my Windows 11 PC and report back.
 

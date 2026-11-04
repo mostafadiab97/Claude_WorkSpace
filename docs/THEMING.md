@@ -1,4 +1,4 @@
-# Theming ReqMan
+# Theming reqochet
 
 All visual styling comes from **one file: `config/theme.json`**. UI components never contain colours,
 fonts or radii — they reference named tokens, so restyling or rebranding is a one-file change.
@@ -7,14 +7,14 @@ fonts or radii — they reference named tokens, so restyling or rebranding is a 
 
 Themes are layered: **built-in defaults ← the app's theme ← your theme**.
 
-- **Your theme:** `%APPDATA%\ReqMan\theme.json`. Click **Edit my theme…** in ReqMan to create it and open its folder.
+- **Your theme:** `%APPDATA%\reqochet-dev\theme.json`. Click **Edit my theme…** in reqochet to create it and open its folder.
   It starts almost empty: add only the values you want to change, so later improvements to the app theme
   still reach every value you haven't changed. Updates never touch this file. A custom logo file can be put
   in the same folder.
-- The app's theme: `%LOCALAPPDATA%\Programs\ReqMan\resources\config\theme.json` (source: `config/theme.json`).
+- The app's theme: `%LOCALAPPDATA%\Programs\reqochet-dev\resources\config\theme.json` (source: `config/theme.json`).
   It is replaced by every update, so don't edit it on a user PC.
 
-Edit your file, save, and restart ReqMan. No rebuild needed.
+Edit your file, save, and restart reqochet. No rebuild needed.
 
 ## What you can change
 

@@ -3,11 +3,15 @@ import { app, BrowserWindow, dialog, shell } from 'electron'
 import { join } from 'node:path'
 import { createServices, type Paths } from './composition'
 import { registerIpc } from './ipc'
+import { moveLegacyUserData } from './legacyData'
 import { Channels } from '../shared/api'
 
-app.setName('ReqMan')
+// The name comes from package.json "productName": reqochet-dev in the development repository, reqochet in the release
+// repository (owner, 4 Nov 2026). It decides the settings folder (%APPDATA%\<name>) and, with electron-builder's
+// appId, the installed app — the two tools can sit side by side on one PC.
+const PRODUCT = app.getName()
 
-// One ReqMan per user (review D-02): a second start (e.g. a double-click on the shortcut while ReqMan is open)
+// One app per user (review D-02): a second start (e.g. a double-click on the shortcut while ReqMan is open)
 // brings the open window to the front instead of starting a second app on the same data.
 const firstInstance = app.requestSingleInstanceLock()
 if (!firstInstance) app.quit()
@@ -40,7 +44,7 @@ function createWindow(services: ReturnType<typeof createServices>): void {
     minWidth: 800,
     minHeight: 560,
     show: false,
-    title: 'ReqMan',
+    title: PRODUCT,
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -73,7 +77,7 @@ function createWindow(services: ReturnType<typeof createServices>): void {
       cancelId: 1,
       title: 'Unsaved changes',
       message: 'You have unsaved changes.',
-      detail: 'If you close ReqMan now, they are lost.'
+      detail: 'If you close the window now, they are lost.'
     })
     if (choice === 0) event.preventDefault() // preventDefault here means: allow the window to close
   })
@@ -92,14 +96,25 @@ function createWindow(services: ReturnType<typeof createServices>): void {
   }
 }
 
-void app.whenReady().then(() => {
+void app.whenReady().then(async () => {
   if (!firstInstance) return
   const paths = resolvePaths()
+  // 0.16: the first start after the switch from ReqMan copies the user's settings over and removes the old folder —
+  // only for the installed app in its normal settings folder (never for tests or a --user-data-dir).
+  const moved: string[] = []
+  const defaultUserData = join(app.getPath('appData'), PRODUCT)
+  if (app.isPackaged && paths.userDir === defaultUserData) {
+    await moveLegacyUserData(join(app.getPath('appData'), 'ReqMan'), paths.userDir, { info: (m) => moved.push(m), warn: (m) => moved.push(`WARN ${m}`) })
+  }
   const services = createServices(paths, app.getVersion())
   const { log } = services
+  for (const m of moved) {
+    if (m.startsWith('WARN ')) log.warn(m.slice(5))
+    else log.info(m)
+  }
 
   log.info(
-    `ReqMan ${app.getVersion()} starting — ${process.platform} ${process.getSystemVersion()} ${process.arch}, ` +
+    `${PRODUCT} ${app.getVersion()} starting — ${process.platform} ${process.getSystemVersion()} ${process.arch}, ` +
       `Electron ${process.versions.electron}, packaged=${app.isPackaged}`
   )
   log.info(`Config folder: ${paths.configDir}`)
@@ -115,7 +130,7 @@ void app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow(services)
   })
-  app.on('will-quit', () => log.info('ReqMan closed normally'))
+  app.on('will-quit', () => log.info(`${PRODUCT} closed normally`))
 })
 
 app.on('window-all-closed', () => {

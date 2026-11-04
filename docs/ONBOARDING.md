@@ -1,17 +1,17 @@
-# Welcome to ReqMan — onboarding guide for engineers
+# Welcome to reqochet — onboarding guide for engineers
 
-Read this first (about 30 minutes). It explains what ReqMan is, how the parts fit together, how data moves through
+Read this first (about 30 minutes). It explains what reqochet is, how the parts fit together, how data moves through
 them, and how to make your first change safely. Deeper references are linked at the end.
 
-## 1. What ReqMan is, in one picture
+## 1. What reqochet is, in one picture
 
-ReqMan is a **small desktop app for managing requirements** (needs, system/software/hardware requirements, tests,
+reqochet is a **small desktop app for managing requirements** (needs, system/software/hardware requirements, tests,
 risks…) that replaces scattered Word and Excel files. It has **no server and no database of its own**:
 
 - every requirement is a **plain text file** in a `requirements/` folder **inside the project's own Git repository**;
 - **Git is the database and the version control**: history, sharing (pull/push), branches and reviews come from Git
   and GitHub;
-- ReqMan is the window that understands those files: a tree table, an editor, typed links between items, "suspect"
+- reqochet is the window that understands those files: a tree table, an editor, typed links between items, "suspect"
   links, and Git actions shown per requirement instead of per file line.
 
 ![How the parts connect](images/architecture.png)
@@ -94,7 +94,7 @@ The main PCB shall limit access tokens in all supported languages.
   two, never stored. `links` are stored only on the source item ("this verifies that").
 - `confirmed` is the fingerprint (type + title + text) of the target when the link was last confirmed; if the
   target changes, the link becomes **suspect** until someone confirms it.
-- The project's `requirements/.reqman/schema.yaml` defines item types, fields (text, choice,
+- The project's `requirements/.reqochet/schema.yaml` defines item types, fields (text, choice,
   list, number, date) and link types (name + reverse name). It is versioned with the requirements.
 
 ## 5. How a request travels — two examples
@@ -115,7 +115,7 @@ diagram on the right. The diagrams are made with [Archify](https://github.com/tt
 
 1. Set up the PC: `docs/DEVELOPING.md` (Git, Node 22 — also without admin rights —, VS Code).
 2. Clone this repository and the test data `Claude_SandBox` **next to** it, then `npm ci` and `npm run check`.
-3. `npm run dev` starts ReqMan from the source. Open the sandbox clone: 10,005 fictional items with every kind of
+3. `npm run dev` starts reqochet from the source. Open the sandbox clone: 10,005 fictional items with every kind of
    structure, link and deliberately broken file (see its README).
 4. Click through the checklist in `docs/TESTING.md` once — it is the fastest tour of every feature.
 5. Read `CLAUDE.md` (project memory: rules, decisions, pitfalls) and skim `docs/ARCHITECTURE.md`.
@@ -165,7 +165,7 @@ that opens an old cache file.
 | Suspect link | A link whose target's type, title or text changed after the link was confirmed |
 | Fingerprint | Short hash of an item's type, title and text, used for suspect links |
 | Revision | Short hash of a file's content when it was read; writes are refused if it changed meanwhile |
-| Index cache | The SQLite file in `%APPDATA%\ReqMan\cache` — fast search; rebuildable at any time |
+| Index cache | The SQLite file in `%APPDATA%\reqochet-dev\cache` — fast search; rebuildable at any time |
 | Upstream | The remote branch a local branch pulls from / pushes to (e.g. `origin/main`) |
 | Branch | A separate line of commits (`main`, `feature/door`); switching changes which versions of the files are in the folder |
 | Merge base | The newest commit two branches share — the "base" of a 3-way merge |

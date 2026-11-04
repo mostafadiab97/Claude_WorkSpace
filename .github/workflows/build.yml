@@ -66,12 +66,12 @@ jobs:
           prev=""
           # the real push only for pushes to main and manual runs — never for pull requests (security check 3 Nov)
           PUSH=""; if [ "${{ github.event_name }}" != "pull_request" ]; then PUSH=1; fi
-          if gh release download --pattern "ReqMan-Setup-*.exe" --dir "$RUNNER_TEMP/previous" 2>/dev/null; then
-            prev="$(ls "$RUNNER_TEMP"/previous/ReqMan-Setup-*.exe | head -1)"
+          if gh release download --pattern "*-Setup-*.exe" --dir "$RUNNER_TEMP/previous" 2>/dev/null; then
+            prev="$(ls "$RUNNER_TEMP"/previous/*-Setup-*.exe | head -1)"
           fi
           git clone --quiet --depth 1 https://github.com/${{ github.repository_owner }}/Claude_SandBox.git "$RUNNER_TEMP/sandbox"
           node e2e/acceptance.mjs \
-            --installer "$(ls dist/ReqMan-Setup-*.exe | head -1)" --feed dist \
+            --installer "$(ls dist/*-Setup-*.exe | head -1)" --feed dist \
             ${prev:+--previous "$prev"} \
             --sandbox "$RUNNER_TEMP/sandbox" \
             ${PUSH:+--push-url "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"} \
@@ -79,6 +79,6 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: ReqMan-Windows-Installer
+          name: reqochet-dev-Windows-Installer
           path: dist/*.exe
           if-no-files-found: error

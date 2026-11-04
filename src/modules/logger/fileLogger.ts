@@ -9,8 +9,8 @@ const MAX_BYTES = 1_000_000
  * Logging must never break the app, so every file error is swallowed.
  */
 export function createFileLogger(dir: string, maxBytes = MAX_BYTES): Logger {
-  const filePath = join(dir, 'reqman.log')
-  const oldPath = join(dir, 'reqman.old.log')
+  const filePath = join(dir, 'reqochet.log')
+  const oldPath = join(dir, 'reqochet.old.log')
   try {
     mkdirSync(dir, { recursive: true })
   } catch {

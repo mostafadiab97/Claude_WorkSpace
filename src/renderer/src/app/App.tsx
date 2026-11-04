@@ -96,7 +96,8 @@ export function App() {
             <>
               <BrandFace mode={effective} state={!active ? 'still' : working ? 'thinking' : 'idle'} size={28} />
               <BrandName mode={effective} width={112} />
-              {T.brand.edition && <span className="brand__edition">{T.brand.edition}</span>}
+              {/* the development tool (reqochet-dev) wears a small mark, so the owner always knows which one is open */}
+              {appInfo?.name.endsWith('-dev') && <span className="brand__edition">{T.brand.dev}</span>}
             </>
           )}
           {repo && !showSettings && (

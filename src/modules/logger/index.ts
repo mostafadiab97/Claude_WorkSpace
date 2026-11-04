@@ -1,6 +1,6 @@
 // PUBLIC ENTRY of the logger module. Other code may import only from this file.
 // Responsibility: write a plain-text log file the user can open and send when reporting a bug.
-// Location on Windows: %APPDATA%\ReqMan\logs\reqman.log (rotated to reqman.old.log at 1 MB).
+// Location on Windows: %APPDATA%\<product>\logs\reqochet.log (rotated to reqochet.old.log at 1 MB).
 import { createFileLogger } from './fileLogger'
 
 export type LogLevel = 'INFO' | 'WARN' | 'ERROR'

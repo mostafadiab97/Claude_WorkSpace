@@ -33,7 +33,7 @@ by a Git rename the user commits). This file collects the open points for the re
 
 | R-08 | Where the eyes appear (follows R-06) | the app's face in the top bar (small eyes instead of the plain icon): idle normally, **thinking** while the app works (opening, pull, push, self-test, import), still when the window is in the background; large eyes on the start screen beside the name | **C: yes** |
 | R-09 | A brand / logo designer helper agent (owner 4 Nov) | yes: a fourth helper for brand work — reviews how logo, icon and motion sit in the app (sizes, clear space, light/dark, Arabic) and proposes adjustments; writes `docs/reviews/agents/<version>-brand.md`; runs for the rename version and when the brand changes | **C: yes** |
-| R-10 | Two tools on one PC (follows the two-feeds decision): this repository's app is the **development tool** | it is named **reqochet dev** (own app identity, `%APPDATA%\reqochet-dev`, installer `reqochet-dev-Setup-x.y.z.exe`, a small "dev" mark beside the logo); the plain **reqochet** comes only from the public repository later; both read the same `.reqochet` project folders | open |
+| R-10 | Two tools on one PC (follows the two-feeds decision): this repository's app is the **development tool** | it is named **reqochet dev** (own app identity, `%APPDATA%\reqochet-dev`, installer `reqochet-dev-Setup-x.y.z.exe`, a small "dev" mark beside the logo); the plain **reqochet** comes only from the public repository later; both read the same `.reqochet` project folders | **C: yes — named `reqochet-dev`** (app, settings folder, installer); the project folder stays `.reqochet` for both tools |
 
 ## Technical decisions (Claude, explained)
 
@@ -59,3 +59,4 @@ by a Git rename the user commits). This file collects the open points for the re
   releases; the *release tool* built in the public repository updates from that repository's releases; the owner has
   both installed for manual tests; each tool's version list shows only its own repository's versions. Other public-repo
   questions later.
+- 4 Nov 2026 — R-10: the development tool is **reqochet-dev**; the release repository builds plain **reqochet**; the project folder stays `requirements/.reqochet` (never `.reqochet-dev`).

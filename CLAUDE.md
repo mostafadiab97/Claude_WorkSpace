@@ -1,7 +1,8 @@
-# ReqMan — project memory for Claude
+# reqochet (formerly ReqMan) — project memory for Claude
 
-ReqMan is a small, serverless requirements-management desktop app (Windows 11 first). Requirements are plain
-files in a `requirements/` folder of a project's own Git repository; ReqMan is the GUI that understands them
+reqochet (called ReqMan until 0.15) is a small, serverless requirements-management desktop app (Windows 11 first). This
+repository builds the **development tool reqochet-dev**; a release repository will build plain **reqochet** (owner, 4 Nov 2026). Requirements are plain
+files in a `requirements/` folder of a project's own Git repository; reqochet is the GUI that understands them
 (table, hierarchy, links, suspect links) and, from M4 on, does the Git work at requirement level.
 Internal proof of concept first; likely a commercial product later.
 
@@ -64,7 +65,7 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
 ## Non-negotiable rules (from the design; enforced by lint/tests where possible)
 
 - **NFR-11 theme:** every colour, font, size, radius, spacing comes from `config/theme.json` via CSS variables
-  `--rm-*`. No hex/rgb in renderer code (a test fails on it). User overrides live in `%APPDATA%\ReqMan\theme.json`.
+  `--rm-*`. No hex/rgb in renderer code (a test fails on it). User overrides live in `%APPDATA%\reqochet-dev\theme.json`.
 - **NFR-12 modules:** each `src/modules/<name>/index.ts` is that module's only public entry (ESLint blocks deep
   imports); `src/main/composition.ts` is the single place that wires implementations. The renderer may use only
   `window.reqochet` (contract in `src/shared/api.ts`) and types from `src/shared/domain.ts` — no Node/Electron.
@@ -73,10 +74,10 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
 - Offline first; no server; no user accounts — access = Git host permissions.
 - Data format: one Markdown file per item, `requirements/items/<ID>.md`, YAML header in fixed key order, links
   stored only on the source item, each with `confirmed:` (target fingerprint). Schema in
-  `requirements/.reqman/schema.yaml`. IDs `REQ-XXXXXXX` (7 random Crockford base32, every type; older `PREFIX-XXXXXX` stay valid). `order:` is an order
+  `requirements/.reqochet/schema.yaml` (projects made with ReqMan: `.reqman`, read until the user takes the rename). IDs `REQ-XXXXXXX` (7 random Crockford base32, every type; older `PREFIX-XXXXXX` stay valid). `order:` is an order
   key (`src/modules/items/orderKey.ts`) compared **byte-wise** (`<`), never with `localeCompare`; outline numbers
   are calculated, never stored. Details: ARCHITECTURE.md.
-- The SQLite index (`%APPDATA%\ReqMan\cache\<sha1(root)>.sqlite`) is only a cache. **If you change its tables,
+- The SQLite index (`%APPDATA%\reqochet-dev\cache\<sha1(root)>.sqlite`) is only a cache. **If you change its tables,
   bump `FORMAT_VERSION` in `src/modules/index-cache/sqliteIndex.ts`** — the cache is then dropped and rebuilt
   (lesson of v0.4.1, see Pitfalls).
 - **Texts (S-06):** every word on screen comes from `src/shared/text.ts` (`T.area.key`, functions for texts with
@@ -119,7 +120,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
    - `build.yml` (every push): check, perf tests, build, e2e, installer artifact.
    - `release.yml` (push that changes `package.json` or the workflow, or manual): skips if `v<version>` release
      exists; otherwise check, build, e2e, `electron-builder --publish never`, zips the installer, and
-     `gh release create v<version>` with `ReqMan-Setup-<v>.exe`, `.blockmap`, `.zip`, `latest.yml`.
+     `gh release create v<version>` with `reqochet-dev-Setup-<v>.exe`, `.blockmap`, `.zip`, `latest.yml`.
 5. Installed copies auto-update from that feed (electron-updater, GitHub provider in `electron-builder.yml`).
    The repository **must stay public** for auto-update to work without a token (tested: private → 404).
 6. Watch with `node tools/ci.mjs status | wait | failures | release | released` (REST only — works in the cloud

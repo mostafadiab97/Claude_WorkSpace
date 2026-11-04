@@ -185,7 +185,7 @@ export function registerIpc(services: Services, paths: Paths): void {
           description: text,
           diagnostics: await diagnostics(),
           log: await readLog(log.filePath),
-          olderLog: await readLog(join(dirname(log.filePath), 'reqman.old.log'))
+          olderLog: await readLog(join(dirname(log.filePath), 'reqochet.old.log'))
         })
         const win = BrowserWindow.fromWebContents(e.sender)
         const opts = { title: T.settings.report.title, defaultPath: join(app.getPath('downloads'), problemReportName()), filters: [{ name: 'Text', extensions: ['txt'] }] }

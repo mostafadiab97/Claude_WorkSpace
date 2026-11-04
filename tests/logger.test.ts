@@ -21,14 +21,14 @@ describe('logger', () => {
     const dir = mkdtempSync(join(tmpdir(), 'reqman-log-'))
     const log = createFileLogger(dir, 200)
     for (let i = 0; i < 20; i++) log.info(`line ${i} with some padding text`)
-    expect(existsSync(join(dir, 'reqman.old.log'))).toBe(true)
+    expect(existsSync(join(dir, 'reqochet.old.log'))).toBe(true)
     expect(readFileSync(log.filePath, 'utf8').length).toBeLessThan(400)
   })
 
   it('never throws when the log file cannot be written', () => {
     const dir = mkdtempSync(join(tmpdir(), 'reqman-log-'))
     // A folder where the log file should be makes every write fail.
-    mkdirSync(join(dir, 'reqman.log'))
+    mkdirSync(join(dir, 'reqochet.log'))
     const log = createFileLogger(dir)
     expect(() => log.error('still fine')).not.toThrow()
   })

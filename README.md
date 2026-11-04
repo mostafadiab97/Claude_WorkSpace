@@ -1,10 +1,10 @@
-# ReqMan
+# reqochet
 
-ReqMan (working name — a new name is being chosen, see `docs/reviews/2026-10-31-rename-impact.md`) is a local,
-Git-based requirements management tool — internal proof of concept, likely a commercial product later.
+reqochet (called ReqMan until version 0.15) is a local, Git-based requirements management tool. This repository
+builds the development tool **reqochet-dev** — internal proof of concept, likely a commercial product later.
 
 Requirements live as plain-text files (one Markdown file per requirement) in a folder of a project's own Git
-repository; ReqMan is the Windows desktop app to view, edit, structure, link, compare, merge, import and export them.
+repository; reqochet is the Windows desktop app to view, edit, structure, link, compare, merge, import and export them.
 No server, no accounts — access is whatever the Git host (e.g. GitHub) allows.
 
 **What it does today (v0.13.0):** tree table with calculated outline numbers, editor, custom fields, typed links with
@@ -17,7 +17,7 @@ an in-app release self-test, light/dark themes, **English / Arabic** (right-to-l
 ## Try it (Windows 11)
 
 1. Install [Git for Windows](https://git-scm.com/downloads/win) if you don't have it.
-2. Open the repository's **Releases** page → latest release → **Assets** → download `ReqMan-Setup-<version>.exe`.
+2. Open the repository's **Releases** page → latest release → **Assets** → download `reqochet-dev-Setup-<version>.exe`.
 3. Run it. It installs for your user only — no admin rights needed. Installed copies update themselves from new releases.
 4. Read the **[user guide](docs/USER-GUIDE.md)** — it starts with a 15-minute quick start.
 5. Testers: follow the checklist in `docs/TESTING.md`.

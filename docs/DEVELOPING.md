@@ -1,8 +1,8 @@
-# Developing ReqMan on Windows
+# Developing reqochet on Windows
 
 ## One-time setup
 
-1. **Git for Windows** — https://git-scm.com/download/win (includes Git Credential Manager, which ReqMan's Git
+1. **Git for Windows** — https://git-scm.com/download/win (includes Git Credential Manager, which reqochet's Git
    features will rely on). Then:
    `git config --global user.name "Your Name"` and `git config --global user.email "you@example.com"`.
 2. **Node.js 22 LTS** — https://nodejs.org (the version CI uses). Check with `node -v` in a **new** terminal.
@@ -22,12 +22,12 @@
    npm run check
    ```
 
-6. Optional first full check: `npm run build` then `npm run test:e2e` (ReqMan windows open and close by
+6. Optional first full check: `npm run build` then `npm run test:e2e` (reqochet windows open and close by
    themselves for about a minute; screenshots land in `e2e\out\`).
 
 ## Daily work
 
-- `npm run dev` runs ReqMan from the source with live reload. It uses the same `%APPDATA%\ReqMan` folder as the
+- `npm run dev` runs reqochet from the source with live reload. It uses the same `%APPDATA%\reqochet-dev` folder as the
   installed app (recent repositories, theme, logs, index caches) — that is fine; caches rebuild when needed.
 - Before pushing: `npm run check` (and `npm run build && npm run test:e2e` for UI changes).
 - Releasing: see "Releasing" in `CLAUDE.md`. Pushing a changed `version` in `package.json` to `main` publishes a
@@ -37,7 +37,7 @@
 
 `.gitattributes` keeps every text file LF in the repository and working copy, so Windows checkouts produce no
 whitespace-only diffs. Item files (`requirements/**`) of user repositories get their own `.gitattributes` when
-ReqMan creates the folder.
+reqochet creates the folder.
 
 ## Libraries (security and updates)
 
@@ -46,5 +46,5 @@ ReqMan creates the folder.
   (the owner's decision, 28 Oct 2026); without network it says so and carries on.
 - **Dependabot** (GitHub) proposes updates as pull requests: security fixes as soon as they are published, other
   updates weekly (`.github/dependabot.yml`). Review and merge them like any change; the build tests them.
-- Users of ReqMan never update libraries themselves: they are packed into the installer and arrive with ReqMan
+- Users of reqochet never update libraries themselves: they are packed into the installer and arrive with reqochet
   updates.

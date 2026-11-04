@@ -1,7 +1,19 @@
-# Past manual checklists (v0.0.3 – v0.15.0)
+# Past manual checklists (v0.0.3 – v0.15.1)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## Previous checklist — v0.15.1 (the owner's points on 0.15.0)
+
+The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
+Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.15.1**. **⚙ → Self-tests → Run release self-test**, go to another page (e.g. Features) and back while it runs. | The test is still running when you come back and ends with **All steps passed**, 21 ✓. |
+| 2 | In the sandbox open an item, **+ Add link**, click the **link type** list and choose a type. | The Add link section stays open; you can then search and pick the item. |
+| 3 | **Changes → Show: the last commit that changed requirements** (your 0.15.0 commit). | Your text change is listed; under the list: **+ 5 items changed only by a link review** (click it for their IDs). |
+| 4 | **⚙**, open **▸ User guide** in the left panel and scroll the panel down. | **← Back** stays at the top. |
 
 ## Previous checklist — v0.15.0 (UI polish from the UI/UX review)
 

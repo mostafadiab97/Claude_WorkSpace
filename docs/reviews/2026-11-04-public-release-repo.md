@@ -80,6 +80,10 @@ match "the tool files with the documentation".
 - I: two tools on one PC need different app identities, names and data folders (otherwise one installer replaces the
   other) — see the rename discussion, R-10.
 
+- I (0.16 build): electron-builder names the install folder after package.json `name` — the release repository must
+  use `name: reqochet`, `productName: reqochet`, appId `com.reqochet.app` (this repository: `reqochet-dev` everywhere),
+  otherwise the two tools would install into the same folder.
+
 ## 5. Open questions for the owner (later)
 
 1. Source + docs public (as proposed), or installers only?

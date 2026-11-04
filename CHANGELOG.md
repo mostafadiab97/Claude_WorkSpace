@@ -3,6 +3,30 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.16.0 — 4 Nov 2026 — The new name: reqochet (development tool reqochet-dev)
+- **Owner (4 Nov 2026) on 0.15.2:** self-test 21/21 (60.0 s); all 3 steps passed. Requests: Changes / Pull / Push next to
+  the branch button; the new name **reqochet** with the brand package (logo, icon, motion). Decisions
+  (`docs/reviews/2026-11-04-rename-reqochet.md`): all lower case; the clean switch of 31 Oct; icon + name in the top
+  bar, the logo on the start screen, the loading animation, the "eyes" shown now as the app's face; a brand helper
+  agent; two tools — this repository builds **reqochet-dev**, the release repository will build **reqochet**; the
+  project folder is `requirements/.reqochet` for both.
+- **The switch from ReqMan:** the update installs reqochet-dev as a new app; its installer removes ReqMan (asking first
+  if ReqMan is open and the installer was started by hand); the first start copies your settings, recent list, import
+  memory and window settings from `%APPDATA%\ReqMan` and then removes that folder (only after everything was copied);
+  each repository is indexed again once. "Go back to an earlier version" lists versions from 0.16.0 on.
+- **Brand:** the face (q and o as eyes: they glance and blink, look busy while the app works, rest when the window is in
+  the background) and the name logo in the top bar with a small DEV mark; the large face and name on the start screen;
+  the bouncing-dots animation at start and while a repository opens; a small busy icon in the Git bar; the Windows icon.
+- **Projects made with ReqMan** open as before and show **Rename folder**: one commit renames `.reqman` to `.reqochet`
+  (items, links and history stay); you then push it. Refused while that folder has uncommitted changes.
+- **Top bar:** Changes / Pull / Push right after the branch; names shrink with "…" so the bar never runs past the window;
+  without a remote one **Publish to GitHub…** button.
+- **Exports:** ReqIF and Excel carry the name reqochet; files exported by ReqMan still import exactly as before.
+- **Also:** a GitHub server error is no longer reported as "Pull first"; the self-test has a 22nd step (a project made
+  with ReqMan is renamed).
+- **Checked before release** by the code reviewer, QA tester (53 tests taken in), UI/UX reviewer and the new brand
+  helper (`docs/reviews/agents/0.16.0-*.md`); the Windows switch from 0.15.2 is tested by the CI acceptance run.
+
 ## 0.15.2 — 4 Nov 2026 — The owner's points on 0.15.1
 - **Owner (4 Nov 2026) on 0.15.1:** self-test 21/21 (50.2 s); all 4 steps passed, with three touches. All here:
 - **Self-test report folds** (step 1): after a passed test only the result line shows; **Show the 21 steps** opens the
@@ -14,6 +38,7 @@ version it was about, and what it led to.
 - **Back sits on a bar of its own** (step 4): the entries scroll under the bar instead of showing around the button.
 - **Also:** the table's Text column no longer shows a stray `*` when a text starts with bold (found by the acceptance
   run's screenshot of 0.15.1).
+- **Owner (4 Nov 2026):** all 3 steps passed (self-test 21/21, 60.0 s) → 0.16.0.
 - **After the release (in the next version):** a GitHub outage while pushing was reported as "Pull first"; it now says
   that GitHub had a problem and nothing was lost. The CI acceptance run of 0.15.1/0.15.2 had failed twice on it.
 

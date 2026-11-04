@@ -3,7 +3,7 @@
 Three kinds of checks protect each version:
 
 1. **Automated checks** run on a Windows machine on GitHub for every push: type checking, lint rules
-   (including the module-boundary rules), about 340 unit tests (real Git with a fake "GitHub", the sandbox's
+   (including the module-boundary rules), about 400 unit tests (real Git with a fake "GitHub", the sandbox's
    broken files, …), performance tests, and end-to-end scenarios that click through the real app. A build that
    fails any of them produces no installer. To see them: repository → **Actions** → latest **Build** run.
 2. **The release self-test** (from 0.8.0) — on *your* PC, inside ReqMan: **⚙ Settings & diagnostics → Run
@@ -67,7 +67,21 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.15.2 (the owner's points on 0.15.1)
+## Manual test checklist — v0.16.0 (the new name: reqochet-dev)
+
+The acceptance run on GitHub installed 0.15.2 (ReqMan), updated it to reqochet-dev, checked that ReqMan was removed and
+the settings moved, then ran the self-test, the sandbox and a real push (Actions → Release → Summary). Report by step
+number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let ReqMan update to **0.16.0** (Restart and update). | **reqochet-dev** opens by itself; ReqMan is gone from the Start menu and from Windows' installed apps; your colour mode, language and recent repositories are still there. |
+| 2 | **⚙ → Self-tests → Run release self-test**. | **All steps passed**, now **22** (new: a project made with ReqMan is renamed). |
+| 3 | Open the sandbox. Look at the top bar and the start screen; hover the window, then click another window. | Face (eyes) + reqochet + **DEV**; the eyes glance and blink, rest when the window is in the background, look busy during Pull. Changes / Pull / Push sit right after the branch. The start screen shows the large face and name; while the sandbox opens only the bouncing dots move. |
+| 4 | The sandbox shows "This project was made with ReqMan…": click **Rename folder**, then **Push**. | A green note "Folder renamed and committed"; on GitHub the commit shows `.reqman → .reqochet` as a rename; the sandbox still opens with all items. (Afterwards `git pull` in your second sandbox clone.) |
+| 5 | Switch to **Dark** and **العربية** (⚙ → Appearance); look at the top bar and the start screen. | The light logo files in Dark; nothing mirrored in Arabic (the logo reads "reqochet"). |
+
+## Previous checklist — v0.15.2 (the owner's points on 0.15.1)
 
 The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
 Report by step number.
@@ -77,18 +91,6 @@ Report by step number.
 | 1 | Update to **0.15.2**, then **⚙ → Self-tests → Run release self-test**. | **All steps passed** (21); the step list is folded — **Show the 21 steps** opens it. |
 | 2 | **Changes → Show: the last commit that changed requirements** (your test commit from 0.15.0/0.15.1). | Under your changed item a row **L — Link review only: 5 items**; a click shows the IDs. No "links are now suspect" warning on the changed item (you kept them). |
 | 3 | **⚙**, open **▸ User guide**, scroll the left panel. | **← Back** sits on its own bar; the entries scroll under it. |
-
-## Previous checklist — v0.15.1 (the owner's points on 0.15.0)
-
-The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
-Report by step number.
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Update to **0.15.1**. **⚙ → Self-tests → Run release self-test**, go to another page (e.g. Features) and back while it runs. | The test is still running when you come back and ends with **All steps passed**, 21 ✓. |
-| 2 | In the sandbox open an item, **+ Add link**, click the **link type** list and choose a type. | The Add link section stays open; you can then search and pick the item. |
-| 3 | **Changes → Show: the last commit that changed requirements** (your 0.15.0 commit). | Your text change is listed; under the list: **+ 5 items changed only by a link review** (click it for their IDs). |
-| 4 | **⚙**, open **▸ User guide** in the left panel and scroll the panel down. | **← Back** stays at the top. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

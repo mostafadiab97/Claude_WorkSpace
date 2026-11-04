@@ -57,7 +57,7 @@ function createWindow(services: ReturnType<typeof createServices>): void {
     return { action: 'deny' }
   })
   // Security check 3 Nov 2026: the window never navigates away from ReqMan's own page (a link or a file dropped on it
-  // would otherwise load a foreign page that could reach window.reqman). External https links go to the browser.
+  // would otherwise load a foreign page that could reach window.reqochet). External https links go to the browser.
   win.webContents.on('will-navigate', (event, url) => {
     if (url === win.webContents.getURL()) return
     event.preventDefault()

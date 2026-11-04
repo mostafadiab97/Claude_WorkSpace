@@ -37,11 +37,11 @@ export function App() {
   const [gitSlot, setGitSlot] = useState<HTMLDivElement | null>(null)
 
   useEffect(() => {
-    void window.reqman.getTheme().then(setTheme)
-    void window.reqman.getAppInfo().then(setAppInfo)
-    void window.reqman.getGitInfo().then(setGit)
-    void window.reqman.getUpdateStatus().then(setUpdate)
-    return window.reqman.onUpdateStatus(setUpdate)
+    void window.reqochet.getTheme().then(setTheme)
+    void window.reqochet.getAppInfo().then(setAppInfo)
+    void window.reqochet.getGitInfo().then(setGit)
+    void window.reqochet.getUpdateStatus().then(setUpdate)
+    return window.reqochet.onUpdateStatus(setUpdate)
   }, [])
 
   // Re-apply tokens when the theme loads, the mode changes, or (in System mode) Windows switches light/dark.
@@ -73,7 +73,7 @@ export function App() {
   }
   const onInfo = useCallback((i: RepoInfo) => setRepo(i), [])
   const close = async (): Promise<void> => {
-    await window.reqman.closeRepository()
+    await window.reqochet.closeRepository()
     setRepo(null)
   }
 

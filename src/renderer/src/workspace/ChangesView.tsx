@@ -481,7 +481,7 @@ export function ChangesSide(props: { changes: ChangesState; git: GitState; block
   const exportAs = async (format: 'csv' | 'markdown'): Promise<void> => {
     if (!c.data) return
     try {
-      const r = await window.reqman.exportCompare(c.data.from.ref, c.data.to.ref, format)
+      const r = await window.reqochet.exportCompare(c.data.from.ref, c.data.to.ref, format)
       if (r.ok) setExported(r.path)
       else if (!r.canceled) setError(r.message)
     } catch (e) {
@@ -520,7 +520,7 @@ export function ChangesSide(props: { changes: ChangesState; git: GitState; block
             {exported && (
               <p className="compare__pull" role="status">
                 {T.compare.exportedTo(exported)}{' '}
-                <button type="button" className="link-btn" onClick={() => void window.reqman.showInFolder(exported)}>
+                <button type="button" className="link-btn" onClick={() => void window.reqochet.showInFolder(exported)}>
                   {T.exportDialog.showInFolder}
                 </button>
               </p>

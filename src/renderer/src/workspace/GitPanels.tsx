@@ -279,7 +279,7 @@ export function CommitTools(props: { state: GitState; blockedReason: string | nu
             className="changes__identity"
             onSubmit={(e) => {
               e.preventDefault()
-              void run(() => window.reqman.setGitIdentity(name, email), (r) => r.ok && setChangingIdentity(false))
+              void run(() => window.reqochet.setGitIdentity(name, email), (r) => r.ok && setChangingIdentity(false))
             }}
           >
             <p className={changingIdentity ? 'muted' : 'notice notice--warn'}>{changingIdentity ? T.changesPanel.changeIdentityHint : T.changesPanel.whoAreYou}</p>
@@ -308,7 +308,7 @@ export function CommitTools(props: { state: GitState; blockedReason: string | nu
               className="changes__commit"
               onSubmit={(e) => {
                 e.preventDefault()
-                void run(() => window.reqman.commit(message), (r) => r.ok && setMessage(''))
+                void run(() => window.reqochet.commit(message), (r) => r.ok && setMessage(''))
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Escape') setMenu(false)
@@ -366,7 +366,7 @@ export function CommitTools(props: { state: GitState; blockedReason: string | nu
                       onClick={() => {
                         setMenu(false)
                         const push = props.onPush
-                        void run(() => window.reqman.commit(message), (r) => {
+                        void run(() => window.reqochet.commit(message), (r) => {
                           if (!r.ok) return
                           setMessage('')
                           push?.()
@@ -387,7 +387,7 @@ export function CommitTools(props: { state: GitState; blockedReason: string | nu
             {confirm === '#undo' ? (
               <span className="actions">
                 <span>{T.changesPanel.undoAsk(state.lastCommitMessage)}</span>
-                <button type="button" className="btn btn--small" disabled={locked} onClick={() => void run(() => window.reqman.undoLastCommit(), () => setConfirm(null))}>
+                <button type="button" className="btn btn--small" disabled={locked} onClick={() => void run(() => window.reqochet.undoLastCommit(), () => setConfirm(null))}>
                   {T.changesPanel.undoCommit}
                 </button>
                 <button type="button" className="btn btn--small" onClick={() => setConfirm(null)}>

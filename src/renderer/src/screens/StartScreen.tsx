@@ -29,31 +29,31 @@ export function StartScreen({
   const [pending, setPending] = useState<Pending>({ kind: 'idle' })
 
   useEffect(() => {
-    void window.reqman.getRecentRepositories().then(setRecent)
+    void window.reqochet.getRecentRepositories().then(setRecent)
   }, [])
 
   const openPath = async (path: string): Promise<void> => {
     setPending({ kind: 'busy', label: T.start.checkingFolder })
     try {
-      const check = await window.reqman.checkFolder(path)
+      const check = await window.reqochet.checkFolder(path)
       if (check.state === 'missing') return setPending({ kind: 'error', message: T.start.missing(path) })
       if (check.state === 'not-initialized') return setPending({ kind: 'confirm-init', check })
       setPending({ kind: 'busy', label: T.start.opening })
-      onOpened(await window.reqman.openRepository(check.root))
+      onOpened(await window.reqochet.openRepository(check.root))
     } catch (e) {
       setPending({ kind: 'error', message: errorMessage(e) })
     }
   }
 
   const choose = async (): Promise<void> => {
-    const path = await window.reqman.pickFolder()
+    const path = await window.reqochet.pickFolder()
     if (path) await openPath(path)
   }
 
   const initialize = async (root: string): Promise<void> => {
     setPending({ kind: 'busy', label: T.start.creating })
     try {
-      onOpened(await window.reqman.initializeRepository(root))
+      onOpened(await window.reqochet.initializeRepository(root))
     } catch (e) {
       setPending({ kind: 'error', message: errorMessage(e) })
     }
@@ -63,7 +63,7 @@ export function StartScreen({
   const fromFile = async (): Promise<void> => {
     setPending({ kind: 'busy', label: T.start.creating })
     try {
-      const r = await window.reqman.newProjectFromFile()
+      const r = await window.reqochet.newProjectFromFile()
       if (r.ok) onOpened(r.info, r.file)
       else setPending(r.canceled ? { kind: 'idle' } : { kind: 'error', message: r.message })
     } catch (e) {
@@ -72,8 +72,8 @@ export function StartScreen({
   }
 
   const forget = async (root: string): Promise<void> => {
-    await window.reqman.forgetRecentRepository(root)
-    setRecent(await window.reqman.getRecentRepositories())
+    await window.reqochet.forgetRecentRepository(root)
+    setRecent(await window.reqochet.getRecentRepositories())
   }
 
   const busy = pending.kind === 'busy'

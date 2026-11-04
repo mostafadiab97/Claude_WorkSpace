@@ -18,13 +18,13 @@ export function VersionsCard({ appInfo, update }: { appInfo: AppInfo | null; upd
   const open = async (): Promise<void> => {
     setList({ state: 'loading' })
     setError(null)
-    const r = await window.reqman.listEarlierVersions()
+    const r = await window.reqochet.listEarlierVersions()
     setList(r.ok ? { state: 'open', versions: r.versions } : { state: 'failed', message: r.message })
     setPick(r.ok ? (r.versions[0]?.version ?? null) : null)
   }
   const install = async (version: string): Promise<void> => {
     setBusy(version)
-    const r = await window.reqman.installEarlierVersion(version)
+    const r = await window.reqochet.installEarlierVersion(version)
     if (!r.ok) {
       setBusy(null)
       setError(r.message)
@@ -41,7 +41,7 @@ export function VersionsCard({ appInfo, update }: { appInfo: AppInfo | null; upd
       {update?.state === 'held' && (
         <div className="notice" role="status">
           {tx.held(update.version)}{' '}
-          <button type="button" className="btn btn--small" onClick={() => void window.reqman.resumeUpdates()}>
+          <button type="button" className="btn btn--small" onClick={() => void window.reqochet.resumeUpdates()}>
             {tx.resume}
           </button>
         </div>

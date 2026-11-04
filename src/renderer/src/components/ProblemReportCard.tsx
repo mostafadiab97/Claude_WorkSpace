@@ -11,7 +11,7 @@ export function ProblemReportCard() {
     setBusy(true)
     setResult(null)
     try {
-      const r = await window.reqman.saveProblemReport(text)
+      const r = await window.reqochet.saveProblemReport(text)
       if (r.ok) {
         setResult({ ok: true, message: T.settings.report.saved(r.path) })
         setText('') // the owner on 0.14.0 step 3: the description is in the file now; start empty for the next report

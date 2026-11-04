@@ -21,7 +21,7 @@ export function useChanges(open: boolean, dataVersion: number) {
   useEffect(() => {
     if (!open) return
     let live = true
-    void window.reqman
+    void window.reqochet
       .getCompareOptions()
       .then((o) => {
         if (!live) return
@@ -41,7 +41,7 @@ export function useChanges(open: boolean, dataVersion: number) {
   useEffect(() => {
     if (!open || !range) return
     let live = true
-    void window.reqman
+    void window.reqochet
       .compareVersions(range.from, range.to)
       .then((data) => {
         if (!live) return
@@ -74,7 +74,7 @@ export function useChanges(open: boolean, dataVersion: number) {
       setPreset('branch')
       setBranch({ name, range: null })
       try {
-        const r = await window.reqman.branchRange(name)
+        const r = await window.reqochet.branchRange(name)
         setBranch({ name, range: r })
       } catch (e) {
         setError(errorMessage(e))

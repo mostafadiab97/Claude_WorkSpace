@@ -39,7 +39,7 @@ export function SuspectLinksDialog(props: {
       return
     }
     setOpen((m) => new Map(m).set(k, null))
-    void window.reqman.getItem(l.id).then(
+    void window.reqochet.getItem(l.id).then(
       (d) => setOpen((m) => (m.has(k) ? new Map(m).set(k, plainText(d?.item.text ?? '').slice(0, 400) || T.suspect.noText) : m)),
       () => setOpen((m) => (m.has(k) ? new Map(m).set(k, T.suspect.noText) : m))
     )
@@ -56,7 +56,7 @@ export function SuspectLinksDialog(props: {
     setBusy(true)
     setError(null)
     try {
-      const r = await window.reqman.decideLinks(decisions)
+      const r = await window.reqochet.decideLinks(decisions)
       if (r.ok) props.onDone(true)
       else setError(r.message)
     } catch (e) {

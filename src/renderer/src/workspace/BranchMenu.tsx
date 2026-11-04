@@ -54,7 +54,7 @@ export function BranchMenu(props: {
 
   useEffect(() => {
     let live = true
-    void Promise.all([window.reqman.listBranches(), window.reqman.getGitState()])
+    void Promise.all([window.reqochet.listBranches(), window.reqochet.getGitState()])
       .then(([l, st]) => {
         if (!live) return
         setList(l)

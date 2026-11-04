@@ -22,7 +22,7 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
   useEffect(() => {
     let live = true
     const t = window.setTimeout(() => {
-      void window.reqman
+      void window.reqochet
         .getGitState()
         .then((st) => live && setState(st))
         .catch(() => {})
@@ -61,7 +61,7 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
   }
   /** Runs pull or push; true when it worked. */
   const run = async (action: 'pull' | 'push'): Promise<boolean> => {
-    const ok = await perform(action === 'pull' ? T.git.pulling : T.git.pushing, () => window.reqman[action]())
+    const ok = await perform(action === 'pull' ? T.git.pulling : T.git.pushing, () => window.reqochet[action]())
     if (ok && action === 'pull') setLastPull(new Date())
     return ok
   }
@@ -83,7 +83,7 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
     setBusy(T.git.pushing)
     setNotice(null)
     try {
-      const r = await window.reqman.publishToRemote(url)
+      const r = await window.reqochet.publishToRemote(url)
       setState(r.state)
       setNotice({ ok: r.ok, message: r.message, ...(r.neutral ? { neutral: true } : {}) })
     } catch (e) {
@@ -118,7 +118,7 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
   return {
     state,
     lastPull,
-    reload: () => void window.reqman.getGitState().then(setState),
+    reload: () => void window.reqochet.getGitState().then(setState),
     busy,
     notice,
     dismiss,
@@ -131,13 +131,13 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
     answerPush: (c: 'pull-first' | 'push' | 'cancel') => void answerPush(c),
     plan,
     mergeDone,
-    pullFrom: (name: string) => perform(T.git.pulling, () => window.reqman.pullFrom(name)),
-    createBranch: (name: string) => perform(T.git.switching, () => window.reqman.createBranch(name)),
-    switchBranch: (name: string, changes: 'take' | 'discard') => perform(T.git.switching, () => window.reqman.switchBranch(name, changes)),
+    pullFrom: (name: string) => perform(T.git.pulling, () => window.reqochet.pullFrom(name)),
+    createBranch: (name: string) => perform(T.git.switching, () => window.reqochet.createBranch(name)),
+    switchBranch: (name: string, changes: 'take' | 'discard') => perform(T.git.switching, () => window.reqochet.switchBranch(name, changes)),
     /** Delete a branch: the panel asks again when Git says it has unmerged commits (no notice for that question). */
     deleteBranch: async (name: string, force: boolean): Promise<{ ok: boolean; unmerged?: boolean; message: string }> => {
       try {
-        const r = await window.reqman.deleteBranch(name, force)
+        const r = await window.reqochet.deleteBranch(name, force)
         setState(r.state)
         const unmerged = !r.ok && r.unmerged === true
         if (!unmerged) setNotice({ ok: r.ok, message: r.message })

@@ -17,7 +17,7 @@ export function ProblemList({ problems, onOpen, onFixed, onClose }: { problems: 
     setBusy(true)
     try {
       for (const id of ids) {
-        const r = await window.reqman.fixFileName(id)
+        const r = await window.reqochet.fixFileName(id)
         if (!r.ok) {
           setError(T.workspace.fixFailed(r.message))
           break

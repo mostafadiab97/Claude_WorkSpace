@@ -1,11 +1,11 @@
 // Exposes the core services to the UI over IPC: one handler per call in src/shared/api.ts (review S-02).
-// `handlers` must name every invoke call of ReqManApi with the matching result type — the compiler reports a
+// `handlers` must name every invoke call of ReqochetApi with the matching result type — the compiler reports a
 // missing or wrong one. Every input is checked by src/main/validate.ts before it reaches a module (X-01).
 import { app, BrowserWindow, dialog, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
 import { readFileSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { Channels, type AppInfo, type ExportFormat, type ExportResult, type InvokeMethod, type ReqManApi } from '../shared/api'
+import { Channels, type AppInfo, type ExportFormat, type ExportResult, type InvokeMethod, type ReqochetApi } from '../shared/api'
 import { runDataBenchmark } from '../modules/sample-data'
 import { writeFileAtomic } from '../modules/safe-files'
 import { buildProblemReport, problemReportName } from '../modules/logger'
@@ -18,7 +18,7 @@ import { setLanguage, T } from '../shared/text'
 const IMPORT_EXTENSIONS = ['xlsx', 'xlsm', 'csv', 'txt', 'reqif', 'reqifz']
 
 type Handlers = {
-  [K in InvokeMethod]: (e: IpcMainInvokeEvent, ...args: unknown[]) => Awaited<ReturnType<ReqManApi[K]>> | ReturnType<ReqManApi[K]>
+  [K in InvokeMethod]: (e: IpcMainInvokeEvent, ...args: unknown[]) => Awaited<ReturnType<ReqochetApi[K]>> | ReturnType<ReqochetApi[K]>
 }
 
 export function registerIpc(services: Services, paths: Paths): void {

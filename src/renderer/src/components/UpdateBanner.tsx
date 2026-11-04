@@ -14,7 +14,7 @@ export function UpdateBanner({ status }: { status: UpdateStatus | null }) {
     return (
       <div className="banner banner--ready" role="status">
         <span>{T.updates.ready(status.version)}</span>
-        <button type="button" className="btn btn--primary" onClick={() => void window.reqman.installUpdate()}>
+        <button type="button" className="btn btn--primary" onClick={() => void window.reqochet.installUpdate()}>
           {T.updates.restart}
         </button>
       </div>

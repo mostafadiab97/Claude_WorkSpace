@@ -22,7 +22,7 @@ export function SelfTestCard() {
   const run = async (): Promise<void> => {
     setState({ kind: 'running', size })
     try {
-      setState({ kind: 'done', r: await withActivity(() => window.reqman.runDataSelfTest(size)) })
+      setState({ kind: 'done', r: await withActivity(() => window.reqochet.runDataSelfTest(size)) })
     } catch (e) {
       setState({ kind: 'failed', message: e instanceof Error ? e.message : String(e) })
     }

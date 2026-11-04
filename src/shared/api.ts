@@ -2,9 +2,9 @@
 import type { FieldDef, Item, ItemDiff, ItemIssue, ItemQuery, QueryResult, Schema, SchemaProblem } from './domain'
 export type * from './domain'
 
-// The UI can do exactly what is listed here and nothing else. Adding a capability = a method in ReqManApi,
+// The UI can do exactly what is listed here and nothing else. Adding a capability = a method in ReqochetApi,
 // its channel name in `Channels` below, and its handler in src/main/ipc.ts (the compiler reports a missing
-// one). The preload builds window.reqman from `Channels` automatically.
+// one). The preload builds window.reqochet from `Channels` automatically.
 
 export interface AppInfo {
   name: string
@@ -464,7 +464,7 @@ export interface RecentRepository {
   openedAt: string
 }
 
-export interface ReqManApi {
+export interface ReqochetApi {
   getAppInfo(): Promise<AppInfo>
   getGitInfo(): Promise<GitInfo>
   getTheme(): Promise<LoadedTheme>
@@ -623,7 +623,7 @@ export interface ReqManApi {
 }
 
 /** Calls that go through `ipcRenderer.invoke` (all except the event subscription and the fire-and-forget log). */
-export type InvokeMethod = Exclude<keyof ReqManApi, 'onUpdateStatus' | 'reportUiError' | 'pathOfDroppedFile'>
+export type InvokeMethod = Exclude<keyof ReqochetApi, 'onUpdateStatus' | 'reportUiError' | 'pathOfDroppedFile'>
 
 export interface ReleaseSelfTestStep {
   name: string
@@ -718,4 +718,4 @@ export const Channels = {
   exportItems: 'export:items',
   exportCompare: 'export:compare',
   showInFolder: 'app:showInFolder'
-} as const satisfies Record<Exclude<keyof ReqManApi, 'onUpdateStatus' | 'pathOfDroppedFile'> | 'updateStatusChanged', string>
+} as const satisfies Record<Exclude<keyof ReqochetApi, 'onUpdateStatus' | 'pathOfDroppedFile'> | 'updateStatusChanged', string>

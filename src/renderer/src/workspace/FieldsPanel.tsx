@@ -243,11 +243,11 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
       // First press: check the items; if some would hold values the new definitions do not allow, say so and
       // let the user decide (press again = save anyway).
       if (check === null) {
-        const found = await window.reqman.checkFields(fields)
+        const found = await window.reqochet.checkFields(fields)
         setCheck(found)
         if (found.length > 0) return
       }
-      const r = await window.reqman.saveSchemaFields(fields, info.schemaRevision)
+      const r = await window.reqochet.saveSchemaFields(fields, info.schemaRevision)
       if (r.ok) onSaved(r.info)
       else setError(r.message)
     } catch (e) {

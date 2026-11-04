@@ -8,7 +8,7 @@ export function DiagnosticsCard({ appInfo }: { appInfo: AppInfo | null }) {
 
   const copy = async (): Promise<void> => {
     try {
-      await navigator.clipboard.writeText(await window.reqman.getDiagnostics())
+      await navigator.clipboard.writeText(await window.reqochet.getDiagnostics())
       setCopied('done')
     } catch {
       setCopied('failed')
@@ -30,10 +30,10 @@ export function DiagnosticsCard({ appInfo }: { appInfo: AppInfo | null }) {
         </dd>
       </dl>
       <div className="actions">
-        <button type="button" className="btn" onClick={() => void window.reqman.openLogFolder()}>
+        <button type="button" className="btn" onClick={() => void window.reqochet.openLogFolder()}>
           {T.settings.diag.openLog}
         </button>
-        <button type="button" className="btn" onClick={() => void window.reqman.openThemeFolder()}>
+        <button type="button" className="btn" onClick={() => void window.reqochet.openThemeFolder()}>
           {T.settings.diag.editTheme}
         </button>
         <button type="button" className="btn" onClick={() => void copy()}>

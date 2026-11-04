@@ -46,7 +46,7 @@ export function HistoryView({ schema, itemId, reloadToken }: { schema: Schema; i
 
   useEffect(() => {
     let live = true
-    void window.reqman
+    void window.reqochet
       .getItemHistory(itemId)
       .then((h) => {
         if (!live) return
@@ -62,7 +62,7 @@ export function HistoryView({ schema, itemId, reloadToken }: { schema: Schema; i
   useEffect(() => {
     if (!selected) return
     let live = true
-    void window.reqman
+    void window.reqochet
       .compareItemVersion(itemId, selected)
       .then((data) => live && setCompare({ hash: selected, data }))
       .catch((e: unknown) => live && setError(errorMessage(e)))

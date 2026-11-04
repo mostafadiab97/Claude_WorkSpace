@@ -47,7 +47,7 @@ export function ItemSearch(props: {
         ? { ...emptyQuery, limit: LIMIT, brief: true }
         : null
     if (!q) return
-    void window.reqman.queryItems(q).then(async (r) => {
+    void window.reqochet.queryItems(q).then(async (r) => {
       const marked = await Promise.all(r.items.map(async (item) => ({ item, reason: blocked ? await blocked(item) : null })))
       if (!live) return
       setResults(marked)

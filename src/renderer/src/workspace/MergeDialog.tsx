@@ -30,7 +30,7 @@ export function MergeDialog(props: { plan: MergePlan; onDone: (r: GitResult | nu
     setBusy(true)
     setError(null)
     try {
-      const r = await window.reqman.finishPull(plan, answers)
+      const r = await window.reqochet.finishPull(plan, answers)
       if (r.ok) props.onDone(r)
       else {
         setError(r.message)

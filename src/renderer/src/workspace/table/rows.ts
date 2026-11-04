@@ -32,7 +32,7 @@ export function useFlatRows(active: boolean, query: Omit<ItemQuery, 'limit' | 'o
     if (!active) return
     const gen = ++generation.current
     loading.current = new Set([0])
-    void window.reqman.queryItems({ ...query, limit: PAGE, offset: 0, brief: true }).then((r) => {
+    void window.reqochet.queryItems({ ...query, limit: PAGE, offset: 0, brief: true }).then((r) => {
       if (gen !== generation.current) return
       setTotal(r.total)
       onTotal?.(r.total)
@@ -49,7 +49,7 @@ export function useFlatRows(active: boolean, query: Omit<ItemQuery, 'limit' | 'o
       for (let p = Math.floor(first / PAGE); p <= Math.floor(last / PAGE); p++) {
         if (pages.has(p) || loading.current.has(p)) continue
         loading.current.add(p)
-        void window.reqman.queryItems({ ...query, limit: PAGE, offset: p * PAGE, brief: true }).then((r) => {
+        void window.reqochet.queryItems({ ...query, limit: PAGE, offset: p * PAGE, brief: true }).then((r) => {
           if (gen !== generation.current) return
           loading.current.delete(p)
           setPages((prev) => new Map(prev).set(p, r.items))
@@ -126,7 +126,7 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number) {
 
   const fetchLevel = useCallback(
     async (key: string, limit: number): Promise<Level> => {
-      const r = await window.reqman.queryItems({ parent: key || null, sort, limit, brief: true })
+      const r = await window.reqochet.queryItems({ parent: key || null, sort, limit, brief: true })
       return { items: r.items, total: r.total, limit }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sortKey stands for sort
@@ -137,7 +137,7 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number) {
   const fetchAll = useCallback(async (): Promise<Map<string, Level>> => {
     const all: IndexedItem[] = []
     for (let offset = 0; ; offset += 10_000) {
-      const r = await window.reqman.queryItems({ sort, limit: 10_000, offset, brief: true })
+      const r = await window.reqochet.queryItems({ sort, limit: 10_000, offset, brief: true })
       all.push(...r.items)
       if (r.items.length === 0 || all.length >= r.total) break
     }
@@ -227,7 +227,7 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number) {
 
   /** Open the ancestors of `id` and load the levels on the way, so the item has a row. */
   const reveal = async (id: string): Promise<void> => {
-    const ancestors = await window.reqman.getAncestors(id)
+    const ancestors = await window.reqochet.getAncestors(id)
     const keys = [ROOT, ...ancestors]
     const loaded = await Promise.all(
       keys.map(async (k, i) => {

@@ -24,7 +24,7 @@ export function applyLanguage(lang: Language): void {
   } catch {
     // private window: the choice is not remembered
   }
-  void window.reqman.setLanguage(lang).catch(() => {})
+  void window.reqochet.setLanguage(lang).catch(() => {})
 }
 
 export const isRtlDocument = (): boolean => document.documentElement.dir === 'rtl'

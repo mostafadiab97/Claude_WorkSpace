@@ -19,12 +19,12 @@ export class ErrorBoundary extends Component<{ children: ReactNode; area: string
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    window.reqman.reportUiError(`${this.props.area} crashed: ${error.stack ?? error.message}\n${info.componentStack ?? ''}`)
+    window.reqochet.reportUiError(`${this.props.area} crashed: ${error.stack ?? error.message}\n${info.componentStack ?? ''}`)
   }
 
   private copy = async (): Promise<void> => {
     try {
-      await navigator.clipboard.writeText(`${await window.reqman.getDiagnostics()}\n\nError: ${this.state.error?.stack ?? this.state.error?.message ?? ''}`)
+      await navigator.clipboard.writeText(`${await window.reqochet.getDiagnostics()}\n\nError: ${this.state.error?.stack ?? this.state.error?.message ?? ''}`)
       this.setState({ copied: true })
     } catch {
       // clipboard unavailable: the log file has it too

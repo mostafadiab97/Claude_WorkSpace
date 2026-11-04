@@ -36,7 +36,7 @@ export function EnvironmentCard(props: {
       >
         {describeUpdate(update)}{' '}
         {/* moved here from Diagnostics (the owner on 0.14.3) — next to the line it changes */}
-        <button type="button" className="btn btn--small btn--primary" onClick={() => void window.reqman.checkForUpdates()}>
+        <button type="button" className="btn btn--small btn--primary" onClick={() => void window.reqochet.checkForUpdates()}>
           {T.settings.diag.checkUpdates}
         </button>
       </StatusRow>

@@ -95,7 +95,7 @@ async function step1Install() {
   let status = null
   for (let i = 0; i < 120 && status?.state !== 'ready'; i++) {
     await sleep(1000)
-    status = await win.evaluate(() => window.reqman.getUpdateStatus()).catch(() => status)
+    status = await win.evaluate(() => (window.reqochet ?? window.reqman).getUpdateStatus()).catch(() => status)
   }
   if (status?.state !== 'ready') {
     fail(`The previous release did not download the update (state: ${JSON.stringify(status)}).`)
@@ -104,7 +104,7 @@ async function step1Install() {
     return
   }
   did(`Started ${prevVersion}: it found and downloaded ${status.version}.`)
-  await win.evaluate(() => window.reqman.installUpdate()).catch(() => {})
+  await win.evaluate(() => (window.reqochet ?? window.reqman).installUpdate()).catch(() => {})
   let v = null
   for (let i = 0; i < 180 && !v?.startsWith(version); i++) {
     await sleep(1000)

@@ -56,7 +56,7 @@ export function LinksSection(props: {
   const decideAll = (keep: boolean): void => {
     setAskUnlinkAll(false)
     void run(async () => {
-      const r = await window.reqman.decideLinks(suspects.map((e) => decision(e, keep)))
+      const r = await window.reqochet.decideLinks(suspects.map((e) => decision(e, keep)))
       return r.ok ? { ok: true } : r
     })
   }
@@ -78,13 +78,13 @@ export function LinksSection(props: {
   const [dir, type] = relation.split(':') as [Direction, string]
   const add = (target: string): void => {
     setAdding(false)
-    void run(() => (dir === 'out' ? window.reqman.addLink(itemId, type, target) : window.reqman.addLink(target, type, itemId)))
+    void run(() => (dir === 'out' ? window.reqochet.addLink(itemId, type, target) : window.reqochet.addLink(target, type, itemId)))
   }
   const remove = (e: Entry): void =>
-    void run(() => (e.dir === 'out' ? window.reqman.removeLink(itemId, e.link.type, e.link.id) : window.reqman.removeLink(e.link.id, e.link.type, itemId)))
+    void run(() => (e.dir === 'out' ? window.reqochet.removeLink(itemId, e.link.type, e.link.id) : window.reqochet.removeLink(e.link.id, e.link.type, itemId)))
   const decide = (e: Entry, keep: boolean): void =>
     void run(async () => {
-      const r = await window.reqman.decideLinks([decision(e, keep)])
+      const r = await window.reqochet.decideLinks([decision(e, keep)])
       return r.ok ? { ok: true } : r
     })
 

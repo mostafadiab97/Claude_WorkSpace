@@ -51,7 +51,7 @@ export function WorkspaceScreen({
   const renameFolder = async (): Promise<void> => {
     setRenamingFolder(true)
     try {
-      const r = await window.reqman.renameProjectFolder()
+      const r = await window.reqochet.renameProjectFolder()
       if (r.ok) {
         onInfo(r.info)
         setDataVersion((v) => v + 1) // the Git bar now shows one commit to push
@@ -93,7 +93,7 @@ export function WorkspaceScreen({
    */
   const afterChange = useCallback(async (): Promise<void> => {
     setDataVersion((v) => v + 1)
-    onInfo(await window.reqman.refreshRepository())
+    onInfo(await window.reqochet.refreshRepository())
   }, [onInfo])
   const git = useGit({ dataVersion, dirty, afterChange })
   const changes = useChanges(showChanges, dataVersion)
@@ -114,7 +114,7 @@ export function WorkspaceScreen({
   // Pick up changes made outside ReqMan (Git pull, an editor) when the window gets focus again.
   useEffect(() => {
     const onFocus = (): void =>
-      void window.reqman
+      void window.reqochet
         .refreshRepository(true)
         .then((i) => {
           onInfo(i)
@@ -181,19 +181,19 @@ export function WorkspaceScreen({
     toggleRef.current = toggleChanges
   })
   const revert = async (id: string, part: RevertPart): Promise<void> => {
-    const r = await window.reqman.revertChange(id, part)
+    const r = await window.reqochet.revertChange(id, part)
     if (!r.ok) changes.setError(r.message)
     await afterChange()
   }
   const discard = async (entry: CompareEntry): Promise<void> => {
-    const r = await window.reqman.discardChanges(entry.paths)
+    const r = await window.reqochet.discardChanges(entry.paths)
     if (!r.ok) changes.setError(r.message)
     git.onPanelResult(r)
   }
 
   const newItem = async (type: string, parent?: string): Promise<void> => {
     if (!type) return
-    const item = await window.reqman.newItem(type, parent)
+    const item = await window.reqochet.newItem(type, parent)
     request({ kind: 'draft', item })
   }
 
@@ -204,7 +204,7 @@ export function WorkspaceScreen({
       return
     }
     // several chosen rows move together (the owner, 0.11.0); they stay chosen
-    const r = ids.length > 1 ? await window.reqman.reparentItems(ids, parent, before) : await window.reqman.reparentItem(id, parent, before)
+    const r = ids.length > 1 ? await window.reqochet.reparentItems(ids, parent, before) : await window.reqochet.reparentItem(id, parent, before)
     setNotice(r.ok ? null : T.workspace.moveFailed(ids.length > 1 ? T.workspace.items : id, r.message))
     if (r.ok && ids.length > 1) {
       await afterChange()
@@ -289,7 +289,7 @@ export function WorkspaceScreen({
             onRevert={revert}
             onDiscard={discard}
             onDiscardPaths={async (paths) => {
-              const r = await window.reqman.discardChanges(paths)
+              const r = await window.reqochet.discardChanges(paths)
               if (!r.ok) changes.setError(r.message)
               git.onPanelResult(r)
             }}
@@ -363,7 +363,7 @@ export function WorkspaceScreen({
           {exported && (
             <div className="notice table-notice table-notice--ok" role="status">
               {T.exportDialog.done(exported.count, exported.path)}{' '}
-              <button type="button" className="link-btn" onClick={() => void window.reqman.showInFolder(exported.path)}>
+              <button type="button" className="link-btn" onClick={() => void window.reqochet.showInFolder(exported.path)}>
                 {T.exportDialog.showInFolder}
               </button>{' '}
               <button type="button" className="link-btn" onClick={() => setExported(null)}>

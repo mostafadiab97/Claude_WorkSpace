@@ -29,7 +29,7 @@ export function ExportDialog(props: {
   const [source, setSource] = useState<ImportSource | null>(null)
   useEffect(() => {
     let live = true
-    void window.reqman.getImportSource().then((x) => live && setSource(x))
+    void window.reqochet.getImportSource().then((x) => live && setSource(x))
     return () => {
       live = false
     }
@@ -60,7 +60,7 @@ export function ExportDialog(props: {
         ...(scope === 'filtered' ? { query: props.query } : {}),
         ...(scope === 'chosen' ? { ids: chosen, includeBelow: below } : {})
       }
-      const r = await window.reqman.exportItems(request)
+      const r = await window.reqochet.exportItems(request)
       if (r.ok) props.onDone(r)
       else if (!r.canceled) setError(r.message)
     } catch (e) {
@@ -74,7 +74,7 @@ export function ExportDialog(props: {
     setBusy(true)
     setError(null)
     try {
-      const r = await window.reqman.updateSourceFile(mode)
+      const r = await window.reqochet.updateSourceFile(mode)
       if (r.ok) props.onDone(r)
       else if (!r.canceled) setError(r.message)
     } catch (e) {

@@ -29,7 +29,7 @@ export function ReleaseSelfTestCard() {
     setState({ kind: 'running' })
     setCopied(false)
     try {
-      setState({ kind: 'done', r: await withActivity(() => window.reqman.runReleaseSelfTest()) })
+      setState({ kind: 'done', r: await withActivity(() => window.reqochet.runReleaseSelfTest()) })
     } catch (e) {
       setState({ kind: 'failed', message: errorMessage(e) })
     }

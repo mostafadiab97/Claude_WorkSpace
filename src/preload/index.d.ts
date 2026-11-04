@@ -1,8 +1,8 @@
-import type { ReqManApi } from '../shared/api'
+import type { ReqochetApi } from '../shared/api'
 
 declare global {
   interface Window {
-    reqman: ReqManApi
+    reqochet: ReqochetApi
   }
 }
 

@@ -67,7 +67,7 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
   `--rm-*`. No hex/rgb in renderer code (a test fails on it). User overrides live in `%APPDATA%\ReqMan\theme.json`.
 - **NFR-12 modules:** each `src/modules/<name>/index.ts` is that module's only public entry (ESLint blocks deep
   imports); `src/main/composition.ts` is the single place that wires implementations. The renderer may use only
-  `window.reqman` (contract in `src/shared/api.ts`) and types from `src/shared/domain.ts` — no Node/Electron.
+  `window.reqochet` (contract in `src/shared/api.ts`) and types from `src/shared/domain.ts` — no Node/Electron.
 - **NFR-05 never lose data:** validate before writing; atomic writes; every write is conflict-checked against the
   file revision it was read at (`ConflictError`); unknown header keys are preserved (`extra`); never force-push.
 - Offline first; no server; no user accounts — access = Git host permissions.
@@ -84,7 +84,7 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
   **Arabic (0.13.0):** every key also in `src/shared/text-ar.ts` (the compiler insists); never store a text in a
   module-level constant (the language switch swaps `T` in place — read it when rendering; memoised lists depend on
   `useLanguage()`); CSS uses logical properties only (the window is right-to-left in Arabic).
-- **Window calls:** add a method to `ReqManApi` + a `Channels` entry + a handler in `src/main/ipc.ts` (the compiler
+- **Window calls:** add a method to `ReqochetApi` + a `Channels` entry + a handler in `src/main/ipc.ts` (the compiler
   insists) that checks its inputs with `src/main/validate.ts`. The preload needs no change.
 - **Writes and Git actions go through the workspace queue** (`q(...)` in `workspace.ts`) — never call one queued
   operation from inside another (it would wait for itself).

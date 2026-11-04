@@ -32,7 +32,7 @@ version (zoom, dark mode, and each box links to the source lines it is drawn fro
 3. **Modules with one front door.** Each folder in `src/modules/<name>/` has an `index.ts` — the only file other code
    may import (ESLint enforces it). `src/main/composition.ts` is the one place where implementations are created
    and connected, so a module can be swapped in one line.
-4. **The window cannot touch files or Git.** The UI (renderer) runs sandboxed; it only calls `window.reqman.*`,
+4. **The window cannot touch files or Git.** The UI (renderer) runs sandboxed; it only calls `window.reqochet.*`,
    defined in `src/shared/api.ts`. All file, Git and database work happens in the main process, which checks
    every argument it receives (`src/main/validate.ts`). Every word on screen comes from `src/shared/text.ts`, with the Arabic copy in `src/shared/text-ar.ts`
    (the compiler refuses a missing key — add both). The window can be right-to-left: use only logical CSS
@@ -47,7 +47,7 @@ The architecture picture in section 1 shows these parts and how calls travel bet
 | Part | Role in one sentence | Main files | Used by |
 | --- | --- | --- | --- |
 | **Renderer** (`src/renderer/src`) | Everything on screen: start screen, tree table, editor, links, Git bar with the branch drop-down, pull decision window, Changes view, History, Fields, Import wizard, Export | `app/App.tsx`, `screens/WorkspaceScreen.tsx`, `workspace/*.tsx`, `styles.css` | the user |
-| **Preload** (`src/preload/index.ts`) | The bridge: exposes `window.reqman`, turning each call into an IPC message | one file | renderer |
+| **Preload** (`src/preload/index.ts`) | The bridge: exposes `window.reqochet`, turning each call into an IPC message | one file | renderer |
 | **Contract** (`src/shared/api.ts`, `domain.ts`) | The types both sides agree on: every call, every data shape, every channel name | two files | everyone |
 | **main/ipc.ts** | Receives calls, checks inputs, shows native dialogs (open folder, save file), forwards to modules | one file | preload |
 | **main/composition.ts** | Builds all modules and wires them together — the only place to swap an implementation | one file | `main/index.ts` |
@@ -126,11 +126,11 @@ Example: a new operation "mark several items as Approved".
 
 1. **Domain/logic** in the right module (e.g. a pure helper in `items`, or the operation in `workspace`), using
    existing pieces: `repository-store.writeItem` with `expectedRevision`, then `index.syncPaths`.
-2. **Contract:** add the call to `ReqManApi` and its channel name to `Channels` in `src/shared/api.ts`.
+2. **Contract:** add the call to `ReqochetApi` and its channel name to `Channels` in `src/shared/api.ts`.
 3. **Main:** add its handler to `handlers` in `src/main/ipc.ts`, checking inputs with `src/main/validate.ts`.
    The compiler reports a missing handler; the preload picks the new channel up by itself. If it writes, wrap it
    in the workspace queue (`q(...)`).
-4. **UI:** call `window.reqman.<name>()` from a component; use only `--rm-*` CSS variables for styling and
+4. **UI:** call `window.reqochet.<name>()` from a component; use only `--rm-*` CSS variables for styling and
    put every text in `src/shared/text.ts`.
 5. **Tests:** a unit test in `tests/` (real temp folders and real Git, no mocks for files), and extend an e2e
    scenario in `e2e/scenarios/` (`journey`, `fixes`, `excel`, `branches`) when the user can see the feature; add a

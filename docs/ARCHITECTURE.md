@@ -10,11 +10,11 @@ documented interfaces. Full rationale, requirements and decisions live in the pr
 | Process | Code | Can do |
 | --- | --- | --- |
 | Core (main) | `src/main/`, `src/modules/` | Files, Git, configuration — everything with side effects |
-| Bridge (preload) | `src/preload/` | Exposes exactly `ReqManApi` to the UI as `window.reqman` |
-| UI (renderer) | `src/renderer/` | Screens only. No Node, no file system, no Git — only `window.reqman` |
+| Bridge (preload) | `src/preload/` | Exposes exactly `ReqochetApi` to the UI as `window.reqochet` |
+| UI (renderer) | `src/renderer/` | Screens only. No Node, no file system, no Git — only `window.reqochet` |
 
 The UI ↔ core contract is **one file**: `src/shared/api.ts`. Adding a capability means:
-1. add it to `ReqManApi` and `Channels` in `src/shared/api.ts`,
+1. add it to `ReqochetApi` and `Channels` in `src/shared/api.ts`,
 2. handle it in `src/main/ipc.ts`,
 3. expose it in `src/preload/index.ts`.
 
@@ -34,9 +34,9 @@ The UI ↔ core contract is **one file**: `src/shared/api.ts`. Adding a capabili
    texts with values are small functions). A test (`tests/ui-texts.test.ts`) fails the build if screen code
    contains literal words. Messages the core sends (Git, saving) come from the same file. (the owner's decision
    S-06, 27 Oct 2026: a later translation is a copy of that one object.)
-7. **Every window call is checked.** `src/main/ipc.ts` has one handler per `ReqManApi` call (the compiler
+7. **Every window call is checked.** `src/main/ipc.ts` has one handler per `ReqochetApi` call (the compiler
    reports a missing one) and checks every argument with `src/main/validate.ts` first; `src/preload` builds
-   `window.reqman` from the `Channels` table, so adding a call never touches the preload.
+   `window.reqochet` from the `Channels` table, so adding a call never touches the preload.
 
 ## Module map
 
@@ -115,7 +115,7 @@ resources/         static assets (logo)
 src/shared/        UI ↔ core contract (api.ts) and shared data types (domain.ts)
 src/main/          core entry, composition root, IPC handlers
 src/modules/       one folder per module, each with index.ts as its only public entry
-src/preload/       bridge exposing window.reqman
+src/preload/       bridge exposing window.reqochet
 src/renderer/      UI (React): screens/ (start, workspace, settings), workspace/ (editor, Git, Changes view, fields…), workspace/table/ (columns, rows, drag & drop), workspace/screen/ (toolbar, problems, filter and Git hooks), components/
 src/shared/text.ts every text the user sees
 e2e/               end-to-end scenarios that drive the built app: harness.mjs (shared), scenarios/*.e2e.mjs, run.mjs (runs them two at a time)

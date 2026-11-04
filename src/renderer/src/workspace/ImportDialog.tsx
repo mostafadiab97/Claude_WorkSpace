@@ -36,7 +36,7 @@ export function ImportDialog(props: { schema: Schema; file: ImportFile | null; n
     if (!settings || step === 'file') return
     let live = true
     const t = window.setTimeout(() => {
-      void window.reqman
+      void window.reqochet
         .previewImport(settings)
         .then((data) => {
           if (!live) return
@@ -56,7 +56,7 @@ export function ImportDialog(props: { schema: Schema; file: ImportFile | null; n
   // the guessed mapping, until the user changes a column
   const shownMapping = mapping ?? data?.mapping ?? null
 
-  const choose = (dropped?: File): Promise<void> => take(() => (dropped ? window.reqman.openImportFile(window.reqman.pathOfDroppedFile(dropped)) : window.reqman.chooseImportFile()))
+  const choose = (dropped?: File): Promise<void> => take(() => (dropped ? window.reqochet.openImportFile(window.reqochet.pathOfDroppedFile(dropped)) : window.reqochet.chooseImportFile()))
   const [dragOver, setDragOver] = useState(false)
   const take = async (read: () => Promise<ImportFile | null>): Promise<void> => {
     setError(null)
@@ -77,7 +77,7 @@ export function ImportDialog(props: { schema: Schema; file: ImportFile | null; n
     setBusy(true)
     setError(null)
     try {
-      const r = await withActivity(() => window.reqman.runImport({ ...settings, ...(shownMapping ? { mapping: shownMapping } : {}) }, props.newProject && file ? T.importMsg.imported(file.name) : undefined))
+      const r = await withActivity(() => window.reqochet.runImport({ ...settings, ...(shownMapping ? { mapping: shownMapping } : {}) }, props.newProject && file ? T.importMsg.imported(file.name) : undefined))
       if (r.ok) props.onDone(r)
       else setError(r.message)
     } catch (e) {

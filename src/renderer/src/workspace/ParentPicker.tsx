@@ -15,7 +15,7 @@ export function ParentPicker({ schema, value, selfId, onChange, onShow }: { sche
   useEffect(() => {
     if (!value) return
     let live = true
-    void window.reqman.queryItems({ text: value, sort: { by: 'relevance' }, limit: 1, brief: true }).then((r) => {
+    void window.reqochet.queryItems({ text: value, sort: { by: 'relevance' }, limit: 1, brief: true }).then((r) => {
       const hit = r.items.find((i) => i.id === value)
       if (live) setResolved({ value, label: hit ? `${hit.number ? `${hit.number} ` : ''}${hit.id} — ${hit.title}` : T.parentPicker.notFound(value) })
     })
@@ -49,7 +49,7 @@ export function ParentPicker({ schema, value, selfId, onChange, onShow }: { sche
       emptyQuery={{ parent: null, sort: { by: 'order' } }}
       emptyHint={T.parentPicker.hint}
       blocked={async (item) =>
-        item.id === selfId || (item.parent !== undefined && (await window.reqman.getAncestors(item.id)).includes(selfId))
+        item.id === selfId || (item.parent !== undefined && (await window.reqochet.getAncestors(item.id)).includes(selfId))
           ? T.parentPicker.blocked
           : null
       }

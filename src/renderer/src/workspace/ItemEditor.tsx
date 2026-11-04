@@ -61,7 +61,7 @@ export function ItemEditor(props: {
       setIssues([])
       return
     }
-    const d = await window.reqman.getItem(target.id)
+    const d = await window.reqochet.getItem(target.id)
     setDetails(d)
     setBase(d?.item ?? null)
     setForm(d?.item ?? null)
@@ -71,7 +71,7 @@ export function ItemEditor(props: {
   useEffect(() => {
     if (target.kind !== 'item') return
     let live = true
-    void window.reqman.getItem(target.id).then((d) => {
+    void window.reqochet.getItem(target.id).then((d) => {
       if (!live) return
       setDetails(d)
       setBase(d?.item ?? null)
@@ -100,7 +100,7 @@ export function ItemEditor(props: {
   useEffect(() => {
     if (reloadToken === firstToken.current || target.kind !== 'item' || dirtyRef.current) return
     let live = true
-    void window.reqman.getItem(target.id).then((d) => {
+    void window.reqochet.getItem(target.id).then((d) => {
       if (!live || dirtyRef.current || !d) return
       setDetails(d)
       setBase(d.item)
@@ -123,7 +123,7 @@ export function ItemEditor(props: {
     if (!form || status.kind === 'saving') return false
     setStatus({ kind: 'saving' })
     try {
-      const r = await window.reqman.saveItem(form, isNew ? null : (details?.revision ?? null))
+      const r = await window.reqochet.saveItem(form, isNew ? null : (details?.revision ?? null))
       if (r.ok) {
         const before = base
         const saved = r.details.item
@@ -165,7 +165,7 @@ export function ItemEditor(props: {
         // Alt+↑ / Alt+↓ moves the open item among its siblings (UX-25)
         e.preventDefault()
         if (!form) return
-        void window.reqman.moveItem(form.id, e.key === 'ArrowUp' ? 'up' : 'down').then(async (r) => {
+        void window.reqochet.moveItem(form.id, e.key === 'ArrowUp' ? 'up' : 'down').then(async (r) => {
           if (!r.ok) return setStatus({ kind: 'error', message: r.message })
           await load()
           onMoved()
@@ -199,12 +199,12 @@ export function ItemEditor(props: {
 
   const remove = async (): Promise<void> => {
     if (!details) return
-    const r = await window.reqman.deleteItem(form.id, details.revision, { removeIncomingLinks: removeIncoming && details.incoming.length > 0 })
+    const r = await window.reqochet.deleteItem(form.id, details.revision, { removeIncomingLinks: removeIncoming && details.incoming.length > 0 })
     if (r.ok) props.onDeleted()
     else setStatus({ kind: 'error', message: r.message })
   }
   const move = async (direction: 'up' | 'down'): Promise<void> => {
-    const r = await window.reqman.moveItem(form.id, direction)
+    const r = await window.reqochet.moveItem(form.id, direction)
     if (!r.ok) setStatus({ kind: 'error', message: r.message })
     else {
       await load()
@@ -427,7 +427,7 @@ export function ItemEditor(props: {
           onDone={(changed) => {
             setReview(null)
             if (!changed) return
-            void window.reqman.getItem(form.id).then((d) => {
+            void window.reqochet.getItem(form.id).then((d) => {
               if (d && !dirtyRef.current) {
                 setDetails(d)
                 setBase(d.item)
@@ -447,7 +447,7 @@ function FieldInput({ def, value, error, onChange }: { def: FieldDef; value: Fie
   const [suggestions, setSuggestions] = useState<string[] | null>(null)
   const loadSuggestions = (): void => {
     if (suggestions) return
-    void window.reqman.getFieldValues(def.id).then(setSuggestions, () => setSuggestions([]))
+    void window.reqochet.getFieldValues(def.id).then(setSuggestions, () => setSuggestions([]))
   }
   let control
   switch (def.type) {

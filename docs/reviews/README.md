@@ -6,9 +6,9 @@ recorded in `docs/design/decisions.md` and `docs/design/roadmap.md` (source of t
 
 ## Open (this folder)
 
-| [2026-11-04-rename-reqochet.md](2026-11-04-rename-reqochet.md) | Rename to reqochet: brand package, open points R-01…R-07 | open |
 | Date | File | What it is | State |
 | --- | --- | --- | --- |
+| 4 Nov 2026 | `2026-11-04-rename-reqochet.md` | Rename to reqochet: the brand package analysed, open points R-01…R-07 | **In progress** |
 | 1 Nov 2026 | `2026-11-01-planning-discussion.md` | The planning discussion for the versions after 0.13: open points P-xx with answers, name candidates checked | **In progress** — themes 2–5 still to detail |
 | 3 Nov 2026 | `2026-11-03-security-check.md` | Security check before sharing: secrets in all history (none), personal data, app hardening, pipeline, libraries | Two fixes in 0.14.1; **one decision for the owner** (work e-mail in the sandbox history) |
 | 2 Nov 2026 | `2026-11-02-requiem-analysis.md` | Requiem (`requirements-manager`, Rust command-line tool, Markdown + YAML in Git): how it works, side by side with ReqMan, ideas worth taking | Reference — ideas placed in themes 1, 2, 5 |

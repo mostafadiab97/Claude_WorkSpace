@@ -78,7 +78,7 @@ export function App() {
   }
 
   // the loading animation while the app starts (before the theme is known: the Windows colour mode decides)
-  if (!theme) return <div className="splash"><BrandLoading mode={resolveMode('system')} width={320} label={T.common.loading} /></div>
+  if (!theme) return <div className="splash"><BrandLoading mode={resolveMode(mode)} width={320} label={T.common.loading} /></div>
   const brand = theme.config.brand.name || T.brand.name
 
   return (

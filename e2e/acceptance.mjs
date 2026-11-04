@@ -42,11 +42,13 @@ const fail = (text) => {
 const secret = (s) => (pushUrl ? s.split(pushUrl).join('<repository>') : s)
 
 // The app's name comes from package.json (reqochet-dev here); releases before 0.16 installed as ReqMan.
-const PRODUCT = JSON.parse(readFileSync('package.json', 'utf8')).productName
+const pkg = JSON.parse(readFileSync('package.json', 'utf8'))
+const PRODUCT = pkg.productName
 const programs = join(process.env.LOCALAPPDATA ?? '', 'Programs')
-const installDir = join(programs, PRODUCT)
+// electron-builder's per-user install folder is named after package.json "name"; the program after "productName"
+const installDir = join(programs, pkg.name)
 const exe = join(installDir, `${PRODUCT}.exe`)
-const legacyDir = join(programs, 'ReqMan')
+const legacyDir = join(programs, 'reqman')
 const legacyExe = join(legacyDir, 'ReqMan.exe')
 const installedVersion = (file = exe) => {
   if (!existsSync(file)) return null

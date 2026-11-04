@@ -3,7 +3,7 @@ import { app, BrowserWindow, dialog, shell } from 'electron'
 import { join } from 'node:path'
 import { createServices, type Paths } from './composition'
 import { registerIpc } from './ipc'
-import { moveLegacyUserData } from './legacyData'
+import { moveLegacyUserData, removeLegacyUpdaterCache } from './legacyData'
 import { Channels } from '../shared/api'
 
 // The name comes from package.json "productName": reqochet-dev in the development repository, reqochet in the release
@@ -45,6 +45,8 @@ function createWindow(services: ReturnType<typeof createServices>): void {
     minHeight: 560,
     show: false,
     title: PRODUCT,
+    // the brand icon also when running from source (the installed app takes it from its .exe) — BR-11
+    icon: join(app.isPackaged ? process.resourcesPath : app.getAppPath(), 'resources', 'brand', 'icon', 'png', 'reqochet-icon-256.png'),
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -104,7 +106,9 @@ void app.whenReady().then(async () => {
   const moved: string[] = []
   const defaultUserData = join(app.getPath('appData'), PRODUCT)
   if (app.isPackaged && paths.userDir === defaultUserData) {
-    await moveLegacyUserData(join(app.getPath('appData'), 'ReqMan'), paths.userDir, { info: (m) => moved.push(m), warn: (m) => moved.push(`WARN ${m}`) })
+    const note = { info: (m: string) => moved.push(m), warn: (m: string) => moved.push(`WARN ${m}`) }
+    await moveLegacyUserData(join(app.getPath('appData'), 'ReqMan'), paths.userDir, note)
+    if (process.env['LOCALAPPDATA']) await removeLegacyUpdaterCache(process.env['LOCALAPPDATA'], note)
   }
   const services = createServices(paths, app.getVersion())
   const { log } = services

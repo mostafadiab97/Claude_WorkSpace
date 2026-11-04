@@ -85,10 +85,12 @@ export function StartScreen({
     <div className="page">
       <div className="page__inner">
         <section className="hero">
-          {showBrand && (
+          {/* while a repository opens only the loading animation moves (BR-01, UX16-09); smaller once there are
+              recent repositories to reach (UX16-12) */}
+          {showBrand && !busy && (
             <div className="hero__brand">
-              <BrandFace mode={mode} state={!active ? 'still' : working ? 'thinking' : 'idle'} size={88} />
-              <BrandName mode={mode} width={240} />
+              <BrandFace mode={mode} state={!active ? 'still' : working ? 'thinking' : 'idle'} size={recent.length > 0 ? 64 : 88} />
+              <BrandName mode={mode} width={recent.length > 0 ? 200 : 264} />
             </div>
           )}
           <h1>{T.start.headline}</h1>

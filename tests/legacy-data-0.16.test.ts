@@ -43,13 +43,16 @@ describe('moving settings from ReqMan (0.16)', () => {
     expect(names).toContain('moved-from-reqman.txt')
   })
 
-  it('runs once: a second start only finishes removing the old folder', async () => {
+  it('never overwrites what the new folder already holds; after the marker a later start only removes the old folder', async () => {
     const { old, neu } = await oldFolder()
     await mkdir(neu, { recursive: true })
     await writeFile(join(neu, 'theme.json'), '{"mine":true}')
-    const r = await moveLegacyUserData(old, neu, log)
-    expect(r?.copied).toEqual([])
+    await moveLegacyUserData(old, neu, log)
     expect(await readFile(join(neu, 'theme.json'), 'utf8')).toBe('{"mine":true}')
+    expect(existsSync(join(neu, 'recent-repositories.json'))).toBe(true)
+    expect(existsSync(old)).toBe(false)
+    await mkdir(old, { recursive: true }) // e.g. an old ReqMan still installed writes it again
+    expect((await moveLegacyUserData(old, neu, log))?.copied).toEqual([])
     expect(existsSync(old)).toBe(false)
   })
 

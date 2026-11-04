@@ -39,12 +39,12 @@ export const reqPath = (repo: RequirementsRepo): string => relative(repo.root, r
 /** Turns Git's often technical messages into something a requirements engineer can act on. */
 export function explainGitError(e: unknown): string {
   const text = e instanceof GitError ? `${e.stderr}\n${e.stdout}\n${e.message}` : String(e instanceof Error ? e.message : e)
-  if (/Authentication failed|could not read Username|terminal prompts disabled|Permission denied \(publickey\)|403/i.test(text)) {
+  if (/Authentication failed|could not read Username|terminal prompts disabled|Permission denied \(publickey\)|\b403\b/i.test(text)) {
     return T.gitMsg.signIn
   }
   // GitHub itself failed ("! [remote rejected] main -> main (Internal Server Error)") — not "pull first" (0.15.2: the
   // acceptance run was told to pull while GitHub had an outage)
-  if (/remote rejected[^\n]*\((internal server error|.*\b5\d\d\b)|internal server error|returned error: 5\d\d|HTTP 5\d\d/i.test(text)) {
+  if (!/hook/i.test(text) && /internal server error|returned error: 5\d\d|HTTP 5\d\d/i.test(text)) {
     return T.gitMsg.serverError
   }
   if (/Could not resolve host|Failed to connect|Connection timed out|unable to access|Network is unreachable/i.test(text)) {

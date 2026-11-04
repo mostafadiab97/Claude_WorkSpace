@@ -98,8 +98,11 @@ export interface RepositoryStore {
   /** Creates the requirements folder with the default schema. Refuses if it already exists. */
   initialize(repoRoot: string): Promise<RequirementsRepo>
   open(repoRoot: string, options?: OpenOptions): Promise<RequirementsRepo>
-  /** Renames requirements/.reqman to .reqochet (0.16). Returns both paths, or null when there is nothing to rename. */
-  renameLegacyFolder(repoRoot: string): Promise<{ from: string; to: string } | null>
+  /**
+   * Renames requirements/.reqman to .reqochet (0.16; `back` undoes it). Returns both paths, or null when there is nothing
+   * to rename. An empty folder in the way is removed; a full one: Error('both-folders').
+   */
+  renameLegacyFolder(repoRoot: string, back?: boolean): Promise<{ from: string; to: string } | null>
 }
 
 export { createFileRepositoryStore }

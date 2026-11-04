@@ -257,6 +257,16 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
       return (await git(root, ['rev-parse', 'HEAD'])).trim()
     },
 
+    async trackedFiles(root, path) {
+      return (await git(root, ['ls-files', '-z', '--', path])).split('\0').filter(Boolean)
+    },
+
+    async unstage(root, paths) {
+      // works before the first commit too (no HEAD to reset to)
+      await git(root, ['rm', '-r', '--cached', '--quiet', '--ignore-unmatch', '--', ...paths]).catch(() => undefined)
+      await git(root, ['reset', '-q', '--', ...paths]).catch(() => undefined)
+    },
+
     async commitFiles(root, paths, message) {
       await git(root, ['add', '--', ...paths])
       await git(root, ['commit', '--quiet', '-m', message, '--only', '--', ...paths])

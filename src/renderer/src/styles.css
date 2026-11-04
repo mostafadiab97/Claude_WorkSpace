@@ -3426,3 +3426,103 @@ code {
   justify-content: space-between;
   gap: var(--rm-space-md);
 }
+
+/* Top bar that never overflows the window (UI review UX16-01): the gear never shrinks; the repository and branch names
+   shrink with "…"; the brand keeps its size (the name logo has a minimum width). */
+.topbar {
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.topbar > .brand {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+}
+
+.topbar__right {
+  flex: none;
+}
+
+.topbar__repo {
+  min-inline-size: 3em;
+  max-inline-size: var(--rm-topbar-repo-max, 22ch);
+}
+
+.topbar__git .gitbar {
+  min-inline-size: 0;
+}
+
+.gitbar__branch {
+  min-inline-size: 0;
+  max-inline-size: var(--rm-topbar-branch-max, 18ch);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gitbar__noremote,
+.gitbar__sync {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-inline-size: 0;
+}
+
+/* review touches of the rename version (docs/reviews/agents/0.16.0-brand.md, 0.16.0-ui-ux.md) */
+.brand-face {
+  border-radius: 0; /* the tiles bring their own corners (BR-10) */
+}
+
+.hero__brand {
+  gap: 28px; /* clear space around the name = the height of its "o" (BR-03) */
+}
+
+/* "dev": small muted capitals right after the name, no box — not a button, not part of the path (BR-05, UX16-10) */
+.brand__edition {
+  border: 0;
+  padding: 0;
+  margin-inline-start: calc(-1 * var(--rm-space-sm));
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: var(--rm-font-size-small);
+  font-family: inherit;
+  color: var(--rm-color-text-muted);
+}
+
+.topbar__sep {
+  margin-inline: var(--rm-space-xs);
+}
+
+.gitbar__busy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rm-space-xs);
+  white-space: nowrap;
+}
+
+/* the folder notice: framed like the information notes, buttons on one row (UX16-06) */
+.folder-notice--ask {
+  border: var(--rm-shape-border-width) solid var(--rm-color-primary);
+  background: var(--rm-color-selection);
+}
+
+.folder-notice__text {
+  max-inline-size: 80ch;
+}
+
+.folder-notice .actions {
+  flex: none;
+  flex-wrap: nowrap;
+}
+
+/* the pressed Changes button is clearly pressed (UX16-13) */
+.btn--active {
+  background: var(--rm-color-selection);
+  color: var(--rm-color-primary);
+}
+
+/* before the theme arrives: the system's own window colours and font (the splash, UX16-02) */
+html {
+  background: Canvas;
+  color: CanvasText;
+  font: caption;
+}

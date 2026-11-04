@@ -47,6 +47,7 @@ export function WorkspaceScreen({
   const [editFields, setEditFields] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [folderLater, setFolderLater] = useState(false)
+  const [folderDone, setFolderDone] = useState(false)
   const [renamingFolder, setRenamingFolder] = useState(false)
   const renameFolder = async (): Promise<void> => {
     setRenamingFolder(true)
@@ -55,6 +56,7 @@ export function WorkspaceScreen({
       if (r.ok) {
         onInfo(r.info)
         setDataVersion((v) => v + 1) // the Git bar now shows one commit to push
+        setFolderDone(true)
       } else setNotice(r.message)
     } catch (e) {
       setNotice(errorMessage(e))
@@ -317,9 +319,17 @@ export function WorkspaceScreen({
           />
 
           {/* 0.16: a project still under ReqMan's folder name — offer the rename as one commit (owner, 31 Oct / 4 Nov) */}
+          {folderDone && (
+            <div className="notice table-notice table-notice--ok folder-notice" role="status">
+              <span>{T.workspace.legacyFolderDone}</span>
+              <button type="button" className="link-btn" onClick={() => setFolderDone(false)}>
+                {T.common.dismiss}
+              </button>
+            </div>
+          )}
           {info.legacyFolder && !folderLater && (
-            <div className="notice table-notice folder-notice" role="status">
-              <span>{T.workspace.legacyFolder}</span>
+            <div className="notice table-notice folder-notice folder-notice--ask" role="status">
+              <span className="folder-notice__text">{T.workspace.legacyFolder}</span>
               <span className="actions">
                 <button type="button" className="btn btn--small btn--primary" disabled={renamingFolder} onClick={() => void renameFolder()}>
                   {T.workspace.legacyFolderUpdate}

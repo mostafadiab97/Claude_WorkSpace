@@ -16,6 +16,8 @@ export interface Session {
   isGit: boolean
   lastSync: RepoInfo['lastSync']
   watch: FolderWatch | null
+  /** The project folder the watch covers ('.reqochet' or '.reqman'). */
+  watchedMeta?: string
 }
 
 export interface WorkspaceContext {

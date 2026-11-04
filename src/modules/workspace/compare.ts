@@ -135,12 +135,18 @@ export function createCompare(git: GitAdapter) {
       const otherFiles: string[] = []
       const reviewedOnly: string[] = []
       let schema: SchemaChange | null = null
+      let schemaBefore: string | null = null
+      let schemaAfter: string | null = null
+      let schemaSeen = false
       for (const c of changes) {
         const oldPath = c.from ?? c.path
         if (schemaPaths.includes(c.path) || schemaPaths.includes(oldPath)) {
+          // the folder rename may arrive as a deletion plus an addition: collect both sides, compare once below
           const b = beforeText(c)
           const a = afterText(c)
-          schema = schemaChange(b ? parseSchema(b).schema : null, a ? parseSchema(a).schema : null)
+          if (b !== null) schemaBefore = b
+          if (a !== null) schemaAfter = a
+          schemaSeen = true
           continue
         }
         if (!ITEM_FILE.test(c.path) && !ITEM_FILE.test(oldPath)) {
@@ -164,6 +170,9 @@ export function createCompare(git: GitAdapter) {
           known.paths.add(oldPath).add(c.path)
         } else pairs.set(id, { before, after, paths: new Set([oldPath, c.path]) })
       }
+
+      // a folder rename with identical content (.reqman → .reqochet) is no schema change (QA-08)
+      if (schemaSeen && schemaBefore !== schemaAfter) schema = schemaChange(schemaBefore ? parseSchema(schemaBefore).schema : null, schemaAfter ? parseSchema(schemaAfter).schema : null)
 
       // An item converted to a new ID keeps its old one as `former-id` (0.9.0 sandbox conversion, later imports):
       // a deleted old ID and an added item that says it was that ID are one changed item, not two.

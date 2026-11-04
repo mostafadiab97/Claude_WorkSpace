@@ -145,7 +145,7 @@ describe('Git in the workspace (two PCs)', { timeout: 120_000 }, () => {
     await b.ws.commit('Bob')
 
     const rejected = await b.ws.push()
-    expect(rejected).toMatchObject({ ok: false, message: 'The remote has changes you do not have yet. Pull first, then push again.' })
+    expect(rejected).toMatchObject({ ok: false, message: 'GitHub has commits you do not have yet. Pull first, then push again.' })
 
     const headBefore = sh(b.root, 'rev-parse', 'HEAD')
     const r = await b.ws.pull()

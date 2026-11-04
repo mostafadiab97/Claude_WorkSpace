@@ -1,5 +1,5 @@
-# ReqMan default schema.
-# Copied into a project as requirements/.reqman/schema.yaml when the requirements folder is created.
+# reqochet default schema.
+# Copied into a project as requirements/.reqochet/schema.yaml when the requirements folder is created.
 # The project's copy is versioned with its requirements; edit that copy to add types, fields or link types.
 #
 # Built-in item properties (always present, not listed here): id, type, title, parent, order, links, text.

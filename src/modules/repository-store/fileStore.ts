@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { mkdir, readdir, readFile, stat, writeFile, rename } from 'node:fs/promises'
+import { mkdir, readdir, readFile, stat, writeFile, rename, rmdir } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import { generateId, ITEM_FILE_EXTENSION, parseItemFile, serializeItem, type FieldValue, type Item } from '../items'
 import { parseDocument } from 'yaml'
@@ -246,12 +246,18 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
       return open(root)
     },
 
-    async renameLegacyFolder(root) {
+    async renameLegacyFolder(root, back = false) {
       const folder = folderOf(root)
-      if (!(await exists(join(folder, LEGACY_META_DIR)))) return null
-      if (await exists(join(folder, META_DIR))) throw new Error(`Both ${LEGACY_META_DIR} and ${META_DIR} exist in ${REQUIREMENTS_FOLDER}; keep one.`)
-      await rename(join(folder, LEGACY_META_DIR), join(folder, META_DIR))
-      return { from: `${REQUIREMENTS_FOLDER}/${LEGACY_META_DIR}`, to: `${REQUIREMENTS_FOLDER}/${META_DIR}` }
+      const [src, dst] = back ? [META_DIR, LEGACY_META_DIR] : [LEGACY_META_DIR, META_DIR]
+      if (!(await exists(join(folder, src)))) return null
+      if (await exists(join(folder, dst))) {
+        // an empty leftover folder (a half-finished manual rename) is simply removed (QA-04); anything else is kept
+        const empty = (await readdir(join(folder, dst)).catch(() => ['?'])).length === 0
+        if (!empty) throw new Error('both-folders')
+        await rmdir(join(folder, dst))
+      }
+      await rename(join(folder, src), join(folder, dst))
+      return { from: `${REQUIREMENTS_FOLDER}/${src}`, to: `${REQUIREMENTS_FOLDER}/${dst}` }
     },
 
     open: (root, options) => open(root, options)

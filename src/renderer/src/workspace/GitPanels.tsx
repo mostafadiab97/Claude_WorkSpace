@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import type { GitResult, GitState, ItemChange } from '../../../shared/api'
 import { errorMessage } from '../lib/hooks'
 import { BranchMenu } from './BranchMenu'
+import { BrandBusy } from '../components/Brand'
 import { useFeature } from '../lib/features'
 import { T } from '../../../shared/text'
 
@@ -124,14 +125,22 @@ export function GitBar(props: {
           aria-label={T.branches.open(state.branch ?? '')}
           title={branchesOn ? `${T.branches.open(state.branch ?? '')}\n${state.upstream ? T.git.remoteBranch(state.upstream) : T.git.notOnRemote}` : T.settings.features.branchesOff}
           disabled={busy !== null || state.detached || state.mergeInProgress || !branchesOn}
-          onClick={() => setBranches((v) => !v)}
+          onClick={() => {
+            onDismiss() // a result note never covers the panel that opens (UX16-07)
+            setBranches((v) => !v)
+          }}
         >
           <span aria-hidden="true">⎇</span> {state.detached ? T.git.noBranch : (state.branch ?? '—')} <span aria-hidden="true">▾</span>
         </button>
         {/* Changes, Pull and Push right next to the branch (owner, 4 Nov 2026) */}
-        <button type="button" className={props.changesOpen ? 'btn btn--active' : 'btn'} aria-pressed={props.changesOpen} onClick={props.onToggleChanges} title={T.git.changesTooltip}>
+        <button type="button" className={props.changesOpen ? 'btn btn--active' : 'btn'} aria-pressed={props.changesOpen} onClick={() => {
+            onDismiss()
+            props.onToggleChanges()
+          }} title={T.git.changesTooltip}>
           {T.git.changes(n)}
         </button>
+        {state.hasRemote && (
+          <>
         <button
           type="button"
           className={state.behind > 0 ? 'btn btn--accent' : 'btn'}
@@ -150,22 +159,28 @@ export function GitBar(props: {
         >
           {T.git.push(state.ahead)}
         </button>
+          </>
+        )}
         {/* UX-13: the counts live on Pull and Push; only "not pushed yet" stays here */}
         {state.hasRemote && !state.upstream && (
           <span className="gitbar__sync" title={T.git.syncTooltip}>
             {T.git.notPushed}
           </span>
         )}
-        {!state.hasRemote && <span className="muted-inline gitbar__noremote" title={T.git.noRemote}>{T.git.noRemoteShort}</span>}
+        {/* no remote yet: one "Publish to GitHub…" button instead of a disabled Pull / Push and "no remote" (UX16-01) */}
         {!state.hasRemote && publishing === null && (
-          <button type="button" className="link-btn" disabled={busy !== null} onClick={() => setPublishing('')} title={T.git.publishTooltip}>
+          <button type="button" className="btn btn--small" disabled={busy !== null} onClick={() => setPublishing('')} title={`${T.git.noRemote}\n${T.git.publishTooltip}`}>
             {T.git.publish}
           </button>
         )}
         {state.warning && <span className="statusbar__warn" title={state.warning}>{T.git.oldGit}</span>}
         {state.mergeInProgress && <span className="statusbar__warn">{T.git.mergeOutside}</span>}
         <span className="toolbar__spacer" />
-        {busy && <span className="muted-inline" role="status">{T.git.busy(busy)}</span>}
+        {busy && (
+          <span className="muted-inline gitbar__busy" role="status">
+            <BrandBusy size={20} /> {T.git.busy(busy)}
+          </span>
+        )}
       </div>
       <div className="gitbar__ask" ref={ask}>
       {publishing !== null && !state.hasRemote && (

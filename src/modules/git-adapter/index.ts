@@ -86,6 +86,10 @@ export interface GitAdapter {
   commit(root: string, pathspec: string, message: string): Promise<string>
   /** Commits exactly these files (paths from the repository top), nothing else that may be staged or changed. */
   commitFiles(root: string, paths: string[], message: string): Promise<string>
+  /** Files Git tracks under a path (relative to the repository). */
+  trackedFiles(root: string, path: string): Promise<string[]>
+  /** Takes paths out of the index again (after a refused commit); the files stay as they are. */
+  unstage(root: string, paths: string[]): Promise<void>
   fetch(root: string): Promise<void>
   /** Would merging `upstream` into `ours` (default HEAD) conflict? Computed without touching the working folder. */
   checkMerge(root: string, upstream: string, ours?: string): Promise<MergeCheck>

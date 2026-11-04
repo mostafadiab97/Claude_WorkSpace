@@ -163,7 +163,7 @@ const kebab = (s: string): string =>
 
 const splitOptions = (s: string): string[] => s.split(/[\n,]/).map((x) => x.trim()).filter(Boolean)
 
-/** Add, rename, reorder and remove the fields every item has. Saved to requirements/.reqman/schema.yaml. */
+/** Add, rename, reorder and remove the fields every item has. Saved to requirements/.reqochet/schema.yaml. */
 export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSaved: (i: RepoInfo) => void; onClose: () => void }) {
   const toDraft = (f: FieldDef): Draft => ({
     key: nextKey++,
@@ -265,7 +265,7 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
             <h2 className="modal__title">{T.fields.title}</h2>
             <p className="muted">
               {T.fields.introBefore}
-              <code>requirements/.reqman/schema.yaml</code>
+              <code>{info.legacyFolder ? 'requirements/.reqman/schema.yaml' : 'requirements/.reqochet/schema.yaml'}</code>
               {T.fields.introAfter}
             </p>
           </div>

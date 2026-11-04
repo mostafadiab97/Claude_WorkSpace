@@ -13,7 +13,7 @@ import type { RepositoryStore } from '../repository-store'
 import { createCompare } from './compare'
 import { queryAll, syncInfo, type Session, type WorkspaceContext } from './context'
 import { createExportOps } from './exporting'
-import { createGitOps } from './gitOps'
+import { createGitOps, explainGitError } from './gitOps'
 import { createMerging } from './merging'
 import type { WorkspaceService } from './index'
 import { createImportOps } from './importing'
@@ -51,6 +51,9 @@ export function cacheFileName(root: string): string {
   return `${createHash('sha1').update(resolve(root).toLowerCase()).digest('hex').slice(0, 20)}.sqlite`
 }
 
+/** The rename commit's message — in the team's Git history, so the same in every window language (UX16-03). */
+export const FOLDER_RENAME_COMMIT = 'Rename the project folder .reqman to .reqochet (reqochet)'
+
 export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   const { store, git, log } = deps
   const recent = createRecentList(deps.userDir, (m) => log.warn(m))
@@ -82,7 +85,18 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       const repo = await ctx.openRepo(s.repo.root)
       s.lastSync = syncInfo(await s.index.sync(repo))
       s.repo = repo
+      rewatch(s)
     }
+  }
+
+  /** (Re)starts the folder watch for the project folder in use — after the .reqman → .reqochet rename, also when the
+   * rename arrives by pull or branch switch (code review CR-05). */
+  const rewatch = (s: Session): void => {
+    if (deps.watchFiles === false) return
+    if (s.watch && s.watchedMeta === s.repo.metaDir) return
+    s.watch?.close()
+    s.watch = watchRequirementsFolder(s.repo.folder, (e) => log.warn(`Folder watch: ${String(e)}`), s.repo.metaDir)
+    s.watchedMeta = s.repo.metaDir
   }
 
   const info = (s: Session = need()): RepoInfo => ({
@@ -104,21 +118,52 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
    */
   const renameProjectFolder = async (): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }> => {
     const s = need()
+    if (s.repo.metaDir !== '.reqman') return { ok: true, info: info() }
+    const root = s.repo.root
+    const base = relative(root, s.repo.folder).split('\\').join('/') || '.'
+    const from = `${base}/.reqman`
+    const to = `${base}/.reqochet`
     try {
-      const moved = await store.renameLegacyFolder(s.repo.root)
-      if (!moved) return { ok: true, info: info() }
-      if (s.isGit) await git.commitFiles(s.repo.root, [moved.from, moved.to], T.wsMsg.folderRenamedCommit)
-      log.info(`Project folder renamed: ${moved.from} → ${moved.to}${s.isGit ? ' (committed)' : ''}`)
+      // The commit carries the rename only (code review CR-03, QA-05): uncommitted edits in the old folder would be
+      // committed under the rename message, so they are committed or discarded first.
+      const tracked = s.isGit ? await git.trackedFiles(root, from) : []
+      if (tracked.length > 0) {
+        const dirty = (await git.status(root, from)).changes
+        if (dirty.length > 0) return { ok: false, message: T.wsMsg.folderRenameDirty }
+      }
+      // close the watcher first: Windows refuses to rename a folder that is being watched
       s.watch?.close()
-      s.repo = await ctx.openRepo(s.repo.root)
-      s.watch = deps.watchFiles === false ? null : watchRequirementsFolder(s.repo.folder, (e) => log.warn(`Folder watch: ${String(e)}`), s.repo.metaDir)
+      s.watch = null
+      let moved: { from: string; to: string } | null
+      try {
+        moved = await store.renameLegacyFolder(root)
+      } catch (e) {
+        rewatch(s)
+        return { ok: false, message: e instanceof Error && e.message === 'both-folders' ? T.wsMsg.folderRenameBoth : String(e) }
+      }
+      if (moved && tracked.length > 0) {
+        try {
+          await git.commitFiles(root, [from, to], FOLDER_RENAME_COMMIT)
+        } catch (e) {
+          // refused (e.g. a commit hook): put everything back as it was, so the folder and the window agree (QA-07)
+          await git.unstage(root, [from, to])
+          await store.renameLegacyFolder(root, true)
+          rewatch(s)
+          return { ok: false, message: T.wsMsg.folderRenameRefused(explainGitError(e)) }
+        }
+      }
+      log.info(`Project folder renamed: ${from} → ${to}${moved && tracked.length > 0 ? ' (committed)' : ''}`)
+      s.repo = await ctx.openRepo(root)
+      rewatch(s)
       s.lastSync = syncInfo(await s.index.sync(s.repo))
       gitOps.invalidate()
       return { ok: true, info: info() }
     } catch (e) {
+      rewatch(s)
       return { ok: false, message: e instanceof Error ? e.message : String(e) }
     }
   }
+
 
   const links = createLinkOps(ctx)
   const structure = createStructureOps(ctx)
@@ -179,7 +224,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     const watch = deps.watchFiles === false ? null : watchRequirementsFolder(repo.folder, (e) => log.warn(`Folder watch: ${String(e)}`), repo.metaDir)
     const stats = await index.sync(repo)
     watch?.take()
-    session = { repo, index, isGit, watch, lastSync: syncInfo(stats) }
+    session = { repo, index, isGit, watch, watchedMeta: repo.metaDir, lastSync: syncInfo(stats) }
     log.info(
       `Opened ${repo.root}: ${stats.files} files, ${stats.added} added / ${stats.updated} updated / ${stats.removed} removed ` +
         `in ${stats.durationMs} ms${stats.full ? ' (full index)' : ''}`
@@ -199,6 +244,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       const repo = await ctx.openRepo(s.repo.root)
       s.lastSync = syncInfo(await s.index.sync(repo))
       s.repo = repo
+      rewatch(s)
     } else if (seen.paths.length > 0) {
       const started = performance.now()
       await s.index.syncPaths(s.repo, seen.paths)

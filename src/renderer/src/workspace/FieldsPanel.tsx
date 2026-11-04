@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { FieldCheck, RepoInfo } from '../../../shared/api'
 import type { FieldDef, FieldType, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
+import { staleTranslations } from '../lib/schema'
 import { columnOrder, optionalColumns, orderColumns, type ColumnPrefs } from './ItemTable'
 import { T } from '../../../shared/text'
 
@@ -207,6 +208,15 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
     if (r.type === 'number' && r.default && Number.isNaN(Number(r.default))) problems.push(T.fields.defaultNotNumber(label))
   })
 
+  // translations a rename leaves behind: a warning only (owner, 4 Nov 2026)
+  const stale: string[] = []
+  withIds.forEach((r) => {
+    if (r.isNew) return
+    const found = staleTranslations(original.get(r.id), r.name, r.type === 'enum' || r.type === 'list' ? splitOptions(r.options) : [])
+    if (found.name) stale.push(T.fields.staleName(r.name.trim()))
+    if (found.options.length > 0) stale.push(T.fields.staleOptions(r.name.trim(), found.options.join(', ')))
+  })
+
   const patch = (key: number, p: Partial<Draft>): void => {
     setCheck(null)
     setRows((rs) => rs.map((r) => (r.key === key ? { ...r, ...p } : r)))
@@ -349,6 +359,9 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
           {removed.length > 0 && (
             <p className="notice notice--warn">{T.fields.removing(removed.map((f) => f.name).join(', '))}</p>
           )}
+          {stale.map((w) => (
+            <p key={w} className="notice notice--warn">{w}</p>
+          ))}
           {problems.map((p) => (
             <p key={p} className="notice notice--error">{p}</p>
           ))}

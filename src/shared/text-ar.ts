@@ -522,6 +522,8 @@ const raw: Texts = {
     remove: (name: string) => `إزالة ${name || 'الحقل'}`,
     removeTooltip: 'إزالة',
     add: '+ إضافة حقل',
+    staleName: (name: string) => `${name}: تغيّر الاسم، لكن اسمه المترجم (مثلاً بالعربية) ما زال القديم. صحّحه في schema.yaml ‏(labels) — يُحفظ الحقل في الحالتين.`,
+    staleOptions: (name: string, options: string) => `${name}: الخيارات ${options} أُزيلت، لكن أسماءها المترجمة ما زالت في schema.yaml ‏(optionLabels). صحّحها أو احذفها هناك — يُحفظ الحقل في الحالتين.`,
     removing: (names: string) => `إزالة ${names}: القيم المخزّنة في العناصر لا تُحذف — تبقى في الملفات وتعود إذا أُضيف حقل بالمفتاح نفسه.`,
     needsName: (i: number) => `الحقل ${i} يحتاج إلى اسم.`,
     fieldN: (i: number) => `الحقل ${i}`,

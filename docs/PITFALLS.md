@@ -124,3 +124,17 @@ elements (strict-mode violation). Only `health` had been run locally after chang
 - **A GitHub outage looked like "Pull first"** (0.15.2): `! [remote rejected] main -> main (Internal Server Error)`
   matched `/rejected/`. `explainGitError` now checks server errors first (`T.gitMsg.serverError`); the acceptance run
   pushes once more after 30 s when the app reports one.
+
+## `overflow: hidden` on the top bar hides its pop-overs (0.16.0 → 0.16.1)
+
+The Git questions and notes hang below the top bar (`position: absolute; top: 100%`). `overflow: hidden` on `.topbar`
+(added to stop long names running past the window) clipped them: "Pull first?" was visible only as a glow. Clip
+sideways only (`overflow-x: clip; overflow-y: visible` — `clip`, unlike `hidden`, allows the other axis to stay
+visible). `journey.e2e.mjs` hit-tests the real button (`elementFromPoint`), because Playwright's `waitFor` passes on a
+clipped element.
+
+## Vitest's transform cache keeps an old `import.meta.glob` list (0.16.1)
+
+`node_modules/.vitest-cache` keys a transformed test file on its own content; a glob inside it (e.g. the brand QA test's
+`resources/brand/**/*.svg`) is not refreshed when files are added. Symptom: a new SVG shows as `unknown:data:…` only
+under `npm run check` (coverage). Fix: delete `node_modules/.vitest-cache`. CI starts clean, so it never sees this.

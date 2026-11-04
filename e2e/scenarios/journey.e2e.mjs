@@ -413,6 +413,13 @@ await scenario('E2E journey', async (ctx) => {
   const offer = gitbar.getByRole('alertdialog', { name: 'Pull first?' })
   await offer.waitFor()
   check(true, 'Push offers to pull first')
+  // 0.16.1: the question hangs below the top bar and must not be clipped by it (owner, 0.16.0 step 4)
+  const onTop = await offer.getByRole('button', { name: 'Push without pulling' }).evaluate((b) => {
+    const r = b.getBoundingClientRect()
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+    return hit === b || b.contains(hit)
+  })
+  check(onTop, 'the Pull first? question is visible on top of the table, not cut off by the top bar')
   await offer.getByRole('button', { name: 'Push without pulling' }).click()
   await gitbar.locator('.gitbar__notice--error', { hasText: 'Pull first' }).waitFor()
   check(true, 'push is refused with "Pull first", never forced')

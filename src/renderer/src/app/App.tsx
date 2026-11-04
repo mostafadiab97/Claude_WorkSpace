@@ -15,6 +15,9 @@ import { SettingsScreen } from '../screens/SettingsScreen'
 import { WorkspaceScreen } from '../screens/WorkspaceScreen'
 import { T } from '../../../shared/text'
 
+/** One loop of the brand's loading animation (brand-tokens.json motion.loading.loopSeconds). */
+const SPLASH_MIN_MS = 1400
+
 export function App() {
   const [theme, setTheme] = useState<LoadedTheme | null>(null)
   const [mode, setMode] = useState<ThemeMode>(loadSavedMode)
@@ -37,7 +40,10 @@ export function App() {
   const [gitSlot, setGitSlot] = useState<HTMLDivElement | null>(null)
 
   useEffect(() => {
-    void window.reqochet.getTheme().then(setTheme)
+    // the loading animation plays at least one loop (1.4 s) so it can be seen (owner, 0.16.0 step 3)
+    const shown = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : SPLASH_MIN_MS
+    const minimum = new Promise((done) => setTimeout(done, shown))
+    void Promise.all([window.reqochet.getTheme(), minimum]).then(([loaded]) => setTheme(loaded))
     void window.reqochet.getAppInfo().then(setAppInfo)
     void window.reqochet.getGitInfo().then(setGit)
     void window.reqochet.getUpdateStatus().then(setUpdate)

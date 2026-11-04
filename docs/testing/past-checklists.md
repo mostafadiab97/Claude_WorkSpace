@@ -1,7 +1,18 @@
-# Past manual checklists (v0.0.3 – v0.15.1)
+# Past manual checklists (v0.0.3 – v0.15.2)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## Previous checklist — v0.15.2 (the owner's points on 0.15.1)
+
+The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
+Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.15.2**, then **⚙ → Self-tests → Run release self-test**. | **All steps passed** (21); the step list is folded — **Show the 21 steps** opens it. |
+| 2 | **Changes → Show: the last commit that changed requirements** (your test commit from 0.15.0/0.15.1). | Under your changed item a row **L — Link review only: 5 items**; a click shows the IDs. No "links are now suspect" warning on the changed item (you kept them). |
+| 3 | **⚙**, open **▸ User guide**, scroll the left panel. | **← Back** sits on its own bar; the entries scroll under it. |
 
 ## Previous checklist — v0.15.1 (the owner's points on 0.15.0)
 

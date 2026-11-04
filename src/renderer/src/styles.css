@@ -3431,7 +3431,9 @@ code {
    shrink with "…"; the brand keeps its size (the name logo has a minimum width). */
 .topbar {
   min-inline-size: 0;
-  overflow: hidden;
+  /* clip sideways only: the Git questions and notes hang below the bar and must stay visible (owner, 0.16.0 step 4) */
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .topbar > .brand {

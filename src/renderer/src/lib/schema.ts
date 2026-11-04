@@ -36,3 +36,20 @@ export const linkName = (schema: Schema, id: string, reverse = false): string =>
 
 export const formatValue = (v: FieldValue | undefined, f?: FieldDef): string =>
   v === undefined ? '' : Array.isArray(v) ? v.map((x) => optionLabel(f, x)).join(', ') : f ? optionLabel(f, String(v)) : String(v)
+
+/**
+ * Translations that a change in the Fields window leaves out of date (owner, 4 Nov 2026: warn, do not drop):
+ * the field was renamed but keeps its translated names, or enum choices with a translation are no longer offered.
+ */
+export const staleTranslations = (
+  was: FieldDef | undefined,
+  name: string,
+  options: readonly string[]
+): { name: boolean; options: string[] } => {
+  if (!was) return { name: false, options: [] }
+  const hasLabels = Object.keys(was.labels ?? {}).length > 0
+  return {
+    name: hasLabels && name.trim() !== was.name,
+    options: Object.keys(was.optionLabels ?? {}).filter((o) => !options.includes(o))
+  }
+}

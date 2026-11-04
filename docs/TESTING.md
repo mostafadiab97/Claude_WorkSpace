@@ -67,7 +67,17 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.16.0 (the new name: reqochet-dev)
+## Manual test checklist — v0.16.1 (the owner's points on 0.16.0)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.16.1**, then **⚙ → Self-tests → Run release self-test**. | Version 0.16.1; **all 22 steps passed**. |
+| 2 | Close and start reqochet-dev. | The bouncing dots play for at least one full bounce before the window appears. |
+| 3 | Dark mode: watch the top-bar face, then click another window and come back. | The face keeps the same size and weight while the eyes glance, blink and rest. |
+| 4 | Light mode: look at the top-bar face and the start screen. | The red and green eyes are clearly visible on the dark tile, and you can see them move. |
+| 5 | In the sandbox, change an item, press **Push** while GitHub has newer commits (or use your second clone to push first). | "Pull first?" opens **on top of** the table; both buttons can be clicked. |
+
+## Previous checklist — v0.16.0 (the new name: reqochet-dev)
 
 The acceptance run on GitHub installed 0.15.2 (ReqMan), updated it to reqochet-dev, checked that ReqMan was removed and
 the settings moved, then ran the self-test, the sandbox and a real push (Actions → Release → Summary). Report by step
@@ -80,17 +90,6 @@ number.
 | 3 | Open the sandbox. Look at the top bar and the start screen; hover the window, then click another window. | Face (eyes) + reqochet + **DEV**; the eyes glance and blink, rest when the window is in the background, look busy during Pull. Changes / Pull / Push sit right after the branch. The start screen shows the large face and name; while the sandbox opens only the bouncing dots move. |
 | 4 | The sandbox shows "This project was made with ReqMan…": click **Rename folder**, then **Push**. | A green note "Folder renamed and committed"; on GitHub the commit shows `.reqman → .reqochet` as a rename; the sandbox still opens with all items. (Afterwards `git pull` in your second sandbox clone.) |
 | 5 | Switch to **Dark** and **العربية** (⚙ → Appearance); look at the top bar and the start screen. | The light logo files in Dark; nothing mirrored in Arabic (the logo reads "reqochet"). |
-
-## Previous checklist — v0.15.2 (the owner's points on 0.15.1)
-
-The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
-Report by step number.
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Update to **0.15.2**, then **⚙ → Self-tests → Run release self-test**. | **All steps passed** (21); the step list is folded — **Show the 21 steps** opens it. |
-| 2 | **Changes → Show: the last commit that changed requirements** (your test commit from 0.15.0/0.15.1). | Under your changed item a row **L — Link review only: 5 items**; a click shows the IDs. No "links are now suspect" warning on the changed item (you kept them). |
-| 3 | **⚙**, open **▸ User guide**, scroll the left panel. | **← Back** sits on its own bar; the entries scroll under it. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

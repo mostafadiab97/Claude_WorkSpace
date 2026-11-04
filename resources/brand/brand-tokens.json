@@ -6,7 +6,9 @@
     "ink": "#1b1f27",
     "white": "#ffffff",
     "darkTile": "#1b1f27",
-    "lightTile": "#ffffff"
+    "lightTile": "#ffffff",
+    "requirementRedOnDarkTile": "#FF5C61",
+    "verificationGreenOnDarkTile": "#3CD873"
   },
   "logo": {
     "minWidthPx": 100,

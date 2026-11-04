@@ -518,6 +518,8 @@ const en = {
     remove: (name: string) => `Remove ${name || 'field'}`,
     removeTooltip: 'Remove',
     add: '+ Add field',
+    staleName: (name: string) => `${name}: the name changed, but its translated name (for example in Arabic) is still the old one. Correct it in schema.yaml (labels) — the field is saved either way.`,
+    staleOptions: (name: string, options: string) => `${name}: the choices ${options} are gone, but their translated names are still in schema.yaml (optionLabels). Correct or remove them there — the field is saved either way.`,
     removing: (names: string) => `Removing ${names}: values already stored in items are not deleted — they stay in the files and come back if a field with the same key is added again.`,
     needsName: (i: number) => `Field ${i} needs a name.`,
     fieldN: (i: number) => `Field ${i}`,

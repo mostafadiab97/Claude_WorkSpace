@@ -130,7 +130,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.16.0, 4 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.16.1, 4 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -151,7 +151,8 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.15.1 the owner's points on 0.15.0 — self-test state for the whole session (`renderer/lib/sessionState.ts`), Add link stays open when the type list is used (`data-keeps-search`), comparisons name link-review-only files (`CompareResult.reviewedOnly`), sticky Back in Settings | Released (v0.15.1) |
 | 0.15.2 the owner's touches on 0.15.1 — self-test steps fold, "Link review only" row in Changes, suspect warning counts only links still waiting for review, Back on its own sticky bar, index preview keeps a leading bold | Released (v0.15.2) |
 | 0.16.0 the new name **reqochet** — this repository builds **reqochet-dev** (package/productName, appId `com.reqochet.dev`, `build/installer.nsh` removes ReqMan, `src/main/legacyData.ts` moves `%APPDATA%\\ReqMan`); brand package in `resources/brand` (`components/Brand.tsx`, `lib/activity.ts`); project folder `.reqochet` (reads `.reqman`, "Rename folder" commit); `window.reqochet`/`ReqochetApi`; revert floor 0.16.0; four helper agents incl. brand | Released (v0.16.0) |
-| **Next** | Owner's 0.16.0 checklist; brand questions BR-02/04/06 (`docs/reviews/agents/0.16.0-brand.md`) and the logo adjusting step; the public release repository (`docs/reviews/2026-11-04-public-release-repo.md`, open; its package name must be `reqochet`, appId `com.reqochet.app`); then 1a structure (plan in `docs/reviews/2026-11-01-planning-discussion.md`); a renamed field keeps its old Arabic label (warn or drop?) | — |
+| 0.16.1 the owner's points on 0.16.0 — top bar clipped the Push questions (`overflow-x: clip` only), small-cut white-tile eyes (BR-02), lighter eyes on the dark tile (`resources/brand/README.md`), splash ≥ one loop, Fields window warns about stale translations (`staleTranslations`) | Released (v0.16.1) |
+| **Next** | Owner's 0.16.1 checklist; the logo adjusting step (Windows .ico/PNG with the lighter eyes); the public release repository (`docs/reviews/2026-11-04-public-release-repo.md`, open; its package name must be `reqochet`, appId `com.reqochet.app`); then 1a structure (plan in `docs/reviews/2026-11-01-planning-discussion.md`) | — |
 
 The owner's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
 Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
@@ -173,7 +174,7 @@ checks in detail".
   the owner's report 3 Nov: 0.14.0/0.14.1 passed with small points → **0.14.2 released 3 Nov** (Settings and help with the
   guide inside, privacy guard, sandbox history cleaned) — 0.14.2: steps 1, 3, 4 passed; step 2 → **0.14.3** (pages) —
   0.14.3 passed → **0.14.4 released 3 Nov** (no personal data in files; Check for updates on the Updates line; blue Back)
-  — 0.14.4 passed with two touches → **0.14.5 released 3 Nov** — 0.14.5 released; **0.15.0 (UI polish) released 4 Nov** — his report 4 Nov: steps 2, 5 passed, points on 1, 3, 4 → **0.15.1 released 4 Nov** — all passed with three touches → **0.15.2 released 4 Nov** — all passed → **0.16.0 (rename to reqochet-dev) released 4 Nov** — waiting for his 0.16.0 checklist (5 steps). History question settled: not rewritten; a public release repository
+  — 0.14.4 passed with two touches → **0.14.5 released 3 Nov** — 0.14.5 released; **0.15.0 (UI polish) released 4 Nov** — his report 4 Nov: steps 2, 5 passed, points on 1, 3, 4 → **0.15.1 released 4 Nov** — all passed with three touches → **0.15.2 released 4 Nov** — all passed → **0.16.0 (rename to reqochet-dev) released 4 Nov** — steps 1, 2, 5 passed, points on 3, 4 → **0.16.1 released 4 Nov** — waiting for his 0.16.1 checklist (5 steps). History question settled: not rewritten; a public release repository
   will start from the files without history.
 - **Planning discussion in progress** — `docs/reviews/2026-11-01-planning-discussion.md` (method: the
   `owner-decision-walkthrough` skill; record every answer there and, when it changes the product, in

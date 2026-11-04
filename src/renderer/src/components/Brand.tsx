@@ -6,9 +6,11 @@ import { T } from '../../../shared/text'
 import logoOnLight from '../../../../resources/brand/logo/reqochet-logo-on-light.svg'
 import logoOnDark from '../../../../resources/brand/logo/reqochet-logo-on-dark.svg'
 import eyesIdleSmall from '../../../../resources/brand/motion/reqochet-eyes-idle-small.svg'
+import eyesIdleLightSmall from '../../../../resources/brand/motion/reqochet-eyes-idle-light-small.svg'
 import eyesIdleLight from '../../../../resources/brand/motion/reqochet-eyes-idle-light.svg'
 import eyesIdle from '../../../../resources/brand/motion/reqochet-eyes-idle.svg'
 import eyesThinkingSmall from '../../../../resources/brand/motion/reqochet-eyes-thinking-small.svg'
+import eyesThinkingLightSmall from '../../../../resources/brand/motion/reqochet-eyes-thinking-light-small.svg'
 import eyesThinkingLight from '../../../../resources/brand/motion/reqochet-eyes-thinking-light.svg'
 import eyesThinking from '../../../../resources/brand/motion/reqochet-eyes-thinking.svg'
 import iconSmall from '../../../../resources/brand/icon/reqochet-icon-small.svg'
@@ -45,12 +47,16 @@ export function BrandFace({ mode, state, size }: { mode: Mode; state: FaceState;
           : icon
       : state === 'thinking'
         ? mode === 'dark'
-          ? eyesThinkingLight
+          ? small
+            ? eyesThinkingLightSmall
+            : eyesThinkingLight
           : small
             ? eyesThinkingSmall
             : eyesThinking
         : mode === 'dark'
-          ? eyesIdleLight
+          ? small
+            ? eyesIdleLightSmall
+            : eyesIdleLight
           : small
             ? eyesIdleSmall
             : eyesIdle

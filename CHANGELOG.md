@@ -3,6 +3,23 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.16.1 — 4 Nov 2026 — The owner's points on 0.16.0
+- **Owner (4 Nov 2026) on 0.16.0:** self-test 22/22 (86.1 s); steps 1, 2, 5 passed; points on 3 and 4. Answers: BR-02
+  draw the two missing drawings now; BR-04 keep face + name as they are in Arabic; BR-06 the white tile in dark mode
+  stays; a renamed field with a translation → warn.
+- **Push / Pull questions were hidden behind the table** (step 4): the 0.16.0 top bar cut off everything that hangs
+  below it, so "Pull first?" with "Push without pulling" could not be clicked. Cause: a rule that keeps long names
+  from running past the window clipped downwards too; it now clips sideways only. An e2e check clicks the real button.
+- **The face kept changing size in dark mode** (step 3): the moving eyes used the large drawing, the resting face the
+  small cut. The small cut on the white tile now exists for idle and thinking (BR-02), and the moving eyes are as large
+  as the resting ones.
+- **Eyes on the dark tile (light mode) are lighter** — a brighter red and green, so they and their movement are seen.
+  The white tile (dark mode) is unchanged. Recorded in `resources/brand/README.md`.
+- **The loading animation plays at least one loop** (1.4 s) when the app starts, so it can be seen (not when Windows
+  animations are off).
+- **Fields window:** renaming a field that has a translated name, or removing a translated choice, shows a warning
+  (the field is still saved).
+
 ## 0.16.0 — 4 Nov 2026 — The new name: reqochet (development tool reqochet-dev)
 - **Owner (4 Nov 2026) on 0.15.2:** self-test 21/21 (60.0 s); all 3 steps passed. Requests: Changes / Pull / Push next to
   the branch button; the new name **reqochet** with the brand package (logo, icon, motion). Decisions
@@ -24,6 +41,7 @@ version it was about, and what it led to.
 - **Exports:** ReqIF and Excel carry the name reqochet; files exported by ReqMan still import exactly as before.
 - **Also:** a GitHub server error is no longer reported as "Pull first"; the self-test has a 22nd step (a project made
   with ReqMan is renamed).
+- **Owner (4 Nov 2026):** steps 1, 2, 5 passed; points on 3 and 4 → 0.16.1.
 - **Checked before release** by the code reviewer, QA tester (53 tests taken in), UI/UX reviewer and the new brand
   helper (`docs/reviews/agents/0.16.0-*.md`); the Windows switch from 0.15.2 is tested by the CI acceptance run.
 

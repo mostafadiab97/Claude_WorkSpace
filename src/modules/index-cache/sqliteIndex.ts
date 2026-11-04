@@ -67,7 +67,7 @@ export function preview(text: string): string {
   return text
     .slice(0, 600)
     .replace(/```[\s\S]*?(```|$)/g, ' ')
-    .replace(/^\s{0,3}(#{1,6}|[-*+]|\d+[.)]|>|\|)\s*/gm, '')
+    .replace(/^\s{0,3}(#{1,6}\s|[-*+]\s|\d+[.)]\s|>|\|)\s*/gm, '') // list marker only with a space: "**bold**" keeps both stars
     // markers only: underscores inside words (SIG_BRAKE_REQ) and lone stars (2 * 3) stay — QA-01 of 0.15
     .replace(/(\*\*|\*|`|~~)(?=\S)([\s\S]*?\S)\1/g, '$2')
     .replace(/(^|[^\p{L}\p{N}_])(__|_)(?=\S)([\s\S]*?\S)\2(?![\p{L}\p{N}_])/gu, '$1$3')

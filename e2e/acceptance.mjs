@@ -181,7 +181,14 @@ async function step4Push() {
     if (remote) did(`Pushed from the app: branch "${branch}" arrived on GitHub.`)
     else fail(`Push: branch "${branch}" is not on GitHub.`)
   } catch (e) {
-    fail(`Real push: ${secret(e.message)}`)
+    // say what the window showed (a red note, a question) — the timeout alone does not tell why
+    let shown = ''
+    try {
+      shown = (await win.locator('.gitbar__notice, .gitbar__ask, [role="alert"]').allTextContents()).join(' | ')
+    } catch {
+      // the window is gone
+    }
+    fail(`Real push: ${secret(e.message.split('\n')[0])}${shown ? ` — the window showed: ${secret(shown)}` : ''}`)
   } finally {
     await close(app)
     const del = spawnSync('git', ['push', '--quiet', pushUrl, '--delete', branch], { encoding: 'utf8' })

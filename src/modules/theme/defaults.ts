@@ -5,7 +5,7 @@ import type { ThemeConfig } from '../../shared/api'
  * Keep it identical to config/theme.json as shipped.
  */
 export const DEFAULT_THEME: ThemeConfig = {
-  brand: { name: 'ReqMan', logo: 'logo.svg' },
+  brand: { name: 'reqochet', logo: '' },
   typography: {
     fontFamily: "'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif",
     fontFamilyMono: "'Cascadia Mono', Consolas, monospace",
@@ -93,7 +93,8 @@ export function validateTheme(
 
   const brand = src.brand as Record<string, unknown> | undefined
   if (brand) {
-    if (typeof brand.name === 'string') theme.brand.name = brand.name
+    // "ReqMan" was the old default name, copied into users' themes before the rename: it does not override the new one
+    if (typeof brand.name === 'string' && brand.name !== 'ReqMan') theme.brand.name = brand.name
     if (typeof brand.logo === 'string') theme.brand.logo = brand.logo
   }
 

@@ -3,6 +3,7 @@ import type { ImportFile, ImportPreview, ImportResult, ImportSettings, ImportTar
 import type { Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { T } from '../../../shared/text'
+import { withActivity } from '../lib/activity'
 import { fieldLabel, linkLabel, typeLabel } from '../lib/schema'
 
 type Step = 'file' | 'columns' | 'check'
@@ -76,7 +77,7 @@ export function ImportDialog(props: { schema: Schema; file: ImportFile | null; n
     setBusy(true)
     setError(null)
     try {
-      const r = await window.reqman.runImport({ ...settings, ...(shownMapping ? { mapping: shownMapping } : {}) }, props.newProject && file ? T.importMsg.imported(file.name) : undefined)
+      const r = await withActivity(() => window.reqman.runImport({ ...settings, ...(shownMapping ? { mapping: shownMapping } : {}) }, props.newProject && file ? T.importMsg.imported(file.name) : undefined))
       if (r.ok) props.onDone(r)
       else setError(r.message)
     } catch (e) {

@@ -1,7 +1,9 @@
+import { BrandFace, BrandLoading, BrandName } from '../components/Brand'
+import { useActivity, useWindowActive } from '../lib/activity'
 import { QUICK_START_PAGE, SHORTCUTS_PAGE } from '../../../shared/guide'
 import { useCallback, useEffect, useState } from 'react'
 import type { AppInfo, GitInfo, LoadedTheme, RepoInfo, UpdateStatus, ImportFile } from '../../../shared/api'
-import { applyTheme, loadSavedMode, saveMode, type ThemeMode } from '../theme/applyTheme'
+import { applyTheme, loadSavedMode, resolveMode, saveMode, useEffectiveMode, type ThemeMode } from '../theme/applyTheme'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { LanguageToggle } from '../components/LanguageToggle'
@@ -54,8 +56,12 @@ export function App() {
   }, [theme, mode])
 
   useEffect(() => {
-    document.title = repo ? `${repo.name} — ${theme?.config.brand.name ?? 'ReqMan'}` : (theme?.config.brand.name ?? 'ReqMan')
-  }, [repo, theme])
+    const name = theme?.config.brand.name || T.brand.name
+    document.title = repo ? `${repo.name} — ${name}` : name
+  }, [repo, theme, lang])
+  const effective = useEffectiveMode(mode)
+  const working = useActivity()
+  const active = useWindowActive()
 
   const changeMode = (m: ThemeMode): void => {
     setMode(m)
@@ -71,16 +77,28 @@ export function App() {
     setRepo(null)
   }
 
-  if (!theme) return <div className="splash">{T.common.loading}</div>
-  const brand = theme.config.brand.name
+  // the loading animation while the app starts (before the theme is known: the Windows colour mode decides)
+  if (!theme) return <div className="splash"><BrandLoading mode={resolveMode('system')} width={320} label={T.common.loading} /></div>
+  const brand = theme.config.brand.name || T.brand.name
 
   return (
     <LanguageContext.Provider value={lang}>
     <div className="shell">
       <header className="topbar">
         <div className="brand">
-          {theme.logoDataUrl && <img className="brand__logo" src={theme.logoDataUrl} alt="" />}
-          <span className="brand__name">{brand}</span>
+          {/* a company theme may bring its own logo and name; otherwise the reqochet face and name (R-03, R-08) */}
+          {theme.logoDataUrl ? (
+            <>
+              <img className="brand__logo" src={theme.logoDataUrl} alt="" />
+              <span className="brand__name">{brand}</span>
+            </>
+          ) : (
+            <>
+              <BrandFace mode={effective} state={!active ? 'still' : working ? 'thinking' : 'idle'} size={28} />
+              <BrandName mode={effective} width={112} />
+              {T.brand.edition && <span className="brand__edition">{T.brand.edition}</span>}
+            </>
+          )}
           {repo && !showSettings && (
             <>
               <span className="topbar__sep" aria-hidden="true">/</span>
@@ -162,6 +180,8 @@ export function App() {
         {!repo && !showSettings && (
           <StartScreen
             brand={brand}
+            mode={effective}
+            showBrand={!theme.logoDataUrl}
             git={git}
             onQuickStart={() => {
               setSettingsStart(QUICK_START_PAGE)

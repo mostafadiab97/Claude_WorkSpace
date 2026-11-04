@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { GitResult, GitState, MergePlan } from '../../../../shared/api'
 import { T } from '../../../../shared/text'
 import { errorMessage } from '../../lib/hooks'
+import { beginActivity } from '../../lib/activity'
 import type { GitNotice } from '../GitPanels'
 
 export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange: () => Promise<void> }) {
@@ -39,6 +40,7 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
   const perform = async (label: string, op: () => Promise<GitResult>): Promise<boolean> => {
     setBusy(label)
     setNotice(null)
+    const endActivity = beginActivity() // the eyes look busy while Git works (R-08)
     try {
       const r = await op()
       setState(r.state)
@@ -54,6 +56,7 @@ export function useGit(opts: { dataVersion: number; dirty: boolean; afterChange:
       return false
     } finally {
       setBusy(null)
+      endActivity()
     }
   }
   /** Runs pull or push; true when it worked. */

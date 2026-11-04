@@ -3359,3 +3359,63 @@ code {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* reqochet brand (0.16, docs/reviews/2026-11-04-rename-reqochet.md): files used unchanged, never mirrored in Arabic */
+.brand-face,
+.brand-name,
+.brand-busy {
+  display: block;
+  flex: none;
+  block-size: auto;
+}
+
+.brand-face {
+  border-radius: 25%;
+}
+
+.brand .brand-name {
+  /* clear space around the name = the height of its "o" (brand rule) */
+  margin-inline: var(--rm-space-xs) var(--rm-space-sm);
+}
+
+.brand__edition {
+  font-family: var(--rm-font-family-mono);
+  font-size: var(--rm-font-size-small);
+  font-weight: var(--rm-font-weight-strong);
+  color: var(--rm-color-text-muted);
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius-small);
+  padding: 0 var(--rm-space-xs);
+}
+
+.brand-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--rm-space-md);
+}
+
+.brand-loading__label {
+  color: var(--rm-color-text-muted);
+}
+
+/* start screen: the face and the name above the first step (R-04, R-08) */
+.hero__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--rm-space-lg);
+  margin-block-end: var(--rm-space-lg);
+}
+
+.start-opening {
+  display: grid;
+  place-items: center;
+  padding-block: var(--rm-space-xl);
+}
+
+/* the Git buttons sit right after the branch (0.16): questions and notes open under them, not at the far end */
+.gitbar__float,
+.gitbar__ask {
+  inset-inline-end: auto;
+  inset-inline-start: 0;
+}

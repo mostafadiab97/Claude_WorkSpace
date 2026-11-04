@@ -3,6 +3,7 @@
 //   typography.fontFamily  -> --rm-font-family
 //   shape.buttonRadius     -> --rm-shape-button-radius
 //   modes.dark.primary     -> --rm-color-primary (when dark mode is active)
+import { useEffect, useState } from 'react'
 import type { ThemeConfig } from '../../../shared/api'
 import { tokensToCssVars } from './tokens'
 
@@ -39,4 +40,16 @@ export function saveMode(mode: ThemeMode): void {
   } catch {
     /* storage unavailable: the choice simply isn't remembered */
   }
+}
+
+/** Light or dark as shown now — follows Windows while the mode is System (to pick the brand files). */
+export function useEffectiveMode(mode: ThemeMode): 'light' | 'dark' {
+  const [system, setSystem] = useState(() => resolveMode('system'))
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const onChange = (): void => setSystem(mq.matches ? 'dark' : 'light')
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  return mode === 'system' ? system : mode
 }

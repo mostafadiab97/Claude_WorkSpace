@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-180.7 -1077.9 1739.3 1739.3" role="img" aria-label="reqochet assistant">
+<style>
+.look{animation:think 1.6s infinite linear}
+.pupil{transform-box:fill-box;transform-origin:50% 50%;animation:blink blinkslow 3.2s infinite}
+@keyframes idle{
+ 0%,38%{transform:translate(0,0)}
+ 42%,58%{transform:translate(-58px,6px)}
+ 62%,76%{transform:translate(0,0)}
+ 80%,90%{transform:translate(44px,-40px)}
+ 94%,100%{transform:translate(0,0)}
+}
+@keyframes think{
+ 0%{transform:translate(0,-54px)}
+ 25%{transform:translate(54px,0)}
+ 50%{transform:translate(0,54px)}
+ 75%{transform:translate(-54px,0)}
+ 100%{transform:translate(0,-54px)}
+}
+@keyframes blink{
+ 0%,66%,69.5%,92%,94.5%,96%,98.5%,100%{transform:scaleY(1)}
+ 67.6%,93.2%,97.2%{transform:scaleY(.08)}
+}
+@keyframes blinkslow{
+ 0%,46%,50%,100%{transform:scaleY(1)}
+ 48%{transform:scaleY(.08)}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style>
+<rect x="-180.7" y="-1077.9" width="1739.3" height="1739.3" rx="382.7" fill="#1b1f27"/><path d="M563 234Q540 234 525.5 219.5Q511 205 511 183V-87Q477 -45 427.0 -20.5Q377 4 318 4Q245 4 187.0 -32.5Q129 -69 95.5 -131.5Q62 -194 62 -273Q62 -352 98.5 -415.0Q135 -478 197.5 -514.5Q260 -551 338 -551Q416 -551 478.0 -514.5Q540 -478 576.5 -415.0Q613 -352 613 -273V183Q613 205 599.0 219.5Q585 234 563 234ZM338 -86Q389 -86 429.0 -110.5Q469 -135 492.0 -177.5Q515 -220 515 -273Q515 -327 492.0 -369.5Q469 -412 429.0 -436.5Q389 -461 338 -461Q288 -461 247.5 -436.5Q207 -412 183.5 -369.5Q160 -327 160 -273Q160 -220 183.5 -177.5Q207 -135 247.5 -110.5Q288 -86 338 -86ZM1041 4Q960 4 898.0 -31.5Q836 -67 800.5 -129.5Q765 -192 765 -273Q765 -355 800.5 -417.5Q836 -480 898.0 -515.5Q960 -551 1041 -551Q1121 -551 1183.0 -515.5Q1245 -480 1280.5 -417.5Q1316 -355 1316 -273Q1316 -192 1281.0 -129.5Q1246 -67 1184.0 -31.5Q1122 4 1041 4ZM1041 -86Q1093 -86 1133.0 -110.0Q1173 -134 1195.5 -176.0Q1218 -218 1218 -273Q1218 -328 1195.5 -370.5Q1173 -413 1133.0 -437.0Q1093 -461 1041 -461Q989 -461 949.0 -437.0Q909 -413 886.0 -370.5Q863 -328 863 -273Q863 -218 886.0 -176.0Q909 -134 949.0 -110.0Q989 -86 1041 -86Z" fill="#ffffff" stroke="#ffffff" stroke-width="44" stroke-linejoin="round"/>
+<g class="look"><circle class="pupil" cx="337.5" cy="-273.5" r="80.2" fill="#D7262B"/><circle class="pupil" cx="1040.5" cy="-273.5" r="80.2" fill="#1F9D48"/></g>
+</svg>

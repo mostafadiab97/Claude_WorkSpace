@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useSessionState } from '../lib/sessionState'
+import { withActivity } from '../lib/activity'
 import type { DataSelfTestResult } from '../../../shared/api'
 import { T } from '../../../shared/text'
 
@@ -21,7 +22,7 @@ export function SelfTestCard() {
   const run = async (): Promise<void> => {
     setState({ kind: 'running', size })
     try {
-      setState({ kind: 'done', r: await window.reqman.runDataSelfTest(size) })
+      setState({ kind: 'done', r: await withActivity(() => window.reqman.runDataSelfTest(size)) })
     } catch (e) {
       setState({ kind: 'failed', message: e instanceof Error ? e.message : String(e) })
     }

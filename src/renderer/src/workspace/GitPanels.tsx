@@ -128,22 +128,7 @@ export function GitBar(props: {
         >
           <span aria-hidden="true">⎇</span> {state.detached ? T.git.noBranch : (state.branch ?? '—')} <span aria-hidden="true">▾</span>
         </button>
-        {/* UX-13: the counts live on Pull and Push; only "not pushed yet" stays here */}
-        {state.hasRemote && !state.upstream && (
-          <span className="gitbar__sync" title={T.git.syncTooltip}>
-            {T.git.notPushed}
-          </span>
-        )}
-        {!state.hasRemote && <span className="muted-inline gitbar__noremote" title={T.git.noRemote}>{T.git.noRemoteShort}</span>}
-        {!state.hasRemote && publishing === null && (
-          <button type="button" className="link-btn" disabled={busy !== null} onClick={() => setPublishing('')} title={T.git.publishTooltip}>
-            {T.git.publish}
-          </button>
-        )}
-        {state.warning && <span className="statusbar__warn" title={state.warning}>{T.git.oldGit}</span>}
-        {state.mergeInProgress && <span className="statusbar__warn">{T.git.mergeOutside}</span>}
-        <span className="toolbar__spacer" />
-        {busy && <span className="muted-inline" role="status">{T.git.busy(busy)}</span>}
+        {/* Changes, Pull and Push right next to the branch (owner, 4 Nov 2026) */}
         <button type="button" className={props.changesOpen ? 'btn btn--active' : 'btn'} aria-pressed={props.changesOpen} onClick={props.onToggleChanges} title={T.git.changesTooltip}>
           {T.git.changes(n)}
         </button>
@@ -165,6 +150,22 @@ export function GitBar(props: {
         >
           {T.git.push(state.ahead)}
         </button>
+        {/* UX-13: the counts live on Pull and Push; only "not pushed yet" stays here */}
+        {state.hasRemote && !state.upstream && (
+          <span className="gitbar__sync" title={T.git.syncTooltip}>
+            {T.git.notPushed}
+          </span>
+        )}
+        {!state.hasRemote && <span className="muted-inline gitbar__noremote" title={T.git.noRemote}>{T.git.noRemoteShort}</span>}
+        {!state.hasRemote && publishing === null && (
+          <button type="button" className="link-btn" disabled={busy !== null} onClick={() => setPublishing('')} title={T.git.publishTooltip}>
+            {T.git.publish}
+          </button>
+        )}
+        {state.warning && <span className="statusbar__warn" title={state.warning}>{T.git.oldGit}</span>}
+        {state.mergeInProgress && <span className="statusbar__warn">{T.git.mergeOutside}</span>}
+        <span className="toolbar__spacer" />
+        {busy && <span className="muted-inline" role="status">{T.git.busy(busy)}</span>}
       </div>
       <div className="gitbar__ask" ref={ask}>
       {publishing !== null && !state.hasRemote && (

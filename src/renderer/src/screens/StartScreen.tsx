@@ -1,3 +1,5 @@
+import { BrandFace, BrandLoading, BrandName, type Mode } from '../components/Brand'
+import { beginActivity, useActivity, useWindowActive } from '../lib/activity'
 import { useEffect, useState } from 'react'
 import type { FolderCheck, GitInfo, RecentRepository, RepoInfo, ImportFile } from '../../../shared/api'
 import { errorMessage } from '../lib/hooks'
@@ -6,7 +8,23 @@ import { T } from '../../../shared/text'
 type Pending = { kind: 'idle' } | { kind: 'busy'; label: string } | { kind: 'confirm-init'; check: FolderCheck } | { kind: 'error'; message: string }
 
 /** Opening screen: open or create a requirements repository, or reopen a recent one. */
-export function StartScreen({ brand, git, onOpened, onQuickStart }: { brand: string; git: GitInfo | null; onOpened: (info: RepoInfo, importFile?: ImportFile) => void; onQuickStart: () => void }) {
+export function StartScreen({
+  brand,
+  git,
+  onOpened,
+  onQuickStart,
+  mode,
+  showBrand
+}: {
+  brand: string
+  git: GitInfo | null
+  onOpened: (info: RepoInfo, importFile?: ImportFile) => void
+  onQuickStart: () => void
+  /** Light or dark as shown now (picks the brand files). */
+  mode: Mode
+  /** False when a company theme brings its own logo. */
+  showBrand: boolean
+}) {
   const [recent, setRecent] = useState<RecentRepository[]>([])
   const [pending, setPending] = useState<Pending>({ kind: 'idle' })
 
@@ -59,10 +77,20 @@ export function StartScreen({ brand, git, onOpened, onQuickStart }: { brand: str
   }
 
   const busy = pending.kind === 'busy'
+  const working = useActivity()
+  const active = useWindowActive()
+  // opening or creating a repository counts as "the app is working": the eyes look busy (R-08)
+  useEffect(() => (busy ? beginActivity() : undefined), [busy])
   return (
     <div className="page">
       <div className="page__inner">
         <section className="hero">
+          {showBrand && (
+            <div className="hero__brand">
+              <BrandFace mode={mode} state={!active ? 'still' : working ? 'thinking' : 'idle'} size={88} />
+              <BrandName mode={mode} width={240} />
+            </div>
+          )}
           <h1>{T.start.headline}</h1>
           <p className="muted">{T.start.intro(brand)}</p>
           <span className="actions">
@@ -81,7 +109,14 @@ export function StartScreen({ brand, git, onOpened, onQuickStart }: { brand: str
           {git?.installed && <p className="hint start__git">{T.start.gitFound(git.version)}</p>}
         </section>
 
-        {pending.kind === 'busy' && <p className="notice">{pending.label}</p>}
+        {pending.kind === 'busy' &&
+          (showBrand ? (
+            <div className="start-opening">
+              <BrandLoading mode={mode} width={260} label={pending.label} />
+            </div>
+          ) : (
+            <p className="notice">{pending.label}</p>
+          ))}
         {pending.kind === 'error' && (
           <p className="notice notice--error" role="alert">
             {pending.message}

@@ -34,8 +34,12 @@ export function createFileThemeService(configDir: string, resourceDir: string, u
 
   const loadLogo = async (config: ThemeConfig, warnings: string[]): Promise<string> => {
     // basename() stops a theme file from pointing outside the allowed folders.
+    // no logo = the built-in reqochet brand (drawn by the window from resources/brand)
+    if (!config.brand.logo.trim()) return ''
     const logoFile = basename(config.brand.logo)
-    for (const dir of [userDir, resourceDir]) {
+    // "logo.svg" was ReqMan's own logo (themes copied before the rename name it): only a user's own file counts
+    const dirs = logoFile === 'logo.svg' ? [userDir] : [userDir, resourceDir]
+    for (const dir of dirs) {
       try {
         const bytes = await readFile(join(dir, logoFile))
         const mime = MIME[extname(logoFile).toLowerCase()] ?? 'application/octet-stream'
@@ -44,6 +48,7 @@ export function createFileThemeService(configDir: string, resourceDir: string, u
         /* try next folder */
       }
     }
+    if (logoFile === 'logo.svg') return ''
     warnings.push(`Logo "${logoFile}" not found in your ReqMan folder or the app; showing the name only.`)
     return ''
   }

@@ -18,6 +18,13 @@ const n = (count: number): string => count.toLocaleString('en')
 const s = (count: number, one = '', many = 's'): string => (count === 1 ? one : many)
 
 const en = {
+  /** The product name (the logo is a drawing; this is its text for screen readers and the title bar). */
+  brand: {
+    name: 'reqochet',
+    /** '' for the release tool; 'dev' for the development tool built from the development repository (R-10). */
+    edition: 'dev'
+  },
+
   common: {
     loading: 'Loading…',
     checking: 'Checking…',

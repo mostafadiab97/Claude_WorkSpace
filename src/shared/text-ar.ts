@@ -22,6 +22,13 @@ const lines = (c: number): string => pl(c, 'سطر واحد', 'سطران', 'أ�
 const choices = (c: number): string => pl(c, 'اختيار واحد', 'اختياران', 'اختيارات', 'اختيارًا')
 
 const raw: Texts = {
+  /** The product name (the logo is a drawing; this is its text for screen readers and the title bar). */
+  brand: {
+    name: 'reqochet',
+    /** '' for the release tool; 'dev' for the development tool built from the development repository (R-10). */
+    edition: 'dev'
+  },
+
   common: {
     loading: 'جارٍ التحميل…',
     checking: 'جارٍ الفحص…',

@@ -1,0 +1,56 @@
+{
+  "name": "reqochet",
+  "colors": {
+    "requirementRed": "#D7262B",
+    "verificationGreen": "#1F9D48",
+    "ink": "#1b1f27",
+    "white": "#ffffff",
+    "darkTile": "#1b1f27",
+    "lightTile": "#ffffff"
+  },
+  "logo": {
+    "minWidthPx": 100,
+    "clearSpace": "height of the letter o, on every side",
+    "aspectRatio": 4.3215,
+    "files": {
+      "onLight": "logo/reqochet-logo-on-light.svg",
+      "onDark": "logo/reqochet-logo-on-dark.svg"
+    }
+  },
+  "icon": {
+    "smallCutAtOrBelowPx": 24,
+    "tileCornerRadius": "22% of size (25% for the small cut)",
+    "files": {
+      "ico": "icon/reqochet.ico",
+      "icoLight": "icon/reqochet-light.ico",
+      "svg": "icon/reqochet-icon.svg",
+      "svgSmall": "icon/reqochet-icon-small.svg",
+      "svgLight": "icon/reqochet-icon-light.svg",
+      "svgLightSmall": "icon/reqochet-icon-light-small.svg",
+      "pngFolder": "icon/png"
+    }
+  },
+  "motion": {
+    "loading": {
+      "loopSeconds": 1.4,
+      "files": [
+        "motion/reqochet-loading-on-light.svg",
+        "motion/reqochet-loading-on-dark.svg",
+        "motion/reqochet-loading-icon.svg"
+      ]
+    },
+    "assistantEyes": {
+      "states": {
+        "idle": {
+          "loopSeconds": 6
+        },
+        "thinking": {
+          "loopSeconds": 1.6
+        },
+        "still": {}
+      },
+      "component": "motion/reqochet-assistant-icon.html"
+    },
+    "respectsReducedMotion": true
+  }
+}

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useSessionState } from '../lib/sessionState'
+import { withActivity } from '../lib/activity'
 import type { ReleaseSelfTestResult } from '../../../shared/api'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
@@ -28,7 +29,7 @@ export function ReleaseSelfTestCard() {
     setState({ kind: 'running' })
     setCopied(false)
     try {
-      setState({ kind: 'done', r: await window.reqman.runReleaseSelfTest() })
+      setState({ kind: 'done', r: await withActivity(() => window.reqman.runReleaseSelfTest()) })
     } catch (e) {
       setState({ kind: 'failed', message: errorMessage(e) })
     }

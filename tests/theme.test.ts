@@ -15,10 +15,29 @@ describe('theme module', () => {
     expect(shipped).toEqual(DEFAULT_THEME)
   })
 
-  it('loads the shipped theme and logo without warnings when the user has no theme', async () => {
+  it('loads the shipped theme without warnings; no custom logo = the built-in reqochet brand (0.16)', async () => {
     const t = await createFileThemeService(shippedConfig, shippedResources, await tempDir()).load()
     expect(t.source).toBe('file')
     expect(t.warnings).toEqual([])
+    expect(t.logoDataUrl).toBe('')
+    expect(t.config.brand.name).toBe('reqochet')
+  })
+
+  it('a theme copied before the rename (ReqMan, logo.svg) shows the new brand, not the old one', async () => {
+    const user = await tempDir()
+    await writeFile(join(user, 'theme.json'), JSON.stringify({ brand: { name: 'ReqMan', logo: 'logo.svg' } }))
+    const t = await createFileThemeService(shippedConfig, shippedResources, user).load()
+    expect(t.config.brand.name).toBe('reqochet')
+    expect(t.logoDataUrl).toBe('')
+    expect(t.warnings).toEqual([])
+  })
+
+  it('a company logo of its own still replaces the brand', async () => {
+    const user = await tempDir()
+    await writeFile(join(user, 'company.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>')
+    await writeFile(join(user, 'theme.json'), JSON.stringify({ brand: { name: 'ACME Reqs', logo: 'company.svg' } }))
+    const t = await createFileThemeService(shippedConfig, shippedResources, user).load()
+    expect(t.config.brand.name).toBe('ACME Reqs')
     expect(t.logoDataUrl.startsWith('data:image/svg+xml;base64,')).toBe(true)
   })
 

@@ -56,7 +56,7 @@ await scenario('E2E health', async (ctx) => {
   check(true, 'turned on again, Export is back')
 
   console.log('The team turns Branches off in schema.yaml')
-  appendFileSync(join(repo, 'requirements', '.reqman', 'schema.yaml'), '\nfeatures:\n  branches: false\n')
+  appendFileSync(join(repo, 'requirements', '.reqochet', 'schema.yaml'), '\nfeatures:\n  branches: false\n')
   await win.getByRole('button', { name: 'Close repository' }).click()
   await win.getByRole('button', { name: 'Open repository…' }).click()
   await win.locator('.table__empty').waitFor()
@@ -108,7 +108,7 @@ await scenario('E2E health', async (ctx) => {
   await report.getByText(/Report saved/).waitFor()
   const text = existsSync(file) ? readFileSync(file, 'utf8') : ''
   check(text.includes('The branch button does nothing.'), 'the report holds the description')
-  check(/ReqMan \d+\.\d+\.\d+/.test(text) && text.includes('Git:'), '…the diagnostics')
+  check(/reqochet \d+\.\d+\.\d+/.test(text) && text.includes('Git:'), '…the diagnostics')
   check(text.includes('== Log (last'), '…and the end of the log')
   check((await report.getByLabel('What happened?').inputValue()) === '', 'the text box is empty again after saving (the owner on 0.14.0 step 3)')
   await t.shot('health-2-report')

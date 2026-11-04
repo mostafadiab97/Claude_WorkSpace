@@ -31,15 +31,17 @@ const SYNONYMS: [ImportTarget, string[]][] = [
  * columns ("Verified by" = links of type verifies stored in the other item). Each target is used once.
  */
 export function guessMapping(headers: string[], schema: Schema): ImportTarget[] {
-  // ReqMan's own ReqIF export: its "ReqMan.Type" is the item type (the ReqIF object type is just "Requirement")
-  if (headers.some((h) => norm(h) === 'reqman.type')) {
-    // … and its "ReqMan.Markdown" is the exact text (ReqIF.Text is the same text as XHTML, for other tools)
-    const markdown = headers.some((h) => norm(h) === 'reqman.markdown')
+  // Our own ReqIF export: its "reqochet.Type" (before 0.16 "ReqMan.Type" — still read) is the item type (the ReqIF
+  // object type is just "Requirement")
+  const own = (n: string, part: string): boolean => n === `reqochet.${part}` || n === `reqman.${part}`
+  if (headers.some((h) => own(norm(h), 'type'))) {
+    // … and its "reqochet.Markdown" is the exact text (ReqIF.Text is the same text as XHTML, for other tools)
+    const markdown = headers.some((h) => own(norm(h), 'markdown'))
     const rename = (h: string): string => {
       const n = norm(h)
-      if (n === 'type' || n === 'reqman.number' || (markdown && n === 'reqif.text')) return ''
-      if (n === 'reqman.type') return 'Type'
-      if (n === 'reqman.markdown') return 'Text'
+      if (n === 'type' || own(n, 'number') || (markdown && n === 'reqif.text')) return ''
+      if (own(n, 'type')) return 'Type'
+      if (own(n, 'markdown')) return 'Text'
       return h
     }
     return guessMapping(headers.map(rename), schema)

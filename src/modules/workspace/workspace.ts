@@ -94,8 +94,31 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     schemaRevision: s.repo.schemaRevision,
     itemCount: s.index.count(),
     issues: s.index.repositoryIssues(),
-    lastSync: s.lastSync
+    lastSync: s.lastSync,
+    ...(s.repo.metaDir === '.reqman' ? { legacyFolder: true } : {})
   })
+
+  /**
+   * "Update this project to reqochet" (0.16): renames requirements/.reqman to .reqochet and commits only that rename,
+   * which the user then pushes; Git shows it as a rename. Until then the project keeps working under the old name.
+   */
+  const renameProjectFolder = async (): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }> => {
+    const s = need()
+    try {
+      const moved = await store.renameLegacyFolder(s.repo.root)
+      if (!moved) return { ok: true, info: info() }
+      if (s.isGit) await git.commitFiles(s.repo.root, [moved.from, moved.to], T.wsMsg.folderRenamedCommit)
+      log.info(`Project folder renamed: ${moved.from} → ${moved.to}${s.isGit ? ' (committed)' : ''}`)
+      s.watch?.close()
+      s.repo = await ctx.openRepo(s.repo.root)
+      s.watch = deps.watchFiles === false ? null : watchRequirementsFolder(s.repo.folder, (e) => log.warn(`Folder watch: ${String(e)}`), s.repo.metaDir)
+      s.lastSync = syncInfo(await s.index.sync(s.repo))
+      gitOps.invalidate()
+      return { ok: true, info: info() }
+    } catch (e) {
+      return { ok: false, message: e instanceof Error ? e.message : String(e) }
+    }
+  }
 
   const links = createLinkOps(ctx)
   const structure = createStructureOps(ctx)
@@ -153,7 +176,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     const repo = await ctx.openRepo(repoRoot)
     const index = deps.openIndex(repo.root)
     // Watch before the first sync, so nothing that changes during it is missed.
-    const watch = deps.watchFiles === false ? null : watchRequirementsFolder(repo.folder, (e) => log.warn(`Folder watch: ${String(e)}`))
+    const watch = deps.watchFiles === false ? null : watchRequirementsFolder(repo.folder, (e) => log.warn(`Folder watch: ${String(e)}`), repo.metaDir)
     const stats = await index.sync(repo)
     watch?.take()
     session = { repo, index, isGit, watch, lastSync: syncInfo(stats) }
@@ -249,6 +272,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     moveItem: q(structure.moveItem),
     checkFields: fields.checkFields,
     saveSchemaFields: q(fields.saveSchemaFields),
+    renameProjectFolder: q(renameProjectFolder),
     addLink: q(links.addLink),
     removeLink: q(links.removeLink),
     confirmLinks: q(links.confirmLinks),

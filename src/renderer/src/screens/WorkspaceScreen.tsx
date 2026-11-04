@@ -46,6 +46,22 @@ export function WorkspaceScreen({
   const [columnPrefs, setColumnPrefs] = useColumnPrefs(info.root)
   const [editFields, setEditFields] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
+  const [folderLater, setFolderLater] = useState(false)
+  const [renamingFolder, setRenamingFolder] = useState(false)
+  const renameFolder = async (): Promise<void> => {
+    setRenamingFolder(true)
+    try {
+      const r = await window.reqman.renameProjectFolder()
+      if (r.ok) {
+        onInfo(r.info)
+        setDataVersion((v) => v + 1) // the Git bar now shows one commit to push
+      } else setNotice(r.message)
+    } catch (e) {
+      setNotice(errorMessage(e))
+    } finally {
+      setRenamingFolder(false)
+    }
+  }
   const [expanding, setExpanding] = useState(false)
   const tree = useRef<TreeControls | null>(null)
   const [revealNonce, setRevealNonce] = useState(0)
@@ -300,6 +316,20 @@ export function WorkspaceScreen({
             onNewItem={(type) => void newItem(type)}
           />
 
+          {/* 0.16: a project still under ReqMan's folder name — offer the rename as one commit (owner, 31 Oct / 4 Nov) */}
+          {info.legacyFolder && !folderLater && (
+            <div className="notice table-notice folder-notice" role="status">
+              <span>{T.workspace.legacyFolder}</span>
+              <span className="actions">
+                <button type="button" className="btn btn--small btn--primary" disabled={renamingFolder} onClick={() => void renameFolder()}>
+                  {T.workspace.legacyFolderUpdate}
+                </button>
+                <button type="button" className="btn btn--small" onClick={() => setFolderLater(true)}>
+                  {T.workspace.legacyFolderLater}
+                </button>
+              </span>
+            </div>
+          )}
           {filtered && <div className="table-mode">{T.workspace.searchMode}</div>}
           <ItemTable
             schema={schema}

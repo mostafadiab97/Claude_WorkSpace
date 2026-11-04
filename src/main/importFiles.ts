@@ -70,11 +70,11 @@ export function createImportFiles() {
   }
 }
 
-/** A backup name next to the file: "Requirements (before ReqMan update 2026-10-29 0835).xlsx". */
+/** A backup name next to the file: "Requirements (before reqochet update 2026-10-29 0835).xlsx". */
 export function backupName(path: string, now = new Date()): string {
   const ext = extname(path)
   const stamp = `${now.toISOString().slice(0, 10)} ${now.toTimeString().slice(0, 5).replace(':', '')}`
-  return `${path.slice(0, path.length - ext.length)} (before ReqMan update ${stamp})${ext}`
+  return `${path.slice(0, path.length - ext.length)} (before reqochet update ${stamp})${ext}`
 }
 
 /**

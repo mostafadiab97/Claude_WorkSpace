@@ -73,6 +73,8 @@ export interface WorkspaceService {
   /** Values a field already has, most used first (suggestions while typing). */
   fieldValues(field: string): string[]
   saveSchemaFields(fields: FieldDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** Renames requirements/.reqman to .reqochet and commits the rename (0.16). */
+  renameProjectFolder(): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   // Git (M4) — see gitOps.ts for the rules
   gitState(): Promise<GitState>
   commit(message: string): Promise<GitResult>

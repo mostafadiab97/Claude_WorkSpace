@@ -97,7 +97,7 @@ await scenario('E2E excel', async (ctx) => {
   await win.locator('.table-notice--ok', { hasText: 'customer-requirements.xlsx' }).waitFor()
   const updated = await readSheet(source)
   check(updated.find((r) => r[2] === 'Remote control')?.[4] === 'Obsolete', 'the changed cell is written into the original file')
-  check(readdirSync(work).some((f) => f.startsWith('customer-requirements (before ReqMan update')), 'a backup of the file as it was is kept next to it')
+  check(readdirSync(work).some((f) => f.startsWith('customer-requirements (before reqochet update')), 'a backup of the file as it was is kept next to it')
 
   console.log('Import the same file again: nothing to do')
   await t.openFiles(source)

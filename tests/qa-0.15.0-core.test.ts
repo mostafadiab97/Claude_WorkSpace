@@ -121,7 +121,7 @@ describe('QA schema labels in odd YAML', () => {
 })
 
 describe('QA writeSchemaFields keeps translations and the rest of the file', () => {
-  const schemaFile = (root: string): string => join(root, 'requirements', '.reqman', 'schema.yaml')
+  const schemaFile = (root: string): string => join(root, 'requirements', '.reqochet', 'schema.yaml')
   async function repoWith(yaml: string) {
     const root = await mkdtemp(join(tmpdir(), 'qa-schema-'))
     await store.initialize(root)

@@ -13,7 +13,7 @@ export function validateItem(item: Item, schema: Schema): ItemIssue[] {
   const add = (path: string, message: string, severity: ItemIssue['severity'] = 'error'): void =>
     void issues.push({ itemId: item.id, path, message, severity })
 
-  if (!isValidId(item.id)) add('id', `"${item.id}" is not in the ReqMan ID format (e.g. REQ-K7Q3XMB).`, 'warning')
+  if (!isValidId(item.id)) add('id', `"${item.id}" is not in the reqochet ID format (e.g. REQ-K7Q3XMB).`, 'warning')
 
   // the type is free to change: IDs no longer depend on it (0.9.0)
   if (!schema.itemTypes.some((t) => t.id === item.type)) add('type', `Unknown item type "${item.type}".`)

@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, stat, writeFile, rename } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import { generateId, ITEM_FILE_EXTENSION, parseItemFile, serializeItem, type FieldValue, type Item } from '../items'
 import { parseDocument } from 'yaml'
@@ -18,9 +18,12 @@ import {
 } from './index'
 
 const ITEMS_DIR = 'items'
-const META_DIR = '.reqman'
+/** The project folder inside requirements/ (0.16: renamed with the product; owner, 31 Oct / 4 Nov 2026). */
+const META_DIR = '.reqochet'
+/** ReqMan's name for it: still read, until the user takes the rename (one commit). */
+const LEGACY_META_DIR = '.reqman'
 const SCHEMA_FILE = 'schema.yaml'
-const GITATTRIBUTES = '# Written by ReqMan: identical line endings on every PC keep diffs clean.\n* text=auto eol=lf\n'
+const GITATTRIBUTES = '# Written by reqochet: identical line endings on every PC keep diffs clean.\n* text=auto eol=lf\n'
 const READ_CONCURRENCY = 64
 /** Every header key that holds a simple value counts as a field (used by the index; see readItemFile). */
 const ALL_KEYS: ReadonlySet<string> = { has: () => true } as unknown as ReadonlySet<string>
@@ -52,12 +55,13 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
 
   async function open(root: string, options: OpenOptions = {}): Promise<RequirementsRepo> {
     const folder = folderOf(root)
-    const schemaFile = join(folder, META_DIR, SCHEMA_FILE)
+    const metaDir = (await exists(join(folder, META_DIR, SCHEMA_FILE))) ? META_DIR : LEGACY_META_DIR
+    const schemaFile = join(folder, metaDir, SCHEMA_FILE)
     let schemaText: string
     try {
       schemaText = await readFile(schemaFile, 'utf8')
     } catch {
-      throw new Error(`No ReqMan requirements folder in ${root} (missing ${REQUIREMENTS_FOLDER}/${META_DIR}/${SCHEMA_FILE}).`)
+      throw new Error(`No requirements folder in ${root} (missing ${REQUIREMENTS_FOLDER}/${META_DIR}/${SCHEMA_FILE}).`)
     }
     const { schema, problems: schemaProblems } = parseSchema(schemaText)
     const fieldIds = new Set(schema.fields.map((f) => f.id))
@@ -71,6 +75,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
     const repo: RequirementsRepo = {
       root,
       folder,
+      metaDir,
       schema,
       schemaProblems,
       schemaRevision: revisionOf(schemaText),
@@ -78,7 +83,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
       async writeSchemaFields(fields, expectedRevision) {
         const current = await readFile(schemaFile, 'utf8')
         if (revisionOf(current) !== expectedRevision) {
-          throw new ConflictError('schema.yaml was changed outside ReqMan since the repository was opened. Refresh and try again.')
+          throw new ConflictError('schema.yaml was changed outside reqochet since the repository was opened. Refresh and try again.')
         }
         // Edit only the "fields" list in the YAML document, so comments and the other sections stay as written.
         const doc = parseDocument(current)
@@ -195,8 +200,8 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
               options.expectedRevision === null
                 ? `${item.id} already exists.`
                 : current
-                  ? `${item.id} was changed outside ReqMan since you opened it.`
-                  : `${item.id} was deleted outside ReqMan since you opened it.`
+                  ? `${item.id} was changed outside reqochet since you opened it.`
+                  : `${item.id} was deleted outside reqochet since you opened it.`
             )
           }
         }
@@ -212,7 +217,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
         if (options.expectedRevision !== undefined) {
           const current = await repo.readItem(id)
           if ((current?.revision ?? null) !== options.expectedRevision) {
-            throw new ConflictError(`${id} was changed outside ReqMan since you opened it.`)
+            throw new ConflictError(`${id} was changed outside reqochet since you opened it.`)
           }
         }
         await removeFile(fileFor(id))
@@ -224,12 +229,14 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
   return {
     async inspect(root): Promise<FolderState> {
       if (!(await exists(root))) return 'missing'
-      return (await exists(join(folderOf(root), META_DIR, SCHEMA_FILE))) ? 'ready' : 'not-initialized'
+      const folder = folderOf(root)
+      return (await exists(join(folder, META_DIR, SCHEMA_FILE))) || (await exists(join(folder, LEGACY_META_DIR, SCHEMA_FILE))) ? 'ready' : 'not-initialized'
     },
 
     async initialize(root) {
       const folder = folderOf(root)
-      if (await exists(join(folder, META_DIR, SCHEMA_FILE))) throw new Error('This repository already has a requirements folder.')
+      if ((await exists(join(folder, META_DIR, SCHEMA_FILE))) || (await exists(join(folder, LEGACY_META_DIR, SCHEMA_FILE))))
+        throw new Error('This repository already has a requirements folder.')
       await mkdir(join(folder, META_DIR), { recursive: true })
       await mkdir(join(folder, ITEMS_DIR), { recursive: true })
       await writeFile(join(folder, META_DIR, SCHEMA_FILE), await readFile(defaultSchemaFile, 'utf8'), { flag: 'wx' })
@@ -237,6 +244,14 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
       // Git does not track empty folders; this keeps items/ in a fresh repository.
       await writeFile(join(folder, ITEMS_DIR, '.gitkeep'), '', { flag: 'w' })
       return open(root)
+    },
+
+    async renameLegacyFolder(root) {
+      const folder = folderOf(root)
+      if (!(await exists(join(folder, LEGACY_META_DIR)))) return null
+      if (await exists(join(folder, META_DIR))) throw new Error(`Both ${LEGACY_META_DIR} and ${META_DIR} exist in ${REQUIREMENTS_FOLDER}; keep one.`)
+      await rename(join(folder, LEGACY_META_DIR), join(folder, META_DIR))
+      return { from: `${REQUIREMENTS_FOLDER}/${LEGACY_META_DIR}`, to: `${REQUIREMENTS_FOLDER}/${META_DIR}` }
     },
 
     open: (root, options) => open(root, options)

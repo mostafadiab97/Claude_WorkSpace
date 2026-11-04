@@ -3,7 +3,7 @@
 // (P-04); a second start brings the open window forward instead of starting a second ReqMan (D-02); and the
 // release self-test runs from Settings & diagnostics.
 import { spawn } from 'node:child_process'
-import { copyFileSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { gitIn, gitRepo, launch, root, scenario } from '../harness.mjs'
 
@@ -38,6 +38,16 @@ await scenario('E2E fixes', async (ctx) => {
   const { win, check } = t
   await win.getByRole('button', { name: 'Open repository…' }).click()
   await win.locator('.table__row').first().waitFor()
+
+  console.log('0.16 rename — a project made with ReqMan (requirements/.reqman)')
+  const folderNote = win.locator('.folder-notice')
+  await folderNote.waitFor()
+  check(true, 'the window offers to update the project folder to reqochet')
+  await folderNote.getByRole('button', { name: 'Update this project' }).click()
+  await folderNote.waitFor({ state: 'detached' })
+  check(existsSync(join(repo, 'requirements', '.reqochet', 'schema.yaml')) && !existsSync(join(repo, 'requirements', '.reqman')), 'the folder is now requirements/.reqochet')
+  check(gitIn(repo, 'log', '-1', '--format=%s').trim() === 'Rename the project folder .reqman to .reqochet (reqochet)', '…as one commit, ready to push')
+  check(gitIn(repo, 'status', '--porcelain', '--', 'requirements/items').includes('RENAMED-BY-HAND'), '…and nothing else was committed')
 
   console.log('D-01 — item in a renamed file')
   await win.getByRole('button', { name: /1 problem/ }).click()

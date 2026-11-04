@@ -242,65 +242,65 @@ export function writeReqif(schema: Schema, items: ReqifItem[], title: string, no
   const idOf = new Map(items.map((x) => [x.item.id, xmlId(x.sourceId ?? x.item.id)]))
   const fieldDefs = schema.fields
   const enumFields = fieldDefs.filter((f) => (f.type === 'enum' || f.type === 'list') && f.options && f.options.length > 0)
-  const enumId = (f: FieldDef, i: number): string => xmlId(`reqman-enum-${f.id}-${i}`)
+  const enumId = (f: FieldDef, i: number): string => xmlId(`reqochet-enum-${f.id}-${i}`)
   const out: string[] = []
   const w = (s: string): void => {
     out.push(s)
   }
   w('<?xml version="1.0" encoding="UTF-8"?>')
   w('<REQ-IF xmlns="http://www.omg.org/spec/ReqIF/20110401/reqif.xsd" xmlns:xhtml="http://www.w3.org/1999/xhtml">')
-  w(`<THE-HEADER><REQ-IF-HEADER IDENTIFIER="reqman-header"><CREATION-TIME>${time}</CREATION-TIME><REQ-IF-TOOL-ID>ReqMan</REQ-IF-TOOL-ID><REQ-IF-VERSION>1.0</REQ-IF-VERSION><SOURCE-TOOL-ID>ReqMan</SOURCE-TOOL-ID><TITLE>${esc(title)}</TITLE></REQ-IF-HEADER></THE-HEADER>`)
+  w(`<THE-HEADER><REQ-IF-HEADER IDENTIFIER="reqochet-header"><CREATION-TIME>${time}</CREATION-TIME><REQ-IF-TOOL-ID>reqochet</REQ-IF-TOOL-ID><REQ-IF-VERSION>1.0</REQ-IF-VERSION><SOURCE-TOOL-ID>reqochet</SOURCE-TOOL-ID><TITLE>${esc(title)}</TITLE></REQ-IF-HEADER></THE-HEADER>`)
   w('<CORE-CONTENT><REQ-IF-CONTENT>')
   // data types
   w('<DATATYPES>')
-  w(`<DATATYPE-DEFINITION-STRING IDENTIFIER="reqman-dt-string" LONG-NAME="String" LAST-CHANGE="${time}" MAX-LENGTH="1000000"/>`)
-  w(`<DATATYPE-DEFINITION-XHTML IDENTIFIER="reqman-dt-xhtml" LONG-NAME="Formatted text" LAST-CHANGE="${time}"/>`)
+  w(`<DATATYPE-DEFINITION-STRING IDENTIFIER="reqochet-dt-string" LONG-NAME="String" LAST-CHANGE="${time}" MAX-LENGTH="1000000"/>`)
+  w(`<DATATYPE-DEFINITION-XHTML IDENTIFIER="reqochet-dt-xhtml" LONG-NAME="Formatted text" LAST-CHANGE="${time}"/>`)
   for (const f of enumFields) {
-    w(`<DATATYPE-DEFINITION-ENUMERATION IDENTIFIER="${xmlId(`reqman-dt-${f.id}`)}" LONG-NAME="${esc(f.name)}" LAST-CHANGE="${time}"><SPECIFIED-VALUES>`)
+    w(`<DATATYPE-DEFINITION-ENUMERATION IDENTIFIER="${xmlId(`reqochet-dt-${f.id}`)}" LONG-NAME="${esc(f.name)}" LAST-CHANGE="${time}"><SPECIFIED-VALUES>`)
     ;(f.options ?? []).forEach((o, i) => w(`<ENUM-VALUE IDENTIFIER="${enumId(f, i)}" LONG-NAME="${esc(o)}" LAST-CHANGE="${time}"><PROPERTIES><EMBEDDED-VALUE KEY="${i}" OTHER-CONTENT=""/></PROPERTIES></ENUM-VALUE>`))
     w('</SPECIFIED-VALUES></DATATYPE-DEFINITION-ENUMERATION>')
   }
   w('</DATATYPES>')
   // types: one object type with all attributes (item types as an enumeration-like "Type" string)
   const attrs: { id: string; name: string; kind: 'string' | 'xhtml' | 'enum'; field?: FieldDef }[] = [
-    { id: 'reqman-ad-foreignid', name: 'ReqIF.ForeignID', kind: 'string' },
-    { id: 'reqman-ad-name', name: 'ReqIF.Name', kind: 'string' },
-    { id: 'reqman-ad-text', name: 'ReqIF.Text', kind: 'xhtml' },
-    { id: 'reqman-ad-type', name: 'ReqMan.Type', kind: 'string' },
-    { id: 'reqman-ad-number', name: 'ReqMan.Number', kind: 'string' },
+    { id: 'reqochet-ad-foreignid', name: 'ReqIF.ForeignID', kind: 'string' },
+    { id: 'reqochet-ad-name', name: 'ReqIF.Name', kind: 'string' },
+    { id: 'reqochet-ad-text', name: 'ReqIF.Text', kind: 'xhtml' },
+    { id: 'reqochet-ad-type', name: 'reqochet.Type', kind: 'string' },
+    { id: 'reqochet-ad-number', name: 'reqochet.Number', kind: 'string' },
     // the text exactly as ReqMan stores it (Markdown), so a ReqIF round trip through ReqMan loses nothing
-    { id: 'reqman-ad-markdown', name: 'ReqMan.Markdown', kind: 'string' },
-    ...fieldDefs.map((f) => ({ id: xmlId(`reqman-ad-${f.id}`), name: f.name, kind: enumFields.includes(f) ? ('enum' as const) : ('string' as const), field: f }))
+    { id: 'reqochet-ad-markdown', name: 'reqochet.Markdown', kind: 'string' },
+    ...fieldDefs.map((f) => ({ id: xmlId(`reqochet-ad-${f.id}`), name: f.name, kind: enumFields.includes(f) ? ('enum' as const) : ('string' as const), field: f }))
   ]
   w('<SPEC-TYPES>')
-  w(`<SPEC-OBJECT-TYPE IDENTIFIER="reqman-type-item" LONG-NAME="Requirement" LAST-CHANGE="${time}"><SPEC-ATTRIBUTES>`)
+  w(`<SPEC-OBJECT-TYPE IDENTIFIER="reqochet-type-item" LONG-NAME="Requirement" LAST-CHANGE="${time}"><SPEC-ATTRIBUTES>`)
   for (const a of attrs) {
-    if (a.kind === 'xhtml') w(`<ATTRIBUTE-DEFINITION-XHTML IDENTIFIER="${a.id}" LONG-NAME="${esc(a.name)}" LAST-CHANGE="${time}"><TYPE><DATATYPE-DEFINITION-XHTML-REF>reqman-dt-xhtml</DATATYPE-DEFINITION-XHTML-REF></TYPE></ATTRIBUTE-DEFINITION-XHTML>`)
+    if (a.kind === 'xhtml') w(`<ATTRIBUTE-DEFINITION-XHTML IDENTIFIER="${a.id}" LONG-NAME="${esc(a.name)}" LAST-CHANGE="${time}"><TYPE><DATATYPE-DEFINITION-XHTML-REF>reqochet-dt-xhtml</DATATYPE-DEFINITION-XHTML-REF></TYPE></ATTRIBUTE-DEFINITION-XHTML>`)
     else if (a.kind === 'enum' && a.field)
       w(
-        `<ATTRIBUTE-DEFINITION-ENUMERATION IDENTIFIER="${a.id}" LONG-NAME="${esc(a.name)}" LAST-CHANGE="${time}" MULTI-VALUED="${a.field.type === 'list'}"><TYPE><DATATYPE-DEFINITION-ENUMERATION-REF>${xmlId(`reqman-dt-${a.field.id}`)}</DATATYPE-DEFINITION-ENUMERATION-REF></TYPE></ATTRIBUTE-DEFINITION-ENUMERATION>`
+        `<ATTRIBUTE-DEFINITION-ENUMERATION IDENTIFIER="${a.id}" LONG-NAME="${esc(a.name)}" LAST-CHANGE="${time}" MULTI-VALUED="${a.field.type === 'list'}"><TYPE><DATATYPE-DEFINITION-ENUMERATION-REF>${xmlId(`reqochet-dt-${a.field.id}`)}</DATATYPE-DEFINITION-ENUMERATION-REF></TYPE></ATTRIBUTE-DEFINITION-ENUMERATION>`
       )
-    else w(`<ATTRIBUTE-DEFINITION-STRING IDENTIFIER="${a.id}" LONG-NAME="${esc(a.name)}" LAST-CHANGE="${time}"><TYPE><DATATYPE-DEFINITION-STRING-REF>reqman-dt-string</DATATYPE-DEFINITION-STRING-REF></TYPE></ATTRIBUTE-DEFINITION-STRING>`)
+    else w(`<ATTRIBUTE-DEFINITION-STRING IDENTIFIER="${a.id}" LONG-NAME="${esc(a.name)}" LAST-CHANGE="${time}"><TYPE><DATATYPE-DEFINITION-STRING-REF>reqochet-dt-string</DATATYPE-DEFINITION-STRING-REF></TYPE></ATTRIBUTE-DEFINITION-STRING>`)
   }
   w('</SPEC-ATTRIBUTES></SPEC-OBJECT-TYPE>')
-  for (const l of schema.linkTypes) w(`<SPEC-RELATION-TYPE IDENTIFIER="${xmlId(`reqman-rel-${l.id}`)}" LONG-NAME="${esc(l.name)}" LAST-CHANGE="${time}"/>`)
-  w(`<SPECIFICATION-TYPE IDENTIFIER="reqman-type-spec" LONG-NAME="Specification" LAST-CHANGE="${time}"/>`)
+  for (const l of schema.linkTypes) w(`<SPEC-RELATION-TYPE IDENTIFIER="${xmlId(`reqochet-rel-${l.id}`)}" LONG-NAME="${esc(l.name)}" LAST-CHANGE="${time}"/>`)
+  w(`<SPECIFICATION-TYPE IDENTIFIER="reqochet-type-spec" LONG-NAME="Specification" LAST-CHANGE="${time}"/>`)
   w('</SPEC-TYPES>')
   // objects
   w('<SPEC-OBJECTS>')
   for (const x of items) {
     const it = x.item
     const typeName = schema.itemTypes.find((t) => t.id === it.type)?.name ?? it.type
-    w(`<SPEC-OBJECT IDENTIFIER="${idOf.get(it.id) as string}" LONG-NAME="${esc(it.title)}" LAST-CHANGE="${time}"><TYPE><SPEC-OBJECT-TYPE-REF>reqman-type-item</SPEC-OBJECT-TYPE-REF></TYPE><VALUES>`)
+    w(`<SPEC-OBJECT IDENTIFIER="${idOf.get(it.id) as string}" LONG-NAME="${esc(it.title)}" LAST-CHANGE="${time}"><TYPE><SPEC-OBJECT-TYPE-REF>reqochet-type-item</SPEC-OBJECT-TYPE-REF></TYPE><VALUES>`)
     const str = (def: string, v: string): void => {
       if (v !== '') w(`<ATTRIBUTE-VALUE-STRING THE-VALUE="${escAttr(v)}"><DEFINITION><ATTRIBUTE-DEFINITION-STRING-REF>${def}</ATTRIBUTE-DEFINITION-STRING-REF></DEFINITION></ATTRIBUTE-VALUE-STRING>`)
     }
-    str('reqman-ad-foreignid', it.id)
-    str('reqman-ad-name', it.title)
-    w(`<ATTRIBUTE-VALUE-XHTML><DEFINITION><ATTRIBUTE-DEFINITION-XHTML-REF>reqman-ad-text</ATTRIBUTE-DEFINITION-XHTML-REF></DEFINITION><THE-VALUE>${markdownToXhtml(it.text)}</THE-VALUE></ATTRIBUTE-VALUE-XHTML>`)
-    str('reqman-ad-type', typeName)
-    str('reqman-ad-number', it.number ?? '')
-    str('reqman-ad-markdown', it.text)
+    str('reqochet-ad-foreignid', it.id)
+    str('reqochet-ad-name', it.title)
+    w(`<ATTRIBUTE-VALUE-XHTML><DEFINITION><ATTRIBUTE-DEFINITION-XHTML-REF>reqochet-ad-text</ATTRIBUTE-DEFINITION-XHTML-REF></DEFINITION><THE-VALUE>${markdownToXhtml(it.text)}</THE-VALUE></ATTRIBUTE-VALUE-XHTML>`)
+    str('reqochet-ad-type', typeName)
+    str('reqochet-ad-number', it.number ?? '')
+    str('reqochet-ad-markdown', it.text)
     for (const a of attrs.filter((y) => y.field)) {
       const f = a.field as FieldDef
       const v = it.fields[f.id]
@@ -321,12 +321,12 @@ export function writeReqif(schema: Schema, items: ReqifItem[], title: string, no
       const target = idOf.get(l.target)
       if (!target || !schema.linkTypes.some((t) => t.id === l.type)) continue
       w(
-        `<SPEC-RELATION IDENTIFIER="reqman-rel-${++n}" LAST-CHANGE="${time}"><TYPE><SPEC-RELATION-TYPE-REF>${xmlId(`reqman-rel-${l.type}`)}</SPEC-RELATION-TYPE-REF></TYPE><SOURCE><SPEC-OBJECT-REF>${idOf.get(x.item.id) as string}</SPEC-OBJECT-REF></SOURCE><TARGET><SPEC-OBJECT-REF>${target}</SPEC-OBJECT-REF></TARGET></SPEC-RELATION>`
+        `<SPEC-RELATION IDENTIFIER="reqochet-rel-${++n}" LAST-CHANGE="${time}"><TYPE><SPEC-RELATION-TYPE-REF>${xmlId(`reqochet-rel-${l.type}`)}</SPEC-RELATION-TYPE-REF></TYPE><SOURCE><SPEC-OBJECT-REF>${idOf.get(x.item.id) as string}</SPEC-OBJECT-REF></SOURCE><TARGET><SPEC-OBJECT-REF>${target}</SPEC-OBJECT-REF></TARGET></SPEC-RELATION>`
       )
     }
   w('</SPEC-RELATIONS>')
   // the hierarchy: items come in document order with their depth
-  w(`<SPECIFICATIONS><SPECIFICATION IDENTIFIER="reqman-spec" LONG-NAME="${esc(title)}" LAST-CHANGE="${time}"><TYPE><SPECIFICATION-TYPE-REF>reqman-type-spec</SPECIFICATION-TYPE-REF></TYPE><CHILDREN>`)
+  w(`<SPECIFICATIONS><SPECIFICATION IDENTIFIER="reqochet-spec" LONG-NAME="${esc(title)}" LAST-CHANGE="${time}"><TYPE><SPECIFICATION-TYPE-REF>reqochet-type-spec</SPECIFICATION-TYPE-REF></TYPE><CHILDREN>`)
   const open: number[] = [] // depths of the hierarchy elements still open
   const close = (): void => {
     w('</CHILDREN></SPEC-HIERARCHY>')
@@ -336,7 +336,7 @@ export function writeReqif(schema: Schema, items: ReqifItem[], title: string, no
   items.forEach((x, i) => {
     const depth = Math.min(x.depth - base, (open.length ? (open[open.length - 1] as number) + 1 : 0))
     while (open.length && (open[open.length - 1] as number) >= depth) close()
-    w(`<SPEC-HIERARCHY IDENTIFIER="reqman-h-${i + 1}" LAST-CHANGE="${time}"><OBJECT><SPEC-OBJECT-REF>${idOf.get(x.item.id) as string}</SPEC-OBJECT-REF></OBJECT><CHILDREN>`)
+    w(`<SPEC-HIERARCHY IDENTIFIER="reqochet-h-${i + 1}" LAST-CHANGE="${time}"><OBJECT><SPEC-OBJECT-REF>${idOf.get(x.item.id) as string}</SPEC-OBJECT-REF></OBJECT><CHILDREN>`)
     open.push(depth)
   })
   while (open.length) close()

@@ -53,7 +53,7 @@ const en = {
     quickStart: 'Read the quick start (15 minutes)',
     gitFound: (version: string) => `✓ Git ${version} found`,
     fromFile: 'New project from a file…',
-    fromFileTooltip: 'Start from an Excel or CSV file: ReqMan creates the folder, the Git repository and imports the file',
+    fromFileTooltip: 'Start from an Excel or CSV file: reqochet creates the folder, the Git repository and imports the file',
     headline: 'Requirements, versioned like code.',
     intro: (brand: string) => `${brand} turns a folder in your project's Git repository into a structured, linkable requirements database — no server, no accounts.`,
     open: 'Open repository…',
@@ -64,8 +64,8 @@ const en = {
     creating: 'Creating requirements folder…',
     initTitle: 'No requirements folder yet',
     initBefore: '',
-    initAfter: ' has no ReqMan requirements. Create a requirements folder there with the default item types, fields and link types?',
-    notGit: 'This folder is not a Git repository. ReqMan will work, but history, branches and sharing need Git — usually you would pick the folder of an existing project clone.',
+    initAfter: ' has no reqochet requirements. Create a requirements folder there with the default item types, fields and link types?',
+    notGit: 'This folder is not a Git repository. reqochet will work, but history, branches and sharing need Git — usually you would pick the folder of an existing project clone.',
     create: 'Create requirements folder',
     recentTitle: 'Recent repositories',
     recentEmpty: 'Repositories you open appear here.',
@@ -106,7 +106,7 @@ const en = {
     versions: {
       title: 'Versions',
       current: (v: string) => `This is version ${v}.`,
-      intro: 'If a new version causes trouble, go back to an earlier one. ReqMan downloads it, installs it over this one and opens again; automatic updates then pause until you resume them. Your repositories are not touched.',
+      intro: 'If a new version causes trouble, go back to an earlier one. reqochet downloads it, installs it over this one and opens again; automatic updates then pause until you resume them. Your repositories are not touched.',
       goBack: 'Go back to an earlier version…',
       loading: 'Looking for earlier versions…',
       none: 'There is no earlier version to go back to yet (going back works from version 0.14.1 on).',
@@ -115,14 +115,14 @@ const en = {
       released: (date: string) => `released ${date}`,
       warning: 'Files changed by a newer version may need that newer version; going back is meant for a few days, until a fix arrives.',
       install: (v: string) => `Install version ${v}`,
-      installing: (v: string) => `Downloading version ${v} — ReqMan will close and open again…`,
+      installing: (v: string) => `Downloading version ${v} — reqochet will close and open again…`,
       held: (v: string) => `Automatic updates are paused at version ${v} (you went back to it).`,
       resume: 'Resume automatic updates',
       cancel: 'Cancel'
     },
     features: {
       title: 'Features',
-      intro: 'Turn a feature off if it causes trouble — the rest of ReqMan keeps working. This choice is remembered on this PC. A team can also turn a feature off for one repository (features: in schema.yaml).',
+      intro: 'Turn a feature off if it causes trouble — the rest of reqochet keeps working. This choice is remembered on this PC. A team can also turn a feature off for one repository (features: in schema.yaml).',
       names: { branches: 'Branches (create, switch, compare, pull from, delete)', import: 'Import from Excel and ReqIF', export: 'Export (Excel, ReqIF, CSV, Markdown)' } as Record<string, string>,
       preview: 'Preview',
       teamOff: 'Turned off for this repository by the team (schema.yaml)',
@@ -130,7 +130,7 @@ const en = {
     },
     report: {
       title: 'Report a problem',
-      intro: 'Describe what happened. ReqMan saves one text file with your description, the diagnostics and the end of the log — send that file. Nothing is sent by itself.',
+      intro: 'Describe what happened. reqochet saves one text file with your description, the diagnostics and the end of the log — send that file. Nothing is sent by itself.',
       label: 'What happened?',
       placeholder: 'What did you do, what did you expect, what happened instead?',
       save: 'Save report…',
@@ -169,14 +169,14 @@ const en = {
       passed: (ms: number) => `All steps passed in ${(ms / 1000).toFixed(1)} s.`,
       failed: (bad: number, all: number) => `${bad} of ${all} steps failed. Copy the report and send it with your test results.`,
       copyReport: 'Copy report',
-      reportTitle: (version: string) => `ReqMan ${version} — release self-test`,
+      reportTitle: (version: string) => `reqochet ${version} — release self-test`,
       error: (message: string) => `The self-test could not run: ${message}`
     }
   },
 
   updates: {
-    downloading: (version: string, percent: number) => `Downloading ReqMan ${version}… ${percent}%`,
-    ready: (version: string) => `ReqMan ${version} is ready to install.`,
+    downloading: (version: string, percent: number) => `Downloading reqochet ${version}… ${percent}%`,
+    ready: (version: string) => `reqochet ${version} is ready to install.`,
     restart: 'Restart and update',
     notChecked: 'Not checked yet',
     off: (reason: string) => `Off (${reason})`,
@@ -188,7 +188,7 @@ const en = {
 
   errorBoundary: {
     title: (area: string) => `Something went wrong in ${area}`,
-    body: 'ReqMan hit an unexpected error while showing this part of the window. Your saved work is not affected — only unsaved typing in the editor may be lost. The details were written to the log file.',
+    body: 'reqochet hit an unexpected error while showing this part of the window. Your saved work is not affected — only unsaved typing in the editor may be lost. The details were written to the log file.',
     retry: 'Try again',
     copy: 'Copy diagnostics for a bug report',
     reload: 'Reload the window'
@@ -273,15 +273,15 @@ const en = {
       groupFields: 'Fields',
       groupLinks: 'Links',
       ignore: '— do not import',
-      id: 'ID (ReqMan or another tool)',
+      id: 'ID (reqochet or another tool)',
       number: 'Outline number (1, 1.2, 2.3.1 → hierarchy)',
       title: 'Title',
       text: 'Text',
       type: 'Type',
       parent: 'Parent (ID)',
       level: 'Level (1, 2, 3 → hierarchy)',
-      links: 'Links, as ReqMan exports them',
-      linkedFrom: 'Linked from, as ReqMan exports them',
+      links: 'Links, as reqochet exports them',
+      linkedFrom: 'Linked from, as reqochet exports them',
       linkOut: (name: string) => `${name} … (IDs in the cell)`,
       linkIn: (reverse: string) => `${reverse} … (IDs in the cell)`
     }
@@ -317,7 +317,7 @@ const en = {
     sourceTitle: 'Or update the file you imported from',
     sourceIntro: (name: string) => `Writes the current requirements into ${name}: only changed cells, new items as new rows; the formatting stays.`,
     updateOriginal: (name: string) => `Update ${name}`,
-    updateOriginalTooltip: 'A copy of the file as it is now is kept next to it first ("… (before ReqMan update …)")',
+    updateOriginalTooltip: 'A copy of the file as it is now is kept next to it first ("… (before reqochet update …)")',
     updateCopy: 'Save an updated copy…',
     csv: 'CSV — opens in Excel (comma-separated, UTF-8)',
     markdown: 'Markdown — one readable document, e.g. to give to an AI tool',
@@ -544,7 +544,7 @@ const en = {
     noRemote: 'No remote (e.g. GitHub) — commits stay on this PC',
     noRemoteShort: 'no remote',
     oldGit: 'Old Git version',
-    mergeOutside: 'Merge with conflicts in progress (outside ReqMan)',
+    mergeOutside: 'Merge with conflicts in progress (outside reqochet)',
     busy: (what: string) => `${what}…`,
     pulling: 'Pulling',
     pushing: 'Pushing',
@@ -605,7 +605,7 @@ const en = {
     ask: (count: number, b: string) => `You have ${count} uncommitted change${s(count)}. What should happen to ${count === 1 ? 'it' : 'them'} when you switch to "${b}"?`,
     commitFirst: 'Commit it first',
     take: (count: number, b = ''): string => `Move ${count === 1 ? 'it' : 'them'} to ${b || 'the other branch'}`,
-    takeTooltip: 'Possible when the other branch has the same version of these items; otherwise ReqMan lists the ones in the way',
+    takeTooltip: 'Possible when the other branch has the same version of these items; otherwise reqochet lists the ones in the way',
     discard: (count: number) => `Discard ${count === 1 ? 'it' : `all ${count}`}`
   },
 
@@ -826,6 +826,9 @@ const en = {
     clearFiltersStatus: 'Show all items again',
     filterSep: ', ',
     lastPull: (time: string) => `Last pull: ${time}`,
+    legacyFolder: 'This project still uses ReqMan\'s folder name (requirements/.reqman). Update it to reqochet: one commit that renames the folder, which you then push. Colleagues need reqochet to open the project after that.',
+    legacyFolderUpdate: 'Update this project',
+    legacyFolderLater: 'Later',
     dragHint: 'Drag a row onto another row to move it there, with everything below it',
     notGit: 'Not a Git repository',
     refreshFailed: (why: string) => `Refresh failed: ${why}`,
@@ -851,7 +854,7 @@ const en = {
     noGit: (reason: string) => `${reason} Install Git for Windows to commit and share changes.`,
     oldGit: (version: string) => `Git ${version} is old: Pull can only detect clashes by trying the merge (then undoing it). Git 2.38 or newer is recommended.`,
     unavailable: 'Git is not available.',
-    mergeOutside: 'This repository is in the middle of a merge with conflicts (started outside ReqMan). Finish or cancel it in Git first ("git merge --abort" cancels it).',
+    mergeOutside: 'This repository is in the middle of a merge with conflicts (started outside reqochet). Finish or cancel it in Git first ("git merge --abort" cancels it).',
     detached: 'No branch is checked out (detached HEAD). Check out a branch in Git first.',
     needMessage: 'Write a short message that says what changed and why.',
     nothingToCommit: 'There is nothing to commit.',
@@ -891,7 +894,7 @@ const en = {
     file: 'The whole file',
     fileMine: 'Your version',
     fileTheirs: 'Their version',
-    outside: (files: string) => `Pull stopped — nothing was changed. Files outside the requirements folder were changed on both sides (${files}). Combine them with Git outside ReqMan first.`,
+    outside: (files: string) => `Pull stopped — nothing was changed. Files outside the requirements folder were changed on both sides (${files}). Combine them with Git outside reqochet first.`,
     unanswered: 'Decide every highlighted part first.',
     moved: 'Something changed in the meantime (a commit or another pull). Pull again.',
     pulled: (items: number, combined: number, decided: number) =>
@@ -945,6 +948,7 @@ const en = {
   },
 
   wsMsg: {
+    folderRenamedCommit: 'Rename the project folder .reqman to .reqochet (reqochet)',
     noRepo: 'No repository is open.',
     unreadable: (id: string) => `${id} could not be read.`,
     unknownLinkType: (type: string) => `Unknown link type "${type}".`,

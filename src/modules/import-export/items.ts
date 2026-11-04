@@ -92,7 +92,7 @@ export function itemsToSheet(schema: Schema, items: ExportItem[], columns: Expor
  */
 export function itemsToMarkdown(schema: Schema, items: ExportItem[], columns: ExportColumn[], title: string): string {
   const fieldCols = columns.filter((c) => c === 'type' || c.startsWith('field:'))
-  const out: string[] = [`# ${title}`, '', `${items.length} items · exported ${new Date().toISOString().slice(0, 10)} from ReqMan`, '']
+  const out: string[] = [`# ${title}`, '', `${items.length} items · exported ${new Date().toISOString().slice(0, 10)} from reqochet`, '']
   for (const e of items) {
     const level = Math.min(6, e.depth + 2)
     // the outline number leads every heading (the owner's decision O-03): "## 2.3 REQ-K7Q3XMB — Title"

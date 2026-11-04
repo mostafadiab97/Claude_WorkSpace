@@ -22,7 +22,7 @@ describe('repository store', () => {
   })
 
   it('refuses to open a folder that is not initialised', async () => {
-    await expect(store.open(await newRoot())).rejects.toThrow(/No ReqMan requirements folder/)
+    await expect(store.open(await newRoot())).rejects.toThrow(/No requirements folder/)
   })
 
   it('creates, saves, reloads and deletes items', async () => {

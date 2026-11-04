@@ -21,7 +21,7 @@ await scenario('E2E journey', async (ctx) => {
   check(await win.getByText('This folder is not a Git repository').count() === 0, 'recognised as a Git repository')
   await win.getByRole('button', { name: 'Create requirements folder' }).click()
   await win.locator('.table__empty', { hasText: 'No items yet' }).waitFor()
-  check(readdirSync(join(repo, 'requirements')).includes('.reqman'), 'requirements/.reqman created on disk')
+  check(readdirSync(join(repo, 'requirements')).includes('.reqochet'), 'requirements/.reqochet created on disk (0.16)')
   await shot('01-empty-repo')
 
   // 0.13.0: the filters live in a pop-up behind the "Filters" button (one toolbar row)
@@ -190,7 +190,7 @@ await scenario('E2E journey', async (ctx) => {
   await shot('05-fields-dialog')
   await win.getByRole('button', { name: 'Save fields' }).click()
   await win.getByRole('columnheader', { name: /^Safety level/ }).waitFor()
-  const schemaText = readFileSync(join(repo, 'requirements', '.reqman', 'schema.yaml'), 'utf8')
+  const schemaText = readFileSync(join(repo, 'requirements', '.reqochet', 'schema.yaml'), 'utf8')
   check(/id: safety-level/.test(schemaText) && schemaText.startsWith('#'), 'new field saved to schema.yaml (comments kept)')
   check((await win.locator('.editor').getByLabel('Safety level').count()) === 1, 'the editor offers the new field')
   check((await win.getByRole('columnheader', { name: /^Owner/ }).count()) === 0, 'hidden column stays hidden')

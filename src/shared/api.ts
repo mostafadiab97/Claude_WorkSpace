@@ -86,6 +86,8 @@ export interface RepoInfo {
   issues: ItemIssue[]
   /** How long opening took and how much had to be re-read. */
   lastSync: { durationMs: number; full: boolean; changedFiles: number }
+  /** The project still uses ReqMan's folder name `.reqman` (0.16: the window offers the rename). */
+  legacyFolder?: true
 }
 
 /** One end of a link, as shown in the editor. */
@@ -514,6 +516,8 @@ export interface ReqManApi {
   reparentItems(ids: string[], parent: string | null, before?: string | null): Promise<{ ok: true } | { ok: false; message: string }>
   /** IDs from the top-level item down to the item's parent (empty for a top-level item). */
   getAncestors(id: string): Promise<string[]>
+  /** Renames the project folder .reqman → .reqochet and commits that rename (0.16). */
+  renameProjectFolder(): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   /** Values a field already has in this repository, most used first (suggestions, UX-27). */
   getFieldValues(field: string): Promise<string[]>
   /** Replaces the project's field definitions in schema.yaml and re-opens the repository. */
@@ -674,6 +678,7 @@ export const Channels = {
   reparentItem: 'ws:reparentItem',
   reparentItems: 'ws:reparentItems',
   getAncestors: 'ws:ancestors',
+  renameProjectFolder: 'ws:renameProjectFolder',
   getFieldValues: 'ws:fieldValues',
   saveSchemaFields: 'ws:saveSchemaFields',
   addLink: 'ws:addLink',

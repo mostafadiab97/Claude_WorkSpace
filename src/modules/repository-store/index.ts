@@ -38,6 +38,8 @@ export interface RequirementsRepo {
   readonly root: string
   /** <root>/requirements */
   readonly folder: string
+  /** The project folder in use: '.reqochet', or '.reqman' in a project not yet renamed (0.16). */
+  readonly metaDir: '.reqochet' | '.reqman'
   readonly schema: Schema
   readonly schemaProblems: SchemaProblem[]
   /** Hash of schema.yaml as read, for conflict-safe schema edits. */
@@ -96,6 +98,8 @@ export interface RepositoryStore {
   /** Creates the requirements folder with the default schema. Refuses if it already exists. */
   initialize(repoRoot: string): Promise<RequirementsRepo>
   open(repoRoot: string, options?: OpenOptions): Promise<RequirementsRepo>
+  /** Renames requirements/.reqman to .reqochet (0.16). Returns both paths, or null when there is nothing to rename. */
+  renameLegacyFolder(repoRoot: string): Promise<{ from: string; to: string } | null>
 }
 
 export { createFileRepositoryStore }

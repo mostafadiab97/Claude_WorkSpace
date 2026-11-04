@@ -49,7 +49,7 @@ export function createFileThemeService(configDir: string, resourceDir: string, u
       }
     }
     if (logoFile === 'logo.svg') return ''
-    warnings.push(`Logo "${logoFile}" not found in your ReqMan folder or the app; showing the name only.`)
+    warnings.push(`Logo "${logoFile}" not found in your reqochet folder or the app; showing the name only.`)
     return ''
   }
 
@@ -92,7 +92,7 @@ export function createFileThemeService(configDir: string, resourceDir: string, u
       const starter = {
         _help:
           'Add only the values you want to change; everything else comes from the app theme. ' +
-          `All available keys and their current values: ${shippedFile}. Save, then restart ReqMan.`,
+          `All available keys and their current values: ${shippedFile}. Save, then restart reqochet.`,
         modes: { light: {}, dark: {} }
       }
       try {

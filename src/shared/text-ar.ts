@@ -57,7 +57,7 @@ const raw: Texts = {
     quickStart: 'اقرأ البداية السريعة (15 دقيقة)',
     gitFound: (version: string) => `✓ تم العثور على Git ${version}`,
     fromFile: 'مشروع جديد من ملف…',
-    fromFileTooltip: 'ابدأ من ملف Excel أو CSV: ينشئ ReqMan المجلد ومستودع Git ويستورد الملف',
+    fromFileTooltip: 'ابدأ من ملف Excel أو CSV: ينشئ reqochet المجلد ومستودع Git ويستورد الملف',
     headline: 'متطلبات بإصدارات، مثل الكود تمامًا.',
     intro: (brand: string) => `يحوّل ${brand} مجلدًا داخل مستودع Git الخاص بمشروعك إلى قاعدة بيانات متطلبات منظّمة وقابلة للربط — بلا خادم وبلا حسابات.`,
     open: 'فتح مستودع…',
@@ -68,8 +68,8 @@ const raw: Texts = {
     creating: 'جارٍ إنشاء مجلد المتطلبات…',
     initTitle: 'لا يوجد مجلد متطلبات بعد',
     initBefore: 'المجلد ',
-    initAfter: ' لا يحتوي على متطلبات ReqMan. هل تريد إنشاء مجلد متطلبات فيه بأنواع العناصر والحقول وأنواع الروابط الافتراضية؟',
-    notGit: 'هذا المجلد ليس مستودع Git. سيعمل ReqMan، لكن السجلّ والفروع والمشاركة تحتاج إلى Git — عادةً تختار مجلد نسخة من مشروع موجود.',
+    initAfter: ' لا يحتوي على متطلبات reqochet. هل تريد إنشاء مجلد متطلبات فيه بأنواع العناصر والحقول وأنواع الروابط الافتراضية؟',
+    notGit: 'هذا المجلد ليس مستودع Git. سيعمل reqochet، لكن السجلّ والفروع والمشاركة تحتاج إلى Git — عادةً تختار مجلد نسخة من مشروع موجود.',
     create: 'إنشاء مجلد المتطلبات',
     recentTitle: 'المستودعات الأخيرة',
     recentEmpty: 'تظهر هنا المستودعات التي تفتحها.',
@@ -110,7 +110,7 @@ const raw: Texts = {
     versions: {
       title: 'الإصدارات',
       current: (v: string) => `هذا هو الإصدار ${v}.`,
-      intro: 'إذا سبّب إصدار جديد مشكلة، فارجع إلى إصدار سابق. ينزّله ReqMan ويثبّته مكان الحالي ثم يفتح من جديد؛ وتتوقف التحديثات التلقائية حتى تستأنفها. لا تُمَسّ مستودعاتك.',
+      intro: 'إذا سبّب إصدار جديد مشكلة، فارجع إلى إصدار سابق. ينزّله reqochet ويثبّته مكان الحالي ثم يفتح من جديد؛ وتتوقف التحديثات التلقائية حتى تستأنفها. لا تُمَسّ مستودعاتك.',
       goBack: 'الرجوع إلى إصدار سابق…',
       loading: 'جارٍ البحث عن الإصدارات السابقة…',
       none: 'لا يوجد بعدُ إصدار سابق يمكن الرجوع إليه (الرجوع متاح ابتداءً من الإصدار 0.14.1).',
@@ -119,14 +119,14 @@ const raw: Texts = {
       released: (date: string) => `صدر في ${date}`,
       warning: 'قد تحتاج الملفات التي غيّرها إصدار أحدث إلى ذلك الإصدار؛ الرجوع مقصود لأيام قليلة حتى يصل الإصلاح.',
       install: (v: string) => `تثبيت الإصدار ${v}`,
-      installing: (v: string) => `جارٍ تنزيل الإصدار ${v} — سيُغلَق ReqMan ثم يفتح من جديد…`,
+      installing: (v: string) => `جارٍ تنزيل الإصدار ${v} — سيُغلَق reqochet ثم يفتح من جديد…`,
       held: (v: string) => `التحديثات التلقائية متوقفة عند الإصدار ${v} (رجعت إليه).`,
       resume: 'استئناف التحديثات التلقائية',
       cancel: 'إلغاء'
     },
     features: {
       title: 'الميزات',
-      intro: 'أوقِف أي ميزة تسبّب مشكلة — يستمر باقي ReqMan في العمل. يُحفظ هذا الاختيار على هذا الجهاز. ويمكن للفريق أيضًا إيقاف ميزة لمستودع واحد (features: في schema.yaml).',
+      intro: 'أوقِف أي ميزة تسبّب مشكلة — يستمر باقي reqochet في العمل. يُحفظ هذا الاختيار على هذا الجهاز. ويمكن للفريق أيضًا إيقاف ميزة لمستودع واحد (features: في schema.yaml).',
       names: { branches: 'الفروع (إنشاء، تبديل، مقارنة، سحب من، حذف)', import: 'الاستيراد من Excel وReqIF', export: 'التصدير (Excel وReqIF وCSV وMarkdown)' } as Record<string, string>,
       preview: 'معاينة',
       teamOff: 'أوقفها الفريق لهذا المستودع (schema.yaml)',
@@ -134,7 +134,7 @@ const raw: Texts = {
     },
     report: {
       title: 'الإبلاغ عن مشكلة',
-      intro: 'صِف ما حدث. يحفظ ReqMan ملفًا نصيًا واحدًا فيه وصفك ومعلومات التشخيص ونهاية السجلّ — أرسل هذا الملف. لا يُرسَل شيء تلقائيًا.',
+      intro: 'صِف ما حدث. يحفظ reqochet ملفًا نصيًا واحدًا فيه وصفك ومعلومات التشخيص ونهاية السجلّ — أرسل هذا الملف. لا يُرسَل شيء تلقائيًا.',
       label: 'ماذا حدث؟',
       placeholder: 'ماذا فعلت، وماذا توقّعت، وماذا حدث بدلًا من ذلك؟',
       save: 'حفظ التقرير…',
@@ -173,14 +173,14 @@ const raw: Texts = {
       passed: (ms: number) => `نجحت كل الخطوات في ${(ms / 1000).toFixed(1)} ثانية.`,
       failed: (bad: number, all: number) => `فشلت ${n(bad)} من ${n(all)} خطوة. انسخ التقرير وأرسله مع نتائج اختبارك.`,
       copyReport: 'نسخ التقرير',
-      reportTitle: (version: string) => `ReqMan ${version} — release self-test`,
+      reportTitle: (version: string) => `reqochet ${version} — release self-test`,
       error: (message: string) => `تعذّر تشغيل الاختبار الذاتي: ${message}`
     }
   },
 
   updates: {
-    downloading: (version: string, percent: number) => `جارٍ تنزيل ReqMan ${version}… ${percent}%`,
-    ready: (version: string) => `ReqMan ${version} جاهز للتثبيت.`,
+    downloading: (version: string, percent: number) => `جارٍ تنزيل reqochet ${version}… ${percent}%`,
+    ready: (version: string) => `reqochet ${version} جاهز للتثبيت.`,
     restart: 'إعادة التشغيل والتحديث',
     notChecked: 'لم يُفحَص بعد',
     off: (reason: string) => `متوقف (${reason})`,
@@ -192,7 +192,7 @@ const raw: Texts = {
 
   errorBoundary: {
     title: (area: string) => `حدث خطأ في ${area}`,
-    body: 'واجه ReqMan خطأً غير متوقع أثناء عرض هذا الجزء من النافذة. عملك المحفوظ لم يتأثر — قد تضيع فقط الكتابة غير المحفوظة في المحرر. كُتبت التفاصيل في ملف السجلّ.',
+    body: 'واجه reqochet خطأً غير متوقع أثناء عرض هذا الجزء من النافذة. عملك المحفوظ لم يتأثر — قد تضيع فقط الكتابة غير المحفوظة في المحرر. كُتبت التفاصيل في ملف السجلّ.',
     retry: 'حاول مرة أخرى',
     copy: 'نسخ معلومات التشخيص لبلاغ خطأ',
     reload: 'إعادة تحميل النافذة'
@@ -277,15 +277,15 @@ const raw: Texts = {
       groupFields: 'الحقول',
       groupLinks: 'الروابط',
       ignore: '— لا يُستورَد',
-      id: 'المعرّف (من ReqMan أو أداة أخرى)',
+      id: 'المعرّف (من reqochet أو أداة أخرى)',
       number: 'رقم التسلسل (1، 1.2، 2.3.1 ← التسلسل الهرمي)',
       title: 'العنوان',
       text: 'النص',
       type: 'النوع',
       parent: 'الأصل (معرّف)',
       level: 'المستوى (1، 2، 3 ← التسلسل الهرمي)',
-      links: 'الروابط، كما يصدّرها ReqMan',
-      linkedFrom: 'مرتبط من، كما يصدّرها ReqMan',
+      links: 'الروابط، كما يصدّرها reqochet',
+      linkedFrom: 'مرتبط من، كما يصدّرها reqochet',
       linkOut: (name: string) => `${name} … (معرّفات في الخلية)`,
       linkIn: (reverse: string) => `${reverse} … (معرّفات في الخلية)`
     }
@@ -321,7 +321,7 @@ const raw: Texts = {
     sourceTitle: 'أو حدّث الملف الذي استوردت منه',
     sourceIntro: (name: string) => `يكتب المتطلبات الحالية في ${name}: الخلايا المتغيرة فقط، والعناصر الجديدة كصفوف جديدة؛ ويبقى التنسيق.`,
     updateOriginal: (name: string) => `تحديث ${name}`,
-    updateOriginalTooltip: 'تُحفَظ أولًا نسخة من الملف بحالته الحالية بجانبه ("… (before ReqMan update …)")',
+    updateOriginalTooltip: 'تُحفَظ أولًا نسخة من الملف بحالته الحالية بجانبه ("… (before reqochet update …)")',
     updateCopy: 'حفظ نسخة محدّثة…',
     csv: 'CSV — يُفتح في Excel (مفصول بفواصل، UTF-8)',
     markdown: 'Markdown — مستند واحد مقروء، مثلًا لتعطيه لأداة ذكاء اصطناعي',
@@ -548,7 +548,7 @@ const raw: Texts = {
     noRemote: 'لا يوجد خادم بعيد (مثل GitHub) — تبقى الإيداعات على هذا الجهاز',
     noRemoteShort: 'بلا خادم بعيد',
     oldGit: 'إصدار Git قديم',
-    mergeOutside: 'دمج بتعارضات قيد التنفيذ (خارج ReqMan)',
+    mergeOutside: 'دمج بتعارضات قيد التنفيذ (خارج reqochet)',
     busy: (what: string) => `${what}…`,
     pulling: 'جارٍ السحب',
     pushing: 'جارٍ الدفع',
@@ -608,7 +608,7 @@ const raw: Texts = {
     ask: (count: number, b: string) => `لديك ${changes(count)} غير مودَع. ماذا يحدث ${count === 1 ? 'له' : 'لها'} عند التبديل إلى "${b}"؟`,
     commitFirst: 'أودِعه أولًا',
     take: (count: number, b = '') => `${count === 1 ? 'انقله' : 'انقلها'} إلى ${b || 'الفرع الآخر'}`,
-    takeTooltip: 'ممكن عندما يحتوي الفرع الآخر على الإصدار نفسه من هذه العناصر؛ وإلا يعرض ReqMan العناصر المانعة',
+    takeTooltip: 'ممكن عندما يحتوي الفرع الآخر على الإصدار نفسه من هذه العناصر؛ وإلا يعرض reqochet العناصر المانعة',
     discard: (count: number) => (count === 1 ? 'إهماله' : `إهمال الكل (${n(count)})`)
   },
 
@@ -828,6 +828,9 @@ const raw: Texts = {
     clearFiltersStatus: 'إظهار كل العناصر مجددًا',
     filterSep: '، ',
     lastPull: (time: string) => `آخر سحب: ${time}`,
+    legacyFolder: 'ما زال هذا المشروع يستخدم اسم مجلد ReqMan (requirements/.reqman). حدّثه إلى reqochet: إيداع واحد يعيد تسمية المجلد، ثم تدفعه. سيحتاج زملاؤك إلى reqochet لفتح المشروع بعد ذلك.',
+    legacyFolderUpdate: 'تحديث هذا المشروع',
+    legacyFolderLater: 'لاحقًا',
     dragHint: 'اسحب صفًا فوق صف آخر لنقله إليه، مع كل ما تحته',
     notGit: 'ليس مستودع Git',
     refreshFailed: (why: string) => `فشل التحديث: ${why}`,
@@ -852,7 +855,7 @@ const raw: Texts = {
     noGit: (reason: string) => `${reason} ثبّت Git لنظام Windows لإيداع التغييرات ومشاركتها.`,
     oldGit: (version: string) => `إصدار Git ${version} قديم: لا يكتشف السحب التعارضات إلا بتجربة الدمج (ثم التراجع عنه). يُنصح بـ Git 2.38 أو أحدث.`,
     unavailable: 'Git غير متاح.',
-    mergeOutside: 'هذا المستودع في منتصف دمج بتعارضات (بدأ خارج ReqMan). أنهِه أو ألغِه في Git أولًا ("git merge --abort" يلغيه).',
+    mergeOutside: 'هذا المستودع في منتصف دمج بتعارضات (بدأ خارج reqochet). أنهِه أو ألغِه في Git أولًا ("git merge --abort" يلغيه).',
     detached: 'لا يوجد فرع مفعّل (detached HEAD). فعّل فرعًا في Git أولًا.',
     needMessage: 'اكتب رسالة قصيرة تقول ما الذي تغيّر ولماذا.',
     nothingToCommit: 'لا شيء للإيداع.',
@@ -891,7 +894,7 @@ const raw: Texts = {
     file: 'الملف كاملًا',
     fileMine: 'نسختك',
     fileTheirs: 'نسختهم',
-    outside: (files: string) => `توقف السحب — لم يتغير شيء. ملفات خارج مجلد المتطلبات تغيّرت على الطرفين (${files}). ادمجها بـ Git خارج ReqMan أولًا.`,
+    outside: (files: string) => `توقف السحب — لم يتغير شيء. ملفات خارج مجلد المتطلبات تغيّرت على الطرفين (${files}). ادمجها بـ Git خارج reqochet أولًا.`,
     unanswered: 'احسم كل جزء معلَّم أولًا.',
     moved: 'تغيّر شيء في هذه الأثناء (إيداع أو سحب آخر). اسحب مرة أخرى.',
     pulled: (count: number, combined: number, decided: number) =>
@@ -944,6 +947,7 @@ const raw: Texts = {
   },
 
   wsMsg: {
+    folderRenamedCommit: 'Rename the project folder .reqman to .reqochet (reqochet)',
     noRepo: 'لا يوجد مستودع مفتوح.',
     unreadable: (id: string) => `تعذّرت قراءة ${id}.`,
     unknownLinkType: (type: string) => `نوع رابط غير معروف "${type}".`,
@@ -974,7 +978,7 @@ const raw: Texts = {
 /**
  * Every Arabic text starts with an invisible RIGHT-TO-LEFT MARK (U+200F). Places that guess a text's direction from
  * its first letter — Windows tooltips, native dialogs, some lists — would otherwise lay out a sentence that starts
- * with (or contains) an English word like "ReqMan" or "Git" from left to right, reversing its word order (the owner on
+ * with (or contains) an English word like "reqochet" or "Git" from left to right, reversing its word order (the owner on
  * 0.13.0, step 5). Inside the window (dir="rtl") the mark changes nothing.
  */
 const RLM = '\u200F'

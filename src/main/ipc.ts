@@ -121,7 +121,7 @@ export function registerIpc(services: Services, paths: Paths): void {
     const git = await services.git.getGitInfo()
     const theme = await services.theme.load()
     return [
-      `ReqMan ${a.version}`,
+      `reqochet ${a.version}`,
       `OS: ${a.platform} (${process.arch})`,
       `Electron: ${a.electronVersion}, Chrome: ${process.versions.chrome ?? ''}, Node: ${process.versions.node}`,
       `Git: ${git.installed ? git.version : `not available (${git.reason})`}`,
@@ -243,6 +243,7 @@ export function registerIpc(services: Services, paths: Paths): void {
     reparentItem: (_e, id, parent, before) => ws.reparentItem(v.str(id, 'ID'), v.optStr(parent, 'parent') ?? null, v.optStr(before, 'position') ?? null),
     reparentItems: (_e, ids, parent, before) => ws.reparentItems(v.strings(ids, 'items', 100_000), v.optStr(parent, 'parent') ?? null, v.optStr(before, 'position') ?? null),
     getAncestors: (_e, id) => ws.ancestors(v.str(id, 'ID')),
+    renameProjectFolder: () => ws.renameProjectFolder(),
     getFieldValues: (_e, field) => ws.fieldValues(v.str(field, 'field')),
     saveSchemaFields: (_e, fields, revision) => ws.saveSchemaFields(v.fieldDefs(fields), v.str(revision, 'revision')),
     checkFields: (_e, fields) => ws.checkFields(v.fieldDefs(fields)),

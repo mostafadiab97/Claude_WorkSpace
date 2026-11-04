@@ -17,14 +17,14 @@ export interface FolderWatch {
 /** More changed files than this → a normal full check is just as fast. */
 const MANY = 2000
 
-export function watchRequirementsFolder(folder: string, onError?: (e: unknown) => void): FolderWatch {
+export function watchRequirementsFolder(folder: string, onError?: (e: unknown) => void, metaDir: string = '.reqochet'): FolderWatch {
   const changed = new Set<string>()
   let all = false
   let schema = false
   const watchers: FSWatcher[] = []
   let failed = false
 
-  const add = (dir: 'items' | '.reqman'): void => {
+  const add = (dir: string): void => {
     try {
       const w = watch(join(folder, dir), { persistent: false }, (_event, name) => {
         if (!name) {
@@ -32,7 +32,7 @@ export function watchRequirementsFolder(folder: string, onError?: (e: unknown) =
           return
         }
         const file = String(name)
-        if (dir === '.reqman') {
+        if (dir === metaDir) {
           if (file === 'schema.yaml') schema = true
           return
         }
@@ -53,7 +53,7 @@ export function watchRequirementsFolder(folder: string, onError?: (e: unknown) =
     }
   }
   add('items')
-  add('.reqman')
+  add(metaDir)
 
   return {
     take() {

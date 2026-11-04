@@ -115,7 +115,8 @@ export function createCompare(git: GitAdapter) {
       if (!toWorking && !to) throw new Error(`"${toRef}" is not a commit, branch or tag of this repository.`)
 
       const changes: NameStatus[] = from === to ? [] : await git.diffNameStatus(root, from, to, base)
-      const schemaPath = `${base === '.' ? '' : `${base}/`}.reqman/schema.yaml`
+      // the schema under its new folder name or ReqMan's (a commit that renamed the folder shows as a schema change)
+      const schemaPaths = ['.reqochet', '.reqman'].map((d) => `${base === '.' ? '' : `${base}/`}${d}/schema.yaml`)
       const blobs = await git.readBlobs(root, changes.flatMap((c) => [c.oldOid, c.newOid].filter((o): o is string => o !== null)))
       // working folder side: files without a blob ID are read from disk
       const fromDisk = toWorking ? await readWorking(root, changes.filter((c) => c.status !== 'D' && !c.newOid).map((c) => c.path)) : new Map<string, string | null>()
@@ -136,7 +137,7 @@ export function createCompare(git: GitAdapter) {
       let schema: SchemaChange | null = null
       for (const c of changes) {
         const oldPath = c.from ?? c.path
-        if (c.path === schemaPath || oldPath === schemaPath) {
+        if (schemaPaths.includes(c.path) || schemaPaths.includes(oldPath)) {
           const b = beforeText(c)
           const a = afterText(c)
           schema = schemaChange(b ? parseSchema(b).schema : null, a ? parseSchema(a).schema : null)

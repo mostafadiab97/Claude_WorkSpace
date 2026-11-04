@@ -54,7 +54,7 @@ export interface SheetData {
 /** A workbook with one sheet per entry: bold, frozen header row with filters; numbers stay text. */
 export async function writeXlsx(sheets: SheetData[]): Promise<Uint8Array> {
   const wb = new Workbook()
-  wb.creator = 'ReqMan'
+  wb.creator = 'reqochet'
   for (const s of sheets) {
     const ws = wb.addWorksheet(safeSheetName(s.name), { views: [{ state: 'frozen', ySplit: 1 }] })
     ws.addRow(s.header)

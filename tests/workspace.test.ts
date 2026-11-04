@@ -219,7 +219,7 @@ describe('workspace', () => {
     if (!r.ok) return
     expect(r.info.schema.fields.map((f) => f.id)).toContain('safety-level')
     expect(r.info.schemaRevision).not.toBe(info.schemaRevision)
-    const text = await readFile(join(root, 'requirements', '.reqman', 'schema.yaml'), 'utf8')
+    const text = await readFile(join(root, 'requirements', '.reqochet', 'schema.yaml'), 'utf8')
     expect(text).toMatch(/safety-level/)
     expect(text).toMatch(/^#/m)
     // second save with the old revision: someone else changed it meanwhile

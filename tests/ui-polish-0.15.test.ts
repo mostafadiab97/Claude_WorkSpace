@@ -56,7 +56,7 @@ describe('names in other languages in schema.yaml (UX-22)', () => {
     const repo = await store.initialize(await mkdtemp(join(tmpdir(), 'reqman-labels-')))
     const fields = fieldDefs(JSON.parse(JSON.stringify(repo.schema.fields)))
     await repo.writeSchemaFields([...fields, { id: 'safety', name: 'Safety', type: 'text' }], repo.schemaRevision)
-    const text = await readFile(join(repo.root, 'requirements', '.reqman', 'schema.yaml'), 'utf8')
+    const text = await readFile(join(repo.root, 'requirements', '.reqochet', 'schema.yaml'), 'utf8')
     const { schema } = parseSchema(text)
     expect(schema.fields.find((f) => f.id === 'status')?.optionLabels?.['ar']?.['Draft']).toBe('مسودة')
     expect(schema.fields.find((f) => f.id === 'owner')?.labels).toEqual({ ar: 'المسؤول' })

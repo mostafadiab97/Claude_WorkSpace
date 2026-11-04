@@ -48,7 +48,7 @@ describe('problem report (P-40d)', () => {
     expect(r).toContain(`== Log (last ${REPORT_LOG_LINES} lines) ==`)
     expect(r).toContain(`line ${REPORT_LOG_LINES + 49}`)
     expect(r).not.toContain('line 49\r\n')
-    expect(r.startsWith('ReqMan problem report\r\nCreated: ')).toBe(true)
+    expect(r.startsWith('reqochet problem report\r\nCreated: ')).toBe(true)
   })
   it('takes the older log first when the current one is short, and says when there is no description', () => {
     const r = buildProblemReport({ description: ' ', diagnostics: 'd', log: 'new 1\nnew 2', olderLog: 'old 1\n', now })
@@ -57,6 +57,6 @@ describe('problem report (P-40d)', () => {
     expect(r).toContain('== Log (last 3 lines) ==')
   })
   it('names the file with date and time', () => {
-    expect(problemReportName(now)).toBe('ReqMan-problem-2026-11-02-2105.txt')
+    expect(problemReportName(now)).toBe('reqochet-problem-2026-11-02-2105.txt')
   })
 })

@@ -3419,3 +3419,10 @@ code {
   inset-inline-end: auto;
   inset-inline-start: 0;
 }
+
+.folder-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rm-space-md);
+}

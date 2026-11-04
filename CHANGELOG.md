@@ -3,6 +3,18 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.15.2 — 4 Nov 2026 — The owner's points on 0.15.1
+- **Owner (4 Nov 2026) on 0.15.1:** self-test 21/21 (50.2 s); all 4 steps passed, with three touches. All here:
+- **Self-test report folds** (step 1): after a passed test only the result line shows; **Show the 21 steps** opens the
+  list. A failed step opens it by itself.
+- **Link reviews are a row in the list** (step 3): "L — Link review only: 5 items" sits under the changed items like
+  any other row; a click shows their IDs, each opens the item.
+- **No more "links are now suspect" warning after you kept them** (step 3): the warning counted every link to the
+  item; it now counts only links that still wait for a review.
+- **Back sits on a bar of its own** (step 4): the entries scroll under the bar instead of showing around the button.
+- **Also:** the table's Text column no longer shows a stray `*` when a text starts with bold (found by the acceptance
+  run's screenshot of 0.15.1).
+
 ## 0.15.1 — 4 Nov 2026 — The owner's points on 0.15.0
 - **Owner (4 Nov 2026) on 0.15.0:** self-test 21/21 (52.0 s); steps 2, 4 (with a point), 5 passed; step 1 and 3 with
   points. All fixed here:
@@ -16,6 +28,7 @@ version it was about, and what it led to.
   showed only the one real change, because a comparison between commits hides confirmation-only files. It now names
   them under the list ("+ 5 items changed only by a link review"), so the numbers match.
 - **Back stays at the top of the Settings panel** when the panel scrolls (step 4).
+- **Owner (4 Nov 2026):** all 4 steps passed (self-test 21/21, 50.2 s); three touches → 0.15.2.
 
 ## 0.15.0 — 4 Nov 2026 — UI polish (from the UI/UX review of 0.14.5)
 - **Owner (3 Nov 2026):** a UI/UX helper agent reviewed 0.14.5 (36 findings, `docs/reviews/agents/0.14.5-ui-ux.md`);

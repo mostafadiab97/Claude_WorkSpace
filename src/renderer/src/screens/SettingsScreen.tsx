@@ -74,9 +74,12 @@ export function SettingsScreen(props: {
   return (
     <div className="page page--split">
       <nav className="settings-nav" aria-label={nav.label}>
-        <button type="button" className="btn btn--primary settings-nav__back" onClick={props.onBack}>
-          {T.settings.back}
-        </button>
+        {/* a bar of its own that stays at the top; the entries scroll under it, not behind the button (owner, 0.15.1 step 4) */}
+        <div className="settings-nav__top">
+          <button type="button" className="btn btn--primary settings-nav__back" onClick={props.onBack}>
+            {T.settings.back}
+          </button>
+        </div>
         <h2 className="settings-nav__group">{nav.settings}</h2>
         <ul>{settingsPages.map((p) => entry(p.id, p.label, view.kind === 'settings' && view.page === p.id, () => setView({ kind: 'settings', page: p.id })))}</ul>
         <h2 className="settings-nav__group">

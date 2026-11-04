@@ -2814,12 +2814,17 @@ code {
   padding: var(--rm-space-md) var(--rm-space-sm);
 }
 .settings-nav__back {
-  margin: 0 var(--rm-space-sm) var(--rm-space-sm);
-  /* stays at the top while the panel scrolls (owner, 0.15.0 step 4) */
+  margin: 0 var(--rm-space-sm);
+}
+/* stays at the top while the panel scrolls, on the panel's own shade, full width (owner, 0.15.0/0.15.1 step 4) */
+.settings-nav__top {
   position: sticky;
-  inset-block-start: 0;
+  inset-block-start: calc(-1 * var(--rm-space-md));
   z-index: 1;
-  box-shadow: 0 0 0 var(--rm-space-sm) color-mix(in srgb, var(--rm-color-surface) 94%, var(--rm-color-text));
+  margin: calc(-1 * var(--rm-space-md)) calc(-1 * var(--rm-space-sm)) var(--rm-space-sm);
+  padding: var(--rm-space-md) var(--rm-space-sm) var(--rm-space-sm);
+  background: color-mix(in srgb, var(--rm-color-surface) 94%, var(--rm-color-text));
+  border-block-end: var(--rm-shape-border-width) solid var(--rm-color-border);
 }
 .settings-nav ul {
   list-style: none;
@@ -3315,4 +3320,42 @@ code {
 /* outline numbers keep a gap to the title (UXN-03) */
 .table__td--number {
   padding-inline-end: var(--rm-space-sm);
+}
+
+/* "Link review only" row in Changes (owner, 0.15.1 step 3) */
+.changes__kind--reviewed {
+  background: var(--rm-color-text-muted);
+}
+
+.compare__reviewed-ids {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rm-space-xs) var(--rm-space-md);
+  padding: var(--rm-space-xs) var(--rm-space-md) var(--rm-space-sm);
+  padding-inline-start: calc(var(--rm-space-md) + 28px);
+}
+
+/* release self-test: the step list folds (owner, 0.15.1 step 1) */
+.results-fold > summary {
+  cursor: pointer;
+  color: var(--rm-color-primary);
+  margin-block: var(--rm-space-sm);
+}
+
+.compare__row.compare__row--reviewed {
+  display: flex;
+  align-items: center;
+  gap: var(--rm-space-md);
+}
+
+.compare__row--reviewed .compare__name {
+  flex: none;
+}
+
+.compare__row--reviewed .compare__summary {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

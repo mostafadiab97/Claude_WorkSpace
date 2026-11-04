@@ -153,6 +153,7 @@ const en = {
       matches: (count: number) => `(${n(count)} matches)`
     },
     releaseTest: {
+      steps: (count: number) => `Show the ${count} steps`,
       title: 'Release self-test',
       intro:
         'Run this once after each update. It tries the main actions — create, edit, move, links, commit, push, a colleague\'s change, a pull that asks per requirement, branches, compare, history, export — on a practice repository with a pretend "GitHub" in a temporary folder, then deletes it. Your repositories and Git settings are not touched. Takes about a minute.',
@@ -735,7 +736,10 @@ const en = {
     showMore: (hidden: number) => `Show more (${n(hidden)} hidden)`,
     noMatch: 'Nothing matches the filter.',
     otherFiles: (files: string) => `Other files changed: ${files}`,
-    reviewedOnly: (count: number) => `+ ${count} item${s(count)} changed only by a link review (Keep) — no content change, not listed above`,
+    reviewedOnly: (count: number) => `Link review only: ${count} item${s(count)}`,
+    reviewedWhy: 'a link was kept — no content change',
+    reviewedTooltip: 'L = link review only: the item\'s file changed only because a link to a changed item was kept',
+    openTooltip: 'Open the item',
     schemaParts: {
       fieldsAdded: (x: string) => `fields added: ${x}`,
       fieldsRemoved: (x: string) => `fields removed: ${x}`,

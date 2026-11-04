@@ -203,7 +203,8 @@ export function createCompare(git: GitAdapter) {
           summary: renamedOnly ? T.compare.fileRenamed : confirmedOnly ? T.compare.linksReviewed : unreadable && nothing ? 'Could not be read' : diff.kind === 'added' ? 'New item' : diff.kind === 'deleted' ? 'Deleted' : summarize(diff),
           diff,
           contentChanged: !b || !a || contentFingerprint(b) !== contentFingerprint(a),
-          incoming: s.index.get(id)?.incomingCount ?? 0,
+          // only links still waiting for a review: after Keep the warning would be wrong (owner, 0.15.1 step 3)
+          incoming: s.index.incomingLinks(id).filter((l) => l.suspect).length,
           paths: [...p.paths],
           ...(unreadable ? { unreadable } : {})
         })

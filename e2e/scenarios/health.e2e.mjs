@@ -84,6 +84,13 @@ await scenario('E2E health', async (ctx) => {
   const back = await win.locator('.settings-nav__back').boundingBox()
   const navBox = await win.locator('.settings-nav').boundingBox()
   check(back !== null && navBox !== null && back.y >= navBox.y - 1 && back.y < navBox.y + 60, 'Back stays at the top of the scrolled left panel')
+  const covered = await win.evaluate(() => {
+    const bar = document.querySelector('.settings-nav__top')?.getBoundingClientRect()
+    if (!bar) return false
+    const at = document.elementFromPoint(bar.left + 4, bar.bottom - 3)
+    return at !== null && at.closest('.settings-nav__top') !== null
+  })
+  check(covered, '…on a bar of its own: the entries scroll under it, not around the button (0.15.1 step 4)')
   await win.setViewportSize({ width: 1400, height: 860 })
   await nav.getByRole('button', { name: 'Introduction and contents' }).click()
   await guide.getByRole('link', { name: 'Import and export (Excel, ReqIF, CSV, Markdown)' }).click()

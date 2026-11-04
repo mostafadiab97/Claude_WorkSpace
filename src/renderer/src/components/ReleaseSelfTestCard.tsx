@@ -63,6 +63,9 @@ export function ReleaseSelfTestCard() {
           <p className={state.r.ok ? 'notice notice--ok' : 'notice notice--error'} role="status">
             {state.r.ok ? tx.passed(state.r.totalMs) : tx.failed(state.r.steps.filter((s) => !s.ok).length, state.r.steps.length)}
           </p>
+          {/* the steps fold away; open by themselves when a step failed (owner, 0.15.1 step 1) */}
+          <details className="results-fold" open={!state.r.ok}>
+          <summary>{tx.steps(state.r.steps.length)}</summary>
           <table className="results" aria-label={tx.title}>
             <tbody>
               {state.r.steps.map((s) => (
@@ -77,6 +80,7 @@ export function ReleaseSelfTestCard() {
               ))}
             </tbody>
           </table>
+          </details>
         </>
       )}
     </section>

@@ -67,7 +67,18 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.15.1 (the owner's points on 0.15.0)
+## Manual test checklist — v0.15.2 (the owner's points on 0.15.1)
+
+The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
+Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.15.2**, then **⚙ → Self-tests → Run release self-test**. | **All steps passed** (21); the step list is folded — **Show the 21 steps** opens it. |
+| 2 | **Changes → Show: the last commit that changed requirements** (your test commit from 0.15.0/0.15.1). | Under your changed item a row **L — Link review only: 5 items**; a click shows the IDs. No "links are now suspect" warning on the changed item (you kept them). |
+| 3 | **⚙**, open **▸ User guide**, scroll the left panel. | **← Back** sits on its own bar; the entries scroll under it. |
+
+## Previous checklist — v0.15.1 (the owner's points on 0.15.0)
 
 The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
 Report by step number.
@@ -78,19 +89,6 @@ Report by step number.
 | 2 | In the sandbox open an item, **+ Add link**, click the **link type** list and choose a type. | The Add link section stays open; you can then search and pick the item. |
 | 3 | **Changes → Show: the last commit that changed requirements** (your 0.15.0 commit). | Your text change is listed; under the list: **+ 5 items changed only by a link review** (click it for their IDs). |
 | 4 | **⚙**, open **▸ User guide** in the left panel and scroll the panel down. | **← Back** stays at the top. |
-
-## Previous checklist — v0.15.0 (UI polish from the UI/UX review)
-
-The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
-Report by step number.
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Update to **0.15.0**, then **⚙ → Self-tests → Run release self-test**. | App shows 0.15.0; **All steps passed**, 21 ✓. |
-| 2 | Open the sandbox. Look at the table and click a requirement with formatted text. Drag the line between table and editor. | Columns: **No., Title, Type, Status, Links, … ID**; the type is short (SysReq), headings are bold. The text shows formatted (bold, lists); a click on it opens the plain text. The editor gets wider and stays so. |
-| 3 | Change one item's text and save (an item others link to). Then click **Changes**, write a message and use **▾ → Commit and push**. | The "Check the links" window shows **what changed**; each link has Keep / Unlink. After Commit and push the change is on GitHub (a real push). **Author:** shows your name; your other repositories' Git name and e-mail are untouched. |
-| 4 | Press **Ctrl+/**, then **← Back**; press **Ctrl+F**, **Ctrl+N** (Esc), **Ctrl+Shift+C**. | Ctrl+/ opens the new **Keyboard shortcuts** page; Ctrl+F goes to search; Ctrl+N opens the type list; Ctrl+Shift+C opens Changes. |
-| 5 | **⚙ → Appearance**: switch to **العربية** and back; try Dark. On the start screen click **Read the quick start**. | Language and colours now live here (and on the start screen), not in the top bar of an open repository. English titles read correctly in the Arabic window. The quick-start link opens the guide page. (The sandbox's own field names stay English — only new projects get Arabic field names.) |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

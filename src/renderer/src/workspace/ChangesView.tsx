@@ -47,6 +47,7 @@ export function ChangesView(props: {
   const [tab, setTab] = useState<'items' | 'links'>('items')
   const [kinds, setKinds] = useState<Set<Kind>>(new Set())
   const [filter, setFilter] = useState('')
+  const [showReviewed, setShowReviewed] = useState(false)
   const [shown, setShown] = useState(SHOW)
   const [working, setWorking] = useState(false)
   const [confirmDiscard, setConfirmDiscard] = useState<string | null>(null)
@@ -350,20 +351,37 @@ export function ChangesView(props: {
                     </button>
                   </li>
                 )}
-                {visible.length === 0 && <li className="muted compare__empty">{T.compare.noMatch}</li>}
+                {visible.length === 0 && data.reviewedOnly.length === 0 && <li className="muted compare__empty">{T.compare.noMatch}</li>}
+                {/* items whose file changed only by a link review: one row in the list, like the others (owner, 0.15.1 step 3) */}
+                {data.reviewedOnly.length > 0 && (
+                  <li className="compare__reviewed">
+                    <button type="button" className="compare__row compare__row--reviewed" aria-expanded={showReviewed} onClick={() => setShowReviewed((v) => !v)}>
+                      <span className="changes__kind changes__kind--reviewed" title={T.compare.reviewedTooltip}>
+                        L
+                      </span>
+                      <span className="compare__name">{T.compare.reviewedOnly(data.reviewedOnly.length)}</span>
+                      <span className="compare__summary">
+                        {showReviewed ? '▾' : '▸'} {T.compare.reviewedWhy}
+                      </span>
+                    </button>
+                    {showReviewed && (
+                      <span className="compare__reviewed-ids">
+                        {data.reviewedOnly.slice(0, 500).map((id) => (
+                          <button key={id} type="button" className="link-btn tree__id" title={T.compare.openTooltip} onClick={() => props.onOpenItem(id)}>
+                            {id}
+                          </button>
+                        ))}
+                        {data.reviewedOnly.length > 500 && T.common.ellipsis}
+                      </span>
+                    )}
+                  </li>
+                )}
               </ul>
             )
           ) : (
             <LinkList schema={schema} links={data.links} filter={filter} onOpen={(id) => c.select(id)} />
           )}
           {data.otherFiles.length > 0 && <p className="muted-inline compare__other">{T.compare.otherFiles(data.otherFiles.join(', '))}</p>}
-          {data.reviewedOnly.length > 0 && (
-            <details className="muted-inline compare__other">
-              <summary>{T.compare.reviewedOnly(data.reviewedOnly.length)}</summary>
-              {data.reviewedOnly.slice(0, 500).join(', ')}
-              {data.reviewedOnly.length > 500 && T.common.ellipsis}
-            </details>
-          )}
 
           {tab === 'items' && sel && (
             <div className="changes-view__detail scroll" aria-label={T.compare.detailLabel(sel.id)} role="region">

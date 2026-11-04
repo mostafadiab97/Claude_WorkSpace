@@ -145,6 +145,7 @@ X-02).
 | **0.14.5** | Small touches | Blue Check for updates; folding User guide topics in Settings; UI/UX review prompt (`docs/guides/ui-review-prompt.md`) |
 | **0.15.0** | UI polish | All accepted findings of the UI/UX review of 0.14.5 (owner 3 Nov 2026), checked by the three helper agents before release; the plan's version numbers move up by one more (rename next, then 1a structure) |
 | **0.15.1** | Owner's points on 0.15.0 | Self-test kept across pages, Add link type list, link reviews named in comparisons, sticky Back |
+| **0.15.2** | Owner's touches on 0.15.1 | Folding self-test steps, link-review row, suspect warning only for unreviewed links, Back bar |
 | **Release plan (C, 2 Nov 2026)** | — | 0.14 rename + health → 0.15 1a structure → 0.16 1b traceability views (pilot can start) → 0.17 daily comfort → 0.18 rich text → 0.19 documents out → 0.20 review basics → 0.21 pull requests in the app → 0.22 verification → 0.23 sharing + help → 0.24 AI → later commercial; a stabilisation patch after every theme; details in `docs/reviews/2026-11-01-planning-discussion.md` |
 | *Proposal A (R)* | *New name + traceability* | *Proposed 31 Oct 2026; order to be settled in the planning discussion (the owner, 31 Oct):* the rename (`docs/reviews/2026-10-31-rename-impact.md`) once the name is chosen; traceability matrix and coverage; item and link types in the GUI; saved views; bulk edit |
 | *Proposal B (R)* | *Documents out* | Word and PDF export, HTML publishing, Markdown preview |

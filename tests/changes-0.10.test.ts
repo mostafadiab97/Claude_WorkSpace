@@ -172,3 +172,22 @@ describe('report by the owner on 0.10.0: "Changes (1)" while the list was empty'
     expect(c.reviewedOnly).toEqual([test])
   })
 })
+
+describe('owner on 0.15.1 step 3: "links are now suspect" after they were kept', () => {
+  it('counts only links that still wait for a review', async () => {
+    const { ws } = await setup()
+    const target = await add(ws, 'Target', { text: 'old' })
+    const test = await add(ws, 'Test', {}, 'test-case')
+    expect((await ws.addLink(test, 'verifies', target)).ok).toBe(true)
+    expect((await ws.commit('start')).ok).toBe(true)
+    const head = (await ws.compareOptions()).head as string
+    await edit(ws, target, (d) => {
+      d.item.text = 'new'
+    })
+    const before = (await ws.compareVersions(head, 'WORKING')).entries.find((e) => e.id === target)
+    expect(before?.incoming).toBe(1)
+    expect((await ws.decideLinks([{ source: test, type: 'verifies', target, keep: true }])).ok).toBe(true)
+    const after = (await ws.compareVersions(head, 'WORKING')).entries.find((e) => e.id === target)
+    expect(after?.incoming).toBe(0)
+  })
+})

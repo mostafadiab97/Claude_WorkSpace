@@ -264,7 +264,7 @@ export interface CompareEntry {
   diff: ItemDiff
   /** Type, title or text changed: links pointing to this item become suspect. */
   contentChanged: boolean
-  /** Links from other items to it today. */
+  /** Links from other items to it that are still suspect today (0.15.2: links already reviewed — kept — do not count). */
   incoming: number
   /** Outline numbers in the older and the newer version ("1.2" → "3.5.1"), where it had one. */
   numberBefore?: string

@@ -1,7 +1,20 @@
-# Past manual checklists (v0.0.3 – v0.14.5)
+# Past manual checklists (v0.0.3 – v0.15.0)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## Previous checklist — v0.15.0 (UI polish from the UI/UX review)
+
+The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
+Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.15.0**, then **⚙ → Self-tests → Run release self-test**. | App shows 0.15.0; **All steps passed**, 21 ✓. |
+| 2 | Open the sandbox. Look at the table and click a requirement with formatted text. Drag the line between table and editor. | Columns: **No., Title, Type, Status, Links, … ID**; the type is short (SysReq), headings are bold. The text shows formatted (bold, lists); a click on it opens the plain text. The editor gets wider and stays so. |
+| 3 | Change one item's text and save (an item others link to). Then click **Changes**, write a message and use **▾ → Commit and push**. | The "Check the links" window shows **what changed**; each link has Keep / Unlink. After Commit and push the change is on GitHub (a real push). **Author:** shows your name; your other repositories' Git name and e-mail are untouched. |
+| 4 | Press **Ctrl+/**, then **← Back**; press **Ctrl+F**, **Ctrl+N** (Esc), **Ctrl+Shift+C**. | Ctrl+/ opens the new **Keyboard shortcuts** page; Ctrl+F goes to search; Ctrl+N opens the type list; Ctrl+Shift+C opens Changes. |
+| 5 | **⚙ → Appearance**: switch to **العربية** and back; try Dark. On the start screen click **Read the quick start**. | Language and colours now live here (and on the start screen), not in the top bar of an open repository. English titles read correctly in the Arabic window. The quick-start link opens the guide page. (The sandbox's own field names stay English — only new projects get Arabic field names.) |
 
 ## Previous checklist — v0.14.5 (visible Check for updates, folding guide topics)
 

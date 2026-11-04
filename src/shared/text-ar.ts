@@ -157,6 +157,7 @@ const raw: Texts = {
       matches: (count: number) => `(${n(count)} نتيجة)`
     },
     releaseTest: {
+      steps: (count: number) => `عرض الخطوات (${n(count)})`,
       title: 'الاختبار الذاتي للإصدار',
       intro:
         'شغّله مرة بعد كل تحديث. يجرّب الإجراءات الرئيسية — الإنشاء والتعديل والنقل والروابط والإيداع والدفع وتغيير من زميل والسحب مع القرارات والفروع والمقارنة والسجلّ والتصدير — على مستودع تدريبي مع "GitHub" وهمي في مجلد مؤقت، ثم يحذفه. لا تُمسّ مستودعاتك ولا إعدادات Git. يستغرق نحو دقيقة.',
@@ -737,7 +738,10 @@ const raw: Texts = {
     showMore: (hidden: number) => `عرض المزيد (${n(hidden)} مخفي)`,
     noMatch: 'لا شيء يطابق التصفية.',
     otherFiles: (files: string) => `ملفات أخرى تغيّرت: ${files}`,
-    reviewedOnly: (count: number) => `+ ${items(count)} تغيّرت بمراجعة رابط فقط (إبقاء) — دون تغيير في المحتوى، غير مدرجة أعلاه`,
+    reviewedOnly: (count: number) => `مراجعة رابط فقط: ${items(count)}`,
+    reviewedWhy: 'أُبقي رابط — دون تغيير في المحتوى',
+    reviewedTooltip: 'L = مراجعة رابط فقط: تغيّر ملف العنصر لأن رابطًا إلى عنصر متغيّر قد أُبقي',
+    openTooltip: 'فتح العنصر',
     schemaParts: {
       fieldsAdded: (x: string) => `حقول أُضيفت: ${x}`,
       fieldsRemoved: (x: string) => `حقول أُزيلت: ${x}`,

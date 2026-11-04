@@ -72,10 +72,18 @@ match "the tool files with the documentation".
 - **Issues and contributions:** off at first, or on?
 - **Privacy check** runs on the public copy too; the forbidden-names hashes stay only here.
 
+## 4a. Decided (C, owner 4 Nov 2026)
+
+- **Two tools, two update feeds.** The development tool (built from this repository) updates from this repository's
+  releases; the release tool (built from the public repository) updates from the public repository's releases. The
+  owner installs both for manual tests. Each tool's "go back to an earlier version" list shows only its own feed.
+- I: two tools on one PC need different app identities, names and data folders (otherwise one installer replaces the
+  other) — see the rename discussion, R-10.
+
 ## 5. Open questions for the owner (later)
 
 1. Source + docs public (as proposed), or installers only?
-2. Switch the update feed to the public repository with the rename version, or later?
+2. ~~Update feed~~ — decided: each tool updates from its own repository (4a).
 3. Licence (open source / source-available / all rights reserved)?
 4. `requirements.md` public? The sandbox test data public?
 5. Issues on the public repository: on or off?

@@ -49,3 +49,12 @@ session; the owner talks only to the builder.
 
 Each helper run uses its own share of the usage allowance — roughly as much as a long reply each. That is why they run
 once per theme version, not on every small change.
+
+## Fourth helper: brand / logo designer (owner, 4 Nov 2026)
+
+For the rename version and whenever the logo, icon or motion change, a **brand helper** reviews how they sit in the
+app: sizes and clear space, light and dark, Arabic (never mirrored), small-size legibility, motion and reduced motion,
+installer and taskbar icon. It follows the brand package's rules (`resources/brand/README.md`), works on screenshots of
+the frozen commit like the UI/UX reviewer, may draw proposals in its own scratch folder, and writes
+`docs/reviews/agents/<version>-brand.md`. It never edits product files; adopted proposals are applied by the builder
+(a changed logo drawing comes back to the owner first).

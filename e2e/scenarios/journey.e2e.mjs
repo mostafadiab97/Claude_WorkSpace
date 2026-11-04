@@ -426,7 +426,7 @@ await scenario('E2E journey', async (ctx) => {
 
   // take back one part of an uncommitted edit (O-05), then discard the rest
   await rowOf('Display readability').click()
-  await editText(win, 'A change we do not want')
+  await editText(win, 'A change we do not want', 'Display readability')
   await win.locator('.editor').getByLabel('Priority').selectOption('Low')
   await save()
   await openChanges()

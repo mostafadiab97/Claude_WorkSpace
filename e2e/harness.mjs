@@ -110,8 +110,12 @@ export async function scenario(name, body) {
  * Types into the editor's Text field. Saved text is shown formatted (UI review UX-08); a click on it opens the plain
  * text box first. New or empty items show the box straight away.
  */
-export async function editText(win, text) {
+export async function editText(win, text, title) {
+  // after clicking a row: wait until the editor shows that item, not the one before
+  if (title) await win.waitForFunction((t) => document.querySelector('input[placeholder="Short name of the requirement"]')?.value === t, title)
   const preview = win.locator('.editor .text-preview')
+  // wait until the item has loaded (one of the two is shown) — checking at once raced on Windows CI
+  await win.locator('.editor .text-preview, .editor textarea.textarea').first().waitFor()
   if (await preview.isVisible()) await preview.click()
   await win.getByPlaceholder('The system shall…').fill(text)
 }

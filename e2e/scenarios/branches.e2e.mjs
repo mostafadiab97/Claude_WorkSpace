@@ -83,7 +83,7 @@ await scenario('E2E branches', async (ctx) => {
 
   console.log('Switching with uncommitted changes asks first')
   await row('Door lock (feature)').click()
-  await editText(win, 'Not committed.')
+  await editText(win, 'Not committed.', 'Door lock (feature)')
   await win.getByRole('button', { name: 'Save', exact: true }).click()
   await win.getByRole('button', { name: 'Saved ✓' }).waitFor()
   await branchButton.click()

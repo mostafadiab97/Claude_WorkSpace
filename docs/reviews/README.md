@@ -6,6 +6,7 @@ recorded in `docs/design/decisions.md` and `docs/design/roadmap.md` (source of t
 
 ## Open (this folder)
 
+| [2026-11-04-rename-reqochet.md](2026-11-04-rename-reqochet.md) | Rename to reqochet: brand package, open points R-01…R-07 | open |
 | Date | File | What it is | State |
 | --- | --- | --- | --- |
 | 1 Nov 2026 | `2026-11-01-planning-discussion.md` | The planning discussion for the versions after 0.13: open points P-xx with answers, name candidates checked | **In progress** — themes 2–5 still to detail |

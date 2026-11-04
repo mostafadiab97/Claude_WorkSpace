@@ -144,6 +144,7 @@ describe('exporting a comparison', () => {
       links: [{ source: 'SYS-1', type: 'verifies', target: 'SYS-2', change: 'added' as const }],
       schema: null,
       otherFiles: [],
+    reviewedOnly: [],
       durationMs: 1
     }
     const rows = parseCsv(compareToCsv(schema, result))

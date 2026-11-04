@@ -235,6 +235,11 @@ await scenario('E2E journey', async (ctx) => {
   const links = () => win.locator('.editor').getByRole('region', { name: 'Links' })
   await openItem('Verify accuracy at 20 °C')
   await links().getByRole('button', { name: '+ Add link' }).click()
+  // the owner, 0.15.0 step 3: going from the search box to the link type list must not close "Add link"
+  await win.getByLabel('Search for the item to link').focus()
+  await win.getByLabel('Link type').focus()
+  await win.waitForTimeout(400)
+  check(await win.getByLabel('Search for the item to link').isVisible(), 'choosing the link type keeps "Add link" open')
   await win.getByLabel('Link type').selectOption('out:verifies')
   await win.getByLabel('Search for the item to link').fill('temperature accuracy')
   await win.locator('.picker__option', { hasText: 'Temperature accuracy' }).waitFor()

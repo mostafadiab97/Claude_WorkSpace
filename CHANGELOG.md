@@ -3,6 +3,20 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.15.1 — 4 Nov 2026 — The owner's points on 0.15.0
+- **Owner (4 Nov 2026) on 0.15.0:** self-test 21/21 (52.0 s); steps 2, 4 (with a point), 5 passed; step 1 and 3 with
+  points. All fixed here:
+- **Self-test kept while you look elsewhere** (step 1): leaving the Self-tests page lost the running test's display —
+  the card kept its state only while shown. The state now lives for the whole window session; the test was in fact
+  still running in the background.
+- **Add link: the link type list closed the section** (step 3): moving from the search box to the list counted as
+  "leaving the search", which closes it. Moving within the Add link form no longer does.
+- **Link reviews in comparisons** (step 3): after Keep, the five linking items changed only by a new link
+  confirmation. Changes listed them ("link review only") and the commit held all 6 files, but "the last commit"
+  showed only the one real change, because a comparison between commits hides confirmation-only files. It now names
+  them under the list ("+ 5 items changed only by a link review"), so the numbers match.
+- **Back stays at the top of the Settings panel** when the panel scrolls (step 4).
+
 ## 0.15.0 — 4 Nov 2026 — UI polish (from the UI/UX review of 0.14.5)
 - **Owner (3 Nov 2026):** a UI/UX helper agent reviewed 0.14.5 (36 findings, `docs/reviews/agents/0.14.5-ui-ux.md`);
   the owner accepted all recommendations — the 7 High findings, 15 quick wins, open questions 1–5 as recommended —
@@ -32,6 +46,7 @@ version it was about, and what it led to.
   fields, choices and link types (`labels:` / `optionLabels:` in `schema.yaml`; files keep the English values).
 - **Colours:** darker green/amber in Light; a test checks the contrast of all text colours.
 - **Tests:** 336 unit tests (QA added 87), 7 e2e scenarios.
+- **Owner (4 Nov 2026):** self-test 21/21 (52.0 s); steps 2 and 5 passed; steps 1, 3, 4 with points → 0.15.1.
 
 ## 0.14.5 — 3 Nov 2026 — Visible "Check for updates", folding guide topics, UI review prompt
 - **Owner (3 Nov 2026) on 0.14.4:** self-test 21/21 (53.0 s); steps 1, 3 passed; step 2: the Check for updates button

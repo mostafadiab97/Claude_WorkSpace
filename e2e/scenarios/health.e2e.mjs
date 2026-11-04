@@ -78,6 +78,13 @@ await scenario('E2E health', async (ctx) => {
   const guide = win.getByRole('article', { name: 'User guide' })
   await guide.getByRole('heading', { name: '1. Quick start (15 minutes)' }).waitFor()
   check((await guide.getByRole('heading', { name: '2. Ideas you need to know' }).count()) === 0, 'the quick start is a page of its own')
+  // the owner, 0.15.0 step 4: Back stays visible when the left panel is scrolled down
+  await win.setViewportSize({ width: 1280, height: 560 })
+  await win.locator('.settings-nav').evaluate((el) => el.scrollTo(0, el.scrollHeight))
+  const back = await win.locator('.settings-nav__back').boundingBox()
+  const navBox = await win.locator('.settings-nav').boundingBox()
+  check(back !== null && navBox !== null && back.y >= navBox.y - 1 && back.y < navBox.y + 60, 'Back stays at the top of the scrolled left panel')
+  await win.setViewportSize({ width: 1400, height: 860 })
   await nav.getByRole('button', { name: 'Introduction and contents' }).click()
   await guide.getByRole('link', { name: 'Import and export (Excel, ReqIF, CSV, Markdown)' }).click()
   await guide.getByRole('heading', { name: '11. Import and export' }).waitFor()

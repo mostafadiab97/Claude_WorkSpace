@@ -357,6 +357,13 @@ export function ChangesView(props: {
             <LinkList schema={schema} links={data.links} filter={filter} onOpen={(id) => c.select(id)} />
           )}
           {data.otherFiles.length > 0 && <p className="muted-inline compare__other">{T.compare.otherFiles(data.otherFiles.join(', '))}</p>}
+          {data.reviewedOnly.length > 0 && (
+            <details className="muted-inline compare__other">
+              <summary>{T.compare.reviewedOnly(data.reviewedOnly.length)}</summary>
+              {data.reviewedOnly.slice(0, 500).join(', ')}
+              {data.reviewedOnly.length > 500 && T.common.ellipsis}
+            </details>
+          )}
 
           {tab === 'items' && sel && (
             <div className="changes-view__detail scroll" aria-label={T.compare.detailLabel(sel.id)} role="region">

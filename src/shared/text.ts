@@ -735,6 +735,7 @@ const en = {
     showMore: (hidden: number) => `Show more (${n(hidden)} hidden)`,
     noMatch: 'Nothing matches the filter.',
     otherFiles: (files: string) => `Other files changed: ${files}`,
+    reviewedOnly: (count: number) => `+ ${count} item${s(count)} changed only by a link review (Keep) — no content change, not listed above`,
     schemaParts: {
       fieldsAdded: (x: string) => `fields added: ${x}`,
       fieldsRemoved: (x: string) => `fields removed: ${x}`,

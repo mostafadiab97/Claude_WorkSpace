@@ -316,6 +316,12 @@ export interface CompareResult {
   schema: SchemaChange | null
   /** Other changed files under requirements/ (e.g. .gitattributes), as paths. */
   otherFiles: string[]
+  /**
+   * Items whose file changed only by a link review (Keep → new confirmation): no content change, so not listed as
+   * entries; their IDs are named in a note so the count matches the commit (owner, 0.15.0 step 3). Not for uncommitted
+   * changes, where they are entries ("link review only").
+   */
+  reviewedOnly: string[]
   durationMs: number
 }
 

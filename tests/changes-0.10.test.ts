@@ -164,6 +164,11 @@ describe('report by the owner on 0.10.0: "Changes (1)" while the list was empty'
     const head = (await ws.compareOptions()).head as string
     const e = (await ws.compareVersions(head, 'WORKING')).entries
     expect(e.map((x) => [x.id, x.summary])).toEqual([[test, 'Link review only (a link was kept or confirmed)']])
-    // between two commits such a change stays hidden (nothing a reader would call a change)
+    // between two commits such a change is not an entry, but it is named (owner, 0.15.0 step 3: 6 committed, 1 listed)
+    expect((await ws.commit('keep the link')).ok).toBe(true)
+    const after = (await ws.compareOptions()).head as string
+    const c = await ws.compareVersions(head, after)
+    expect(c.entries).toEqual([])
+    expect(c.reviewedOnly).toEqual([test])
   })
 })

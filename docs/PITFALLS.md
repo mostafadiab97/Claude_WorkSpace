@@ -117,3 +117,7 @@ elements (strict-mode violation). Only `health` had been run locally after chang
   to a prop object (`onSaveReady` callback instead of a `saveRef` prop).
 - **Git identity:** written per repository, globally only when no global identity exists — the owner's company
   repositories use his global one (0.14.2 step 5).
+- **Cards that run long actions lose their state when the page changes** (Settings pages unmount). Keep such state in
+  `renderer/lib/sessionState.ts` (0.15.1, self-test).
+- **A search box that closes on blur** closes when the user moves to a sibling control (the link type list). Mark the
+  form with `data-keeps-search`; `ItemSearch` ignores blurs into it (0.15.1).

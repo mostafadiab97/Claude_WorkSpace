@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSessionState } from '../lib/sessionState'
 import type { ReleaseSelfTestResult } from '../../../shared/api'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
@@ -16,8 +17,11 @@ export function selfTestReport(r: ReleaseSelfTestResult): string {
  * The release self-test (Settings & diagnostics): the main actions on a practice repository in a temporary
  * folder, on the owner's own PC, with pass/fail per step and a report to copy.
  */
+/** Kept for the whole window session, so leaving the page does not lose a running test (owner, 0.15.0 step 1). */
+const IDLE = { kind: 'idle' } as const
+
 export function ReleaseSelfTestCard() {
-  const [state, setState] = useState<{ kind: 'idle' } | { kind: 'running' } | { kind: 'done'; r: ReleaseSelfTestResult } | { kind: 'failed'; message: string }>({ kind: 'idle' })
+  const [state, setState] = useSessionState<{ kind: 'idle' } | { kind: 'running' } | { kind: 'done'; r: ReleaseSelfTestResult } | { kind: 'failed'; message: string }>('selfTest.release', IDLE)
   const [copied, setCopied] = useState(false)
 
   const run = async (): Promise<void> => {

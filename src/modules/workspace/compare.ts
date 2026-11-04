@@ -132,6 +132,7 @@ export function createCompare(git: GitAdapter) {
       // Pair versions by item ID (a file renamed by hand keeps its ID)
       const pairs = new Map<string, { before: Side; after: Side; paths: Set<string> }>()
       const otherFiles: string[] = []
+      const reviewedOnly: string[] = []
       let schema: SchemaChange | null = null
       for (const c of changes) {
         const oldPath = c.from ?? c.path
@@ -147,7 +148,10 @@ export function createCompare(git: GitAdapter) {
         }
         // Fast path: only link confirmations or line endings differ → nothing a reader would call a change
         // (not for uncommitted changes: every changed file must be visible there, to commit or discard it)
-        if (!toWorking && c.status === 'M' && sameIgnoringConfirmations(beforeText(c), afterText(c))) continue
+        if (!toWorking && c.status === 'M' && sameIgnoringConfirmations(beforeText(c), afterText(c))) {
+          reviewedOnly.push(ITEM_FILE.exec(c.path)?.[1] ?? c.path)
+          continue
+        }
         const before = c.status === 'A' ? { item: null } : parse(beforeText(c))
         const after = c.status === 'D' ? { item: null } : parse(afterText(c))
         const id = after.item?.id ?? before.item?.id ?? ITEM_FILE.exec(c.path)?.[1] ?? c.path
@@ -238,6 +242,7 @@ export function createCompare(git: GitAdapter) {
         links,
         schema,
         otherFiles,
+        reviewedOnly: reviewedOnly.sort(),
         durationMs: Math.round(performance.now() - started)
       }
     }

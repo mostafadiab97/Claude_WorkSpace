@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSessionState } from '../lib/sessionState'
 import type { DataSelfTestResult } from '../../../shared/api'
 import { T } from '../../../shared/text'
 
@@ -10,9 +11,12 @@ const seconds = (ms: number): string => `${(ms / 1000).toFixed(1)} s`
  * Lets a tester measure the data layer on their own PC: generates fictional items in a temporary folder,
  * indexes them, runs typical table queries, then deletes everything. Nothing in any real repository is touched.
  */
+/** Kept for the whole window session, so leaving the page does not lose a running test (owner, 0.15.0 step 1). */
+const IDLE = { kind: 'idle' } as const
+
 export function SelfTestCard() {
   const [size, setSize] = useState(10_000)
-  const [state, setState] = useState<{ kind: 'idle' } | { kind: 'running'; size: number } | { kind: 'done'; r: DataSelfTestResult } | { kind: 'failed'; message: string }>({ kind: 'idle' })
+  const [state, setState] = useSessionState<{ kind: 'idle' } | { kind: 'running'; size: number } | { kind: 'done'; r: DataSelfTestResult } | { kind: 'failed'; message: string }>('selfTest.data', IDLE)
 
   const run = async (): Promise<void> => {
     setState({ kind: 'running', size })

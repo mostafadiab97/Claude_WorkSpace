@@ -134,7 +134,7 @@ export function LinksSection(props: {
       {lockedReason && <p className="muted-inline">{lockedReason}</p>}
 
       {adding && (
-        <div className="links__add">
+        <div className="links__add" data-keeps-search>
           <select className="input" aria-label={T.links.linkType} value={relation} onChange={(e) => setRelation(e.target.value)}>
             <optgroup label={T.links.thisItem}>
               {schema.linkTypes.map((t) => <option key={`out-${t.id}`} value={`out:${t.id}`}>{linkLabel(t)}</option>)}

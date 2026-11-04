@@ -2815,6 +2815,11 @@ code {
 }
 .settings-nav__back {
   margin: 0 var(--rm-space-sm) var(--rm-space-sm);
+  /* stays at the top while the panel scrolls (owner, 0.15.0 step 4) */
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  box-shadow: 0 0 0 var(--rm-space-sm) color-mix(in srgb, var(--rm-color-surface) 94%, var(--rm-color-text));
 }
 .settings-nav ul {
   list-style: none;

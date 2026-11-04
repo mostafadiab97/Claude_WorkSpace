@@ -1,7 +1,17 @@
-# Past manual checklists (v0.0.3 – v0.14.4)
+# Past manual checklists (v0.0.3 – v0.14.5)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## Previous checklist — v0.14.5 (visible Check for updates, folding guide topics)
+
+The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
+Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.14.5**, then **⚙ → Self-tests → Run release self-test**. | App shows 0.14.5; **All steps passed**, 21 ✓. |
+| 2 | **⚙ → Environment and versions**; then in the panel click **▸ User guide**, open a topic, go back to a settings page. | **Check for updates** is a blue button on the Updates line. The guide topics are hidden until you click ▸ User guide; they stay open while a guide page is shown. |
 
 ## Previous checklist — v0.14.4 (no personal data in the files; Settings touches)
 

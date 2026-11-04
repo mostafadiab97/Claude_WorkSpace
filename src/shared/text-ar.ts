@@ -737,6 +737,7 @@ const raw: Texts = {
     showMore: (hidden: number) => `عرض المزيد (${n(hidden)} مخفي)`,
     noMatch: 'لا شيء يطابق التصفية.',
     otherFiles: (files: string) => `ملفات أخرى تغيّرت: ${files}`,
+    reviewedOnly: (count: number) => `+ ${items(count)} تغيّرت بمراجعة رابط فقط (إبقاء) — دون تغيير في المحتوى، غير مدرجة أعلاه`,
     schemaParts: {
       fieldsAdded: (x: string) => `حقول أُضيفت: ${x}`,
       fieldsRemoved: (x: string) => `حقول أُزيلت: ${x}`,

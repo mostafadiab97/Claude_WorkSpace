@@ -76,7 +76,9 @@ export function ItemSearch(props: {
             if (first) pick(first.item)
           }
         }}
-        onBlur={() => {
+        onBlur={(e) => {
+          // moving to a control of the same form (e.g. the link type list) keeps the search open (owner, 0.15.0 step 3)
+          if (e.relatedTarget instanceof Element && e.relatedTarget.closest('[data-keeps-search]')) return
           blurTimer.current = window.setTimeout(props.onCancel, 150)
         }}
       />

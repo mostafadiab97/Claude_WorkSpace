@@ -4,6 +4,7 @@ Each version was installed and tried by the owner (product owner) on Windows 11;
 version it was about, and what it led to.
 
 ## 0.16.2 — 4 Nov 2026 — The Windows icon redrawn
+- **Owner (4 Nov 2026):** all 3 steps passed (self-test 22/22, 69.6 s).
 - **Owner (4 Nov 2026) on 0.16.1:** all 5 steps passed (self-test 22/22, 65.5 s). Asked: redraw the Windows icon with
   the brighter eyes and a thin lighter outline, so it shows on dark wallpapers.
 - **Windows icon** (taskbar, Start menu, desktop, window): brighter red and green eyes and a thin grey-blue outline

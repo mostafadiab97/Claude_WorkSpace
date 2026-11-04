@@ -8,6 +8,7 @@ recorded in `docs/design/decisions.md` and `docs/design/roadmap.md` (source of t
 
 | Date | File | What it is | State |
 | --- | --- | --- | --- |
+| 4 Nov 2026 | `2026-11-04-next-round.md` | 1a structure questions, the whole-project review plan, more helper agents, cheaper helper runs | **Open** — waiting for the owner |
 | 4 Nov 2026 | `2026-11-04-public-release-repo.md` | How files would move to a public release repository (first time and per release), which files go, options — **open, not decided**; decided so far: two tools, two update feeds | **Open** — 4 questions in section 5 |
 | 1 Nov 2026 | `2026-11-01-planning-discussion.md` | The planning discussion for the versions after 0.13: open points P-xx with answers, release plan (0.14 … 0.24) | **Decided** — the plan in use; each theme's details are settled when it starts |
 | 2 Nov 2026 | `2026-11-02-requiem-analysis.md` | Requiem (`requirements-manager`, Rust command-line tool, Markdown + YAML in Git): how it works, side by side with ReqMan, ideas worth taking | Reference — ideas placed in themes 1, 2, 5 |

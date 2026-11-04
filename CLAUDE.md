@@ -130,7 +130,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.16.1, 4 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.16.2, 4 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -142,7 +142,7 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.13.0 the owner's points on 0.12.1 — pull from another branch = uncommitted changes for review, delete branch, Git controls in the top bar + one-row toolbar (Filters pop-up), **Arabic / English with right-to-left** | Done (v0.13.0) |
 | 0.13.1 the owner's points on 0.13.0 — floating note tinted green/red/blue with frame and glow, centred text; red Delete button per branch; right-to-left mark on every Arabic text (word order in tooltips/dialogs) | Done (v0.13.1) |
 | 0.14.0 health (P-40/P-41) — feature switches (Settings → Features; team `features:` in schema.yaml; `src/shared/features.ts`, `renderer/lib/features.ts`), Report a problem (one text file), coverage floor (`vitest.config.mts` thresholds, part of `npm run check`), **automatic acceptance run** (`e2e/acceptance.mjs` in build.yml + release.yml: install previous → update from local feed → self-test → 10k sandbox → real push to `ci/acceptance-*`, deleted) | Released (v0.14.0) |
-| 0.14.1 before the pilot — `docs/USER-GUIDE.md` (quick start + everything); Settings → Versions: go back to an earlier version (`src/modules/updater/versions.ts`, `update-hold.json` pauses updates; `OLDEST_REVERT_TARGET` must be raised at the rename); security check `docs/reviews/2026-11-03-security-check.md` (no secrets; navigation guard; no push on PRs); floating notes theme-coloured, blue `neutral` Git results | Released (v0.14.1) |
+| 0.14.1 before the pilot — `docs/USER-GUIDE.md` (quick start + everything); Settings → Versions: go back to an earlier version (`src/modules/updater/versions.ts`, `update-hold.json` pauses updates; `OLDEST_REVERT_TARGET` must be raised at the rename); security check `docs/reviews/done/2026-11-03-security-check.md` (no secrets; navigation guard; no push on PRs); floating notes theme-coloured, blue `neutral` Git results | Released (v0.14.1) |
 | 0.14.2 Settings and help — left panel (`SettingsScreen.tsx`), user guide built in (`renderer/lib/guide.ts`, `docs/USER-GUIDE.md?raw`, marked); privacy guard in build.yml (`tools/check-privacy.mjs` + gitleaks, both repos, full history); sandbox history rewritten (work e-mail removed, approved) | Released (v0.14.2) |
 | 0.14.3 Settings and help as pages — one page per settings group and per guide section (`src/shared/guide.ts` splits the guide; `renderer/lib/guide.ts` renders it); Back on top of the shaded panel. The owner cannot set a global private Git e-mail (company repos) → per-repository config in the sandbox clones only | Released (v0.14.3) |
 | 0.14.4 no personal data in the tool's files — the owner's name → "the owner"; no account name anywhere (workflows use `github.repository_owner`, CI passes `-c.publish.owner/repo`, the app reads `app-update.yml`, `tools/ci.mjs` reads the Git remote); `tools/check-privacy.mjs` checks current files only (names as hashes); Check for updates on the Updates line; blue Back | Released (v0.14.4) |
@@ -152,7 +152,8 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.15.2 the owner's touches on 0.15.1 — self-test steps fold, "Link review only" row in Changes, suspect warning counts only links still waiting for review, Back on its own sticky bar, index preview keeps a leading bold | Released (v0.15.2) |
 | 0.16.0 the new name **reqochet** — this repository builds **reqochet-dev** (package/productName, appId `com.reqochet.dev`, `build/installer.nsh` removes ReqMan, `src/main/legacyData.ts` moves `%APPDATA%\\ReqMan`); brand package in `resources/brand` (`components/Brand.tsx`, `lib/activity.ts`); project folder `.reqochet` (reads `.reqman`, "Rename folder" commit); `window.reqochet`/`ReqochetApi`; revert floor 0.16.0; four helper agents incl. brand | Released (v0.16.0) |
 | 0.16.1 the owner's points on 0.16.0 — top bar clipped the Push questions (`overflow-x: clip` only), small-cut white-tile eyes (BR-02), lighter eyes on the dark tile (`resources/brand/README.md`), splash ≥ one loop, Fields window warns about stale translations (`staleTranslations`) | Released (v0.16.1) |
-| **Next** | Owner's 0.16.1 checklist; the logo adjusting step (Windows .ico/PNG with the lighter eyes); the public release repository (`docs/reviews/2026-11-04-public-release-repo.md`, open; its package name must be `reqochet`, appId `com.reqochet.app`); then 1a structure (plan in `docs/reviews/2026-11-01-planning-discussion.md`) | — |
+| 0.16.2 Windows icon redrawn — brighter eyes + thin outline (`#7a8499`, class `ring`) on every dark-tile drawing; PNG/.ico made by `tools/brand-icons.mjs`; finished reviews moved to `docs/reviews/done/` | Released (v0.16.2) |
+| **Next** | Owner's 0.16.2 checklist; the four open questions of the public release repository (`docs/reviews/2026-11-04-public-release-repo.md`; its package name must be `reqochet`, appId `com.reqochet.app`); then 1a structure (plan in `docs/reviews/2026-11-01-planning-discussion.md`) | — |
 
 The owner's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
 Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
@@ -174,7 +175,7 @@ checks in detail".
   the owner's report 3 Nov: 0.14.0/0.14.1 passed with small points → **0.14.2 released 3 Nov** (Settings and help with the
   guide inside, privacy guard, sandbox history cleaned) — 0.14.2: steps 1, 3, 4 passed; step 2 → **0.14.3** (pages) —
   0.14.3 passed → **0.14.4 released 3 Nov** (no personal data in files; Check for updates on the Updates line; blue Back)
-  — 0.14.4 passed with two touches → **0.14.5 released 3 Nov** — 0.14.5 released; **0.15.0 (UI polish) released 4 Nov** — his report 4 Nov: steps 2, 5 passed, points on 1, 3, 4 → **0.15.1 released 4 Nov** — all passed with three touches → **0.15.2 released 4 Nov** — all passed → **0.16.0 (rename to reqochet-dev) released 4 Nov** — steps 1, 2, 5 passed, points on 3, 4 → **0.16.1 released 4 Nov** — waiting for his 0.16.1 checklist (5 steps). History question settled: not rewritten; a public release repository
+  — 0.14.4 passed with two touches → **0.14.5 released 3 Nov** — 0.14.5 released; **0.15.0 (UI polish) released 4 Nov** — his report 4 Nov: steps 2, 5 passed, points on 1, 3, 4 → **0.15.1 released 4 Nov** — all passed with three touches → **0.15.2 released 4 Nov** — all passed → **0.16.0 (rename to reqochet-dev) released 4 Nov** — steps 1, 2, 5 passed, points on 3, 4 → **0.16.1 released 4 Nov** — all 5 passed; icon redraw asked → **0.16.2 released 4 Nov** — waiting for his 0.16.2 checklist (3 steps). History question settled: not rewritten; a public release repository
   will start from the files without history.
 - **Planning discussion in progress** — `docs/reviews/2026-11-01-planning-discussion.md` (method: the
   `owner-decision-walkthrough` skill; record every answer there and, when it changes the product, in
@@ -213,7 +214,7 @@ checks in detail".
   - P-11 **no Word import**. Import: Excel, ReqIF, CSV, ReqMan repositories. Export: Excel, ReqIF, CSV, ReqMan
     repositories, Markdown, Word, PDF.
 - **3 Nov 2026: the CTO approved a pilot with a complete team** — the rename must ship before the team gets the tool.
-- **New name:** the owner is choosing (decision expected 3 Nov). Candidates 3 Nov: reqochet, reqoin, reqornea (his), Reqoncile, Reqonnect, Reqosmos, Reqompass, Reqollect, Reqipe; avoid Reqord (existing tool). Latest candidates (2 Nov): ShallWe (recommended), Plumbline, Keelson; earlier: reqochet (felt long, "misses the target"), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/2026-10-31-rename-impact.md` (section 5:
+- **New name:** the owner is choosing (decision expected 3 Nov). Candidates 3 Nov: reqochet, reqoin, reqornea (his), Reqoncile, Reqonnect, Reqosmos, Reqompass, Reqollect, Reqipe; avoid Reqord (existing tool). Latest candidates (2 Nov): ShallWe (recommended), Plumbline, Keelson; earlier: reqochet (felt long, "misses the target"), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/done/2026-10-31-rename-impact.md` (section 5:
   uninstall old → install new, `.reqman` folder renamed by Git rename, copy the user's settings first).
 - **Rust: no migration now** (31 Oct). Feature input: `docs/reviews/2026-10-31-feature-catalogue.md` (163 features),
   market list `docs/reviews/2026-10-31-rm-tools-market-list.md`.

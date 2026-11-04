@@ -35,3 +35,16 @@ describe('top bar (0.16.1)', () => {
   })
 })
 
+
+describe('icon outline (0.16.2)', () => {
+  it('every dark-tile drawing has the thin lighter outline, so the icon shows on dark wallpapers', () => {
+    for (const f of ['icon/reqochet-icon.svg', 'icon/reqochet-icon-small.svg', 'motion/reqochet-eyes-idle.svg', 'motion/reqochet-eyes-idle-small.svg', 'motion/reqochet-eyes-thinking.svg', 'motion/reqochet-eyes-thinking-small.svg', 'motion/reqochet-loading-icon.svg']) {
+      expect(brand(f), f).toMatch(/<rect class="ring"[^>]*stroke="#7a8499"/)
+    }
+  })
+  it('the Windows icon holds every size from 16 to 256 px', () => {
+    const ico = readFileSync('resources/brand/icon/reqochet.ico')
+    expect(ico.readUInt16LE(2)).toBe(1)
+    expect(ico.readUInt16LE(4)).toBe(10)
+  })
+})

@@ -120,8 +120,11 @@ Transform origin = bottom centre of the dot.
 - **Lighter eyes on the dark tile:** on every dark-tile drawing (`reqochet-icon(-small).svg`, `reqochet-eyes-*` without
   `-light`, `reqochet-loading-icon.svg`) the q's eye is `#FF5C61` and the o's eye `#3CD873` (tokens
   `requirementRedOnDarkTile`, `verificationGreenOnDarkTile`) — the original red and green could not be told from the
-  dark tile. White-tile drawings and the name logos keep `#D7262B` / `#1F9D48`. The Windows `.ico`/PNG files are not
-  redrawn yet (logo adjusting step).
+  dark tile. White-tile drawings and the name logos keep `#D7262B` / `#1F9D48`. The Windows `.ico`/PNG files were redrawn in
+  0.16.2 (`tools/brand-icons.mjs`).
 - **New (BR-02):** `motion/reqochet-eyes-idle-light-small.svg` and `motion/reqochet-eyes-thinking-light-small.svg` —
   the small cut on the white tile.
 - The small-cut eyes are as large as the still small icon's (r 84.3), so the face does not change size when it rests.
+- **Outline (owner, 4 Nov 2026 — 0.16.2):** every dark-tile drawing has a thin `#7a8499` outline inside the tile edge
+  (`<rect class="ring">`; 32 units on the large cut, 92 on the small cut ≈ 1 px at 16 px) so the icon shows on dark
+  wallpapers. After changing an icon drawing, run `node tools/brand-icons.mjs` to remake the PNG and `.ico` files.

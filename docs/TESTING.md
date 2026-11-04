@@ -67,7 +67,15 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.16.1 (the owner's points on 0.16.0)
+## Manual test checklist — v0.16.2 (the Windows icon redrawn)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.16.2**, then **⚙ → Self-tests → Run release self-test**. | Version 0.16.2; **all 22 steps passed**. |
+| 2 | Look at reqochet-dev in the taskbar, Start menu and on the desktop, on a dark wallpaper. (If Windows still shows the old icon, it is its icon cache — it refreshes after a restart.) | Brighter red and green eyes; a thin light outline around the dark tile. |
+| 3 | Light mode: look at the face in the top bar. | The same thin outline; the face keeps its size while the eyes move and rest. |
+
+## Previous checklist — v0.16.1 (the owner's points on 0.16.0)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
@@ -76,20 +84,6 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 | 3 | Dark mode: watch the top-bar face, then click another window and come back. | The face keeps the same size and weight while the eyes glance, blink and rest. |
 | 4 | Light mode: look at the top-bar face and the start screen. | The red and green eyes are clearly visible on the dark tile, and you can see them move. |
 | 5 | In the sandbox, change an item, press **Push** while GitHub has newer commits (or use your second clone to push first). | "Pull first?" opens **on top of** the table; both buttons can be clicked. |
-
-## Previous checklist — v0.16.0 (the new name: reqochet-dev)
-
-The acceptance run on GitHub installed 0.15.2 (ReqMan), updated it to reqochet-dev, checked that ReqMan was removed and
-the settings moved, then ran the self-test, the sandbox and a real push (Actions → Release → Summary). Report by step
-number.
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let ReqMan update to **0.16.0** (Restart and update). | **reqochet-dev** opens by itself; ReqMan is gone from the Start menu and from Windows' installed apps; your colour mode, language and recent repositories are still there. |
-| 2 | **⚙ → Self-tests → Run release self-test**. | **All steps passed**, now **22** (new: a project made with ReqMan is renamed). |
-| 3 | Open the sandbox. Look at the top bar and the start screen; hover the window, then click another window. | Face (eyes) + reqochet + **DEV**; the eyes glance and blink, rest when the window is in the background, look busy during Pull. Changes / Pull / Push sit right after the branch. The start screen shows the large face and name; while the sandbox opens only the bouncing dots move. |
-| 4 | The sandbox shows "This project was made with ReqMan…": click **Rename folder**, then **Push**. | A green note "Folder renamed and committed"; on GitHub the commit shows `.reqman → .reqochet` as a rename; the sandbox still opens with all items. (Afterwards `git pull` in your second sandbox clone.) |
-| 5 | Switch to **Dark** and **العربية** (⚙ → Appearance); look at the top bar and the start screen. | The light logo files in Dark; nothing mirrored in Arabic (the logo reads "reqochet"). |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

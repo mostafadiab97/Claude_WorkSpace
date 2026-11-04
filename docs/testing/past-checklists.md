@@ -1,7 +1,21 @@
-# Past manual checklists (v0.0.3 – v0.15.2)
+# Past manual checklists (v0.0.3 – v0.16.0)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## Previous checklist — v0.16.0 (the new name: reqochet-dev)
+
+The acceptance run on GitHub installed 0.15.2 (ReqMan), updated it to reqochet-dev, checked that ReqMan was removed and
+the settings moved, then ran the self-test, the sandbox and a real push (Actions → Release → Summary). Report by step
+number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let ReqMan update to **0.16.0** (Restart and update). | **reqochet-dev** opens by itself; ReqMan is gone from the Start menu and from Windows' installed apps; your colour mode, language and recent repositories are still there. |
+| 2 | **⚙ → Self-tests → Run release self-test**. | **All steps passed**, now **22** (new: a project made with ReqMan is renamed). |
+| 3 | Open the sandbox. Look at the top bar and the start screen; hover the window, then click another window. | Face (eyes) + reqochet + **DEV**; the eyes glance and blink, rest when the window is in the background, look busy during Pull. Changes / Pull / Push sit right after the branch. The start screen shows the large face and name; while the sandbox opens only the bouncing dots move. |
+| 4 | The sandbox shows "This project was made with ReqMan…": click **Rename folder**, then **Push**. | A green note "Folder renamed and committed"; on GitHub the commit shows `.reqman → .reqochet` as a rename; the sandbox still opens with all items. (Afterwards `git pull` in your second sandbox clone.) |
+| 5 | Switch to **Dark** and **العربية** (⚙ → Appearance); look at the top bar and the start screen. | The light logo files in Dark; nothing mirrored in Arabic (the logo reads "reqochet"). |
 
 ## Previous checklist — v0.15.2 (the owner's points on 0.15.1)
 

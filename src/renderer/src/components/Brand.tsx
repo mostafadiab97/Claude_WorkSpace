@@ -1,4 +1,4 @@
-// The reqochet brand in the window (owner, 4 Nov 2026 — docs/reviews/2026-11-04-rename-reqochet.md). The files in
+// The reqochet brand in the window (owner, 4 Nov 2026 — docs/reviews/done/2026-11-04-rename-reqochet.md). The files in
 // resources/brand are final and used unchanged (never redrawn, recoloured or mirrored in Arabic); light or dark files
 // are chosen by the window's colour mode. Animations play inside <img> and stop by themselves when Windows
 // animations are off (prefers-reduced-motion is in each file).

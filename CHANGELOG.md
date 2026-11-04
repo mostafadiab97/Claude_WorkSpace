@@ -3,7 +3,16 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.16.2 — 4 Nov 2026 — The Windows icon redrawn
+- **Owner (4 Nov 2026) on 0.16.1:** all 5 steps passed (self-test 22/22, 65.5 s). Asked: redraw the Windows icon with
+  the brighter eyes and a thin lighter outline, so it shows on dark wallpapers.
+- **Windows icon** (taskbar, Start menu, desktop, window): brighter red and green eyes and a thin grey-blue outline
+  around the dark tile, all sizes 16–256 px. The same outline is on the face in the window (light mode), so the face
+  keeps one look. The files are made by `tools/brand-icons.mjs` from the drawings.
+- **Reviews folder tidied:** the rename, rename-impact and security-check files moved to `docs/reviews/done/`.
+
 ## 0.16.1 — 4 Nov 2026 — The owner's points on 0.16.0
+- **Owner (4 Nov 2026):** all 5 steps passed → 0.16.2.
 - **Owner (4 Nov 2026) on 0.16.0:** self-test 22/22 (86.1 s); steps 1, 2, 5 passed; points on 3 and 4. Answers: BR-02
   draw the two missing drawings now; BR-04 keep face + name as they are in Arabic; BR-06 the white tile in dark mode
   stays; a renamed field with a translation → warn.

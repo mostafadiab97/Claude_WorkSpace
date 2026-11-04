@@ -1,4 +1,4 @@
-// The switch from ReqMan to reqochet (0.16; owner, 31 Oct / 4 Nov 2026 — docs/reviews/2026-10-31-rename-impact.md §5):
+// The switch from ReqMan to reqochet (0.16; owner, 31 Oct / 4 Nov 2026 — docs/reviews/done/2026-10-31-rename-impact.md §5):
 // the new app has its own identity and settings folder. On its first start it copies the user's own settings from
 // %APPDATA%\ReqMan, then removes the old folder (a clean switch: no files left under the old name). The index cache is
 // not copied — it is rebuilt on the first opening of each repository. Node only, no Electron (unit-tested).

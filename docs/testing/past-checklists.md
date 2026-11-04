@@ -1,7 +1,18 @@
-# Past manual checklists (v0.0.3 – v0.12.1)
+# Past manual checklists (v0.0.3 – v0.14.4)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## Previous checklist — v0.14.4 (no personal data in the files; Settings touches)
+
+The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
+Re-clone the sandbox first if you have not yet (its history was rewritten in 0.14.2). Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.14.4**, then **⚙ → Self-tests → Run release self-test**. | App shows 0.14.4; **All steps passed**, 21 ✓. |
+| 2 | **⚙ → Environment and versions**: next to "Updates", click **Check for updates**. Look at **← Back**. | The button sits on the Updates line and checks; Back is blue like the other main buttons. |
+| 3 | **⚙ → Environment and versions → Go back to an earlier version…** | It lists **0.14.3, 0.14.2, 0.14.1** (going back works from 0.14.1 on). Don't install one now — unless you want to try it: install 0.14.3, check that updates say "paused", then **Resume automatic updates** to come back to 0.14.4. |
 
 ## Previous checklist — v0.14.3 (Settings and help as pages)
 

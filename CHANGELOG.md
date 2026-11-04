@@ -3,6 +3,36 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.15.0 — 4 Nov 2026 — UI polish (from the UI/UX review of 0.14.5)
+- **Owner (3 Nov 2026):** a UI/UX helper agent reviewed 0.14.5 (36 findings, `docs/reviews/agents/0.14.5-ui-ux.md`);
+  the owner accepted all recommendations — the 7 High findings, 15 quick wins, open questions 1–5 as recommended —
+  and all remaining findings except UX-19 (filters → theme 2), UX-29 (fields dialog → 1a) and UX-33 (keep the
+  GitHub-like difference view). Before release a code reviewer, a QA tester and a UI/UX re-check looked at the frozen
+  build (`docs/reviews/agents/0.15.0-*.md`); their findings were fixed.
+- **Table:** columns No., Title, Type, Status, Links, other fields, ID, Text (yours stays if you reordered; ID can
+  now be moved too); short type names (SysReq), headings bold, no type shown for headings; outline numbers never cut;
+  the Text column shows the text without Markdown markers (underscores inside words such as `SIG_BRAKE_REQ` kept —
+  the old preview dropped them); the editor can be made wider by dragging (or ← → on the line).
+- **Editor:** the text shows formatted (bold, lists, tables) until you click it; the Parent field is a button with
+  **Change…** and **Show**; Owner suggests names already used; a dot marks unsaved changes; **Save and continue** in
+  the unsaved-changes question; Tags takes a full row; "Saved ✓" for 2 seconds.
+- **Links:** suspect links are checked with one button (Keep all / Unlink all… behind it); the "Check the links"
+  window shows **what changed** in the item, a Keep | Unlink choice per link, the linking item's text on click.
+- **Git:** a question (pull first? publish) opens as a small box under the buttons and closes with Esc; result notes
+  never cover dialogs; Pull/Push show their counts and turn blue when there is something to do; **▾ → Commit and
+  push**; **Author:** line with **Change…**; the name and e-mail are stored for the repository (and as your Git
+  default only if you have none — your company repositories keep theirs); branch panel: "Bring in changes from…",
+  "Other branches on this PC" / "Only on GitHub"; the pull decision shows both versions as cards to click.
+- **Other screens:** grouped Problems panel with counts and a Close button; status bar shows chosen rows, the active
+  filters (✕ clears them) and the time of your last pull; import with steps and a drop zone for files; history
+  placeholder while Git reads; start screen with **Read the quick start** and a Git check; **Settings → Appearance**
+  holds language and colours (the top bar of an open repository no longer does); keyboard shortcuts (Ctrl+S, Ctrl+F,
+  Ctrl+N, Alt+↑/↓, Ctrl+Shift+C, Ctrl+/) with a new guide page **18. Keyboard shortcuts**.
+- **Arabic:** English text reads correctly in the right-to-left window; new projects get Arabic names for types,
+  fields, choices and link types (`labels:` / `optionLabels:` in `schema.yaml`; files keep the English values).
+- **Colours:** darker green/amber in Light; a test checks the contrast of all text colours.
+- **Tests:** 336 unit tests (QA added 87), 7 e2e scenarios.
+
 ## 0.14.5 — 3 Nov 2026 — Visible "Check for updates", folding guide topics, UI review prompt
 - **Owner (3 Nov 2026) on 0.14.4:** self-test 21/21 (53.0 s); steps 1, 3 passed; step 2: the Check for updates button
   is hard to see (make it blue) and the user-guide topics should fold under "User guide". Extra: a prompt for an AI

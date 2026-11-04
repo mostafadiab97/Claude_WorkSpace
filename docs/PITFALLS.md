@@ -104,3 +104,16 @@ elements (strict-mode violation). Only `health` had been run locally after chang
 ## electron-builder: `-c` means a config FILE (0.14.4)
 `-c.publish.owner=x` was read as "config file `.publish.owner=x`" and the release build failed. Use the long form
 `--config.publish.owner=… --config.publish.repo=…` (checked locally: the installed `app-update.yml` then holds them).
+
+## 0.15.0 UI polish
+
+- **CSS class names are global.** A new `.segmented` rule for the suspect dialog silently restyled the existing
+  language/theme switches. Grep `styles.css` for a class before adding one (`.choice-pair` now).
+- **The table's Text column comes from the index**, not from the window: `preview()` in
+  `src/modules/index-cache/sqliteIndex.ts` builds it for brief queries. A fix only in `renderer/lib/markdown.ts`
+  did not reach the table (underscores were still dropped) — the QA e2e caught it.
+- **React compiler lint:** a component whose props contain refs gets "Cannot access refs during render" on every
+  `props.x` — destructure the refs out of the props (`Toolbar({ searchRef, newRef, ...props })`); never assign
+  to a prop object (`onSaveReady` callback instead of a `saveRef` prop).
+- **Git identity:** written per repository, globally only when no global identity exists — the owner's company
+  repositories use his global one (0.14.2 step 5).

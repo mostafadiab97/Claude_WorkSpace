@@ -3,7 +3,7 @@
 Three kinds of checks protect each version:
 
 1. **Automated checks** run on a Windows machine on GitHub for every push: type checking, lint rules
-   (including the module-boundary rules), about 190 unit tests (real Git with a fake "GitHub", the sandbox's
+   (including the module-boundary rules), about 340 unit tests (real Git with a fake "GitHub", the sandbox's
    broken files, …), performance tests, and end-to-end scenarios that click through the real app. A build that
    fails any of them produces no installer. To see them: repository → **Actions** → latest **Build** run.
 2. **The release self-test** (from 0.8.0) — on *your* PC, inside ReqMan: **⚙ Settings & diagnostics → Run
@@ -67,7 +67,20 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.14.5 (visible Check for updates, folding guide topics)
+## Manual test checklist — v0.15.0 (UI polish from the UI/UX review)
+
+The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
+Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Update to **0.15.0**, then **⚙ → Self-tests → Run release self-test**. | App shows 0.15.0; **All steps passed**, 21 ✓. |
+| 2 | Open the sandbox. Look at the table and click a requirement with formatted text. Drag the line between table and editor. | Columns: **No., Title, Type, Status, Links, … ID**; the type is short (SysReq), headings are bold. The text shows formatted (bold, lists); a click on it opens the plain text. The editor gets wider and stays so. |
+| 3 | Change one item's text and save (an item others link to). Then click **Changes**, write a message and use **▾ → Commit and push**. | The "Check the links" window shows **what changed**; each link has Keep / Unlink. After Commit and push the change is on GitHub (a real push). **Author:** shows your name; your other repositories' Git name and e-mail are untouched. |
+| 4 | Press **Ctrl+/**, then **← Back**; press **Ctrl+F**, **Ctrl+N** (Esc), **Ctrl+Shift+C**. | Ctrl+/ opens the new **Keyboard shortcuts** page; Ctrl+F goes to search; Ctrl+N opens the type list; Ctrl+Shift+C opens Changes. |
+| 5 | **⚙ → Appearance**: switch to **العربية** and back; try Dark. On the start screen click **Read the quick start**. | Language and colours now live here (and on the start screen), not in the top bar of an open repository. English titles read correctly in the Arabic window. The quick-start link opens the guide page. (The sandbox's own field names stay English — only new projects get Arabic field names.) |
+
+## Previous checklist — v0.14.5 (visible Check for updates, folding guide topics)
 
 The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
 Report by step number.
@@ -76,17 +89,6 @@ Report by step number.
 | --- | --- | --- |
 | 1 | Update to **0.14.5**, then **⚙ → Self-tests → Run release self-test**. | App shows 0.14.5; **All steps passed**, 21 ✓. |
 | 2 | **⚙ → Environment and versions**; then in the panel click **▸ User guide**, open a topic, go back to a settings page. | **Check for updates** is a blue button on the Updates line. The guide topics are hidden until you click ▸ User guide; they stay open while a guide page is shown. |
-
-## Previous checklist — v0.14.4 (no personal data in the files; Settings touches)
-
-The acceptance run on GitHub did the update, self-test, sandbox and a real push (Actions → Build → Summary).
-Re-clone the sandbox first if you have not yet (its history was rewritten in 0.14.2). Report by step number.
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Update to **0.14.4**, then **⚙ → Self-tests → Run release self-test**. | App shows 0.14.4; **All steps passed**, 21 ✓. |
-| 2 | **⚙ → Environment and versions**: next to "Updates", click **Check for updates**. Look at **← Back**. | The button sits on the Updates line and checks; Back is blue like the other main buttons. |
-| 3 | **⚙ → Environment and versions → Go back to an earlier version…** | It lists **0.14.3, 0.14.2, 0.14.1** (going back works from 0.14.1 on). Don't install one now — unless you want to try it: install 0.14.3, check that updates say "paused", then **Resume automatic updates** to come back to 0.14.4. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

@@ -129,7 +129,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.14.5, 3 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.15.0, 4 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -146,7 +146,8 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.14.3 Settings and help as pages — one page per settings group and per guide section (`src/shared/guide.ts` splits the guide; `renderer/lib/guide.ts` renders it); Back on top of the shaded panel. The owner cannot set a global private Git e-mail (company repos) → per-repository config in the sandbox clones only | Released (v0.14.3) |
 | 0.14.4 no personal data in the tool's files — the owner's name → "the owner"; no account name anywhere (workflows use `github.repository_owner`, CI passes `-c.publish.owner/repo`, the app reads `app-update.yml`, `tools/ci.mjs` reads the Git remote); `tools/check-privacy.mjs` checks current files only (names as hashes); Check for updates on the Updates line; blue Back | Released (v0.14.4) |
 | 0.14.5 blue Check for updates; folding User guide topics; UI review prompt `docs/guides/ui-review-prompt.md` (the owner may send back a review file to apply) | Released (v0.14.5) |
-| **Next (decided 3 Nov)** | **UI polish version** from the UI/UX review (`docs/reviews/agents/0.14.5-ui-ux.md` → Decisions: 7 High + 15 quick wins + questions 1–5 as recommended; remaining findings listed to the owner), then the rename version as soon as the owner picks the name, then 1a structure (plan in `docs/reviews/2026-11-01-planning-discussion.md` → "Release plan"); Arabic wording review later | — |
+| 0.15.0 UI polish — every accepted UI/UX finding (`docs/reviews/agents/0.14.5-ui-ux.md`); first version checked by the three helper agents (`docs/reviews/agents/0.15.0-*.md`, QA tests taken in); schema `labels`/`optionLabels` (Arabic names), `src/renderer/src/lib/{markdown,schema,shortcuts,statusbar}.ts`, Git identity per repository (+ global only when empty), Settings → Appearance, guide page 18 Keyboard shortcuts | Released (v0.15.0) |
+| **Next** | **Rename version** as soon as the owner picks the name, then 1a structure (plan in `docs/reviews/2026-11-01-planning-discussion.md` → "Release plan"); UI leftovers listed in `docs/reviews/agents/0.15.0-ui-ux.md` → Outcome; question for the owner: a renamed field keeps its old Arabic label (warn or drop?); Arabic wording review later | — |
 
 The owner's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
 Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
@@ -156,8 +157,8 @@ sandbox, `Claude_SandBox` and `Claude_SandBox_B`, still on his PC) — self-test
 points on the branch panel went into 0.12.1. He has no DOORS/Jama to try ReqIF: exports are validated against the
 official schema in `tests/reqif.test.ts` (`tests/fixtures/reqif-schema/`, xmllint-wasm).
 
-Automated tests: 204 unit tests (with a coverage floor) + 6 e2e scenarios (`journey`, `fixes`, `excel`, `branches`,
-`language`, `health`) + the 21-step in-app release self-test + the CI acceptance run on the installed app; what each covers and every speed measurement: `docs/TESTING.md` → "Automated
+Automated tests: 336 unit tests (with a coverage floor) + 7 e2e scenarios (`journey`, `fixes`, `excel`, `branches`,
+`language`, `health`, `qa-0.15.0-polish`) + the 21-step in-app release self-test + the CI acceptance run on the installed app; what each covers and every speed measurement: `docs/TESTING.md` → "Automated
 checks in detail".
 
 ## Where we are right now (2 Nov 2026) — read this first
@@ -168,7 +169,7 @@ checks in detail".
   the owner's report 3 Nov: 0.14.0/0.14.1 passed with small points → **0.14.2 released 3 Nov** (Settings and help with the
   guide inside, privacy guard, sandbox history cleaned) — 0.14.2: steps 1, 3, 4 passed; step 2 → **0.14.3** (pages) —
   0.14.3 passed → **0.14.4 released 3 Nov** (no personal data in files; Check for updates on the Updates line; blue Back)
-  — 0.14.4 passed with two touches → **0.14.5 released 3 Nov** — waiting for his 0.14.5 checklist (2 steps). History question settled: not rewritten; a public release repository
+  — 0.14.4 passed with two touches → **0.14.5 released 3 Nov** — 0.14.5 released; **0.15.0 (UI polish) released 4 Nov** — waiting for his 0.15.0 checklist (5 steps). History question settled: not rewritten; a public release repository
   will start from the files without history.
 - **Planning discussion in progress** — `docs/reviews/2026-11-01-planning-discussion.md` (method: the
   `owner-decision-walkthrough` skill; record every answer there and, when it changes the product, in

@@ -899,6 +899,7 @@ const en = {
     fileTheirs: 'Their version',
     outside: (files: string) => `Pull stopped — nothing was changed. Files outside the requirements folder were changed on both sides (${files}). Combine them with Git outside reqochet first.`,
     unanswered: 'Decide every highlighted part first.',
+    invalidAnswer: (item: string, problems: string) => `${item}: the typed value cannot be saved — ${problems} Correct it and finish again.`,
     moved: 'Something changed in the meantime (a commit or another pull). Pull again.',
     pulled: (items: number, combined: number, decided: number) =>
       `${items > 0 ? `Pulled: ${items} item${s(items)} changed` : 'Pulled. No items changed'}${combined > 0 ? `, ${combined} combined automatically` : ''}${decided > 0 ? `, ${decided} decided by you` : ''}.`,

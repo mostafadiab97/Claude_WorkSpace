@@ -123,6 +123,8 @@ export function createGitOps(deps: GitOpsDeps) {
       git.headSummary(s.repo.root)
     ])
     const hasParent = head.hasParent
+    // undoing a pull's joining commit would undo the pull itself (CR1-12, the owner 5 Nov 2026: do not offer it)
+    const lastIsPull = head.isMerge
     const lastMessage = head.lastMessage
     const changes = st.changes.map((c) => toChange(s, c))
     // Deleted items are no longer in the index; take their titles from the last commit — all through one
@@ -158,7 +160,7 @@ export function createGitOps(deps: GitOpsDeps) {
       changes,
       mergeInProgress: merging || st.changes.some((c) => c.kind === 'conflict'),
       // only commits that never left this PC: with an upstream they are "ahead"; without one, none was pushed
-      canUndoCommit: hasParent && !merging && (st.upstream ? st.ahead > 0 : remotes.length === 0 || !(await branchOnRemote(s, st.branch, remotes))),
+      canUndoCommit: hasParent && !lastIsPull && !merging && (st.upstream ? st.ahead > 0 : remotes.length === 0 || !(await branchOnRemote(s, st.branch, remotes))),
       lastCommitMessage: lastMessage
     }
   }

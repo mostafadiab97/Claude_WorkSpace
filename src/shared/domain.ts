@@ -70,6 +70,8 @@ export interface Link {
   target: string
   /** Fingerprint of the target's content when this link was last confirmed (suspect-link detection). */
   confirmed?: string
+  /** Other keys written on the link by hand or by another tool — kept unchanged on save (NFR-05). */
+  extra?: Record<string, unknown>
 }
 
 export interface Item {

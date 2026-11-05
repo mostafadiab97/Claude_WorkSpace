@@ -21,6 +21,13 @@ export function str(v: unknown, what: string, max = MAX): string {
   return v
 }
 
+/** An item ID: a plain name that can become a file name (no / \\ : .. or control characters — SEC-06). */
+export function id(v: unknown, what = 'ID'): string {
+  const s = str(v, what, 128)
+  if (/[\\/:]/.test(s) || s.includes('..') || s.startsWith('.') || [...s].some((c) => c.charCodeAt(0) < 32)) return bad(what)
+  return s
+}
+
 /** An absolute path to a file with one of the allowed extensions (a file dropped on the import window). */
 export function importPath(v: unknown, extensions: readonly string[]): string {
   const p = str(v, 'file path')
@@ -135,7 +142,7 @@ export function item(v: unknown): Item {
   if (!isObj(v)) return bad('item')
   if (!isObj(v.fields) || !Array.isArray(v.links) || !isObj(v.extra ?? {})) return bad('item')
   const out: Item = {
-    id: str(v.id, 'item ID', 64),
+    id: id(v.id, 'item ID'),
     type: str(v.type, 'item type'),
     title: text(v.title, 'title', MAX),
     fields: Object.fromEntries(Object.entries(v.fields).map(([k, x]) => [str(k, 'field name'), fieldValue(x)])),

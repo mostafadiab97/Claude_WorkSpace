@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto'
 import { mkdir, readdir, readFile, stat, writeFile, rename, rmdir } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import { generateId, ITEM_FILE_EXTENSION, parseItemFile, serializeItem, type FieldValue, type Item } from '../items'
-import { parseDocument } from 'yaml'
-import { parseSchema } from '../schema'
+import { isMap, isSeq, parseDocument, type YAMLMap, type YAMLSeq } from 'yaml'
+import { parseSchema, type FieldDef } from '../schema'
 import { removeFile, renameFile, writeFileAtomic } from '../safe-files'
 import { checkRepository } from './checks'
 import { ConflictError } from './errors'
@@ -19,6 +19,16 @@ import {
 
 const ITEMS_DIR = 'items'
 /** The project folder inside requirements/ (0.16: renamed with the product; owner, 31 Oct / 4 Nov 2026). */
+/** True when the ID can be used as a file name inside items/ (no path parts). */
+export const isSafeFileId = (id: string): boolean =>
+  id.length > 0 &&
+  id.length <= 128 &&
+  !/[\\/:]/.test(id) &&
+  ![...id].some((c) => c.charCodeAt(0) < 32) &&
+  !id.includes('..') &&
+  !id.startsWith('.') &&
+  id.trim() === id
+
 const META_DIR = '.reqochet'
 /** ReqMan's name for it: still read, until the user takes the rename (one commit). */
 const LEGACY_META_DIR = '.reqman'
@@ -66,7 +76,12 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
     const { schema, problems: schemaProblems } = parseSchema(schemaText)
     const fieldIds = new Set(schema.fields.map((f) => f.id))
     const itemsDir = join(folder, ITEMS_DIR)
-    const defaultPath = (id: string): string => `${ITEMS_DIR}/${id}${ITEM_FILE_EXTENSION}`
+    // An ID becomes a file name: it must be a plain name that stays inside items/ (SEC-01, SEC-06). Older or
+    // hand-written IDs in other formats are allowed; separators, "..", ":" and control characters are not.
+    const defaultPath = (id: string): string => {
+      if (!isSafeFileId(id)) throw new Error(`"${id}" cannot be used as an item ID: it must not contain / \\ : .. or control characters.`)
+      return `${ITEMS_DIR}/${id}${ITEM_FILE_EXTENSION}`
+    }
     // An item's file is normally items/<ID>.md, but a file renamed by hand still holds its item: the caller's
     // locator (the index) knows the real path, so such an item can be read, saved and deleted in place.
     const pathOf = (id: string): string => options.locate?.(id) ?? defaultPath(id)
@@ -87,19 +102,33 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
         }
         // Edit only the "fields" list in the YAML document, so comments and the other sections stay as written.
         const doc = parseDocument(current)
-        doc.set(
-          'fields',
-          fields.map((f) => ({
-            id: f.id,
-            name: f.name,
-            type: f.type,
-            ...(f.type === 'enum' && f.options ? { options: f.options } : {}),
-            ...(f.default !== undefined && f.default !== '' ? { default: f.default } : {}),
-            // translated names (UX-22) are kept when the fields are edited in the window
-            ...(f.labels && Object.keys(f.labels).length > 0 ? { labels: f.labels } : {}),
-            ...(f.type === 'enum' && f.optionLabels && Object.keys(f.optionLabels).length > 0 ? { optionLabels: f.optionLabels } : {})
-          }))
-        )
+        // Update each field's own map in place: keys reqochet does not manage (required:, description: …) and the
+        // comments around them stay as written (CR1-03); new fields get a new map, removed ones are dropped.
+        const oldSeq = doc.get('fields')
+        const oldNodes = new Map<string, YAMLMap>()
+        if (isSeq(oldSeq)) {
+          for (const node of oldSeq.items) if (isMap(node) && typeof node.get('id') === 'string') oldNodes.set(node.get('id') as string, node)
+        }
+        const managed: Record<string, (f: FieldDef) => unknown> = {
+          name: (f) => f.name,
+          type: (f) => f.type,
+          options: (f) => (f.type === 'enum' && f.options ? f.options : undefined),
+          default: (f) => (f.default !== undefined && f.default !== '' ? f.default : undefined),
+          // translated names (UX-22) are kept when the fields are edited in the window
+          labels: (f) => (f.labels && Object.keys(f.labels).length > 0 ? f.labels : undefined),
+          optionLabels: (f) => (f.type === 'enum' && f.optionLabels && Object.keys(f.optionLabels).length > 0 ? f.optionLabels : undefined)
+        }
+        const seq = isSeq(oldSeq) ? oldSeq : (doc.createNode([]) as YAMLSeq)
+        seq.items = fields.map((f) => {
+          const node = oldNodes.get(f.id) ?? (doc.createNode({ id: f.id }) as YAMLMap)
+          for (const [key, value] of Object.entries(managed)) {
+            const v = value(f)
+            if (v === undefined) node.delete(key)
+            else node.set(key, doc.createNode(v))
+          }
+          return node
+        })
+        if (!isSeq(oldSeq)) doc.set('fields', seq)
         const text = doc.toString({ lineWidth: 0 })
         // only the fields written here must be clean; a problem elsewhere in the file (e.g. an item type's label) is
         // the team's to fix and must not block editing fields (QA-02 in 0.15)

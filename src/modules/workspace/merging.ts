@@ -17,7 +17,7 @@ import type { BranchInfo, GitResult, GitState, ItemChange, MergeAnswers, MergePa
 import type { Item } from '../../shared/domain'
 import { T } from '../../shared/text'
 import { GitError, parseOverwrittenFiles, type GitAdapter } from '../git-adapter'
-import { generateId, mergeItems, parseItemFile, renameReferences, sameItem, serializeItem } from '../items'
+import { generateId, mergeItems, parseItemFile, renameReferences, serializeItem, validateItem } from '../items'
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { Logger } from '../logger'
@@ -35,7 +35,7 @@ type Resolved = { path: string; content: string | null }
 /** One file both sides changed in ways Git could not combine, as ReqMan sees it. */
 type Entry =
   | { kind: 'combined'; path: string; content: string | null; change: ItemChange }
-  | { kind: 'question'; path: string; question: MergeQuestion; resolve: (answers: Record<string, MergeAnswers[string][string]>) => Resolved[] | null }
+  | { kind: 'question'; path: string; question: MergeQuestion; resolve: (answers: Record<string, MergeAnswers[string][string]>) => Resolved[] | string | null }
   | { kind: 'duplicate'; path: string; id: string; theirs: string; mine: Item; change: ItemChange }
 
 type Analysis =
@@ -123,10 +123,10 @@ export function createMerging(deps: MergingDeps) {
       const label = change.label
       const id = ID_FROM_PATH.exec(path)?.[1]
       if (id && b.ok && m.ok && t.ok) {
-        if (bt === null && m.item && t.item && !sameItem(m.item, t.item) && tt !== null) {
-          entries.push({ kind: 'duplicate', path, id, theirs: tt, mine: m.item, change: { ...change, label: `${id} ${m.item.title}`, title: m.item.title } })
-          continue
-        }
+        // The same ID added on both sides is the same requirement (the owner, 5 Nov 2026 — CR1-01): it was usually
+        // brought in by an earlier "Pull from…" and committed, so Git sees no common version. It is merged like any
+        // other item, asking only about the parts that differ. (Two different items getting the same random ID is
+        // about 1 in 34 billion; duplicate-ID repair stays for IDs that clash inside one branch, D-09.)
         const first = mergeItems(b.item, m.item, t.item, schema)
         const title = (m.item ?? t.item ?? b.item)?.title
         const named = title !== undefined ? { ...change, title, label: `${id} ${title}` } : change
@@ -141,6 +141,9 @@ export function createMerging(deps: MergingDeps) {
           resolve: (answers) => {
             if (first.conflicts.some((c) => answers[c.key] === undefined)) return null
             const r = mergeItems(b.item, m.item, t.item, schema, answers)
+            // a typed answer is checked like a save before anything is written (QA-WP-01, NFR-05)
+            const problems = r.item ? validateItem(r.item, schema).filter((x) => x.severity === 'error') : []
+            if (problems.length > 0) return T.merge.invalidAnswer(named.label, problems.map((x) => x.message).join(' '))
             return [{ path, content: r.item ? serializeItem(r.item, schema) : null }]
           }
         })
@@ -229,6 +232,7 @@ export function createMerging(deps: MergingDeps) {
           else if (e.kind === 'question') {
             const r = e.resolve(answers[e.path] ?? {})
             if (!r) return { ok: false, message: T.merge.unanswered, plan: p, state: await ops.state(s) }
+            if (typeof r === 'string') return { ok: false, message: r, plan: p, state: await ops.state(s) }
             files.push(...r)
             decided++
           }

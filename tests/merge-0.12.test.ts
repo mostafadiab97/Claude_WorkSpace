@@ -204,26 +204,18 @@ describe('Pull with decisions per requirement (two PCs)', { timeout: 180_000 }, 
     expect((await b.ws.getItem(sys))?.item.text).toBe('Alice and Bob')
   })
 
-  it('repairs an ID created on both sides (D-09): mine gets a new ID, my links follow', async () => {
-    const { a, b, sys } = await twoPcs()
+  it('an ID added on both sides is one requirement: only the differing parts are asked (CR1-01, owner 5 Nov 2026; replaces the D-09 pull rule)', async () => {
+    const { a, b } = await twoPcs()
     const dup = 'REQ-DUP0000'
     await create(a.ws, 'system-requirement', 'Alice item', 'from Alice', dup)
     await a.ws.commit('Alice adds')
     await a.ws.push()
     await create(b.ws, 'system-requirement', 'Bob item', 'from Bob', dup)
-    const child = await create(b.ws, 'test-case', 'Bob test')
-    await b.ws.addLink(child, 'verifies', dup)
     await b.ws.commit('Bob adds')
-    const r = await b.ws.pull()
-    expect(r.ok).toBe(true)
-    const m = /REQ-DUP0000 was also created on the other side for a different item: yours is now (REQ-[0-9A-Z]{7})/.exec(r.message)
-    expect(m).not.toBeNull()
-    const newId = m![1]!
-    expect((await b.ws.getItem(dup))?.item.title).toBe('Alice item')
-    expect((await b.ws.getItem(newId))?.item.title).toBe('Bob item')
-    expect((await b.ws.getItem(child))?.item.links.map((l) => l.target)).toEqual([newId])
-    expect((await b.ws.getItem(sys))?.item.title).toBe('Shared requirement')
-    expect(b.ws.repoInfo().issues).toEqual([])
+    const r = (await b.ws.pull()) as Awaited<ReturnType<typeof b.ws.pull>> & { plan?: { questions: { id?: string; parts: { key: string }[] }[]; duplicates: unknown[] } }
+    expect(r.plan?.duplicates ?? []).toEqual([])
+    const q = r.plan?.questions.find((x) => x.id === dup)
+    expect(q?.parts.map((p) => p.key)).toEqual(expect.arrayContaining(['title']))
   })
 
   it('finds "the last pull" after a git pull --rebase outside ReqMan (D-05)', async () => {

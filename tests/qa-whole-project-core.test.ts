@@ -26,27 +26,27 @@ const roundTrip = (src: string): string => {
 
 describe('CR1-02: unknown header content survives a save (NFR-05)', () => {
   const base = 'id: REQ-AAAAAAA\ntype: system-requirement\ntitle: T\norder: a0\n'
-  it.fails('CR1-02a: extra keys inside a link are kept', () => {
+  it('CR1-02a: extra keys inside a link are kept', () => {
     // defect: only type/target/confirmed are copied (itemFile.ts:247-252)
     const out = roundTrip(FILE(`${base}links:\n  - type: verifies\n    target: REQ-BBBBBBB\n    note: keep me`))
     expect(out).toContain('keep me')
   })
-  it.fails('CR1-02b: a list holding mappings is not turned into "[object Object]"', () => {
+  it('CR1-02b: a list holding mappings is not turned into "[object Object]"', () => {
     const out = roundTrip(FILE(`${base}tags:\n  - a: 1`))
     expect(out).not.toContain('[object Object]')
   })
-  it.fails('CR1-02c: a parent that is not text is kept somewhere, not dropped', () => {
+  it('CR1-02c: a parent that is not text is kept somewhere, not dropped', () => {
     const out = roundTrip(FILE(`${base}parent: 123`))
     expect(out).toMatch(/123/)
   })
-  it.fails('CR1-02d: a boolean field value stays a boolean', () => {
+  it('CR1-02d: a boolean field value stays a boolean', () => {
     const out = roundTrip(FILE(`${base}flag: true`))
     expect(out).not.toContain('"true"')
   })
 })
 
 describe('CR1-03: "Edit fields" keeps unknown keys on a field and the comments', () => {
-  it.fails('CR1-03: required/description and a comment survive writeSchemaFields', async () => {
+  it('CR1-03: required/description and a comment survive writeSchemaFields', async () => {
     const root = await newRoot()
     const repo = await store.initialize(root)
     const path = join(root, 'requirements', repo.metaDir, 'schema.yaml')
@@ -63,7 +63,7 @@ describe('CR1-03: "Edit fields" keeps unknown keys on a field and the comments',
 })
 
 describe('SEC-01: a hostile ID in a header cannot move a file out of the repository', () => {
-  it.fails('SEC-01: fixFileName refuses "../" in the ID', async () => {
+  it('SEC-01: fixFileName refuses "../" in the ID', async () => {
     const root = await newRoot()
     const repo = await store.initialize(root)
     const dir = join(root, 'requirements', 'items')

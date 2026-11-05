@@ -899,6 +899,7 @@ const raw: Texts = {
     fileTheirs: 'نسختهم',
     outside: (files: string) => `توقف السحب — لم يتغير شيء. ملفات خارج مجلد المتطلبات تغيّرت على الطرفين (${files}). ادمجها بـ Git خارج reqochet أولًا.`,
     unanswered: 'احسم كل جزء معلَّم أولًا.',
+    invalidAnswer: (item: string, problems: string) => `${item}: لا يمكن حفظ القيمة المكتوبة — ${problems} صحّحها ثم أكمل من جديد.`,
     moved: 'تغيّر شيء في هذه الأثناء (إيداع أو سحب آخر). اسحب مرة أخرى.',
     pulled: (count: number, combined: number, decided: number) =>
       `${count > 0 ? `تم السحب: تغيّر ${items(count)}` : 'تم السحب. لم يتغير أي عنصر'}${combined > 0 ? `، دُمج ${n(combined)} تلقائيًا` : ''}${decided > 0 ? `، وحسمتَ ${n(decided)}` : ''}.`,

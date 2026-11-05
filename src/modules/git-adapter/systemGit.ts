@@ -522,10 +522,12 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
 
     async headSummary(root) {
       try {
-        const lines = (await git(root, ['log', '-2', '--format=%s'])).split(/\r?\n/).filter((l, i, all) => i < all.length - 1 || l !== '')
-        return { hasParent: lines.length >= 2, lastMessage: lines[0]?.trim() || null }
+        // first line: the last commit's parents (two = a joining commit made by a pull), then its message
+        const [parents = '', message = ''] = (await git(root, ['log', '-1', '--format=%P%n%s'])).split(/\r?\n/)
+        const count = parents.trim() ? parents.trim().split(/\s+/).length : 0
+        return { hasParent: count >= 1, isMerge: count >= 2, lastMessage: message.trim() || null }
       } catch {
-        return { hasParent: false, lastMessage: null } // no commits yet
+        return { hasParent: false, isMerge: false, lastMessage: null } // no commits yet
       }
     },
 

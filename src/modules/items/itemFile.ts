@@ -30,8 +30,11 @@ const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object
 
 function toFieldValue(v: unknown): FieldValue | undefined {
   if (typeof v === 'string' || typeof v === 'number') return v
-  if (typeof v === 'boolean') return String(v)
-  if (Array.isArray(v)) return v.filter((x) => x !== null && x !== undefined).map(String)
+  // only plain text, numbers and lists of them are field values; anything else (true/false, mappings, lists of
+  // mappings) stays in `extra` exactly as written (CR1-02, NFR-05)
+  if (Array.isArray(v) && v.every((x) => x === null || x === undefined || typeof x === 'string' || typeof x === 'number')) {
+    return v.filter((x) => x !== null && x !== undefined).map(String)
+  }
   return undefined
 }
 
@@ -72,6 +75,8 @@ export function parseItemFile(content: string, schemaFieldIds: ReadonlySet<strin
       }
       const link: Link = { type: l.type, target: l.target }
       if (typeof l.confirmed === 'string') link.confirmed = l.confirmed
+      const rest = Object.fromEntries(Object.entries(l).filter(([k]) => k !== 'type' && k !== 'target' && k !== 'confirmed'))
+      if (Object.keys(rest).length > 0) link.extra = rest
       links.push(link)
     }
   }
@@ -95,6 +100,9 @@ export function parseItemFile(content: string, schemaFieldIds: ReadonlySet<strin
     extra
   }
   if (typeof header.parent === 'string' && header.parent.trim()) item.parent = header.parent.trim()
+  else if (typeof header.parent === 'number') item.parent = String(header.parent)
+  // a parent ReqMan cannot read (a list, a mapping) is kept as it was, never dropped (CR1-02)
+  else if (header.parent !== undefined && header.parent !== null) item.extra['parent'] = header.parent
   if (typeof header.order === 'number' && Number.isFinite(header.order)) item.order = keyOfNumber(header.order)
   else if (typeof header.order === 'string' && isOrderKey(header.order.trim())) item.order = header.order.trim()
   // an order value ReqMan cannot read is kept as it was (never lost), but gives no position
@@ -119,10 +127,11 @@ export function serializeItem(item: Item, schema: Pick<Schema, 'fields'>): strin
     if (!(key in header) && !BUILT_IN.has(key)) header[key] = item.extra[key]
   }
   if (item.parent) header.parent = item.parent
+  else if (item.extra['parent'] !== undefined) header.parent = item.extra['parent']
   if (item.order !== undefined) header.order = item.order
   else if (item.extra['order'] !== undefined) header.order = item.extra['order']
   if (item.links.length > 0) {
-    header.links = item.links.map((l) => (l.confirmed ? { type: l.type, target: l.target, confirmed: l.confirmed } : { type: l.type, target: l.target }))
+    header.links = item.links.map((l) => ({ type: l.type, target: l.target, ...(l.confirmed ? { confirmed: l.confirmed } : {}), ...(l.extra ?? {}) }))
   }
   const yamlText = stringifyYaml(header, { lineWidth: 0, defaultStringType: 'PLAIN', defaultKeyType: 'PLAIN' })
   const body = item.text.replace(/\r\n?/g, '\n').replace(/\n+$/, '')

@@ -2,7 +2,7 @@
 //   npm run build && xvfb-run -a node tools/perf-qa-whole.mjs <generated-scenario-repo-with-git>
 // The repository is modified (edits, commits): pass a throw-away copy. Prints one line per measurement.
 import { execFileSync } from 'node:child_process'
-import { appendFileSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -89,7 +89,7 @@ const [cmt] = await call(win, 'commit', ['perf 1000']); out('commit 1,000 files 
 edit(5000, 'e2')
 const [r5] = await call(win, 'refreshRepository', [true]); out('refreshRepository(focus) after 5,000 files edited outside', r5)
 out('getGitState with 5,000 uncommitted files', (await call(win, 'getGitState'))[0])
-;[cm, cr] = await call(win, 'compareVersions', [git('rev-parse', 'HEAD').trim(), 'WORKING']); out('compareVersions HEAD..WORKING, 5,000 edits', cm)
+;[cm] = await call(win, 'compareVersions', [git('rev-parse', 'HEAD').trim(), 'WORKING']); out('compareVersions HEAD..WORKING, 5,000 edits', cm)
 const [cm2] = await call(win, 'commit', ['perf 5000']); out('commit 5,000 files (app)', cm2)
 out('compareVersions first commit..HEAD (≈6,000 changed files)', (await call(win, 'compareVersions', [head, git('rev-parse', 'HEAD').trim()]))[0])
 out('getGitState clean', (await call(win, 'getGitState'))[0])
@@ -105,7 +105,7 @@ await win.evaluate(() => { window.__lt = 0; window.__n = 0 })
 const fo = []
 for (let i = 0; i < 10; i++) {
   const t = await win.evaluate(() => new Promise((res) => {
-    const s = performance.now(); const orig = window.reqochet.queryItems; let calls = 0
+    const s = performance.now()
     window.dispatchEvent(new Event('focus'))
     const iv = setInterval(() => { if (performance.now() - s > 200 && !document.querySelector('.table__row--loading')) { clearInterval(iv); res(performance.now() - s) } }, 20)
   }))

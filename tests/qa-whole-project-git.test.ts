@@ -54,7 +54,7 @@ async function edit(ws: WorkspaceService, id: string, change: (i: Item) => void)
 }
 
 describe('CR1-01: a second "Pull from…" of the same branch must not copy an item under a new ID', { timeout: 180_000 }, () => {
-  it.fails('CR1-01: item created on the branch, pulled, committed, edited on both sides, pulled again → still one item', async () => {
+  it('CR1-01: item created on the branch, pulled, committed, edited on both sides, pulled again → still one item', async () => {
     const base = await mkdtemp(join(tmpdir(), 'qa-wp-cr101-'))
     sh(base, 'init', '-q', '--bare', '-b', 'main', join(base, 'remote.git'))
     const a = await pc(base, 'a', 'Alice')
@@ -129,7 +129,7 @@ async function conflictPair(): Promise<{ b: { ws: WorkspaceService; root: string
 }
 
 describe('QA-WP-01: a typed answer in the pull decision window is checked against the schema (NFR-05: validate before writing)', { timeout: 120_000 }, () => {
-  it.fails('QA-WP-01a: "Bogus" for the Status choice is refused or corrected', async () => {
+  it('QA-WP-01a: "Bogus" for the Status choice is refused or corrected', async () => {
     const { b, id } = await conflictPair()
     const pulled = (await b.ws.pull()) as Awaited<ReturnType<WorkspaceService['pull']>> & { plan?: MergePlan }
     expect(pulled.plan?.questions).toHaveLength(1)

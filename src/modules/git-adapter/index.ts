@@ -149,7 +149,7 @@ export interface GitAdapter {
   /** Subject of the last commit. */
   lastCommitMessage(root: string): Promise<string | null>
   /** One call for the Git bar: does HEAD have a parent commit, and the subject of the last commit. */
-  headSummary(root: string): Promise<{ hasParent: boolean; lastMessage: string | null }>
+  headSummary(root: string): Promise<{ hasParent: boolean; isMerge: boolean; lastMessage: string | null }>
   /** Blob IDs of these paths in a commit (paths that do not exist there are missing from the map). */
   blobIds(root: string, ref: string, paths: string[]): Promise<Map<string, string>>
   /** Every file under `dir` in a commit, path → blob ID (one `ls-tree -r` process). */

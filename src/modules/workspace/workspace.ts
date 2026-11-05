@@ -200,7 +200,17 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       if (plan.length === 0) return 0
       const r = await structure.applyPlan(session, plan)
       if (!r.ok) throw new Error(r.message)
-      await git.commitFiles(s.repo.root, plan.map((x) => `${prefix}${session.repo.itemPath(x.id)}`), T.gitMsg.tidyCommit(plan.length))
+      const touched = plan.map((x) => `${prefix}${session.repo.itemPath(x.id)}`)
+      try {
+        await git.commitFiles(s.repo.root, touched, T.gitMsg.tidyCommit(plan.length))
+      } catch (e) {
+        // all or nothing (CR1-05): the tidy could not be committed (no Git name, a hook, a lock) — put the files back
+        // exactly as they were, so the user's next commit does not carry changes they never made
+        await git.unstage(s.repo.root, touched).catch(() => {})
+        await git.discard(s.repo.root, touched)
+        await ctx.resyncAll(session)
+        throw e
+      }
       return plan.length
     }
   })

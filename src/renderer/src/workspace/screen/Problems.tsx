@@ -9,7 +9,20 @@ export { problemsOf, type Problem } from './problemList'
  * grouped by kind with a count — each row with a severity mark, the item ID and the message, and a fix button where
  * ReqMan can fix it (UI review UX-11).
  */
-export function ProblemList({ problems, onOpen, onFixed, onClose }: { problems: Problem[]; onOpen: (id: string) => void; onFixed: () => void; onClose: () => void }) {
+export function ProblemList({
+  problems,
+  onOpen,
+  onFixed,
+  onClose,
+  guard = (then) => then()
+}: {
+  problems: Problem[]
+  onOpen: (id: string) => void
+  onFixed: () => void
+  onClose: () => void
+  /** Asks about unsaved edits before a file is renamed (CR2-03). */
+  guard?: (then: () => void) => void
+}) {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const fix = async (ids: string[]): Promise<void> => {
@@ -46,7 +59,7 @@ export function ProblemList({ problems, onOpen, onFixed, onClose }: { problems: 
               <summary>
                 {T.workspace.problemGroup[g.group]} ({g.problems.length})
                 {fixable.length > 1 && (
-                  <button type="button" className="btn btn--small problems__fix-all" disabled={busy} onClick={() => void fix(fixable)}>
+                  <button type="button" className="btn btn--small problems__fix-all" disabled={busy} onClick={() => guard(() => void fix(fixable))}>
                     {T.workspace.fixAll(fixable.length)}
                   </button>
                 )}
@@ -66,7 +79,7 @@ export function ProblemList({ problems, onOpen, onFixed, onClose }: { problems: 
                     )}
                     <span className="problems__msg">{p.message}</span>
                     {p.fix === 'file-name' && p.id && (
-                      <button type="button" className="btn btn--small" disabled={busy} title={T.workspace.fixFileNameTooltip(p.id)} onClick={() => p.id && void fix([p.id])}>
+                      <button type="button" className="btn btn--small" disabled={busy} title={T.workspace.fixFileNameTooltip(p.id)} onClick={() => p.id && guard(() => void fix([p.id as string]))}>
                         {T.workspace.fixFileName}
                       </button>
                     )}

@@ -3,8 +3,31 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.16.3 — 5 Nov 2026 — Stabilisation 1: data and safety (whole-project review)
+- **Whole-project review (5 Nov 2026):** seven helper agents read the whole project one area at a time — 6 High, 41
+  Medium, 101 Low findings (`docs/reviews/2026-11-05-project-review.md`); the owner confirmed the plan 0.16.3 → 0.16.4
+  → 1a and answered the product questions. QA turned the findings into tests that failed; they now pass.
+- **Never lose or split data:** a requirement brought back from a branch a second time is one requirement — only the
+  differing parts are asked (CR1-01; replaces giving your copy a new ID); hand-written header content is kept on save
+  (CR1-02); the Fields window keeps other settings and comments in `schema.yaml` (CR1-03); an import that fails halfway
+  says how far it got (CR1-04); Push's automatic tidy-up never leaves files you did not change (CR1-05); a typed answer in
+  the pull window is checked like a save (QA-WP-01); no "Undo last commit" for a pull's joining commit (CR1-12).
+- **Screens:** the ✕ beside the project name asks Save / Discard / Keep editing and waits for a running pull or push
+  (CR2-01); Push, Import and "Fix file name" ask the same question when an item has unsaved edits, then Push goes on
+  with the usual "Pull first?" (CR2-03, the owner's flow); an open item deleted by a pull closes, or says so if you were
+  typing (CR2-02); a list field such as Tags counts while you type, so Ctrl+S saves it (CR2-05).
+- **Import and export:** ReqIF keeps IDs from other tools such as "DOORS 1" (no duplicate on re-import, CR3-01); a stray
+  `"` in a CSV cell no longer swallows the file (CR3-02); Arabic and other scripts, ✓/✗ match choices and types
+  (CR3-03); a workbook with macros (.xlsm) is never rewritten — "Save an updated copy" makes an .xlsx (CR3-04); backups
+  are never overwritten (CR3-05); updating your own CSV leaves unchanged cells exactly as they were (CR3-06); search
+  finds `_` and `%` (QA-WP-02).
+- **Security:** an ID can no longer point outside the repository (SEC-01/06); passwords or tokens in a Git address are
+  hidden in the log and problem reports (SEC-02); GitHub workflows give write rights only where needed and use fixed
+  versions of their building blocks (SEC-03/04); the release checks privacy and secrets like every build (CR3-25); the
+  one library without a licence is gone (SEC-05).
+
 ## 0.16.2 — 4 Nov 2026 — The Windows icon redrawn
-- **Owner (4 Nov 2026):** all 3 steps passed (self-test 22/22, 69.6 s).
+- **Owner (4 Nov 2026):** all 3 steps passed (self-test 22/22, 69.6 s) → whole-project review → 0.16.3.
 - **Owner (4 Nov 2026) on 0.16.1:** all 5 steps passed (self-test 22/22, 65.5 s). Asked: redraw the Windows icon with
   the brighter eyes and a thin lighter outline, so it shows on dark wallpapers.
 - **Windows icon** (taskbar, Start menu, desktop, window): brighter red and green eyes and a thin grey-blue outline

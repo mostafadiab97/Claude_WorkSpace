@@ -67,23 +67,26 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.16.2 (the Windows icon redrawn)
+## Manual test checklist — v0.16.3 (stabilisation 1: data and safety)
+
+Most fixes of this version are checked automatically (30 QA tests from the review, a new e2e scenario, the acceptance
+run). Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.16.3**, then **⚙ → Self-tests → Run release self-test**. | Version 0.16.3; **all 22 steps passed**. |
+| 2 | In the sandbox, open an item, change its title, then click the **✕** beside the project name. | "Save / Discard / Keep editing" appears; Keep editing keeps your text; Save closes the project with the change saved. |
+| 3 | Change an item without saving, then press **Push**. | The same question first; after Save comes the usual "Pull first? / Push without pulling" (if GitHub has newer commits) or the push. |
+| 4 | Type a value into **Tags** and press **Ctrl+S** without clicking elsewhere. | The tags are saved (the item is not marked unsaved afterwards). |
+| 5 | Optional: Import a CSV that has a cell like `12" display` and an Arabic choice value. | Every row arrives; the Arabic value is the one you typed. |
+
+## Previous checklist — v0.16.2 (the Windows icon redrawn)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
 | 1 | Let reqochet-dev update to **0.16.2**, then **⚙ → Self-tests → Run release self-test**. | Version 0.16.2; **all 22 steps passed**. |
 | 2 | Look at reqochet-dev in the taskbar, Start menu and on the desktop, on a dark wallpaper. (If Windows still shows the old icon, it is its icon cache — it refreshes after a restart.) | Brighter red and green eyes; a thin light outline around the dark tile. |
 | 3 | Light mode: look at the face in the top bar. | The same thin outline; the face keeps its size while the eyes move and rest. |
-
-## Previous checklist — v0.16.1 (the owner's points on 0.16.0)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.16.1**, then **⚙ → Self-tests → Run release self-test**. | Version 0.16.1; **all 22 steps passed**. |
-| 2 | Close and start reqochet-dev. | The bouncing dots play for at least one full bounce before the window appears. |
-| 3 | Dark mode: watch the top-bar face, then click another window and come back. | The face keeps the same size and weight while the eyes glance, blink and rest. |
-| 4 | Light mode: look at the top-bar face and the start screen. | The red and green eyes are clearly visible on the dark tile, and you can see them move. |
-| 5 | In the sandbox, change an item, press **Push** while GitHub has newer commits (or use your second clone to push first). | "Pull first?" opens **on top of** the table; both buttons can be clicked. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

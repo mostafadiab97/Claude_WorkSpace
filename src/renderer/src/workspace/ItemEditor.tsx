@@ -95,13 +95,24 @@ export function ItemEditor(props: {
     dirtyRef.current = dirty
   }, [dirty])
 
+  const onCloseRef = useRef(props.onClose)
+  useEffect(() => {
+    onCloseRef.current = props.onClose
+  })
   // Data changed elsewhere (e.g. this item was dragged to a new parent): show the current version.
   const firstToken = useRef(reloadToken)
   useEffect(() => {
-    if (reloadToken === firstToken.current || target.kind !== 'item' || dirtyRef.current) return
+    if (reloadToken === firstToken.current || target.kind !== 'item') return
     let live = true
     void window.reqochet.getItem(target.id).then((d) => {
-      if (!live || dirtyRef.current || !d) return
+      if (!live) return
+      // the item is gone (a pull, a revert in Changes): close it — or, with typed edits, say so (CR2-02)
+      if (!d) {
+        if (dirtyRef.current) setStatus({ kind: 'error', message: T.editor.goneWhileEditing })
+        else onCloseRef.current()
+        return
+      }
+      if (dirtyRef.current) return
       setDetails(d)
       setBase(d.item)
       setForm(d.item)
@@ -462,13 +473,7 @@ function FieldInput({ def, value, error, onChange }: { def: FieldDef; value: Fie
       break
     case 'list':
       control = (
-        <input
-          className="input"
-          defaultValue={str}
-          key={str}
-          placeholder={T.editor.listPlaceholder}
-          onBlur={(e) => onChange(e.target.value.split(',').map((x) => x.trim()).filter(Boolean))}
-        />
+        <ListInput value={str} onChange={onChange} />
       )
       break
     case 'number':
@@ -498,5 +503,28 @@ function FieldInput({ def, value, error, onChange }: { def: FieldDef; value: Fie
       {control}
       {error && <span className="field__error">{error}</span>}
     </label>
+  )
+}
+
+/** A list field typed as "a, b, c": every keystroke counts (Ctrl+S saves what is typed — CR2-05). */
+function ListInput({ value, onChange }: { value: string; onChange: (v: string[]) => void }) {
+  const [raw, setRaw] = useState(value)
+  const parse = (t: string): string[] => t.split(',').map((x) => x.trim()).filter(Boolean)
+  // a new value from outside (another item, a reload) replaces the text; the user's own typing does not jump
+  const [seen, setSeen] = useState(value)
+  if (value !== seen) {
+    setSeen(value)
+    if (parse(raw).join(', ') !== value) setRaw(value)
+  }
+  return (
+    <input
+      className="input"
+      value={raw}
+      placeholder={T.editor.listPlaceholder}
+      onChange={(e) => {
+        setRaw(e.target.value)
+        onChange(parse(e.target.value))
+      }}
+    />
   )
 }

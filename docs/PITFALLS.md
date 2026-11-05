@@ -138,3 +138,10 @@ clipped element.
 `node_modules/.vitest-cache` keys a transformed test file on its own content; a glob inside it (e.g. the brand QA test's
 `resources/brand/**/*.svg`) is not refreshed when files are added. Symptom: a new SVG shows as `unknown:data:…` only
 under `npm run check` (coverage). Fix: delete `node_modules/.vitest-cache`. CI starts clean, so it never sees this.
+
+## A library override can pull in optional requires the bundler cannot find (0.16.3)
+
+`overrides: { unzipper: 0.12.3 }` (SEC-05) made `npm run build` fail: unzipper 0.12 `require`s `@aws-sdk/client-s3`
+inside a function for reading zips from S3. Vitest and e2e still passed because e2e ran the *previous* `out/` build.
+Fix: `external: ['@aws-sdk/client-s3']` in the main build of `electron.vite.config.mts`. Always run `npm run build`
+and check it printed "built in" before trusting an e2e run.

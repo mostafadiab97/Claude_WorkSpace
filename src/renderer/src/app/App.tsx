@@ -1,7 +1,7 @@
 import { BrandFace, BrandLoading, BrandName } from '../components/Brand'
 import { useActivity, useWindowActive } from '../lib/activity'
 import { QUICK_START_PAGE, SHORTCUTS_PAGE } from '../../../shared/guide'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { AppInfo, GitInfo, LoadedTheme, RepoInfo, UpdateStatus, ImportFile } from '../../../shared/api'
 import { applyTheme, loadSavedMode, resolveMode, saveMode, useEffectiveMode, type ThemeMode } from '../theme/applyTheme'
 import { ErrorBoundary } from '../components/ErrorBoundary'
@@ -78,9 +78,20 @@ export function App() {
     setLang(l) // everything re-renders with the new texts; nothing is remounted, so unsaved edits stay
   }
   const onInfo = useCallback((i: RepoInfo) => setRepo(i), [])
-  const close = async (): Promise<void> => {
-    await window.reqochet.closeRepository()
-    setRepo(null)
+  // the ✕ beside the project name: unsaved edits are asked about first, and it waits for a running pull/push (CR2-01)
+  const leaveGuard = useRef<((leave: () => void) => void) | null>(null)
+  const [gitBusy, setGitBusy] = useState(false)
+  const onLeaveGuard = useCallback((g: ((leave: () => void) => void) | null) => {
+    leaveGuard.current = g
+  }, [])
+  const close = (): void => {
+    const leave = (): void =>
+      void window.reqochet.closeRepository().then(() => {
+        setRepo(null)
+        setGitBusy(false)
+      })
+    if (leaveGuard.current) leaveGuard.current(leave)
+    else leave()
   }
 
   // the loading animation while the app starts (before the theme is known: the Windows colour mode decides)
@@ -110,7 +121,7 @@ export function App() {
             <>
               <span className="topbar__sep" aria-hidden="true">/</span>
               <span className="topbar__repo" title={repo.root}>{repo.name}</span>
-              <button type="button" className="icon-btn icon-btn--small" aria-label={T.app.closeRepository} title={T.app.closeRepository} onClick={() => void close()}>
+              <button type="button" className="icon-btn icon-btn--small" aria-label={T.app.closeRepository} title={T.app.closeRepository} disabled={gitBusy} onClick={close}>
                 ✕
               </button>
             </>
@@ -152,6 +163,8 @@ export function App() {
                   setSettingsStart(SHORTCUTS_PAGE)
                   setShowSettings(true)
                 }}
+                onLeaveGuard={onLeaveGuard}
+                onGitBusy={setGitBusy}
               />
             </ErrorBoundary>
           </div>

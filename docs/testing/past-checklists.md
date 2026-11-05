@@ -1,7 +1,17 @@
-# Past manual checklists (v0.0.3 – v0.16.0)
+# Past manual checklists (v0.0.3 – v0.16.1)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## Previous checklist — v0.16.1 (the owner's points on 0.16.0)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.16.1**, then **⚙ → Self-tests → Run release self-test**. | Version 0.16.1; **all 22 steps passed**. |
+| 2 | Close and start reqochet-dev. | The bouncing dots play for at least one full bounce before the window appears. |
+| 3 | Dark mode: watch the top-bar face, then click another window and come back. | The face keeps the same size and weight while the eyes glance, blink and rest. |
+| 4 | Light mode: look at the top-bar face and the start screen. | The red and green eyes are clearly visible on the dark tile, and you can see them move. |
+| 5 | In the sandbox, change an item, press **Push** while GitHub has newer commits (or use your second clone to push first). | "Pull first?" opens **on top of** the table; both buttons can be clicked. |
 
 ## Previous checklist — v0.16.0 (the new name: reqochet-dev)
 

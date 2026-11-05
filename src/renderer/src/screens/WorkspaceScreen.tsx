@@ -31,7 +31,9 @@ export function WorkspaceScreen({
   onInfo,
   importFile,
   gitSlot = null,
-  onShortcuts
+  onShortcuts,
+  onLeaveGuard,
+  onGitBusy
 }: {
   info: RepoInfo
   onInfo: (i: RepoInfo) => void
@@ -39,6 +41,10 @@ export function WorkspaceScreen({
   gitSlot?: HTMLElement | null
   /** Ctrl+/ — the keyboard shortcuts page of the user guide. */
   onShortcuts?: () => void
+  /** The app's way to leave this screen (the ✕ beside the project name) asks about unsaved edits first (CR2-01). */
+  onLeaveGuard?: (guard: ((leave: () => void) => void) | null) => void
+  /** Whether a Git action is running (the ✕ is disabled meanwhile — CR2-01). */
+  onGitBusy?: (busy: boolean) => void
 }) {
   const schema = info.schema
   const filters = useFilters(schema)
@@ -82,8 +88,10 @@ export function WorkspaceScreen({
   const [exported, setExported] = useState<{ path: string; count: number } | null>(null)
   const [imported, setImported] = useState<(ImportResult & { ok: true }) | null>(null)
   const [target, setTarget] = useState<EditorTarget | null>(null)
-  const [pending, setPending] = useState<EditorTarget | null | undefined>(undefined)
+  // An action waiting for "Save and continue / Discard / Keep editing" (switching item, closing, pushing)
+  const [pending, setPending] = useState<{ then: () => void } | undefined>(undefined)
   const [dirty, setDirty] = useState(false)
+  const [formReset, setFormReset] = useState(0)
   const [dataVersion, setDataVersion] = useState(0)
   const [total, setTotal] = useState(info.itemCount)
   const [showProblems, setShowProblems] = useState(false)
@@ -102,11 +110,23 @@ export function WorkspaceScreen({
 
   // Switching items with unsaved changes asks first.
   // Opening an item (or a new one) shows the editor again in place of the Changes panel.
+  const guarded = (then: () => void): void => (dirty ? setPending({ then }) : then())
   const request = (next: EditorTarget | null): void => {
     if (next) setShowChanges(false)
-    if (dirty) setPending(next)
-    else setTarget(next)
+    guarded(() => setTarget(next))
   }
+  // the app's ✕ and the Git state it needs (CR2-01)
+  const dirtyNow = useRef(dirty)
+  useEffect(() => {
+    dirtyNow.current = dirty
+  }, [dirty])
+  useEffect(() => {
+    onLeaveGuard?.((then) => (dirtyNow.current ? setPending({ then }) : then()))
+    return () => onLeaveGuard?.(null)
+  }, [onLeaveGuard])
+  useEffect(() => onGitBusy?.(git.busy !== null), [git.busy, onGitBusy])
+  // Push with unsaved edits asks first (the owner, 5 Nov 2026), then goes on with the normal pull-first question
+  const push = (): void => guarded(() => git.requestPush())
   const select = (id: string): void => {
     setShowChanges(false)
     if (target?.kind === 'item' && target.id === id) return
@@ -246,7 +266,7 @@ export function WorkspaceScreen({
           blockedReason={git.blocked}
           changesOpen={showChanges}
           onToggleChanges={toggleChanges}
-          onRun={(a) => (a === 'push' ? git.requestPush() : void git.run(a))}
+          onRun={(a) => (a === 'push' ? push() : void git.run(a))}
           notice={git.notice}
           onDismiss={git.dismiss}
           onOpenItem={select}
@@ -311,7 +331,7 @@ export function WorkspaceScreen({
             onEditFields={() => setEditFields(true)}
             canExport={info.itemCount > 0}
             onExport={() => setExportOpen({})}
-            onImport={() => setImporting({ file: null, newProject: false })}
+            onImport={() => guarded(() => setImporting({ file: null, newProject: false }))}
             expanding={expanding}
             onExpandAll={() => void expandAll()}
             onCollapseAll={() => tree.current?.collapseAll()}
@@ -399,7 +419,7 @@ export function WorkspaceScreen({
           )}
         </div>
 
-        {showProblems && problems.length > 0 && <ProblemList problems={problems} onOpen={select} onFixed={() => void afterChange()} onClose={() => setShowProblems(false)} />}
+        {showProblems && problems.length > 0 && <ProblemList problems={problems} onOpen={select} onFixed={() => void afterChange()} onClose={() => setShowProblems(false)} guard={guarded} />}
         <footer className="statusbar">
           <span>{filtered ? T.workspace.of(total, info.itemCount) : T.common.items(info.itemCount)}</span>
           {problems.length > 0 ? (
@@ -441,14 +461,14 @@ export function WorkspaceScreen({
         </footer>
       </section>
 
-      {showChanges && git.state?.available && <ChangesSide changes={changes} git={git.state} blocked={git.blocked} onResult={git.onPanelResult} onPush={git.requestPush} />}
+      {showChanges && git.state?.available && <ChangesSide changes={changes} git={git.state} blocked={git.blocked} onResult={git.onPanelResult} onPush={push} />}
 
       {target && (
         <div className={showChanges && git.state?.available ? 'is-hidden' : 'workspace__side'}>
           {editorWidth.handle}
           <ItemEditor
             // Same key for a draft and the saved item, so the editor stays in place when a new item is saved.
-            key={target.kind === 'item' ? target.id : target.item.id}
+            key={`${target.kind === 'item' ? target.id : target.item.id}:${formReset}`}
             schema={schema}
             target={target}
             onDirtyChange={setDirty}
@@ -542,10 +562,10 @@ export function WorkspaceScreen({
                 onClick={() => {
                   const next = pending
                   void (editorSave.current?.() ?? Promise.resolve(false)).then((ok) => {
-                    if (!ok) return setPending(undefined) // the editor shows why it could not save
-                    setDirty(false)
-                    setTarget(next)
                     setPending(undefined)
+                    if (!ok) return // the editor shows why it could not save
+                    setDirty(false)
+                    next.then()
                   })
                 }}
               >
@@ -556,8 +576,9 @@ export function WorkspaceScreen({
                 className="btn btn--danger-outline"
                 onClick={() => {
                   setDirty(false)
-                  setTarget(pending)
                   setPending(undefined)
+                  setFormReset((n) => n + 1) // the editor reads the item again: the typed edits are dropped
+                  pending.then()
                 }}
               >
                 {T.workspace.discard}

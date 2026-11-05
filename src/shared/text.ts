@@ -458,6 +458,7 @@ const en = {
     linksAfterSave: 'Save the item first, then add links.',
     linksLocked: 'Save or discard your changes before changing links.',
     reload: 'Reload the current version (your changes are discarded)',
+    goneWhileEditing: 'This item was deleted on disk (for example by a pull). Copy what you need from it, then close it.',
     deleteAsk: (id: string) => `Delete ${id}?`,
     removeIncoming: (count: number) => `Also remove the ${count} link(s) other items have to it`,
     delete: 'Delete',

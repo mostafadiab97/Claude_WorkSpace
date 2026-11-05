@@ -462,6 +462,7 @@ const raw: Texts = {
     linksAfterSave: 'احفظ العنصر أولًا، ثم أضف الروابط.',
     linksLocked: 'احفظ تغييراتك أو تراجع عنها قبل تغيير الروابط.',
     reload: 'إعادة تحميل الإصدار الحالي (تُهمَل تغييراتك)',
+    goneWhileEditing: 'حُذف هذا العنصر من القرص (مثلًا بسحب). انسخ ما تحتاجه منه، ثم أغلقه.',
     deleteAsk: (id: string) => `حذف ${id}؟`,
     removeIncoming: (count: number) => `إزالة ${links(count)} من عناصر أخرى إليه أيضًا`,
     delete: 'حذف',

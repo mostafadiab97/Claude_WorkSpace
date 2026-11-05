@@ -4,6 +4,13 @@ Each version was installed and tried by the owner (product owner) on Windows 11;
 version it was about, and what it led to.
 
 ## 0.16.3 — 5 Nov 2026 — Stabilisation 1: data and safety (whole-project review)
+- **Owner (5 Nov 2026):** self-test 22/22 (129.9 s, a large compile ran at the same time); steps 1, 3, 4 passed. Points
+  for the next round (owner: change nothing before the usage limit resets, start when he says): (a) step 2 — clicking
+  into the Text box puts the cursor at the start of the text, not where he clicked or at the end; (b) step 5 — a `"`
+  inside a multi-line cell (table, bullet list) still cuts the rest of that cell; he suggests a rule for characters or
+  a warning. Builder's note (I/R): Excel writes such a cell quoted and doubles its quotes; a bare `"` typed inside it in a
+  text editor ends the quoted cell — read a quote inside a quoted cell as its end only when a separator, line end or
+  file end follows (no character rule needed), and warn when a cell still looks cut.
 - **Whole-project review (5 Nov 2026):** seven helper agents read the whole project one area at a time — 6 High, 41
   Medium, 101 Low findings (`docs/reviews/2026-11-05-project-review.md`); the owner confirmed the plan 0.16.3 → 0.16.4
   → 1a and answered the product questions. QA turned the findings into tests that failed; they now pass.

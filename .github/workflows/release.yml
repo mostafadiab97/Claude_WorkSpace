@@ -10,14 +10,28 @@ on:
     paths: [package.json, .github/workflows/release.yml]
   workflow_dispatch:
 
+# read by default (SEC-03); the job writes only the release (gh release create, token passed to that step)
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   windows:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # full history for the secrets check
+
+      - name: Privacy and secrets check (CR3-25 — the release checks the same as every build)
+        shell: bash
+        run: |
+          node tools/check-privacy.mjs .
+          curl -sSL -o "$RUNNER_TEMP/gitleaks.zip" https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_windows_x64.zip
+          unzip -q -o "$RUNNER_TEMP/gitleaks.zip" -d "$RUNNER_TEMP/gitleaks"
+          "$RUNNER_TEMP/gitleaks/gitleaks.exe" git . --no-banner --redact
 
       - name: Skip if this version is already released
         id: version
@@ -33,7 +47,7 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"; echo "Releasing $v"
           fi
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         if: steps.version.outputs.exists == 'false'
         with:
           node-version: 22

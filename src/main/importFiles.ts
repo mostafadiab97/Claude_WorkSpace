@@ -1,6 +1,7 @@
 // Reading the files the user chose for an import, and writing "Update the Excel file" (M7). The window never sees
 // paths it could misuse: it gets a token for a file it picked in the dialog, and the contents stay here.
 import { randomBytes } from 'node:crypto'
+import { constants as fsConstants } from 'node:fs'
 import { copyFile, readFile } from 'node:fs/promises'
 import { basename, extname } from 'node:path'
 import type { ImportFile } from '../shared/api'
@@ -70,10 +71,22 @@ export function createImportFiles() {
   }
 }
 
+/**
+ * Where "Update the Excel file" may write (CR3-04, the owner 5 Nov 2026): a workbook with macros (.xlsm) is never
+ * rewritten, because the macros cannot be kept; its copy always gets the .xlsx name. null = refused.
+ */
+export function updateTarget(source: string, mode: 'original' | 'copy', chosen?: string): string | null {
+  const macros = /\.xlsm$/i.test(source)
+  if (mode === 'original') return macros ? null : source
+  return macros && chosen ? chosen.replace(/\.xlsm$/i, '.xlsx') : (chosen ?? null)
+}
+
 /** A backup name next to the file: "Requirements (before reqochet update 2026-10-29 0835).xlsx". */
 export function backupName(path: string, now = new Date()): string {
   const ext = extname(path)
-  const stamp = `${now.toISOString().slice(0, 10)} ${now.toTimeString().slice(0, 5).replace(':', '')}`
+  // local date and time from the same clock, with seconds (CR3-05)
+  const two = (n: number): string => String(n).padStart(2, '0')
+  const stamp = `${now.getFullYear()}-${two(now.getMonth() + 1)}-${two(now.getDate())} ${two(now.getHours())}${two(now.getMinutes())}${two(now.getSeconds())}`
   return `${path.slice(0, path.length - ext.length)} (before reqochet update ${stamp})${ext}`
 }
 
@@ -82,7 +95,19 @@ export function backupName(path: string, now = new Date()): string {
  * chose. Excel files keep their formatting; a CSV file is written again with its own separator.
  */
 export async function writeSourceUpdate(source: LoadedFile, sheet: string, edits: CellEdit[], append: string[][], target: string): Promise<void> {
-  if (target === source.path) await copyFile(source.path, backupName(source.path))
+  if (target === source.path) {
+    // never replace an earlier backup: COPYFILE_EXCL refuses an existing name, then " (2)", " (3)" … (CR3-05)
+    const name = backupName(source.path)
+    for (let n = 1; ; n++) {
+      const candidate = n === 1 ? name : name.replace(/(\.[^.\\/]+)$/, ` (${n})$1`)
+      try {
+        await copyFile(source.path, candidate, fsConstants.COPYFILE_EXCL)
+        break
+      } catch (e) {
+        if ((e as NodeJS.ErrnoException).code !== 'EEXIST' || n > 50) throw e
+      }
+    }
+  }
   if (source.kind === 'xlsx') {
     const data = new Uint8Array(await readFile(source.path))
     await writeFileAtomic(target, await updateXlsx(data, sheet, edits, append))
@@ -94,6 +119,8 @@ export async function writeSourceUpdate(source: LoadedFile, sheet: string, edits
     while (row.length < e.col) row.push('')
     row[e.col - 1] = e.value
   }
+  const firstNew = rows.length
   rows.push(...append)
-  await writeFileAtomic(target, toCsv(rows, source.separator))
+  const changed = new Set(edits.map((e) => `${e.row - 1}:${e.col - 1}`))
+  await writeFileAtomic(target, toCsv(rows, source.separator, (r, c) => r >= firstNew || changed.has(`${r}:${c}`)))
 }

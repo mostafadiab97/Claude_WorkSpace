@@ -11,6 +11,9 @@ import type { IndexCache, IndexedItem, ItemQuery, LinkRef, QueryResult, SyncStat
 /** Bump when the table layout changes; an old cache file is then rebuilt automatically. */
 const FORMAT_VERSION = '4'
 
+/** A text used inside LIKE: its wildcards and the escape character itself stand for themselves (QA-WP-02). */
+const likeEscape = (s: string): string => s.replace(/[\\%_]/g, (c) => `\\${c}`)
+
 const DDL = `
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS files (path TEXT PRIMARY KEY, mtime REAL NOT NULL, size INTEGER NOT NULL, ok INTEGER NOT NULL);
@@ -105,7 +108,8 @@ function rowToItem(r: ItemRow, fieldIds: ReadonlySet<string>): IndexedItem {
 
 /** Turns what a user types into a safe FTS5 query: every word must appear, as a prefix. */
 export function toFtsQuery(text: string): string | null {
-  const words = text.match(/[\p{L}\p{N}_]+/gu)
+  // a "word" made only of underscores is not one the full-text index knows: it is searched as a sign (QA-WP-02)
+  const words = text.match(/[\p{L}\p{N}_]+/gu)?.filter((w) => /[\p{L}\p{N}]/u.test(w))
   if (!words || words.length === 0) return null
   return words.map((w) => `"${w}"*`).join(' AND ')
 }
@@ -344,13 +348,16 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
 
       if (q.text && q.text.trim()) {
         const fts = toFtsQuery(q.text)
-        const idLike = `%${q.text.trim().toUpperCase().replace(/[%_]/g, '')}%`
+        // % and _ are LIKE wildcards: escaped, so a search for "_" finds a "_", not everything (QA-WP-02)
+        const idLike = `%${likeEscape(q.text.trim().toUpperCase())}%`
         if (fts) {
-          where.push('(i.rid IN (SELECT rowid FROM items_fts WHERE items_fts MATCH ?) OR i.id LIKE ?)')
+          where.push("(i.rid IN (SELECT rowid FROM items_fts WHERE items_fts MATCH ?) OR i.id LIKE ? ESCAPE '\\')")
           params.push(fts, idLike)
         } else {
-          where.push('i.id LIKE ?')
-          params.push(idLike)
+          // no word to search for (only signs such as "_", "%", "#"): look for the signs themselves
+          const anyLike = `%${likeEscape(q.text.trim())}%`
+          where.push("(i.id LIKE ? ESCAPE '\\' OR i.title LIKE ? ESCAPE '\\' OR i.text LIKE ? ESCAPE '\\')")
+          params.push(idLike, anyLike, anyLike)
         }
       }
       if (q.types && q.types.length > 0) {
@@ -382,8 +389,8 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         // Exact ID first, then the best full-text matches. bm25 weights: ID ×4, title ×10, text ×1,
         // so a heading whose title matches beats a long text that mentions the words in passing.
         const exact = q.text.trim().toUpperCase()
-        orderSql = 'CASE WHEN i.id = ? THEN 0 WHEN i.id LIKE ? THEN 1 ELSE 2 END'
-        orderParams.push(exact, `${exact.replace(/[%_]/g, '')}%`)
+        orderSql = "CASE WHEN i.id = ? THEN 0 WHEN i.id LIKE ? ESCAPE '\\' THEN 1 ELSE 2 END"
+        orderParams.push(exact, `${likeEscape(exact)}%`)
         if (fts) {
           orderSql += `, (SELECT bm25(items_fts, 4.0, 10.0, 1.0) FROM items_fts WHERE items_fts MATCH ? AND rowid = i.rid) ASC NULLS LAST`
           orderParams.push(fts)

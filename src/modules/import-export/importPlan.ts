@@ -10,7 +10,8 @@ const norm = (s: string): string =>
     .toLowerCase()
     .normalize('NFKD')
     .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9#.]+/g, ' ')
+    // letters and digits of every script count (Arabic, Cyrillic …), not only a–z (CR3-03); ✓/✗ stay as themselves
+    .replace(/[^\p{L}\p{N}#.✓✔✗✘]+/gu, ' ')
     .trim()
 
 /** Header names other tools and people use, per target (compared after lower-casing and removing punctuation). */

@@ -72,7 +72,7 @@ describe('QA-WP: search with odd characters (real workspace and index)', { timeo
     expect(ws.query({ text: 'Plain', sort: { by: 'id' } }).items.find((i) => i.title === 'Plain')?.text).toHaveLength(1_000_000)
     expect(ws.query({ text: 'Plain', brief: true }).items.every((i) => i.text.length <= 200)).toBe(true)
   })
-  it.fails('QA-WP-02: searching for "_" or "%" finds only items that contain that character (LIKE wildcards are escaped)', async () => {
+  it('QA-WP-02: searching for "_" or "%" finds only items that contain that character (LIKE wildcards are escaped)', async () => {
     const ws = await workspaceWith(data)
     // only "under_score" contains "_" and only "100%" contains "%": the defect returns every item (SQL LIKE wildcard)
     expect(ws.query({ text: '_' }).total).toBe(1)

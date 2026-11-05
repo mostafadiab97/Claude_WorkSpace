@@ -1,3 +1,4 @@
+import { maskSecrets } from './report'
 import { appendFileSync, mkdirSync, renameSync, rmSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Logger, LogLevel } from './index'
@@ -18,7 +19,7 @@ export function createFileLogger(dir: string, maxBytes = MAX_BYTES): Logger {
   }
 
   const write = (level: LogLevel, message: string): void => {
-    const line = `${new Date().toISOString()} ${level.padEnd(5)} ${message.replace(/\r?\n/g, '\n    ')}\n`
+    const line = `${new Date().toISOString()} ${level.padEnd(5)} ${maskSecrets(message).replace(/\r?\n/g, '\n    ')}\n`
     try {
       const size = statSync(filePath, { throwIfNoEntry: false })?.size ?? 0
       if (size > maxBytes) {

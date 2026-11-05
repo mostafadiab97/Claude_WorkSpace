@@ -11,7 +11,8 @@ export default defineConfig({
     // so it catches a drop without failing on noise. Raise it when coverage grows; never lower it to make a build pass.
     coverage: {
       provider: 'v8',
-      include: ['src/modules/**', 'src/shared/**'],
+      // src/main: the parts that run without Electron (validators, import files, settings move) — CR3-28
+      include: ['src/modules/**', 'src/shared/**', 'src/main/validate.ts', 'src/main/importFiles.ts', 'src/main/legacyData.ts'],
       // texts are data; the sample generator is a tool; the updater only runs inside the installed app
       exclude: ['src/shared/text*.ts', 'src/modules/sample-data/**', 'src/modules/updater/githubUpdater.ts'],
       reporter: ['text-summary'],

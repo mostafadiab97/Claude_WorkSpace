@@ -1,6 +1,12 @@
 // The "Report a problem" file (P-40d, the owner 2 Nov 2026): the user's description, the diagnostics and the end of
 // the log in one plain-text file the user saves and sends. Nothing is sent by the app itself.
 
+/**
+ * Removes the sign-in part of addresses ("https://name:token@host" → "https://***@host") so a password or token in a
+ * Git remote never reaches the log or a problem report (SEC-02).
+ */
+export const maskSecrets = (text: string): string => text.replace(/\b([a-z][a-z0-9+.-]*:\/\/)[^\s/@]+@/gi, '$1***@')
+
 /** How many log lines go into a report (the newest ones). */
 export const REPORT_LOG_LINES = 400
 
@@ -16,10 +22,10 @@ export function buildProblemReport(input: { description: string; diagnostics: st
     input.description.trim() || '(no description)',
     '',
     '== Diagnostics ==',
-    input.diagnostics.trim(),
+    maskSecrets(input.diagnostics.trim()),
     '',
     `== Log (last ${tail.length} lines) ==`,
-    ...tail,
+    ...tail.map(maskSecrets),
     ''
   ].join('\r\n')
 }

@@ -117,6 +117,8 @@ export function markdownToXhtml(md: string): string {
 
 /** Column names of the table a ReqIF file becomes (also what the import guesses from). */
 export const REQIF_COLUMNS = { id: 'ReqIF identifier', parent: 'Parent', type: 'Type' }
+/** The attribute that carries a source ID the XML identifier could not hold unchanged (CR3-01). */
+const SOURCE_ID_ATTR = 'reqochet.SourceId'
 
 /**
  * A ReqIF document as tables, one per specification (DOORS: one per module): a row per object in document order
@@ -189,13 +191,15 @@ export function readReqif(xml: string): { name: string; rows: string[][] }[] {
     m.set(source, [...(m.get(source) ?? []), target])
   }
 
-  const header = [REQIF_COLUMNS.id, REQIF_COLUMNS.parent, REQIF_COLUMNS.type, ...columns, ...relTypes]
+  const shown = (id: string): string => objects.get(id)?.values.get(SOURCE_ID_ATTR) || id
+  const visible = columns.filter((c) => c !== SOURCE_ID_ATTR)
+  const header = [REQIF_COLUMNS.id, REQIF_COLUMNS.parent, REQIF_COLUMNS.type, ...visible, ...relTypes]
   const row = (o: Obj, parent: string): string[] => [
-    o.id,
-    parent,
+    shown(o.id),
+    parent ? shown(parent) : '',
     o.type,
-    ...columns.map((c) => o.values.get(c) ?? ''),
-    ...relTypes.map((t) => (rels.get(t)?.get(o.id) ?? []).join(', '))
+    ...visible.map((c) => o.values.get(c) ?? ''),
+    ...relTypes.map((t) => (rels.get(t)?.get(o.id) ?? []).map(shown).join(', '))
   ]
   const tables: { name: string; rows: string[][] }[] = []
   const placed = new Set<string>()
@@ -270,6 +274,9 @@ export function writeReqif(schema: Schema, items: ReqifItem[], title: string, no
     { id: 'reqochet-ad-number', name: 'reqochet.Number', kind: 'string' },
     // the text exactly as ReqMan stores it (Markdown), so a ReqIF round trip through ReqMan loses nothing
     { id: 'reqochet-ad-markdown', name: 'reqochet.Markdown', kind: 'string' },
+    // a source ID that is not a valid XML identifier ("123", "DOORS 1") is changed for IDENTIFIER; its true value
+    // travels here, so the re-import finds the item again instead of creating a duplicate (CR3-01)
+    { id: 'reqochet-ad-sourceid', name: SOURCE_ID_ATTR, kind: 'string' },
     ...fieldDefs.map((f) => ({ id: xmlId(`reqochet-ad-${f.id}`), name: f.name, kind: enumFields.includes(f) ? ('enum' as const) : ('string' as const), field: f }))
   ]
   w('<SPEC-TYPES>')
@@ -301,6 +308,7 @@ export function writeReqif(schema: Schema, items: ReqifItem[], title: string, no
     str('reqochet-ad-type', typeName)
     str('reqochet-ad-number', it.number ?? '')
     str('reqochet-ad-markdown', it.text)
+    if (x.sourceId !== undefined && xmlId(x.sourceId) !== x.sourceId) str('reqochet-ad-sourceid', x.sourceId)
     for (const a of attrs.filter((y) => y.field)) {
       const f = a.field as FieldDef
       const v = it.fields[f.id]

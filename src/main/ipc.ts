@@ -9,7 +9,7 @@ import { Channels, type AppInfo, type ExportFormat, type ExportResult, type Invo
 import { runDataBenchmark } from '../modules/sample-data'
 import { writeFileAtomic } from '../modules/safe-files'
 import { buildProblemReport, problemReportName } from '../modules/logger'
-import { createImportFiles, loadImportFile, writeSourceUpdate } from './importFiles'
+import { createImportFiles, loadImportFile, updateTarget, writeSourceUpdate } from './importFiles'
 import type { Paths, Services } from './composition'
 import * as v from './validate'
 import { setLanguage, T } from '../shared/text'
@@ -322,13 +322,16 @@ export function registerIpc(services: Services, paths: Paths): void {
         if (!sheet) return { ok: false, message: T.importMsg.noSheet(src.sheet) }
         const u = await ws.sourceUpdate(sheet.rows)
         let target = src.path
+        const macros = /\.xlsm$/i.test(src.path)
+        if (m === 'original' && updateTarget(src.path, 'original') === null) return { ok: false, message: T.importMsg.macroOriginal }
         if (m === 'copy') {
           const win = BrowserWindow.fromWebContents(e.sender)
           const ext = f.kind === 'xlsx' ? 'xlsx' : 'csv'
-          const opts = { title: T.importDialog.copyTitle, defaultPath: src.path.replace(/(\.[^.\\/]+)$/, ` (updated)$1`), filters: [{ name: T.importDialog.fileFilter, extensions: [ext] }] }
+          const opts = { title: T.importDialog.copyTitle, defaultPath: src.path.replace(/(\.[^.\\/]+)$/, macros ? ' (updated).xlsx' : ` (updated)$1`), filters: [{ name: T.importDialog.fileFilter, extensions: [ext] }] }
           const r = win ? await dialog.showSaveDialog(win, opts) : await dialog.showSaveDialog(opts)
           if (r.canceled || !r.filePath) return { ok: false, canceled: true }
-          target = r.filePath
+          // the macros cannot be kept (CR3-04): the copy is a plain workbook and must carry the .xlsx name
+          target = updateTarget(src.path, 'copy', r.filePath) ?? r.filePath
         }
         await writeSourceUpdate(f, u.sheet, u.edits, u.append, target)
         log.info(`Updated ${target}: ${u.edits.length} cell(s), ${u.added} new row(s)`)

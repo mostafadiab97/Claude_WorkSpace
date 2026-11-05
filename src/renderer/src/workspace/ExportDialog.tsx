@@ -159,7 +159,7 @@ export function ExportDialog(props: {
               <legend className="field__label">{T.exportDialog.sourceTitle}</legend>
               <p className="muted-inline">{T.exportDialog.sourceIntro(source.name)}</p>
               <span className="actions">
-                <button type="button" className="btn" disabled={busy} onClick={() => void update('original')} title={T.exportDialog.updateOriginalTooltip}>
+                <button type="button" className="btn" disabled={busy || /\.xlsm$/i.test(source.name)} onClick={() => void update('original')} title={/\.xlsm$/i.test(source.name) ? T.importMsg.macroOriginal : T.exportDialog.updateOriginalTooltip}>
                   {T.exportDialog.updateOriginal(source.name)}
                 </button>
                 <button type="button" className="btn" disabled={busy} onClick={() => void update('copy')}>

@@ -140,10 +140,22 @@ export function createImportOps(ctx: WorkspaceContext, structure: StructureOps, 
         const errors = validateItem(x.item, s.repo.schema).filter((i) => i.severity === 'error')
         if (errors.length) return { ok: false, message: `${T.importMsg.rowFailed(x.row)} ${errors.map((e) => e.message).join(' ')}` }
       }
-      const paths: string[] = []
+      // every item that is updated must be readable at a known version, or the write would be refused halfway (CR1-04)
       for (const x of writes) {
-        await s.repo.writeItem(x.item, { expectedRevision: x.action === 'create' ? null : (revisions.get(x.item.id) ?? null) })
-        paths.push(s.repo.itemPath(x.item.id))
+        if (x.action !== 'create' && !revisions.has(x.item.id)) return { ok: false, message: `${T.importMsg.rowFailed(x.row)} ${T.importMsg.cannotUpdate(x.item.id)}` }
+      }
+      const paths: string[] = []
+      try {
+        for (const x of writes) {
+          await s.repo.writeItem(x.item, { expectedRevision: x.action === 'create' ? null : (revisions.get(x.item.id) ?? null) })
+          paths.push(s.repo.itemPath(x.item.id))
+        }
+      } catch (e) {
+        // a write still failed (disk, a file changed meanwhile): keep the index true to what is on disk and say how far
+        // it got — the written rows show in Changes and can be taken back there
+        await s.index.syncPaths(s.repo, paths)
+        ctx.log.warn(`Import stopped after ${paths.length} of ${writes.length} rows: ${String(e)}`)
+        return { ok: false, message: T.importMsg.stopped(paths.length, writes.length, (e as Error).message ?? String(e)) }
       }
       // "Verified by" columns: links stored in existing items outside the file
       const bySource = new Map<string, Link[]>()

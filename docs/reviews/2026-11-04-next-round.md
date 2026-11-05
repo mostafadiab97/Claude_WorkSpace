@@ -8,10 +8,10 @@ usage. Method: `owner-decision-walkthrough`. F = fact, I = inference, R = recomm
 
 | ID | Point | Options (recommended first) | Decision |
 | --- | --- | --- | --- |
-| S-01 | How an item belongs to a document | a) a document is a top-level heading of type "Document"; everything under it belongs to it, outline numbers restart per document; moving between documents = moving in the tree; **no new field in the item files** · b) a `document:` field in every item · c) one folder per document | **C 5 Nov: a** |
+| S-01 | How an item belongs to a document | a) a document is a top-level heading of type "Document"; everything under it belongs to it, outline numbers restart per document; moving between documents = moving in the tree; **no new field in the item files** · b) a `document:` field in every item · c) one folder per document | ~~C 5 Nov: a~~ → **replaced 5 Nov by S-10 (one folder per document)** |
 | S-02 | How documents appear in the window | a) a document picker above the tree (one document at a time, plus "All documents") · b) all documents as top branches of one tree | **C 5 Nov: a** |
-| S-03 | Existing repositories | a) nothing changes until a second document is added; then the existing tree becomes the first document (one commit) · b) convert at once on opening | explained again 5 Nov; new option c (recommended): no file ever changes — items outside any Document heading form the unnamed first document |
-| S-04 | Editing item/link types in the window | a) add, rename, change the short name (prefix) and "is a heading"; remove only when no item/link uses it (the window shows the count) · b) also remove a used type by moving its items to another type | explained again 5 Nov |
+| S-03 | Existing repositories | a) nothing changes until a second document is added; then the existing tree becomes the first document (one commit) · b) convert at once on opening | **C 5 Nov → S-10**: the requirements folder holds only document folders; loose items → the app offers to move them into a named document (one commit) |
+| S-04 | Editing item/link types in the window | a) add, rename, change the short name (prefix) and "is a heading"; remove only when no item/link uses it (the window shows the count) · b) also remove a used type by moving its items to another type | **C 5 Nov: a**; plus "columns movable like rows" → S-11 |
 | S-05 | Required fields | a) per item type; an item missing one is saved but marked **incomplete** (warning, filter "incomplete") · b) per item type, saving is refused · c) for all types | **C 5 Nov: a** |
 | S-06 | Baselines | a) a Git tag `baseline/<name>` with a note, sent with the next Push; list, compare with now, open read-only · b) the same, pushed at once on creation | questions 5 Nov: which commit becomes the baseline; switching to a commit; a commit graph → S-08, S-09 |
 | S-07 | Size of 1a | a) 0.17.0 documents + types + required fields; 0.17.x/0.18.0 baselines (two smaller checklists) · b) everything in 0.17.0 | **C 5 Nov: a** (two versions) |
@@ -30,7 +30,7 @@ severity, effort. Then a walkthrough with the owner and the agreed fixes in one 
 | ID | Point | Options (recommended first) | Decision |
 | --- | --- | --- | --- |
 | V-01 | When | a) **now, before 1a** — 1a changes the data format and the tree; fixing the base first is cheaper, and the pilot gets a reviewed tool · b) after 1a + 1b, just before the pilot | **C 5 Nov: a — now, before 1a** |
-| V-02 | Who | a) split by area over parallel helper agents (each reads only its area), the builder merges and checks every finding against the code · b) the builder alone (slower, one long context) | question 5 Nov: how much usage each way (answered in the reply) |
+| V-02 | Who | a) split by area over parallel helper agents (each reads only its area), the builder merges and checks every finding against the code · b) the builder alone (slower, one long context) | **C 5 Nov: a — several helpers** |
 
 ## C. More helper agents
 
@@ -66,11 +66,21 @@ F: today four — code reviewer, QA tester, UI/UX reviewer, brand (logo changes 
 
 | ID | Point | Options (recommended first) | Decision |
 | --- | --- | --- | --- |
-| S-08 | Which commit a baseline marks | a) the latest commit of the current branch; with uncommitted changes the window offers "commit first" or "baseline without them"; also "baseline at this commit" from the history list · b) only the latest commit | |
-| S-09 | Old commits (F: today the app can only switch branches, not go to a commit) | a) a history list per branch (newest first, search by commit ID or message): open a commit **read-only**, compare it with now, make it a baseline, or start a new branch from it — never "stand" on an old commit (Git's "detached HEAD": edits there belong to no branch and are easily lost); a drawn graph later (theme 2) · b) the drawn graph already in 1a · c) type a commit ID in the branch switcher and work there | |
-| A-06 | Helpers as project agent definitions | a) one file per helper in `.claude/agents/` (its brief, tools, model) + a `review-pack` skill + an Arabic glossary — briefs are written once, every run is the same and cheaper to start · b) keep writing each brief by hand | |
+| S-08 | Which commit a baseline marks | a) the latest commit of the current branch; with uncommitted changes the window offers "commit first" or "baseline without them"; also "baseline at this commit" from the history list · b) only the latest commit | **C 5 Nov: a** |
+| S-09 | Old commits (F: today the app can only switch branches, not go to a commit) | a) a history list per branch (newest first, search by commit ID or message): open a commit **read-only**, compare it with now, make it a baseline, or start a new branch from it — never "stand" on an old commit (Git's "detached HEAD": edits there belong to no branch and are easily lost); a drawn graph later (theme 2) · b) the drawn graph already in 1a · c) type a commit ID in the branch switcher and work there | **C 5 Nov: a**; check a free graph library → findings below |
+| A-06 | Helpers as project agent definitions | a) one file per helper in `.claude/agents/` (its brief, tools, model) + a `review-pack` skill + an Arabic glossary — briefs are written once, every run is the same and cheaper to start · b) keep writing each brief by hand | **C 5 Nov: a** |
+
+| S-10 | Documents as folders (the owner, 5 Nov) | `requirements/<document>/` holds that document's item files; `requirements/` holds only document folders and `.reqochet/` (types and fields shared by all documents); an item moves between documents by moving its file (Git keeps its history); IDs stay unique in the whole repository; links across documents work as today; a new project starts with one document; a repository with loose items (today `requirements/items/`) gets an offer "Move into a document" with a name — one commit, like the folder rename in 0.16 | **C 5 Nov** (replaces S-01 a) |
+| S-11 | "Columns movable like rows" | to clarify: the table's columns can already be dragged sideways (0.15) — which window is meant? | |
+
+**Graph library check (S-09, 5 Nov):** F: gitgraph.js (MIT) is archived and unmaintained since 2019; its author points to
+Mermaid, which draws small scripted diagrams, not a real history of thousands of commits. F: `commit-graph`
+(CommitGraph, a React component for commit-log graphs with paging) was updated in March 2026; npm says MIT, the
+repository says Apache-2.0 — both allow commercial use, to be confirmed from its licence file before use. R: try it when
+the history list is built; if it cannot take our data, a lane layout of our own is a few hundred lines.
 
 ## Discussion log
 
 - 4 Nov 2026 — opened; all points asked.
 - 5 Nov 2026 — S-01 a, S-02 a, S-05 a, S-07 a, V-01 a, W-01 a without the cap on findings, W-02 a (+ A-06); S-03, S-04, S-06, V-02 explained again; S-08, S-09, A-06 asked.
+- 5 Nov 2026 — S-10 documents as folders (replaces S-01 a; covers S-03); S-04 a; S-08 a; S-09 a (+ library check); V-02 a; A-06 a; S-11 asked.

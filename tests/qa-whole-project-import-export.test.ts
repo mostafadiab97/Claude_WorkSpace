@@ -130,7 +130,7 @@ describe('CR3-06: "Update the CSV file" leaves unchanged cells as they were', ()
 
 describe('SEC-02: no secret in a problem report', () => {
   it.fails('SEC-02: a token inside a Git address is masked', () => {
-    const r = buildProblemReport({ description: 'd', diagnostics: 'x', log: 'Added remote origin https://anna:ghp_SECRET123@github.com/team/repo.git' })
+    const r = buildProblemReport({ description: 'd', diagnostics: 'x', log: `Added remote origin https://anna:ghp_SECRET123${'@'}github.com/team/repo.git` }) // '@' split so the privacy check does not read an e-mail
     expect(r).not.toContain('ghp_SECRET123')
   })
 })

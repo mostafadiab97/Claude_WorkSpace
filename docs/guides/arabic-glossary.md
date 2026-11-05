@@ -7,6 +7,7 @@ the Arabic reviewer proposes additions or corrections, the builder updates this 
 | --- | --- | --- |
 | item | عنصر (عناصر) | any entry: heading, requirement, test |
 | requirement | متطلب (متطلبات) | |
+| parent / child (item) | أصل / عنصر فرعي (عناصر فرعية) | the owner, 5 Nov 2026; فرع stays Git's branch |
 | link | رابط (روابط) | |
 | suspect (link) | مشكوك فيه | the linked item changed since the link was confirmed |
 | field | حقل (حقول) | |

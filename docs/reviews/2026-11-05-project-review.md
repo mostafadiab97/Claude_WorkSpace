@@ -57,3 +57,8 @@ the builder before it is fixed.
 ## Discussion log
 
 - 5 Nov 2026 — all eight reports in; plan and questions sent to the owner.
+- 5 Nov 2026 — the owner: **1 a**; 2 explained again (asked); **3 a**; **4** the push asks "Save before push / Discard /
+  Keep editing", then the normal "Pull first? / Push without pulling" flow; **5 b, extended** — when creating an item the
+  user chooses its parent / level (default: next to the selected item); **6 a**; **7 a**; 8 explained again (asked);
+  **9 a**; **10 a**; **11 a — plan confirmed** (0.16.3 → 0.16.4 → 1a). AR-04: child = **"عنصر فرعي"** (replaces "فرع",
+  which stays Git's branch); parent = "أصل".

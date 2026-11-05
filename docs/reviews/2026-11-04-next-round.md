@@ -71,7 +71,7 @@ F: today four — code reviewer, QA tester, UI/UX reviewer, brand (logo changes 
 | A-06 | Helpers as project agent definitions | a) one file per helper in `.claude/agents/` (its brief, tools, model) + a `review-pack` skill + an Arabic glossary — briefs are written once, every run is the same and cheaper to start · b) keep writing each brief by hand | **C 5 Nov: a** |
 
 | S-10 | Documents as folders (the owner, 5 Nov) | `requirements/<document>/` holds that document's item files; `requirements/` holds only document folders and `.reqochet/` (types and fields shared by all documents); an item moves between documents by moving its file (Git keeps its history); IDs stay unique in the whole repository; links across documents work as today; a new project starts with one document; a repository with loose items (today `requirements/items/`) gets an offer "Move into a document" with a name — one commit, like the folder rename in 0.16 | **C 5 Nov** (replaces S-01 a) |
-| S-11 | "Columns movable like rows" | to clarify: the table's columns can already be dragged sideways (0.15) — which window is meant? | |
+| S-11 | "Columns movable like rows" | the owner, 5 Nov: in the **Columns menu** the order is changed with arrows — make its rows drag-and-drop like items | **C 5 Nov** → 1a (with the Types window) |
 
 **Graph library check (S-09, 5 Nov):** F: gitgraph.js (MIT) is archived and unmaintained since 2019; its author points to
 Mermaid, which draws small scripted diagrams, not a real history of thousands of commits. F: `commit-graph`
@@ -84,3 +84,4 @@ the history list is built; if it cannot take our data, a lane layout of our own 
 - 4 Nov 2026 — opened; all points asked.
 - 5 Nov 2026 — S-01 a, S-02 a, S-05 a, S-07 a, V-01 a, W-01 a without the cap on findings, W-02 a (+ A-06); S-03, S-04, S-06, V-02 explained again; S-08, S-09, A-06 asked.
 - 5 Nov 2026 — S-10 documents as folders (replaces S-01 a; covers S-03); S-04 a; S-08 a; S-09 a (+ library check); V-02 a; A-06 a; S-11 asked.
+- 5 Nov 2026 — S-11 clarified (drag and drop in the Columns menu). Step 1 done: seven helpers in `.claude/agents/`, `tools/review-pack.mjs`, `review-pack` skill, `docs/guides/arabic-glossary.md`. Next: the whole-project review.

@@ -48,7 +48,7 @@ session; the owner talks only to the builder.
 ## Cost
 
 Each helper run uses its own share of the usage allowance — roughly as much as a long reply each. That is why they run
-once per theme version, not on every small change.
+once per theme version, not on every small change, and only the helpers the review pack names (below).
 
 ## Fourth helper: brand / logo designer (owner, 4 Nov 2026)
 
@@ -58,3 +58,17 @@ installer and taskbar icon. It follows the brand package's rules (`resources/bra
 the frozen commit like the UI/UX reviewer, may draw proposals in its own scratch folder, and writes
 `docs/reviews/agents/<version>-brand.md`. It never edits product files; adopted proposals are applied by the builder
 (a changed logo drawing comes back to the owner first).
+
+## Saved helpers, review pack, only the helpers needed (owner, 5 Nov 2026)
+
+- **Seven helpers are saved** as definitions in `.claude/agents/` — `code-reviewer` (also checks that docs match the
+  code), `qa-tester`, `ui-ux-reviewer` (also accessibility; also the brand when both changed), `brand-reviewer`,
+  `security-reviewer`, `arabic-reviewer` (with `docs/guides/arabic-glossary.md`), `performance-tester`. Each file holds
+  the helper's brief, its tools and its model: the code and security reviewers on the strongest model, the others on
+  a smaller, cheaper one.
+- **Review pack:** `tools/review-pack.mjs` lists the changed files by area, the rules that apply and the screenshots,
+  and names the helpers those areas need (texts → Arabic; brand → brand; data/Git → QA + security; screens →
+  UI/UX …). Helpers start from it instead of reading the whole project. Steps: the `review-pack` skill.
+- **Reports:** one table with **every** finding — no cap (the owner: a cap would let defects through) — plus
+  "Checked, nothing found" per area.
+- **Patches** (x.y.z): no helpers, or the code reviewer alone on the diff when data or Git code changed.

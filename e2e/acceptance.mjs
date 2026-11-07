@@ -198,7 +198,7 @@ async function step4Push() {
   try {
     await win.getByRole('button', { name: 'Open repository…' }).click()
     await win.getByRole('button', { name: 'Create requirements folder' }).click()
-    await win.locator('.table__empty').waitFor()
+    await win.locator('.table__empty, .first-run').first().waitFor() // 0.16.4: an empty project shows the first-run card
     await win.getByLabel('New item').selectOption('system-requirement')
     await win.getByPlaceholder('Short name of the requirement').fill('Acceptance run item')
     await win.getByRole('button', { name: 'Save', exact: true }).click()

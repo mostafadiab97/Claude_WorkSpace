@@ -43,6 +43,8 @@ await scenario('E2E fixes-0.16.4', async (ctx) => {
   check(pos('Alpha') < pos('Bravo') && pos('Bravo') < pos('Charlie'), `"Below the selected item" puts Bravo between Alpha and Charlie (${order.length} rows)`)
 
   console.log('UX-W05 — the Changes counter counts items')
+  // the Git bar refreshes a moment after the save (slow on the Windows runner): wait for the count
+  await win.locator('.gitbar button', { hasText: /^Changes \(3\)/ }).first().waitFor({ timeout: 15_000 }).catch(() => {})
   const changes = await win.locator('.gitbar button', { hasText: /^Changes/ }).first().textContent()
   check(/Changes \(3\)/.test(changes ?? ''), `the counter says 3 items (${changes})`)
 

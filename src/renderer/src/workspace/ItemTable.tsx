@@ -1,5 +1,5 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
 import type { ItemQuery, Schema, SortKey } from '../../../shared/domain'
 import { T } from '../../../shared/text'
 import { isHeading } from '../lib/schema'
@@ -40,7 +40,8 @@ export function ItemTable(props: {
   controlsRef?: { current: TreeControls | null }
   /** Bumped after a save or move: show the selected item again (its parent may have changed). */
   revealNonce?: number
-  emptyText: string
+  /** What an empty table shows: a sentence, or the first-run card (UX-W01). */
+  emptyText: string | ReactNode
   /** The user dragged a column edge: new width in px, or null = automatic again. */
   onResize?: (key: string, width: number | null) => void
   /** Items chosen with Ctrl/Shift+click (M7: export of chosen items). */
@@ -173,6 +174,19 @@ export function ItemTable(props: {
       else if (e.key === 'ArrowLeft' && row.path.length > 0) onSelect(row.path.at(-1) as string)
       return
     }
+    // the row menu from the keyboard (Menu key, Shift+F10, Delete) and Enter into the editor (UX-W03)
+    if (row?.kind === 'item' && (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey) || e.key === 'Delete')) {
+      e.preventDefault()
+      const el = e.currentTarget.querySelector<HTMLElement>(`[data-id="${CSS.escape(row.item.id)}"]`)
+      const r = el?.getBoundingClientRect()
+      onRowMenu?.(row.item.id, r ? r.left + 24 : 80, r ? r.bottom : 120)
+      return
+    }
+    if (row?.kind === 'item' && e.key === 'Enter') {
+      e.preventDefault()
+      document.querySelector<HTMLElement>('.editor input, .editor textarea, .editor select')?.focus()
+      return
+    }
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
     e.preventDefault()
     const step = e.key === 'ArrowDown' ? 1 : -1
@@ -235,7 +249,7 @@ export function ItemTable(props: {
           ))}
         </div>
         {count === 0 ? (
-          <p className="table__empty">{emptyText}</p>
+          typeof emptyText === 'string' ? <p className="table__empty">{emptyText}</p> : emptyText
         ) : (
           <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
             {visible.map((v) => {
@@ -336,6 +350,7 @@ export function ItemTable(props: {
                             role="gridcell"
                             className={`table__td${c.key === 'id' ? ' table__td--id' : ''}${c.key === 'number' ? ' table__td--number' : ''}${c.key === 'links' ? ' table__td--links' : ''}${c.warn?.(item) ? ' table__td--warn' : ''}`}
                             title={c.key === 'links' ? linkTitle(item) : (c.tip?.(item) ?? c.value(item))}
+                            aria-label={c.key === 'links' && c.value(item) ? linkTitle(item) : undefined}
                             // user content takes its own direction, so it is cut at the right end in either window (UX-02)
                             dir={c.key === 'number' || c.key === 'id' || c.key === 'links' ? undefined : 'auto'}
                           >

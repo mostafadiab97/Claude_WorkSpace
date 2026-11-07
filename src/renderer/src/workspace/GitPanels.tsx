@@ -92,7 +92,9 @@ export function GitBar(props: {
       </div>
     )
   }
-  const n = state.changes.length
+  // the button counts requirements, not files: settings files show as "+ settings" (the owner, 5 Nov 2026 — UX-W05)
+  const changedItems = new Set(state.changes.flatMap((c) => (c.id ? [c.id] : []))).size
+  const otherFiles = state.changes.some((c) => !c.id)
   return place(
     <div role="region" aria-label={T.git.region} className="gitbar-region">
       <div className="gitbar gitbar--anchor">
@@ -137,7 +139,7 @@ export function GitBar(props: {
             onDismiss()
             props.onToggleChanges()
           }} title={T.git.changesTooltip}>
-          {T.git.changes(n)}
+          {T.git.changes(changedItems, otherFiles)}
         </button>
         {state.hasRemote && (
           <>

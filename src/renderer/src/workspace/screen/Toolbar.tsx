@@ -24,6 +24,10 @@ export function Toolbar({ searchRef, newRef, ...props }: {
   onExpandAll: () => void
   onCollapseAll: () => void
   onNewItem: (type: string) => void
+  /** Where a new item goes (the owner, 5 Nov 2026). */
+  newWhere: 'after' | 'inside' | 'end'
+  onNewWhere: (w: 'after' | 'inside' | 'end') => void
+  hasSelection: boolean
 }) {
   const { schema, filters: f } = props
   const enumFields = schema.fields.filter((d) => d.type === 'enum' || d.type === 'list')
@@ -95,6 +99,18 @@ export function Toolbar({ searchRef, newRef, ...props }: {
         </button>
       )}
       <span className="toolbar__spacer" />
+      <select
+        className="select-btn select-btn--fit"
+        value={props.hasSelection ? props.newWhere : 'end'}
+        disabled={!props.hasSelection}
+        onChange={(e) => props.onNewWhere(e.target.value as 'after' | 'inside' | 'end')}
+        aria-label={tw.newWhere}
+        title={props.hasSelection ? tw.newWhereTooltip : tw.newWhereNone}
+      >
+        <option value="after">{tw.newAfter}</option>
+        <option value="inside">{tw.newInside}</option>
+        <option value="end">{tw.newEnd}</option>
+      </select>
       <select ref={newRef} title={tw.newItemTooltip} className="select-btn select-btn--primary select-btn--fit" value="" onChange={(e) => props.onNewItem(e.target.value)} aria-label={tw.newItem}>
         <option value="">{tw.newItemOption}</option>
         {schema.itemTypes.map((t) => (

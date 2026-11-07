@@ -52,7 +52,8 @@ export interface WorkspaceService {
   forgetRecent(root: string): Promise<void>
   query(q: ItemQuery): QueryResult
   getItem(id: string): Promise<ItemDetails | null>
-  newItem(type: string, parent?: string): Item
+  /** `after`: the new item goes right below that item, at its level. */
+  newItem(type: string, parent?: string, after?: string): Item
   saveItem(item: Item, revision: string | null): Promise<SaveResult>
   /** `removeIncomingLinks`: also remove the links other items have to it, so none point to nothing. */
   deleteItem(id: string, revision: string, opts?: { removeIncomingLinks?: boolean }): Promise<OpResult>

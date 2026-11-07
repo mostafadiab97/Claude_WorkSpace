@@ -63,3 +63,4 @@ the builder before it is fixed.
   **9 a**; **10 a**; **11 a — plan confirmed** (0.16.3 → 0.16.4 → 1a). AR-04: child = **"عنصر فرعي"** (replaces "فرع",
   which stays Git's branch); parent = "أصل".
 - 5 Nov 2026 — **2 a** — no "Undo last commit" for a pull's joining commit (CR1-12, fixed in 0.16.3: `headSummary().isMerge`); **8 a** — the Changes counter counts items, "+ settings" when settings changed (0.16.4).
+- 7 Nov 2026 — **0.16.4** carries PQ-01, PQ-02 (F: the 2.5 s gap was `measure:ui` counting the start screen's 1.4 s animation; with the clock started at the start screen open = index + ~0.2 s; open phases now logged), CR2-04, AR-01…13, CR1-08, UX-W01/02/03/05, the owner's 5 Nov answers 5 and 8, the doc findings CR2-17/18. Remaining Lows: to be sorted into later versions.

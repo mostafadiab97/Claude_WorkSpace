@@ -1,7 +1,15 @@
-# Past manual checklists (v0.0.3 – v0.16.1)
+# Past manual checklists (v0.0.3 – v0.16.2)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## Previous checklist — v0.16.2 (the Windows icon redrawn)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.16.2**, then **⚙ → Self-tests → Run release self-test**. | Version 0.16.2; **all 22 steps passed**. |
+| 2 | Look at reqochet-dev in the taskbar, Start menu and on the desktop, on a dark wallpaper. (If Windows still shows the old icon, it is its icon cache — it refreshes after a restart.) | Brighter red and green eyes; a thin light outline around the dark tile. |
+| 3 | Light mode: look at the face in the top bar. | The same thin outline; the face keeps its size while the eyes move and rest. |
 
 ## Previous checklist — v0.16.1 (the owner's points on 0.16.0)
 

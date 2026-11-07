@@ -10,7 +10,7 @@ await scenario('E2E branches', async (ctx) => {
   console.log('A repository with one item, pushed')
   await win.getByRole('button', { name: 'Open repository…' }).click()
   await win.getByRole('button', { name: 'Create requirements folder' }).click()
-  await win.locator('.table__empty', { hasText: 'No items yet' }).waitFor()
+  await win.locator('.first-run').waitFor()
   await win.getByLabel('New item').selectOption('system-requirement')
   await win.getByPlaceholder('Short name of the requirement').fill('Door lock')
   await editText(win, 'The door shall lock automatically.')

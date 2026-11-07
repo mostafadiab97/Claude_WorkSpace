@@ -200,6 +200,15 @@ export function createStructureOps(ctx: WorkspaceContext) {
     },
 
     /** Order value for a new item placed last under `parent`. */
+    /** An order key between an item and the sibling that follows it (byte-wise order, never localeCompare). */
+    orderAfter(s: Session, id: string): string {
+      const me = s.index.get(id)
+      const siblings = s.index.query({ parent: me?.parent ?? null, sort: { by: 'order', descending: false } }).items
+      const at = siblings.findIndex((x) => x.id === id)
+      const next = siblings.slice(at + 1).find((x) => (x.order ?? '') > (me?.order ?? ''))
+      return keyBetween(me?.order ?? null, next?.order ?? null)
+    },
+
     nextOrder(s: Session, parent: string | undefined): string {
       const last = s.index.query({ parent: parent ?? null, sort: { by: 'order', descending: true }, limit: 1 }).items[0]
       return keyBetween(last?.order ?? null, null)

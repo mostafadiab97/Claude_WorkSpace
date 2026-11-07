@@ -20,7 +20,7 @@ await scenario('E2E journey', async (ctx) => {
   await win.getByText('No requirements folder yet').waitFor()
   check(await win.getByText('This folder is not a Git repository').count() === 0, 'recognised as a Git repository')
   await win.getByRole('button', { name: 'Create requirements folder' }).click()
-  await win.locator('.table__empty', { hasText: 'No items yet' }).waitFor()
+  await win.locator('.first-run').waitFor()
   check(readdirSync(join(repo, 'requirements')).includes('.reqochet'), 'requirements/.reqochet created on disk (0.16)')
   await shot('01-empty-repo')
 
@@ -62,6 +62,8 @@ await scenario('E2E journey', async (ctx) => {
     await win.locator('.editor').getByLabel('Priority').selectOption('High')
     await save()
   }
+  // 0.16.4: a new item goes below the selected one by default; this test case belongs at the end of the document
+  await win.getByLabel('Insert position').selectOption('end')
   await win.getByLabel('New item').selectOption('test-case')
   await win.getByPlaceholder('Short name of the requirement').fill('Verify accuracy at 20 °C')
   await save()
@@ -248,7 +250,7 @@ await scenario('E2E journey', async (ctx) => {
   const sysId = (await links().locator('.links__item .links__id').first().textContent()).trim()
   check((await links().locator('.links__rel').first().textContent()) === 'verifies', 'link added: "verifies" ' + sysId)
   check(new RegExp(`target: ${sysId}[\\s\\S]*confirmed: [0-9a-f]{12}`).test(fileOf('Verify accuracy at 20 °C')), 'stored in the test case file with a confirmation fingerprint')
-  check((await rowOf(sysId).locator('.table__td').filter({ hasText: '←1' }).count()) === 1, 'Links column of the requirement shows ←1')
+  check((await rowOf(sysId).locator('.table__td').filter({ hasText: '1 in' }).count()) === 1, 'Links column of the requirement shows "1 in" (in words since 0.16.4, UX-W02)')
 
   // the reverse direction, added from the other side: stored in the other item
   await links().locator('.links__id', { hasText: sysId }).click()

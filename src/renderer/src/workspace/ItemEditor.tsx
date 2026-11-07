@@ -11,7 +11,8 @@ import { ParentPicker } from './ParentPicker'
 import { SuspectLinksDialog } from './SuspectLinksDialog'
 import { T } from '../../../shared/text'
 
-export type EditorTarget = { kind: 'item'; id: string } | { kind: 'draft'; item: Item }
+/** askDelete: opened from the row menu's Delete — the editor shows its delete question at once (UX-W03). */
+export type EditorTarget = { kind: 'item'; id: string; askDelete?: boolean } | { kind: 'draft'; item: Item }
 
 type Status = { kind: 'idle' } | { kind: 'saving' } | { kind: 'saved' } | { kind: 'error'; message: string; conflict?: boolean }
 
@@ -77,6 +78,7 @@ export function ItemEditor(props: {
       setBase(d?.item ?? null)
       setForm(d?.item ?? null)
       setIssues(d?.issues ?? [])
+      if (d && target.askDelete) setConfirmDelete(true)
     })
     return () => {
       live = false

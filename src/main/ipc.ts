@@ -235,7 +235,7 @@ export function registerIpc(services: Services, paths: Paths): void {
     forgetRecentRepository: (_e, root) => ws.forgetRecent(v.str(root, 'folder')),
     queryItems: (_e, q) => ws.query(v.query(q)),
     getItem: (_e, id) => ws.getItem(v.id(id)),
-    newItem: (_e, type, parent) => ws.newItem(v.str(type, 'type'), v.optStr(parent, 'parent')),
+    newItem: (_e, type, parent, after) => ws.newItem(v.str(type, 'type'), v.optStr(parent, 'parent'), v.optStr(after, 'position')),
     saveItem: (_e, item, revision) => ws.saveItem(v.item(item), v.optStr(revision, 'revision') ?? null),
     deleteItem: (_e, id, revision, opts) =>
       ws.deleteItem(v.id(id), v.str(revision, 'revision'), { removeIncomingLinks: (opts as { removeIncomingLinks?: unknown } | null)?.removeIncomingLinks === true }),
@@ -280,13 +280,14 @@ export function registerIpc(services: Services, paths: Paths): void {
     openImportFile: (_e, path) => readImportFile(v.importPath(path, IMPORT_EXTENSIONS)),
     previewImport: (_e, settings) => {
       const s = v.importSettings(settings)
-      return ws.previewImport(sheetOf(s.token, s.sheet).rows, s)
+      const { f, rows } = sheetOf(s.token, s.sheet)
+      return ws.previewImport(rows, { ...s, textFile: f.kind === 'csv' })
     },
     runImport: (_e, settings, message) => {
       const s = v.importSettings(settings)
       const { f, rows } = sheetOf(s.token, s.sheet)
       const commit = v.text(message, 'commit message', 10_000)
-      return ws.runImport(rows, s, { path: f.path, name: f.name, kind: f.kind }, commit || undefined)
+      return ws.runImport(rows, { ...s, textFile: f.kind === 'csv' }, { path: f.path, name: f.name, kind: f.kind }, commit || undefined)
     },
     newProjectFromFile: async (e) => {
       try {

@@ -47,13 +47,13 @@ export function optionalColumns(schema: Schema): { key: string; label: string; b
   ]
 }
 
-/** "→2 ←3 ⚠1": links out, links in, suspect links. */
+/** "2 out · 3 in · ⚠ 1 suspect": the counts in words, so nobody needs the tooltip to read them (UX-W02). */
 export function linkSummary(i: Pick<IndexedItem, 'links' | 'incomingCount' | 'suspectCount'>): string {
   const parts: string[] = []
-  if (i.links.length) parts.push(`→${i.links.length}`)
-  if (i.incomingCount) parts.push(`←${i.incomingCount}`)
-  if (i.suspectCount) parts.push(`⚠${i.suspectCount}`)
-  return parts.join(' ')
+  if (i.links.length) parts.push(T.table.linksOut(i.links.length))
+  if (i.incomingCount) parts.push(T.table.linksIn(i.incomingCount))
+  if (i.suspectCount) parts.push(T.table.linksSuspect(i.suspectCount))
+  return parts.join(' · ')
 }
 
 export function linkTitle(i: Pick<IndexedItem, 'links' | 'incomingCount' | 'suspectCount'>): string {
@@ -124,7 +124,7 @@ export function columnsFor(schema: Schema, prefs: ColumnPrefs = { hidden: new Se
     { key: 'title', label: T.columns.title, minPx: 240, grow: 4, value: (i) => i.title || T.common.noTitle },
     // short type label in the table (full name in the tooltip); headings show no type — they stand out by weight (UX-03)
     { key: 'type', label: T.columns.type, minPx: 84, grow: 0.6, value: (i) => (isHeading(schema, i.type) ? '' : typeShort(schema, i.type)), tip: (i) => typeName(schema, i.type) },
-    { key: 'links', label: T.columns.links, minPx: 96, grow: 0, value: linkSummary, warn: (i) => i.suspectCount > 0 },
+    { key: 'links', label: T.columns.links, minPx: 150, grow: 0, value: linkSummary, warn: (i) => i.suspectCount > 0 },
     ...schema.fields.map<Column>((f) => ({
       key: `field:${f.id}`,
       label: fieldLabel(f),

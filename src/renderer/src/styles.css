@@ -3532,3 +3532,29 @@ html {
   color: CanvasText;
   font: caption;
 }
+
+/* first run: what to do first (UX-W01) */
+.first-run {
+  max-inline-size: 34rem;
+  margin: var(--rm-space-xl) auto;
+  padding: var(--rm-space-lg);
+  border: 1px solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius-large);
+  background: var(--rm-color-surface);
+  text-align: center;
+}
+.first-run__title {
+  margin: 0 0 var(--rm-space-sm);
+  font-size: var(--rm-font-size-large);
+}
+.first-run__text {
+  margin: 0 0 var(--rm-space-md);
+  color: var(--rm-color-text-muted);
+}
+.first-run__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rm-space-sm);
+  justify-content: center;
+  align-items: center;
+}

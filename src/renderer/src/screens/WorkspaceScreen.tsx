@@ -33,7 +33,8 @@ export function WorkspaceScreen({
   gitSlot = null,
   onShortcuts,
   onLeaveGuard,
-  onGitBusy
+  onGitBusy,
+  onQuickStart
 }: {
   info: RepoInfo
   onInfo: (i: RepoInfo) => void
@@ -45,6 +46,8 @@ export function WorkspaceScreen({
   onLeaveGuard?: (guard: ((leave: () => void) => void) | null) => void
   /** Whether a Git action is running (the ✕ is disabled meanwhile — CR2-01). */
   onGitBusy?: (busy: boolean) => void
+  /** Opens the quick start page of the guide (the first-run card — UX-W01). */
+  onQuickStart?: () => void
 }) {
   const schema = info.schema
   const filters = useFilters(schema)
@@ -92,6 +95,7 @@ export function WorkspaceScreen({
   const [pending, setPending] = useState<{ then: () => void } | undefined>(undefined)
   const [dirty, setDirty] = useState(false)
   const [formReset, setFormReset] = useState(0)
+  const [newWhere, setNewWhere] = useState<'after' | 'inside' | 'end'>('after')
   const [dataVersion, setDataVersion] = useState(0)
   const [total, setTotal] = useState(info.itemCount)
   const [showProblems, setShowProblems] = useState(false)
@@ -219,9 +223,9 @@ export function WorkspaceScreen({
     git.onPanelResult(r)
   }
 
-  const newItem = async (type: string, parent?: string): Promise<void> => {
+  const newItem = async (type: string, parent?: string, after?: string): Promise<void> => {
     if (!type) return
-    const item = await window.reqochet.newItem(type, parent)
+    const item = await window.reqochet.newItem(type, parent, after)
     request({ kind: 'draft', item })
   }
 
@@ -341,7 +345,16 @@ export function WorkspaceScreen({
             expanding={expanding}
             onExpandAll={() => void expandAll()}
             onCollapseAll={() => tree.current?.collapseAll()}
-            onNewItem={(type) => void newItem(type)}
+            onNewItem={(type) => {
+              // where it goes: below the selected item (default), inside it, or at the end (the owner, 5 Nov 2026)
+              const sel = target?.kind === 'item' ? target.id : undefined
+              if (sel && newWhere === 'after') void newItem(type, undefined, sel)
+              else if (sel && newWhere === 'inside') void newItem(type, sel)
+              else void newItem(type)
+            }}
+            newWhere={newWhere}
+            onNewWhere={setNewWhere}
+            hasSelection={target?.kind === 'item'}
           />
 
           {/* 0.16: a project still under ReqMan's folder name — offer the rename as one commit (owner, 31 Oct / 4 Nov) */}
@@ -394,7 +407,30 @@ export function WorkspaceScreen({
             onMove={(ids, parent, before) => void onMove(ids, parent, before)}
             controlsRef={tree}
             revealNonce={revealNonce}
-            emptyText={info.itemCount === 0 ? T.workspace.emptyRepo : T.workspace.emptyFilter}
+            emptyText={
+              info.itemCount === 0 ? (
+                // first run: what to do first, in one place (UX-W01)
+                <div className="first-run" role="region" aria-label={T.workspace.firstRunTitle}>
+                  <h2 className="first-run__title">{T.workspace.firstRunTitle}</h2>
+                  <p className="first-run__text">{T.workspace.firstRunText}</p>
+                  <div className="first-run__actions">
+                    <button type="button" className="btn btn--primary" onClick={() => void newItem(schema.itemTypes.find((x) => x.requirement !== false)?.id ?? schema.itemTypes[0]?.id ?? '')}>
+                      {T.workspace.firstRunNew}
+                    </button>
+                    <button type="button" className="btn" onClick={() => guarded(() => setImporting({ file: null, newProject: false }))}>
+                      {T.workspace.firstRunImport}
+                    </button>
+                    {onQuickStart && (
+                      <button type="button" className="link-btn" onClick={onQuickStart}>
+                        {T.workspace.firstRunGuide}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                T.workspace.emptyFilter
+              )
+            }
           />
           {exported && (
             <div className="notice table-notice table-notice--ok" role="status">
@@ -507,6 +543,11 @@ export function WorkspaceScreen({
           onOpen={() => select(rowMenu.id)}
           onExportItem={() => setExportOpen({ chosen: [rowMenu.id] })}
           onExportChosen={() => setExportOpen({ chosen: [...chosen] })}
+          onAddChild={() => void newItem(schema.itemTypes.find((x) => x.requirement !== false)?.id ?? schema.itemTypes[0]?.id ?? '', rowMenu.id)}
+          onDelete={() => {
+            setShowChanges(false)
+            guarded(() => setTarget({ kind: 'item', id: rowMenu.id, askDelete: true }))
+          }}
           onClose={() => setRowMenu(null)}
         />
       )}

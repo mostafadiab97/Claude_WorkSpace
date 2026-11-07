@@ -25,7 +25,41 @@ describe('import warns about a row whose cell count does not match the header (o
     const schema = parseSchema(readFileSync('config/default-schema.yaml', 'utf8')).schema
     const headers = ['Title', 'Text', 'Status']
     const rows = [['One', 'x', 'Draft'], ['Two', 'cut']]
-    const plan = planImport({ rows, headers, firstRow: 2, mapping: guessMapping(headers, schema), schema, defaultType: 'system-requirement', existing: { byId: new Map(), bySource: new Map() }, newId: (() => { let n = 0; return () => `REQ-T00000${n++}` })(), isValidId: () => true })
+    const plan = planImport({ rows, headers, firstRow: 2, mapping: guessMapping(headers, schema), schema, defaultType: 'system-requirement', existing: { byId: new Map(), bySource: new Map() }, newId: (() => { let n = 0; return () => `REQ-T00000${n++}` })(), isValidId: () => true, checkCells: true })
     expect(plan.problems.some((p) => p.row === 3 && /2 cells but the header has 3/.test(p.message))).toBe(true)
+  })
+})
+
+describe('a new item can go right below the selected one (the owner, 5 Nov 2026)', () => {
+  it('newItem(type, undefined, after) places it between the item and its next sibling', async () => {
+    const { mkdtemp } = await import('node:fs/promises')
+    const { tmpdir } = await import('node:os')
+    const { join } = await import('node:path')
+    const { createSqliteIndexCache } = await import('../src/modules/index-cache')
+    const { createFileRepositoryStore } = await import('../src/modules/repository-store')
+    const { createWorkspace } = await import('../src/modules/workspace')
+    const root = await mkdtemp(join(tmpdir(), 'rq-after-'))
+    const userDir = await mkdtemp(join(tmpdir(), 'rq-after-user-'))
+    const quiet = { info: () => {}, warn: () => {}, error: () => {} }
+    const ws = createWorkspace({
+      store: createFileRepositoryStore(join(__dirname, '..', 'config', 'default-schema.yaml')),
+      git: (await import('../src/modules/git-adapter')).createSystemGitAdapter(),
+      openIndex: () => createSqliteIndexCache(join(userDir, 'index.sqlite')),
+      userDir,
+      log: quiet,
+      watchFiles: false
+    } as Parameters<typeof createWorkspace>[0])
+    await ws.initialize(root)
+    const save = async (title: string, after?: string): Promise<string> => {
+      const it = ws.newItem('system-requirement', undefined, after)
+      const r = await ws.saveItem({ ...it, title }, null)
+      if (!r.ok) throw new Error(r.message)
+      return it.id
+    }
+    const a = await save('A')
+    await save('C')
+    await save('B', a)
+    const titles = ws.query({ parent: null, sort: { by: 'order', descending: false } }).items.map((x) => x.title)
+    expect(titles).toEqual(['A', 'B', 'C'])
   })
 })

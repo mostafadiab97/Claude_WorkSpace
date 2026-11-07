@@ -30,6 +30,7 @@ accounts — who may read or change requirements is decided by your GitHub repos
 16. [What reqochet can do — specification](#16-what-reqochet-can-do--specification)
 17. [Troubleshooting and questions](#17-troubleshooting-and-questions)
 18. [Keyboard shortcuts](#18-keyboard-shortcuts)
+19. [Coming from DOORS or Jama?](#19-coming-from-doors-or-jama)
 
 ---
 
@@ -127,8 +128,10 @@ with a message; **Push** shares them.
 
 ## 4. Writing and structuring requirements
 
-- **Create:** **+ New item** adds at the top level (or next to the selected item); **+ Child…** adds under the
-  selected item.
+- **Create:** **+ New item** adds the new item **below the selected item**, at its level. The list beside it
+  (**Insert position**) chooses instead **Inside the selected item** (as a child) or **At the end**; with nothing
+  selected it goes at the end. **+ Child…** in the editor, or the row menu (right-click, Menu key or Shift+F10),
+  adds under the selected item.
 - **Edit:** select a row, change anything in the editor, **Save**. Leaving an item with unsaved changes asks first.
   If a colleague's newer version arrived meanwhile, reqochet refuses to overwrite it and tells you.
 - **Move:** drag a row onto another row (it becomes the last child, with everything below it) or into the space between
@@ -267,7 +270,7 @@ name**). reqochet never guesses silently and never deletes data to "fix" somethi
 
 ## 13. Settings
 
-Open with **⚙** (top right). The left panel switches between pages: **Environment and versions**, **Report a problem and
+Open with **⚙** (top right). The left panel switches between pages: **Appearance** (language, light/dark), **Environment and versions**, **Report a problem and
 diagnostics**, **Features**, **Self-tests**, and this **User guide** (one page per section). **← Back** at the top of the
 panel returns to your repository.
 
@@ -281,7 +284,7 @@ panel returns to your repository.
 | **Release self-test** | Runs the main actions (create, edit, move, link, commit, push, a colleague's change, a pull with decisions, branches, compare, history, export, import) on a practice repository in a temporary folder, then deletes it — about a minute; your data is not touched. |
 | **Data self-test** | Measures speed on this PC with generated requirements in a temporary folder. |
 
-**Language:** English / العربية in the top bar — the whole window turns right-to-left in Arabic; your data stays as
+**Language:** English / العربية in ⚙ → Appearance (and on the start screen) — the whole window turns right-to-left in Arabic; your data stays as
 written. **Colours:** Light / Dark / System; a company can change colours, fonts and logo in a theme file
 (`docs/THEMING.md`).
 
@@ -416,7 +419,35 @@ Press **Ctrl+/** in the main window to open this page. Buttons show their shortc
 | **Alt+↑ / Alt+↓** | Move the open item up or down among its siblings (after saving). |
 | **↑ / ↓** (in the table) | Previous / next row; the editor follows. |
 | **→ / ←** (in the table) | Open a level / close it, or go to the parent. |
-| **Ctrl+click / Shift+click** | Choose several rows (to move, export or change them together). |
+| **Menu key / Shift+F10 / Delete** (in the table) | The row's menu: open, export, delete. |
+| **Enter** (in the table) | Into the open item's fields. |
+| **Ctrl+click / Shift+click** | Choose several rows (to move or export them together). |
 | **Ctrl+Shift+C** | Open or close Changes. |
 | **Esc** | Close a pop-up, a menu or a question. |
 | **Ctrl+/** | This page. |
+
+## 19. Coming from DOORS or Jama?
+
+reqochet does the same work with fewer moving parts: the requirements are plain files in your project's Git
+repository, and reqochet is the window that understands them. What you know maps like this:
+
+| In DOORS / Jama | In reqochet | Where |
+| --- | --- | --- |
+| Module / project, document | The repository's requirements (several documents per repository are coming next, one folder each) | Start screen → Open |
+| Object / item | Item: a heading, a requirement, a test … | the table and the editor |
+| Object number (1.2.3) | Outline number, calculated from the tree, never stored | column **No.** |
+| Attribute | Field (Status, Priority, Safety level …) | ⚙ → Fields; Settings for the team |
+| Object type / item type | Item type | the **Type** column; `schema.yaml` |
+| Link module, link type | Link type (verifies, refines …) — links are stored on the item they start from | editor → Links |
+| Suspect link | Suspect link: the linked item changed after the link was checked — **⚠ suspect** in the Links column | editor → Links: keep or unlink |
+| Baseline | A commit (every saved state), soon named baselines | History, Compare |
+| Change proposal / review | A branch, compared like a pull request, then pulled in | the branch button → Compare with… |
+| View | Filters, search and the columns you choose | toolbar: Filters, Columns |
+| History | History of an item; Compare between any two versions | editor → History; Changes |
+| Exchange with a supplier | ReqIF (the OMG standard) and Excel, both ways | toolbar: Import, Export |
+| Licence, server, accounts | None: access = your Git host's permissions | — |
+
+**First steps for a DOORS or Jama user:** export your module as **ReqIF** (or Excel), then here **Import** it — the
+outline, types, fields and links come along, and every row is matched again on a later import. Then share with
+**Push**: your team pulls it, edits, and every change is reviewable per requirement in **Changes** and **Compare**.
+

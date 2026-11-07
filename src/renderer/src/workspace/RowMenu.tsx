@@ -8,12 +8,20 @@ import { useFeature } from '../lib/features'
  * The export dialog has "Include the items below" (ticked) to export only the items themselves.
  * Closes on Escape, on a click elsewhere and when the window scrolls.
  */
-export function RowMenu(props: { id: string; x: number; y: number; chosenCount: number; onExportItem: () => void; onExportChosen: () => void; onOpen: () => void; onClose: () => void }) {
+export function RowMenu(props: { id: string; x: number; y: number; chosenCount: number; onExportItem: () => void; onExportChosen: () => void; onOpen: () => void; onClose: () => void; onAddChild?: () => void; onDelete?: () => void }) {
   const ref = useRef<HTMLDivElement>(null)
   const exportOn = useFeature('export')
   useEffect(() => {
     ref.current?.querySelector('button')?.focus()
     const close = (e: Event): void => {
+      if (e instanceof KeyboardEvent && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+        // move between the menu's items (a menu is used with the arrow keys — UX-W03)
+        const items = [...(ref.current?.querySelectorAll<HTMLButtonElement>('button') ?? [])]
+        const at = items.indexOf(document.activeElement as HTMLButtonElement)
+        items[(at + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length]?.focus()
+        e.preventDefault()
+        return
+      }
       if (e instanceof KeyboardEvent && e.key !== 'Escape') return
       if (e instanceof MouseEvent && ref.current?.contains(e.target as Node)) return
       props.onClose()
@@ -39,6 +47,16 @@ export function RowMenu(props: { id: string; x: number; y: number; chosenCount: 
       <button type="button" role="menuitem" className="row-menu__item" onClick={act(props.onOpen)}>
         {T.rowMenu.open}
       </button>
+      {props.onAddChild && (
+        <button type="button" role="menuitem" className="row-menu__item" onClick={act(props.onAddChild)}>
+          {T.rowMenu.addChild}
+        </button>
+      )}
+      {props.onDelete && (
+        <button type="button" role="menuitem" className="row-menu__item" onClick={act(props.onDelete)}>
+          {T.rowMenu.delete}
+        </button>
+      )}
       {!exportOn ? null : props.chosenCount > 1 ? (
         <button type="button" role="menuitem" className="row-menu__item" onClick={act(props.onExportChosen)}>
           {T.rowMenu.exportChosen(props.chosenCount)}

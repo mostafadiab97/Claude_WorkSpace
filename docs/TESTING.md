@@ -1,4 +1,4 @@
-# Testing ReqMan
+# Testing reqochet-dev
 
 Three kinds of checks protect each version:
 
@@ -6,7 +6,7 @@ Three kinds of checks protect each version:
    (including the module-boundary rules), about 400 unit tests (real Git with a fake "GitHub", the sandbox's
    broken files, …), performance tests, and end-to-end scenarios that click through the real app. A build that
    fails any of them produces no installer. To see them: repository → **Actions** → latest **Build** run.
-2. **The release self-test** (from 0.8.0) — on *your* PC, inside ReqMan: **⚙ Settings & diagnostics → Run
+2. **The release self-test** (from 0.8.0) — on *your* PC, inside reqochet-dev: **⚙ Settings & diagnostics → Run
    release self-test**. It does the main actions on a practice repository in a temporary folder (never your
    data) and shows ✓/✗ per step. It checks what only your PC has: your Git, Windows Defender, your disk.
 3. **A short manual checklist** — at most 5 steps per version (the owner's rule, 28 Oct 2026): the update
@@ -31,10 +31,10 @@ scroll to bottom 65 ms, suspect filter 0.3 s. The owner's PC: 10k queries < 15 m
 
 | What | Location |
 | --- | --- |
-| Installed app | `%LOCALAPPDATA%\Programs\ReqMan\` |
-| Your theme file (survives updates) | `%APPDATA%\ReqMan\theme.json` — created by **Edit my theme…** |
-| App's built-in theme (replaced by updates — don't edit) | `%LOCALAPPDATA%\Programs\ReqMan\resources\config\theme.json` |
-| Log file | `%APPDATA%\ReqMan\logs\reqman.log` (older entries in `reqman.old.log`) |
+| Installed app | `%LOCALAPPDATA%\Programs\reqochet-dev\` |
+| Your theme file (survives updates) | `%APPDATA%\reqochet-dev\theme.json` — created by **Edit my theme…** |
+| App's built-in theme (replaced by updates — don't edit) | `%LOCALAPPDATA%\Programs\reqochet-dev\resources\config\theme.json` |
+| Log file | `%APPDATA%\reqochet-dev\logs\reqochet.log` (older entries in `reqochet.old.log`) |
 
 Paste a location into the Explorer address bar to open it. The app's **Diagnostics** panel also shows
 the paths and has buttons to open them.
@@ -43,12 +43,12 @@ the paths and has buttons to open them.
 
 From 0.14.0: **⚙ → Report a problem** — describe what happened and click **Save report…**; send the saved text file
 (it holds your description, the diagnostics and the end of the log). Before 0.14.0: **Copy diagnostics**, attach
-`reqman.log` (**Open log folder**) and describe what you did, expected and saw.
+`reqochet.log` (**Open log folder**) and describe what you did, expected and saw.
 
 ## Getting a version to test
 
 Each tested version is published on the repository's **Releases** page
-(`https://github.com/<owner>/Claude_WorkSpace/releases`). Download `ReqMan-Setup-<version>.exe` from
+(`https://github.com/<owner>/Claude_WorkSpace/releases`). Download `reqochet-dev-Setup-<version>.exe` from
 the release's **Assets** and run it — there is no zip and no GitHub sign-in needed. From v0.0.3 onwards,
 an installed ReqMan also finds newer releases by itself and offers **Restart and update**.
 
@@ -67,7 +67,17 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.16.3 (stabilisation 1: data and safety)
+## Manual test checklist — v0.16.4 (stabilisation 2: speed, Arabic, first run, keyboard)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.16.4**, then **⚙ → Self-tests → Run release self-test**. | Version 0.16.4; **all 22 steps passed**. |
+| 2 | Open an item with text, click in the middle of its text. Then select an item and press **New item** (Insert position: Below the selected item). | The cursor is where you clicked (or at the end), not at the start. The new item appears right below the selected one. |
+| 3 | Export some items to CSV, put `12"` inside a table or bullet list in one Text cell, save, **Import** the file. | The whole text arrives, including what follows the `"`. |
+| 4 | In the table press **Shift+F10** (or the Menu key) on a row; then look at the **Links** column and the **Changes** button. | The row menu opens (Open, Add a child item, Delete…, Export); Links reads like "1 out · ⚠ 1 suspect"; Changes counts items. |
+| 5 | Switch to **العربية** and look at the table, the Changes button and a Compare. | IDs read left to right; counts read correctly ("عنصران", "3 عناصر"); "عنصر فرعي" for children; nothing in English except names. |
+
+## Previous checklist — v0.16.3 (stabilisation 1: data and safety)
 
 Most fixes of this version are checked automatically (30 QA tests from the review, a new e2e scenario, the acceptance
 run). Report by step number.
@@ -79,14 +89,6 @@ run). Report by step number.
 | 3 | Change an item without saving, then press **Push**. | The same question first; after Save comes the usual "Pull first? / Push without pulling" (if GitHub has newer commits) or the push. |
 | 4 | Type a value into **Tags** and press **Ctrl+S** without clicking elsewhere. | The tags are saved (the item is not marked unsaved afterwards). |
 | 5 | Optional: Import a CSV that has a cell like `12" display` and an Arabic choice value. | Every row arrives; the Arabic value is the one you typed. |
-
-## Previous checklist — v0.16.2 (the Windows icon redrawn)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.16.2**, then **⚙ → Self-tests → Run release self-test**. | Version 0.16.2; **all 22 steps passed**. |
-| 2 | Look at reqochet-dev in the taskbar, Start menu and on the desktop, on a dark wallpaper. (If Windows still shows the old icon, it is its icon cache — it refreshes after a restart.) | Brighter red and green eyes; a thin light outline around the dark tile. |
-| 3 | Light mode: look at the face in the top bar. | The same thin outline; the face keeps its size while the eyes move and rest. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

@@ -388,6 +388,8 @@ export interface ImportSettings {
   mapping?: ImportTarget[]
   /** Type of rows without a (known) type. */
   defaultType: string
+  /** Set by the main process, never by the window: the file is CSV text, where every row has all its cells. */
+  textFile?: boolean
 }
 
 export interface ImportProblem {
@@ -504,7 +506,8 @@ export interface ReqochetApi {
   queryItems(query: ItemQuery): Promise<QueryResult>
   getItem(id: string): Promise<ItemDetails | null>
   /** A new, unsaved item of `type` with a fresh ID, placed last under `parent`. */
-  newItem(type: string, parent?: string): Promise<Item>
+  /** `after`: right below that item, at its level (else at the end of `parent`, or of the top level). */
+  newItem(type: string, parent?: string, after?: string): Promise<Item>
   /** `revision` null = a new item. */
   saveItem(item: Item, revision: string | null): Promise<SaveResult>
   deleteItem(id: string, revision: string, opts?: { removeIncomingLinks?: boolean }): Promise<{ ok: true } | { ok: false; message: string }>

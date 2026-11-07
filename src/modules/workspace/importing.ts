@@ -70,7 +70,8 @@ export function createImportOps(ctx: WorkspaceContext, structure: StructureOps, 
         taken.add(id)
         return id
       },
-      isValidId: (id) => isValidId(id) && s.index.get(id) === undefined
+      isValidId: (id) => isValidId(id) && s.index.get(id) === undefined,
+      checkCells: settings.textFile === true
     })
     breakLoops(s, p)
     return { plan: p, headers, mapping, revisions }

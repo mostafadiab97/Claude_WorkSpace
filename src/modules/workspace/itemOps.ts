@@ -35,9 +35,15 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
   return {
     getItem: (id: string): Promise<ItemDetails | null> => details(ctx.need(), id),
 
-    newItem(type: string, parent?: string): Item {
+    newItem(type: string, parent?: string, after?: string): Item {
       const s = ctx.need()
       const taken = { has: (id: string) => s.index.get(id) !== undefined } as ReadonlySet<string>
+      // "after" = right below that item, at its level (the owner, 5 Nov 2026: choose where a new item goes)
+      const sibling = after ? s.index.get(after) : undefined
+      if (sibling) {
+        const under = sibling.parent ?? undefined
+        return s.repo.createItem(type, taken, { ...(under ? { parent: under } : {}), order: structure.orderAfter(s, sibling.id) })
+      }
       return s.repo.createItem(type, taken, { ...(parent ? { parent } : {}), order: structure.nextOrder(s, parent) })
     },
 

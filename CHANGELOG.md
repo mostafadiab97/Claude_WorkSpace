@@ -3,6 +3,27 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.16.4 — 7 Nov 2026 — Stabilisation 2: speed, Arabic, first run, keyboard
+- **The owner's points on 0.16.3:** clicking into the Text box puts the cursor where you clicked (or at the end), not at
+  the start; a `"` typed inside a multi-line CSV cell (a table, a bullet list) no longer cuts the rest — a quote ends a
+  quoted cell only when a separator, a line end or the file end follows (and the row then has all its columns); a CSV
+  row that still has too few cells is named in the import preview.
+- **Where a new item goes** (the owner, 5 Nov): **below the selected item** by default; the new **Insert position** list
+  chooses Inside the selected item or At the end.
+- **First run:** an empty project shows what to do first — Add the first requirement, Import from Excel/CSV/ReqIF, Open
+  the quick start (UX-W01).
+- **Links column in words:** "2 out · 1 in · ⚠ 1 suspect", also read out by screen readers (UX-W02).
+- **Keyboard:** Menu key / Shift+F10 / Delete open the row menu (now with Add a child item and Delete…), arrow keys move
+  in it, Enter goes into the editor (UX-W03); listed on the Keyboard shortcuts page.
+- **Changes counts requirements**, with "+ settings" when the settings changed — no more "8" for 5 items (UX-W05).
+- **Speed:** Alt+Tab back to the window reloads only when files really changed (CR2-04); a big Compare no longer freezes
+  the app (PQ-01). The "2.5 s extra on open" (PQ-02) was the measurement counting the start screen's animation; the
+  real gap is about 0.2 s, and the log now shows the phases of every open.
+- **Arabic:** correct counts for 0 and agreement for 1 and 2; one word per idea — parent أصل, child **عنصر فرعي**,
+  siblings العناصر المجاورة, pull سحب, Git tag علامة إصدار, Defect خلل; IDs read left to right in the table; diff labels
+  and checks of the core speak Arabic too (AR-01…13, CR1-08).
+- **User guide:** new page **19. Coming from DOORS or Jama?**; the pages that no longer matched the screens corrected.
+
 ## 0.16.3 — 5 Nov 2026 — Stabilisation 1: data and safety (whole-project review)
 - **Owner (5 Nov 2026):** self-test 22/22 (129.9 s, a large compile ran at the same time); steps 1, 3, 4 passed. Points
   for the next round (owner: change nothing before the usage limit resets, start when he says): (a) step 2 — clicking

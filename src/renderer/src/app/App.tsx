@@ -164,6 +164,10 @@ export function App() {
                   setShowSettings(true)
                 }}
                 onLeaveGuard={onLeaveGuard}
+                onQuickStart={() => {
+                  setSettingsStart(QUICK_START_PAGE)
+                  setShowSettings(true)
+                }}
                 onGitBusy={setGitBusy}
               />
             </ErrorBoundary>

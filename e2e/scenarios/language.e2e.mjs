@@ -11,7 +11,7 @@ await scenario('E2E language', async (ctx) => {
 
   await win.getByRole('button', { name: 'Open repository…' }).click()
   await win.getByRole('button', { name: 'Create requirements folder' }).click()
-  await win.locator('.table__empty', { hasText: 'No items yet' }).waitFor()
+  await win.locator('.first-run').waitFor()
   await win.getByLabel('New item').selectOption('system-requirement')
   await win.getByPlaceholder('Short name of the requirement').fill('Door lock')
   await win.getByRole('button', { name: 'Save', exact: true }).click()

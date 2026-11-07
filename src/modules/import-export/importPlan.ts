@@ -162,6 +162,8 @@ export function planImport(input: ImportPlanInput): ImportPlan {
   let skip = 0
   rows.forEach((r, i) => {
     const row = input.firstRow + i
+    // a row with more or fewer cells than the header usually means a " cut a cell (the owner, 0.16.3): say so
+    if (input.headers.length > 1 && r.length !== input.headers.length && r.some((x) => x.trim())) problem(row, null, T.importMsg.cellCount(r.length, input.headers.length))
     const title0 = cell(r, col('title'))
     // the text exactly as in the cell (spaces at line ends are part of it); only Windows line ends are normalised
     const text = col('text') === null ? '' : (r[col('text') as number] ?? '').replace(/\r\n/g, '\n').replace(/^\n+|\n+$/g, '')

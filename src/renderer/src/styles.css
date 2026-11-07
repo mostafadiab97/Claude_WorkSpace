@@ -793,6 +793,10 @@ code {
 .table__td--id {
   font-family: var(--rm-font-family-mono);
   font-size: var(--rm-font-size-small);
+  /* an ID is Latin text: in the right-to-left window it still reads left to right and is cut at its end (AR-11) */
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: start;
 }
 
 /* The ID column stays visible while the table scrolls sideways. */

@@ -19,11 +19,11 @@ itemTypes:
   - { id: use-case,             name: Use Case, short: 'Use case', labels: { ar: حالة استخدام } }
   - { id: design-element,       name: Design Element, short: Design, labels: { ar: عنصر تصميم } }
   - { id: test-case,            name: Test Case, short: Test, labels: { ar: حالة اختبار } }
-  - { id: defect,               name: Defect, short: Defect, labels: { ar: عيب } }
+  - { id: defect,               name: Defect, short: Defect, labels: { ar: خلل } }
   - { id: risk,                 name: Risk, short: Risk, labels: { ar: خطر } }
   - { id: change-request,       name: Change Request, short: CR, labels: { ar: طلب تغيير } }
   # Headings and explanatory text that structure a specification; not counted as requirements.
-  - { id: information,          name: Heading / Information, requirement: false, short: Heading, labels: { ar: عنوان / معلومات } }
+  - { id: information,          name: Heading / Information, requirement: false, short: Heading, labels: { ar: عنوان قسم / معلومات } }
 
 fields:
   - id: status

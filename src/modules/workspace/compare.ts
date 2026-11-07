@@ -138,7 +138,9 @@ export function createCompare(git: GitAdapter) {
       let schemaBefore: string | null = null
       let schemaAfter: string | null = null
       let schemaSeen = false
+      let step = 0
       for (const c of changes) {
+        if (++step % YIELD_EVERY === 0) await giveWay()
         const oldPath = c.from ?? c.path
         if (schemaPaths.includes(c.path) || schemaPaths.includes(oldPath)) {
           // the folder rename may arrive as a deletion plus an addition: collect both sides, compare once below
@@ -192,6 +194,7 @@ export function createCompare(git: GitAdapter) {
       /** The ID an entry had in the older version (differs after an ID conversion). */
       const beforeId = new Map<string, string>()
       for (const [id, p] of pairs) {
+        if (++step % YIELD_EVERY === 0) await giveWay()
         if (p.before.item) beforeId.set(id, p.before.item.id)
         const diff = diffItems(p.before.item, p.after.item, s.repo.schema)
         const unreadable = p.before.error ?? p.after.error
@@ -261,6 +264,10 @@ export function createCompare(git: GitAdapter) {
 }
 
 /** Outline numbers of all items in a commit (siblings by order key, then ID — like the index). */
+/** A big Compare lets other window calls (open an item, save, the Git bar) run every few hundred files (PQ-01). */
+const YIELD_EVERY = 200
+const giveWay = (): Promise<void> => new Promise((r) => setImmediate(r))
+
 async function numbersFromTree(git: GitAdapter, s: Session, ref: string): Promise<Map<string, string>> {
   const base = reqPath(s.repo)
   const tree = await git.treeBlobs(s.repo.root, ref, `${base === '.' ? '' : `${base}/`}items`)

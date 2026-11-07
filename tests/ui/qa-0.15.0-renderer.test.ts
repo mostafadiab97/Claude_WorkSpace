@@ -268,7 +268,7 @@ describe('QA schema label helpers', () => {
     expect(typeShort(schema, 'sys')).toBe('SysReq')
     expect(typeName(schema, 'tc')).toBe('Test Case')
     expect(fieldLabel(f)).toBe('Status')
-    expect(linkName(schema, 'verifies')).toBe('يتحقق من')
+    expect(linkName(schema, 'verifies')).toBe('\u200Fيتحقق من') // 0.16.4: a right-to-left mark before an Arabic link name (AR-13)
     expect(linkName(schema, 'verifies', true)).toBe('verified by') // no reverse label
     expect(typeName(schema, 'unknown')).toBe('unknown')
   })

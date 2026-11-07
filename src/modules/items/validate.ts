@@ -1,3 +1,4 @@
+import { T } from '../../shared/text'
 import type { Schema } from '../schema'
 import type { Item, ItemIssue } from './index'
 import { isValidId } from './ids'
@@ -13,11 +14,11 @@ export function validateItem(item: Item, schema: Schema): ItemIssue[] {
   const add = (path: string, message: string, severity: ItemIssue['severity'] = 'error'): void =>
     void issues.push({ itemId: item.id, path, message, severity })
 
-  if (!isValidId(item.id)) add('id', `"${item.id}" is not in the reqochet ID format (e.g. REQ-K7Q3XMB).`, 'warning')
+  if (!isValidId(item.id)) add('id', T.validate.idFormat(item.id), 'warning')
 
   // the type is free to change: IDs no longer depend on it (0.9.0)
-  if (!schema.itemTypes.some((t) => t.id === item.type)) add('type', `Unknown item type "${item.type}".`)
-  if (!item.title.trim()) add('title', 'The title is empty.', 'warning')
+  if (!schema.itemTypes.some((t) => t.id === item.type)) add('type', T.validate.unknownType(item.type))
+  if (!item.title.trim()) add('title', T.validate.emptyTitle, 'warning')
 
   for (const f of schema.fields) {
     const v = item.fields[f.id]
@@ -26,32 +27,32 @@ export function validateItem(item: Item, schema: Schema): ItemIssue[] {
     switch (f.type) {
       case 'enum':
         if (typeof v !== 'string' || !f.options?.includes(v)) {
-          add(path, `"${String(v)}" is not an allowed ${f.name} (allowed: ${f.options?.join(', ')}).`)
+          add(path, T.validate.notAllowed(String(v), f.name, f.options?.join(', ') ?? ''))
         }
         break
       case 'number':
-        if (typeof v !== 'number') add(path, `${f.name} must be a number.`)
+        if (typeof v !== 'number') add(path, T.validate.mustNumber(f.name))
         break
       case 'date':
-        if (typeof v !== 'string' || !DATE_RE.test(v)) add(path, `${f.name} must be a date written as YYYY-MM-DD.`)
+        if (typeof v !== 'string' || !DATE_RE.test(v)) add(path, T.validate.mustDate(f.name))
         break
       case 'list':
-        if (!Array.isArray(v)) add(path, `${f.name} must be a list.`)
+        if (!Array.isArray(v)) add(path, T.validate.mustList(f.name))
         break
       case 'text':
-        if (typeof v !== 'string' && typeof v !== 'number') add(path, `${f.name} must be text.`)
+        if (typeof v !== 'string' && typeof v !== 'number') add(path, T.validate.mustText(f.name))
         break
     }
   }
 
-  if (item.parent === item.id) add('parent', 'An item cannot be its own parent.')
+  if (item.parent === item.id) add('parent', T.validate.ownParent)
 
   const seen = new Set<string>()
   item.links.forEach((l, i) => {
-    if (!schema.linkTypes.some((t) => t.id === l.type)) add(`links[${i}].type`, `Unknown link type "${l.type}".`)
-    if (l.target === item.id) add(`links[${i}].target`, 'An item cannot link to itself.')
+    if (!schema.linkTypes.some((t) => t.id === l.type)) add(`links[${i}].type`, T.validate.unknownLink(l.type))
+    if (l.target === item.id) add(`links[${i}].target`, T.validate.selfLink)
     const key = `${l.type}>${l.target}`
-    if (seen.has(key)) add(`links[${i}]`, `Duplicate link "${l.type}" to ${l.target}.`, 'warning')
+    if (seen.has(key)) add(`links[${i}]`, T.validate.duplicateLink(l.type, l.target), 'warning')
     seen.add(key)
   })
   return issues

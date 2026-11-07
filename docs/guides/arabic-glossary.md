@@ -18,8 +18,11 @@ the Arabic reviewer proposes additions or corrections, the builder updates this 
 | branch | فرع (فروع) | |
 | commit (noun / verb) | إيداع (إيداعات) | |
 | push | دفع | |
-| pull | سحب | |
+| pull | سحب | never جلب (that is fetch) — AR-05 |
 | changes | تغييرات | |
-| history | سجل | |
+| history | سجلّ | |
+| siblings (items) | العناصر المجاورة | AR-04 |
+| Git tag | علامة إصدار | the field "Tags" stays الوسوم (AR-06) |
+| defect (item type) | خلل | AR-12 |
 | import / export | استيراد / تصدير | |
 | reqochet, Git, GitHub, Excel, ReqIF, Markdown | stay in Latin letters | with a right-to-left mark before the sentence when it starts with them |

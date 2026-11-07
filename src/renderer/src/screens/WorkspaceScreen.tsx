@@ -133,7 +133,12 @@ export function WorkspaceScreen({
     request({ kind: 'item', id })
   }
 
-  // Pick up changes made outside ReqMan (Git pull, an editor) when the window gets focus again.
+  // Pick up changes made outside reqochet (Git pull, an editor) when the window gets focus again. Only when files
+  // really changed does everything reload; otherwise just the Git bar (commits made outside) — CR2-04
+  const reloadGit = useRef(git.reload)
+  useEffect(() => {
+    reloadGit.current = git.reload
+  })
   useEffect(() => {
     const onFocus = (): void =>
       void window.reqochet
@@ -141,7 +146,8 @@ export function WorkspaceScreen({
         .then((i) => {
           onInfo(i)
           setRefreshError(null)
-          setDataVersion((v) => v + 1) // also refreshes the Git bar (commits made outside ReqMan)
+          if (i.lastSync.changedFiles > 0 || i.lastSync.full) setDataVersion((v) => v + 1)
+          else reloadGit.current()
         })
         .catch((e: unknown) => setRefreshError(errorMessage(e)))
     window.addEventListener('focus', onFocus)

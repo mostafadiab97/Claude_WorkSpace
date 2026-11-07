@@ -227,17 +227,22 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     closeSession()
     gitOps.invalidate()
     if (init) await init()
+    // the phases are logged so a slow open shows where its time went (PQ-02)
+    const t0 = performance.now()
+    const lap = (): number => Math.round(performance.now() - t0)
     // opened with the locator: it asks the session's index (set below) where each item's file is
     const repo = await ctx.openRepo(repoRoot)
+    const tRepo = lap()
     const index = deps.openIndex(repo.root)
     // Watch before the first sync, so nothing that changes during it is missed.
     const watch = deps.watchFiles === false ? null : watchRequirementsFolder(repo.folder, (e) => log.warn(`Folder watch: ${String(e)}`), repo.metaDir)
+    const tWatch = lap()
     const stats = await index.sync(repo)
     watch?.take()
     session = { repo, index, isGit, watch, watchedMeta: repo.metaDir, lastSync: syncInfo(stats) }
     log.info(
       `Opened ${repo.root}: ${stats.files} files, ${stats.added} added / ${stats.updated} updated / ${stats.removed} removed ` +
-        `in ${stats.durationMs} ms${stats.full ? ' (full index)' : ''}`
+        `in ${stats.durationMs} ms${stats.full ? ' (full index)' : ''} — phases: project ${tRepo} ms, index+watch ready ${tWatch} ms, synced ${lap()} ms`
     )
     await recent.remember(repo.root)
     return info(session)

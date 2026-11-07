@@ -34,6 +34,8 @@ const time = async (label, fn) => {
   console.log(`${label}: ${Date.now() - s} ms`)
 }
 try {
+  // the start screen first (its loading animation plays at least one loop since 0.16.1): not part of opening (PQ-02)
+  await win.getByRole('button', { name: 'Open repository…' }).waitFor({ timeout: 30_000 })
   await time('open + first tree (includes first indexing)', async () => {
     await win.getByRole('button', { name: 'Open repository…' }).click()
     await win.locator('.table__row').first().waitFor({ timeout: 120_000 })

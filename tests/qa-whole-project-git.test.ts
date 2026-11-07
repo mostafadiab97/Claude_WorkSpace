@@ -95,12 +95,12 @@ describe('CR1-08: core texts follow the language (Arabic)', () => {
   const { schema } = parseSchema(readFileSync(join(__dirname, '..', 'config', 'default-schema.yaml'), 'utf8'))
   const it1: Item = { id: 'REQ-AAAAAAA', type: 'system-requirement', title: 'Old', order: 'a0', fields: {}, links: [], text: '', extra: {} }
   const arabic = /[؀-ۿ]/
-  it.fails('CR1-08a: diff row labels Title/Type/Parent are Arabic in the Arabic window', () => {
+  it('CR1-08a: diff row labels Title/Type/Parent are Arabic in the Arabic window', () => {
     setLanguage('ar')
     const d = diffItems(it1, { ...it1, title: 'New', parent: 'REQ-BBBBBBB' }, schema)
     expect(d.rows.map((r) => r.label).filter((l) => !arabic.test(l))).toEqual([])
   })
-  it.fails('CR1-08b: validation messages are Arabic in the Arabic window', () => {
+  it('CR1-08b: validation messages are Arabic in the Arabic window', () => {
     setLanguage('ar')
     const issues = validateItem({ ...it1, title: '', type: 'no-such-type' }, schema)
     expect(issues.length).toBeGreaterThan(0)

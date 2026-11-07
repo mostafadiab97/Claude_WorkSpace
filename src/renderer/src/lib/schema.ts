@@ -28,7 +28,11 @@ export const optionLabel = (f: FieldDef | undefined, value: string): string => {
   return own(byLang, value) ?? value
 }
 
-export const linkLabel = (t: LinkTypeDef, reverse = false): string => (reverse ? inLanguage(t.reverseName, t.reverseLabels) : inLanguage(t.name, t.labels))
+/** In Arabic a link name stands next to a Latin ID in tooltips: a right-to-left mark keeps the word order (AR-13). */
+export const linkLabel = (t: LinkTypeDef, reverse = false): string => {
+  const own = reverse ? inLanguage(t.reverseName, t.reverseLabels) : inLanguage(t.name, t.labels)
+  return getLanguage() === 'ar' && own !== (reverse ? t.reverseName : t.name) && !own.startsWith('\u200F') ? `\u200F${own}` : own
+}
 export const linkName = (schema: Schema, id: string, reverse = false): string => {
   const t = schema.linkTypes.find((l) => l.id === id)
   return t ? linkLabel(t, reverse) : id

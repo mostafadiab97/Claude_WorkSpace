@@ -98,7 +98,7 @@ describe('schema names in the window language (UX-22)', () => {
     expect([typeName(s, 'sys'), typeShort(s, 'sys'), fieldLabel(f), optionLabel(f, 'Draft'), linkName(s, 'verifies', true)]).toEqual(['System Requirement', 'SysReq', 'Status', 'Draft', 'verified by'])
     setLanguage('ar')
     try {
-      expect([typeName(s, 'sys'), typeShort(s, 'sys'), fieldLabel(f), optionLabel(f, 'Draft'), linkName(s, 'verifies', true), linkName(s, 'verifies')]).toEqual(['متطلب نظام', 'متطلب نظام', 'الحالة', 'مسودة', 'متحقَّق منه بـ', 'verifies'])
+      expect([typeName(s, 'sys'), typeShort(s, 'sys'), fieldLabel(f), optionLabel(f, 'Draft'), linkName(s, 'verifies', true), linkName(s, 'verifies')]).toEqual(['متطلب نظام', 'متطلب نظام', 'الحالة', 'مسودة', '\u200Fمتحقَّق منه بـ', 'verifies']) // RLM since 0.16.4 (AR-13)
       expect(formatValue('Draft', f)).toBe('مسودة')
       expect(optionLabel(f, 'Unknown')).toBe('Unknown')
     } finally {

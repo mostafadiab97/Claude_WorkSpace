@@ -1,5 +1,5 @@
 import type { DiffRow, FieldValue, Item, ItemDiff, Link, Schema } from '../../shared/domain'
-import { T } from '../../shared/text'
+import { getLanguage, T } from '../../shared/text'
 
 const show = (v: FieldValue | undefined | unknown): string =>
   v === undefined || v === null ? '' : Array.isArray(v) ? v.join(', ') : typeof v === 'object' ? JSON.stringify(v) : String(v)
@@ -16,15 +16,21 @@ export function diffItems(before: Item | null, after: Item | null, schema: Pick<
   const add = (key: string, label: string, a: string, b: string): void => {
     if (a !== b) rows.push({ key, label, before: a, after: b })
   }
-  const typeName = (id: string | undefined): string => (id ? (schema.itemTypes.find((t) => t.id === id)?.name ?? id) : '')
-  add('title', 'Title', before?.title ?? '', after?.title ?? '')
-  add('type', 'Type', typeName(before?.type), typeName(after?.type))
-  add('parent', 'Parent', before?.parent ?? '', after?.parent ?? '')
+  // names in the window's language: the built-in labels from the texts, schema names with their labels (CR1-08)
+  const lang = getLanguage()
+  const named = (x: { name: string; labels?: Record<string, string> }): string => (x.labels && Object.hasOwn(x.labels, lang) ? (x.labels[lang] as string) : x.name)
+  const typeName = (id: string | undefined): string => {
+    const t = id ? schema.itemTypes.find((x) => x.id === id) : undefined
+    return t ? named(t) : (id ?? '')
+  }
+  add('title', T.columns.title, before?.title ?? '', after?.title ?? '')
+  add('type', T.columns.type, typeName(before?.type), typeName(after?.type))
+  add('parent', T.columns.parent, before?.parent ?? '', after?.parent ?? '')
   // Order keys mean nothing to a reader: a changed position is shown in words here, and Compare replaces them
   // with the outline numbers before and after ("1.2 → 3.5.1"). A new or deleted item has no position change.
   if (before && after && (before.order ?? '') !== (after.order ?? '')) rows.push({ key: 'order', label: T.change.position, before: T.change.oldPlace, after: T.change.newPlace })
   const known = new Set(schema.fields.map((f) => f.id))
-  for (const f of schema.fields) add(`field:${f.id}`, f.name, show(before?.fields[f.id]), show(after?.fields[f.id]))
+  for (const f of schema.fields) add(`field:${f.id}`, named(f), show(before?.fields[f.id]), show(after?.fields[f.id]))
   // values of fields that are no longer (or not yet) in the schema
   const others = new Set([...Object.keys(before?.fields ?? {}), ...Object.keys(after?.fields ?? {})].filter((k) => !known.has(k)))
   for (const k of [...others].sort()) add(`field:${k}`, k, show(before?.fields[k]), show(after?.fields[k]))

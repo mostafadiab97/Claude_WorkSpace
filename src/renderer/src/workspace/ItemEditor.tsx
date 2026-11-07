@@ -86,6 +86,7 @@ export function ItemEditor(props: {
   const dirty = form !== null && (isNew || !same(form, base))
   // the Text field: formatted while the saved text is shown and nobody is typing in it (UX-08)
   const [editingText, setEditingText] = useState(false)
+  const caretAt = useRef<number | null>(null)
   const textPreview = form !== null && base !== null && !editingText && form.text.trim() !== '' && form.text === base.text
   // formatted once per text, not on every keystroke in another field (code review CR-09)
   const previewText = textPreview ? form.text : ''
@@ -296,7 +297,14 @@ export function ItemEditor(props: {
           <div className="field">
             <span className="field__label field__label--row">
               {T.editor.text}
-              <button type="button" className="link-btn" onClick={() => setEditingText(true)}>
+              <button
+                type="button"
+                className="link-btn"
+                onClick={() => {
+                  caretAt.current = form.text.length
+                  setEditingText(true)
+                }}
+              >
                 {T.editor.editText}
               </button>
             </span>
@@ -308,11 +316,15 @@ export function ItemEditor(props: {
               aria-label={T.editor.editTextTooltip}
               onClick={(e) => {
                 // a click on a link (or on bold text inside one) opens the link, not the text box (CR-06)
-                if (!(e.target instanceof Element && e.target.closest('a'))) setEditingText(true)
+                if (e.target instanceof Element && e.target.closest('a')) return
+                // the cursor goes where the user clicked (the owner, 0.16.3 step 2), or to the end
+                caretAt.current = caretFromClick(e.clientX, e.clientY, form.text)
+                setEditingText(true)
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && e.target === e.currentTarget) {
                   e.preventDefault()
+                  caretAt.current = form.text.length
                   setEditingText(true)
                 }
               }}
@@ -338,6 +350,11 @@ export function ItemEditor(props: {
               className="input textarea"
               value={form.text}
               autoFocus={editingText}
+              onFocus={(e) => {
+                const at = caretAt.current
+                caretAt.current = null
+                if (at !== null) e.currentTarget.setSelectionRange(at, at)
+              }}
               onChange={(e) => set({ text: e.target.value })}
               onBlur={() => setEditingText(false)}
               placeholder={T.editor.textPlaceholder}
@@ -527,4 +544,18 @@ function ListInput({ value, onChange }: { value: string; onChange: (v: string[])
       }}
     />
   )
+}
+
+/**
+ * Where in the Markdown source a click on the formatted preview landed: the clicked word's text is looked up in the
+ * source (formatting marks differ, the words do not); not found → the end of the text.
+ */
+function caretFromClick(x: number, y: number, source: string): number {
+  const doc = document as Document & { caretRangeFromPoint?: (x: number, y: number) => Range | null }
+  const range = doc.caretRangeFromPoint?.(x, y)
+  const node = range?.startContainer
+  if (!range || !node || node.nodeType !== Node.TEXT_NODE) return source.length
+  const text = node.textContent ?? ''
+  const at = source.indexOf(text)
+  return at < 0 || source.indexOf(text, at + 1) >= 0 ? source.length : at + range.startOffset
 }

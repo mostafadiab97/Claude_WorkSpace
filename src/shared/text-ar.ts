@@ -1,13 +1,14 @@
 // ARABIC TEXTS (0.13.0, the owner's request 31 Oct 2026) — the same keys as the English texts in text.ts.
 // The type `Texts` makes the compiler refuse a missing or extra key, so a new English text cannot be forgotten here.
-// Product, tool and format names stay in Latin letters (ReqMan, Git, GitHub, Excel, ReqIF, CSV, Markdown, IDs).
+// Product, tool and format names stay in Latin letters (reqochet, Git, GitHub, Excel, ReqIF, CSV, Markdown, IDs).
 // Numbers are written with Western digits (as in the data); plurals follow Arabic number agreement (pl()).
 import type { Texts } from './text'
 
 const n = (count: number): string => count.toLocaleString('en')
 
-/** Arabic counted nouns: 1 → "one" form, 2 → dual, 3–10 → plural, 0 and 11+ → singular accusative after the number. */
+/** Arabic counted nouns: 1 → "one" form, 2 → dual, 0 and 3–10 → plural, 11+ → singular accusative after the number. */
 function pl(count: number, one: string, two: string, few: string, many: string): string {
+  if (count === 0) return `${n(0)} ${few}` // zero takes the plural (AR-01)
   if (count === 1) return one
   if (count === 2) return two
   if (count >= 3 && count <= 10) return `${n(count)} ${few}`
@@ -88,7 +89,7 @@ const raw: Texts = {
       theme: 'المظهر',
       themeSource: { user: 'ملف theme.json الخاص بك', file: 'مظهر التطبيق', default: 'المظهر الافتراضي المدمج' },
       tone: { ok: 'سليم:', warn: 'تنبيه:', error: 'مشكلة:' } as Record<'ok' | 'warn' | 'error', string>,
-      themeWarnings: (count: number) => ` — ${n(count)} تحذير`,
+      themeWarnings: (count: number) => ` — ${pl(count, 'تحذير واحد', 'تحذيران', 'تحذيرات', 'تحذيرًا')}`,
       updates: 'التحديثات',
       app: 'التطبيق',
       releases: 'الإصدارات',
@@ -155,13 +156,13 @@ const raw: Texts = {
       intro: 'ينشئ متطلبات وهمية في مجلد مؤقت، ويفهرسها ويجري عمليات بحث وتصفية معتادة، ثم يحذفها. لا تُمسّ مستودعاتك.',
       items: 'العناصر',
       run: 'تشغيل الاختبار الذاتي',
-      running: (count: number) => `جارٍ التشغيل على ${n(count)} عنصر…`,
+      running: (count: number) => `جارٍ التشغيل على ${items(count)}…`,
       failed: (message: string) => `فشل الاختبار الذاتي: ${message}`,
       writing: (count: number) => `كتابة ${n(count)} ملف عنصر`,
       firstIndex: 'الفهرسة الأولى (مرة واحدة لكل جهاز ولكل مستودع)',
       reopen: 'إعادة الفتح (بلا تغييرات)',
       query: (name: string) => `استعلام: ${name}`,
-      matches: (count: number) => `(${n(count)} نتيجة)`
+      matches: (count: number) => `(${pl(count, 'نتيجة واحدة', 'نتيجتان', 'نتائج', 'نتيجة')})`
     },
     releaseTest: {
       steps: (count: number) => `عرض الخطوات (${n(count)})`,
@@ -198,6 +199,20 @@ const raw: Texts = {
     reload: 'إعادة تحميل النافذة'
   },
 
+  validate: {
+    idFormat: (id: string) => `"${id}" ليس بصيغة معرّفات reqochet (مثل REQ-K7Q3XMB).`,
+    unknownType: (t: string) => `نوع عنصر غير معروف "${t}".`,
+    emptyTitle: 'العنوان فارغ.',
+    notAllowed: (v: string, field: string, allowed: string) => `"${v}" ليست قيمة مسموحًا بها في ${field} (المسموح: ${allowed}).`,
+    mustNumber: (field: string) => `يجب أن يكون ${field} رقمًا.`,
+    mustDate: (field: string) => `يجب أن يكون ${field} تاريخًا بالصيغة YYYY-MM-DD.`,
+    mustList: (field: string) => `يجب أن يكون ${field} قائمة.`,
+    mustText: (field: string) => `يجب أن يكون ${field} نصًا.`,
+    ownParent: 'لا يمكن أن يكون العنصر أصلًا لنفسه.',
+    unknownLink: (t: string) => `نوع رابط غير معروف "${t}".`,
+    selfLink: 'لا يمكن أن يرتبط العنصر بنفسه.',
+    duplicateLink: (t: string, target: string) => `رابط "${t}" مكرر إلى ${target}.`
+  },
   columns: {
     id: 'المعرّف',
     number: 'الرقم',
@@ -212,7 +227,7 @@ const raw: Texts = {
 
   table: {
     label: 'العناصر',
-    linksTooltip: (out: number, incoming: number) => `${n(out)} رابط من هذا العنصر، و${n(incoming)} من عناصر أخرى`,
+    linksTooltip: (out: number, incoming: number) => `${links(out)} من هذا العنصر، و${links(incoming)} من عناصر أخرى`,
     linksLegend: '→ روابط من هذا العنصر · ← روابط إليه · ⚠ روابط مشكوك فيها',
     suspectTooltip: (count: number) => `${n(count)} مشكوك فيه: العنصر المرتبط تغيّر منذ تأكيد الرابط`,
     sortTreeTooltip: (label: string) => `ترتيب حسب ${label} (داخل كل أصل)؛ انقر مرة أخرى للترتيب التنازلي، ومرة ثالثة لترتيب المستند`,
@@ -269,7 +284,7 @@ const raw: Texts = {
     countUpdate: (c: number) => `${n(c)} محدَّث`,
     countSame: (c: number) => `${n(c)} بلا تغيير`,
     countSkip: (c: number) => `${n(c)} متخطّى`,
-    countLinks: (c: number) => `${links(c)} أُضيفت إلى عناصر أخرى`,
+    countLinks: (c: number) => `${links(c)} ${c === 1 ? 'أُضيف' : c === 2 ? 'أُضيفا' : 'أُضيفت'} إلى عناصر أخرى`,
     done: (created: number, updated: number, unchanged: number, skipped: number, committed: boolean) =>
       `تم الاستيراد: ${n(created)} جديد، ${n(updated)} محدَّث، ${n(unchanged)} بلا تغيير${skipped ? `، ${n(skipped)} متخطّى` : ''}.${committed ? ' أُودِع كأول إصدار.' : ' راجعها في "التغييرات"، ثم أودِعها.'}`,
     targets: {
@@ -295,7 +310,7 @@ const raw: Texts = {
     label: (id: string) => `إجراءات ${id}`,
     open: 'فتح',
     exportItem: 'تصدير هذا العنصر وكل ما تحته…',
-    exportChosen: (count: number) => `تصدير ${items(count)} المختارة وكل ما تحتها…`,
+    exportChosen: (count: number) => `تصدير العناصر المختارة (${n(count)}) وكل ما تحتها…`,
     chosenStatus: (count: number) => `${n(count)} مختار`,
     chosenHint: 'Ctrl+نقر للإضافة أو الإزالة، Shift+نقر لنطاق، نقر يمين للتصدير',
     clearChosen: 'إلغاء الاختيار'
@@ -315,7 +330,7 @@ const raw: Texts = {
     format: 'الصيغة',
     xlsx: 'مصنّف Excel (.xlsx) — صفوف مجمّعة حسب التسلسل الهرمي، والعناوين بإزاحة',
     reqif: 'ReqIF (.reqif) — لأدوات DOORS وJama وPolarion وغيرها: التسلسل الهرمي وكل الحقول والروابط',
-    chosen: (count: number) => `${items(count)} المختارة`,
+    chosen: (count: number) => `العناصر المختارة (${n(count)})`,
     chosenOne: (id: string) => `العنصر المختار ${id}`,
     includeBelow: 'تضمين العناصر التي تحتها',
     sourceTitle: 'أو حدّث الملف الذي استوردت منه',
@@ -406,7 +421,7 @@ const raw: Texts = {
   },
 
   history: {
-    slow: 'سجل كبير — ما زال Git يقرأ…',
+    slow: 'سجلّ كبير — ما زال Git يقرأ…',
     loading: 'جارٍ تحميل السجلّ…',
     none: 'لا سجلّ بعد — لم يُودَع هذا العنصر قط.',
     versions: 'الإصدارات',
@@ -471,11 +486,11 @@ const raw: Texts = {
     saveTooltip: 'حفظ (Ctrl+S)',
     discard: 'إهمال التغييرات',
     moveUp: 'تحريك لأعلى',
-    moveUpTooltip: 'تحريك لأعلى بين الإخوة (Alt+↑)',
+    moveUpTooltip: 'تحريك لأعلى بين العناصر المجاورة (Alt+↑)',
     moveDown: 'تحريك لأسفل',
-    moveDownTooltip: 'تحريك لأسفل بين الإخوة (Alt+↓)',
-    addChild: 'إضافة عنصر ابن',
-    addChildOption: '+ ابن…',
+    moveDownTooltip: 'تحريك لأسفل بين العناصر المجاورة (Alt+↓)',
+    addChild: 'إضافة عنصر فرعي',
+    addChildOption: '+ عنصر فرعي…',
     notAllowed: (value: string) => `${value} (غير مسموح)`,
     listPlaceholder: 'مفصولة، بفواصل'
   },
@@ -523,7 +538,7 @@ const raw: Texts = {
     remove: (name: string) => `إزالة ${name || 'الحقل'}`,
     removeTooltip: 'إزالة',
     add: '+ إضافة حقل',
-    staleName: (name: string) => `${name}: تغيّر الاسم، لكن اسمه المترجم (مثلاً بالعربية) ما زال القديم. صحّحه في schema.yaml ‏(labels) — يُحفظ الحقل في الحالتين.`,
+    staleName: (name: string) => `${name}: تغيّر الاسم، لكن اسمه المترجم (مثلًا بالعربية) ما زال القديم. صحّحه في schema.yaml ‏(labels) — يُحفظ الحقل في الحالتين.`,
     staleOptions: (name: string, options: string) => `${name}: الخيارات ${options} أُزيلت، لكن أسماءها المترجمة ما زالت في schema.yaml ‏(optionLabels). صحّحها أو احذفها هناك — يُحفظ الحقل في الحالتين.`,
     removing: (names: string) => `إزالة ${names}: القيم المخزّنة في العناصر لا تُحذف — تبقى في الملفات وتعود إذا أُضيف حقل بالمفتاح نفسه.`,
     needsName: (i: number) => `الحقل ${i} يحتاج إلى اسم.`,
@@ -534,7 +549,7 @@ const raw: Texts = {
     defaultNotOption: (label: string) => `${label}: يجب أن يكون الافتراضي أحد الخيارات.`,
     defaultNotNumber: (label: string) => `${label}: يجب أن يكون الافتراضي رقمًا.`,
     invalidAfter: (count: number, name: string, examples: string) =>
-      `${items(count)} لها قيم ${name} لا يسمح بها التعريف الجديد (مثلًا ${examples}). تُحفظ القيم وتظهر كمشكلات في تلك العناصر.`,
+      `${items(count)} ${count === 1 ? 'له' : 'لها'} قيم ${name} لا يسمح بها التعريف الجديد (مثلًا ${examples}). تُحفظ القيم وتظهر كمشكلات في تلك العناصر.`,
     checking: 'جارٍ فحص العناصر…',
     saveAnyway: 'حفظ على أي حال',
     save: 'حفظ الحقول'
@@ -571,7 +586,7 @@ const raw: Texts = {
     changes: (count: number) => `التغييرات${count > 0 ? ` (${n(count)})` : ''}`,
     pull: 'سحب',
     pullN: (behind: number) => `سحب${behind > 0 ? ` (${n(behind)})` : ''}`,
-    pullTooltip: 'جلب التغييرات التي دفعها الآخرون',
+    pullTooltip: 'سحب التغييرات التي دفعها الآخرون',
     push: (ahead: number) => `دفع${ahead > 0 ? ` (${n(ahead)})` : ''}`,
     pushTooltip: 'إرسال إيداعاتك إلى الخادم البعيد (دون إجبار أبدًا)',
     blocked: 'احفظ تعديلك أو تراجع عنه أولًا.'
@@ -590,14 +605,14 @@ const raw: Texts = {
     local: 'فروع أخرى على هذا الجهاز',
     remote: 'على GitHub فقط',
     switchTooltip: (b: string) => `التبديل إلى "${b}" (يعرض الجدول بعدها متطلبات ذلك الفرع)`,
-    pullFrom: 'جلب التغييرات من…',
+    pullFrom: 'سحب التغييرات من…',
     pullFromTooltip: (current: string) => `إدخال تغييرات فرع آخر إلى "${current}" كتغييرات غير مودعة — اختر الفرع أدناه`,
     compareWith: 'مقارنة مع…',
     compareWithTooltip: (current: string) => `انظر ما الذي سيضيفه فرع آخر إلى "${current}"، مثل طلب السحب — اختر الفرع أدناه`,
     pullTooltip: (b: string, current: string) => `سحب "${b}" إلى "${current}" مع القرار لكل متطلب حيث غيّر الطرفان الجزء نفسه`,
     compareTooltip: (b: string, current: string) => `ما الذي سيضيفه "${b}" إلى "${current}"`,
     chooseSwitch: 'انقر فرعًا للتبديل إليه.',
-    choosePull: (current: string) => `جلب التغييرات إلى ${current} من أي فرع؟ (Esc = رجوع)`,
+    choosePull: (current: string) => `سحب التغييرات إلى ${current} من أي فرع؟ (Esc = رجوع)`,
     chooseCompare: (current: string) => `مقارنة ${current} مع أي فرع؟ (Esc = رجوع)`,
     noOthers: 'لا توجد فروع أخرى بعد.',
     deleteLabel: (b: string) => `حذف الفرع "${b}" من هذا الجهاز`,
@@ -616,9 +631,9 @@ const raw: Texts = {
   },
 
   mergeDialog: {
-    title: (source: string) => (source.startsWith('origin/') ? `جلب التغييرات من GitHub (${source.slice(7)}): قراراتك` : `جلب التغييرات من ${source}: قراراتك`),
+    title: (source: string) => (source.startsWith('origin/') ? `سحب التغييرات من GitHub (${source.slice(7)}): قراراتك` : `سحب التغييرات من ${source}: قراراتك`),
     intro: (incoming: number, combined: number, questions: number) =>
-      `تغيّر هناك ${items(incoming)}. ${combined > 0 ? `${items(combined)} تغيّرت على الطرفين في أجزاء مختلفة ودُمجت تلقائيًا. ` : ''}${items(questions)} تغيّر فيها الجزء نفسه بشكل مختلف — قرّر أدناه. لا يتغير شيء حتى تنتهي.`,
+      `تغيّر هناك ${items(incoming)}. ${combined > 0 ? `${items(combined)} ${combined === 1 ? 'تغيّر' : combined === 2 ? 'تغيّرا' : 'تغيّرت'} على الطرفين في أجزاء مختلفة ودُمجت تلقائيًا. ` : ''}${items(questions)} تغيّر فيها الجزء نفسه بشكل مختلف — قرّر أدناه. لا يتغير شيء حتى تنتهي.`,
     duplicates: (labels: string) => `أُنشئت على الطرفين بالمعرّف نفسه (سيحصل عنصرك على معرّف جديد): ${labels}`,
     openTooltip: 'إظهار هذا العنصر في الجدول (إصدارك)',
     partLabel: (label: string) => `قرار: ${label}`,
@@ -702,11 +717,11 @@ const raw: Texts = {
     title: 'المقارنة',
     kinds: { added: 'مُضاف', modified: 'متغيّر', moved: 'منقول', deleted: 'محذوف' },
     working: 'مجلد عملك (كل التغييرات المحفوظة)',
-    refsGroup: 'الفروع والوسوم',
-    refKinds: { tag: 'وسم', remote: 'بعيد', branch: 'فرع' },
+    refsGroup: 'الفروع وعلامات الإصدار',
+    refKinds: { tag: 'علامة إصدار', remote: 'بعيد', branch: 'فرع' },
     commitsGroup: 'الإيداعات التي غيّرت المتطلبات',
     what: 'ما الذي تقارنه',
-    lastPull: (date: string | null) => `ما جلبه آخر سحب${date ? ` (${date})` : ' (لا سحب على هذا الجهاز بعد)'}`,
+    lastPull: (date: string | null) => `ما أتى به آخر سحب${date ? ` (${date})` : ' (لا سحب على هذا الجهاز بعد)'}`,
     uncommitted: 'التغييرات غير المودعة (آخر إيداع ← مجلد العمل)',
     lastCommit: 'آخر إيداع غيّر المتطلبات',
     custom: 'اختيار إصدارين…',
@@ -810,7 +825,7 @@ const raw: Texts = {
       schema: 'ملف الإعدادات (schema.yaml)',
       id: 'معرّفات مكرّرة',
       links: 'روابط إلى عناصر غير موجودة',
-      parent: 'آباء غير موجودين',
+      parent: 'أصول غير موجودة',
       file: 'ملفات تتعذّر قراءتها',
       'file-name': 'اسم الملف لا يطابق المعرّف',
       other: 'مشكلات أخرى'
@@ -824,7 +839,7 @@ const raw: Texts = {
     fixFileName: 'إصلاح اسم الملف',
     fixFileNameTooltip: (id: string) => `إعادة تسمية الملف إلى ${id}.md (يراها Git إعادة تسمية، فيبقى السجلّ)`,
     fixFailed: (why: string) => `تعذّر إصلاح اسم الملف: ${why}`,
-    of: (shown: number, all: number) => `${n(shown)} من ${n(all)} عنصر`,
+    of: (shown: number, all: number) => `${n(shown)} من ${items(all)}`,
     searchFor: (text: string) => `«${text}»`,
     filterIs: (name: string, value: string) => `${name} = ${value}`,
     filteredBy: (what: string) => `مُصفّى: ${what}`,
@@ -905,17 +920,17 @@ const raw: Texts = {
     pulled: (count: number, combined: number, decided: number) =>
       `${count > 0 ? `تم السحب: تغيّر ${items(count)}` : 'تم السحب. لم يتغير أي عنصر'}${combined > 0 ? `، دُمج ${n(combined)} تلقائيًا` : ''}${decided > 0 ? `، وحسمتَ ${n(decided)}` : ''}.`,
     duplicate: (id: string, newId: string) => ` أُنشئ ${id} أيضًا على الطرف الآخر لعنصر مختلف: عنصرك الآن ${newId} (حُدّثت الروابط إليه).`,
-    needsDecision: (count: number) => `${items(count)} تغيّرت بشكل مختلف على الطرفين. قرّر أي نسخة تُبقي — لا يتغير شيء حتى تنتهي.`,
+    needsDecision: (count: number) => `${items(count)} ${count === 1 ? 'تغيّر' : count === 2 ? 'تغيّرا' : 'تغيّرت'} بشكل مختلف على الطرفين. قرّر أي نسخة تُبقي — لا يتغير شيء حتى تنتهي.`,
     mergeMessage: (source: string, branch: string) => `Merge ${source} into ${branch}`,
     noSuchBranch: (name: string) => `لا يوجد فرع باسم "${name}".`,
     sameBranch: 'هذا هو الفرع الحالي.',
-    badName: (name: string) => `لا يصلح "${name}" اسمًا لفرع. استخدم حروفًا لاتينية وأرقامًا و- و/ (بلا مسافات).`,
+    badName: (name: string) => `لا يصلح "${name}" اسمًا لفرع. استخدم حروفًا لاتينية وأرقامًا والواصلة (-) والشرطة المائلة (/)، بلا مسافات.`,
     exists: (name: string) => `يوجد فرع باسم "${name}" بالفعل.`,
     created: (name: string) => `أُنشئ الفرع "${name}" وتم التبديل إليه. الدفع ينشره.`,
     switched: (name: string) => `تم التبديل إلى "${name}".`,
     blocking: 'هذه العناصر مختلفة في الفرع الآخر، لذا لا يمكن نقل تغييراتك غير المودعة. أودِعها أو أهملها أولًا.',
     broughtIn: (source: string, count: number, combined: number, decided: number) =>
-      `جُلب ${items(count)} متغيّرة من ${source} إلى مجلد عملك${combined > 0 ? ` (دُمج ${n(combined)} تلقائيًا)` : ''}${decided > 0 ? `، وحسمتَ ${n(decided)}` : ''} — لم يُودَع شيء. راجعها في "التغييرات": أبقِ أو تراجع أو أهمِل، ثم أودِع.`,
+      `سُحب من ${source} ${count === 1 ? 'عنصر واحد متغيّر' : count === 2 ? 'عنصران متغيّران' : `${items(count)} متغيّرة`} إلى مجلد عملك${combined > 0 ? ` (دُمج ${n(combined)} تلقائيًا)` : ''}${decided > 0 ? `، وحسمتَ ${n(decided)}` : ''} — لم يُودَع شيء. راجعها في "التغييرات": أبقِ أو تراجع أو أهمِل، ثم أودِع.`,
     deleteCurrent: 'لا يمكن حذف الفرع الحالي. بدّل إلى فرع آخر أولًا.',
     unmerged: (name: string) => `في "${name}" إيداعات لا توجد في أي فرع آخر. حذفه يضيّعها (ما لم تكن على GitHub).`,
     branchDeleted: (name: string) => `حُذف الفرع "${name}" من هذا الجهاز.`,
@@ -936,6 +951,7 @@ const raw: Texts = {
     noSheet: (sheet: string) => `الورقة "${sheet}" ليست في الملف.`,
     noTitleColumn: 'اختر العمود الذي يحتوي العنوان أو النص.',
     rowFailed: (row: number) => `لا يمكن استيراد الصف ${row}:`,
+    cellCount: (cells: number, header: number) => `في هذا الصف ${cells} خلايا بينما في العنوان ${header} — ربما قطعت علامة اقتباس (") داخل خلية جزءًا منه. راجع الصف في الملف.`,
     macroOriginal: 'هذا المصنّف يحتوي على وحدات ماكرو (.xlsm). لا يستطيع reqochet الإبقاء عليها، لذا لا يغيّر الأصل: استخدم «حفظ نسخة محدّثة» — تُحفظ النسخة بصيغة .xlsx.',
     cannotUpdate: (id: string) => `لا يمكن قراءة ${id} بنسخة معروفة. حدّث ثم استورد من جديد.`,
     stopped: (done: number, all: number, why: string) => `توقّف الاستيراد بعد ${done} من ${all} صفًّا: ${why} الصفوف المكتوبة حتى الآن موجودة في التغييرات، ويمكن التراجع عنها هناك.`,
@@ -968,7 +984,7 @@ const raw: Texts = {
     parentMissing: (id: string) => `الأصل ${id} غير موجود.`,
     parentLoop: (id: string) => `${id} هو هذا العنصر أو أحد أبنائه؛ اختر أصلًا آخر.`,
     savedUnreadable: 'حُفظ العنصر لكن تعذّرت قراءته مرة أخرى.',
-    hasChildren: (id: string, count: number) => `لدى ${id} ${pl(count, 'عنصر ابن واحد', 'عنصران ابنان', 'عناصر أبناء', 'عنصرًا ابنًا')}. انقلها أو احذفها أولًا.`,
+    hasChildren: (id: string, count: number) => `لدى ${id} ${pl(count, 'عنصر فرعي واحد', 'عنصران فرعيان', 'عناصر فرعية', 'عنصرًا فرعيًا')}. انقلها أو احذفها أولًا.`,
     deletedLinksFailed: (id: string, source: string, why: string) => `حُذف ${id}، لكن تعذّرت إزالة روابطه من ${source}: ${why}`,
     movingStopped: (id: string) => `تعذّرت قراءة ${id}؛ توقف النقل.`,
     moveLoop: (parent: string, id: string) => `${parent} هو ${id} نفسه أو أحد أبنائه.`,

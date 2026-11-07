@@ -45,8 +45,16 @@ export function parseCsv(text: string, separator = ','): string[][] {
       if (ch === '"' && t[i + 1] === '"') {
         cell += '"'
         i++
-      } else if (ch === '"') quoted = false
-      else cell += ch
+      } else if (ch === '"') {
+        // the closing quote is followed by a separator, a line end or the end of the file; any other " was typed
+        // inside the cell (12" in a table or list edited by hand — the owner, 0.16.3) and is kept as text
+        const next = t[i + 1]
+        // before a line end it closes only if the row then has all its columns: a list line ending in 12" inside a
+        // cell that is not the last column keeps going
+        const rowEndsEarly = (next === '\n' || next === '\r') && rows.length > 0 && row.length + 1 < (rows[0]?.length ?? 0)
+        if ((next === undefined || next === separator || next === '\n' || next === '\r') && !rowEndsEarly) quoted = false
+        else cell += ch
+      } else cell += ch
     } else if (ch === '"' && cell === '') quoted = true // a quote opens a quoted cell only at its start (CR3-02: 12" display)
     else if (ch === separator) {
       row.push(unprotect(cell))

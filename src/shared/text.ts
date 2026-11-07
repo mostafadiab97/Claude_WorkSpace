@@ -194,6 +194,20 @@ const en = {
     reload: 'Reload the window'
   },
 
+  validate: {
+    idFormat: (id: string) => `"${id}" is not in the reqochet ID format (e.g. REQ-K7Q3XMB).`,
+    unknownType: (t: string) => `Unknown item type "${t}".`,
+    emptyTitle: 'The title is empty.',
+    notAllowed: (v: string, field: string, allowed: string) => `"${v}" is not an allowed ${field} (allowed: ${allowed}).`,
+    mustNumber: (field: string) => `${field} must be a number.`,
+    mustDate: (field: string) => `${field} must be a date written as YYYY-MM-DD.`,
+    mustList: (field: string) => `${field} must be a list.`,
+    mustText: (field: string) => `${field} must be text.`,
+    ownParent: 'An item cannot be its own parent.',
+    unknownLink: (t: string) => `Unknown link type "${t}".`,
+    selfLink: 'An item cannot link to itself.',
+    duplicateLink: (t: string, target: string) => `Duplicate link "${t}" to ${target}.`
+  },
   columns: {
     id: 'ID',
     number: 'No.',
@@ -937,6 +951,7 @@ const en = {
     noSheet: (sheet: string) => `The sheet "${sheet}" is not in the file.`,
     noTitleColumn: 'Choose which column holds the title or the text.',
     rowFailed: (row: number) => `Row ${row} cannot be imported:`,
+    cellCount: (cells: number, header: number) => `This row has ${cells} cells but the header has ${header} — a quote mark (") inside a cell may have cut it. Check the row in the file.`,
     macroOriginal: 'This workbook has macros (.xlsm). reqochet cannot keep them, so it does not change the original: use "Save an updated copy" — the copy is saved as .xlsx.',
     cannotUpdate: (id: string) => `${id} cannot be read at a known version. Refresh and import again.`,
     stopped: (done: number, all: number, why: string) => `The import stopped after ${done} of ${all} rows: ${why} The rows written so far are in Changes, where they can be taken back.`,

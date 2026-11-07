@@ -89,6 +89,10 @@ export interface RepoInfo {
   lastSync: { durationMs: number; full: boolean; changedFiles: number }
   /** The project still uses ReqMan's folder name `.reqman` (0.16: the window offers the rename). */
   legacyFolder?: true
+  /** The documents: folders under requirements/, with their item counts; name '' = loose files (S-10). */
+  documents: { name: string; itemCount: number }[]
+  /** Where a new item goes when no document is chosen. */
+  defaultDocument: string
 }
 
 /** One end of a link, as shown in the editor. */
@@ -507,7 +511,7 @@ export interface ReqochetApi {
   getItem(id: string): Promise<ItemDetails | null>
   /** A new, unsaved item of `type` with a fresh ID, placed last under `parent`. */
   /** `after`: right below that item, at its level (else at the end of `parent`, or of the top level). */
-  newItem(type: string, parent?: string, after?: string): Promise<Item>
+  newItem(type: string, parent?: string, after?: string, document?: string): Promise<Item>
   /** `revision` null = a new item. */
   saveItem(item: Item, revision: string | null): Promise<SaveResult>
   deleteItem(id: string, revision: string, opts?: { removeIncomingLinks?: boolean }): Promise<{ ok: true } | { ok: false; message: string }>

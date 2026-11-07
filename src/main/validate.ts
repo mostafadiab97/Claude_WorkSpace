@@ -155,6 +155,12 @@ export function item(v: unknown): Item {
     if (typeof v.order !== 'string' || !ORDER_KEY.test(v.order)) return bad('order')
     out.order = v.order
   }
+  // a new item's document: a plain folder name (S-10); it decides only where a new file goes
+  if (v.document !== undefined && v.document !== '') {
+    const d = str(v.document, 'document', 80)
+    if (/[\\/:*?"<>|]/.test(d) || d.startsWith('.') || d.includes('..')) return bad('document')
+    out.document = d
+  }
   return out
 }
 

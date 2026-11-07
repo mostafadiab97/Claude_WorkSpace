@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
+import { documentOfPath } from '../../shared/domain'
 import { mkdir, readdir, readFile, stat, writeFile, rename, rmdir } from 'node:fs/promises'
-import { basename, join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { generateId, ITEM_FILE_EXTENSION, parseItemFile, serializeItem, type FieldValue, type Item } from '../items'
 import { isMap, isSeq, parseDocument, type YAMLMap, type YAMLSeq } from 'yaml'
 import { parseSchema, type FieldDef } from '../schema'
@@ -17,7 +18,13 @@ import {
   type RequirementsRepo
 } from './index'
 
+/** The document folder of projects made before 0.17 (and the default when nothing else is known). */
 const ITEMS_DIR = 'items'
+/** The first document of a new project (S-10: the requirements folder holds only document folders). */
+export const FIRST_DOCUMENT = 'Specification'
+/** True when the name can be a document folder: a plain folder name, not hidden (S-10). */
+export const isDocumentName = (name: string): boolean =>
+  name.length > 0 && name.length <= 80 && !/[\\/:*?"<>|]/.test(name) && ![...name].some((c) => c.charCodeAt(0) < 32) && !name.startsWith('.') && name.trim() === name && !name.endsWith('.')
 /** The project folder inside requirements/ (0.16: renamed with the product; owner, 31 Oct / 4 Nov 2026). */
 /** True when the ID can be used as a file name inside items/ (no path parts). */
 export const isSafeFileId = (id: string): boolean =>
@@ -75,17 +82,27 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
     }
     const { schema, problems: schemaProblems } = parseSchema(schemaText)
     const fieldIds = new Set(schema.fields.map((f) => f.id))
-    const itemsDir = join(folder, ITEMS_DIR)
-    // An ID becomes a file name: it must be a plain name that stays inside items/ (SEC-01, SEC-06). Older or
+    // Documents are the folders directly under requirements/ (S-10); the hidden project folder is not one.
+    const listDocuments = async (): Promise<string[]> =>
+      (await readdir(folder, { withFileTypes: true }).catch(() => []))
+        .filter((d) => d.isDirectory() && isDocumentName(d.name))
+        .map((d) => d.name)
+        .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+    const initialDocuments = await listDocuments()
+    // where a new item goes when nothing says otherwise: the only document, else "items" (before 0.17), else the first
+    const defaultDocument = initialDocuments.length === 1 ? (initialDocuments[0] as string) : initialDocuments.includes(ITEMS_DIR) ? ITEMS_DIR : (initialDocuments[0] ?? FIRST_DOCUMENT)
+    // An ID becomes a file name: it must be a plain name that stays inside its document (SEC-01, SEC-06). Older or
     // hand-written IDs in other formats are allowed; separators, "..", ":" and control characters are not.
-    const defaultPath = (id: string): string => {
+    const defaultPath = (id: string, document?: string): string => {
       if (!isSafeFileId(id)) throw new Error(`"${id}" cannot be used as an item ID: it must not contain / \\ : .. or control characters.`)
-      return `${ITEMS_DIR}/${id}${ITEM_FILE_EXTENSION}`
+      const doc = document ?? defaultDocument
+      if (!isDocumentName(doc)) throw new Error(`"${doc}" cannot be used as a document name.`)
+      return `${doc}/${id}${ITEM_FILE_EXTENSION}`
     }
     // An item's file is normally items/<ID>.md, but a file renamed by hand still holds its item: the caller's
     // locator (the index) knows the real path, so such an item can be read, saved and deleted in place.
-    const pathOf = (id: string): string => options.locate?.(id) ?? defaultPath(id)
-    const fileFor = (id: string): string => join(folder, pathOf(id))
+    const pathOf = (id: string, document?: string): string => options.locate?.(id) ?? defaultPath(id, document)
+    const fileFor = (id: string, document?: string): string => join(folder, pathOf(id, document))
 
     const repo: RequirementsRepo = {
       root,
@@ -138,14 +155,22 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
         await atomicWrite(schemaFile, text)
       },
 
+      defaultDocument,
+      listDocuments,
+
+      // every .md file of every document folder, plus .md files directly in requirements/ (loose items, S-10)
       async listItemFiles(): Promise<ItemFileInfo[]> {
-        const names = await readdir(itemsDir).catch(() => [] as string[])
-        const files = names.filter((n) => n.endsWith(ITEM_FILE_EXTENSION))
-        const infos = await mapLimit(files, READ_CONCURRENCY, async (n) => {
-          const s = await stat(join(itemsDir, n)).catch(() => null)
-          return s?.isFile() ? { path: `${ITEMS_DIR}/${n}`, mtimeMs: s.mtimeMs, size: s.size } : null
+        const docs = await listDocuments()
+        const files: string[] = []
+        for (const d of ['', ...docs]) {
+          const names = await readdir(d ? join(folder, d) : folder).catch(() => [] as string[])
+          for (const n of names) if (n.endsWith(ITEM_FILE_EXTENSION) && !(d === '' && n.toLowerCase() === 'readme.md')) files.push(d ? `${d}/${n}` : n)
+        }
+        const infos = await mapLimit(files, READ_CONCURRENCY, async (p) => {
+          const s = await stat(join(folder, p)).catch(() => null)
+          return s?.isFile() ? { path: p, mtimeMs: s.mtimeMs, size: s.size } : null
         })
-        return infos.filter((x): x is ItemFileInfo => x !== null).sort((a, b) => a.path.localeCompare(b.path))
+        return infos.filter((x): x is ItemFileInfo => x !== null).sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))
       },
 
       async readItemFile(path, opts) {
@@ -161,7 +186,8 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
 
       async fixFileName(id) {
         const from = pathOf(id)
-        const to = defaultPath(id)
+        // the file keeps its document; a loose file goes into the default document
+        const to = defaultPath(id, documentOfPath(from) || undefined)
         if (from === to) return to
         if (await exists(join(folder, to))) throw new Error(`${to} already exists; the file ${from} was not renamed.`)
         const current = await readFile(join(folder, from), 'utf8').catch(() => null)
@@ -215,12 +241,13 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
           extra: {}
         }
         if (init.parent) item.parent = init.parent
+        if (init.document) item.document = init.document
         if (init.order !== undefined) item.order = init.order
         return item
       },
 
       async writeItem(item, options = {}) {
-        const file = fileFor(item.id)
+        const file = fileFor(item.id, item.document)
         const current = await repo.readItem(item.id)
         if (options.expectedRevision !== undefined) {
           const actual = current ? current.revision : null
@@ -236,7 +263,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
         }
         // Never overwrite a file a person edited into a state ReqMan cannot read: their text would be lost.
         if (current && !current.ok) throw new Error(`${basename(file)} cannot be read (${current.error}); fix it before saving over it.`)
-        await mkdir(itemsDir, { recursive: true })
+        await mkdir(dirname(file), { recursive: true })
         const content = serializeItem(item, schema)
         await atomicWrite(file, content)
         return revisionOf(content)
@@ -262,16 +289,18 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
       return (await exists(join(folder, META_DIR, SCHEMA_FILE))) || (await exists(join(folder, LEGACY_META_DIR, SCHEMA_FILE))) ? 'ready' : 'not-initialized'
     },
 
-    async initialize(root) {
+    async initialize(root, firstDocument = ITEMS_DIR) {
       const folder = folderOf(root)
       if ((await exists(join(folder, META_DIR, SCHEMA_FILE))) || (await exists(join(folder, LEGACY_META_DIR, SCHEMA_FILE))))
         throw new Error('This repository already has a requirements folder.')
       await mkdir(join(folder, META_DIR), { recursive: true })
-      await mkdir(join(folder, ITEMS_DIR), { recursive: true })
+      // a new project starts with one document folder, never loose items (S-10)
+      const doc = isDocumentName(firstDocument) ? firstDocument : ITEMS_DIR
+      await mkdir(join(folder, doc), { recursive: true })
       await writeFile(join(folder, META_DIR, SCHEMA_FILE), await readFile(defaultSchemaFile, 'utf8'), { flag: 'wx' })
       await writeFile(join(folder, '.gitattributes'), GITATTRIBUTES, { flag: 'w' })
-      // Git does not track empty folders; this keeps items/ in a fresh repository.
-      await writeFile(join(folder, ITEMS_DIR, '.gitkeep'), '', { flag: 'w' })
+      // Git does not track empty folders; this keeps the document folder in a fresh repository.
+      await writeFile(join(folder, doc, '.gitkeep'), '', { flag: 'w' })
       return open(root)
     },
 

@@ -9,6 +9,7 @@ import type { IndexCache } from '../index-cache'
 import { contentFingerprint, diffItems, parseItemFile } from '../items'
 import { parseSchema } from '../schema'
 import { outlineNumbers } from './structure'
+import { documentOfPath } from '../../shared/domain'
 import type { RequirementsRepo } from '../repository-store'
 import { T } from '../../shared/text'
 
@@ -270,14 +271,19 @@ const giveWay = (): Promise<void> => new Promise((r) => setImmediate(r))
 
 async function numbersFromTree(git: GitAdapter, s: Session, ref: string): Promise<Map<string, string>> {
   const base = reqPath(s.repo)
-  const tree = await git.treeBlobs(s.repo.root, ref, `${base === '.' ? '' : `${base}/`}items`)
+  // every document's files (S-10): all .md files under requirements/, outside the hidden project folder
+  const prefix = base === '.' ? '' : `${base}/`
+  const all = await git.treeBlobs(s.repo.root, ref, base === '.' ? '.' : base)
+  const tree = new Map([...all].filter(([p]) => p.endsWith('.md') && !p.slice(prefix.length).startsWith('.')))
   const blobs = await git.readBlobs(s.repo.root, [...new Set(tree.values())])
-  const rows: { id: string; parent?: string; order?: string }[] = []
-  for (const text of blobs.values()) {
+  const docOf = new Map<string, string>()
+  for (const [p, oid] of tree) docOf.set(oid, documentOfPath(p.slice(prefix.length)))
+  const rows: { id: string; parent?: string; order?: string; document: string }[] = []
+  for (const [oid, text] of blobs) {
     if (text === null) continue
     const r = parseItemFile(text, new Set())
     if (!r.ok) continue
-    rows.push({ id: r.item.id, ...(r.item.parent ? { parent: r.item.parent } : {}), ...(r.item.order !== undefined ? { order: r.item.order } : {}) })
+    rows.push({ id: r.item.id, document: docOf.get(oid) ?? '', ...(r.item.parent ? { parent: r.item.parent } : {}), ...(r.item.order !== undefined ? { order: r.item.order } : {}) })
   }
   rows.sort((a, b) => (a.order === undefined ? 1 : 0) - (b.order === undefined ? 1 : 0) || cmp(a.order ?? '', b.order ?? '') || cmp(a.id, b.id))
   return outlineNumbers(rows)

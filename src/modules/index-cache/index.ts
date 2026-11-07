@@ -38,7 +38,7 @@ export interface IndexCache {
   /** Changes whenever the index changes (for caches built from it, e.g. outline numbers). */
   revision(): number
   /** Every item's ID, parent and order key, siblings in document order — small and fast (for outline numbers). */
-  structure(): { id: string; parent?: string; order?: string }[]
+  structure(): { id: string; parent?: string; order?: string; document: string }[]
   /**
    * Whole-repository problems, answered from the index in milliseconds: duplicate IDs, links to missing
    * items, missing parents, and files that could not be read (`itemId` is then the file path).

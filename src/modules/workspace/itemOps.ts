@@ -35,16 +35,16 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
   return {
     getItem: (id: string): Promise<ItemDetails | null> => details(ctx.need(), id),
 
-    newItem(type: string, parent?: string, after?: string): Item {
+    newItem(type: string, parent?: string, after?: string, document?: string): Item {
       const s = ctx.need()
       const taken = { has: (id: string) => s.index.get(id) !== undefined } as ReadonlySet<string>
       // "after" = right below that item, at its level (the owner, 5 Nov 2026: choose where a new item goes)
       const sibling = after ? s.index.get(after) : undefined
-      if (sibling) {
-        const under = sibling.parent ?? undefined
-        return s.repo.createItem(type, taken, { ...(under ? { parent: under } : {}), order: structure.orderAfter(s, sibling.id) })
-      }
-      return s.repo.createItem(type, taken, { ...(parent ? { parent } : {}), order: structure.nextOrder(s, parent) })
+      // the document: of the item it goes next to or under (a tree never spans documents), else the chosen one (S-10)
+      const under = sibling ? (sibling.parent ?? undefined) : parent
+      const doc = (sibling ?? (parent ? s.index.get(parent) : undefined))?.document || document || s.repo.defaultDocument
+      if (sibling) return s.repo.createItem(type, taken, { ...(under ? { parent: under } : {}), order: structure.orderAfter(s, sibling.id), document: doc })
+      return s.repo.createItem(type, taken, { ...(parent ? { parent } : {}), order: structure.nextOrder(s, parent, doc), document: doc })
     },
 
     async saveItem(item: Item, revision: string | null): Promise<SaveResult> {
@@ -53,7 +53,11 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
       if (clean.parent === '') delete clean.parent
       const issues = validateItem(clean, s.repo.schema).filter((i) => i.severity === 'error')
       if (clean.parent) {
-        if (!s.index.get(clean.parent)) issues.push({ itemId: clean.id, path: 'parent', message: T.wsMsg.parentMissing(clean.parent), severity: 'error' })
+        const parent = s.index.get(clean.parent)
+        const mine = s.index.get(clean.id)?.document ?? clean.document ?? s.repo.defaultDocument
+        if (!parent) issues.push({ itemId: clean.id, path: 'parent', message: T.wsMsg.parentMissing(clean.parent), severity: 'error' })
+        // every document has its own tree (S-10): a parent from another document cannot hold this item
+        else if ((parent.document ?? '') !== mine) issues.push({ itemId: clean.id, path: 'parent', message: T.wsMsg.parentOtherDocument(clean.parent, parent.document || '—'), severity: 'error' })
         else if (createsLoop(s, clean.id, clean.parent)) {
           issues.push({ itemId: clean.id, path: 'parent', message: T.wsMsg.parentLoop(clean.parent), severity: 'error' })
         }
@@ -61,7 +65,7 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
       if (issues.length > 0) return { ok: false, reason: 'invalid', message: issues.map((i) => i.message).join(' '), issues }
       try {
         await s.repo.writeItem(clean, { expectedRevision: revision })
-        await s.index.syncPaths(s.repo, [s.repo.itemPath(clean.id)])
+        await s.index.syncPaths(s.repo, [s.repo.itemPath(clean.id, clean.document)])
         const d = await details(s, clean.id)
         if (!d) return { ok: false, reason: 'error', message: T.wsMsg.savedUnreadable }
         log.info(`Saved ${clean.id}${revision === null ? ' (new)' : ''}`)

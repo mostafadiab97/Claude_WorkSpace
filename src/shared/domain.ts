@@ -88,6 +88,8 @@ export interface Item {
   /** Values of schema fields (status, priority, owner, tags, custom fields). */
   fields: Record<string, FieldValue>
   links: Link[]
+  /** For a new item: the document (folder) its file goes into. Not written into the file — the folder is the document. */
+  document?: string
   /** The requirement text (Markdown). */
   text: string
   /** Header keys this version of ReqMan does not know; written back unchanged so nothing is ever lost. */
@@ -117,6 +119,8 @@ export interface IndexedItem {
   text: string
   /** File path relative to the requirements folder. */
   path: string
+  /** The document (folder under requirements/) the item's file is in; '' = directly in requirements/ (S-10). Always set by the index. */
+  document?: string
   /** Number of items whose parent is this item. */
   childCount: number
   /** Number of links from other items to this one. */
@@ -140,6 +144,8 @@ export interface ItemQuery {
   links?: 'suspect' | 'none'
   /** Only direct children of this item; `null` = only top-level items. */
   parent?: string | null
+  /** Only items of this document (folder under requirements/); leave out for all documents (S-10). */
+  document?: string
   sort?: { by: SortKey; descending?: boolean }
   limit?: number
   offset?: number
@@ -179,4 +185,10 @@ export interface ItemDiff {
   text: { before: string; after: string } | null
   linksAdded: Link[]
   linksRemoved: Link[]
+}
+
+/** The document of an item file: the first folder of its path under requirements/ ('' = loose file) — S-10. */
+export const documentOfPath = (path: string): string => {
+  const at = path.indexOf('/')
+  return at < 0 ? '' : path.slice(0, at)
 }

@@ -998,6 +998,7 @@ const raw: Texts = {
     alreadyLinked: (source: string, target: string) => `لدى ${source} هذا الرابط إلى ${target} بالفعل.`,
     noSuchLink: (source: string, type: string, target: string) => `ليس لدى ${source} رابط "${type}" إلى ${target}.`,
     parentMissing: (id: string) => `الأصل ${id} غير موجود.`,
+    parentOtherDocument: (parent: string, document: string) => `${parent} في المستند "${document}": يجب أن يكون العنصر وأصله في المستند نفسه.`,
     parentLoop: (id: string) => `${id} هو هذا العنصر أو أحد أبنائه؛ اختر أصلًا آخر.`,
     savedUnreadable: 'حُفظ العنصر لكن تعذّرت قراءته مرة أخرى.',
     hasChildren: (id: string, count: number) => `لدى ${id} ${pl(count, 'عنصر فرعي واحد', 'عنصران فرعيان', 'عناصر فرعية', 'عنصرًا فرعيًا')}. انقلها أو احذفها أولًا.`,

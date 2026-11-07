@@ -50,15 +50,19 @@ export interface RequirementsRepo {
    */
   writeSchemaFields(fields: FieldDef[], expectedRevision: string): Promise<void>
   listItemFiles(): Promise<ItemFileInfo[]>
+  /** The documents: folders directly under requirements/ (S-10), byte-wise sorted. */
+  listDocuments(): Promise<string[]>
+  /** Where a new item goes when no document is given: the only document, "items" (before 0.17) or the first. */
+  readonly defaultDocument: string
   /**
    * Reads one item file. `allKeysAsFields`: every header key with a simple value goes to `fields`, whether or not
    * the schema defines it (the index stores them all, so adding or removing a field needs no re-index).
    */
   readItemFile(path: string, opts?: { allKeysAsFields?: boolean }): Promise<{ ok: true; item: Item } | { ok: false; error: string }>
   /** Path of an item's file relative to the requirements folder — where it really is (see OpenOptions.locate). */
-  itemPath(id: string): string
+  itemPath(id: string, document?: string): string
   /** Where the item's file should be: items/<ID>.md. */
-  defaultItemPath(id: string): string
+  defaultItemPath(id: string, document?: string): string
   /**
    * Renames a file whose name does not match its ID to items/<ID>.md (Git sees a rename, so history is kept).
    * Refuses if that name is taken. Returns the new path.
@@ -72,7 +76,7 @@ export interface RequirementsRepo {
   /** Reads every item and runs all checks. */
   loadAll(): Promise<LoadResult>
   /** A new item with a fresh unique ID and the schema's default values. Not saved yet. */
-  createItem(typeId: string, takenIds: ReadonlySet<string>, init?: Partial<Pick<Item, 'title' | 'text' | 'parent' | 'order'>>): Item
+  createItem(typeId: string, takenIds: ReadonlySet<string>, init?: Partial<Pick<Item, 'title' | 'text' | 'parent' | 'order' | 'document'>>): Item
   /**
    * Saves an item atomically (a crash never leaves a half-written file) and returns its new revision.
    * With `expectedRevision`, refuses with a ConflictError if the file changed since it was read
@@ -96,7 +100,8 @@ export interface RepositoryStore {
   /** Is there a requirements folder in this repository? */
   inspect(repoRoot: string): Promise<FolderState>
   /** Creates the requirements folder with the default schema. Refuses if it already exists. */
-  initialize(repoRoot: string): Promise<RequirementsRepo>
+  /** `firstDocument`: the name of the first document folder (default "items"; the window passes "Specification", S-10). */
+  initialize(repoRoot: string, firstDocument?: string): Promise<RequirementsRepo>
   open(repoRoot: string, options?: OpenOptions): Promise<RequirementsRepo>
   /**
    * Renames requirements/.reqman to .reqochet (0.16; `back` undoes it). Returns both paths, or null when there is nothing
@@ -106,5 +111,6 @@ export interface RepositoryStore {
 }
 
 export { createFileRepositoryStore }
+export { FIRST_DOCUMENT, isDocumentName } from './fileStore'
 export { ConflictError } from './errors'
 export { checkRepository } from './checks'

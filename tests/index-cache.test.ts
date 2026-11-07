@@ -48,7 +48,7 @@ describe('index cache', () => {
   it('returns full items by ID', () => {
     const expected: Partial<Item> = { ...ctx.items.sys! }
     delete expected.extra
-    expect(ctx.cache.get(ctx.items.sys!.id)).toEqual({ ...expected, path: `items/${ctx.items.sys!.id}.md`, childCount: 0, incomingCount: 1, suspectCount: 0 })
+    expect(ctx.cache.get(ctx.items.sys!.id)).toEqual({ ...expected, path: `items/${ctx.items.sys!.id}.md`, document: 'items', childCount: 0, incomingCount: 1, suspectCount: 0 })
   })
 
   it('lists the values a field already has, most used first (Owner suggestions, UX-27)', () => {

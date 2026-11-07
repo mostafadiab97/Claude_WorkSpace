@@ -1,4 +1,4 @@
-import { watch, type FSWatcher } from 'node:fs'
+import { readdirSync, watch, type FSWatcher } from 'node:fs'
 import { join } from 'node:path'
 
 /**
@@ -6,12 +6,28 @@ import { join } from 'node:path'
  * re-reads only those instead of checking every file (review P-01). If the operating system cannot watch the
  * folder, or reports a change without a file name, the next refresh simply checks everything (`all`).
  *
- * Paths are relative to the requirements folder: "items/SYS-K7Q3XM.md", ".reqman/schema.yaml".
+ * Paths are relative to the requirements folder: "Specification/REQ-K7Q3XMB.md", ".reqochet/schema.yaml". Every
+ * document folder is watched (S-10), and the requirements folder itself: a new or removed document folder means a
+ * full check.
  */
 export interface FolderWatch {
   /** Takes and clears the list of changes since the last call. */
   take(): { all: boolean; paths: string[]; schema: boolean }
   close(): void
+  /** The document folders being watched, joined — to restart the watch when the documents change. */
+  readonly documents: string
+}
+
+/** The document folders under requirements/ right now (plain folder names, not hidden). */
+export const documentFolders = (folder: string): string[] => {
+  try {
+    return readdirSync(folder, { withFileTypes: true })
+      .filter((d) => d.isDirectory() && !d.name.startsWith('.'))
+      .map((d) => d.name)
+      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+  } catch {
+    return []
+  }
 }
 
 /** More changed files than this → a normal full check is just as fast. */
@@ -36,8 +52,14 @@ export function watchRequirementsFolder(folder: string, onError?: (e: unknown) =
           if (file === 'schema.yaml') schema = true
           return
         }
+        if (dir === '') {
+          // the requirements folder itself: a loose item file, or a document folder added or removed
+          if (file.endsWith('.md')) changed.add(file)
+          else if (file !== '.gitattributes') all = true
+          return
+        }
         if (!file.endsWith('.md')) return
-        changed.add(`items/${file}`)
+        changed.add(`${dir}/${file}`)
         if (changed.size > MANY) all = true
       })
       w.on('error', (e) => {
@@ -52,7 +74,9 @@ export function watchRequirementsFolder(folder: string, onError?: (e: unknown) =
       failed = true
     }
   }
-  add('items')
+  const docs = documentFolders(folder).filter((d) => d !== metaDir && d !== '.reqman' && d !== '.reqochet')
+  add('')
+  for (const d of docs) add(d)
   add(metaDir)
 
   return {
@@ -65,6 +89,7 @@ export function watchRequirementsFolder(folder: string, onError?: (e: unknown) =
     },
     close() {
       for (const w of watchers) w.close()
-    }
+    },
+    documents: docs.join('\u0000')
   }
 }

@@ -4,10 +4,11 @@
 import { app, BrowserWindow, dialog, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
 import { readFileSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { Channels, type AppInfo, type ExportFormat, type ExportResult, type InvokeMethod, type ReqochetApi } from '../shared/api'
 import { runDataBenchmark } from '../modules/sample-data'
 import { writeFileAtomic } from '../modules/safe-files'
+import { FIRST_DOCUMENT, isDocumentName } from '../modules/repository-store'
 import { buildProblemReport, problemReportName } from '../modules/logger'
 import { createImportFiles, loadImportFile, updateTarget, writeSourceUpdate } from './importFiles'
 import type { Paths, Services } from './composition'
@@ -227,7 +228,8 @@ export function registerIpc(services: Services, paths: Paths): void {
       return r.canceled ? null : (r.filePaths[0] ?? null)
     },
     checkFolder: (_e, path) => ws.checkFolder(v.str(path, 'folder')),
-    initializeRepository: (_e, root) => ws.initialize(v.str(root, 'folder')),
+    // a new project's first document is called Specification (S-10: the requirements folder holds only documents)
+    initializeRepository: (_e, root) => ws.initialize(v.str(root, 'folder'), FIRST_DOCUMENT),
     openRepository: (_e, root) => ws.open(v.str(root, 'folder')),
     closeRepository: () => ws.close(),
     refreshRepository: (_e, focus) => ws.refresh(focus === true),
@@ -235,7 +237,7 @@ export function registerIpc(services: Services, paths: Paths): void {
     forgetRecentRepository: (_e, root) => ws.forgetRecent(v.str(root, 'folder')),
     queryItems: (_e, q) => ws.query(v.query(q)),
     getItem: (_e, id) => ws.getItem(v.id(id)),
-    newItem: (_e, type, parent, after) => ws.newItem(v.str(type, 'type'), v.optStr(parent, 'parent'), v.optStr(after, 'position')),
+    newItem: (_e, type, parent, after, document) => ws.newItem(v.str(type, 'type'), v.optStr(parent, 'parent'), v.optStr(after, 'position'), v.optStr(document, 'document')),
     saveItem: (_e, item, revision) => ws.saveItem(v.item(item), v.optStr(revision, 'revision') ?? null),
     deleteItem: (_e, id, revision, opts) =>
       ws.deleteItem(v.id(id), v.str(revision, 'revision'), { removeIncomingLinks: (opts as { removeIncomingLinks?: unknown } | null)?.removeIncomingLinks === true }),
@@ -298,7 +300,9 @@ export function registerIpc(services: Services, paths: Paths): void {
           const folder = await openDialog(e, { title: T.importDialog.folderTitle, properties: ['openDirectory', 'createDirectory', 'promptToCreate'] })
           if (!folder) return { ok: false, canceled: true }
           const inside = await readdir(folder).catch(() => [] as string[])
-          if (inside.length === 0) return { ok: true, info: await ws.createProject(folder), file }
+          // the first document is named after the file ("Brake spec.xlsx" → "Brake spec"), S-10
+          const named = basename(file.path).replace(/\.[^.]+$/, '').trim()
+          if (inside.length === 0) return { ok: true, info: await ws.createProject(folder, isDocumentName(named) ? named : FIRST_DOCUMENT), file }
           const win = BrowserWindow.fromWebContents(e.sender)
           const opts = { type: 'warning' as const, title: T.importDialog.titleNew, message: T.importMsg.notEmpty, detail: T.importMsg.notEmptyDetail(folder), buttons: [T.importDialog.chooseAnother, T.common.cancel], defaultId: 0, cancelId: 1, noLink: true }
           const answer = win ? await dialog.showMessageBox(win, opts) : await dialog.showMessageBox(opts)

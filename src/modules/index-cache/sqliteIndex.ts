@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import { contentFingerprint, type FieldValue, type Item } from '../items'
 import type { RequirementsRepo } from '../repository-store'
-import type { ItemIssue } from '../../shared/domain'
+import { documentOfPath, type ItemIssue } from '../../shared/domain'
 import type { IndexCache, IndexedItem, ItemQuery, LinkRef, QueryResult, SyncStats } from './index'
 
 /** Bump when the table layout changes; an old cache file is then rebuilt automatically. */
@@ -97,6 +97,7 @@ function rowToItem(r: ItemRow, fieldIds: ReadonlySet<string>): IndexedItem {
     links: JSON.parse(r.links_json) as IndexedItem['links'],
     text: r.text,
     path: r.path,
+    document: documentOfPath(r.path),
     childCount: r.child_count,
     incomingCount: r.incoming_count,
     suspectCount: r.suspect_count
@@ -330,7 +331,7 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         issues.push({ itemId: r.id, path: 'parent', message: `Parent ${r.parent} does not exist.`, severity: 'error' })
       }
       const misnamed = db
-        .prepare("SELECT id, path FROM items WHERE path <> 'items/' || id || '.md' ORDER BY id")
+        .prepare("SELECT id, path FROM items WHERE path <> id || '.md' AND substr(path, -length(id) - 4) <> '/' || id || '.md' ORDER BY id")
         .all() as { id: string; path: string }[]
       for (const r of misnamed) {
         issues.push({ itemId: r.id, path: 'file-name', message: `The file ${r.path} holds ${r.id}; it should be named ${r.id}.md.`, severity: 'warning', fix: 'file-name' })
@@ -371,6 +372,14 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       }
       if (q.links === 'suspect') where.push(`EXISTS (${SUSPECT_SQL})`)
       else if (q.links === 'none') where.push('NOT EXISTS (SELECT 1 FROM links l WHERE l.rid = i.rid) AND NOT EXISTS (SELECT 1 FROM links l WHERE l.target = i.id)')
+      if (q.document !== undefined) {
+        // the document is the first folder of the path (S-10); '' = files directly in requirements/
+        if (q.document === '') where.push("instr(i.path, '/') = 0")
+        else {
+          where.push('substr(i.path, 1, length(?) + 1) = ? || \'/\'')
+          params.push(q.document, q.document)
+        }
+      }
       if (q.parent !== undefined) {
         if (q.parent === null) where.push('i.parent IS NULL')
         else {
@@ -444,8 +453,9 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     revision: () => revision,
 
     structure: () =>
-      (db.prepare('SELECT id, parent, ord FROM items ORDER BY ord IS NULL, ord, id').all() as { id: string; parent: string | null; ord: string | null }[]).map((r) => ({
+      (db.prepare('SELECT id, parent, ord, path FROM items ORDER BY ord IS NULL, ord, id').all() as { id: string; parent: string | null; ord: string | null; path: string }[]).map((r) => ({
         id: r.id,
+        document: documentOfPath(r.path),
         ...(r.parent !== null ? { parent: r.parent } : {}),
         ...(r.ord !== null ? { order: r.ord } : {})
       })),

@@ -40,7 +40,8 @@ export type { OpResult }
 
 export interface WorkspaceService {
   checkFolder(path: string): Promise<FolderCheck>
-  initialize(root: string): Promise<RepoInfo>
+  /** `firstDocument`: the first document folder's name (S-10; the core's default is "items"). */
+  initialize(root: string, firstDocument?: string): Promise<RepoInfo>
   open(root: string): Promise<RepoInfo>
   close(): void
   /** Re-reads what changed on disk. `focus`: the window got focus again (also re-checks Git settings). */
@@ -53,7 +54,7 @@ export interface WorkspaceService {
   query(q: ItemQuery): QueryResult
   getItem(id: string): Promise<ItemDetails | null>
   /** `after`: the new item goes right below that item, at its level. */
-  newItem(type: string, parent?: string, after?: string): Item
+  newItem(type: string, parent?: string, after?: string, document?: string): Item
   saveItem(item: Item, revision: string | null): Promise<SaveResult>
   /** `removeIncomingLinks`: also remove the links other items have to it, so none point to nothing. */
   deleteItem(id: string, revision: string, opts?: { removeIncomingLinks?: boolean }): Promise<OpResult>
@@ -99,7 +100,7 @@ export interface WorkspaceService {
   compareVersions(from: string, to: string): Promise<CompareResult>
   // Export (M6): builds the file content; the main process asks where to save it
   /** "New project from a file": creates `root`, a Git repository and a requirements folder, and opens it. */
-  createProject(root: string): Promise<RepoInfo>
+  createProject(root: string, firstDocument?: string): Promise<RepoInfo>
   /** Adds the remote "origin" and pushes for the first time. */
   publish(url: string): Promise<GitResult>
   /** What importing these rows (a whole sheet) would do. */

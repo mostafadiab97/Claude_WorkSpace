@@ -998,6 +998,7 @@ const en = {
     alreadyLinked: (source: string, target: string) => `${source} already has this link to ${target}.`,
     noSuchLink: (source: string, type: string, target: string) => `${source} has no "${type}" link to ${target}.`,
     parentMissing: (id: string) => `Parent ${id} does not exist.`,
+    parentOtherDocument: (parent: string, document: string) => `${parent} is in the document "${document}": an item and its parent must be in the same document.`,
     parentLoop: (id: string) => `${id} is this item or one of its children; choose another parent.`,
     savedUnreadable: 'The item was saved but could not be read back.',
     hasChildren: (id: string, count: number) => `${id} has ${count} child item(s). Move or delete them first.`,

@@ -24,7 +24,7 @@ import { createRecentList } from './recent'
 import { createRevertOps } from './revert'
 import { createSchemaFieldOps } from './schemaFields'
 import { compareOutline, createStructureOps, outlineNumbers, planTidy } from './structure'
-import { watchRequirementsFolder } from './watcher'
+import { documentFolders, watchRequirementsFolder } from './watcher'
 import { T } from '../../shared/text'
 
 export interface WorkspaceDeps {
@@ -93,12 +93,20 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
    * rename arrives by pull or branch switch (code review CR-05). */
   const rewatch = (s: Session): void => {
     if (deps.watchFiles === false) return
-    if (s.watch && s.watchedMeta === s.repo.metaDir) return
+    // restart when the project folder was renamed or a document folder came or went (S-10)
+    if (s.watch && s.watchedMeta === s.repo.metaDir && s.watch.documents === documentFolders(s.repo.folder).join('\u0000')) return
     s.watch?.close()
     s.watch = watchRequirementsFolder(s.repo.folder, (e) => log.warn(`Folder watch: ${String(e)}`), s.repo.metaDir)
     s.watchedMeta = s.repo.metaDir
   }
 
+  // the documents (folders under requirements/) with their item counts; '' = loose files, listed only when there are any
+  const documentsOf = (s: Session): { name: string; itemCount: number }[] => {
+    const names = documentFolders(s.repo.folder).filter((d) => d !== s.repo.metaDir && d !== '.reqman' && d !== '.reqochet')
+    const out = names.map((name) => ({ name, itemCount: s.index.query({ document: name, limit: 0 }).total }))
+    const loose = s.index.query({ document: '', limit: 0 }).total
+    return loose > 0 ? [...out, { name: '', itemCount: loose }] : out
+  }
   const info = (s: Session = need()): RepoInfo => ({
     root: s.repo.root,
     name: basename(s.repo.root),
@@ -109,6 +117,8 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     itemCount: s.index.count(),
     issues: s.index.repositoryIssues(),
     lastSync: s.lastSync,
+    documents: documentsOf(s),
+    defaultDocument: s.repo.defaultDocument,
     ...(s.repo.metaDir === '.reqman' ? { legacyFolder: true } : {})
   })
 
@@ -182,7 +192,8 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       const base = relative(session.repo.root, session.repo.folder).split('\\').join('/') || '.'
       const prefix = base === '.' ? '' : `${base}/`
       // groups (parents) of the items this user changed in commits not on the remote yet
-      const changed = await git.changedFiles(s.repo.root, upstream, 'HEAD', `${prefix}items`)
+      // item files of every document (S-10), not the project folder
+      const changed = (await git.changedFiles(s.repo.root, upstream, 'HEAD', base === '.' ? '.' : base)).filter((f) => f.endsWith('.md') && !f.slice(prefix.length).startsWith('.'))
       const parents = new Set<string>()
       for (const f of changed) {
         const it = session.index.get(basename(f, '.md'))
@@ -280,19 +291,19 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     },
 
     /** "New project from a file" (M7): a new Git repository with a requirements folder in an empty folder. */
-    createProject: q(async (root: string) => {
+    createProject: q(async (root: string, firstDocument?: string) => {
       await mkdir(root, { recursive: true })
       await git.init(root)
       return startSession(root, true, async () => {
-        await store.initialize(root)
+        await store.initialize(root, firstDocument)
         log.info(`Created a new project in ${root}`)
       })
     }),
 
-    initialize: q(async (root: string) => {
+    initialize: q(async (root: string, firstDocument?: string) => {
       const isGit = (await git.findRepositoryRoot(root)) !== null
       return startSession(root, isGit, async () => {
-        await store.initialize(root)
+        await store.initialize(root, firstDocument)
         log.info(`Created requirements folder in ${root}`)
       })
     }),

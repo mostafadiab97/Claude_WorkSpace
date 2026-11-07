@@ -67,12 +67,14 @@ type Placed = { id: string; order?: string }
  * in document order (as `IndexCache.structure()` does). Items whose parent is missing, or that sit in a parent
  * loop, are not in the hierarchy and get no number. Pure.
  */
-export function outlineNumbers(rows: { id: string; parent?: string }[]): Map<string, string> {
+export function outlineNumbers(rows: { id: string; parent?: string; document?: string }[]): Map<string, string> {
   const ids = new Set(rows.map((r) => r.id))
   const children = new Map<string, string[]>()
+  // every document has its own tree and numbers (S-10): its top-level items hang under a key for the document
+  const roots = [...new Set(rows.filter((r) => r.parent === undefined).map((r) => r.document ?? ''))]
   for (const r of rows) {
     if (r.parent !== undefined && !ids.has(r.parent)) continue // orphan: not in the tree
-    const key = r.parent ?? ''
+    const key = r.parent ?? ROOT_OF(r.document ?? '')
     const list = children.get(key)
     if (list) list.push(r.id)
     else children.set(key, [r.id])
@@ -86,9 +88,11 @@ export function outlineNumbers(rows: { id: string; parent?: string }[]): Map<str
       walk(id, number)
     })
   }
-  walk('', '')
+  for (const d of roots) walk(ROOT_OF(d), '')
   return out
 }
+/** The tree key of a document's top level (an item ID never contains a NUL). */
+const ROOT_OF = (document: string): string => `\u0000${document}`
 
 /** Compares outline numbers part by part ("1.10" after "1.9"); items without a number come last. Pure. */
 export function compareOutline(a: string | undefined, b: string | undefined): number {
@@ -209,8 +213,9 @@ export function createStructureOps(ctx: WorkspaceContext) {
       return keyBetween(me?.order ?? null, next?.order ?? null)
     },
 
-    nextOrder(s: Session, parent: string | undefined): string {
-      const last = s.index.query({ parent: parent ?? null, sort: { by: 'order', descending: true }, limit: 1 }).items[0]
+    nextOrder(s: Session, parent: string | undefined, document?: string): string {
+      // a top-level item comes after the last top-level item of its own document (S-10)
+      const last = s.index.query({ parent: parent ?? null, ...(parent === undefined && document !== undefined ? { document } : {}), sort: { by: 'order', descending: true }, limit: 1 }).items[0]
       return keyBetween(last?.order ?? null, null)
     },
 
@@ -218,8 +223,11 @@ export function createStructureOps(ctx: WorkspaceContext) {
       const s = ctx.need()
       if (!s.index.get(id)) return { ok: false, message: T.wsMsg.unreadable(id) }
       if (parent !== null) {
-        if (!s.index.get(parent)) return { ok: false, message: T.wsMsg.missing(parent) }
+        const target = s.index.get(parent)
+        if (!target) return { ok: false, message: T.wsMsg.missing(parent) }
         if (createsLoop(s, id, parent)) return { ok: false, message: T.wsMsg.moveLoop(parent, id) }
+        // a tree never spans documents (S-10)
+        if ((target.document ?? '') !== (s.index.get(id)?.document ?? '')) return { ok: false, message: T.wsMsg.parentOtherDocument(parent, target.document || '—') }
       }
       // Its own children move with it: they keep pointing at it.
       const plan = planInsert(siblings(s, parent ?? undefined).filter((x) => x.id !== id), id, before)

@@ -25,6 +25,8 @@ import type {
   Item,
   ItemDetails,
   ItemQuery,
+  ItemTypeDef,
+  LinkTypeDef,
   LinkDecision,
   QueryResult,
   RevertPart,
@@ -75,6 +77,10 @@ export interface WorkspaceService {
   /** Values a field already has, most used first (suggestions while typing). */
   fieldValues(field: string): string[]
   saveSchemaFields(fields: FieldDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** How many items / links use each type (S-04). */
+  typeUsage(): { items: Record<string, number>; links: Record<string, number> }
+  /** Saves the item and link types (S-04, required fields S-05); a type still in use cannot be removed. */
+  saveSchemaTypes(itemTypes: ItemTypeDef[], linkTypes: LinkTypeDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   /** Renames requirements/.reqman to .reqochet and commits the rename (0.16). */
   renameProjectFolder(): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   /** A new empty document (folder under requirements/), S-10. */

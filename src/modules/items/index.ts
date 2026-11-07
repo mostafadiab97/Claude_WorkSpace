@@ -5,7 +5,7 @@ export type { FieldValue, Link, Item, ItemIssue, ItemDiff, DiffRow } from '../..
 
 export { parseItemFile, serializeItem, ITEM_FILE_EXTENSION, type ParseResult } from './itemFile'
 export { generateId, isValidId, ID_ALPHABET, ID_PREFIX } from './ids'
-export { validateItem } from './validate'
+export { missingRequired, validateItem } from './validate'
 export { contentFingerprint } from './fingerprint'
 export { diffItems, isEmptyDiff } from './diff'
 export { mergeItems, renameReferences, sameItem, type ItemMergeResult, type MergeConflict } from './merge'

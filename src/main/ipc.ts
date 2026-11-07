@@ -251,6 +251,8 @@ export function registerIpc(services: Services, paths: Paths): void {
     getFieldValues: (_e, field) => ws.fieldValues(v.str(field, 'field')),
     saveSchemaFields: (_e, fields, revision) => ws.saveSchemaFields(v.fieldDefs(fields), v.str(revision, 'revision')),
     checkFields: (_e, fields) => ws.checkFields(v.fieldDefs(fields)),
+    getTypeUsage: () => ws.typeUsage(),
+    saveSchemaTypes: (_e, itemTypes, linkTypes, revision) => ws.saveSchemaTypes(v.itemTypeDefs(itemTypes), v.linkTypeDefs(linkTypes), v.str(revision, 'revision')),
     addLink: (_e, source, type, target) => ws.addLink(v.str(source, 'source'), v.str(type, 'link type'), v.str(target, 'target')),
     removeLink: (_e, source, type, target) => ws.removeLink(v.str(source, 'source'), v.str(type, 'link type'), v.str(target, 'target')),
     confirmLinks: (_e, source, target) => ws.confirmLinks(v.str(source, 'source'), v.optStr(target, 'target')),

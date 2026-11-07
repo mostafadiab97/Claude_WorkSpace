@@ -72,7 +72,7 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
 - **NFR-05 never lose data:** validate before writing; atomic writes; every write is conflict-checked against the
   file revision it was read at (`ConflictError`); unknown header keys are preserved (`extra`); never force-push.
 - Offline first; no server; no user accounts — access = Git host permissions.
-- Data format: one Markdown file per item, `requirements/items/<ID>.md`, YAML header in fixed key order, links
+- Data format: one Markdown file per item, `requirements/<document>/<ID>.md` (0.17: every folder under requirements/ is a document — S-10; `items` is the document of projects made before 0.17; loose files = document ''), YAML header in fixed key order, links
   stored only on the source item, each with `confirmed:` (target fingerprint). Schema in
   `requirements/.reqochet/schema.yaml` (projects made with ReqMan: `.reqman`, read until the user takes the rename). IDs `REQ-XXXXXXX` (7 random Crockford base32, every type; older `PREFIX-XXXXXX` stay valid). `order:` is an order
   key (`src/modules/items/orderKey.ts`) compared **byte-wise** (`<`), never with `localeCompare`; outline numbers

@@ -17,6 +17,8 @@ export function Toolbar({ searchRef, newRef, ...props }: {
   prefs: ColumnPrefs
   onPrefs: (p: ColumnPrefs) => void
   onEditFields: () => void
+  /** Opens the item and link types (S-04). */
+  onEditTypes: () => void
   canExport: boolean
   onExport: () => void
   onImport: () => void
@@ -80,6 +82,7 @@ export function Toolbar({ searchRef, newRef, ...props }: {
         <option value="">{tw.linksAny}</option>
         <option value="suspect">{tw.linksSuspect}</option>
         <option value="none">{tw.linksNone}</option>
+        <option value="incomplete">{tw.incomplete}</option>
       </select>
       </FilterMenu>
       {f.filtered && (
@@ -87,7 +90,7 @@ export function Toolbar({ searchRef, newRef, ...props }: {
           {tw.clearFilters}
         </button>
       )}
-      <ColumnsMenu schema={schema} prefs={props.prefs} onChange={props.onPrefs} onEditFields={props.onEditFields} />
+      <ColumnsMenu schema={schema} prefs={props.prefs} onChange={props.onPrefs} onEditFields={props.onEditFields} onEditTypes={props.onEditTypes} />
       {importOn && (
         <button type="button" className="btn" onClick={props.onImport} title={T.importDialog.buttonTooltip}>
           {T.importDialog.button}

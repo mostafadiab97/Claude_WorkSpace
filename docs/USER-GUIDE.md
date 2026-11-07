@@ -97,7 +97,8 @@ person who supports reqochet in your team. Nothing is sent by itself.
 | Idea | What it means in reqochet |
 | --- | --- |
 | **Repository** | Your project's Git folder. reqochet works inside its `requirements/` folder and never touches your code. |
-| **Item** | One requirement, heading, test case, risk… — one file `requirements/items/<ID>.md`. |
+| **Document** | A specification: one folder under `requirements/` (e.g. `requirements/System/`). A repository can hold several; each has its own tree and numbers. Pick it above the table, or **All documents**. |
+| **Item** | One requirement, heading, test case, risk… — one file `requirements/<document>/<ID>.md`. |
 | **ID** | `REQ-K7Q3XMB`: random, so two people (or two branches) never create the same ID. IDs never change. |
 | **Item type** | What kind of item it is (system requirement, test case, heading…). Headings / information are not counted as requirements. |
 | **Fields** | Attributes such as Status, Priority, Owner, Tags — defined by the team (see 7). |
@@ -172,7 +173,15 @@ Coming next (theme 1): coverage view, impact chain, traceability matrix with Exc
 - **Columns → Edit fields…** opens the team's fields: add a field (text, choice with options, list), rename it,
   reorder, set a default, remove it. Saving changes `requirements/.reqochet/schema.yaml`, which travels to the whole team
   with the next push. Removing a field never deletes values already in the files.
-- **Item types and link types** are defined in the same `schema.yaml` (editing them in the window comes in theme 1).
+- **Columns → Edit types…** opens the item types and link types: add a type, rename it, change its short name
+  (shown in the table) and whether it is a **heading** (not counted as a requirement). A type can be removed only when
+  nothing uses it — the window shows how many items or links do.
+- **Required fields** (per item type, in the same window): an item of that type without them is still saved, but
+  marked **incomplete** (a warning in the editor); **Filters → Incomplete** lists them.
+- **Documents** (the bar above the table): **New document…** makes a folder under `requirements/`; **Rename…**
+  renames it in one commit (every item keeps its history). A project made before 0.17 keeps its items in a folder
+  called `items` and is offered a real name the same way. An item and its parent are always in the same document;
+  the numbers start at 1 in each document.
 
 ---
 

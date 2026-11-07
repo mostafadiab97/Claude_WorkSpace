@@ -1,7 +1,7 @@
 // Input checks for every call that arrives from the window (review X-01). The window is ReqMan's own code, so
 // this is about robustness: a wrong value is refused with a clear message instead of reaching a file write.
 // Each function either returns a clean value of the expected type or throws.
-import type { ExportItemsRequest, FieldDef, ImportSettings, ImportTarget, Item, ItemQuery, Link, LinkDecision, MergeAnswers, MergeChoice, MergePlan, RevertPart, SortKey } from '../shared/api'
+import type { ExportItemsRequest, FieldDef, ImportSettings, ImportTarget, Item, ItemQuery, ItemTypeDef, LinkTypeDef, Link, LinkDecision, MergeAnswers, MergeChoice, MergePlan, RevertPart, SortKey } from '../shared/api'
 
 const MAX = 4096
 /** Order keys (see modules/items/orderKey.ts): base-62 digits, at most 200 characters. */
@@ -175,6 +175,45 @@ function labels(v: unknown, what: string, keysAreLanguages = true): Record<strin
   return Object.fromEntries(entries.map(([k, t]) => [keysAreLanguages && !LANG.test(k) ? bad(what) : str(k, what, 200), str(t, what, 500)]))
 }
 
+const TYPE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const labelMap = (v: unknown, what: string): Record<string, string> | undefined => {
+  if (v === undefined || v === null) return undefined
+  if (!isObj(v)) return bad(what)
+  return Object.fromEntries(Object.entries(v).map(([k, x]) => [str(k, what, 10), text(x, what, 200)]))
+}
+
+/** Item types from the Types window (S-04, S-05). */
+export function itemTypeDefs(v: unknown): ItemTypeDef[] {
+  if (!Array.isArray(v) || v.length > 200) return bad('item types')
+  return v.map((t) => {
+    if (!isObj(t)) return bad('item type')
+    const id = str(t.id, 'type ID', 64)
+    if (!TYPE_ID.test(id)) return bad('type ID')
+    const def: ItemTypeDef = { id, name: str(t.name, 'type name', 200), requirement: t.requirement !== false }
+    if (t.short !== undefined && t.short !== '') def.short = text(t.short, 'short name', 40)
+    const labels = labelMap(t.labels, 'type labels')
+    if (labels) def.labels = labels
+    if (t.required !== undefined) def.required = strings(t.required, 'required fields', 200)
+    return def
+  })
+}
+
+/** Link types from the Types window (S-04). */
+export function linkTypeDefs(v: unknown): LinkTypeDef[] {
+  if (!Array.isArray(v) || v.length > 200) return bad('link types')
+  return v.map((t) => {
+    if (!isObj(t)) return bad('link type')
+    const id = str(t.id, 'link type ID', 64)
+    if (!TYPE_ID.test(id)) return bad('link type ID')
+    const def: LinkTypeDef = { id, name: str(t.name, 'link name', 200), reverseName: str(t.reverseName, 'reverse name', 200) }
+    const labels = labelMap(t.labels, 'link labels')
+    if (labels) def.labels = labels
+    const reverseLabels = labelMap(t.reverseLabels, 'link labels')
+    if (reverseLabels) def.reverseLabels = reverseLabels
+    return def
+  })
+}
+
 export function fieldDefs(v: unknown): FieldDef[] {
   if (!Array.isArray(v)) return bad('field list')
   return v.map((f) => {
@@ -205,6 +244,9 @@ export function query(v: unknown): ItemQuery {
   }
   if (v.links !== undefined) q.links = oneOf(v.links, ['suspect', 'none'] as const, 'links filter')
   if (v.parent !== undefined) q.parent = v.parent === null ? null : str(v.parent, 'parent', 64)
+  // a document (S-10): a plain folder name, '' = loose files
+  if (v.document !== undefined) q.document = v.document === '' ? '' : text(v.document, 'document', 80)
+  if (v.incomplete === true) q.incomplete = true
   if (v.sort !== undefined) {
     if (!isObj(v.sort) || typeof v.sort.by !== 'string' || !SORT.test(v.sort.by)) return bad('sort')
     q.sort = { by: v.sort.by as SortKey, ...(v.sort.descending === true ? { descending: true } : {}) }

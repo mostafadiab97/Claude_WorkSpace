@@ -5,7 +5,7 @@ import { useDebounced } from '../../lib/hooks'
 import { T } from '../../../../shared/text'
 import { fieldLabel, optionLabel, typeName } from '../../lib/schema'
 
-export type LinkFilter = '' | 'suspect' | 'none'
+export type LinkFilter = '' | 'suspect' | 'none' | 'incomplete'
 
 /** Header clicks: ascending → descending → back to document order. Pure. */
 export function nextSort(s: { by: SortKey; descending: boolean }, key: SortKey): { by: SortKey; descending: boolean } {
@@ -23,7 +23,7 @@ export function filterSummary(schema: Schema, f: { search: string; types: string
     const v = f.fieldFilters[d.id]
     if (v) parts.push(T.workspace.filterIs(fieldLabel(d), optionLabel(d, v)))
   }
-  if (f.linkFilter) parts.push(f.linkFilter === 'suspect' ? T.workspace.linksSuspect : T.workspace.linksNone)
+  if (f.linkFilter) parts.push(f.linkFilter === 'suspect' ? T.workspace.linksSuspect : f.linkFilter === 'incomplete' ? T.workspace.incomplete : T.workspace.linksNone)
   return parts.join(T.workspace.filterSep)
 }
 
@@ -39,7 +39,8 @@ export function buildQuery(
     query: {
       ...(f.search.trim() ? { text: f.search } : {}),
       ...(f.types ? { types: [f.types] } : {}),
-      ...(f.linkFilter ? { links: f.linkFilter } : {}),
+      // "incomplete" (S-05) shares the list with the link filters but is its own query part
+      ...(f.linkFilter === 'incomplete' ? { incomplete: true } : f.linkFilter ? { links: f.linkFilter } : {}),
       fields: Object.fromEntries(fields.map(([k, v]) => [k, [v]])),
       sort: f.search.trim() && f.sort.by === 'order' ? { by: 'relevance' } : f.sort
     }

@@ -18,6 +18,8 @@ export function validateItem(item: Item, schema: Schema): ItemIssue[] {
 
   // the type is free to change: IDs no longer depend on it (0.9.0)
   if (!schema.itemTypes.some((t) => t.id === item.type)) add('type', T.validate.unknownType(item.type))
+  // required fields of its type: saved anyway, marked incomplete (the owner, 5 Nov 2026 — S-05)
+  for (const name of missingRequired(item, schema)) add('required', T.validate.required(name), 'warning')
   if (!item.title.trim()) add('title', T.validate.emptyTitle, 'warning')
 
   for (const f of schema.fields) {
@@ -56,4 +58,16 @@ export function validateItem(item: Item, schema: Schema): ItemIssue[] {
     seen.add(key)
   })
   return issues
+}
+
+/** The names of the required fields (S-05) this item has no value for. Pure. */
+export function missingRequired(item: Pick<Item, 'type' | 'title' | 'text' | 'fields'>, schema: Pick<Schema, 'itemTypes' | 'fields'>): string[] {
+  const type = schema.itemTypes.find((t) => t.id === item.type)
+  const empty = (v: unknown): boolean => v === undefined || v === null || (typeof v === 'string' && v.trim() === '') || (Array.isArray(v) && v.length === 0)
+  return (type?.required ?? []).flatMap((r) => {
+    if (r === 'title') return item.title.trim() ? [] : [T.columns.title]
+    if (r === 'text') return item.text.trim() ? [] : [T.columns.text]
+    const f = schema.fields.find((x) => x.id === r)
+    return f && empty(item.fields[r]) ? [f.name] : []
+  })
 }

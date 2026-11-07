@@ -65,7 +65,10 @@ export function parseSchema(text: string): ParsedSchema {
     // Since 0.9.0 IDs do not depend on the type (all are REQ-…), so a "prefix" in older schemas is ignored.
     const short = str(v.short)
     const labels = labelsOf(v.labels, `${p}.labels`, add)
-    itemTypes.push({ id, name: str(v.name) ?? id, requirement: v.requirement !== false, ...(short ? { short } : {}), ...(labels ? { labels } : {}) })
+    // required fields (S-05): a list of field ids; checked against the field list below
+    const required = Array.isArray(v.required) ? v.required.filter((x): x is string => typeof x === 'string' && x.trim() !== '').map((x) => x.trim()) : undefined
+    if (v.required !== undefined && !Array.isArray(v.required)) add(`${p}.required`, 'Must be a list of field ids, e.g. [status, priority].')
+    itemTypes.push({ id, name: str(v.name) ?? id, requirement: v.requirement !== false, ...(short ? { short } : {}), ...(labels ? { labels } : {}), ...(required && required.length ? { required } : {}) })
   })
   if (itemTypes.length === 0) add('itemTypes', 'At least one valid item type is needed.')
 
@@ -108,6 +111,12 @@ export function parseSchema(text: string): ParsedSchema {
   })
 
   // ---- link types
+  // required fields must be fields of the schema (built-in: title, text)
+  itemTypes.forEach((t, i) =>
+    (t.required ?? []).forEach((r) => {
+      if (r !== 'title' && r !== 'text' && !fields.some((f) => f.id === r)) add(`itemTypes[${i}].required`, `"${r}" is not a field.`)
+    })
+  )
   const linkTypes: LinkTypeDef[] = []
   list('linkTypes').forEach((v, i) => {
     const p = `linkTypes[${i}]`

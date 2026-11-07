@@ -14,6 +14,8 @@ export interface ItemTypeDef {
   short?: string
   /** The name in other window languages, e.g. `{ ar: 'متطلب نظام' }` (UX-22); `name` is the default. */
   labels?: Labels
+  /** Fields an item of this type must have; one without them is saved but marked incomplete (the owner, 5 Nov 2026 — S-05). */
+  required?: string[]
 }
 
 /** A text per window language (`ar`, …); missing languages use the default name. */
@@ -142,6 +144,10 @@ export interface ItemQuery {
   fields?: Record<string, string[]>
   /** `suspect` = items with at least one suspect outgoing link; `none` = items with no links in or out. */
   links?: 'suspect' | 'none'
+  /** Only items missing a required field of their type (S-05). */
+  incomplete?: boolean
+  /** Filled in by the workspace from the schema (never by the window): item type → required field ids. */
+  required?: Record<string, string[]>
   /** Only direct children of this item; `null` = only top-level items. */
   parent?: string | null
   /** Only items of this document (folder under requirements/); leave out for all documents (S-10). */

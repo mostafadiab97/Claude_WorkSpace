@@ -38,7 +38,7 @@ export function useColumnPrefs(root: string): [ColumnPrefs, (next: ColumnPrefs) 
 }
 
 /** "Columns" button: tick the columns to show, ↑/↓ to reorder; "Edit fields…" opens the field definitions. */
-export function ColumnsMenu({ schema, prefs, onChange, onEditFields }: { schema: Schema; prefs: ColumnPrefs; onChange: (p: ColumnPrefs) => void; onEditFields: () => void }) {
+export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes }: { schema: Schema; prefs: ColumnPrefs; onChange: (p: ColumnPrefs) => void; onEditFields: () => void; onEditTypes?: () => void }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -80,6 +80,16 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields }: { schema:
     ;[keys[index], keys[j]] = [keys[j] as string, keys[index] as string]
     onChange({ ...prefs, order: keys })
   }
+  // drag and drop a row to its new place, like items in the table (the owner, 5 Nov 2026 — S-11)
+  const [dragging, setDragging] = useState<number | null>(null)
+  const [over, setOver] = useState<number | null>(null)
+  const moveTo = (from: number, to: number): void => {
+    if (from === to) return
+    const keys = movable.map((c) => c.key)
+    const [k] = keys.splice(from, 1)
+    if (k !== undefined) keys.splice(to, 0, k)
+    onChange({ ...prefs, order: keys })
+  }
 
   return (
     <div className="popover" ref={ref}>
@@ -100,7 +110,32 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields }: { schema:
               </li>
             )}
             {movable.map((c, i) => (
-              <li key={c.key} className="popover__row">
+              <li
+                key={c.key}
+                className={`popover__row popover__row--drag${dragging === i ? ' is-dragging' : ''}${over === i && dragging !== null && dragging !== i ? ' is-drop-target' : ''}`}
+                draggable
+                title={T.columnsMenu.dragHint}
+                onDragStart={(e) => {
+                  setDragging(i)
+                  e.dataTransfer.effectAllowed = 'move'
+                  e.dataTransfer.setData('text/plain', c.key)
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  setOver(i)
+                }}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  if (dragging !== null) moveTo(dragging, i)
+                  setDragging(null)
+                  setOver(null)
+                }}
+                onDragEnd={() => {
+                  setDragging(null)
+                  setOver(null)
+                }}
+              >
+                <span className="drag-handle" aria-hidden="true">⋮⋮</span>
                 <label className="check">
                   <input type="checkbox" checked={c.fixed === true || !hidden.has(c.key)} disabled={c.fixed} onChange={() => toggle(c.key)} />
                   {c.label}
@@ -127,6 +162,18 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields }: { schema:
             >
               {T.columnsMenu.editFields}
             </button>
+            {onEditTypes && (
+              <button
+                type="button"
+                className="btn btn--small"
+                onClick={() => {
+                  setOpen(false)
+                  onEditTypes()
+                }}
+              >
+                {T.columnsMenu.editTypes}
+              </button>
+            )}
           </div>
         </div>
       )}

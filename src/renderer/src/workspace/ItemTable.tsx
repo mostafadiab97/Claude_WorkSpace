@@ -96,7 +96,7 @@ export function ItemTable(props: {
   const sort = query.sort ?? { by: 'order' as const }
 
   const flat = useFlatRows(!isTree, query, dataVersion, onTotal)
-  const tree = useTreeRows(isTree, sort, dataVersion)
+  const tree = useTreeRows(isTree, sort, dataVersion, query.document)
   const count = isTree ? tree.rows.length : flat.count
   const rowAt = (i: number): Row | undefined => (isTree ? tree.rows[i] : flat.rowAt(i))
   const indexOf = (id: string): number => (isTree ? tree.rows.findIndex((r) => r.kind === 'item' && r.item.id === id) : flat.indexOf(id))

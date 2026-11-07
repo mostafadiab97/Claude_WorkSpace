@@ -198,6 +198,7 @@ const en = {
     idFormat: (id: string) => `"${id}" is not in the reqochet ID format (e.g. REQ-K7Q3XMB).`,
     unknownType: (t: string) => `Unknown item type "${t}".`,
     emptyTitle: 'The title is empty.',
+    required: (field: string) => `Incomplete: ${field} is required for this item type.`,
     notAllowed: (v: string, field: string, allowed: string) => `"${v}" is not an allowed ${field} (allowed: ${allowed}).`,
     mustNumber: (field: string) => `${field} must be a number.`,
     mustDate: (field: string) => `${field} must be a date written as YYYY-MM-DD.`,
@@ -207,6 +208,36 @@ const en = {
     unknownLink: (t: string) => `Unknown link type "${t}".`,
     selfLink: 'An item cannot link to itself.',
     duplicateLink: (t: string, target: string) => `Duplicate link "${t}" to ${target}.`
+  },
+  typesDialog: {
+    title: 'Item and link types',
+    intro: 'The kinds of items and links of this project, shared through schema.yaml. A type can be removed only when nothing uses it. Required fields: an item of that type without them is saved, but marked incomplete (Filters → Incomplete).',
+    itemTypes: 'Item types',
+    linkTypes: 'Link types',
+    name: 'Name',
+    short: 'Short name (table)',
+    heading: 'Heading',
+    required: 'Required fields',
+    used: 'Used by',
+    linkName: 'Name (from the source)',
+    reverseName: 'Name (from the target)',
+    nameOf: (name: string) => `Name of ${name}`,
+    shortOf: (name: string) => `Short name of ${name}`,
+    headingOf: (name: string) => `${name} is a heading, not a requirement`,
+    reverseOf: (name: string) => `Name of ${name} read from the target`,
+    none: 'none',
+    count: (n: number) => `${n} item(s)`,
+    linkCount: (n: number) => `${n} link(s)`,
+    remove: 'Remove',
+    cannotRemove: (n: number) => `Used ${n} time(s): change those first`,
+    addItemType: '+ Add item type',
+    addLinkType: '+ Add link type',
+    missingName: 'Every type needs a name (and every link type a reverse name).',
+    duplicate: 'Two types have the same name — give each its own.'
+  },
+  types: {
+    stillUsed: (list: string) => `These types are still used and cannot be removed: ${list}. Change those items or links first.`,
+    atLeastOne: 'Keep at least one item type.'
   },
   documents: {
     label: 'Document',
@@ -521,7 +552,9 @@ const en = {
     up: (label: string) => `Move ${label} column up`,
     down: (label: string) => `Move ${label} column down`,
     reset: 'Reset',
-    editFields: 'Edit fields…'
+    editFields: 'Edit fields…',
+    dragHint: 'Drag to move the column, or use ↑ / ↓',
+    editTypes: 'Edit types…'
   },
 
   fields: {
@@ -824,6 +857,7 @@ const en = {
     linksAny: 'Links: any',
     linksSuspect: 'With suspect links',
     linksNone: 'Without any links',
+    incomplete: 'Incomplete (a required field is empty)',
     clearFilters: 'Clear filters',
     export: 'Export…',
     expandAll: 'Expand all',

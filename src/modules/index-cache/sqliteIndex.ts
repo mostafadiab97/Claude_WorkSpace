@@ -372,6 +372,23 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       }
       if (q.links === 'suspect') where.push(`EXISTS (${SUSPECT_SQL})`)
       else if (q.links === 'none') where.push('NOT EXISTS (SELECT 1 FROM links l WHERE l.rid = i.rid) AND NOT EXISTS (SELECT 1 FROM links l WHERE l.target = i.id)')
+      if (q.incomplete) {
+        // items missing a required field of their type (S-05); title and text are columns, the rest item_fields
+        const ors: string[] = []
+        for (const [type, fields] of Object.entries(q.required ?? {})) {
+          const missing = fields.map((f) => {
+            if (f === 'title') return "trim(i.title) = ''"
+            if (f === 'text') return "trim(i.text) = ''"
+            params.push(f)
+            return "NOT EXISTS (SELECT 1 FROM item_fields x WHERE x.rid = i.rid AND x.field = ? AND trim(x.value) <> '')"
+          })
+          if (missing.length === 0) continue
+          ors.push(`(i.type = ? AND (${missing.join(' OR ')}))`)
+          // the type parameter comes before its field parameters in the SQL text
+          params.splice(params.length - fields.filter((f) => f !== 'title' && f !== 'text').length, 0, type)
+        }
+        where.push(ors.length ? `(${ors.join(' OR ')})` : '0')
+      }
       if (q.document !== undefined) {
         // the document is the first folder of the path (S-10); '' = files directly in requirements/
         if (q.document === '') where.push("instr(i.path, '/') = 0")
@@ -451,6 +468,11 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       (db.prepare('SELECT trim(value) AS v, COUNT(*) AS n FROM item_fields WHERE field = ? AND trim(value) <> \'\' GROUP BY trim(value) ORDER BY n DESC, v LIMIT ?').all(field, limit) as { v: string }[]).map((r) => r.v),
 
     revision: () => revision,
+
+    typeUsage: () => ({
+      items: Object.fromEntries((db.prepare('SELECT type AS t, COUNT(*) AS n FROM items GROUP BY type').all() as { t: string; n: number }[]).map((r) => [r.t, r.n])),
+      links: Object.fromEntries((db.prepare('SELECT type AS t, COUNT(*) AS n FROM links GROUP BY type').all() as { t: string; n: number }[]).map((r) => [r.t, r.n]))
+    }),
 
     structure: () =>
       (db.prepare('SELECT id, parent, ord, path FROM items ORDER BY ord IS NULL, ord, id').all() as { id: string; parent: string | null; ord: string | null; path: string }[]).map((r) => ({

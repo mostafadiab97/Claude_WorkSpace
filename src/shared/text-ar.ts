@@ -203,6 +203,7 @@ const raw: Texts = {
     idFormat: (id: string) => `"${id}" ليس بصيغة معرّفات reqochet (مثل REQ-K7Q3XMB).`,
     unknownType: (t: string) => `نوع عنصر غير معروف "${t}".`,
     emptyTitle: 'العنوان فارغ.',
+    required: (field: string) => `غير مكتمل: ${field} مطلوب لهذا النوع من العناصر.`,
     notAllowed: (v: string, field: string, allowed: string) => `"${v}" ليست قيمة مسموحًا بها في ${field} (المسموح: ${allowed}).`,
     mustNumber: (field: string) => `يجب أن يكون ${field} رقمًا.`,
     mustDate: (field: string) => `يجب أن يكون ${field} تاريخًا بالصيغة YYYY-MM-DD.`,
@@ -212,6 +213,36 @@ const raw: Texts = {
     unknownLink: (t: string) => `نوع رابط غير معروف "${t}".`,
     selfLink: 'لا يمكن أن يرتبط العنصر بنفسه.',
     duplicateLink: (t: string, target: string) => `رابط "${t}" مكرر إلى ${target}.`
+  },
+  typesDialog: {
+    title: 'أنواع العناصر والروابط',
+    intro: 'أنواع العناصر والروابط في هذا المشروع، مشتركة عبر schema.yaml. لا يُزال نوع إلا إذا لم يستخدمه شيء. الحقول المطلوبة: يُحفظ العنصر من ذلك النوع بدونها لكنه يُعلَّم غير مكتمل (المرشحات ← غير مكتمل).',
+    itemTypes: 'أنواع العناصر',
+    linkTypes: 'أنواع الروابط',
+    name: 'الاسم',
+    short: 'الاسم المختصر (الجدول)',
+    heading: 'عنوان',
+    required: 'الحقول المطلوبة',
+    used: 'مستخدم في',
+    linkName: 'الاسم (من المصدر)',
+    reverseName: 'الاسم (من الهدف)',
+    nameOf: (name: string) => `اسم ${name}`,
+    shortOf: (name: string) => `الاسم المختصر لـ ${name}`,
+    headingOf: (name: string) => `${name} عنوان وليس متطلبًا`,
+    reverseOf: (name: string) => `اسم ${name} مقروءًا من الهدف`,
+    none: 'لا شيء',
+    count: (n: number) => `${n} عنصر`,
+    linkCount: (n: number) => `${n} رابط`,
+    remove: 'إزالة',
+    cannotRemove: (n: number) => `مستخدم ${n} مرة: غيّر تلك أولًا`,
+    addItemType: '+ إضافة نوع عناصر',
+    addLinkType: '+ إضافة نوع روابط',
+    missingName: 'كل نوع يحتاج اسمًا (وكل نوع روابط اسمًا من الهدف).',
+    duplicate: 'لنوعين الاسم نفسه — أعطِ كلًّا منهما اسمه.'
+  },
+  types: {
+    stillUsed: (list: string) => `هذه الأنواع ما زالت مستخدمة ولا يمكن إزالتها: ${list}. غيّر تلك العناصر أو الروابط أولًا.`,
+    atLeastOne: 'أبقِ نوع عناصر واحدًا على الأقل.'
   },
   documents: {
     label: 'المستند',
@@ -526,7 +557,9 @@ const raw: Texts = {
     up: (label: string) => `تحريك عمود ${label} لأعلى`,
     down: (label: string) => `تحريك عمود ${label} لأسفل`,
     reset: 'إعادة الضبط',
-    editFields: 'تعديل الحقول…'
+    editFields: 'تعديل الحقول…',
+    dragHint: 'اسحب لتحريك العمود، أو استخدم ↑ / ↓',
+    editTypes: 'تعديل الأنواع…'
   },
 
   fields: {
@@ -827,6 +860,7 @@ const raw: Texts = {
     linksAny: 'الروابط: أي',
     linksSuspect: 'بروابط مشكوك فيها',
     linksNone: 'بلا أي روابط',
+    incomplete: 'غير مكتمل (حقل مطلوب فارغ)',
     clearFilters: 'مسح التصفية',
     export: 'تصدير…',
     expandAll: 'توسيع الكل',

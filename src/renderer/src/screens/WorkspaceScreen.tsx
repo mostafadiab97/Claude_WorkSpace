@@ -4,6 +4,7 @@ import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
 import { ItemEditor, type EditorTarget } from '../workspace/ItemEditor'
 import { FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
+import { TypesDialog } from '../workspace/TypesPanel'
 import { ChangesSide, ChangesView } from '../workspace/ChangesView'
 import { GitBar } from '../workspace/GitPanels'
 import { MergeDialog } from '../workspace/MergeDialog'
@@ -68,6 +69,7 @@ export function WorkspaceScreen({
   })
   const setDocument = (d: string): void => {
     setDocumentState(d)
+    setDataVersion((v) => v + 1) // the tree reloads its levels for the other document
     try {
       localStorage.setItem(`rq.document.${info.root}`, d)
     } catch {
@@ -80,6 +82,7 @@ export function WorkspaceScreen({
   const query = useMemo(() => (document === ALL_DOCUMENTS ? filterQuery : { ...filterQuery, document }), [filterQuery, document])
   const [columnPrefs, setColumnPrefs] = useColumnPrefs(info.root)
   const [editFields, setEditFields] = useState(false)
+  const [editTypes, setEditTypes] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [folderLater, setFolderLater] = useState(false)
   const [folderDone, setFolderDone] = useState(false)
@@ -366,6 +369,7 @@ export function WorkspaceScreen({
             prefs={columnPrefs}
             onPrefs={setColumnPrefs}
             onEditFields={() => setEditFields(true)}
+            onEditTypes={() => setEditTypes(true)}
             canExport={info.itemCount > 0}
             onExport={() => setExportOpen({})}
             onImport={() => guarded(() => setImporting({ file: null, newProject: false }))}
@@ -435,7 +439,8 @@ export function WorkspaceScreen({
             controlsRef={tree}
             revealNonce={revealNonce}
             emptyText={
-              info.itemCount === 0 ? (
+              // a new project, or an empty document (S-10): what to do first
+              info.itemCount === 0 || (!filtered && document !== ALL_DOCUMENTS && (info.documents.find((d) => d.name === document)?.itemCount ?? 0) === 0) ? (
                 // first run: what to do first, in one place (UX-W01)
                 <div className="first-run" role="region" aria-label={T.workspace.firstRunTitle}>
                   <h2 className="first-run__title">{T.workspace.firstRunTitle}</h2>
@@ -607,6 +612,18 @@ export function WorkspaceScreen({
           onDone={(r) => {
             setExportOpen(false)
             setExported({ path: r.path, count: r.count })
+          }}
+        />
+      )}
+
+      {editTypes && (
+        <TypesDialog
+          info={info}
+          onClose={() => setEditTypes(false)}
+          onSaved={(i) => {
+            setEditTypes(false)
+            onInfo(i)
+            setDataVersion((v) => v + 1)
           }}
         />
       )}

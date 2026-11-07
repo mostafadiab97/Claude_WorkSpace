@@ -22,7 +22,7 @@ version (zoom, dark mode, and each box links to the source lines it is drawn fro
 
 ## 2. Five ideas that explain most of the code
 
-1. **Files are the truth.** One Markdown file per item (`requirements/items/<ID>.md`), YAML header + text. Anything
+1. **Files are the truth.** One Markdown file per item (`requirements/<document>/<ID>.md`, one folder per document), YAML header + text. Anything
    else (the SQLite index, the UI state) can be thrown away and rebuilt from the files.
 2. **Never lose or overwrite someone's work.** Every write checks that the file is still the version that was read
    (a *revision* hash); otherwise it refuses with a clear message. Writes are atomic (temp file + rename). Unknown

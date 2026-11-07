@@ -385,8 +385,11 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     recent: recent.read,
     forgetRecent: (root) => recent.forget(root),
 
-    query(query) {
+    query(asked) {
       const s = need()
+      // "incomplete" needs the required fields of every type (S-05): the index gets them from the schema here
+      const required = Object.fromEntries(s.repo.schema.itemTypes.filter((t) => t.required?.length).map((t) => [t.id, t.required as string[]]))
+      const query = asked.incomplete ? { ...asked, required } : asked
       const numbers = ctx.numbers(s)
       const withNumbers = (r: QueryResult): QueryResult => ({ total: r.total, items: r.items.map((i) => withNumber(i, numbers)) })
       if (query.sort?.by !== 'number') return withNumbers(s.index.query(query))
@@ -408,6 +411,8 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     moveItem: q(structure.moveItem),
     checkFields: fields.checkFields,
     saveSchemaFields: q(fields.saveSchemaFields),
+    typeUsage: fields.typeUsage,
+    saveSchemaTypes: q(fields.saveSchemaTypes),
     renameProjectFolder: q(renameProjectFolder),
     createDocument: q(createDocument),
     renameDocument: q(renameDocument),

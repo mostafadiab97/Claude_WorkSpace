@@ -1,5 +1,5 @@
 // The ONE contract between the UI (renderer) and the core (main process).
-import type { FieldDef, Item, ItemDiff, ItemIssue, ItemQuery, QueryResult, Schema, SchemaProblem } from './domain'
+import type { FieldDef, Item, ItemDiff, ItemIssue, ItemQuery, ItemTypeDef, LinkTypeDef, QueryResult, Schema, SchemaProblem } from './domain'
 export type * from './domain'
 
 // The UI can do exactly what is listed here and nothing else. Adding a capability = a method in ReqochetApi,
@@ -534,6 +534,10 @@ export interface ReqochetApi {
   getFieldValues(field: string): Promise<string[]>
   /** Replaces the project's field definitions in schema.yaml and re-opens the repository. */
   saveSchemaFields(fields: FieldDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** How many items / links use each type (the Types window, S-04). */
+  getTypeUsage(): Promise<{ items: Record<string, number>; links: Record<string, number> }>
+  /** Saves the item and link types (S-04) with their required fields (S-05). */
+  saveSchemaTypes(itemTypes: ItemTypeDef[], linkTypes: LinkTypeDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   /** Adds a link stored in `source` ("source verifies target"); confirmed against the target as it is now. */
   addLink(source: string, type: string, target: string): Promise<{ ok: true } | { ok: false; message: string }>
   removeLink(source: string, type: string, target: string): Promise<{ ok: true } | { ok: false; message: string }>
@@ -695,6 +699,8 @@ export const Channels = {
   renameDocument: 'ws:renameDocument',
   getFieldValues: 'ws:fieldValues',
   saveSchemaFields: 'ws:saveSchemaFields',
+  getTypeUsage: 'ws:getTypeUsage',
+  saveSchemaTypes: 'ws:saveSchemaTypes',
   addLink: 'ws:addLink',
   removeLink: 'ws:removeLink',
   confirmLinks: 'ws:confirmLinks',

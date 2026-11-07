@@ -158,6 +158,47 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
       defaultDocument,
       listDocuments,
 
+      async writeSchemaTypes(itemTypes, linkTypes, expectedRevision) {
+        const current = await readFile(schemaFile, 'utf8')
+        if (revisionOf(current) !== expectedRevision) {
+          throw new ConflictError('schema.yaml was changed outside reqochet since the repository was opened. Refresh and try again.')
+        }
+        const doc = parseDocument(current)
+        const edit = <T extends { id: string }>(key: string, list: T[], managed: Record<string, (x: T) => unknown>): void => {
+          const old = doc.get(key)
+          const nodes = new Map<string, YAMLMap>()
+          if (isSeq(old)) for (const n of old.items) if (isMap(n) && typeof n.get('id') === 'string') nodes.set(n.get('id') as string, n)
+          const seq = isSeq(old) ? old : (doc.createNode([]) as YAMLSeq)
+          seq.items = list.map((x) => {
+            const node = nodes.get(x.id) ?? (doc.createNode({ id: x.id }) as YAMLMap)
+            for (const [k, value] of Object.entries(managed)) {
+              const v = value(x)
+              if (v === undefined) node.delete(k)
+              else node.set(k, doc.createNode(v))
+            }
+            return node
+          })
+          if (!isSeq(old)) doc.set(key, seq)
+        }
+        edit('itemTypes', itemTypes, {
+          name: (t) => t.name,
+          short: (t) => t.short || undefined,
+          requirement: (t) => (t.requirement === false ? false : undefined),
+          labels: (t) => (t.labels && Object.keys(t.labels).length ? t.labels : undefined),
+          required: (t) => (t.required?.length ? t.required : undefined)
+        })
+        edit('linkTypes', linkTypes, {
+          name: (l) => l.name,
+          reverseName: (l) => l.reverseName,
+          labels: (l) => (l.labels && Object.keys(l.labels).length ? l.labels : undefined),
+          reverseLabels: (l) => (l.reverseLabels && Object.keys(l.reverseLabels).length ? l.reverseLabels : undefined)
+        })
+        const text = doc.toString({ lineWidth: 0 })
+        const own = parseSchema(text).problems.filter((p) => /^(itemTypes|linkTypes)/.test(p.path))
+        if (own.length > 0) throw new Error(own.map((p) => `${p.path}: ${p.message}`).join(' '))
+        await atomicWrite(schemaFile, text)
+      },
+
       // every .md file of every document folder, plus .md files directly in requirements/ (loose items, S-10)
       async listItemFiles(): Promise<ItemFileInfo[]> {
         const docs = await listDocuments()

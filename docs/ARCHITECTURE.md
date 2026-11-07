@@ -66,8 +66,17 @@ Keep this table up to date with every change.
 requirements/
   .reqochet/schema.yaml   item types, fields, link types (copied from config/default-schema.yaml, then owned by the project)
   .gitattributes        LF line endings for identical diffs on every PC
-  items/REQ-K7Q3XMB.md  one file per item: YAML header + Markdown text
+  System/REQ-K7Q3XMB.md one file per item: YAML header + Markdown text; the folder is the item's document
+  Software/…            another document (0.17, S-10): its own tree and outline numbers
 ```
+
+- **Documents** (0.17, S-10): every folder directly under `requirements/` that does not start with a dot is a
+  document; an item's document is the first folder of its path (`documentOfPath`, `shared/domain.ts`), never a key in
+  the file. Projects made before 0.17 have one document called `items` (the window offers a real name: a folder rename
+  in one commit, `workspace.renameDocument`). `.md` files directly in `requirements/` (except README.md) are "loose"
+  items, document `''`. A tree never spans documents (save and move refuse a parent from another document); outline
+  numbers restart per document (`outlineNumbers` groups the top level by document). The index derives the document
+  from the path (no table change); `ItemQuery.document` filters by it.
 
 - **IDs** (0.9.0): `REQ-` + 7 random characters (Crockford base32, no I/L/O/U), the same prefix for every type, so
   the **type can change** without changing the ID. Random, not sequential, so items created on different branches

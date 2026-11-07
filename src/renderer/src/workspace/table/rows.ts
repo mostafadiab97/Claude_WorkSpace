@@ -111,7 +111,8 @@ export function treeRows(levels: ReadonlyMap<string, Level>, open: OpenState): R
   return out
 }
 
-export function useTreeRows(active: boolean, sort: Sort, dataVersion: number) {
+/** `document`: only that document's tree (S-10); undefined = all documents. */
+export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, document?: string) {
   const [levels, setLevels] = useState<Map<string, Level>>(new Map())
   const [open, setOpenState] = useState<OpenState>({ all: false, ids: new Set() })
   const levelsRef = useRef(levels)
@@ -122,11 +123,12 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number) {
   }, [levels, open])
   const generation = useRef(0)
   const inflight = useRef(new Set<string>())
-  const sortKey = JSON.stringify(sort)
+  // the document is part of the key: another document is another tree (S-10)
+  const sortKey = JSON.stringify([sort, document ?? null])
 
   const fetchLevel = useCallback(
     async (key: string, limit: number): Promise<Level> => {
-      const r = await window.reqochet.queryItems({ parent: key || null, sort, limit, brief: true })
+      const r = await window.reqochet.queryItems({ parent: key || null, sort, limit, brief: true, ...(document !== undefined && !key ? { document } : {}) })
       return { items: r.items, total: r.total, limit }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sortKey stands for sort
@@ -137,7 +139,7 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number) {
   const fetchAll = useCallback(async (): Promise<Map<string, Level>> => {
     const all: IndexedItem[] = []
     for (let offset = 0; ; offset += 10_000) {
-      const r = await window.reqochet.queryItems({ sort, limit: 10_000, offset, brief: true })
+      const r = await window.reqochet.queryItems({ sort, limit: 10_000, offset, brief: true, ...(document !== undefined ? { document } : {}) })
       all.push(...r.items)
       if (r.items.length === 0 || all.length >= r.total) break
     }

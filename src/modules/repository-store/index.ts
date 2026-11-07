@@ -8,7 +8,7 @@
 //            .gitattributes          keeps LF line endings so diffs are identical on every PC
 //            items/<ID>.md           one file per item
 import type { Item, ItemIssue } from '../items'
-import type { FieldDef, Schema, SchemaProblem } from '../schema'
+import type { FieldDef, ItemTypeDef, LinkTypeDef, Schema, SchemaProblem } from '../schema'
 import { createFileRepositoryStore } from './fileStore'
 
 export const REQUIREMENTS_FOLDER = 'requirements'
@@ -49,6 +49,8 @@ export interface RequirementsRepo {
    * schema.yaml changed since this repository was opened. The repository must be re-opened afterwards.
    */
   writeSchemaFields(fields: FieldDef[], expectedRevision: string): Promise<void>
+  /** Replaces the item and link type lists the same way (S-04): other keys and comments stay as written. */
+  writeSchemaTypes(itemTypes: ItemTypeDef[], linkTypes: LinkTypeDef[], expectedRevision: string): Promise<void>
   listItemFiles(): Promise<ItemFileInfo[]>
   /** The documents: folders directly under requirements/ (S-10), byte-wise sorted. */
   listDocuments(): Promise<string[]>

@@ -327,9 +327,13 @@ written. **Colours:** Light / Dark / System; a company can change colours, fonts
   requirements/
     .reqochet/
       schema.yaml          item types, fields, link types, feature switches
-    items/
+    Specification/         one folder per document (any name)
       REQ-K7Q3XMB.md       one file per item
+    Software/
+      REQ-2M9RT4Q.md
 ```
+
+Every folder under `requirements/` is a document. Projects made before 0.17 have one document called `items`.
 
 An item file:
 
@@ -384,6 +388,9 @@ branch as reviewable uncommitted changes, delete safely, search among many branc
 **Exchange** — import from Excel, CSV and ReqIF with column mapping, a check step and repeatable updates; export to
 Excel, ReqIF (schema-validated), CSV and Markdown, all or filtered, in document order.
 
+**Structure** — several documents (specifications) in one repository, each with its own tree and numbers; item and
+link types edited in the window; required fields per item type with an Incomplete filter.
+
 **Usability** — English and Arabic (full right-to-left), light / dark / system themes, company theme file.
 
 **Reliability** — atomic, validated, conflict-checked writes; nothing ever force-pushed; built-in release self-test and
@@ -393,8 +400,8 @@ paused; automatic updates.
 **Platform and data** — Windows 10/11 desktop, per-user install; offline first; no server, no database, no accounts;
 plain Markdown files in your own Git repository; tested with 10,000 and 50,000 requirements.
 
-**Planned** (decided release plan) — editable types and required fields, coverage view, impact chain, traceability
-matrix, several specifications per repository, baselines; bulk edit, templates, saved views, wording hints; rich text
+**Planned** (decided release plan) — baselines and a history list, coverage view, impact chain, traceability
+matrix; bulk edit, templates, saved views, wording hints; rich text
 with tables, images and diagrams; Word / PDF / HTML documents; approvals, comments and pull requests in the app; links to
 code and test results; AI access.
 

@@ -3,7 +3,7 @@
 //   gitOps (M4) and compare (M5).
 // Every operation that writes files, changes the index or runs Git goes through one queue (review D-03).
 import { createHash } from 'node:crypto'
-import { mkdir, readdir, rename, writeFile } from 'node:fs/promises'
+import { access, mkdir, rename, writeFile } from 'node:fs/promises'
 import { basename, join, relative, resolve } from 'node:path'
 import type { FolderCheck, GitResult, ImportSettings, MergeAnswers, MergePlan, ImportSource, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
 import type { GitAdapter } from '../git-adapter'
@@ -11,7 +11,7 @@ import type { IndexCache } from '../index-cache'
 import type { Logger } from '../logger'
 import { isDocumentName, type RepositoryStore } from '../repository-store'
 import { createCompare } from './compare'
-import { queryAll, syncInfo, type Session, type WorkspaceContext } from './context'
+import { queryAll, syncInfo, withRequired, type Session, type WorkspaceContext } from './context'
 import { createExportOps } from './exporting'
 import { createGitOps, explainGitError } from './gitOps'
 import { createMerging } from './merging'
@@ -53,6 +53,11 @@ export function cacheFileName(root: string): string {
 
 /** The rename commit's message — in the team's Git history, so the same in every window language (UX16-03). */
 /** The commit of a document rename — the same in every language, like FOLDER_RENAME_COMMIT (S-10). */
+const exists = (p: string): Promise<boolean> => access(p).then(() => true, () => false)
+
+/** Loose files moved in one commit at most: two paths each must fit on a Windows command line (CR-07). */
+const MAX_LOOSE_MOVE = 300
+
 export const DOCUMENT_RENAME_COMMIT = (from: string, to: string): string => `Rename the document ${from} to ${to} (reqochet)`
 export const FOLDER_RENAME_COMMIT = 'Rename the project folder .reqman to .reqochet (reqochet)'
 
@@ -100,6 +105,23 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     s.watch?.close()
     s.watch = watchRequirementsFolder(s.repo.folder, (e) => log.warn(`Folder watch: ${String(e)}`), s.repo.metaDir)
     s.watchedMeta = s.repo.metaDir
+  }
+
+  /**
+   * Runs a Git action that may add, remove or rename document folders with the folder watch closed: Windows refuses
+   * to remove a folder that is being watched (CR-09). Every such action re-reads the project afterwards (resync), and
+   * the watch starts again then — or here, when the action stopped early.
+   */
+  const paused = async <R>(run: (s: Session) => Promise<R>): Promise<R> => {
+    const s = need()
+    s.watch?.close()
+    s.watch = null
+    try {
+      return await run(s)
+    } finally {
+      // an action that stopped before its resync changed nothing: just watch again
+      if (session === s && !s.watch) rewatch(s)
+    }
   }
 
   // the documents (folders under requirements/) with their item counts; '' = loose files, listed only when there are any
@@ -182,8 +204,12 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     const n = name.trim()
     if (!isDocumentName(n)) return { ok: false, message: T.wsMsg.documentName }
     if (documentFolders(s.repo.folder).some((d) => d.toLowerCase() === n.toLowerCase())) return { ok: false, message: T.wsMsg.documentExists(n) }
-    await mkdir(join(s.repo.folder, n), { recursive: true })
-    await writeFile(join(s.repo.folder, n, '.gitkeep'), '', { flag: 'w' })
+    try {
+      await mkdir(join(s.repo.folder, n), { recursive: true })
+      await writeFile(join(s.repo.folder, n, '.gitkeep'), '', { flag: 'w' })
+    } catch (e) {
+      return { ok: false, message: e instanceof Error ? e.message : String(e) } // a file with that name, no permission (CR-11)
+    }
     log.info(`Document created: ${n}`)
     s.repo = await ctx.openRepo(s.repo.root)
     rewatch(s)
@@ -198,36 +224,59 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     const s = need()
     const n = to.trim()
     if (!isDocumentName(n)) return { ok: false, message: T.wsMsg.documentName }
+    if (n === from) return { ok: true, info: info() } // nothing to do (QA-10)
     const docs = documentFolders(s.repo.folder)
     if (from !== '' && !docs.includes(from)) return { ok: false, message: T.wsMsg.missing(from) }
-    if (docs.some((d) => d !== from && d.toLowerCase() === n.toLowerCase()) && from !== '') return { ok: false, message: T.wsMsg.documentExists(n) }
+    // a case-only rename confuses Git on Windows and macOS (CR-12); another spelling of an existing folder too (CR-13)
+    if (from !== '' && from.toLowerCase() === n.toLowerCase()) return { ok: false, message: T.wsMsg.documentCaseOnly }
+    const existing = docs.find((d) => d !== from && d.toLowerCase() === n.toLowerCase())
+    if (from !== '' && existing) return { ok: false, message: T.wsMsg.documentExists(n) }
+    const target = from === '' && existing ? existing : n
     const root = s.repo.root
     const base = relative(root, s.repo.folder).split('\\').join('/') || '.'
     const p = (x: string): string => (base === '.' ? x : `${base}/${x}`)
-    // the files that move: the whole folder, or each loose .md file
-    const loose = from === '' ? (await readdir(s.repo.folder)).filter((f) => f.endsWith('.md') && f.toLowerCase() !== 'readme.md') : []
-    const moves = from === '' ? loose.map((f) => ({ a: f, b: `${n}/${f}` })) : [{ a: from, b: n }]
+    // the files that move: the whole folder, or each loose item file the index knows (not README or notes — QA-09)
+    const loose = from === '' ? queryAll(s.index, { document: '' }).map((i) => i.path).filter((x) => !x.includes('/')) : []
+    if (loose.length > MAX_LOOSE_MOVE) return { ok: false, message: T.wsMsg.tooManyLoose(MAX_LOOSE_MOVE) }
+    const moves = from === '' ? loose.map((f) => ({ a: f, b: `${target}/${f}` })) : [{ a: from, b: target }]
+    // never over an existing file (CR-01, QA-02): an item there would be lost
+    for (const m of moves) if (from === '' && (await exists(join(s.repo.folder, m.b)))) return { ok: false, message: T.wsMsg.documentFileTaken(m.b) }
     try {
-      const tracked = s.isGit ? (await Promise.all(moves.map((m) => git.trackedFiles(root, p(m.a))))).flat() : []
+      const trackedAll = s.isGit ? new Set(await git.trackedFiles(root, base === '.' ? '.' : base)) : new Set<string>()
+      const tracked = [...trackedAll].filter((t) => moves.some((m) => t === p(m.a) || t.startsWith(`${p(m.a)}/`)))
       if (tracked.length > 0 && (await git.status(root, from === '' ? base : p(from))).changes.some((c) => moves.some((m) => c.path === p(m.a) || c.path.startsWith(`${p(m.a)}/`)))) {
         return { ok: false, message: T.wsMsg.documentDirty }
       }
       s.watch?.close() // Windows refuses to rename a watched folder
       s.watch = null
-      if (from === '') await mkdir(join(s.repo.folder, n), { recursive: true })
-      for (const m of moves) await rename(join(s.repo.folder, m.a), join(s.repo.folder, m.b))
+      if (from === '') await mkdir(join(s.repo.folder, target), { recursive: true })
+      const done: typeof moves = []
+      const undo = async (): Promise<void> => {
+        for (const m of [...done].reverse()) await rename(join(s.repo.folder, m.b), join(s.repo.folder, m.a)).catch(() => {})
+      }
+      try {
+        for (const m of moves) {
+          await rename(join(s.repo.folder, m.a), join(s.repo.folder, m.b))
+          done.push(m)
+        }
+      } catch (e) {
+        // a file was locked halfway (an editor, a virus scanner): put back what moved, so folder and window agree (CR-06)
+        await undo()
+        rewatch(s)
+        return { ok: false, message: T.wsMsg.folderRenameRefused(e instanceof Error ? e.message : String(e)) }
+      }
       if (tracked.length > 0) {
         const paths = moves.flatMap((m) => [p(m.a), p(m.b)])
         try {
-          await git.commitFiles(root, paths, DOCUMENT_RENAME_COMMIT(from || 'loose files', n))
+          await git.commitFiles(root, paths, DOCUMENT_RENAME_COMMIT(from || 'loose files', target))
         } catch (e) {
           await git.unstage(root, paths)
-          for (const m of [...moves].reverse()) await rename(join(s.repo.folder, m.b), join(s.repo.folder, m.a))
+          await undo()
           rewatch(s)
           return { ok: false, message: T.wsMsg.folderRenameRefused(explainGitError(e)) }
         }
       }
-      log.info(`Document ${from || '(loose files)'} → ${n}${tracked.length > 0 ? ' (committed)' : ''}`)
+      log.info(`Document ${from || '(loose files)'} → ${target}${tracked.length > 0 ? ' (committed)' : ''}`)
       s.repo = await ctx.openRepo(root)
       rewatch(s)
       s.lastSync = syncInfo(await s.index.sync(s.repo))
@@ -258,17 +307,18 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       // groups (parents) of the items this user changed in commits not on the remote yet
       // item files of every document (S-10), not the project folder
       const changed = (await git.changedFiles(s.repo.root, upstream, 'HEAD', base === '.' ? '.' : base)).filter((f) => f.endsWith('.md') && !f.slice(prefix.length).startsWith('.'))
+      // a group = a parent, or the top level of one document (CR-04)
       const parents = new Set<string>()
       for (const f of changed) {
         const it = session.index.get(basename(f, '.md'))
-        if (it) parents.add(it.parent ?? '')
+        if (it) parents.add(it.parent ?? `\u0000${it.document ?? ''}`)
       }
       if (parents.size === 0) return 0
       // never touch a group with uncommitted edits: they would end up in this commit
       const dirty = new Set((await git.status(s.repo.root, base)).changes.map((c) => c.path))
       const plan: { id: string; order: string }[] = []
       for (const p of parents) {
-        const sibs = structure.siblings(session, p || undefined)
+        const sibs = p.startsWith('\u0000') ? structure.siblings(session, undefined, p.slice(1)) : structure.siblings(session, p)
         if (sibs.some((x) => dirty.has(`${prefix}${x.path}`))) continue
         plan.push(...planTidy(sibs))
       }
@@ -388,8 +438,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     query(asked) {
       const s = need()
       // "incomplete" needs the required fields of every type (S-05): the index gets them from the schema here
-      const required = Object.fromEntries(s.repo.schema.itemTypes.filter((t) => t.required?.length).map((t) => [t.id, t.required as string[]]))
-      const query = asked.incomplete ? { ...asked, required } : asked
+      const query = withRequired(s, asked)
       const numbers = ctx.numbers(s)
       const withNumbers = (r: QueryResult): QueryResult => ({ total: r.total, items: r.items.map((i) => withNumber(i, numbers)) })
       if (query.sort?.by !== 'number') return withNumbers(s.index.query(query))
@@ -424,18 +473,18 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
 
     gitState: q(() => gitOps.state(need())),
     commit: q((message: string) => gitOps.commit(need(), message)),
-    pull: q(() => merging.pull(need())),
-    pullFrom: q((source: string) => merging.pullFrom(need(), source)),
-    finishPull: q((plan: MergePlan, answers: MergeAnswers) => merging.finishPull(need(), plan, answers)),
+    pull: q(() => paused((s) => merging.pull(s))),
+    pullFrom: q((source: string) => paused((s) => merging.pullFrom(s, source))),
+    finishPull: q((plan: MergePlan, answers: MergeAnswers) => paused((s) => merging.finishPull(s, plan, answers))),
     listBranches: () => merging.listBranches(need()),
     createBranch: q((name: string) => merging.createBranch(need(), name)),
-    switchBranch: q((name: string, changes: 'take' | 'discard') => merging.switchBranch(need(), name, changes)),
+    switchBranch: q((name: string, changes: 'take' | 'discard') => paused((s) => merging.switchBranch(s, name, changes))),
     branchRange: (name: string) => merging.branchRange(need(), name),
     deleteBranch: q((name: string, force: boolean) => merging.deleteBranch(need(), name, force)),
     push: q(() => gitOps.push(need())),
-    discardChanges: q((paths: string[]) => gitOps.discard(need(), paths)),
+    discardChanges: q((paths: string[]) => paused((s) => gitOps.discard(s, paths))),
     setGitIdentity: q((name: string, email: string) => gitOps.setIdentity(need(), name, email)),
-    undoLastCommit: q(() => gitOps.undoLastCommit(need())),
+    undoLastCommit: q(() => paused((s) => gitOps.undoLastCommit(s))),
     itemHistory: (id) => gitOps.history(need(), id),
     compareItemVersion: (id, hash) => gitOps.compare(need(), id, hash),
 

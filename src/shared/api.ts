@@ -394,6 +394,8 @@ export interface ImportSettings {
   defaultType: string
   /** Set by the main process, never by the window: the file is CSV text, where every row has all its cells. */
   textFile?: boolean
+  /** The document new items go into (S-10); new items under an existing parent go into that parent's document. */
+  document?: string
 }
 
 export interface ImportProblem {

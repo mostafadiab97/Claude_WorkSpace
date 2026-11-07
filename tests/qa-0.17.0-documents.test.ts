@@ -74,7 +74,7 @@ describe('QA: document names', () => {
   })
 
   // Windows cannot create folders called CON, NUL, COM1 … (and "Spec." / "Spec " are changed silently).
-  it.fails('DEFECT QA-01: reserved Windows device names are refused as document names', () => {
+  it('DEFECT QA-01: reserved Windows device names are refused as document names', () => {
     expect(['CON', 'nul', 'COM1', 'LPT9', 'aux'].some(isDocumentName)).toBe(false)
   })
 
@@ -138,7 +138,7 @@ describe('QA: folders changed outside the app', () => {
 
   // The save and the move refuse a parent from another document, but a hand-moved file (or a pull) can create one:
   // nothing flags it and the child is numbered "1.1" under a parent of the other document.
-  it.fails('DEFECT QA-03: an item whose parent is in another document is flagged to the user', async () => {
+  it('DEFECT QA-03: an item whose parent is in another document is flagged to the user', async () => {
     const { ws, root } = await setup('A')
     await ws.createDocument('B')
     const parent = await add(ws, 'parent', { document: 'A' })
@@ -149,7 +149,7 @@ describe('QA: folders changed outside the app', () => {
     expect((d?.issues.length ?? 0) > 0 || info.issues.length > 0).toBe(true)
   })
 
-  it.fails('DEFECT QA-03b: such a child is numbered inside its own document, not under the other document\'s parent', () => {
+  it('DEFECT QA-03b: such a child is numbered inside its own document, not under the other document\'s parent', () => {
     const m = outlineNumbers([
       { id: 'p', document: 'A' },
       { id: 'c', parent: 'p', document: 'B' }
@@ -179,7 +179,7 @@ describe('QA: folders changed outside the app', () => {
     expect(m.size).toBeGreaterThanOrEqual(2)
   })
 
-  it.fails('DEFECT QA-04: moving an item to the top level of its document leaves other documents\' files untouched', async () => {
+  it('DEFECT QA-04: moving an item to the top level of its document leaves other documents\' files untouched', async () => {
     const { ws, root } = await setup('A')
     await ws.createDocument('B')
     const a1 = await add(ws, 'a1', { document: 'A' })
@@ -240,12 +240,13 @@ describe('QA: renameDocument without Git', () => {
     expect((await ws.getItem(b))?.item.links?.[0]?.target).toBe(a)
   })
 
-  it('case-only rename works', async () => {
+  // decision after the review (CR-12): a case-only rename confuses Git on Windows, so it is refused with a clear note
+  it('case-only rename is refused clearly and nothing moves', async () => {
     const { ws } = await setup('spec')
     const id = await add(ws, 'x', { document: 'spec' })
     const r = await ws.renameDocument('spec', 'Spec')
-    expect(r.ok).toBe(true)
-    expect(ws.query({ document: 'Spec' }).items.map((i) => i.id)).toEqual([id])
+    expect(r.ok).toBe(false)
+    expect(ws.query({ document: 'spec' }).items.map((i) => i.id)).toEqual([id])
   })
 
   it('rename to the same name is a harmless no-op or a clear refusal', async () => {
@@ -279,7 +280,7 @@ describe('QA: renameDocument without Git', () => {
 
   // rename() replaces an existing file on Linux/macOS and Windows: a loose file with the ID of an item that already
   // is in the target document overwrites it silently.
-  it.fails('DEFECT QA-02: moving loose files into an existing document must not overwrite a file with the same name', async () => {
+  it('DEFECT QA-02: moving loose files into an existing document must not overwrite a file with the same name', async () => {
     const { ws, root } = await setup('A')
     await writeFile(join(root, 'requirements', 'A', 'REQ-SAME001.md'), itemFile('REQ-SAME001', 'kept in A'))
     await writeFile(join(root, 'requirements', 'REQ-SAME001.md'), itemFile('REQ-SAME001', 'loose twin'))
@@ -294,12 +295,15 @@ describe('QA: renameDocument without Git', () => {
   })
 
   // for loose files ('') the "name already taken" check is skipped: "spec" is created beside "Spec" (one folder on Windows)
-  it.fails('DEFECT QA-05: loose files cannot go into a document name that only differs in case from an existing one', async () => {
+  it('QA-05: loose files typed with another spelling of an existing document go into that document', async () => {
     const { ws, root } = await setup('Spec')
     await writeFile(join(root, 'requirements', 'REQ-LOOSE02.md'), itemFile('REQ-LOOSE02', 'loose'))
     await ws.refresh(true)
+    // decision after the review (CR-13): another spelling of an existing document means that document
     const r = await ws.renameDocument('', 'spec')
-    expect(r.ok).toBe(false)
+    expect(r.ok).toBe(true)
+    expect(await readdir(join(root, 'requirements'))).not.toContain('spec')
+    expect(ws.query({ document: 'Spec' }).items.map((i) => i.id)).toContain('REQ-LOOSE02')
   })
 })
 

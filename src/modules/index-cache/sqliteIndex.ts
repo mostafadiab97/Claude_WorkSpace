@@ -12,6 +12,9 @@ import type { IndexCache, IndexedItem, ItemQuery, LinkRef, QueryResult, SyncStat
 const FORMAT_VERSION = '4'
 
 /** A text used inside LIKE: its wildcards and the escape character itself stand for themselves (QA-WP-02). */
+/** White space as JavaScript's trim() sees it (the common kinds): the filter and the editor agree on "empty" (CR-20). */
+const BLANKS = "' ' || char(9) || char(10) || char(11) || char(12) || char(13) || char(160) || char(8239) || char(12288) || char(65279)"
+
 const likeEscape = (s: string): string => s.replace(/[\\%_]/g, (c) => `\\${c}`)
 
 const DDL = `
@@ -377,10 +380,10 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         const ors: string[] = []
         for (const [type, fields] of Object.entries(q.required ?? {})) {
           const missing = fields.map((f) => {
-            if (f === 'title') return "trim(i.title) = ''"
-            if (f === 'text') return "trim(i.text) = ''"
+            if (f === 'title') return `trim(i.title, ${BLANKS}) = ''`
+            if (f === 'text') return `trim(i.text, ${BLANKS}) = ''`
             params.push(f)
-            return "NOT EXISTS (SELECT 1 FROM item_fields x WHERE x.rid = i.rid AND x.field = ? AND trim(x.value) <> '')"
+            return `NOT EXISTS (SELECT 1 FROM item_fields x WHERE x.rid = i.rid AND x.field = ? AND trim(x.value, ${BLANKS}) <> '')`
           })
           if (missing.length === 0) continue
           ors.push(`(i.type = ? AND (${missing.join(' OR ')}))`)
@@ -438,6 +441,8 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
           links: `(json_array_length(i.links_json) + (SELECT COUNT(*) FROM links l WHERE l.target = i.id))`
         }[by as 'id']
         orderSql = `${col} ${dir}, i.id`
+        // All documents, top level, document order: one document after the other, each in its own order (CR-22)
+        if (by === 'order' && q.parent === null && q.document === undefined) orderSql = `(CASE WHEN instr(i.path, '/') > 0 THEN substr(i.path, 1, instr(i.path, '/') - 1) ELSE '' END), ${orderSql}`
       }
 
       const total = (db.prepare(`SELECT COUNT(*) AS n FROM items i ${whereSql}`).get(...params) as { n: number }).n

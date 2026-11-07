@@ -24,9 +24,9 @@ const ITEMS_DIR = 'items'
 export const FIRST_DOCUMENT = 'Specification'
 /** True when the name can be a document folder: a plain folder name, not hidden (S-10). */
 export const isDocumentName = (name: string): boolean =>
-  name.length > 0 && name.length <= 80 && !/[\\/:*?"<>|]/.test(name) && ![...name].some((c) => c.charCodeAt(0) < 32) && !name.startsWith('.') && name.trim() === name && !name.endsWith('.')
+  name.length > 0 && name.length <= 80 && !/^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\.|$)/i.test(name) && !/[\\/:*?"<>|]/.test(name) && ![...name].some((c) => c.charCodeAt(0) < 32) && !name.startsWith('.') && name.trim() === name && !name.endsWith('.')
 /** The project folder inside requirements/ (0.16: renamed with the product; owner, 31 Oct / 4 Nov 2026). */
-/** True when the ID can be used as a file name inside items/ (no path parts). */
+/** True when the ID can be used as a file name inside a document folder (no path parts). */
 export const isSafeFileId = (id: string): boolean =>
   id.length > 0 &&
   id.length <= 128 &&
@@ -96,10 +96,11 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
     const defaultPath = (id: string, document?: string): string => {
       if (!isSafeFileId(id)) throw new Error(`"${id}" cannot be used as an item ID: it must not contain / \\ : .. or control characters.`)
       const doc = document ?? defaultDocument
+      if (doc === '') return `${id}${ITEM_FILE_EXTENSION}` // a loose item stays loose (CR-10, CR-17)
       if (!isDocumentName(doc)) throw new Error(`"${doc}" cannot be used as a document name.`)
       return `${doc}/${id}${ITEM_FILE_EXTENSION}`
     }
-    // An item's file is normally items/<ID>.md, but a file renamed by hand still holds its item: the caller's
+    // An item's file is normally <document>/<ID>.md, but a file renamed by hand still holds its item: the caller's
     // locator (the index) knows the real path, so such an item can be read, saved and deleted in place.
     const pathOf = (id: string, document?: string): string => options.locate?.(id) ?? defaultPath(id, document)
     const fileFor = (id: string, document?: string): string => join(folder, pathOf(id, document))
@@ -205,7 +206,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
         const files: string[] = []
         for (const d of ['', ...docs]) {
           const names = await readdir(d ? join(folder, d) : folder).catch(() => [] as string[])
-          for (const n of names) if (n.endsWith(ITEM_FILE_EXTENSION) && !(d === '' && n.toLowerCase() === 'readme.md')) files.push(d ? `${d}/${n}` : n)
+          for (const n of names) if (n.endsWith(ITEM_FILE_EXTENSION) && n.toLowerCase() !== 'readme.md') files.push(d ? `${d}/${n}` : n)
         }
         const infos = await mapLimit(files, READ_CONCURRENCY, async (p) => {
           const s = await stat(join(folder, p)).catch(() => null)
@@ -228,7 +229,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
       async fixFileName(id) {
         const from = pathOf(id)
         // the file keeps its document; a loose file goes into the default document
-        const to = defaultPath(id, documentOfPath(from) || undefined)
+        const to = defaultPath(id, documentOfPath(from))
         if (from === to) return to
         if (await exists(join(folder, to))) throw new Error(`${to} already exists; the file ${from} was not renamed.`)
         const current = await readFile(join(folder, from), 'utf8').catch(() => null)
@@ -282,7 +283,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
           extra: {}
         }
         if (init.parent) item.parent = init.parent
-        if (init.document) item.document = init.document
+        if (init.document !== undefined) item.document = init.document
         if (init.order !== undefined) item.order = init.order
         return item
       },

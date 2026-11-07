@@ -71,10 +71,15 @@ export function outlineNumbers(rows: { id: string; parent?: string; document?: s
   const ids = new Set(rows.map((r) => r.id))
   const children = new Map<string, string[]>()
   // every document has its own tree and numbers (S-10): its top-level items hang under a key for the document
-  const roots = [...new Set(rows.filter((r) => r.parent === undefined).map((r) => r.document ?? ''))]
+  // a parent in another document (a hand-moved file) does not count: the item is numbered at its own top level (QA-03b)
+  const docOf = new Map(rows.map((r) => [r.id, r.document ?? '']))
+  const parentOf = (r: { parent?: string; document?: string }): string | undefined =>
+    r.parent !== undefined && ids.has(r.parent) && docOf.get(r.parent) !== (r.document ?? '') ? undefined : r.parent
+  const roots = [...new Set(rows.filter((r) => parentOf(r) === undefined).map((r) => r.document ?? ''))]
   for (const r of rows) {
-    if (r.parent !== undefined && !ids.has(r.parent)) continue // orphan: not in the tree
-    const key = r.parent ?? ROOT_OF(r.document ?? '')
+    const parent = parentOf(r)
+    if (parent !== undefined && !ids.has(parent)) continue // orphan: not in the tree
+    const key = parent ?? ROOT_OF(r.document ?? '')
     const list = children.get(key)
     if (list) list.push(r.id)
     else children.set(key, [r.id])
@@ -164,8 +169,9 @@ export function planTidy(sibs: Placed[]): { id: string; order: string }[] {
 export function createStructureOps(ctx: WorkspaceContext) {
   const { log } = ctx
 
-  const siblings = (s: Session, parent: string | undefined): IndexedItem[] =>
-    s.index.query({ parent: parent ?? null, sort: { by: 'order' }, limit: 10_000 }).items
+  /** The children of `parent`; at the top level only those of `document` — every document has its own (CR-04). */
+  const siblings = (s: Session, parent: string | undefined, document?: string): IndexedItem[] =>
+    s.index.query({ parent: parent ?? null, ...(parent === undefined && document !== undefined ? { document } : {}), sort: { by: 'order' }, limit: 10_000 }).items
 
   /** Writes the planned order values (and the new parent of `moved`), conflict-safe, then updates the index. */
   async function apply(s: Session, plan: { id: string; order: string }[], moved?: { ids: ReadonlySet<string>; parent: string | null }): Promise<OpResult> {
@@ -207,7 +213,8 @@ export function createStructureOps(ctx: WorkspaceContext) {
     /** An order key between an item and the sibling that follows it (byte-wise order, never localeCompare). */
     orderAfter(s: Session, id: string): string {
       const me = s.index.get(id)
-      const siblings = s.index.query({ parent: me?.parent ?? null, sort: { by: 'order', descending: false } }).items
+      // every sibling, also past the first 200 (CR-24); at the top level those of the same document (CR-04)
+      const siblings = s.index.query({ parent: me?.parent ?? null, ...(me?.parent ? {} : { document: me?.document ?? '' }), sort: { by: 'order', descending: false }, limit: 10_000 }).items
       const at = siblings.findIndex((x) => x.id === id)
       const next = siblings.slice(at + 1).find((x) => (x.order ?? '') > (me?.order ?? ''))
       return keyBetween(me?.order ?? null, next?.order ?? null)
@@ -230,7 +237,7 @@ export function createStructureOps(ctx: WorkspaceContext) {
         if ((target.document ?? '') !== (s.index.get(id)?.document ?? '')) return { ok: false, message: T.wsMsg.parentOtherDocument(parent, target.document || '—') }
       }
       // Its own children move with it: they keep pointing at it.
-      const plan = planInsert(siblings(s, parent ?? undefined).filter((x) => x.id !== id), id, before)
+      const plan = planInsert(siblings(s, parent ?? undefined, s.index.get(id)?.document ?? '').filter((x) => x.id !== id), id, before)
       try {
         const r = await apply(s, plan, { ids: new Set([id]), parent })
         if (r.ok) log.info(`Moved ${id} under ${parent ?? 'top level'}${before ? ` before ${before}` : ''}`)
@@ -252,7 +259,16 @@ export function createStructureOps(ctx: WorkspaceContext) {
       if (parent !== null) {
         if (!s.index.get(parent)) return { ok: false, message: T.wsMsg.missing(parent) }
         for (const id of wanted) if (createsLoop(s, id, parent)) return { ok: false, message: T.wsMsg.moveLoop(parent, id) }
+        // a tree never spans documents (CR-02), also when several rows are dragged at once
+        const target = s.index.get(parent)
+        for (const id of wanted) {
+          if ((s.index.get(id)?.document ?? '') !== (target?.document ?? '')) return { ok: false, message: T.wsMsg.parentOtherDocument(parent, target?.document || '—') }
+        }
+      } else if (new Set([...wanted].map((id) => s.index.get(id)?.document ?? '')).size > 1) {
+        // to the top level of one document: rows of different documents cannot go together
+        return { ok: false, message: T.wsMsg.severalDocuments }
       }
+      const docOfMoved = s.index.get([...wanted][0] as string)?.document ?? ''
       // items below another moved item go along with it
       const hasMovedAncestor = (id: string): boolean => {
         const seen = new Set<string>()
@@ -267,11 +283,11 @@ export function createStructureOps(ctx: WorkspaceContext) {
       const numbers = ctx.numbers(s)
       const moving = [...wanted].filter((id) => !hasMovedAncestor(id)).sort((a, b) => compareOutline(numbers.get(a), numbers.get(b)) || (a < b ? -1 : 1))
       const set = new Set(moving)
-      const sibs = siblings(s, parent ?? undefined).filter((x) => !set.has(x.id))
+      const sibs = siblings(s, parent ?? undefined, docOfMoved).filter((x) => !set.has(x.id))
       // dropping before one of the moved items means before the next one that stays
       let target = before ?? null
       if (target && set.has(target)) {
-        const all = siblings(s, parent ?? undefined)
+        const all = siblings(s, parent ?? undefined, docOfMoved)
         const k = all.findIndex((x) => x.id === target)
         target = all.slice(k + 1).find((x) => !set.has(x.id))?.id ?? null
       }
@@ -289,7 +305,7 @@ export function createStructureOps(ctx: WorkspaceContext) {
       const s = ctx.need()
       const self = s.index.get(id)
       if (!self) return { ok: false, message: T.wsMsg.notFound(id) }
-      const sibs = siblings(s, self.parent)
+      const sibs = siblings(s, self.parent, self.document ?? '')
       const i = sibs.findIndex((x) => x.id === id)
       const j = direction === 'up' ? i - 1 : i + 1
       if (i < 0 || j < 0 || j >= sibs.length) return { ok: true } // already first/last

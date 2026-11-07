@@ -6,7 +6,7 @@
 // Layout:  <repo>/requirements/
 //            .reqman/schema.yaml     the project's schema (copied from config/default-schema.yaml)
 //            .gitattributes          keeps LF line endings so diffs are identical on every PC
-//            items/<ID>.md           one file per item
+//            <document>/<ID>.md      one file per item; every folder is a document (S-10); loose <ID>.md = document ''
 import type { Item, ItemIssue } from '../items'
 import type { FieldDef, ItemTypeDef, LinkTypeDef, Schema, SchemaProblem } from '../schema'
 import { createFileRepositoryStore } from './fileStore'
@@ -14,7 +14,7 @@ import { createFileRepositoryStore } from './fileStore'
 export const REQUIREMENTS_FOLDER = 'requirements'
 
 export interface ItemFileInfo {
-  /** Path relative to the requirements folder, with forward slashes, e.g. "items/SYS-K7Q3XM.md". */
+  /** Path relative to the requirements folder, with forward slashes, e.g. "Specification/SYS-K7Q3XM.md". */
   path: string
   mtimeMs: number
   size: number
@@ -63,10 +63,10 @@ export interface RequirementsRepo {
   readItemFile(path: string, opts?: { allKeysAsFields?: boolean }): Promise<{ ok: true; item: Item } | { ok: false; error: string }>
   /** Path of an item's file relative to the requirements folder — where it really is (see OpenOptions.locate). */
   itemPath(id: string, document?: string): string
-  /** Where the item's file should be: items/<ID>.md. */
+  /** Where the item's file should be: <document>/<ID>.md (the default document when none is given; '' = loose). */
   defaultItemPath(id: string, document?: string): string
   /**
-   * Renames a file whose name does not match its ID to items/<ID>.md (Git sees a rename, so history is kept).
+   * Renames a file whose name does not match its ID to <document>/<ID>.md in its own document (Git sees a rename, so history is kept).
    * Refuses if that name is taken. Returns the new path.
    */
   fixFileName(id: string): Promise<string>
@@ -91,7 +91,7 @@ export interface RequirementsRepo {
 export interface OpenOptions {
   /**
    * Where an item's file really is (path relative to the requirements folder), if known — e.g. from the index.
-   * Without it, items/<ID>.md is assumed.
+   * Without it, <default document>/<ID>.md is assumed.
    */
   locate?: (id: string) => string | undefined
 }

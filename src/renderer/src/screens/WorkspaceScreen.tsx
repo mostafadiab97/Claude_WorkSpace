@@ -589,6 +589,7 @@ export function WorkspaceScreen({
           schema={schema}
           file={importing.file}
           newProject={importing.newProject}
+          {...(document !== ALL_DOCUMENTS ? { document } : {})}
           onClose={() => setImporting(null)}
           onDone={(r) => {
             setImporting(null)

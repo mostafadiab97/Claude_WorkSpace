@@ -2,6 +2,7 @@
 // uses. Each service file (itemOps, links, structure, schemaFields, exporting, gitOps, compare) receives this
 // context; workspace.ts puts them together behind the single WorkspaceService facade.
 import type { RepoInfo } from '../../shared/api'
+import type { ItemQuery } from '../../shared/domain'
 import type { GitAdapter } from '../git-adapter'
 import type { IndexCache, SyncStats } from '../index-cache'
 import type { Logger } from '../logger'
@@ -41,6 +42,13 @@ export const syncInfo = (stats: SyncStats): RepoInfo['lastSync'] => ({
 })
 
 /** Reads all pages of a query (the index returns at most 10,000 rows per call). */
+/** "incomplete" needs the required fields of every type (S-05): the index gets them from the schema (query and export, CR-05). */
+export function withRequired<Q extends ItemQuery>(s: Session, q: Q): Q {
+  if (!q.incomplete) return q
+  const required = Object.fromEntries(s.repo.schema.itemTypes.filter((t) => t.required?.length).map((t) => [t.id, t.required as string[]]))
+  return { ...q, required }
+}
+
 export function queryAll(index: IndexCache, q: Parameters<IndexCache['query']>[0]): ReturnType<IndexCache['query']>['items'] {
   const all: ReturnType<IndexCache['query']>['items'] = []
   for (let offset = 0; ; offset += 10_000) {

@@ -28,8 +28,17 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
       incoming: s.index.incomingLinks(id).map((l) => info(l.id, l.type, l.suspect)),
       childCount: s.index.query({ parent: id, limit: 0 }).total,
       ...(ctx.numbers(s).has(id) ? { number: ctx.numbers(s).get(id) as string } : {}),
-      issues: validateItem(r.item, s.repo.schema)
+      issues: [...validateItem(r.item, s.repo.schema), ...otherDocumentParent(s, r.item)]
     }
+  }
+
+  /** A parent in another document (only a hand-moved file or a pull can make one) is shown as a warning (QA-03). */
+  const otherDocumentParent = (s: Session, item: Item): ItemDetails['issues'] => {
+    const parent = item.parent ? s.index.get(item.parent) : undefined
+    const mine = s.index.get(item.id)?.document ?? item.document ?? ''
+    return parent && (parent.document ?? '') !== mine
+      ? [{ itemId: item.id, path: 'parent', message: T.wsMsg.parentOtherDocument(parent.id, parent.document || '—'), severity: 'warning' as const }]
+      : []
   }
 
   return {
@@ -42,7 +51,8 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
       const sibling = after ? s.index.get(after) : undefined
       // the document: of the item it goes next to or under (a tree never spans documents), else the chosen one (S-10)
       const under = sibling ? (sibling.parent ?? undefined) : parent
-      const doc = (sibling ?? (parent ? s.index.get(parent) : undefined))?.document || document || s.repo.defaultDocument
+      const anchor = sibling ?? (parent ? s.index.get(parent) : undefined)
+      const doc = anchor ? (anchor.document ?? '') : (document ?? s.repo.defaultDocument)
       if (sibling) return s.repo.createItem(type, taken, { ...(under ? { parent: under } : {}), order: structure.orderAfter(s, sibling.id), document: doc })
       return s.repo.createItem(type, taken, { ...(parent ? { parent } : {}), order: structure.nextOrder(s, parent, doc), document: doc })
     },

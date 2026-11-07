@@ -54,11 +54,13 @@ export function watchRequirementsFolder(folder: string, onError?: (e: unknown) =
         }
         if (dir === '') {
           // the requirements folder itself: a loose item file, or a document folder added or removed
-          if (file.endsWith('.md')) changed.add(file)
-          else if (file !== '.gitattributes') all = true
+          // README.md is not an item (CR-14); a document folder's own change event is not a new folder (CR-08)
+          if (file.endsWith('.md')) {
+            if (file.toLowerCase() !== 'readme.md') changed.add(file)
+          } else if (file !== '.gitattributes' && !docs.includes(file)) all = true
           return
         }
-        if (!file.endsWith('.md')) return
+        if (!file.endsWith('.md') || file.toLowerCase() === 'readme.md') return
         changed.add(`${dir}/${file}`)
         if (changed.size > MANY) all = true
       })

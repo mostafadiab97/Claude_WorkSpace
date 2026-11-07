@@ -14,7 +14,7 @@ type Step = 'file' | 'columns' | 'check'
  * how many items are new, updated, unchanged or skipped, and every problem by row. Importing writes uncommitted
  * changes (review them in Changes); a new project from a file commits them right away.
  */
-export function ImportDialog(props: { schema: Schema; file: ImportFile | null; newProject: boolean; onClose: () => void; onDone: (r: ImportResult & { ok: true }) => void }) {
+export function ImportDialog(props: { schema: Schema; file: ImportFile | null; newProject: boolean; document?: string; onClose: () => void; onDone: (r: ImportResult & { ok: true }) => void }) {
   const { schema } = props
   const [file, setFile] = useState<ImportFile | null>(props.file)
   const [step, setStep] = useState<Step>('file')
@@ -28,7 +28,9 @@ export function ImportDialog(props: { schema: Schema; file: ImportFile | null; n
   const [error, setError] = useState<string | null>(null)
 
   const sheetInfo = file?.sheets.find((s) => s.name === sheet)
-  const settings: ImportSettings | null = file && sheet ? { token: file.token, sheet, headerRow, defaultType, ...(mapping ? { mapping } : {}) } : null
+  // new items go into the document shown in the window (S-10)
+  const document = props.document
+  const settings: ImportSettings | null = file && sheet ? { token: file.token, sheet, headerRow, defaultType, ...(mapping ? { mapping } : {}), ...(document ? { document } : {}) } : null
   const key = settings ? JSON.stringify(settings) : ''
 
   // the preview follows every choice (from step 2 on)

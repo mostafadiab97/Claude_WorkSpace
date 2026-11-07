@@ -65,7 +65,7 @@ The architecture picture in section 1 shows these parts and how calls travel bet
 
 ## 4. What the data looks like
 
-An item file (`requirements/items/REQ-0033FVK.md`):
+An item file (`requirements/Specification/REQ-0033FVK.md` — `requirements/<document>/<ID>.md`):
 
 ```markdown
 ---

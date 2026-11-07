@@ -107,6 +107,10 @@ export function importSettings(v: unknown): ImportSettings {
     headerRow: num(v.headerRow, 'header row', 0, 1_000_000),
     defaultType: str(v.defaultType, 'type', 100)
   }
+  if (typeof v.document === 'string' && v.document !== '') {
+    if (/[\\/:*?"<>|]/.test(v.document) || v.document.startsWith('.')) return bad('document')
+    r.document = str(v.document, 'document', 80)
+  }
   if (v.mapping !== undefined && v.mapping !== null) {
     const m = strings(v.mapping, 'column mapping', 2000)
     if (!m.every((t) => TARGET.test(t))) return bad('column mapping')
@@ -175,7 +179,7 @@ function labels(v: unknown, what: string, keysAreLanguages = true): Record<strin
   return Object.fromEntries(entries.map(([k, t]) => [keysAreLanguages && !LANG.test(k) ? bad(what) : str(k, what, 200), str(t, what, 500)]))
 }
 
-const TYPE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const TYPE_ID = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/
 const labelMap = (v: unknown, what: string): Record<string, string> | undefined => {
   if (v === undefined || v === null) return undefined
   if (!isObj(v)) return bad(what)

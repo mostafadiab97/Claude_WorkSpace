@@ -55,6 +55,14 @@ export function createSchemaFieldOps(ctx: WorkspaceContext, info: () => RepoInfo
       const s = ctx.need()
       try {
         await s.repo.writeSchemaFields(fields, schemaRevision)
+        // a removed field is no longer required by any type either (CR-18 / QA-06)
+        const kept = new Set(['title', 'text', ...fields.map((f) => f.id)])
+        const types = s.repo.schema.itemTypes
+        if (types.some((t) => t.required?.some((f) => !kept.has(f)))) {
+          const reread = await ctx.openRepo(s.repo.root)
+          const cleaned = reread.schema.itemTypes.map((t) => (t.required ? { ...t, required: t.required.filter((f) => kept.has(f)) } : t))
+          await reread.writeSchemaTypes(cleaned, reread.schema.linkTypes, reread.schemaRevision)
+        }
         log.info(`Schema fields changed: ${fields.map((f) => f.id).join(', ')}`)
         // Re-open with the new schema. The index keeps every header key, so this re-reads no item file (P-05).
         const repo = await ctx.openRepo(s.repo.root)

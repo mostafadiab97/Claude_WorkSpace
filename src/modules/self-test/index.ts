@@ -13,6 +13,7 @@ import { join } from 'node:path'
 import type { MergePlan, ReleaseSelfTestResult, ReleaseSelfTestStep } from '../../shared/api'
 import { readReqif, readXlsx, writeXlsx } from '../import-export'
 import type { WorkspaceService } from '../workspace'
+import { FIRST_DOCUMENT } from '../repository-store'
 
 export interface SelfTestDeps {
   /** A fresh workspace whose index caches and settings live in `userDir` (not the user's own). */
@@ -104,7 +105,7 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
         await git(mine, ['config', k as string, val as string])
       }
       ws = deps.createWorkspace(join(base, 'appdata'))
-      const info = await W().initialize(mine)
+      const info = await W().initialize(mine, FIRST_DOCUMENT) // the layout a new project gets from the window (CR-25)
       expect(info.itemCount === 0, 'The new requirements folder is not empty.')
     })
 
@@ -162,7 +163,7 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
     await step('A colleague changes the requirement and pushes', async () => {
       await git(base, ['clone', '-q', remote, colleague])
       for (const [k, val] of [['user.name', 'Colleague'], ['user.email', 'colleague@example.invalid']]) await git(colleague, ['config', k as string, val as string])
-      const file = join(colleague, 'requirements', 'items', `${id('req')}.md`)
+      const file = join(colleague, 'requirements', FIRST_DOCUMENT, `${id('req')}.md`)
       const text = await readFile(file, 'utf8')
       await writeFile(file, text.replace('Temperature accuracy', 'Temperature accuracy (colleague)'), 'utf8')
       await git(colleague, ['commit', '-q', '-am', 'Colleague edit'])
@@ -263,7 +264,7 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
     })
 
     await step('A file renamed by hand is found and fixed', async () => {
-      const items = join(mine, 'requirements', 'items')
+      const items = join(mine, 'requirements', FIRST_DOCUMENT)
       await rename(join(items, `${id('test')}.md`), join(items, 'RENAMED-BY-HAND.md'))
       await new Promise((r) => setTimeout(r, 300)) // like a user switching back to ReqMan afterwards
       const info = await W().refresh()

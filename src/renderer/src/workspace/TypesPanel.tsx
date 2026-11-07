@@ -11,6 +11,7 @@ const idFrom = (name: string): string =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
+    .replace(/^(?=[0-9])/, 't-') // an id starts with a letter (CR-19)
 
 type ItemDraft = ItemTypeDef & { key: number; isNew: boolean }
 type LinkDraft = LinkTypeDef & { key: number; isNew: boolean }

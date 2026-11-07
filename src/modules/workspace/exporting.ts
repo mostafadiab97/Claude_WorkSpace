@@ -2,7 +2,7 @@
 import { basename } from 'node:path'
 import type { ExportFormat, ExportItemsRequest } from '../../shared/api'
 import { compareToCsv, compareToMarkdown, compareToSheet, itemsToCsv, itemsToMarkdown, itemsToSheet, writeReqif, writeXlsx, type ExportItem } from '../import-export'
-import { queryAll, type WorkspaceContext } from './context'
+import { queryAll, withRequired, type WorkspaceContext } from './context'
 import type { createCompare } from './compare'
 import { depthOf, type StructureOps } from './structure'
 
@@ -13,7 +13,7 @@ export function createExportOps(ctx: WorkspaceContext, structure: StructureOps, 
       const numbers = ctx.numbers(s)
       let rows: ExportItem[]
       if (request.scope === 'filtered' && request.query) {
-        const all = queryAll(s.index, request.query)
+        const all = queryAll(s.index, withRequired(s, request.query))
         // Markdown of a search result: flat list of headings; CSV keeps the real level
         rows = all.map((item) => ({ item, depth: request.format === 'markdown' ? 0 : depthOf(s, item.id), incoming: [] }))
       } else if (request.scope === 'chosen') {

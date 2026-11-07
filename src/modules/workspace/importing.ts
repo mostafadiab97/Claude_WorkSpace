@@ -97,13 +97,17 @@ export function createImportOps(ctx: WorkspaceContext, structure: StructureOps, 
   }
 
   /** New items, and items the file moved to another parent, go after the existing children of that parent. */
-  function placeItems(s: Session, p: ImportPlan): void {
+  function placeItems(s: Session, p: ImportPlan, document?: string): void {
+    // new items go into the chosen document — or, under an existing parent, into that parent's document (CR-03, S-10)
+    const importDoc = document ?? s.repo.defaultDocument
+    const docFor = (parent: string | undefined): string => (parent && s.index.get(parent) ? (s.index.get(parent)?.document ?? importDoc) : importDoc)
+    for (const x of p.items) if (x.action === 'create') x.item.document = docFor(x.item.parent)
     const moving = p.items.filter((x) => x.action !== 'unchanged' && (x.action === 'create' || (x.placed && s.index.get(x.item.id)?.parent !== x.item.parent)))
     const movingIds = new Set(moving.map((x) => x.item.id))
     const groups = new Map<string, typeof moving>()
     for (const x of moving) groups.set(x.item.parent ?? '', [...(groups.get(x.item.parent ?? '') ?? []), x])
     for (const [parent, list] of groups) {
-      const stay = parent && !s.index.get(parent) ? [] : structure.siblings(s, parent || undefined).filter((x) => !movingIds.has(x.id))
+      const stay = parent && !s.index.get(parent) ? [] : structure.siblings(s, parent || undefined, importDoc).filter((x) => !movingIds.has(x.id))
       // byte-wise largest key among the children that stay (order keys compare as plain text, never by language)
       const last = stay.reduce<string | null>((m, x) => (x.order !== undefined && (m === null || x.order > m) ? x.order : m), null)
       const keys = keysBetween(last, null, list.length)
@@ -125,7 +129,7 @@ export function createImportOps(ctx: WorkspaceContext, structure: StructureOps, 
       const s = ctx.need()
       const { plan: p, headers, mapping, revisions } = await plan(s, sheet, settings)
       if (!mapping.includes('title') && !mapping.includes('text')) return { ok: false, message: T.importMsg.noTitleColumn }
-      placeItems(s, p)
+      placeItems(s, p, settings.document)
       const writes = p.items.filter((x) => x.action !== 'unchanged')
       // a new link is confirmed against its target as it will be after the import
       const final = new Map(p.items.map((x) => [x.item.id, x.item]))

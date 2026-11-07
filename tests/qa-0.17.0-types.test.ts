@@ -111,7 +111,7 @@ describe('QA: Types window, core rules', () => {
 
   // The Fields window drops a field that a type still requires: the schema then has a problem in itemTypes and the
   // requirement is silently ignored (the check only looks at problems under "fields").
-  it.fails('DEFECT QA-06: removing a field that an item type requires is refused (or the requirement is removed with it)', async () => {
+  it('DEFECT QA-06: removing a field that an item type requires is refused (or the requirement is removed with it)', async () => {
     const { ws, root } = await setup()
     await requireOn(ws, root, 'risk', ['priority'])
     const info = await ws.refresh(false)
@@ -158,7 +158,7 @@ describe('QA: required fields and the incomplete filter', () => {
   })
 
   // item window and index must agree: the item check trims every kind of white space, SQLite trim() only spaces
-  it.fails('DEFECT QA-07: a text of only a tab or line break is "missing" in the filter as it is in the item check', async () => {
+  it('DEFECT QA-07: a text of only a tab or line break is "missing" in the filter as it is in the item check', async () => {
     const { ws, root } = await setup()
     await requireOn(ws, root, 'risk', ['text'])
     const a = await add(ws, 'tabby', { type: 'risk' })

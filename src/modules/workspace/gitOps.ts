@@ -32,7 +32,7 @@ export interface GitOpsDeps {
 }
 
 // an item file: requirements/<document>/<ID>.md or a loose requirements/<ID>.md — never a hidden folder (S-10)
-export const ID_FROM_PATH = /(?:^|\/)requirements\/(?:(?!\.)[^/]+\/)?([^/]+)\.md$/
+export const ID_FROM_PATH = /(?:^|\/)requirements\/(?:(?!\.)[^/]+\/)?(?!README\.md$)([^/]+)\.md$/i
 
 /** "requirements" for the usual layout; forward slashes, relative to the repository top folder. */
 export const reqPath = (repo: RequirementsRepo): string => relative(repo.root, repo.folder).split('\\').join('/') || '.'

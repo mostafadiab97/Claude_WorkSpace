@@ -25,7 +25,7 @@ interface Session {
 }
 
 // an item file: requirements/<document>/<ID>.md or a loose requirements/<ID>.md — never a hidden folder (S-10)
-const ITEM_FILE = /(?:^|\/)requirements\/(?:(?!\.)[^/]+\/)?([^/]+)\.md$/
+const ITEM_FILE = /(?:^|\/)requirements\/(?:(?!\.)[^/]+\/)?(?!README\.md$)([^/]+)\.md$/i
 const reqPath = (repo: RequirementsRepo): string => relative(repo.root, repo.folder).split('\\').join('/') || '.'
 
 /** A pull or a merge of a remote branch in the reflog: "pull: Fast-forward", "merge origin/main: Merge made by …". */
@@ -275,7 +275,12 @@ async function numbersFromTree(git: GitAdapter, s: Session, ref: string): Promis
   // every document's files (S-10): all .md files under requirements/, outside the hidden project folder
   const prefix = base === '.' ? '' : `${base}/`
   const all = await git.treeBlobs(s.repo.root, ref, base === '.' ? '.' : base)
-  const tree = new Map([...all].filter(([p]) => p.endsWith('.md') && !p.slice(prefix.length).startsWith('.')))
+  const tree = new Map(
+    [...all].filter(([p]) => {
+      const rest = p.slice(prefix.length)
+      return rest.endsWith('.md') && !rest.startsWith('.') && rest.split('/').length <= 2 && rest.toLowerCase() !== 'readme.md'
+    })
+  )
   const blobs = await git.readBlobs(s.repo.root, [...new Set(tree.values())])
   const docOf = new Map<string, string>()
   for (const [p, oid] of tree) docOf.set(oid, documentOfPath(p.slice(prefix.length)))

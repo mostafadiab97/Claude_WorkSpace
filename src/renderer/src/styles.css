@@ -3506,7 +3506,8 @@ code {
 }
 
 /* the folder notice: framed like the information notes, buttons on one row (UX16-06) */
-.folder-notice--ask {
+.folder-notice--ask,
+.document-notice {
   border: var(--rm-shape-border-width) solid var(--rm-color-primary);
   background: var(--rm-color-selection);
 }
@@ -3557,4 +3558,26 @@ html {
   gap: var(--rm-space-sm);
   justify-content: center;
   align-items: center;
+}
+
+/* the documents of the repository (S-10) */
+.document-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rm-space-sm);
+  padding-block: var(--rm-space-xs);
+  padding-inline: var(--rm-space-md);
+}
+.document-bar__label {
+  color: var(--rm-color-text-muted);
+  font-size: var(--rm-font-size-small);
+}
+.document-bar__form {
+  display: flex;
+  gap: var(--rm-space-xs);
+  align-items: center;
+}
+.document-bar .folder-notice {
+  flex-basis: 100%;
 }

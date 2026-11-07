@@ -3,13 +3,13 @@
 //   gitOps (M4) and compare (M5).
 // Every operation that writes files, changes the index or runs Git goes through one queue (review D-03).
 import { createHash } from 'node:crypto'
-import { mkdir } from 'node:fs/promises'
-import { basename, relative, resolve } from 'node:path'
+import { mkdir, readdir, rename, writeFile } from 'node:fs/promises'
+import { basename, join, relative, resolve } from 'node:path'
 import type { FolderCheck, GitResult, ImportSettings, MergeAnswers, MergePlan, ImportSource, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
 import type { GitAdapter } from '../git-adapter'
 import type { IndexCache } from '../index-cache'
 import type { Logger } from '../logger'
-import type { RepositoryStore } from '../repository-store'
+import { isDocumentName, type RepositoryStore } from '../repository-store'
 import { createCompare } from './compare'
 import { queryAll, syncInfo, type Session, type WorkspaceContext } from './context'
 import { createExportOps } from './exporting'
@@ -52,6 +52,8 @@ export function cacheFileName(root: string): string {
 }
 
 /** The rename commit's message — in the team's Git history, so the same in every window language (UX16-03). */
+/** The commit of a document rename — the same in every language, like FOLDER_RENAME_COMMIT (S-10). */
+export const DOCUMENT_RENAME_COMMIT = (from: string, to: string): string => `Rename the document ${from} to ${to} (reqochet)`
 export const FOLDER_RENAME_COMMIT = 'Rename the project folder .reqman to .reqochet (reqochet)'
 
 export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
@@ -174,6 +176,68 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     }
   }
 
+  /** A new, empty document: a folder under requirements/ (S-10). Git keeps it through a .gitkeep file. */
+  const createDocument = async (name: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }> => {
+    const s = need()
+    const n = name.trim()
+    if (!isDocumentName(n)) return { ok: false, message: T.wsMsg.documentName }
+    if (documentFolders(s.repo.folder).some((d) => d.toLowerCase() === n.toLowerCase())) return { ok: false, message: T.wsMsg.documentExists(n) }
+    await mkdir(join(s.repo.folder, n), { recursive: true })
+    await writeFile(join(s.repo.folder, n, '.gitkeep'), '', { flag: 'w' })
+    log.info(`Document created: ${n}`)
+    s.repo = await ctx.openRepo(s.repo.root)
+    rewatch(s)
+    return { ok: true, info: info() }
+  }
+
+  /**
+   * Renames a document folder — or moves the loose item files (document '') into a new document — in one Git commit,
+   * so Git keeps every item's history (S-10: a project made before 0.17 names its "items" folder this way).
+   */
+  const renameDocument = async (from: string, to: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }> => {
+    const s = need()
+    const n = to.trim()
+    if (!isDocumentName(n)) return { ok: false, message: T.wsMsg.documentName }
+    const docs = documentFolders(s.repo.folder)
+    if (from !== '' && !docs.includes(from)) return { ok: false, message: T.wsMsg.missing(from) }
+    if (docs.some((d) => d !== from && d.toLowerCase() === n.toLowerCase()) && from !== '') return { ok: false, message: T.wsMsg.documentExists(n) }
+    const root = s.repo.root
+    const base = relative(root, s.repo.folder).split('\\').join('/') || '.'
+    const p = (x: string): string => (base === '.' ? x : `${base}/${x}`)
+    // the files that move: the whole folder, or each loose .md file
+    const loose = from === '' ? (await readdir(s.repo.folder)).filter((f) => f.endsWith('.md') && f.toLowerCase() !== 'readme.md') : []
+    const moves = from === '' ? loose.map((f) => ({ a: f, b: `${n}/${f}` })) : [{ a: from, b: n }]
+    try {
+      const tracked = s.isGit ? (await Promise.all(moves.map((m) => git.trackedFiles(root, p(m.a))))).flat() : []
+      if (tracked.length > 0 && (await git.status(root, from === '' ? base : p(from))).changes.some((c) => moves.some((m) => c.path === p(m.a) || c.path.startsWith(`${p(m.a)}/`)))) {
+        return { ok: false, message: T.wsMsg.documentDirty }
+      }
+      s.watch?.close() // Windows refuses to rename a watched folder
+      s.watch = null
+      if (from === '') await mkdir(join(s.repo.folder, n), { recursive: true })
+      for (const m of moves) await rename(join(s.repo.folder, m.a), join(s.repo.folder, m.b))
+      if (tracked.length > 0) {
+        const paths = moves.flatMap((m) => [p(m.a), p(m.b)])
+        try {
+          await git.commitFiles(root, paths, DOCUMENT_RENAME_COMMIT(from || 'loose files', n))
+        } catch (e) {
+          await git.unstage(root, paths)
+          for (const m of [...moves].reverse()) await rename(join(s.repo.folder, m.b), join(s.repo.folder, m.a))
+          rewatch(s)
+          return { ok: false, message: T.wsMsg.folderRenameRefused(explainGitError(e)) }
+        }
+      }
+      log.info(`Document ${from || '(loose files)'} → ${n}${tracked.length > 0 ? ' (committed)' : ''}`)
+      s.repo = await ctx.openRepo(root)
+      rewatch(s)
+      s.lastSync = syncInfo(await s.index.sync(s.repo))
+      gitOps.invalidate()
+      return { ok: true, info: info() }
+    } catch (e) {
+      rewatch(s)
+      return { ok: false, message: e instanceof Error ? e.message : String(e) }
+    }
+  }
 
   const links = createLinkOps(ctx)
   const structure = createStructureOps(ctx)
@@ -345,6 +409,8 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     checkFields: fields.checkFields,
     saveSchemaFields: q(fields.saveSchemaFields),
     renameProjectFolder: q(renameProjectFolder),
+    createDocument: q(createDocument),
+    renameDocument: q(renameDocument),
     addLink: q(links.addLink),
     removeLink: q(links.removeLink),
     confirmLinks: q(links.confirmLinks),

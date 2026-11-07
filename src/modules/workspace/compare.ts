@@ -24,7 +24,8 @@ interface Session {
   isGit: boolean
 }
 
-const ITEM_FILE = /\/items\/([^/]+)\.md$/
+// an item file: requirements/<document>/<ID>.md or a loose requirements/<ID>.md — never a hidden folder (S-10)
+const ITEM_FILE = /(?:^|\/)requirements\/(?:(?!\.)[^/]+\/)?([^/]+)\.md$/
 const reqPath = (repo: RequirementsRepo): string => relative(repo.root, repo.folder).split('\\').join('/') || '.'
 
 /** A pull or a merge of a remote branch in the reflog: "pull: Fast-forward", "merge origin/main: Merge made by …". */

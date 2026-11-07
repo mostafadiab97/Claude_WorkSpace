@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CompareEntry, ImportFile, ImportResult, RepoInfo, RevertPart } from '../../../shared/api'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
@@ -14,6 +14,7 @@ import { ImportDialog } from '../workspace/ImportDialog'
 import { RowMenu } from '../workspace/RowMenu'
 import { ItemTable, shownColumnKeys, withWidth, type TreeControls } from '../workspace/ItemTable'
 import { ProblemList, problemsOf } from '../workspace/screen/Problems'
+import { ALL_DOCUMENTS, DocumentBar } from '../workspace/screen/DocumentBar'
 import { Toolbar } from '../workspace/screen/Toolbar'
 import { useFilters } from '../workspace/screen/useFilters'
 import { middleEllipsis, showDragTip } from '../lib/statusbar'
@@ -51,7 +52,32 @@ export function WorkspaceScreen({
 }) {
   const schema = info.schema
   const filters = useFilters(schema)
-  const { query, filtered } = filters
+  const { query: filterQuery, filtered } = filters
+  // the document shown (S-10): one document at a time or all; remembered per repository on this PC
+  const [document, setDocumentState] = useState<string>(() => {
+    const names = info.documents.map((d) => d.name)
+    const saved = ((): string | null => {
+      try {
+        return localStorage.getItem(`rq.document.${info.root}`)
+      } catch {
+        return null
+      }
+    })()
+    if (saved !== null && (saved === ALL_DOCUMENTS ? names.length > 1 : names.includes(saved))) return saved
+    return names.length === 1 ? (names[0] as string) : ALL_DOCUMENTS
+  })
+  const setDocument = (d: string): void => {
+    setDocumentState(d)
+    try {
+      localStorage.setItem(`rq.document.${info.root}`, d)
+    } catch {
+      // a private window: the choice lasts for this session only
+    }
+  }
+  // a document that disappeared (renamed, pulled away) falls back to the first one or all
+  const names = info.documents.map((d) => d.name)
+  if (document !== ALL_DOCUMENTS && !names.includes(document)) setDocumentState(names.length === 1 ? (names[0] as string) : ALL_DOCUMENTS)
+  const query = useMemo(() => (document === ALL_DOCUMENTS ? filterQuery : { ...filterQuery, document }), [filterQuery, document])
   const [columnPrefs, setColumnPrefs] = useColumnPrefs(info.root)
   const [editFields, setEditFields] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
@@ -225,7 +251,7 @@ export function WorkspaceScreen({
 
   const newItem = async (type: string, parent?: string, after?: string): Promise<void> => {
     if (!type) return
-    const item = await window.reqochet.newItem(type, parent, after)
+    const item = await window.reqochet.newItem(type, parent, after, document === ALL_DOCUMENTS ? undefined : document)
     request({ kind: 'draft', item })
   }
 
@@ -331,6 +357,7 @@ export function WorkspaceScreen({
         )}
         {/* The table stays mounted while the Changes view is open, so its opened levels and scroll position survive. */}
         <div className={showChanges && git.state?.available ? 'is-hidden' : 'workspace__items'}>
+          <DocumentBar info={info} document={document} onDocument={setDocument} onInfo={onInfo} guard={guarded} />
           <Toolbar
             searchRef={searchRef}
             newRef={newRef}

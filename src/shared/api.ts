@@ -526,6 +526,10 @@ export interface ReqochetApi {
   getAncestors(id: string): Promise<string[]>
   /** Renames the project folder .reqman → .reqochet and commits that rename (0.16). */
   renameProjectFolder(): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** A new empty document (folder under requirements/), S-10. */
+  createDocument(name: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** Renames a document folder, or moves the loose files ('') into a new document, in one commit (S-10). */
+  renameDocument(from: string, to: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   /** Values a field already has in this repository, most used first (suggestions, UX-27). */
   getFieldValues(field: string): Promise<string[]>
   /** Replaces the project's field definitions in schema.yaml and re-opens the repository. */
@@ -687,6 +691,8 @@ export const Channels = {
   reparentItems: 'ws:reparentItems',
   getAncestors: 'ws:ancestors',
   renameProjectFolder: 'ws:renameProjectFolder',
+  createDocument: 'ws:createDocument',
+  renameDocument: 'ws:renameDocument',
   getFieldValues: 'ws:fieldValues',
   saveSchemaFields: 'ws:saveSchemaFields',
   addLink: 'ws:addLink',

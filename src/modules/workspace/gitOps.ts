@@ -31,7 +31,8 @@ export interface GitOpsDeps {
   tidyBeforePush?(s: GitSession, upstream: string): Promise<number>
 }
 
-export const ID_FROM_PATH = /\/items\/([^/]+)\.md$/
+// an item file: requirements/<document>/<ID>.md or a loose requirements/<ID>.md — never a hidden folder (S-10)
+export const ID_FROM_PATH = /(?:^|\/)requirements\/(?:(?!\.)[^/]+\/)?([^/]+)\.md$/
 
 /** "requirements" for the usual layout; forward slashes, relative to the repository top folder. */
 export const reqPath = (repo: RequirementsRepo): string => relative(repo.root, repo.folder).split('\\').join('/') || '.'

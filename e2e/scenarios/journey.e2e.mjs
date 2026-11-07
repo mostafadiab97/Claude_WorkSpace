@@ -68,7 +68,7 @@ await scenario('E2E journey', async (ctx) => {
   await win.getByPlaceholder('Short name of the requirement').fill('Verify accuracy at 20 °C')
   await save()
 
-  const itemsDir = join(repo, 'requirements', 'items')
+  const itemsDir = join(repo, 'requirements', 'Specification')
   const files = readdirSync(itemsDir).filter((f) => f.endsWith('.md'))
   check(files.length === 4, `4 item files written (${files.length})`)
   const fileOf = (title) => {
@@ -311,7 +311,7 @@ await scenario('E2E journey', async (ctx) => {
 
   // someone edits a file outside ReqMan (e.g. git pull); a window refocus picks it up
   const tcFile = fileOfType(itemsDir, 'test-case')
-  const tcPath = join(repo, 'requirements', 'items', tcFile)
+  const tcPath = join(repo, 'requirements', 'Specification', tcFile)
   writeFileSync(tcPath, readFileSync(tcPath, 'utf8').replace('Verify accuracy at 20 °C', 'Verify accuracy at 25 °C'))
   await win.evaluate(() => window.dispatchEvent(new Event('focus')))
   await win.getByRole('button', { name: 'Expand all' }).click()
@@ -355,8 +355,8 @@ await scenario('E2E journey', async (ctx) => {
   gitIn(pcB, 'clone', '-q', remote, '.')
   gitIn(pcB, 'config', 'user.name', 'Bob')
   gitIn(pcB, 'config', 'user.email', 'bob@example.com')
-  const tcName = fileOfType(join(pcB, 'requirements', 'items'), 'test-case')
-  const tcB = join(pcB, 'requirements', 'items', tcName)
+  const tcName = fileOfType(join(pcB, 'requirements', 'Specification'), 'test-case')
+  const tcB = join(pcB, 'requirements', 'Specification', tcName)
   writeFileSync(tcB, readFileSync(tcB, 'utf8').replace(/^title: .*$/m, 'title: Verify accuracy at 22 °C'))
   gitIn(pcB, 'commit', '-q', '-am', 'Bob: test at 22 °C')
   gitIn(pcB, 'push', '-q')
@@ -384,8 +384,8 @@ await scenario('E2E journey', async (ctx) => {
 
   // conflict: Bob changes the stakeholder need's title and pushes; Alice changes it too and commits
   gitIn(pcB, 'pull', '-q')
-  const stkName = fileOfType(join(pcB, 'requirements', 'items'), 'stakeholder-need')
-  const stkB = join(pcB, 'requirements', 'items', stkName)
+  const stkName = fileOfType(join(pcB, 'requirements', 'Specification'), 'stakeholder-need')
+  const stkB = join(pcB, 'requirements', 'Specification', stkName)
   writeFileSync(stkB, readFileSync(stkB, 'utf8').replace(/^title: .*$/m, 'title: Comfortable temperature (Bob)'))
   gitIn(pcB, 'commit', '-q', '-am', 'Bob renames the need')
   gitIn(pcB, 'push', '-q')
@@ -464,8 +464,8 @@ await scenario('E2E journey', async (ctx) => {
 
   console.log('M5 / O-06 — the Changes view: what the last pull brought in (offers to pull first), any two versions')
   gitIn(pcB, 'pull', '-q')
-  const sysName = readdirSync(join(pcB, 'requirements', 'items')).find((f) => readFileSync(join(pcB, 'requirements', 'items', f), 'utf8').includes('title: Temperature accuracy'))
-  const sysB = join(pcB, 'requirements', 'items', sysName)
+  const sysName = readdirSync(join(pcB, 'requirements', 'Specification')).find((f) => readFileSync(join(pcB, 'requirements', 'Specification', f), 'utf8').includes('title: Temperature accuracy'))
+  const sysB = join(pcB, 'requirements', 'Specification', sysName)
   writeFileSync(sysB, readFileSync(sysB, 'utf8').replace('status: Draft', 'status: Review').replace('±0.3 °C', '±0.2 °C'))
   gitIn(pcB, 'commit', '-q', '-am', 'Bob tightens accuracy to 0.2')
   gitIn(pcB, 'push', '-q')

@@ -77,6 +77,10 @@ export interface WorkspaceService {
   saveSchemaFields(fields: FieldDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   /** Renames requirements/.reqman to .reqochet and commits the rename (0.16). */
   renameProjectFolder(): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** A new empty document (folder under requirements/), S-10. */
+  createDocument(name: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** Renames a document folder, or moves the loose files ('') into a new one — one commit, history kept (S-10). */
+  renameDocument(from: string, to: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   // Git (M4) — see gitOps.ts for the rules
   gitState(): Promise<GitState>
   commit(message: string): Promise<GitResult>

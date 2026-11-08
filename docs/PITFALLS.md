@@ -209,3 +209,14 @@ one-time: the next update is small again. Not a defect to fix; tell the owner if
 `marked` throws "Maximum call stack size exceeded" on a 2,000-level quote and takes seconds on some long texts
 (100,000 `_`). Since the main column formats every visible row, one such item would break or freeze the table:
 `renderItemText` catches and falls back to plain text, and the table formats at most 3,000 characters (`textUpTo`).
+
+## Measured row heights and the Show text switch (0.19.1)
+`@tanstack/react-virtual` keeps measured sizes by item key (the row index by default) across option changes. Heights
+measured with the text shown stayed after Show text off, so one-line rows sat in tall slots once levels opened (the
+owner, 0.19.0 test 2). Each mode now has its own keys (`getItemKey`) and a switch calls `virtualizer.measure()`. A
+4-item e2e did **not** show it: reproduce virtual-list bugs with a large generated project (`rows-0.19`: 1,500 items).
+
+## A rare test failure under full-suite load (open, 0.19.x)
+`tests/qa-0.17.0-types.test.ts` → "incomplete combined with document, type, …" failed in 2 of about 11 full `npm run check`
+runs (never alone, fails in ~85 ms, so not a timeout). Since 0.19.1 every check prints the query and the index content;
+when it fails again (here or in CI), read that message before changing code. If CI fails on it, re-run the job once.

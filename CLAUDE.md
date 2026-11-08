@@ -26,7 +26,7 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
 | --- | --- |
 | Decisions (source of truth): product questions + answers, technical design, per-milestone decisions, the owner's small preferences | `docs/design/decisions.md` |
 | Product definition, FR/NFR, scope | `docs/design/requirements.md` |
-| What has been built, where each requirement stands, release plan | `docs/design/roadmap.md` |
+| What has been built, where each requirement stands, release plan, **final-touches reminder list** (read before planning the last polish) | `docs/design/roadmap.md` |
 | The 5-tool domain study (frozen) | `docs/design/analysis.md` |
 | **Planning discussion in progress** (open points P-xx with answers) and other analyses | `docs/reviews/` (index: its README); finished reviews in `docs/reviews/done/` |
 | Module map, rules, data format, UI structure | `docs/ARCHITECTURE.md` |

@@ -3,6 +3,15 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.19.1 — 8 Nov 2026 — fix: empty space between rows after Show text off
+- **Owner (8 Nov 2026), 0.19.0:** all 5 steps passed (self-test 24/24, 187.6 s while another 20-minute build ran).
+  Test 2: with Show text off, opening levels left empty rows. Test 5: the privacy diagram passes but can have a better
+  layout — revisit all diagrams at the final touches (reminder list added to `docs/design/roadmap.md`).
+- **Fix:** the table remembered each row's measured height by its position; heights measured with the text shown stayed
+  after Show text off, so one-line rows sat in tall slots once levels opened. Each mode now has its own measurements,
+  and a switch forgets them all. Reproduced first by a new e2e scenario (`rows-0.19`: 1,500 generated items; gaps of up
+  to 284 px before, none after).
+
 ## 0.19.0 — 8 Nov 2026 — reading the table, old versions, compare layout
 - **Owner (8 Nov 2026), 0.18.0:** all 5 steps passed (self-test 24/24, 95.5 s). The update downloaded the full
   installer once (0.17.2 was installed by hand, so the small download could not be used — see PITFALLS). Points:

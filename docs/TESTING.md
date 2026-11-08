@@ -67,7 +67,15 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.19.0 (main column, old version in the table, compare layout)
+## Manual test checklist — v0.19.1 (no empty rows after Show text off)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.19.1**, then **⚙ → Self-tests → Run release self-test**. | **All 24 steps passed.** |
+| 2 | In the sandbox with **Show text** on: **⊞ Expand all** and scroll down a few screens. Then switch **Show text** off, **⊟ Collapse all**, **⊞ Expand all** and scroll again. | With Show text off every row is one line high, with no empty space between rows anywhere. |
+| 3 | Switch **Show text** on again and scroll. | Titles with their text again; no rows drawn on top of each other. |
+
+## Previous checklist — v0.19.0 (main column, old version in the table, compare layout)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
@@ -76,16 +84,6 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 | 3 | **Versions → History**: on an older commit choose **Open read-only**. Use the tree, a filter and the search; open an item; then **Back to now**. | The whole table shows that version under a coloured bar *Viewing … (read-only)*; no Git buttons, no New item; the item opens greyed out; **Back to now** brings today's items back. |
 | 4 | **Versions → History → Compare with now** on an older commit (or **Changes → Compare two versions**). Click an item in the left list; scroll the right side; try **Export CSV**. | Changed items on the left, every change one after another on the right using the full width; a click jumps to that change and the left list follows your scrolling; the exports sit at the top next to **Close changes**. |
 | 5 | **⚙ → Privacy and access** in Light, then Dark (**⚙ → Theme**). | The diagram matches the theme, no boxes overlap, the arrows are short. |
-
-## Previous checklist — v0.18.0 (baselines and the history list)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.18.0** (or install it from the Releases page), then **⚙ → Self-tests → Run release self-test**. | **All 24 steps passed** (new: "Baseline: make one, read the old version, push it"). |
-| 2 | In the sandbox: **Versions → New baseline…**, name `SRS-0.1`, a note, **Make baseline**; then **Push**. | The baseline is listed with *not pushed yet* and Push is highlighted; after the push the label is gone (on GitHub it shows under Tags as `baseline/SRS-0.1`). |
-| 3 | **Versions → History** tab: search a word of an older commit message; on that commit try **Open read-only**, then **Compare with now**. | The old version shows the items as they were (nothing can be changed); Compare opens Changes with that version against now. |
-| 4 | Copy one requirement file by hand into another document folder; switch to that document; **Problems → Give the copy a new ID**. Then make a test document, add an item and **Changes → Discard all**. | The copy shows at the top of its document and gets a new ID; after Discard all the test document is gone from the list. |
-| 5 | Look at the top bars, the privacy page (**⚙ → Privacy and access**, click the diagram) and the icons. | Slimmer bars; the diagram (GitHub on top, Git on the right) opens full size; the top-bar logo has no grey outline, the desktop/taskbar icon has it. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

@@ -162,11 +162,21 @@ export function ItemTable(props: {
     count,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => (full ? FULL_ROW_GUESS : ROW_HEIGHT),
+    // heights measured with the text shown must not carry over to one line per item (owner, 0.19.0 test 2: empty
+    // space between rows after Show text off and opening levels): each mode has its own keys, so its own sizes
+    getItemKey: (i) => (full ? `t${i}` : i),
     // the sticky header sits above the first row inside the same scroll area
     scrollMargin: HEADER_HEIGHT,
     overscan: 12
   })
   const visible = virtualizer.getVirtualItems()
+  // a switch of Show text forgets every measured height (both modes start from their first guess again)
+  const lastFull = useRef(full)
+  useEffect(() => {
+    if (lastFull.current === full) return
+    lastFull.current = full
+    virtualizer.measure()
+  }, [full, virtualizer])
   const first = visible[0]?.index ?? 0
   const last = visible.at(-1)?.index ?? 0
   const ensureFlat = flat.ensure

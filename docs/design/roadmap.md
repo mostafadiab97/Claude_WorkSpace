@@ -156,6 +156,7 @@ X-02).
 | **0.17.2** | The owner's points on 0.17.0 | Document groups in All documents, column header drag, Columns menu fix, orange Clear filters, Settings → Privacy and access, guide pictures + updated diagrams, theme-following taskbar icon, token savings (`docs/STATUS.md`) |
 | **0.18.0** | 1a structure part 2: baselines + history | Baselines (tags `baseline/<name>`, pushed with the next Push), the branch history (search, open read-only, compare with now, baseline or branch at a commit), copied files get a new ID, Discard removes emptied folders, update check falls back to the API, incomplete mark, slimmer bars, privacy diagram (Archify) |
 | **0.19.0** | The owner's points on 0.18.0 (D-19a/b/c) | Main column with title + whole text and growing rows (switch Show text), an old version shown in the table with Back to now, every compare screen with the changed items on the left and all changes in one list on the right, dark and tighter privacy diagram |
+| **0.19.1** | Fix from the owner's 0.19.0 test | No empty space between rows after Show text off |
 | **Release plan (C, 2 Nov 2026)** | — | 0.14 rename + health → 0.15 1a structure → 0.16 1b traceability views (pilot can start) → 0.17 daily comfort → 0.18 rich text → 0.19 documents out → 0.20 review basics → 0.21 pull requests in the app → 0.22 verification → 0.23 sharing + help → 0.24 AI → later commercial; a stabilisation patch after every theme; details in `docs/reviews/2026-11-01-planning-discussion.md` |
 | *Proposal A (R)* | *New name + traceability* | *Proposed 31 Oct 2026; order to be settled in the planning discussion (the owner, 31 Oct):* the rename (`docs/reviews/done/2026-10-31-rename-impact.md`) once the name is chosen; traceability matrix and coverage; item and link types in the GUI; saved views; bulk edit |
 | *Proposal B (R)* | *Documents out* | Word and PDF export, HTML publishing, Markdown preview |
@@ -165,3 +166,12 @@ X-02).
 
 Settled decisions (the owner) on the review (27–28 Oct 2026): UI texts in one central file (S-06, yes); one requirement
 set per repository (S-07, discarded); private update channel and code signing later (S-08, X-02).
+
+## Final touches — to do before the first public release (reminder list)
+
+Things the owner asked to revisit when the product gets its last polish. **Whoever plans the final-polish version reads
+this list and raises every point with the owner** (the `owner-decision-walkthrough` skill).
+
+| Since | What | Notes |
+| --- | --- | --- |
+| 8 Nov 2026 (0.19.0 test 5) | **Revisit every diagram** (Archify: `docs/diagrams/archify/*.json` — privacy, architecture, onboarding…) for a better layout | The owner: the privacy diagram passes but "can have a better layout". Also: Arabic labels for the diagram shown in the app (UX19-18), readable at card size (UX19-19), legend words for non-technical readers (UX19-20). |

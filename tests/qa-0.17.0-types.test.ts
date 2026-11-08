@@ -196,15 +196,19 @@ describe('QA: required fields and the incomplete filter', () => {
     const b1 = await add(ws, 'alpha b no prio', { document: 'B', fields: { status: 'Draft' } })
     await add(ws, 'alpha prio', { document: 'A', fields: { priority: 'High' } })
     const q = (x: object): string[] => ws.query({ incomplete: true, ...x }).items.map((i) => i.id).sort()
-    expect(q({})).toEqual([a1, b1].sort())
-    expect(q({ document: 'A' })).toEqual([a1])
-    expect(q({ document: 'B' })).toEqual([b1])
-    expect(q({ document: 'A', types: ['risk'] })).toEqual([])
-    expect(q({ types: ['system-requirement'], text: 'alpha b' })).toEqual([b1])
-    expect(q({ fields: { status: ['Draft'] }, document: 'B' })).toEqual([b1])
-    expect(q({ fields: { status: ['Approved'] } })).toEqual([])
-    expect(q({ links: 'none', document: 'A' })).toEqual([a1])
-    expect(q({ parent: null, document: 'A' })).toEqual([a1])
+    // fails about 1 run in 5 under full-suite load only (0.19.0/0.19.1): say what the index holds when it does
+    const why = (x: object): string =>
+      `query ${JSON.stringify(x)}; ids a1=${a1} b1=${b1}; all: ${JSON.stringify(ws.query({ limit: 50 }).items.map((i) => ({ id: i.id, doc: i.path.split('/')[0], type: i.type, f: i.fields })))}`
+    const expectQ = (x: object, want: string[]): void => expect(q(x), why(x)).toEqual(want)
+    expectQ({}, [a1, b1].sort())
+    expectQ({ document: 'A' }, [a1])
+    expectQ({ document: 'B' }, [b1])
+    expectQ({ document: 'A', types: ['risk'] }, [])
+    expectQ({ types: ['system-requirement'], text: 'alpha b' }, [b1])
+    expectQ({ fields: { status: ['Draft'] }, document: 'B' }, [b1])
+    expectQ({ fields: { status: ['Approved'] } }, [])
+    expectQ({ links: 'none', document: 'A' }, [a1])
+    expectQ({ parent: null, document: 'A' }, [a1])
     expect(ws.query({ incomplete: true, document: 'A', sort: { by: 'number' }, limit: 1 }).total).toBe(1)
   })
 

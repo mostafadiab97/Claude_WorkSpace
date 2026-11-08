@@ -1,7 +1,17 @@
-# Past manual checklists (v0.0.3 – v0.17.2)
+# Past manual checklists (v0.0.3 – v0.18.0)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.18.0 (baselines and the history list)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.18.0** (or install it from the Releases page), then **⚙ → Self-tests → Run release self-test**. | **All 24 steps passed** (new: "Baseline: make one, read the old version, push it"). |
+| 2 | In the sandbox: **Versions → New baseline…**, name `SRS-0.1`, a note, **Make baseline**; then **Push**. | The baseline is listed with *not pushed yet* and Push is highlighted; after the push the label is gone (on GitHub it shows under Tags as `baseline/SRS-0.1`). |
+| 3 | **Versions → History** tab: search a word of an older commit message; on that commit try **Open read-only**, then **Compare with now**. | The old version shows the items as they were (nothing can be changed); Compare opens Changes with that version against now. |
+| 4 | Copy one requirement file by hand into another document folder; switch to that document; **Problems → Give the copy a new ID**. Then make a test document, add an item and **Changes → Discard all**. | The copy shows at the top of its document and gets a new ID; after Discard all the test document is gone from the list. |
+| 5 | Look at the top bars, the privacy page (**⚙ → Privacy and access**, click the diagram) and the icons. | Slimmer bars; the diagram (GitHub on top, Git on the right) opens full size; the top-bar logo has no grey outline, the desktop/taskbar icon has it. |
 
 ## v0.17.2 (document groups, column drag, privacy page, guide pictures)
 

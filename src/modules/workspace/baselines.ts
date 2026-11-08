@@ -2,14 +2,11 @@
 // A baseline is an annotated Git tag refs/tags/baseline/<name> with a note; it goes to the remote with the next
 // Push. The history list shows the current branch's commits; an old commit can be looked at read-only, compared with
 // now, made a baseline or used as the start of a new branch — never "stood on" (Git's detached HEAD is never used).
-import type { Baseline, CreateBaselineRequest, GitResult, HistoryPage, Snapshot, SnapshotItem } from '../../shared/api'
-import { documentOfPath } from '../../shared/domain'
+import type { Baseline, CreateBaselineRequest, GitResult, HistoryPage } from '../../shared/api'
 import type { GitAdapter } from '../git-adapter'
-import { parseItemFile } from '../items'
 import type { Logger } from '../logger'
 import type { createGitOps, GitSession } from './gitOps'
 import { explainGitError, reqPath } from './gitOps'
-import { outlineNumbers } from './structure'
 import { T } from '../../shared/text'
 
 const HISTORY_PAGE = 100
@@ -66,51 +63,6 @@ export function createBaselineOps(deps: { git: GitAdapter; log: Pick<Logger, 'in
     },
 
     /** Every item of an older version, read from Git without touching the working folder. */
-    async snapshot(s: GitSession, ref: string): Promise<Snapshot> {
-      const root = s.repo.root
-      const base = reqPath(s.repo)
-      const prefix = base === '.' ? '' : `${base}/`
-      const all = await git.treeBlobs(root, ref, base === '.' ? '.' : base)
-      const files = [...all].filter(([p]) => {
-        const rest = p.slice(prefix.length)
-        return rest.endsWith('.md') && !rest.startsWith('.') && rest.split('/').length <= 2 && rest.toLowerCase() !== 'readme.md'
-      })
-      const blobs = await git.readBlobs(root, [...new Set(files.map(([, oid]) => oid))])
-      const fieldIds = new Set(s.repo.schema.fields.map((f) => f.id))
-      const items: SnapshotItem[] = []
-      for (const [path, oid] of files) {
-        const text = blobs.get(oid)
-        if (!text || text.length > 5_000_000) continue // an item is text; a huge file is not parsed (SEC-18-09)
-        const r = parseItemFile(text, fieldIds)
-        if (!r.ok) continue
-        const it = r.item
-        items.push({
-          id: it.id,
-          title: it.title,
-          type: it.type,
-          document: documentOfPath(path.slice(prefix.length)),
-          ...(it.parent ? { parent: it.parent } : {}),
-          text: it.text,
-          fields: it.fields,
-          links: it.links.map((l) => ({ type: l.type, target: l.target })),
-          ...(it.order !== undefined ? { order: it.order } : {})
-        } as SnapshotItem & { order?: string })
-      }
-      // outline numbers as in that version (siblings by order key, then ID — like the index)
-      const cmp = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0)
-      const ordered = [...items].sort((a, b) => cmp((a as { order?: string }).order ?? '￿', (b as { order?: string }).order ?? '￿') || cmp(a.id, b.id))
-      // keyed by document + ID: an ID in two documents (a copied file) keeps a number of its own (QA-11)
-      const key = (doc: string, id: string): string => `${doc}\u0000${id}`
-      const numbers = outlineNumbers(ordered.map((i) => ({ id: key(i.document, i.id), document: i.document, ...(i.parent ? { parent: key(i.document, i.parent) } : {}) })))
-      for (const i of items) {
-        const n = numbers.get(key(i.document, i.id))
-        if (n) i.number = n
-        delete (i as { order?: string }).order
-      }
-      const info = await git.commitInfo(root, ref)
-      return { ref, label: info ? `${ref.slice(0, 7)} ${info.message}` : ref.slice(0, 7), items }
-    },
-
     async branchAt(s: GitSession, name: string, commit: string): Promise<GitResult> {
       const blocked = await precheck(s)
       if (blocked) return blocked

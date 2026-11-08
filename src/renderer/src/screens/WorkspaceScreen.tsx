@@ -6,7 +6,6 @@ import { ItemEditor, type EditorTarget } from '../workspace/ItemEditor'
 import { FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
 import { TypesDialog } from '../workspace/TypesPanel'
 import { HistoryDialog } from '../workspace/HistoryDialog'
-import { SnapshotDialog } from '../workspace/SnapshotDialog'
 import { ChangesSide, ChangesView } from '../workspace/ChangesView'
 import { GitBar } from '../workspace/GitPanels'
 import { MergeDialog } from '../workspace/MergeDialog'
@@ -143,7 +142,10 @@ export function WorkspaceScreen({
   }, [onInfo])
   // History and baselines (1a part 2): the dialog, and an older version opened read-only
   const [historyOpen, setHistoryOpen] = useState(false)
-  const [snapshotRef, setSnapshotRef] = useState<string | null>(null)
+  // D-19b: an old version shown in the table (info.version), and the message while it opens
+  const viewing = info.version
+  const [versionBusy, setVersionBusy] = useState(false)
+  const [versionError, setVersionError] = useState<string | null>(null)
   const git = useGit({ dataVersion, dirty, afterChange })
   const changes = useChanges(showChanges, dataVersion)
 
@@ -300,11 +302,62 @@ export function WorkspaceScreen({
     editorSave.current = save
   }, [])
   const problems = problemsOf(info)
+  const openVersion = async (ref: string): Promise<void> => {
+    setHistoryOpen(false)
+    setVersionBusy(true)
+    setVersionError(null)
+    try {
+      const r = await window.reqochet.openVersion(ref)
+      if (!r.ok) {
+        setVersionError(r.message)
+        return
+      }
+      setShowChanges(false)
+      setTarget(null)
+      setChosen(new Set())
+      onInfo(r.info)
+      setDataVersion((v) => v + 1)
+    } catch (e) {
+      setVersionError(errorMessage(e))
+    } finally {
+      setVersionBusy(false)
+    }
+  }
+  const backToNow = async (): Promise<void> => {
+    setTarget(null)
+    setChosen(new Set())
+    onInfo(await window.reqochet.closeVersion())
+    setDataVersion((v) => v + 1)
+  }
 
   return (
     <div className="workspace" style={editorWidth.style} ref={rootRef}>
       <section className="workspace__main" aria-label={T.workspace.items}>
+        {viewing && (
+          // D-19b: the whole table shows an old version; this bar says which and leads back
+          <div className="version-bar" role="status">
+            <strong className="version-bar__label" dir="auto">
+              {T.version.banner(viewing.label)}
+            </strong>
+            <span className="version-bar__tag">{T.version.readOnlyTag}</span>
+            <span className="muted-inline">{T.version.hint}</span>
+            <span className="toolbar__spacer" />
+            <button type="button" className="btn btn--small btn--primary" onClick={() => void backToNow()}>
+              {T.version.back}
+            </button>
+          </div>
+        )}
+        {versionBusy && <p className="notice table-notice" role="status">{T.version.opening}</p>}
+        {versionError && (
+          <p className="notice notice--error table-notice" role="alert">
+            {versionError}{' '}
+            <button type="button" className="link-btn" onClick={() => setVersionError(null)}>
+              {T.common.dismiss}
+            </button>
+          </p>
+        )}
         <GitBar
+          hidden={viewing !== undefined}
           slot={gitSlot}
           state={git.state}
           busy={git.busy}
@@ -367,7 +420,7 @@ export function WorkspaceScreen({
         )}
         {/* The table stays mounted while the Changes view is open, so its opened levels and scroll position survive. */}
         <div className={showChanges && git.state?.available ? 'is-hidden' : 'workspace__items'}>
-          <DocumentBar info={info} document={document} onDocument={setDocument} onInfo={onInfo} guard={guarded} />
+          <DocumentBar info={info} document={document} onDocument={setDocument} onInfo={onInfo} guard={guarded} readOnly={viewing !== undefined} />
           <Toolbar
             searchRef={searchRef}
             newRef={newRef}
@@ -393,6 +446,7 @@ export function WorkspaceScreen({
             newWhere={newWhere}
             onNewWhere={setNewWhere}
             hasSelection={target?.kind === 'item'}
+            readOnly={viewing !== undefined}
           />
 
           {/* 0.16: a project still under ReqMan's folder name — offer the rename as one commit (owner, 31 Oct / 4 Nov) */}
@@ -436,7 +490,7 @@ export function WorkspaceScreen({
                 return next
               })
             }
-            onRowMenu={(id, x, y) => setRowMenu({ id, x, y })}
+            onRowMenu={(id, x, y) => !viewing && setRowMenu({ id, x, y })}
             mode={filtered ? 'flat' : 'tree'}
             query={query}
             dataVersion={dataVersion}
@@ -444,7 +498,7 @@ export function WorkspaceScreen({
             onSelect={select}
             onSort={filters.onSort}
             onTotal={setTotal}
-            onMove={(ids, parent, before) => void onMove(ids, parent, before)}
+            onMove={(ids, parent, before) => !viewing && void onMove(ids, parent, before)}
             controlsRef={tree}
             revealNonce={revealNonce}
             emptyText={
@@ -571,6 +625,7 @@ export function WorkspaceScreen({
             onNewChild={(type, parent) => void newItem(type, parent)}
             onOpen={select}
             onClose={() => request(null)}
+            readOnly={viewing !== undefined}
           />
         </div>
       )}
@@ -629,7 +684,7 @@ export function WorkspaceScreen({
       {historyOpen && (
         <HistoryDialog
           onClose={() => setHistoryOpen(false)}
-          onOpenSnapshot={(ref) => setSnapshotRef(ref)}
+          onOpenSnapshot={(ref) => void openVersion(ref)}
           onCompare={(ref) => {
             // an older version against the working folder, in the Changes view (S-09)
             setHistoryOpen(false)
@@ -641,7 +696,6 @@ export function WorkspaceScreen({
           onResult={(r) => git.onPanelResult(r)}
         />
       )}
-      {snapshotRef && <SnapshotDialog gitRef={snapshotRef} schema={schema} onClose={() => setSnapshotRef(null)} />}
       {editTypes && (
         <TypesDialog
           info={info}

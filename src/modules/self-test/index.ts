@@ -324,15 +324,19 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       expect((await W().gitState()).lastCommitMessage?.includes('.reqochet'), 'The rename was not committed.')
     })
 
-    await step('Baseline: make one, read the old version, push it', async () => {
+    await step('Baseline: make one, show the old version, push it', async () => {
       // 0.18.0 (S-06, S-09): a baseline is the tag baseline/<name>, sent with the next Push
       const r = await W().createBaseline({ name: 'practice-1.0', note: 'self-test', uncommitted: 'commit', commitMessage: 'Practice: before the baseline' })
       expect(r.ok, r.message)
       const list = await W().listBaselines()
       const b = list.find((x) => x.name === 'practice-1.0')
       expect(b?.pending === true, 'The new baseline is not listed as waiting for the push.')
-      const snap = await W().getSnapshot(b?.commit ?? '')
-      expect(snap.items.length > 0, 'The baseline version could not be read.')
+      // 0.19.0 (D-19b): the old version opens in the table; nothing can be saved meanwhile
+      const v = await W().openVersion(b?.commit ?? '')
+      expect(v.ok && v.info.version !== undefined && W().query({ limit: 1 }).total > 0, 'The baseline version could not be read.')
+      const refused = await W().commit('must be refused')
+      expect(!refused.ok, 'A commit was not refused while an old version was shown.')
+      expect((await W().closeVersion()).version === undefined, 'Back to now did not end the old version.')
       const p = await W().push()
       expect(p.ok, p.message)
       expect((await git(remote, ['tag', '-l'])).includes('baseline/practice-1.0'), 'The fake GitHub did not receive the baseline.')

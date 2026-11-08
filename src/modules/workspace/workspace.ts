@@ -12,6 +12,7 @@ import type { IndexCache } from '../index-cache'
 import type { Logger } from '../logger'
 import { isDocumentName, type RepositoryStore } from '../repository-store'
 import { createBaselineOps } from './baselines'
+import { closeVersion, openVersion, type VersionView } from './versionView'
 import { createCompare } from './compare'
 import { queryAll, syncInfo, withRequired, type Session, type WorkspaceContext } from './context'
 import { createExportOps } from './exporting'
@@ -67,6 +68,8 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   const recent = createRecentList(deps.userDir, (m) => log.warn(m))
   const queue = createSerialQueue()
   let session: Session | null = null
+  /** An old version shown in the table (D-19b): read calls go to it, writes and Git actions are refused. */
+  let viewing: VersionView | null = null
 
   const need = (): Session => {
     if (!session) throw new Error(T.wsMsg.noRepo)
@@ -74,6 +77,9 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   }
 
   let outline: { index: IndexCache; revision: number; map: Map<string, string> } | null = null
+
+  /** The session the read calls answer from: the old version while one is shown, else the open repository. */
+  const reading = (): Session => viewing?.session ?? need()
 
   const ctx: WorkspaceContext = {
     store,
@@ -127,13 +133,18 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
 
   // the documents (folders under requirements/) with their item counts; '' = loose files, listed only when there are any
   const documentsOf = (s: Session): { name: string; itemCount: number }[] => {
-    const names = documentFolders(s.repo.folder).filter((d) => d !== s.repo.metaDir && d !== '.reqman' && d !== '.reqochet')
     const counts = s.index.documentCounts()
+    // an old version has no folders on disk: its documents are the ones its items are in
+    const names =
+      s === viewing?.session
+        ? Object.keys(counts).filter((d) => d !== '').sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+        : documentFolders(s.repo.folder).filter((d) => d !== s.repo.metaDir && d !== '.reqman' && d !== '.reqochet')
     const out = names.map((name) => ({ name, itemCount: counts[name] ?? 0 }))
     const loose = counts[''] ?? 0
     return loose > 0 ? [...out, { name: '', itemCount: loose }] : out
   }
-  const info = (s: Session = need()): RepoInfo => ({
+  const info = (s: Session = reading()): RepoInfo => ({
+    ...(viewing && s === viewing.session ? { version: { ref: viewing.ref, label: viewing.label } } : {}),
     root: s.repo.root,
     name: basename(s.repo.root),
     isGitRepository: s.isGit,
@@ -324,6 +335,11 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   const revert = createRevertOps(ctx, git, items.saveItem)
   const importing = createImportOps(ctx, structure, { userDir: deps.userDir, cacheName: cacheFileName, info: () => info() })
   const exporting = createExportOps(ctx, structure, compare)
+  // the same read services on whatever the table shows: the old version while one is open (D-19b)
+  const viewCtx: WorkspaceContext = { ...ctx, need: reading }
+  const viewStructure = createStructureOps(viewCtx)
+  const viewItems = createItemOps(viewCtx, createLinkOps(viewCtx), viewStructure)
+  const viewExporting = createExportOps(viewCtx, viewStructure, compare)
   const gitOps = createGitOps({
     git,
     log,
@@ -371,7 +387,14 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   const merging = createMerging({ git, log, resync: () => ctx.resyncAll(need()), ops: gitOps })
   const baselineOps = createBaselineOps({ git, log, gitOps })
 
+  const endVersion = async (): Promise<void> => {
+    const v = viewing
+    viewing = null
+    if (v) await closeVersion(v).catch((e: unknown) => log.warn(`Could not remove the old version's index: ${String(e)}`))
+  }
+
   function closeSession(): void {
+    void endVersion()
     session?.watch?.close()
     session?.index.close()
     session = null
@@ -424,7 +447,11 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     return info(s)
   }
 
-  const q = <A extends unknown[], R>(fn: (...a: A) => Promise<R>) => (...a: A): Promise<R> => queue.run(() => fn(...a))
+  /** Queued, and allowed while an old version is shown (reads, opening, refresh). */
+  const qr = <A extends unknown[], R>(fn: (...a: A) => Promise<R>) => (...a: A): Promise<R> => queue.run(() => fn(...a))
+  /** Queued writes and Git actions: refused while an old version is shown (D-19b — nothing can change there). */
+  const q = <A extends unknown[], R>(fn: (...a: A) => Promise<R>) => (...a: A): Promise<R> =>
+    queue.run(() => (viewing ? Promise.resolve({ ok: false, message: T.version.readOnly } as R) : fn(...a)))
 
   return {
     async checkFolder(path): Promise<FolderCheck> {
@@ -434,7 +461,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     },
 
     /** "New project from a file" (M7): a new Git repository with a requirements folder in an empty folder. */
-    createProject: q(async (root: string, firstDocument?: string) => {
+    createProject: qr(async (root: string, firstDocument?: string) => {
       await mkdir(root, { recursive: true })
       await git.init(root)
       return startSession(root, true, async () => {
@@ -443,7 +470,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       })
     }),
 
-    initialize: q(async (root: string, firstDocument?: string) => {
+    initialize: qr(async (root: string, firstDocument?: string) => {
       const isGit = (await git.findRepositoryRoot(root)) !== null
       return startSession(root, isGit, async () => {
         await store.initialize(root, firstDocument)
@@ -451,21 +478,21 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       })
     }),
 
-    open: q(async (root: string) => startSession(root, (await git.findRepositoryRoot(root)) !== null)),
+    open: qr(async (root: string) => startSession(root, (await git.findRepositoryRoot(root)) !== null)),
 
     close() {
       if (session) log.info(`Closed ${session.repo.root}`)
       closeSession()
     },
 
-    refresh: q((focus?: boolean) => refresh(focus === true)),
+    refresh: qr((focus?: boolean) => refresh(focus === true)),
     repoInfo: () => info(),
     isOpen: () => session !== null,
     recent: recent.read,
     forgetRecent: (root) => recent.forget(root),
 
     query(asked) {
-      const s = need()
+      const s = reading()
       // "incomplete" needs the required fields of every type (S-05): the index gets them from the schema here
       const query = withRequired(s, asked)
       const numbers = ctx.numbers(s)
@@ -477,14 +504,14 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       all.sort((a, b) => compareOutline(a.number, b.number) * (query.sort?.descending ? -1 : 1) || a.id.localeCompare(b.id))
       return { total: all.length, items: all.slice(offset, offset + limit) }
     },
-    getItem: items.getItem,
+    getItem: viewItems.getItem,
     newItem: items.newItem,
     saveItem: q(items.saveItem),
     deleteItem: q(items.deleteItem),
     fixFileName: q(items.fixFileName),
     renewCopyId: q(items.renewCopyId),
-    ancestors: structure.ancestors,
-    fieldValues: (field) => need().index.fieldValues(field, 200),
+    ancestors: viewStructure.ancestors,
+    fieldValues: (field) => reading().index.fieldValues(field, 200),
     reparentItem: q(structure.reparentItem),
     reparentItems: q(structure.reparentItems),
     moveItem: q(structure.moveItem),
@@ -501,7 +528,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     decideLinks: q(links.decideLinks),
     revertChange: q(revert.revertChange),
 
-    gitState: q(() => gitOps.state(need())),
+    gitState: qr(() => gitOps.state(need())),
     commit: q((message: string) => gitOps.commit(need(), message)),
     pull: q(() => paused((s) => merging.pull(s))),
     pullFrom: q((source: string) => paused((s) => merging.pullFrom(s, source))),
@@ -511,7 +538,21 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     listBaselines: () => baselineOps.list(need()),
     createBaseline: q((req: CreateBaselineRequest) => baselineOps.create(need(), req)),
     getHistory: (req: { search?: string; skip?: number }) => baselineOps.history(need(), req),
-    getSnapshot: (ref: string) => baselineOps.snapshot(need(), ref),
+    openVersion: qr(async (ref: string) => {
+      const s = need()
+      await endVersion()
+      try {
+        viewing = await openVersion({ git, s, ref, openIndex: deps.openIndex, indexFile: (key) => join(deps.userDir, 'cache', cacheFileName(key)) })
+      } catch (e) {
+        return { ok: false as const, message: explainGitError(e) }
+      }
+      log.info(`Showing the old version ${viewing.label} (${viewing.session.index.count()} items, ${viewing.session.lastSync.durationMs} ms)`)
+      return { ok: true as const, info: info() }
+    }),
+    closeVersion: qr(async () => {
+      await endVersion()
+      return info()
+    }),
     createBranchAt: q((name: string, commit: string) => baselineOps.branchAt(need(), name, commit)),
     switchBranch: q((name: string, changes: 'take' | 'discard') => paused((s) => merging.switchBranch(s, name, changes))),
     branchRange: (name: string) => merging.branchRange(need(), name),
@@ -542,7 +583,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
 
     compareOptions: () => compare.options(need()),
     compareVersions: (from, to) => compare.compare(need(), from, to),
-    exportItems: exporting.exportItems,
+    exportItems: viewExporting.exportItems,
     exportCompare: exporting.exportCompare
   }
 }

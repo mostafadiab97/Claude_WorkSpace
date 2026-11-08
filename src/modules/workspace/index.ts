@@ -7,7 +7,6 @@ import type {
   Baseline,
   CreateBaselineRequest,
   HistoryPage,
-  Snapshot,
   FieldCheck,
   CompareOptions,
   CompareResult,
@@ -106,7 +105,8 @@ export interface WorkspaceService {
   listBaselines(): Promise<Baseline[]>
   createBaseline(req: CreateBaselineRequest): Promise<GitResult & { baseline?: Baseline; needs?: 'uncommitted-decision' }>
   getHistory(req: { search?: string; skip?: number }): Promise<HistoryPage>
-  getSnapshot(ref: string): Promise<Snapshot>
+  openVersion(ref: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  closeVersion(): Promise<RepoInfo>
   createBranchAt(name: string, commit: string): Promise<GitResult>
   switchBranch(name: string, changes: 'take' | 'discard'): Promise<GitResult>
   branchRange(name: string): Promise<{ from: string; to: string } | null>

@@ -997,6 +997,16 @@ const raw: Texts = {
     keepEditing: 'متابعة التعديل'
   },
 
+  version: {
+    readOnly: 'نسخة قديمة معروضة: لا يمكن تغيير أي شيء. اختر «العودة إلى الآن» أولًا.',
+    notInVersion: 'هذا الملف غير موجود في تلك النسخة.',
+    tooLarge: 'حجم الملف أكبر من 5 ميغابايت: لم تتم قراءته.',
+    banner: (label: string) => `عرض ${label}`,
+    readOnlyTag: 'للقراءة فقط',
+    back: 'العودة إلى الآن',
+    opening: 'جارٍ فتح النسخة القديمة…',
+    hint: 'كل عنصر كما كان في تلك النسخة. لم يتغير مجلد العمل.'
+  },
   baselines: {
     button: 'النسخ',
     buttonTooltip: 'خطوط الأساس وسجلّ هذا الفرع (تبويب السجلّ في المحرّر يعرض عنصرًا واحدًا)',
@@ -1043,12 +1053,6 @@ const raw: Texts = {
     refused: 'الاسم مأخوذ على GitHub',
     refusedTooltip: 'لدى GitHub خط أساس بهذا الاسم من شخص آخر — يبقى هذا على هذا الحاسوب. أنشئه من جديد باسم آخر.',
     searchButton: 'بحث',
-    snapshotTitle: (label: string) => `للقراءة فقط: ${label}`,
-    snapshotHint: 'كما كان في تلك النسخة. لا يمكن تغيير شيء هنا.',
-    snapshotSearch: 'ابحث بالمعرّف أو العنوان',
-    snapshotCount: (count: number) => items(count),
-    snapshotPick: 'اختر عنصرًا لتراه كما كان.',
-    loading: 'جارٍ قراءة تلك النسخة…'
   },
 
   gitMsg: {

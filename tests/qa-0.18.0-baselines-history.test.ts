@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest'
 import { createSystemGitAdapter } from '../src/modules/git-adapter'
 import { createSqliteIndexCache } from '../src/modules/index-cache'
 import { createFileRepositoryStore } from '../src/modules/repository-store'
-import { createWorkspace, type WorkspaceService } from '../src/modules/workspace'
+import { cacheFileName, createWorkspace, type WorkspaceService } from '../src/modules/workspace'
 
 const quiet = { info: () => {}, warn: () => {}, error: () => {} }
 type Ctx = { ws: WorkspaceService; root: string; remote: string; sh: (...a: string[]) => string }
@@ -21,7 +21,7 @@ async function setup(opts: { git?: boolean; remote?: boolean; name?: string } = 
   const ws = createWorkspace({
     store: createFileRepositoryStore(join(__dirname, '..', 'config', 'default-schema.yaml')),
     git: createSystemGitAdapter(),
-    openIndex: () => createSqliteIndexCache(join(userDir, 'index.sqlite')),
+    openIndex: (r: string) => createSqliteIndexCache(join(userDir, 'cache', cacheFileName(r))),
     userDir,
     log: quiet,
     watchFiles: false
@@ -135,7 +135,7 @@ describe('QA 0.18.0 baselines', () => {
     execFileSync('git', ['config', 'user.name', 'T'], { cwd: root })
     execFileSync('git', ['config', 'user.email', 't@example.invalid'], { cwd: root })
     const userDir = await mkdtemp(join(tmpdir(), 'rq-qa18-user-'))
-    const ws = createWorkspace({ store: createFileRepositoryStore(join(__dirname, '..', 'config', 'default-schema.yaml')), git: createSystemGitAdapter(), openIndex: () => createSqliteIndexCache(join(userDir, 'i.sqlite')), userDir, log: quiet, watchFiles: false } as Parameters<typeof createWorkspace>[0])
+    const ws = createWorkspace({ store: createFileRepositoryStore(join(__dirname, '..', 'config', 'default-schema.yaml')), git: createSystemGitAdapter(), openIndex: (r: string) => createSqliteIndexCache(join(userDir, 'cache', cacheFileName(r))), userDir, log: quiet, watchFiles: false } as Parameters<typeof createWorkspace>[0])
     await ws.initialize(root, 'System')
     const r = await ws.createBaseline({ name: 'X', note: '', uncommitted: 'without' })
     expect(r.ok).toBe(false)
@@ -197,13 +197,18 @@ describe('QA 0.18.0 history and snapshots', () => {
     sh('commit', '-qm', 'before')
     const before = sh('rev-parse', 'HEAD').trim()
     const userDir = await mkdtemp(join(tmpdir(), 'rq-qa18-user-'))
-    const ws = createWorkspace({ store: createFileRepositoryStore(join(__dirname, '..', 'config', 'default-schema.yaml')), git: createSystemGitAdapter(), openIndex: () => createSqliteIndexCache(join(userDir, 'i.sqlite')), userDir, log: quiet, watchFiles: false } as Parameters<typeof createWorkspace>[0])
+    const ws = createWorkspace({ store: createFileRepositoryStore(join(__dirname, '..', 'config', 'default-schema.yaml')), git: createSystemGitAdapter(), openIndex: (r: string) => createSqliteIndexCache(join(userDir, 'cache', cacheFileName(r))), userDir, log: quiet, watchFiles: false } as Parameters<typeof createWorkspace>[0])
     await ws.initialize(root, 'System')
     await add(ws, 'a')
     expect((await ws.commit('later')).ok).toBe(true)
-    expect((await ws.getSnapshot(before)).items).toEqual([])
-    const bogus = await ws.getSnapshot('deadbeefdeadbeef').catch((e: unknown) => e)
-    expect(bogus).not.toBeInstanceOf(Error) // a missing commit should give an empty snapshot, not an exception
+    // restated by the builder (0.19.0, D-19b): the old version opens in the table
+    const v = await ws.openVersion(before)
+    expect(v.ok).toBe(true)
+    expect(ws.query({ limit: 5 }).total).toBe(0)
+    await ws.closeVersion()
+    const bogus = await ws.openVersion('deadbeefdeadbeefdeadbeefdeadbeefdeadbeef')
+    expect(bogus.ok).toBe(false) // a missing commit gives a message, not an exception
+    expect(ws.query({ limit: 5 }).total).toBe(1)
   })
 
   it('QA-10 snapshot after an item moved to another document and after a parent was deleted', async () => {
@@ -219,13 +224,15 @@ describe('QA 0.18.0 history and snapshots', () => {
     // remove the parent file outright: the kid points to a missing parent
     sh('rm', '-q', `requirements/System/${top}.md`)
     sh('commit', '-qm', 'parent gone')
-    const s1 = await ws.getSnapshot(c1)
-    expect(s1.items.map((i) => i.id).sort()).toEqual([top, kid].sort())
-    expect(s1.items.find((i) => i.id === kid)?.number).toBe('1.1')
-    const s3 = await ws.getSnapshot(sh('rev-parse', 'HEAD').trim())
-    expect(s3.items.map((i) => i.id)).toEqual([kid])
+    expect((await ws.openVersion(c1)).ok).toBe(true)
+    expect(ws.query({ limit: 10 }).items.map((i) => i.id).sort()).toEqual([top, kid].sort())
+    expect(ws.query({ limit: 10 }).items.find((i) => i.id === kid)?.number).toBe('1.1')
+    expect((await ws.openVersion(sh('rev-parse', 'HEAD').trim())).ok).toBe(true)
+    const s3 = ws.query({ limit: 10 }).items
+    expect(s3.map((i) => i.id)).toEqual([kid])
     // decision: like the live table, an item whose parent is missing gets no outline number (it is listed under Problems)
-    expect(s3.items[0]?.number).toBeUndefined()
+    expect(s3[0]?.number).toBeUndefined()
+    await ws.closeVersion()
   })
 
   it('QA-11 snapshot of a commit that holds the same ID twice (file copied into another document) lists it once or numbers it right', async () => {
@@ -236,12 +243,12 @@ describe('QA 0.18.0 history and snapshots', () => {
     await copyFile(join(root, 'requirements', 'System', `${b}.md`), join(root, 'requirements', 'Software', `${b}.md`))
     sh('add', '-A')
     sh('commit', '-qm', 'dup')
-    const snap = await ws.getSnapshot(sh('rev-parse', 'HEAD').trim())
-    const bs = snap.items.filter((i) => i.id === b)
-    // the two copies are in different documents; each must have its own outline number "1" / "2" in its document
-    const nums = bs.map((i) => `${i.document}:${i.number}`).sort()
-    expect(nums).toEqual(['Software:1', 'System:2'])
-    expect(snap.items.find((i) => i.id === a)?.number).toBe('1')
+    expect((await ws.openVersion(sh('rev-parse', 'HEAD').trim())).ok).toBe(true)
+    const items = ws.query({ limit: 10 }).items
+    // restated (0.19.0): the old version's index works like the live one — each copy in its own document (0.18.0)
+    expect(items.filter((i) => i.id === b).map((i) => i.path.split('/')[0]).sort()).toEqual(['Software', 'System'])
+    expect(items.find((i) => i.id === a)?.number).toBe('1')
+    await ws.closeVersion()
   })
 
   it('QA-12 branch at a commit: existing name, name equal to a tag, uppercase hash, short hash', async () => {

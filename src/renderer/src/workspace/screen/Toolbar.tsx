@@ -28,6 +28,8 @@ export function Toolbar({ searchRef, newRef, ...props }: {
   onNewItem: (type: string) => void
   /** Where a new item goes (the owner, 5 Nov 2026). */
   newWhere: 'after' | 'inside' | 'end'
+  /** An old version is shown (D-19b): no new items, no import. */
+  readOnly?: boolean
   onNewWhere: (w: 'after' | 'inside' | 'end') => void
   hasSelection: boolean
 }) {
@@ -93,7 +95,7 @@ export function Toolbar({ searchRef, newRef, ...props }: {
         </button>
       )}
       <ColumnsMenu schema={schema} prefs={props.prefs} onChange={props.onPrefs} onEditFields={props.onEditFields} onEditTypes={props.onEditTypes} />
-      {importOn && (
+      {importOn && !props.readOnly && (
         <button type="button" className="btn" onClick={props.onImport} title={T.importDialog.buttonTooltip}>
           {T.importDialog.button}
         </button>
@@ -104,6 +106,8 @@ export function Toolbar({ searchRef, newRef, ...props }: {
         </button>
       )}
       <span className="toolbar__spacer" />
+      {!props.readOnly && (
+        <>
       <select
         className="select-btn select-btn--fit"
         value={props.hasSelection ? props.newWhere : 'end'}
@@ -124,6 +128,8 @@ export function Toolbar({ searchRef, newRef, ...props }: {
           </option>
         ))}
       </select>
+        </>
+      )}
     </div>
   )
 }

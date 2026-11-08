@@ -11,7 +11,7 @@ export const ALL_DOCUMENTS = '\u0000all'
  * time or all of them, "New document…" and "Rename…". A project made before 0.17 has one folder called "items";
  * the bar offers to give it a real name (one commit, history kept). Loose item files are offered a document too.
  */
-export function DocumentBar(props: { info: RepoInfo; document: string; onDocument: (d: string) => void; onInfo: (i: RepoInfo) => void; guard: (then: () => void) => void }) {
+export function DocumentBar(props: { info: RepoInfo; document: string; onDocument: (d: string) => void; onInfo: (i: RepoInfo) => void; guard: (then: () => void) => void; readOnly?: boolean }) {
   const { info, document, onDocument } = props
   const [naming, setNaming] = useState<null | { kind: 'new' | 'rename'; from: string }>(null)
   const [name, setName] = useState('')
@@ -90,7 +90,7 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
             {T.common.cancel}
           </button>
         </form>
-      ) : (
+      ) : props.readOnly ? null : (
         <>
           <button type="button" className="link-btn" onClick={() => start('new', '', '')}>
             {T.documents.newDocument}
@@ -107,7 +107,7 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
           {error}
         </span>
       )}
-      {!naming && !later && (legacy || loose) && (
+      {!naming && !later && !props.readOnly && (legacy || loose) && (
         <div className="notice table-notice folder-notice document-notice" role="status">
           <span className="folder-notice__text">{legacy ? T.documents.legacy : T.documents.looseAsk(loose?.itemCount ?? 0)}</span>
           <span className="actions">

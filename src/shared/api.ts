@@ -1,5 +1,5 @@
 // The ONE contract between the UI (renderer) and the core (main process).
-import type { FieldDef, FieldValue, Item, ItemDiff, ItemIssue, ItemQuery, ItemTypeDef, LinkTypeDef, QueryResult, Schema, SchemaProblem } from './domain'
+import type { FieldDef, Item, ItemDiff, ItemIssue, ItemQuery, ItemTypeDef, LinkTypeDef, QueryResult, Schema, SchemaProblem } from './domain'
 export type * from './domain'
 
 // The UI can do exactly what is listed here and nothing else. Adding a capability = a method in ReqochetApi,
@@ -74,6 +74,8 @@ export interface FolderCheck {
 }
 
 export interface RepoInfo {
+  /** Set while an old version is shown in the table (D-19b): every item here is from that commit, read-only. */
+  version?: { ref: string; label: string }
   root: string
   /** Folder name, shown in the title bar. */
   name: string
@@ -149,24 +151,6 @@ export interface CreateBaselineRequest {
   /** With uncommitted changes and no `commit`: commit them first (with this message), or make the baseline without them. */
   uncommitted?: 'commit' | 'without'
   commitMessage?: string
-}
-
-/** The items of an older version, to look at only (S-09: "open read-only"). */
-export interface Snapshot {
-  ref: string
-  label: string
-  items: SnapshotItem[]
-}
-export interface SnapshotItem {
-  id: string
-  title: string
-  type: string
-  document: string
-  number?: string
-  parent?: string
-  text: string
-  fields: Record<string, FieldValue>
-  links: { type: string; target: string }[]
 }
 
 export interface GitState {
@@ -628,8 +612,13 @@ export interface ReqochetApi {
   createBaseline(req: CreateBaselineRequest): Promise<GitResult & { baseline?: Baseline; needs?: 'uncommitted-decision' }>
   /** The current branch's commits, newest first, 100 at a time (S-09). */
   getHistory(req: { search?: string; skip?: number }): Promise<HistoryPage>
-  /** The items of an older version, to look at only. */
-  getSnapshot(ref: string): Promise<Snapshot>
+  /**
+   * Shows an old version in the table (D-19b): every read call (items, tree, search, export) answers from that commit
+   * until `closeVersion`; writes and Git actions are refused meanwhile. `info.version` says which version is shown.
+   */
+  openVersion(ref: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** Back to now: the table shows the working folder again. */
+  closeVersion(): Promise<RepoInfo>
   /** A new branch starting at an older commit (the current branch stays). */
   createBranchAt(name: string, commit: string): Promise<GitResult>
   /**
@@ -783,7 +772,8 @@ export const Channels = {
   listBaselines: 'git:listBaselines',
   createBaseline: 'git:createBaseline',
   getHistory: 'git:getHistory',
-  getSnapshot: 'git:getSnapshot',
+  openVersion: 'git:openVersion',
+  closeVersion: 'git:closeVersion',
   createBranchAt: 'git:createBranchAt',
   switchBranch: 'git:switchBranch',
   branchRange: 'git:branchRange',

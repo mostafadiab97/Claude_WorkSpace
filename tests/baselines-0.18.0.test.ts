@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest'
 import { createSystemGitAdapter } from '../src/modules/git-adapter'
 import { createSqliteIndexCache } from '../src/modules/index-cache'
 import { createFileRepositoryStore } from '../src/modules/repository-store'
-import { createWorkspace, type WorkspaceService } from '../src/modules/workspace'
+import { cacheFileName, createWorkspace, type WorkspaceService } from '../src/modules/workspace'
 
 const quiet = { info: () => {}, warn: () => {}, error: () => {} }
 async function setup(): Promise<{ ws: WorkspaceService; root: string; remote: string; sh: (...a: string[]) => string; first: string }> {
@@ -21,7 +21,7 @@ async function setup(): Promise<{ ws: WorkspaceService; root: string; remote: st
   const ws = createWorkspace({
     store: createFileRepositoryStore(join(__dirname, '..', 'config', 'default-schema.yaml')),
     git: createSystemGitAdapter(),
-    openIndex: () => createSqliteIndexCache(join(userDir, 'index.sqlite')),
+    openIndex: (r: string) => createSqliteIndexCache(join(userDir, 'cache', cacheFileName(r))),
     userDir,
     log: quiet,
     watchFiles: false
@@ -94,9 +94,14 @@ describe('0.18.0 history list', () => {
     const oldHash = page.commits[1]?.hash as string
     expect((await ws.getHistory({ search: oldHash.slice(0, 8) })).commits.map((c) => c.hash)).toEqual([oldHash])
     // read-only: the old title, the working folder untouched
-    const snap = await ws.getSnapshot(oldHash)
-    expect(snap.items.find((i) => i.id === first)?.title).toBe('first version')
-    expect(snap.items.find((i) => i.id === first)?.number).toBe('1')
+    // D-19b: the old version in the table — reads answer from it, writes are refused, Back to now returns
+    const v = await ws.openVersion(oldHash)
+    expect(v.ok && v.info.version?.ref).toBe(oldHash)
+    expect(ws.query({ limit: 10 }).items.find((i) => i.id === first)).toMatchObject({ title: 'first version', number: '1' })
+    expect((await ws.getItem(first))?.item.title).toBe('first version')
+    const refused = await ws.saveItem({ ...(d?.item as NonNullable<typeof d>['item']), title: 'x' }, null)
+    expect(refused.ok).toBe(false)
+    expect((await ws.closeVersion()).version).toBeUndefined()
     expect((await ws.getItem(first))?.item.title).toBe('second version')
     expect(sh('rev-parse', '--abbrev-ref', 'HEAD').trim()).toBe('main')
     // a baseline and a branch at the old commit

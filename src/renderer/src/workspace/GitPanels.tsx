@@ -21,6 +21,8 @@ export interface GitNotice {
  * Only the requirements folder is ever committed.
  */
 export function GitBar(props: {
+  /** Not drawn while an old version is shown (D-19b): no Git action can run then. */
+  hidden?: boolean
   /** The top bar's slot (0.13.0): the Git controls live there, so the workspace has one bar less. */
   slot?: HTMLElement | null
   state: GitState | null
@@ -86,7 +88,7 @@ export function GitBar(props: {
       document.removeEventListener('pointerdown', onDown)
     }
   }, [asking, pushOffer, onPushOffer])
-  if (!state) return null
+  if (!state || props.hidden) return null
   if (!state.available) {
     return place(
       <div className="gitbar gitbar--off" role="region" aria-label={T.git.region}>

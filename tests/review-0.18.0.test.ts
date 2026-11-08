@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest'
 import { createSystemGitAdapter } from '../src/modules/git-adapter'
 import { createSqliteIndexCache } from '../src/modules/index-cache'
 import { createFileRepositoryStore } from '../src/modules/repository-store'
-import { createWorkspace, type WorkspaceService } from '../src/modules/workspace'
+import { cacheFileName, createWorkspace, type WorkspaceService } from '../src/modules/workspace'
 
 const quiet = { info: () => {}, warn: () => {}, error: () => {} }
 async function setup(): Promise<{ ws: WorkspaceService; root: string; remote: string; base: string; sh: (...a: string[]) => string }> {
@@ -25,7 +25,7 @@ async function setup(): Promise<{ ws: WorkspaceService; root: string; remote: st
   const ws = createWorkspace({
     store: createFileRepositoryStore(join(__dirname, '..', 'config', 'default-schema.yaml')),
     git: createSystemGitAdapter(),
-    openIndex: () => createSqliteIndexCache(join(userDir, 'index.sqlite')),
+    openIndex: (r: string) => createSqliteIndexCache(join(userDir, 'cache', cacheFileName(r))),
     userDir,
     log: quiet,
     watchFiles: false

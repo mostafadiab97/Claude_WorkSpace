@@ -996,6 +996,16 @@ const en = {
 
   /** Messages the core sends after Git actions (shown in the Git bar and the Changes panel). */
   /** Baselines and the history list (1a part 2 — S-06, S-08, S-09). */
+  version: {
+    readOnly: 'An old version is shown: nothing can be changed. Choose Back to now first.',
+    notInVersion: 'This file is not in that version.',
+    tooLarge: 'The file is larger than 5 MB: not read.',
+    banner: (label: string) => `Viewing ${label}`,
+    readOnlyTag: 'read-only',
+    back: 'Back to now',
+    opening: 'Opening the old version…',
+    hint: 'Every item as it was in that version. Your working folder has not changed.'
+  },
   baselines: {
     button: 'Versions',
     buttonTooltip: 'Baselines and the history of this branch (the editor\'s History tab shows one item)',
@@ -1042,12 +1052,6 @@ const en = {
     refused: 'name taken on GitHub',
     refusedTooltip: 'GitHub already has a baseline of this name from someone else — this one stays on this PC. Make it again under another name.',
     searchButton: 'Search',
-    snapshotTitle: (label: string) => `Read-only: ${label}`,
-    snapshotHint: 'As it was in that version. Nothing here can be changed.',
-    snapshotSearch: 'Search ID or title',
-    snapshotCount: (count: number) => `${n(count)} item${s(count)}`,
-    snapshotPick: 'Choose an item to see it as it was.',
-    loading: 'Reading that version…'
   },
 
   gitMsg: {

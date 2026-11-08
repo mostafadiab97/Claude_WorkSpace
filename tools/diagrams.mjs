@@ -149,6 +149,8 @@ const realOwner = /github\.com[/:]([^/]+)\//i.exec(remote)?.[1]
 const tmpSpecDir = join(root, 'docs', 'diagrams', '.tmp-specs')
 
 let failed = 0
+/** Diagrams whose layout check failed: no pictures are taken of them (they would show the old drawing). */
+const failedNames = new Set()
 for (const name of names) {
   const spec = JSON.parse(readFileSync(join(srcDir, `${name}.json`), 'utf8'))
   const out = `docs/diagrams/${name}.html`
@@ -161,6 +163,7 @@ for (const name of names) {
     console.log(`✓ ${out}`)
   } catch (e) {
     failed++
+    failedNames.add(name)
     console.error(`✗ ${name}: ${String(e.stdout ?? e.message).slice(0, 2000)}`)
   }
   rmSync(tmpSpecDir, { recursive: true, force: true })
@@ -173,7 +176,7 @@ const DARK_TOO = new Set(['privacy'])
 const require = createRequire(join(root, 'package.json'))
 const { chromium } = require('playwright-core')
 const browser = await chromium.launch(process.env.ARCHIFY_CHROME ? { executablePath: process.env.ARCHIFY_CHROME } : { channel: 'msedge' }).catch(() => chromium.launch())
-for (const name of names) {
+for (const name of names.filter((n) => !failedNames.has(n))) {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, colorScheme: 'light', deviceScaleFactor: 2 })
   await page.goto(`file://${join(root, 'docs', 'diagrams', `${name}.html`)}`)
   await page.waitForTimeout(1500)

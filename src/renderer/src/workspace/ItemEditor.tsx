@@ -36,6 +36,8 @@ export function ItemEditor(props: {
   /** Filled with a function that saves the open edit and tells whether it worked ("Save and continue", UX-09). */
   /** Hands the parent this editor's save function (null when the editor goes away) — for "Save and continue". */
   onSaveReady?: (save: (() => Promise<boolean>) | null) => void
+  /** An old version is shown (D-19b): everything visible, nothing can be changed. */
+  readOnly?: boolean
 }) {
   const { schema, target, onDirtyChange, reloadToken, onMoved } = props
   // The editor is re-created (keyed) for every target, so a draft can start its state directly.
@@ -265,7 +267,7 @@ export function ItemEditor(props: {
           <HistoryView schema={schema} itemId={form.id} reloadToken={reloadToken} />
         </div>
       ) : (
-      <div className="editor__body">
+      <fieldset className="editor__body editor__fieldset" disabled={props.readOnly === true}>
         <label className="field">
           <span className="field__label">{T.editor.title}</span>
           <input className="input" dir="auto" value={form.title} autoFocus={isNew} onChange={(e) => set({ title: e.target.value })} placeholder={T.editor.titlePlaceholder} />
@@ -382,9 +384,14 @@ export function ItemEditor(props: {
             {i.message}
           </p>
         ))}
-      </div>
+      </fieldset>
       )}
 
+      {props.readOnly ? (
+        <footer className="editor__footer">
+          <p className="muted-inline">{T.version.hint}</p>
+        </footer>
+      ) : (
       <footer className="editor__footer">
         {status.kind === 'error' && (
           <p className="notice notice--error" role="alert">
@@ -446,6 +453,7 @@ export function ItemEditor(props: {
           </div>
         )}
       </footer>
+      )}
       {review && (
         <SuspectLinksDialog
           schema={schema}

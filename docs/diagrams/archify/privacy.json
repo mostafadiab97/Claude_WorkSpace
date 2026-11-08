@@ -20,7 +20,7 @@
       "label": "reqochet releases",
       "sublabel": "new reqochet-dev versions",
       "pos": [
-        200,
+        170,
         40
       ],
       "size": [
@@ -34,7 +34,7 @@
       "label": "Your project's repository",
       "sublabel": "on GitHub — the shared copy",
       "pos": [
-        760,
+        700,
         40
       ],
       "size": [
@@ -48,7 +48,7 @@
       "label": "No tracking server",
       "sublabel": "no statistics, no AI service",
       "pos": [
-        1080,
+        1000,
         40
       ],
       "size": [
@@ -64,7 +64,7 @@
       "sublabel": "Windows 11",
       "pos": [
         20,
-        250
+        260
       ],
       "size": [
         120,
@@ -77,8 +77,8 @@
       "label": "reqochet",
       "sublabel": "the app on your PC",
       "pos": [
-        180,
-        250
+        170,
+        260
       ],
       "size": [
         190,
@@ -99,8 +99,8 @@
       "label": "Project folder",
       "sublabel": "requirements/ — your items",
       "pos": [
-        440,
-        160
+        400,
+        175
       ],
       "size": [
         220,
@@ -114,8 +114,8 @@
       "label": "Git program",
       "sublabel": "git.exe, run without a shell",
       "pos": [
-        770,
-        250
+        720,
+        260
       ],
       "size": [
         220,
@@ -136,8 +136,8 @@
       "label": "Git settings",
       "sublabel": "project .git\\config · your .gitconfig",
       "pos": [
-        1070,
-        180
+        1000,
+        195
       ],
       "size": [
         270,
@@ -164,8 +164,8 @@
       "label": "Credential Manager",
       "sublabel": "your GitHub sign-in",
       "pos": [
-        1070,
-        330
+        1000,
+        325
       ],
       "size": [
         220,
@@ -179,8 +179,8 @@
       "label": "reqochet's folder",
       "sublabel": "%APPDATA%: index, settings, log",
       "pos": [
-        100,
-        410
+        90,
+        380
       ],
       "size": [
         250,
@@ -207,8 +207,8 @@
       "label": "Files you choose",
       "sublabel": "Excel, CSV, ReqIF, exports",
       "pos": [
-        400,
-        410
+        380,
+        380
       ],
       "size": [
         220,
@@ -264,7 +264,11 @@
       "id": "items",
       "from": "app",
       "to": "project",
-      "label": "reads and writes items"
+      "label": "reads and writes items",
+      "labelAt": [
+        372,
+        167
+      ]
     },
     {
       "id": "rungit",

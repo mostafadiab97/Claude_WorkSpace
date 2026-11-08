@@ -3,6 +3,20 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.20.0 — 8 Nov 2026 — theme 1b: traceability views
+- **Owner (8 Nov 2026):** 1b next (the pilot can start after it); decisions T-01…T-08, all as recommended
+  (`docs/reviews/2026-11-08-1b-traceability.md`); helper reviews as before (all six).
+- **Coverage rules** in `schema.yaml` (`rules:` — shared through Git): a starter set in new projects, offered once to
+  older ones; edited in the new **Rules** tab of the item-types window; warnings only, with a level stored for a later
+  CI check. Obsolete items are counted on neither end; links count across documents.
+- **Traceability** (top bar): **Coverage** per rule (x of y covered, gap list, show the gaps in the table) and
+  **Matrix** (rows of one type following the filter, columns = linked items of another, list form when very wide,
+  **Export Excel**).
+- **Impact** tab in the editor (also from a change in Changes): everything that depends on the item, all levels down.
+- **Coverage gaps**: a ◌ mark in rows, **Filters → Coverage gaps**, a group in Problems and a count in the status bar.
+- Self-test step 25; e2e `trace-0.20`. The e2e harness removes a passing scenario's temporary projects (a full disk
+  broke a test run).
+
 ## 0.19.1 — 8 Nov 2026 — fix: empty space between rows after Show text off
 - **Owner (8 Nov 2026), 0.19.1:** all 3 steps passed (self-test 24/24, 174.6 s).
 - **Owner (8 Nov 2026), 0.19.0:** all 5 steps passed (self-test 24/24, 187.6 s while another 20-minute build ran).

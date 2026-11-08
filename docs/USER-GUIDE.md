@@ -120,7 +120,7 @@ with a message; **Push** shares them.
 
 | Area | What is there |
 | --- | --- |
-| **Top bar** | Repository name and ✕ (close), branch button ⎇, **Changes**, **Pull** and **Push** (with the number of commits to get or send), ⚙ Settings. Language and colours: **Settings → Appearance** (and on the start screen). |
+| **Top bar** | Repository name and ✕ (close), branch button ⎇, **Changes**, **Versions**, **Traceability**, **Pull** and **Push** (with the number of commits to get or send), ⚙ Settings. Language and colours: **Settings → Appearance** (and on the start screen). |
 | **Toolbar** | Search box, ⊞ expand all, ⊟ collapse all, **Filters**, **Columns**, **Show text**, **Import…**, **Export…**, **+ New item**. |
 | **Table** | One row per item, in document order; ▸ opens a branch of the tree; numbers in the title show how many children. With **Show text** on (the default), the main column reads like a document: a heading shows its title in bold, any other item its title in bold and its whole text below, and each row is as tall as it needs to be. **Show text** off: one line per item, and the **Text** column shows the start of the text. |
 | **Editor (right)** | Details (title, type, fields, parent, text, links) and **History**; Save, ↑ ↓ (move), + Child…, Delete. The text is shown formatted; click it to edit. Drag the left edge to make the editor wider. |
@@ -171,7 +171,26 @@ with a message; **Push** shares them.
 - **Find them:** Filters → Links → *suspect* lists every item with a suspect link.
 - **Broken links** (target missing, e.g. deleted on another branch) appear in the problems panel (12).
 
-Coming next (theme 1): coverage view, impact chain, traceability matrix with Excel export.
+### Coverage, matrix and impact (0.20.0)
+
+- **Coverage rules** say what a complete project looks like, e.g. *every System Requirement is verified by at least 1
+  Test Case*. They are stored in `requirements/.reqochet/schema.yaml` and shared through Git, so the whole team sees the
+  same gaps. New projects start with a starter set; an older project is asked once (**Add the rules** / **No rules**).
+  Change them in **Traceability → Edit rules…** (or Columns → Edit item types… → **Rules**): item type, direction
+  (*other items link to it* / *it links to other items*), link type, from which type, *at least* how many, and a level.
+  reqochet only **warns** — nothing is ever blocked; the level *error* is for a planned automatic check on GitHub.
+  Items with status *Obsolete* are not counted, on either end; links count across documents.
+- **Coverage gaps** — items that break a rule — show a small **◌** next to their title, a count in the status bar, a
+  group in the Problems panel and a filter (**Filters → Coverage gaps**).
+- **Traceability** (top bar) opens a full-width view, following the document you picked:
+  - **Coverage**: each rule with *x of y covered* and a bar; open its gaps, click one to open it, or **Show the gaps
+    in the table**.
+  - **Matrix**: rows = items of one type (they follow the table's filter), columns = the items of another type linked
+    to them, a dot where they are linked (⚠ when the link is suspect), rows without any link marked. Very wide matrices
+    are shown as a list. **Export Excel** writes the whole grid.
+- **Impact** (editor tab, or the **Impact** button on a change in Changes): everything that depends on the item, all
+  levels down — items linked to it (verifies, refines, implements, mitigates…; *relates to* does not count) and the
+  items below it — so you see what a change may affect.
 
 ---
 

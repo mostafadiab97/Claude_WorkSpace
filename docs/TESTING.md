@@ -67,23 +67,23 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.19.1 (no empty rows after Show text off)
+## Manual test checklist — v0.20.0 (traceability views)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.20.0**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed** (new: "Traceability: coverage rules, gaps, matrix and impact"). |
+| 2 | Open the sandbox. Above the table: *Start with the usual coverage rules?* → **Add the rules**. | The question goes away; items without the needed links get a small **◌** next to their title, and the status bar shows *N coverage gaps*. (schema.yaml changed — commit it when you like.) |
+| 3 | Top bar **Traceability** → **Coverage**: open the gaps of one rule, click one; then **Show the gaps in the table** on another rule. | Each rule shows *x of y covered* with a bar; the item opens in the table; the table then lists only that rule's gaps (Filters → Coverage gaps). |
+| 4 | **Traceability → Matrix**: rows *System Requirement*, columns *Test Case*; then **Export Excel**. | A grid with a dot where they are linked, rows without a test marked; the Excel file has the whole grid. |
+| 5 | Open a stakeholder need → editor tab **Impact**. Then **Edit rules…** (in Traceability), change *At least* of one rule to 2, **Save**. | Impact lists everything that depends on the need, level by level. After the rule change the coverage numbers and ◌ marks follow it. |
+
+## Previous checklist — v0.19.1 (no empty rows after Show text off)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
 | 1 | Let reqochet-dev update to **0.19.1**, then **⚙ → Self-tests → Run release self-test**. | **All 24 steps passed.** |
 | 2 | In the sandbox with **Show text** on: **⊞ Expand all** and scroll down a few screens. Then switch **Show text** off, **⊟ Collapse all**, **⊞ Expand all** and scroll again. | With Show text off every row is one line high, with no empty space between rows anywhere. |
 | 3 | Switch **Show text** on again and scroll. | Titles with their text again; no rows drawn on top of each other. |
-
-## Previous checklist — v0.19.0 (main column, old version in the table, compare layout)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.19.0**, then **⚙ → Self-tests → Run release self-test**. | **All 24 steps passed** (step 22 now: "Baseline: make one, show the old version, push it"). |
-| 2 | Open the sandbox. The new toolbar button **Show text** is on. Scroll quickly through the whole table, open and close a few levels; then switch **Show text** off and on. | On: headings show their bold title only; other items their bold title with the whole text below, rows as tall as needed; scrolling stays smooth. Off: one line per item and the **Text** column is back. |
-| 3 | **Versions → History**: on an older commit choose **Open read-only**. Use the tree, a filter and the search; open an item; then **Back to now**. | The whole table shows that version under a coloured bar *Viewing … (read-only)*; no Git buttons, no New item; the item opens greyed out; **Back to now** brings today's items back. |
-| 4 | **Versions → History → Compare with now** on an older commit (or **Changes → Compare two versions**). Click an item in the left list; scroll the right side; try **Export CSV**. | Changed items on the left, every change one after another on the right using the full width; a click jumps to that change and the left list follows your scrolling; the exports sit at the top next to **Close changes**. |
-| 5 | **⚙ → Privacy and access** in Light, then Dark (**⚙ → Theme**). | The diagram matches the theme, no boxes overlap, the arrows are short. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

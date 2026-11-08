@@ -1,7 +1,17 @@
-# Past manual checklists (v0.0.3 – v0.18.0)
+# Past manual checklists (v0.0.3 – v0.19.0)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.19.0 (main column, old version in the table, compare layout)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.19.0**, then **⚙ → Self-tests → Run release self-test**. | **All 24 steps passed** (step 22 now: "Baseline: make one, show the old version, push it"). |
+| 2 | Open the sandbox. The new toolbar button **Show text** is on. Scroll quickly through the whole table, open and close a few levels; then switch **Show text** off and on. | On: headings show their bold title only; other items their bold title with the whole text below, rows as tall as needed; scrolling stays smooth. Off: one line per item and the **Text** column is back. |
+| 3 | **Versions → History**: on an older commit choose **Open read-only**. Use the tree, a filter and the search; open an item; then **Back to now**. | The whole table shows that version under a coloured bar *Viewing … (read-only)*; no Git buttons, no New item; the item opens greyed out; **Back to now** brings today's items back. |
+| 4 | **Versions → History → Compare with now** on an older commit (or **Changes → Compare two versions**). Click an item in the left list; scroll the right side; try **Export CSV**. | Changed items on the left, every change one after another on the right using the full width; a click jumps to that change and the left list follows your scrolling; the exports sit at the top next to **Close changes**. |
+| 5 | **⚙ → Privacy and access** in Light, then Dark (**⚙ → Theme**). | The diagram matches the theme, no boxes overlap, the arrows are short. |
 
 ## v0.18.0 (baselines and the history list)
 

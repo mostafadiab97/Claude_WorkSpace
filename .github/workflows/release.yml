@@ -27,10 +27,18 @@ jobs:
 
       - name: Privacy and secrets check (CR3-25 — the release checks the same as every build)
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           node tools/check-privacy.mjs .
-          curl -sSL -o "$RUNNER_TEMP/gitleaks.zip" https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_windows_x64.zip
-          unzip -q -o "$RUNNER_TEMP/gitleaks.zip" -d "$RUNNER_TEMP/gitleaks"
+          # the secrets scanner: downloaded with gh (signed in with this run's token, so no anonymous rate limit), retried;
+          # a failed download stops the step with a clear message (8 Nov 2026: curl got an answer that was not a zip)
+          for attempt in 1 2 3; do
+            rm -f "$RUNNER_TEMP"/gitleaks_*.zip
+            gh release download v8.28.0 -R gitleaks/gitleaks -p 'gitleaks_8.28.0_windows_x64.zip' -D "$RUNNER_TEMP" --clobber && unzip -tq "$RUNNER_TEMP/gitleaks_8.28.0_windows_x64.zip" && break
+            echo "gitleaks download attempt $attempt failed"; sleep 20
+          done
+          unzip -q -o "$RUNNER_TEMP/gitleaks_8.28.0_windows_x64.zip" -d "$RUNNER_TEMP/gitleaks" || { echo "::error::Could not download the gitleaks secrets scanner from GitHub (3 attempts). Rerun the job later."; exit 1; }
           "$RUNNER_TEMP/gitleaks/gitleaks.exe" git . --no-banner --redact
 
       - name: Skip if this version is already released

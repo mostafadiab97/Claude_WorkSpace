@@ -3938,3 +3938,25 @@ html {
 .snapshot__fields dd {
   margin: 0;
 }
+
+/* WCAG 2.2 target size: small buttons and text buttons are at least 24 px high (UX18-20) */
+.btn--small,
+.link-btn {
+  min-block-size: 24px;
+}
+/* incomplete: a clear "!" badge instead of a glyph that looked like a progress mark (UX18-13) */
+.table__incomplete {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.2em;
+  block-size: 1.2em;
+  border: 1.5px solid var(--rm-color-warning);
+  border-radius: 50%;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.history__search {
+  display: flex;
+  gap: var(--rm-space-sm);
+}

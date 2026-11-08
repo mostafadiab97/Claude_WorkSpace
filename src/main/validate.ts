@@ -284,8 +284,8 @@ export function exportRequest(v: unknown): ExportItemsRequest {
 }
 
 // ---- baselines and history (0.18.0) ----
-const COMMIT_REF = /^[0-9a-f]{7,40}$/i
-/** A commit ID (7–40 hex digits): never a branch or option name. */
+const COMMIT_REF = /^[0-9a-f]{40}$/i
+/** A full commit ID (40 hex digits): a short one could resolve to a tag or branch of that name (SEC-18-04). */
 export function commitRef(v: unknown): string {
   const s = str(v, 'commit', 40)
   if (!COMMIT_REF.test(s)) throw new Error('Invalid commit ID')
@@ -295,7 +295,7 @@ export function baselineRequest(v: unknown): CreateBaselineRequest {
   if (typeof v !== 'object' || v === null) throw new Error('Invalid baseline request')
   const r = v as Record<string, unknown>
   const name = str(r.name, 'baseline name', 100)
-  if (/[\s~^:?*[\\]/.test(name) || [...name].some((c) => c.charCodeAt(0) < 32) || name.startsWith('-')) throw new Error('Invalid baseline name')
+  if ([...name].some((c) => c.charCodeAt(0) < 32)) throw new Error('Invalid baseline name') // the rest: the core's friendly check (CR18-03)
   return {
     name,
     note: r.note === undefined ? '' : text(r.note, 'note', 2000),

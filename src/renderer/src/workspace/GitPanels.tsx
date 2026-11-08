@@ -167,7 +167,7 @@ export function GitBar(props: {
           title={(state.pendingBaselines ?? 0) > 0 ? `${T.git.pushTooltip}\n${T.baselines.pendingTooltip}` : T.git.pushTooltip}
           onClick={() => props.onRun('push')}
         >
-          {T.git.push(state.ahead)}
+          {state.ahead === 0 && (state.pendingBaselines ?? 0) > 0 ? T.git.pushBaselines(state.pendingBaselines ?? 0) : T.git.push(state.ahead)}
         </button>
           </>
         )}

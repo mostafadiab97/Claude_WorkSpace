@@ -67,9 +67,16 @@ export function ItemTable(props: {
   useEffect(() => {
     if (!hasRequired) return
     let live = true
-    void window.reqochet.queryItems({ incomplete: true, limit: 10_000, brief: true }).then((r) => {
-      if (live) setIncompleteIds(new Set(r.items.map((i) => i.id)))
-    })
+    // every page, not only the first 10,000 (UX18-14)
+    void (async () => {
+      const ids = new Set<string>()
+      for (let offset = 0; ; offset += 10_000) {
+        const r = await window.reqochet.queryItems({ incomplete: true, limit: 10_000, offset, brief: true })
+        for (const i of r.items) ids.add(i.id)
+        if (r.items.length === 0 || ids.size >= r.total) break
+      }
+      if (live) setIncompleteIds(ids)
+    })()
     return () => {
       live = false
     }
@@ -78,7 +85,7 @@ export function ItemTable(props: {
   const incompleteMark = (id: string): ReactNode =>
     isIncomplete(id) ? (
       <span className="table__incomplete" role="img" aria-label={T.table.incomplete} title={T.table.incompleteTip}>
-        ◐
+        !
       </span>
     ) : null
   // a column header being dragged to a new place (rows have their own drag and drop)
@@ -339,8 +346,8 @@ export function ItemTable(props: {
               }
               if (row?.kind === 'group') {
                 return (
-                  <div key={v.key} role="row" aria-level={1} aria-expanded={row.open} className="table__row table__row--group" style={style}>
-                    <span className="table__td table__td--group">
+                  <div key={v.key} role="row" aria-level={1} className="table__row table__row--group" style={style}>
+                    <span role="gridcell" className="table__td table__td--group">
                       <button type="button" className="table__group-toggle" aria-expanded={row.open} onClick={() => tree.setGroupOpen(row.name, !row.open)} title={row.open ? T.table.groupClose(row.name || T.documents.loose) : T.table.groupOpen(row.name || T.documents.loose)}>
                         <span aria-hidden="true">{row.open ? '▾' : '▸'}</span> <strong>{row.name || T.documents.loose}</strong> <span className="muted-inline">{T.table.groupCount(row.count)}</span>
                       </button>

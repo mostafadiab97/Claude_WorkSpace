@@ -91,6 +91,7 @@ const en = {
       releasesPage: 'Releases page (all versions, installers)'
     },
     privacy: {
+      diagramShortAlt: 'Diagram of what reqochet reads, keeps and sends',
       enlarge: 'Show the diagram full size',
       diagramAlt: 'Diagram: reqochet on your PC reads and writes the project folder, keeps its index, settings and log in its own folder, reads and writes only files you choose, and runs Git; Git reads your name and e-mail from its settings, asks the Credential Manager for your sign-in and pulls and pushes to your GitHub repository; reqochet asks GitHub releases for updates; there is no tracking server.',
       intro: 'What reqochet sees, keeps and sends, and what it is allowed to change. There are no accounts, no tracking and no cloud service: your requirements stay in your files and your Git repositories.',
@@ -698,6 +699,7 @@ const en = {
     pullN: (behind: number) => `Pull${behind > 0 ? ` (${behind})` : ''}`,
     pullTooltip: 'Get your colleagues\' commits',
     push: (ahead: number) => `Push${ahead > 0 ? ` (${ahead})` : ''}`,
+    pushBaselines: (count: number) => `Push (${count === 1 ? 'baseline' : `${n(count)} baselines`})`,
     pushTooltip: 'Send your commits to GitHub (never forced)',
     blocked: 'Save or discard your edit first.'
   },
@@ -962,6 +964,8 @@ const en = {
     noProblems: 'No problems',
     schemaProblem: (path: string, message: string) => `schema.yaml ${path}: ${message}`,
     renewCopyId: 'Give the copy a new ID',
+    whichCopy: (id: string, files: string) => `Nothing tells which file is the copy of ${id} (${files}). Rename or delete the copy by hand, or keep it out of Git until then.`,
+    renewedCopy: (oldId: string, newId: string) => `The copy of ${oldId} is now ${newId}.`,
     renewCopyIdTooltip: (id: string) => `The file copied last (or not yet committed) gets a new ID and file name; the original ${id} stays as it is`,
     fixFileName: 'Fix file name',
     fixFileNameTooltip: (id: string) => `Rename the file to ${id}.md (Git sees it as a rename, so the history is kept)`,
@@ -990,9 +994,9 @@ const en = {
   /** Messages the core sends after Git actions (shown in the Git bar and the Changes panel). */
   /** Baselines and the history list (1a part 2 — S-06, S-08, S-09). */
   baselines: {
-    button: 'History',
-    buttonTooltip: 'Baselines and the history of this branch',
-    title: 'History and baselines',
+    button: 'Versions',
+    buttonTooltip: 'Baselines and the history of this branch (the editor\'s History tab shows one item)',
+    title: 'Versions: baselines and history',
     tabBaselines: 'Baselines',
     tabHistory: 'History',
     intro: 'A baseline is a named, fixed version of the requirements — for a review, a delivery or a release. It is a Git tag (baseline/<name>) and goes to GitHub with your next Push.',
@@ -1023,10 +1027,18 @@ const en = {
     without: 'Baseline without them',
     commitMessage: (name: string) => `Baseline ${name}`,
     made: (name: string, hasRemote: boolean) => `Baseline ${name} made.${hasRemote ? ' It goes to GitHub with your next Push.' : ''}`,
-    badName: 'A baseline name uses letters, digits, dots, dashes and underscores, without spaces (e.g. SRS-1.0).',
+    badName: 'A baseline name uses letters (any language), digits, dots, dashes and underscores — no spaces or slashes — and starts with a letter or digit (e.g. SRS-1.0).',
     exists: (name: string) => `There is already a baseline called ${name}.`,
     badCommit: 'That is not a commit ID.',
     branchMade: (name: string) => `Branch ${name} created. Switch to it with the branch button when you want to work there.`,
+    openFor: (what: string) => `Open ${what} read-only`,
+    compareFor: (what: string) => `Compare ${what} with now`,
+    baselineFor: (what: string) => `Make a baseline at ${what}`,
+    branchFor: (what: string) => `New branch at ${what}`,
+    nameRule: 'Letters, digits, dots, dashes, underscores; no spaces or slashes.',
+    refused: 'name taken on GitHub',
+    refusedTooltip: 'GitHub already has a baseline of this name from someone else — this one stays on this PC. Make it again under another name.',
+    searchButton: 'Search',
     snapshotTitle: (label: string) => `Read-only: ${label}`,
     snapshotHint: 'As it was in that version. Nothing here can be changed.',
     snapshotSearch: 'Search ID or title',
@@ -1063,6 +1075,8 @@ const en = {
     nothingToPushYet: 'Nothing to push yet — commit your changes first.',
     notCommittedYet: 'Nothing to push. Your changes are not committed yet — commit them first.',
     remoteHasAll: 'Nothing to push — the remote already has everything.',
+    undoBaseline: (names: string) => `The baseline ${names} marks this commit, so it cannot be taken back. Change the items and commit again instead.`,
+    baselinesRefused: (names: string) => ` GitHub already has a baseline called ${names} (made by someone else) — it stays on this PC only; make it again under another name.`,
     baselinesPushed: (count: number) => ` ${count === 1 ? 'One baseline' : `${n(count)} baselines`} sent too.`,
     pushed: (uncommitted: number) => `Pushed${uncommitted > 0 ? ` (${uncommitted} uncommitted change${uncommitted === 1 ? ' was' : 's were'} not included)` : ''}.`,
     nothingToDiscard: 'Nothing to discard.',
@@ -1149,6 +1163,7 @@ const en = {
   },
 
   wsMsg: {
+    changedMeanwhile: 'The file changed while reqochet was working on it; nothing was changed. Try again.',
     folderRenameDirty: 'The project folder has changes that are not committed yet (requirements/.reqman). Commit or discard them first, then update the project — the rename commit holds only the rename.',
     folderRenameBoth: 'requirements/ holds both .reqman and .reqochet with files in them. Keep one (with Git or Explorer), then open the project again.',
     folderRenameRefused: (why: string) => `The folder was not renamed — everything was put back as it was. Reason: ${why}`,

@@ -1,7 +1,7 @@
 // Reading, creating, saving and deleting single items, with the rules that need the whole repository
 // (the parent must exist and must not create a loop; saves are refused if the file changed meanwhile).
 import type { Item, ItemDetails, LinkInfo, SaveResult } from '../../shared/api'
-import { rm, stat } from 'node:fs/promises'
+import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { documentOfPath } from '../../shared/domain'
 import { generateId, validateItem } from '../items'
@@ -116,7 +116,7 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
     /** Renames a file whose name does not match its ID to <ID>.md (review D-01). */
     /**
      * Two files hold one ID — usually a file copied by hand into another document (the owner on 0.17.2). The copy
-     * (the file Git does not know yet, else the newer one) gets a new ID and a matching file name; a parent from
+     * (the file Git does not know yet, else the one copied away from its parent's document) gets a new ID and a matching file name; a parent from
      * another document is dropped, so the copy sits at the top of its own document.
      */
     async renewCopyId(id: string): Promise<OpResult & { newId?: string }> {
@@ -127,24 +127,48 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
         const tracked = s.isGit ? new Set(await ctx.git.trackedFiles(s.repo.root, s.repo.folder)) : new Set<string>()
         const rel = (p: string): string => join(s.repo.folder, p).slice(s.repo.root.length + 1).split('\\').join('/')
         const untracked = paths.filter((p) => !tracked.has(rel(p)))
-        const newest = async (ps: string[]): Promise<string> => {
-          const times = await Promise.all(ps.map(async (p) => [p, (await stat(join(s.repo.folder, p))).mtimeMs] as const))
-          return times.sort((a, b) => b[1] - a[1])[0]?.[0] as string
+        // the copy: the one file Git does not know yet; else the one whose parent is in another document (copied away
+        // from its parent); otherwise nothing tells — no guess, the user decides (QA-13: the newest file is not proof)
+        // a file Git does not know, next to one it knows, is a copy (any of several such copies)
+        let copy: string | undefined = untracked.length >= 1 && untracked.length < paths.length ? untracked[0] : undefined
+        if (!copy) {
+          const pool = untracked.length > 1 ? untracked : paths
+          const away: string[] = []
+          for (const p of pool) {
+            const r = await s.repo.readItemFile(p)
+            const par = r.ok && r.item.parent ? s.index.get(r.item.parent) : undefined
+            if (r.ok && r.item.parent && par && (par.document ?? '') !== documentOfPath(p)) away.push(p)
+          }
+          if (away.length === 1) copy = away[0]
         }
-        const copy = untracked.length === 1 ? (untracked[0] as string) : await newest(untracked.length > 1 ? untracked : paths)
+        if (!copy) return { ok: false, message: T.workspace.whichCopy(id, paths.join(', ')) }
         const read = await s.repo.readItemFile(copy)
         if (!read.ok) return { ok: false, message: read.error }
         const document = documentOfPath(copy)
         const newId = generateId((x) => s.index.get(x) !== undefined)
         const item: Item = { ...read.item, id: newId, document }
-        const parent = item.parent ? s.index.get(item.parent) : undefined
-        if (item.parent && (!parent || (parent.document ?? '') !== document)) {
+        // the parent stays when it has a copy in this document too (a copied subtree keeps its shape, CR18-07)
+        const parentHere = item.parent !== undefined && s.index.pathsOf(item.parent).some((p) => documentOfPath(p) === document)
+        if (item.parent && !parentHere) {
           delete item.parent
           item.order = structure.nextOrder(s, undefined, document)
         }
+        const bad = validateItem(item, s.repo.schema).filter((x) => x.severity === 'error')
+        if (bad.length > 0) return { ok: false, message: bad.map((x) => x.message).join(' ') }
+        // the file must still be the one just read (NFR-05, CR18-12)
+        const again = await s.repo.readItemFile(copy)
+        if (!again.ok || JSON.stringify(again.item) !== JSON.stringify(read.item)) return { ok: false, message: T.wsMsg.changedMeanwhile }
         await s.repo.writeItem(item, { expectedRevision: null })
         await rm(join(s.repo.folder, copy))
-        await s.index.syncPaths(s.repo, [copy, s.repo.itemPath(newId, document)])
+        // children of the copy in this document now point to its new ID
+        const touched = [copy, s.repo.itemPath(newId, document)]
+        for (const childPath of s.index.query({ document, parent: id, limit: 10_000 }).items.map((c) => c.path).filter((p) => p && documentOfPath(p) === document)) {
+          const c = await s.repo.readItemFile(childPath)
+          if (!c.ok || c.item.parent !== id) continue
+          await s.repo.writeItem({ ...c.item, parent: newId, document })
+          touched.push(childPath)
+        }
+        await s.index.syncPaths(s.repo, touched)
         log.info(`Copied file ${copy}: ${id} → ${newId}`)
         return { ok: true, newId }
       } catch (e) {

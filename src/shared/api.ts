@@ -131,6 +131,8 @@ export interface Baseline {
   note: string
   /** Made on this PC and not sent yet: it goes with the next Push. */
   pending: boolean
+  /** The remote refused it: a baseline of that name is there already (from someone else) — this one is local only. */
+  refused?: boolean
 }
 
 /** One page of the current branch's history (S-09), newest first. */

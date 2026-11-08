@@ -21,20 +21,21 @@ export function createBaselineOps(deps: { git: GitAdapter; log: Pick<Logger, 'in
 
   return {
     async list(s: GitSession): Promise<Baseline[]> {
-      const [tags, pending] = await Promise.all([git.baselines(s.repo.root), git.pendingBaselines(s.repo.root).catch(() => [] as string[])])
-      return tags.map((t) => ({ ...t, pending: pending.includes(t.name) }))
+      const [tags, pending, refused] = await Promise.all([git.baselines(s.repo.root), git.pendingBaselines(s.repo.root).catch(() => [] as string[]), git.refusedBaselines(s.repo.root).catch(() => [] as string[])])
+      return tags.map((t) => ({ ...t, pending: pending.includes(t.name), ...(refused.includes(t.name) ? { refused: true } : {}) }))
     },
 
     async create(s: GitSession, req: CreateBaselineRequest): Promise<GitResult & { baseline?: Baseline; needs?: 'uncommitted-decision' }> {
       const blocked = await precheck(s)
       if (blocked) return blocked
       const name = req.name.trim()
-      if (!name || !(await git.checkBaselineName(s.repo.root, name))) return fail(s, T.baselines.badName)
+      // no invisible or direction characters: a baseline name must look like what it is on the shared remote (SEC-18-07)
+      if (!/^[\p{L}\p{N}][\p{L}\p{N}._-]{0,99}$/u.test(name) || !(await git.checkBaselineName(s.repo.root, name))) return fail(s, T.baselines.badName)
       if ((await git.baselines(s.repo.root)).some((b) => b.name === name)) return fail(s, T.baselines.exists(name))
       const st = await gitOps.state(s)
       if (!st.identity.name || !st.identity.email) return fail(s, T.gitMsg.needIdentity)
       let commit = req.commit
-      if (commit !== undefined && !COMMIT.test(commit)) return fail(s, T.baselines.badCommit)
+      if (commit !== undefined && (!COMMIT.test(commit) || !(await git.resolve(s.repo.root, `${commit}^{commit}`)))) return fail(s, T.baselines.badCommit)
       if (commit === undefined) {
         // the latest commit; uncommitted changes are committed first or left out — the user says which (S-08 a)
         if (st.changes.length > 0 && req.uncommitted === undefined) return { ...(await fail(s, T.baselines.uncommittedAsk(st.changes.length))), needs: 'uncommitted-decision' }
@@ -79,7 +80,7 @@ export function createBaselineOps(deps: { git: GitAdapter; log: Pick<Logger, 'in
       const items: SnapshotItem[] = []
       for (const [path, oid] of files) {
         const text = blobs.get(oid)
-        if (!text) continue
+        if (!text || text.length > 5_000_000) continue // an item is text; a huge file is not parsed (SEC-18-09)
         const r = parseItemFile(text, fieldIds)
         if (!r.ok) continue
         const it = r.item
@@ -98,9 +99,11 @@ export function createBaselineOps(deps: { git: GitAdapter; log: Pick<Logger, 'in
       // outline numbers as in that version (siblings by order key, then ID — like the index)
       const cmp = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0)
       const ordered = [...items].sort((a, b) => cmp((a as { order?: string }).order ?? '￿', (b as { order?: string }).order ?? '￿') || cmp(a.id, b.id))
-      const numbers = outlineNumbers(ordered.map((i) => ({ id: i.id, document: i.document, ...(i.parent ? { parent: i.parent } : {}) })))
+      // keyed by document + ID: an ID in two documents (a copied file) keeps a number of its own (QA-11)
+      const key = (doc: string, id: string): string => `${doc}\u0000${id}`
+      const numbers = outlineNumbers(ordered.map((i) => ({ id: key(i.document, i.id), document: i.document, ...(i.parent ? { parent: key(i.document, i.parent) } : {}) })))
       for (const i of items) {
-        const n = numbers.get(i.id)
+        const n = numbers.get(key(i.document, i.id))
         if (n) i.number = n
         delete (i as { order?: string }).order
       }
@@ -112,7 +115,7 @@ export function createBaselineOps(deps: { git: GitAdapter; log: Pick<Logger, 'in
       const blocked = await precheck(s)
       if (blocked) return blocked
       const n = name.trim()
-      if (!COMMIT.test(commit)) return fail(s, T.baselines.badCommit)
+      if (!COMMIT.test(commit) || !(await git.resolve(s.repo.root, `${commit}^{commit}`))) return fail(s, T.baselines.badCommit)
       if (!n || !(await git.checkBranchName(s.repo.root, n))) return fail(s, T.merge.badName(n))
       try {
         await git.createBranchAt(s.repo.root, n, commit)

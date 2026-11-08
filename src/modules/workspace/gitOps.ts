@@ -235,8 +235,15 @@ export function createGitOps(deps: GitOpsDeps) {
       if (!st.hasRemote) return fail(s, T.gitMsg.noRemotePush)
       if (!(await git.head(s.repo.root))) return fail(s, T.gitMsg.nothingToPushYet, undefined, true)
       const { remote } = await remoteBranch(s, st)
-      // baselines made here go with the push (S-06), also when no commit is waiting
-      const baselines = await git.pendingBaselines(s.repo.root).catch(() => [] as string[])
+      // baselines made here go with the push (S-06), also when no commit is waiting; one whose tag was deleted outside
+      // reqochet is dropped from the list instead of failing every push (QA-01)
+      const waiting = await git.pendingBaselines(s.repo.root).catch(() => [] as string[])
+      const existing = new Set((await git.baselines(s.repo.root).catch(() => [])).map((b) => b.name))
+      const baselines = waiting.filter((b) => existing.has(b))
+      if (baselines.length !== waiting.length) {
+        await git.setPendingBaselines(s.repo.root, baselines)
+        invalidate()
+      }
       if (st.upstream && st.ahead === 0 && baselines.length === 0) {
         return done(s, st.changes.length > 0 ? T.gitMsg.notCommittedYet : T.gitMsg.remoteHasAll)
       }
@@ -244,14 +251,19 @@ export function createGitOps(deps: GitOpsDeps) {
       const tidied = st.upstream && deps.tidyBeforePush ? await deps.tidyBeforePush(s, st.upstream).catch((e: unknown) => (log.warn(`Tidying positions skipped: ${String(e)}`), 0)) : 0
       try {
         if (!st.upstream || st.ahead > 0) await git.push(s.repo.root, st.upstream || !remote || !st.branch ? undefined : { remote, branch: st.branch })
+        let refused: string[] = []
         if (baselines.length > 0 && remote) {
-          await git.pushBaselines(s.repo.root, remote, baselines)
+          refused = await git.pushBaselines(s.repo.root, remote, baselines)
+          // a refused name stays here only: the remote has a baseline of that name already (QA-02); it is marked so
+          // nobody mistakes it for the shared one (CR18-02)
           await git.setPendingBaselines(s.repo.root, [])
+          if (refused.length) await git.setRefusedBaselines(s.repo.root, [...new Set([...(await git.refusedBaselines(s.repo.root)), ...refused])])
           invalidate()
-          log.info(`Pushed baselines: ${baselines.join(', ')}`)
+          log.info(`Pushed baselines: ${baselines.filter((b) => !refused.includes(b)).join(', ')}${refused.length ? `; refused: ${refused.join(', ')}` : ''}`)
         }
         log.info(`Pushed ${st.branch ?? ''}${tidied ? ` (positions of ${tidied} items tidied)` : ''}`)
-        return done(s, `${T.gitMsg.pushed(st.changes.length)}${baselines.length > 0 ? T.gitMsg.baselinesPushed(baselines.length) : ''}`)
+        const sent = baselines.length - refused.length
+        return done(s, `${T.gitMsg.pushed(st.changes.length)}${sent > 0 ? T.gitMsg.baselinesPushed(sent) : ''}${refused.length ? T.gitMsg.baselinesRefused(refused.join(', ')) : ''}`)
       } catch (e) {
         log.warn(`Push failed: ${String(e)}`)
         return fail(s, explainGitError(e))
@@ -284,6 +296,10 @@ export function createGitOps(deps: GitOpsDeps) {
       if (blocked) return blocked
       const st = await state(s)
       if (!st.canUndoCommit) return fail(s, T.gitMsg.cannotUndo)
+      // a baseline marks this commit: undoing it would leave the baseline on a commit of no branch (CR18-09)
+      const head = await git.head(s.repo.root)
+      const marking = (await git.baselines(s.repo.root).catch(() => [])).filter((b) => b.commit === head).map((b) => b.name)
+      if (marking.length > 0) return fail(s, T.gitMsg.undoBaseline(marking.join(', ')))
       try {
         await git.undoLastCommit(s.repo.root)
         await deps.resync()

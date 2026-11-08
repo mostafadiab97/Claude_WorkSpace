@@ -80,7 +80,16 @@ export function createGithubUpdater({ enabled, log, holdFile, updateConfigFile }
   // (latest.yml) is then read straight from that release's downloads.
   let triedApi = false
   let feedChanged = false
+  let fallbackRunning = false
   const viaApi = async (): Promise<boolean> => {
+    fallbackRunning = true
+    try {
+      return await viaApiNow()
+    } finally {
+      fallbackRunning = false
+    }
+  }
+  const viaApiNow = async (): Promise<boolean> => {
     const { owner, repo } = feedConfig()
     const res = await net.fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/releases?per_page=30`, { headers: { Accept: 'application/vnd.github+json' } })
     if (!res.ok) throw new Error(`GitHub API answered ${res.status}`)
@@ -91,7 +100,8 @@ export function createGithubUpdater({ enabled, log, holdFile, updateConfigFile }
       return true
     }
     log.info(`Update check through the API: ${target.version} — reading its update file from the release`)
-    autoUpdater.setFeedURL({ provider: 'generic', url: `https://github.com/${owner}/${repo}/releases/download/v${target.version}` })
+    if (!/^\d+\.\d+\.\d+$/.test(target.version)) throw new Error(`unexpected release version ${target.version}`) // SEC-18-08
+    autoUpdater.setFeedURL({ provider: 'generic', url: `https://github.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/releases/download/v${target.version}` })
     feedChanged = true
     await autoUpdater.checkForUpdates()
     return true
@@ -103,7 +113,7 @@ export function createGithubUpdater({ enabled, log, holdFile, updateConfigFile }
   }
 
   const checkNow = async (): Promise<void> => {
-    if (!enabled || held) return
+    if (!enabled || held || fallbackRunning) return // the API fallback is still working (CR18-13)
     // every check starts with the normal releases feed again
     triedApi = false
     if (feedChanged) {

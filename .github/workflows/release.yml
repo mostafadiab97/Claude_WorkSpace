@@ -67,10 +67,15 @@ jobs:
         # Electron comes through gh, signed in with this run's token, checksum checked (tools/ci-electron.mjs):
         # 8 Nov 2026 GitHub answered the anonymous Electron download with 504 for hours, signed-in downloads worked
         env:
-          GH_TOKEN: ${{ github.token }}
           ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: for attempt in 1 2 3; do npm ci && exit 0; echo "npm ci attempt $attempt failed; waiting"; sleep 60; done; exit 1
+      # the token only here, not while libraries' install scripts run (SEC-18-01)
+      - name: Electron (signed-in download, checksum from the locked package)
+        if: steps.version.outputs.exists == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          for attempt in 1 2 3; do npm ci && break; echo "npm ci attempt $attempt failed; waiting"; sleep 60; done
           node tools/ci-electron.mjs
           node -e "require('electron')"
       - if: steps.version.outputs.exists == 'false'

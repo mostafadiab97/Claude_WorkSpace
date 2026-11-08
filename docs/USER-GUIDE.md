@@ -101,7 +101,7 @@ person who supports reqochet in your team. Nothing is sent by itself.
 | **Repository** | Your project's Git folder. reqochet works inside its `requirements/` folder and never touches your code. |
 | **Document** | A specification: one folder under `requirements/` (e.g. `requirements/System/`). A repository can hold several; each has its own tree and numbers. Pick it above the table, or **All documents**. |
 | **Item** | One requirement, heading, test case, risk… — one file `requirements/<document>/<ID>.md`. |
-| **ID** | `REQ-K7Q3XMB`: random, so two people (or two branches) never create the same ID. IDs never change. |
+| **ID** | `REQ-K7Q3XMB`: random, so two people (or two branches) never create the same ID. IDs never change — except a copied file, which gets a new ID with **Give the copy a new ID** (Problems panel). |
 | **Item type** | What kind of item it is (system requirement, test case, heading…). Headings / information are not counted as requirements. |
 | **Fields** | Attributes such as Status, Priority, Owner, Tags — defined by the team (see 7). |
 | **Tree and outline numbers** | Every item has a parent and a position; numbers like 2.3.1 are calculated, never stored. |
@@ -229,7 +229,7 @@ frame and a ✓), or choose **Write it myself**. Nothing changes until you click
 
 ### Baselines and the branch history
 
-The **History** button in the top bar opens two lists:
+The **Versions** button in the top bar opens two lists:
 
 - **Baselines** — a baseline is a named, fixed version of the requirements, for a review, a delivery or a release
   (e.g. `SRS-1.0`). **New baseline…** asks for a name and a note and marks the latest commit of your branch. If you
@@ -301,7 +301,9 @@ Coming (theme 3b): Word from your company's own template, PDF, and one self-cont
 The status bar shows **N problems** when reqochet finds something it cannot fully understand — a file edited by hand with
 a mistake, a link to an item that does not exist, two items with the same ID after a merge, a file whose name does not
 match its ID. Click it for the list; click a problem to open the item; many have a one-click fix (e.g. **Fix file
-name**). reqochet never guesses silently and never deletes data to "fix" something.
+name**). A file copied into another document (two files with the same ID) gets **Give the copy a new ID**: the copy
+gets a fresh ID, its copied children follow it, and its parent is dropped when the parent lives in another document
+(the copy then sits at the top of its own document); the original stays as it was. reqochet never guesses silently and never deletes data to "fix" something.
 
 ---
 
@@ -429,7 +431,7 @@ paused; automatic updates.
 **Platform and data** — Windows 10/11 desktop, per-user install; offline first; no server, no database, no accounts;
 plain Markdown files in your own Git repository; tested with 10,000 and 50,000 requirements.
 
-**Planned** (decided release plan) — baselines and a history list, coverage view, impact chain, traceability
+**Planned** (decided release plan) — coverage view, impact chain, traceability
 matrix; bulk edit, templates, saved views, wording hints; rich text
 with tables, images and diagrams; Word / PDF / HTML documents; approvals, comments and pull requests in the app; links to
 code and test results; AI access.
@@ -485,7 +487,7 @@ repository, and reqochet is the window that understands them. What you know maps
 | Object type / item type | Item type | the **Type** column; `schema.yaml` |
 | Link module, link type | Link type (verifies, refines …) — links are stored on the item they start from | editor → Links |
 | Suspect link | Suspect link: the linked item changed after the link was checked — **⚠ suspect** in the Links column | editor → Links: keep or unlink |
-| Baseline | A commit (every saved state), soon named baselines | History, Compare |
+| Baseline | A named baseline (Git tag `baseline/<name>`) | Versions → Baselines, Compare |
 | Change proposal / review | A branch, compared like a pull request, then pulled in | the branch button → Compare with… |
 | View | Filters, search and the columns you choose | toolbar: Filters, Columns |
 | History | History of an item; Compare between any two versions | editor → History; Changes |

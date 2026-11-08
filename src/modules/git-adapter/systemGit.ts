@@ -2,7 +2,7 @@
 // with exactly the credentials, SSH keys and configuration the user already has.
 // Every call passes arguments as an array (no shell), so file names and messages are never interpreted.
 import { execFile, spawn } from 'node:child_process'
-import { mkdtemp, readdir, rm, rmdir } from 'node:fs/promises'
+import { mkdtemp, rm, rmdir } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join, normalize } from 'node:path'
 import type { GitInfo } from '../../shared/api'
@@ -217,6 +217,18 @@ export function parseOverwrittenFiles(stderr: string): string[] {
 export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitAdapter {
   const git = (root: string, args: string[], timeoutMs = LOCAL_TIMEOUT, extra: Omit<RunOptions, 'timeoutMs'> = {}): Promise<string> =>
     run('git', ['-C', root, ...args], { timeoutMs, ...extra })
+  // a list in one repository config value, written in one call (CR18-11)
+  const configList = async (root: string, key: string): Promise<string[]> => {
+    try {
+      return (await git(root, ['config', '--local', '--get', key])).trim().split(/\s+/).filter(Boolean)
+    } catch {
+      return [] // not set
+    }
+  }
+  const setConfigList = async (root: string, key: string, names: string[]): Promise<void> => {
+    if (names.length === 0) await git(root, ['config', '--local', '--unset-all', key]).catch(() => undefined)
+    else await git(root, ['config', '--local', key, names.join(' ')])
+  }
   const configValue = async (root: string, key: string): Promise<string | null> => {
     try {
       return (await git(root, ['config', '--get', key])).trim() || null
@@ -430,15 +442,16 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
 
     // ---- baselines (S-06): annotated tags refs/tags/baseline/<name>; history list (S-09) ----
     async baselines(root) {
-      const out = await git(root, ['for-each-ref', '--sort=-creatordate', '--format=%(refname:strip=3)%1f%(*objectname)%1f%(objectname)%1f%(taggername)%1f%(creatordate:iso-strict)%1f%(contents)%1e', 'refs/tags/baseline/'])
-      return out
-        .split('\x1e')
-        .map((r) => r.replace(/^\r?\n/, ''))
-        .filter((r) => r.trim() !== '')
-        .map((r) => {
-          const [name, peeled, oid, by, date, ...note] = r.split('\x1f')
-          return { name: name ?? '', commit: peeled || oid || '', by: by ?? '', date: date ?? '', note: note.join('\x1f').trim() }
-        })
+      // six NUL-ended fields per tag: a tag message cannot contain NUL, so a crafted note cannot add entries (SEC-18-03)
+      const out = await git(root, ['for-each-ref', '--sort=-creatordate', '--format=%(refname:strip=3)%00%(*objectname)%00%(objectname)%00%(taggername)%00%(creatordate:iso-strict)%00%(contents)%00', 'refs/tags/baseline/'])
+      const f = out.split('\0')
+      const list: { name: string; commit: string; by: string; date: string; note: string }[] = []
+      for (let i = 0; i + 5 < f.length; i += 6) {
+        const name = (f[i] ?? '').replace(/^\r?\n/, '')
+        if (!name) continue
+        list.push({ name, commit: f[i + 1] || f[i + 2] || '', by: f[i + 3] ?? '', date: f[i + 4] ?? '', note: (f[i + 5] ?? '').trim() })
+      }
+      return list
     },
     async checkBaselineName(root, name) {
       try {
@@ -452,27 +465,48 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
       await git(root, ['tag', '-a', '-m', note || name, `baseline/${name}`, commit])
     },
     async pushBaselines(root, remote, names) {
-      if (names.length > 0) await git(root, ['push', '--quiet', remote, ...names.map((n) => `refs/tags/baseline/${n}:refs/tags/baseline/${n}`)], NETWORK_TIMEOUT)
-    },
-    async pendingBaselines(root) {
-      try {
-        return (await git(root, ['config', '--local', '--get-all', 'reqochet.baselineToPush'])).split(/\r?\n/).filter(Boolean)
-      } catch {
-        return [] // none recorded
+      // one by one: a name a colleague already pushed must not block the others (QA-02, SEC-18-06)
+      const refused: string[] = []
+      for (const n of names) {
+        try {
+          await git(root, ['push', '--quiet', remote, `refs/tags/baseline/${n}:refs/tags/baseline/${n}`], NETWORK_TIMEOUT)
+        } catch (e) {
+          if (/rejected|already exists|does not match/i.test(String((e as Error).message))) refused.push(n)
+          else throw e
+        }
       }
+      return refused
+    },
+    // one config value with the names separated by spaces (a baseline name has none): written in one call (CR18-11)
+    async pendingBaselines(root) {
+      return configList(root, 'reqochet.baselinesToPush')
     },
     async setPendingBaselines(root, names) {
-      await git(root, ['config', '--local', '--unset-all', 'reqochet.baselineToPush']).catch(() => undefined)
-      for (const n of names) await git(root, ['config', '--local', '--add', 'reqochet.baselineToPush', n])
+      await setConfigList(root, 'reqochet.baselinesToPush', names)
     },
+    async refusedBaselines(root) {
+      return configList(root, 'reqochet.baselinesRefused')
+    },
+    async setRefusedBaselines(root, names) {
+      await setConfigList(root, 'reqochet.baselinesRefused', names)
+    },
+
     async history(root, pathspec, opts) {
       const args = ['log', `-n${opts.limit + 1}`, `--skip=${opts.skip}`, '--format=%x1e%H%x1f%an%x1f%ae%x1f%aI%x1f%s']
       const search = opts.search?.trim()
       // a commit ID (or its start) finds that commit; other words are searched in the commit messages
+      if (!(await git(root, ['rev-parse', '--verify', '--quiet', 'HEAD']).then(() => true, () => false))) return { commits: [], more: false }
       if (search && /^[0-9a-f]{4,40}$/i.test(search)) {
         const hash = await git(root, ['rev-parse', '--verify', '--quiet', `${search}^{commit}`]).then((h) => h.trim(), () => '')
-        if (hash) args.push(hash, '-n1')
-        else args.push('--regexp-ignore-case', '--fixed-strings', `--grep=${search}`)
+        // only commits of the current branch: not one taken back with "Undo commit" or on another branch (SEC-18-05)
+        const onBranch = hash ? await git(root, ['merge-base', '--is-ancestor', hash, 'HEAD']).then(() => true, () => false) : false
+        if (onBranch) {
+          // exactly that commit, also when it did not touch the requirements folder (CR18-08)
+          const one = await git(root, ['log', '-n1', '--format=%H%x1f%an%x1f%ae%x1f%aI%x1f%s', hash])
+          const [h, author, email, date, ...subject] = one.trim().split('\x1f')
+          return { commits: opts.skip > 0 ? [] : [{ hash: h ?? '', author: author ?? '', email: email ?? '', date: date ?? '', message: subject.join('\x1f'), path: pathspec }], more: false }
+        }
+        args.push('--regexp-ignore-case', '--fixed-strings', `--grep=${search}`)
       } else if (search) args.push('--regexp-ignore-case', '--fixed-strings', `--grep=${search}`)
       args.push('--', pathspec)
       const list = (await git(root, args))
@@ -695,13 +729,25 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
       for (const part of chunks(stagedNew)) await git(root, ['rm', '--cached', '--quiet', '--', ...part], BULK_TIMEOUT)
       for (const p of remove) await rm(join(root, p), { force: true })
       // a folder the discard left empty goes too (the owner on 0.17.2: a discarded new document stayed in the list)
-      const dirs = [...new Set(remove.map((p) => dirname(p)))].sort((a, b) => b.length - a.length)
-      for (let d of dirs) {
-        while (d && d !== '.' && d !== '/') {
-          if ((await readdir(join(root, d)).catch(() => ['?'])).length > 0) break
-          await rmdir(join(root, d)).catch(() => undefined)
-          d = dirname(d)
+      // deepest folders first, one level at a time, so a parent is tried only after all its emptied children went;
+      // rmdir alone: it refuses a folder that still holds anything, so no listing is needed (listing the parent after
+      // every removal made 10,000 folders take 34 s — PERF-01)
+      const depth = (d: string): number => d.split(/[\\/]/).length
+      let level = new Set(remove.map((p) => dirname(p)).filter((d) => d && d !== '.' && d !== '/'))
+      while (level.size > 0) {
+        const deepest = Math.max(...[...level].map(depth))
+        const next = new Set<string>()
+        for (const d of level) {
+          if (depth(d) < deepest) {
+            next.add(d)
+            continue
+          }
+          if (await rmdir(join(root, d)).then(() => true, () => false)) {
+            const up = dirname(d)
+            if (up && up !== '.' && up !== '/') next.add(up)
+          }
         }
+        level = next
       }
     }
   }

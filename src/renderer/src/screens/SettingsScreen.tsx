@@ -124,8 +124,8 @@ export function SettingsScreen(props: {
               <p className="hint hint--flush">{T.settings.privacy.intro}</p>
               {/* the Archify drawing of the same facts (docs/diagrams/archify/privacy.json — the owner, 8 Nov 2026) */}
               <figure className="privacy__figure">
-                <button type="button" className="privacy__zoom" title={T.settings.privacy.enlarge} onClick={() => setZoom(true)}>
-                  <img src={privacyDiagram} alt={T.settings.privacy.diagramAlt} />
+                <button type="button" className="privacy__zoom" title={T.settings.privacy.enlarge} aria-label={T.settings.privacy.enlarge} onClick={() => setZoom(true)}>
+                  <img src={privacyDiagram} alt="" />
                 </button>
               </figure>
               {zoom && (
@@ -134,7 +134,7 @@ export function SettingsScreen(props: {
                     <button type="button" className="icon-btn" autoFocus aria-label={T.common.close} onClick={() => setZoom(false)}>
                       ✕
                     </button>
-                    <div className="scroll">
+                    <div className="scroll" tabIndex={0} aria-label={T.settings.privacy.diagramShortAlt}>
                       <img src={privacyDiagram} alt={T.settings.privacy.diagramAlt} />
                     </div>
                   </div>

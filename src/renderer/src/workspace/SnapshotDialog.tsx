@@ -52,7 +52,7 @@ export function SnapshotDialog(props: { gitRef: string; schema: Schema; onClose:
     const s = q.trim().toLowerCase()
     return s ? all.filter((i) => i.id.toLowerCase().includes(s) || i.title.toLowerCase().includes(s)) : all
   }, [snap, q])
-  const item = snap?.items.find((i) => i.id === picked) ?? null
+  const item = snap?.items.find((i) => `${i.document}/${i.id}` === picked) ?? null
 
   return (
     <div className="modal" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && props.onClose()}>
@@ -73,12 +73,17 @@ export function SnapshotDialog(props: { gitRef: string; schema: Schema; onClose:
         )}
         <div className="snapshot__body">
           <div className="snapshot__list">
-            <input className="input" type="search" aria-label={T.baselines.snapshotSearch} placeholder={T.baselines.snapshotSearch} value={q} onChange={(e) => setQ(e.target.value)} />
+            <input className="input" type="search" autoFocus aria-label={T.baselines.snapshotSearch} placeholder={T.baselines.snapshotSearch} value={q} onChange={(e) => setQ(e.target.value)} />
             <p className="muted-inline">{T.baselines.snapshotCount(items.length)}</p>
             <ul className="scroll">
               {items.map((i) => (
                 <li key={`${i.document}/${i.id}`}>
-                  <button type="button" className={picked === i.id ? 'snapshot__row is-picked' : 'snapshot__row'} onClick={() => setPicked(i.id)}>
+                  <button
+                    type="button"
+                    className={picked === `${i.document}/${i.id}` ? 'snapshot__row is-picked' : 'snapshot__row'}
+                    aria-current={picked === `${i.document}/${i.id}` ? 'true' : undefined}
+                    onClick={() => setPicked(`${i.document}/${i.id}`)}
+                  >
                     <span className="snapshot__num">{i.number ?? ''}</span>
                     <span className="snapshot__title" dir="auto">
                       {i.title}
@@ -89,7 +94,7 @@ export function SnapshotDialog(props: { gitRef: string; schema: Schema; onClose:
               ))}
             </ul>
           </div>
-          <div className="snapshot__item scroll">
+          <div className="snapshot__item scroll" aria-live="polite">
             {item ? (
               <>
                 <h3 dir="auto">
@@ -114,7 +119,7 @@ export function SnapshotDialog(props: { gitRef: string; schema: Schema; onClose:
                   <ul className="snapshot__links">
                     {item.links.map((l) => (
                       <li key={`${l.type}-${l.target}`}>
-                        {linkName(props.schema, l.type)} → <code>{l.target}</code>
+                        {linkName(props.schema, l.type)}: <code>{l.target}</code>
                       </li>
                     ))}
                   </ul>

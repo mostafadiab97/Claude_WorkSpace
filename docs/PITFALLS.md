@@ -172,3 +172,12 @@ with `gh` (`GH_TOKEN: ${{ github.token }}`) worked. CI now gets Electron with `t
 from `SHASUMS256.txt`, unpacked with Windows' own `tar.exe` — Git Bash's tar reads `D:` as a host) and builds the
 installer with `--config.electronDist=node_modules/electron/dist`; gitleaks also comes through `gh`. Run `npm run
 check` before pushing a new tools/ script too (ESLint covers tools/).
+
+## Removing emptied folders (0.18.0, PERF-01)
+Listing the parent folder after every `rmdir` made Discard of 10,000 new folders take 34 s. Use `rmdir` alone (it
+refuses a folder that still holds anything) and go **level by level, deepest first** — sorting folder names by length
+tries a parent before a shorter-named child is gone, and the parent then stays.
+
+## e2e and per-row button names (0.18.0)
+A UI/UX fix gave each history row's buttons their own accessible name ("Open 1a2b3c4 read-only"), so `getByRole('button',
+{ name: 'Open read-only' })` no longer matched. When a label gains the row's name, match with a regular expression.

@@ -25,6 +25,7 @@ export function ProblemList({
 }) {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [done, setDone] = useState<string | null>(null)
   const fix = async (ids: string[]): Promise<void> => {
     setError(null)
     setBusy(true)
@@ -48,7 +49,8 @@ export function ProblemList({
     setBusy(true)
     try {
       const r = await window.reqochet.renewCopyId(id)
-      if (!r.ok) setError(T.workspace.fixFailed(r.message))
+      if (!r.ok) return setError(T.workspace.fixFailed(r.message))
+      if (r.newId) setDone(T.workspace.renewedCopy(id, r.newId))
       onFixed()
     } catch (e) {
       setError(T.workspace.fixFailed(errorMessage(e)))
@@ -92,7 +94,7 @@ export function ProblemList({
                     )}
                     <span className="problems__msg">{p.message}</span>
                     {p.fix === 'copy-id' && p.id && (
-                      <button type="button" className="btn btn--small" disabled={busy} title={T.workspace.renewCopyIdTooltip(p.id)} onClick={() => p.id && guard(() => void renew(p.id as string))}>
+                      <button type="button" className="btn btn--small" disabled={busy} title={T.workspace.renewCopyIdTooltip(p.id)} aria-label={`${T.workspace.renewCopyId}: ${p.id}`} onClick={() => p.id && guard(() => void renew(p.id as string))}>
                         {T.workspace.renewCopyId}
                       </button>
                     )}
@@ -107,6 +109,11 @@ export function ProblemList({
             </details>
           )
         })}
+        {done && (
+          <p className="notice" role="status">
+            {done}
+          </p>
+        )}
         {error && (
           <p className="error-text" role="alert">
             {error}

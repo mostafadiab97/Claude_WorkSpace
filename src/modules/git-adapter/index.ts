@@ -148,11 +148,14 @@ export interface GitAdapter {
   checkBaselineName(root: string, name: string): Promise<boolean>
   /** Creates the annotated tag baseline/<name> at `commit`, with `note` as its message. */
   createBaseline(root: string, name: string, commit: string, note: string): Promise<void>
-  /** Sends these baselines to `remote`. */
-  pushBaselines(root: string, remote: string, names: string[]): Promise<void>
+  /** Sends these baselines to `remote`; returns the names the remote refused (taken there already). */
+  pushBaselines(root: string, remote: string, names: string[]): Promise<string[]>
   /** Baselines made here that are not sent yet (kept in the repository's own Git config). */
   pendingBaselines(root: string): Promise<string[]>
   setPendingBaselines(root: string, names: string[]): Promise<void>
+  /** Baselines the remote refused (a baseline of that name is there already, from someone else). */
+  refusedBaselines(root: string): Promise<string[]>
+  setRefusedBaselines(root: string, names: string[]): Promise<void>
   /** The commits of the current branch that touch `pathspec`, newest first, a page at a time; `search` = a commit ID or words of the message (S-09). */
   history(root: string, pathspec: string, opts: { limit: number; skip: number; search?: string }): Promise<{ commits: CommitInfo[]; more: boolean }>
   /** A new branch at `commit` (the current branch stays). */

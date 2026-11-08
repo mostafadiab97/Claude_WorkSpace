@@ -183,8 +183,12 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
       if (r.items.length === 0 || all.length >= r.total) break
     }
     const groups = new Map<string, IndexedItem[]>(groupNames ? groupNames.split('\u0000').map((g) => [GROUP_KEY(g), []]) : [[ROOT, []]])
+    // an item whose parent is not in this result (another document, or missing) sits at the top level, as in
+    // fetchLevel (CR18-05)
+    const here = new Set(all.map((x) => `${x.document ?? ''}\u0000${x.id}`))
     for (const it of all) {
-      const k = it.parent ?? (groupNames ? GROUP_KEY(it.document ?? '') : ROOT)
+      const parentHere = it.parent !== undefined && here.has(`${it.document ?? ''}\u0000${it.parent}`)
+      const k = parentHere ? (it.parent as string) : groupNames ? GROUP_KEY(it.document ?? '') : ROOT
       const g = groups.get(k)
       if (g) g.push(it)
       else groups.set(k, [it])

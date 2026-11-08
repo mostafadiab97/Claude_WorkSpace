@@ -61,11 +61,18 @@ export function HistoryDialog(props: { onClose: () => void; onCompare: (ref: str
   }, [tab, asked])
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape' && !busy) props.onClose()
+      if (e.key !== 'Escape' || busy) return
+      if (form) setForm(null)
+      else if (branchAt) setBranchAt(null)
+      else props.onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [busy, props])
+  }, [busy, props, form, branchAt])
+  useEffect(() => {
+    const before = document.activeElement as HTMLElement | null
+    return () => before?.focus?.()
+  }, [])
 
   const create = async (uncommitted?: 'commit' | 'without'): Promise<void> => {
     if (!form) return
@@ -113,19 +120,20 @@ export function HistoryDialog(props: { onClose: () => void; onCompare: (ref: str
     }
   }
 
-  const actions = (ref: string): React.ReactNode => (
+  // each button names its commit or baseline for screen readers (UX18-04)
+  const actions = (ref: string, what: string): React.ReactNode => (
     <span className="actions history__actions">
-      <button type="button" className="btn btn--small" onClick={() => props.onOpenSnapshot(ref)}>
+      <button type="button" className="btn btn--small" aria-label={T.baselines.openFor(what)} onClick={() => props.onOpenSnapshot(ref)}>
         {T.baselines.open}
       </button>
-      <button type="button" className="btn btn--small" onClick={() => props.onCompare(ref)}>
+      <button type="button" className="btn btn--small" aria-label={T.baselines.compareFor(what)} onClick={() => props.onCompare(ref)}>
         {T.baselines.compare}
       </button>
     </span>
   )
 
   return (
-    <div className="modal" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && !busy && props.onClose()}>
+    <div className="modal" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && !busy && !form && !branchAt && props.onClose()}>
       <div className="modal__panel history" role="dialog" aria-modal="true" aria-label={T.baselines.title}>
         <header className="modal__header">
           <h2 className="modal__title">{T.baselines.title}</h2>
@@ -135,12 +143,31 @@ export function HistoryDialog(props: { onClose: () => void; onCompare: (ref: str
         </header>
         <div className="history__tabs" role="tablist">
           {(['baselines', 'history'] as const).map((t) => (
-            <button key={t} type="button" role="tab" aria-selected={tab === t} className={tab === t ? 'tab tab--active' : 'tab'} onClick={() => setTab(t)}>
+            <button
+              key={t}
+              id={`history-tab-${t}`}
+              type="button"
+              role="tab"
+              aria-selected={tab === t}
+              aria-controls="history-panel"
+              tabIndex={tab === t ? 0 : -1}
+              autoFocus={t === 'baselines'}
+              className={tab === t ? 'tab tab--active' : 'tab'}
+              onClick={() => setTab(t)}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                  e.preventDefault()
+                  const next = tab === 'baselines' ? 'history' : 'baselines'
+                  setTab(next)
+                  document.getElementById(`history-tab-${next}`)?.focus()
+                }
+              }}
+            >
               {t === 'baselines' ? T.baselines.tabBaselines : T.baselines.tabHistory}
             </button>
           ))}
         </div>
-        <div className="modal__body scroll">
+        <div className="modal__body scroll" id="history-panel" role="tabpanel" aria-labelledby={`history-tab-${tab}`}>
           {note && (
             <p className="notice" role="status">
               {note}
@@ -162,7 +189,10 @@ export function HistoryDialog(props: { onClose: () => void; onCompare: (ref: str
               <p className="hint hint--flush">{form.commit ? T.baselines.atCommit(form.commit.slice(0, 7)) : T.baselines.atLatest}</p>
               <label className="field">
                 <span>{T.baselines.name}</span>
-                <input className="input" autoFocus value={form.name} placeholder={T.baselines.namePlaceholder} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                <input className="input" autoFocus value={form.name} placeholder={T.baselines.namePlaceholder} aria-describedby="baseline-name-rule" onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                <small id="baseline-name-rule" className="muted">
+                  {T.baselines.nameRule}
+                </small>
               </label>
               <label className="field">
                 <span>{T.baselines.note}</span>
@@ -213,6 +243,11 @@ export function HistoryDialog(props: { onClose: () => void; onCompare: (ref: str
                   <li key={b.name} className="history__row">
                     <div className="history__main">
                       <strong>{b.name}</strong>
+                      {b.refused && (
+                        <span className="badge" title={T.baselines.refusedTooltip}>
+                          {T.baselines.refused}
+                        </span>
+                      )}
                       {b.pending && (
                         <span className="badge" title={T.baselines.pendingTooltip}>
                           {T.baselines.pending}
@@ -223,7 +258,7 @@ export function HistoryDialog(props: { onClose: () => void; onCompare: (ref: str
                       </span>
                       {b.note && <span className="history__note">{b.note}</span>}
                     </div>
-                    {actions(b.commit)}
+                    {actions(b.commit, b.name)}
                   </li>
                 ))}
               </ul>
@@ -240,6 +275,9 @@ export function HistoryDialog(props: { onClose: () => void; onCompare: (ref: str
                 }}
               >
                 <input className="input" type="search" value={search} aria-label={T.baselines.search} placeholder={T.baselines.search} onChange={(e) => setSearch(e.target.value)} />
+                <button type="submit" className="btn">
+                  {T.baselines.searchButton}
+                </button>
               </form>
               {history && history.commits.length === 0 && <p className="muted">{T.baselines.noCommits}</p>}
               <ul className="history__list">
@@ -251,11 +289,11 @@ export function HistoryDialog(props: { onClose: () => void; onCompare: (ref: str
                       <span className="muted-inline">{T.baselines.by(c.author, when(c.date))}</span>
                     </div>
                     <span className="actions history__actions">
-                      {actions(c.hash)}
-                      <button type="button" className="btn btn--small" onClick={() => setForm({ commit: c.hash, name: '', note: '', commitMessage: '' })}>
+                      {actions(c.hash, c.hash.slice(0, 7))}
+                      <button type="button" className="btn btn--small" aria-label={T.baselines.baselineFor(c.hash.slice(0, 7))} onClick={() => setForm({ commit: c.hash, name: '', note: '', commitMessage: '' })}>
                         {T.baselines.makeBaseline}
                       </button>
-                      <button type="button" className="btn btn--small" onClick={() => setBranchAt({ commit: c.hash, name: '' })}>
+                      <button type="button" className="btn btn--small" aria-label={T.baselines.branchFor(c.hash.slice(0, 7))} onClick={() => setBranchAt({ commit: c.hash, name: '' })}>
                         {T.baselines.branchHere}
                       </button>
                     </span>

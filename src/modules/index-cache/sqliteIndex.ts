@@ -414,8 +414,10 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
           where.push(`(i.parent IS NULL OR NOT EXISTS (SELECT 1 FROM items p WHERE p.id = i.parent AND ${DOC_OF('p')} = ${DOC_OF('i')}))`)
         } else if (q.parent === null) where.push('i.parent IS NULL')
         else {
-          where.push('i.parent = ?')
-          params.push(q.parent)
+          // children in the parent's own document only: a hand-moved child shows at its own document's top level,
+          // not also under its old parent (CR18-04)
+          where.push(`i.parent = ? AND ${DOC_OF('i')} IN (SELECT ${DOC_OF('p')} FROM items p WHERE p.id = ?)`)
+          params.push(q.parent, q.parent)
         }
       }
       const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : ''

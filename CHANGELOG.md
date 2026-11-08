@@ -9,7 +9,8 @@ version it was about, and what it led to.
   document; a discarded new document stayed in the list; clearer privacy texts and a diagram; the update check
   should fall back to the API; incomplete items marked in the table; slimmer bars; Arabic "عنوان قسم"; the grey
   outline only on the Windows icon.
-- **Baselines (S-06 a, S-08 a):** **History → New baseline…** — a name and a note mark the latest commit (with
+- **Baselines (S-06 a, S-08 a):** **Versions → New baseline…** (the top-bar button is called *Versions*; tell us if
+  you prefer another word) — a name and a note mark the latest commit (with
   uncommitted changes: commit them first, or leave them out); listed as *not pushed yet* until the next **Push**
   sends it. Underneath it is the Git tag `baseline/<name>`.
 - **History of the branch (S-09 a):** newest first, search by words or commit ID; per commit **Open read-only**
@@ -19,12 +20,19 @@ version it was about, and what it led to.
   **Problems → Give the copy a new ID** gives it its own ID and file name.
 - **Discard** removes the folders it leaves empty, so a discarded new document disappears.
 - **Updates:** when GitHub's releases feed fails, the check asks GitHub's API instead.
-- **Table:** a small ◐ marks items with an empty required field; slimmer top bar and toolbar; a thin document bar when
+- **Table:** a small **!** marks items with an empty required field; slimmer top bar and toolbar; a thin document bar when
   the project has one document.
 - **Privacy page:** clearer words on the log (sign-ins in addresses become ***) and on the Git name and e-mail; an
   Archify diagram of what is read, kept and sent (click to enlarge; `docs/diagrams/privacy.html`).
 - **Icon:** the grey outline stays on the desktop / Start menu / taskbar icon only; the light tile inside the app is
   plain again.
+- **Helper review (code, QA, security, UI/UX, Arabic, performance — `docs/reviews/agents/0.18.0-*.md`):** a baseline
+  name GitHub already has no longer blocks later pushes (it is marked *name taken on GitHub*); a deleted baseline tag
+  is dropped from the waiting list; baselines are pushed one by one; names follow one clear rule (letters of any
+  language, digits, `.`, `_`, `-`); Undo commit is refused when a baseline marks that commit; searching a commit ID
+  finds exactly that commit; a copied parent and child keep their hierarchy when both get new IDs; a copy that cannot
+  be told apart from the original is not guessed; an item whose parent is in another document shows only at its own
+  document's top level; Discard of thousands of new folders takes seconds instead of half a minute.
 - **Workflow:** the release and review skills, the helper rules and the hand-over notes were tightened (fewer tokens,
   no push after a red check, sturdier CI downloads).
 

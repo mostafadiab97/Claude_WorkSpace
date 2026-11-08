@@ -2,7 +2,7 @@
 // script. On 8 Nov 2026 GitHub answered the Windows build machines' anonymous downloads of Electron with
 // "504 Gateway Time-out" for hours (no incident on its status page), while downloads signed in with `gh` worked.
 // So: `npm ci` runs with ELECTRON_SKIP_BINARY_DOWNLOAD=1, then this script downloads the same file with `gh` (the
-// run's token), checks it against Electron's published SHA-256 list, and unpacks it where Electron's own install
+// run's token), checks it against the SHA-256 list inside the locked npm package, and unpacks it where Electron's own install
 // script would. The installer build then uses that copy (`--config.electronDist=node_modules/electron/dist`).
 //
 //   node tools/ci-electron.mjs            (needs GH_TOKEN; Windows x64 build machines)
@@ -23,7 +23,7 @@ mkdirSync(dir, { recursive: true })
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 for (let attempt = 1; ; attempt++) {
   try {
-    execFileSync('gh', ['release', 'download', `v${version}`, '-R', 'electron/electron', '-p', file, '-p', 'SHASUMS256.txt', '-D', dir, '--clobber'], { stdio: 'inherit' })
+    execFileSync('gh', ['release', 'download', `v${version}`, '-R', 'electron/electron', '-p', file, '-D', dir, '--clobber'], { stdio: 'inherit' })
     break
   } catch (e) {
     if (attempt >= 4) throw new Error(`Could not download ${file} with gh (4 attempts): ${e.message}`, { cause: e })
@@ -32,9 +32,9 @@ for (let attempt = 1; ; attempt++) {
   }
 }
 
-// the file must be the one Electron published
-const sums = readFileSync(join(dir, 'SHASUMS256.txt'), 'utf8')
-const expected = sums.split(/\r?\n/).find((l) => l.endsWith(` *${file}`) || l.endsWith(`  ${file}`))?.split(/\s+/)[0]
+// the file must be the one this Electron version was published with: its checksum list comes inside the npm package,
+// which package-lock.json pins by its own hash — not from the same download as the file (SEC-18-02)
+const expected = JSON.parse(readFileSync(join(electronDir, 'checksums.json'), 'utf8'))[file]
 const actual = createHash('sha256').update(readFileSync(join(dir, file))).digest('hex')
 if (!expected || expected !== actual) throw new Error(`${file}: checksum ${actual} does not match Electron's list (${expected ?? 'not listed'})`)
 

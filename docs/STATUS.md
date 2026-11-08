@@ -4,7 +4,7 @@ CLAUDE.md is read at the start of every session and again after every context co
 history there cost thousands of tokens each time (the owner asked to save tokens, 8 Nov 2026). **This file is the
 status**: update it with every release (the version table, "Next", the owner's last report, test counts).
 
-## Status (v0.17.2, 8 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.18.0, 8 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -32,18 +32,19 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.17.0 1a structure part 1 — documents as folders (S-10: `requirements/<document>/`, `DocumentBar.tsx`, `workspace.createDocument/renameDocument`, loose files = document ''), Types window (S-04: `TypesPanel.tsx`, `saveSchemaTypes`, `writeSchemaTypes`, `typeUsage`), required fields + Incomplete (S-05: `ItemTypeDef.required`, `withRequired`), Columns drag and drop (S-11); watcher closed during pull/switch/discard/undo (`paused`); helper reports `docs/reviews/agents/0.17.0-*.md` | Released (v0.17.0) |
 | 0.17.1 the owner's 0.17.0 test 2 — renaming the 10,005-item folder failed on Windows (30 s Git limit, folder not put back, ENAMETOOLONG on Discard all): `git.move` (`git mv`), `commitFiles` path list via stdin, `PATHS_PER_COMMAND`/`BULK_TIMEOUT` in `systemGit.ts`, put-back with retries + re-read in `renameDocument`, discard restores a rename's old path, self-test step 23 | Released (v0.17.1) |
 | 0.17.2 the owner's points on 0.17.0 — document group rows in All documents (`rows.ts` `GROUP_KEY`, `treeRows(…, groups)`), column header drag (`moveColumn`), Columns menu alignment + Title row, orange Clear filters, Settings → Privacy and access (`T.settings.privacy`, lists in texts), guide pictures (`docs/images/guide/*.svg` inlined by `lib/guide.ts`), diagrams re-checked (`tools/diagrams.mjs` with a temporary spec copy), light .ico + theme-following taskbar icon (`windowIcon()`), status moved here from CLAUDE.md | Released (v0.17.2) |
-| **Next** | Owner's 0.17.2 checklist; then **1a part 2** — baselines + history list (S-06/08/09; graph library `commit-graph` to try) — decisions in `docs/reviews/2026-11-04-next-round.md`; the four open questions of the public release repository (`docs/reviews/2026-11-04-public-release-repo.md`); later items from the 0.17.0 reviews (CR-23, CR-29, CR-30) and remaining Lows of the whole-project review | — |
+| 0.18.0 1a structure part 2 — baselines (`workspace/baselines.ts`; annotated tags `baseline/<name>`; waiting/refused lists in the repository's Git config `reqochet.baselinesToPush` / `reqochet.baselinesRefused`, pushed one by one with the next Push), the branch history (`git.history`, search by words or commit ID), read-only snapshot (`SnapshotDialog.tsx`), branch at a commit; **Versions** button (`HistoryDialog.tsx`); copied files: `renewCopyId` + Problems button; Discard removes emptied folders (level by level); updater API fallback (`newerRelease`); incomplete **!** in rows; slimmer bars + compact document bar; privacy diagram (Archify `privacy.json`); outline only on the Windows icon; six helper reports `docs/reviews/agents/0.18.0-*.md` | Released (v0.18.0) |
+| **Next** | Owner's 0.18.0 checklist; then the later items of the 0.18.0 reviews (PERF-02 snapshot cache, PERF-03 incomplete-IDs call, updater fallback wiring test, SEC-18-09 total size, UX18-09/12/17/19/21, CR18 Lows), the commit graph (`commit-graph` to try), the four open questions of the public release repository (`docs/reviews/2026-11-04-public-release-repo.md`), Arabic diagram labels; then the next theme of the release plan (`docs/design/roadmap.md`) | — |
 
-The owner's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
-Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
+The owner's last report (8 Nov 2026): **0.17.2 all 5 steps passed**, self-test 23/23 (73.9 s), with points — all in 0.18.0 (see `CHANGELOG.md`).
+Before: 0.13.1 all 4 steps passed, 21/21 (66.8 s). Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
 Before: 0.12.1 steps 1–3, 5 passed, 21/21 (50.7 s); step 4 (pull from a branch
 committed at once) and three requests → 0.13.0. Before: **0.12.0 all 5 steps passed** — that was the two-folder trial (two clones of the
 sandbox, `Claude_SandBox` and `Claude_SandBox_B`, still on his PC) — self-test 21/21 in 44.6 s, Git 2.52.0. His four
 points on the branch panel went into 0.12.1. He has no DOORS/Jama to try ReqIF: exports are validated against the
 official schema in `tests/reqif.test.ts` (`tests/fixtures/reqif-schema/`, xmllint-wasm).
 
-Automated tests: 529 unit tests (with a coverage floor) + 11 e2e scenarios (`journey`, `fixes`, `excel`, `branches`,
-`language`, `health`, `qa-0.15.0-polish`, `qa-0.16.0-rename`, `fixes-0.16.3`, `fixes-0.16.4`, `structure-0.17`) + the 23-step in-app release self-test + the CI acceptance run on the installed app; what each covers and every speed measurement: `docs/TESTING.md` → "Automated
+Automated tests: 563 unit tests (with a coverage floor) + 12 e2e scenarios (`history-0.18`, `journey`, `fixes`, `excel`, `branches`,
+`language`, `health`, `qa-0.15.0-polish`, `qa-0.16.0-rename`, `fixes-0.16.3`, `fixes-0.16.4`, `structure-0.17`) + the 24-step in-app release self-test + the CI acceptance run on the installed app; what each covers and every speed measurement: `docs/TESTING.md` → "Automated
 checks in detail".
 
 ## Where we are right now (2 Nov 2026) — read this first

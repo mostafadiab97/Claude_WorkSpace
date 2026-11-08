@@ -2,6 +2,7 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
 import type { ItemQuery, Schema, SortKey } from '../../../shared/domain'
 import { T } from '../../../shared/text'
+import { renderItemText } from '../lib/markdown'
 import { isHeading } from '../lib/schema'
 import { clampWidth, columnTemplate, columnsFor, linkTitle, tableMinWidth, type ColumnPrefs } from './table/columns'
 import { useRowDrag } from './table/drag'
@@ -12,6 +13,8 @@ export { columnOrder, defaultOrder, moveColumn, optionalColumns, orderColumns, s
 export type { Row } from './table/rows'
 
 const ROW_HEIGHT = 34
+/** First guess for a row with title and text (D-19a); each row is then measured. */
+const FULL_ROW_GUESS = 72
 const HEADER_HEIGHT = 37
 const INDENT = 14
 
@@ -91,8 +94,9 @@ export function ItemTable(props: {
   // a column header being dragged to a new place (rows have their own drag and drop)
   const [colDrag, setColDrag] = useState<string | null>(null)
   const [colOver, setColOver] = useState<string | null>(null)
+  // while the main column shows the text (D-19a), a Text column would only repeat it
   // eslint-disable-next-line react-hooks/exhaustive-deps -- the column labels follow the language
-  const saved = useMemo(() => columnsFor(schema, prefs), [schema, prefs, lang])
+  const saved = useMemo(() => columnsFor(schema, prefs).filter((c) => !(prefs.oneLine !== true && c.key === 'text')), [schema, prefs, lang])
   // while a column edge is dragged, its width lives here and is saved when the mouse is released
   const [live, setLive] = useState<{ key: string; width: number } | null>(null)
   const columns = live ? saved.map((c) => (c.key === live.key ? { ...c, width: live.width } : c)) : saved
@@ -132,8 +136,11 @@ export function ItemTable(props: {
   const isTree = mode === 'tree'
   const sort = query.sort ?? { by: 'order' as const }
 
-  const flat = useFlatRows(!isTree, query, dataVersion, onTotal)
-  const tree = useTreeRows(isTree, sort, dataVersion, query.document, props.documentGroups)
+  // D-19a (the owner, 8 Nov 2026): the main column shows each item's title and full text, rows grow; the toolbar switch
+  // "One line" turns it back into one line per item
+  const full = props.prefs.oneLine !== true
+  const flat = useFlatRows(!isTree, query, dataVersion, onTotal, full)
+  const tree = useTreeRows(isTree, sort, dataVersion, query.document, props.documentGroups, full)
   const count = isTree ? tree.rows.length : flat.count
   const rowAt = (i: number): Row | undefined => (isTree ? tree.rows[i] : flat.rowAt(i))
   const indexOf = (id: string): number => (isTree ? tree.rows.findIndex((r) => r.kind === 'item' && r.item.id === id) : flat.indexOf(id))
@@ -152,7 +159,7 @@ export function ItemTable(props: {
   const virtualizer = useVirtualizer({
     count,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => ROW_HEIGHT,
+    estimateSize: () => (full ? FULL_ROW_GUESS : ROW_HEIGHT),
     // the sticky header sits above the first row inside the same scroll area
     scrollMargin: HEADER_HEIGHT,
     overscan: 12
@@ -243,7 +250,7 @@ export function ItemTable(props: {
 
   return (
     <div
-      className="table table__scroll scroll"
+      className={full ? 'table table--full table__scroll scroll' : 'table table__scroll scroll'}
       role={isTree ? 'treegrid' : 'grid'}
       aria-rowcount={count}
       aria-label={T.table.label}
@@ -327,7 +334,7 @@ export function ItemTable(props: {
           <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
             {visible.map((v) => {
               const row = rowAt(v.index)
-              const style = { gridTemplateColumns: template, height: ROW_HEIGHT, transform: `translateY(${v.start - HEADER_HEIGHT}px)` }
+              const style = full ? { gridTemplateColumns: template, minHeight: ROW_HEIGHT, transform: `translateY(${v.start - HEADER_HEIGHT}px)` } : { gridTemplateColumns: template, height: ROW_HEIGHT, transform: `translateY(${v.start - HEADER_HEIGHT}px)` }
               if (row?.kind === 'more' || row?.kind === 'loading') {
                 return (
                   <div key={v.key} role="row" className={`table__row table__row--more${row.kind === 'loading' ? ' table__row--loading' : ''}`} style={style}>
@@ -369,6 +376,8 @@ export function ItemTable(props: {
                   aria-level={isTree && row ? row.depth + 1 : undefined}
                   aria-expanded={isTree && item && item.childCount > 0 ? open : undefined}
                   data-id={item?.id}
+                  data-index={v.index}
+                  ref={full ? virtualizer.measureElement : undefined}
                   className={`table__row${selected ? ' table__row--selected' : ''}${isChosen ? ' table__row--chosen' : ''}${dropClass}`}
                   style={style}
                   draggable={Boolean(item)}
@@ -423,9 +432,13 @@ export function ItemTable(props: {
                             ) : (
                               <span className="tree__toggle tree__toggle--leaf" aria-hidden="true" />
                             )}
-                            <span className={isHeading(schema, item.type) ? 'table__text table__text--heading' : 'table__text'} dir="auto">
-                              {c.value(item)}
-                            </span>
+                            {full ? (
+                              <MainCell heading={isHeading(schema, item.type)} title={c.value(item)} text={item.text} />
+                            ) : (
+                              <span className={isHeading(schema, item.type) ? 'table__text table__text--heading' : 'table__text'} dir="auto">
+                                {c.value(item)}
+                              </span>
+                            )}
                             {incompleteMark(item.id)}
                             {item.childCount > 0 && !open && <span className="table__count">{item.childCount.toLocaleString('en')}</span>}
                           </span>
@@ -439,7 +452,7 @@ export function ItemTable(props: {
                             // user content takes its own direction, so it is cut at the right end in either window (UX-02)
                             dir={c.key === 'number' || c.key === 'id' || c.key === 'links' ? undefined : 'auto'}
                           >
-                            {c.value(item)}
+                            {c.key === 'title' && full ? <MainCell heading={isHeading(schema, item.type)} title={c.value(item)} text={item.text} /> : c.value(item)}
                             {c.key === 'title' && incompleteMark(item.id)}
                           </span>
                         )
@@ -452,5 +465,19 @@ export function ItemTable(props: {
         )}
       </div>
     </div>
+  )
+}
+
+/**
+ * The main column (D-19a), like the DOORS module view: a heading shows its title; any other item its title in bold and
+ * its whole text below (formatted as in the editor's preview).
+ */
+function MainCell({ heading, title, text }: { heading: boolean; title: string; text: string }) {
+  const html = useMemo(() => (heading || !text.trim() ? '' : renderItemText(text)), [heading, text])
+  return (
+    <span className="table__main" dir="auto">
+      <span className={heading ? 'table__text table__text--heading' : 'table__text table__main-title'}>{title}</span>
+      {html && <span className="table__main-text markdown" dangerouslySetInnerHTML={{ __html: html }} />}
+    </span>
   )
 }

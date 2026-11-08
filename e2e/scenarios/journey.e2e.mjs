@@ -212,7 +212,11 @@ await scenario('E2E journey', async (ctx) => {
   const colMenu = win.getByRole('dialog', { name: 'Columns' })
   check((await colMenu.getByRole('checkbox', { name: 'Text' }).count()) === 1 && (await colMenu.getByRole('checkbox', { name: 'Links' }).count()) === 1, 'Columns menu offers Text and Links')
   await win.keyboard.press('Escape')
-  check((await win.getByRole('columnheader', { name: /^Text/ }).count()) === 1 && (await win.getByRole('columnheader', { name: /^Links/ }).count()) === 1, 'table has Text and Links columns')
+  // D-19a (0.19.0): the main column shows title and whole text; "Show text" off gives one line and the Text column
+  check((await rowOf('Temperature accuracy').locator('.table__main-text', { hasText: 'thermostat shall measure' }).count()) === 1, 'the main column shows the whole text under the title')
+  check((await win.getByRole('columnheader', { name: /^Text/ }).count()) === 0, 'no Text column while the main column shows the text')
+  await win.getByRole('button', { name: 'Show text' }).click()
+  check((await win.getByRole('columnheader', { name: /^Text/ }).count()) === 1 && (await win.getByRole('columnheader', { name: /^Links/ }).count()) === 1, 'one line per item: table has Text and Links columns')
   check((await rowOf('Temperature accuracy').locator('.table__td').filter({ hasText: 'thermostat shall measure' }).count()) === 1, 'Text column shows the start of the text')
   const headers = () => win.getByRole('columnheader').allTextContents()
   const before = (await headers()).findIndex((h) => h.startsWith('Text'))
@@ -221,6 +225,7 @@ await scenario('E2E journey', async (ctx) => {
   await win.getByRole('button', { name: 'Move Text column up' }).click()
   await win.keyboard.press('Escape')
   check((await headers()).findIndex((h) => h.startsWith('Text')) === before - 2, 'Columns menu moves the Text column two places left')
+  await win.getByRole('button', { name: 'Show text' }).click() // back to the main column for the rest
   await win.getByRole('button', { name: /^Columns/ }).click()
   await win.getByRole('button', { name: 'Edit fields…' }).click()
   await win.getByRole('button', { name: '+ Add field' }).click()

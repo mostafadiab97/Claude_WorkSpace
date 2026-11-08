@@ -68,6 +68,8 @@ export interface ColumnPrefs {
   order: string[]
   /** Column key → width in px; columns without an entry size themselves. */
   widths?: Readonly<Record<string, number>>
+  /** One line per item (D-19a switch); otherwise the main column shows each item's title and full text, rows grow. */
+  oneLine?: boolean
 }
 
 export const MIN_COLUMN_PX = 48

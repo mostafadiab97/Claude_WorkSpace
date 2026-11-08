@@ -95,6 +95,16 @@ export function Toolbar({ searchRef, newRef, ...props }: {
         </button>
       )}
       <ColumnsMenu schema={schema} prefs={props.prefs} onChange={props.onPrefs} onEditFields={props.onEditFields} onEditTypes={props.onEditTypes} />
+      {/* D-19a: title and whole text in the main column, or one line per item */}
+      <button
+        type="button"
+        className={props.prefs.oneLine ? 'btn' : 'btn btn--active'}
+        aria-pressed={props.prefs.oneLine !== true}
+        title={tw.showTextTooltip}
+        onClick={() => props.onPrefs({ ...props.prefs, oneLine: props.prefs.oneLine !== true })}
+      >
+        {tw.showText}
+      </button>
       {importOn && !props.readOnly && (
         <button type="button" className="btn" onClick={props.onImport} title={T.importDialog.buttonTooltip}>
           {T.importDialog.button}

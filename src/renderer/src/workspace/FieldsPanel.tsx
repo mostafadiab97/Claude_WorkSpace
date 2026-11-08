@@ -17,8 +17,8 @@ export function useColumnPrefs(root: string): [ColumnPrefs, (next: ColumnPrefs) 
     try {
       const raw = localStorage.getItem(storageKey(root))
       if (raw) {
-        const p = JSON.parse(raw) as { hidden?: string[]; order?: string[]; widths?: Record<string, number> }
-        return { hidden: new Set(p.hidden ?? []), order: p.order ?? [], widths: p.widths ?? {} }
+        const p = JSON.parse(raw) as { hidden?: string[]; order?: string[]; widths?: Record<string, number>; oneLine?: boolean }
+        return { hidden: new Set(p.hidden ?? []), order: p.order ?? [], widths: p.widths ?? {}, oneLine: p.oneLine === true }
       }
       const old = localStorage.getItem(oldKey(root)) // v0.3.0 kept only the hidden list
       return { hidden: new Set(old ? (JSON.parse(old) as string[]) : []), order: [] }
@@ -29,7 +29,7 @@ export function useColumnPrefs(root: string): [ColumnPrefs, (next: ColumnPrefs) 
   const update = (next: ColumnPrefs): void => {
     setPrefs(next)
     try {
-      localStorage.setItem(storageKey(root), JSON.stringify({ hidden: [...next.hidden], order: next.order, widths: next.widths ?? {} }))
+      localStorage.setItem(storageKey(root), JSON.stringify({ hidden: [...next.hidden], order: next.order, widths: next.widths ?? {}, oneLine: next.oneLine === true }))
     } catch {
       // storage unavailable: the choice lasts until the window closes
     }
@@ -154,9 +154,9 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
                   ⋮⋮
                 </span>
                 <label className="check">
-                  <input type="checkbox" checked={c.fixed === true || !hidden.has(c.key)} disabled={c.fixed} onChange={() => toggle(c.key)} />
+                  <input type="checkbox" checked={c.fixed === true || !hidden.has(c.key)} disabled={c.fixed || (c.key === 'text' && prefs.oneLine !== true)} onChange={() => toggle(c.key)} />
                   {c.label}
-                  {c.builtIn && <span className="muted-inline">{T.columnsMenu.builtIn}</span>}
+                  {c.key === 'text' && prefs.oneLine !== true ? <span className="muted-inline">{T.columnsMenu.textInMain}</span> : c.builtIn && <span className="muted-inline">{T.columnsMenu.builtIn}</span>}
                 </label>
                 <span className="actions">
                   <button type="button" className="icon-btn icon-btn--small" aria-label={T.columnsMenu.up(c.label)} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
@@ -166,7 +166,7 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
             ))}
           </ul>
           <div className="actions actions--spread popover__footer">
-            <button type="button" className="link-btn" onClick={() => onChange({ hidden: new Set(), order: [], widths: {} })} disabled={hidden.size === 0 && prefs.order.length === 0 && Object.keys(prefs.widths ?? {}).length === 0}>
+            <button type="button" className="link-btn" onClick={() => onChange({ hidden: new Set(), order: [], widths: {}, oneLine: prefs.oneLine === true })} disabled={hidden.size === 0 && prefs.order.length === 0 && Object.keys(prefs.widths ?? {}).length === 0}>
               {T.columnsMenu.reset}
             </button>
             <button

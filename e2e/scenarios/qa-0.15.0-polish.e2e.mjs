@@ -31,9 +31,10 @@ await scenario('E2E qa-0.15.0-polish', async (ctx) => {
   await win.locator('.table__row').first().waitFor()
 
   console.log('UX-08 — formatted text from a commit is harmless')
-  const cell = await win.locator('.table__row', { hasText: 'Hostile text' }).locator('[role=gridcell]').last().textContent() // Text is the last column by default (UX-03)
-  check(!/\*\*/.test(cell ?? ''), `the Text cell shows no Markdown markers (${JSON.stringify(cell?.slice(0, 60))})`)
-  check((cell ?? '').includes('SIG_BRAKE_REQ'), 'the Text cell keeps underscores in signal names')
+  // 0.19.0 (D-19a): the text is shown formatted under the title in the main column
+  const cell = await win.locator('.table__row', { hasText: 'Hostile text' }).locator('.table__main-text').textContent()
+  check(!/\*\*/.test(cell ?? ''), `the text shows no Markdown markers (${JSON.stringify(cell?.slice(0, 60))})`)
+  check((cell ?? '').includes('SIG_BRAKE_REQ'), 'the text keeps underscores in signal names')
   await win.locator('.table__row', { hasText: 'Hostile text' }).click()
   const preview = win.locator('.text-preview')
   await preview.waitFor()

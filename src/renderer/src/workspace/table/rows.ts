@@ -31,8 +31,9 @@ type Sort = NonNullable<ItemQuery['sort']>
 
 // ---------------------------------------------------------------- flat list (search / filters)
 
-export function useFlatRows(active: boolean, query: Omit<ItemQuery, 'limit' | 'offset'>, dataVersion: number, onTotal?: (n: number) => void) {
-  const queryKey = JSON.stringify(query)
+/** `fullText`: the rows carry each item's whole text (the main column, D-19a), not the short preview. */
+export function useFlatRows(active: boolean, query: Omit<ItemQuery, 'limit' | 'offset'>, dataVersion: number, onTotal?: (n: number) => void, fullText = false) {
+  const queryKey = JSON.stringify([query, fullText])
   const [total, setTotal] = useState(0)
   const [pages, setPages] = useState<Map<number, IndexedItem[]>>(new Map())
   const loading = useRef(new Set<number>())
@@ -42,7 +43,7 @@ export function useFlatRows(active: boolean, query: Omit<ItemQuery, 'limit' | 'o
     if (!active) return
     const gen = ++generation.current
     loading.current = new Set([0])
-    void window.reqochet.queryItems({ ...query, limit: PAGE, offset: 0, brief: true }).then((r) => {
+    void window.reqochet.queryItems({ ...query, limit: PAGE, offset: 0, brief: !fullText }).then((r) => {
       if (gen !== generation.current) return
       setTotal(r.total)
       onTotal?.(r.total)
@@ -59,7 +60,7 @@ export function useFlatRows(active: boolean, query: Omit<ItemQuery, 'limit' | 'o
       for (let p = Math.floor(first / PAGE); p <= Math.floor(last / PAGE); p++) {
         if (pages.has(p) || loading.current.has(p)) continue
         loading.current.add(p)
-        void window.reqochet.queryItems({ ...query, limit: PAGE, offset: p * PAGE, brief: true }).then((r) => {
+        void window.reqochet.queryItems({ ...query, limit: PAGE, offset: p * PAGE, brief: !fullText }).then((r) => {
           if (gen !== generation.current) return
           loading.current.delete(p)
           setPages((prev) => new Map(prev).set(p, r.items))
@@ -136,7 +137,7 @@ export function treeRows(levels: ReadonlyMap<string, Level>, open: OpenState, gr
  * `document`: only that document's tree (S-10); undefined = all documents — then `groups` (two or more documents)
  * shows one collapsible row per document with its tree inside.
  */
-export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, document?: string, groups?: readonly DocumentGroup[]) {
+export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, document?: string, groups?: readonly DocumentGroup[], fullText = false) {
   const grouped = document === undefined && groups !== undefined && groups.length > 1
   const groupNames = grouped ? (groups as DocumentGroup[]).map((g) => g.name).join('\u0000') : ''
   const [closedGroups, setClosedGroups] = useState<ReadonlySet<string>>(new Set())
@@ -155,7 +156,7 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
   const generation = useRef(0)
   const inflight = useRef(new Set<string>())
   // the document is part of the key: another document is another tree (S-10)
-  const sortKey = JSON.stringify([sort, document ?? null, groupNames])
+  const sortKey = JSON.stringify([sort, document ?? null, groupNames, fullText])
   // an answer for another sort or document that arrives late must not overwrite the current tree (the e2e run showed
   // "All documents" with only the previous document's row after a save + switch)
   const sortKeyRef = useRef(sortKey)
@@ -167,7 +168,7 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
     async (key: string, limit: number): Promise<Level> => {
       // a document group's top level, an item's children, or the top level of one document / all documents
       const where = isGroupKey(key) ? { parent: null, document: key.slice(1) } : { parent: key || null, ...(document !== undefined && !key ? { document } : {}) }
-      const r = await window.reqochet.queryItems({ ...where, sort, limit, brief: true })
+      const r = await window.reqochet.queryItems({ ...where, sort, limit, brief: !fullText })
       return { items: r.items, total: r.total, limit }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sortKey stands for sort
@@ -178,7 +179,7 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
   const fetchAll = useCallback(async (): Promise<Map<string, Level>> => {
     const all: IndexedItem[] = []
     for (let offset = 0; ; offset += 10_000) {
-      const r = await window.reqochet.queryItems({ sort, limit: 10_000, offset, brief: true, ...(document !== undefined ? { document } : {}) })
+      const r = await window.reqochet.queryItems({ sort, limit: 10_000, offset, brief: !fullText, ...(document !== undefined ? { document } : {}) })
       all.push(...r.items)
       if (r.items.length === 0 || all.length >= r.total) break
     }

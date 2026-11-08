@@ -42,6 +42,8 @@ if (!expected || expected !== actual) throw new Error(`${file}: checksum ${actua
 const dist = join(electronDir, 'dist')
 rmSync(dist, { recursive: true, force: true })
 mkdirSync(dist, { recursive: true })
-execFileSync('tar', ['-xf', join(dir, file), '-C', dist], { stdio: 'inherit' }) // Windows 10+ tar reads zip files
+// Windows' own tar reads zip files; Git's tar (first on the path in Git Bash) would take "D:" for a host name
+const tar = process.platform === 'win32' ? join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'tar.exe') : 'tar'
+execFileSync(tar, ['-xf', join(dir, file), '-C', dist], { stdio: 'inherit' })
 writeFileSync(join(electronDir, 'path.txt'), exe)
 console.log(`Electron ${version} installed from ${file} (checksum checked)`)

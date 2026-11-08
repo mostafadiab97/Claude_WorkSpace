@@ -46,7 +46,10 @@ jobs:
           node-version: 22
           cache: npm
 
-      - run: npm ci
+      - name: Install (retried)
+        shell: bash
+        # GitHub's file downloads sometimes time out (8 Nov 2026: 504 for the Electron zip for an hour) — try again
+        run: for attempt in 1 2 3 4; do npm ci && node -e "require('electron')" && exit 0; echo "npm ci attempt $attempt failed; waiting"; sleep 90; done; exit 1
       - run: npm run check
       - name: Performance tests (10,000 items; 50,000 runs for releases)
         run: npm run test:perf

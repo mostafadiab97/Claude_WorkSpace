@@ -1,5 +1,5 @@
 // Core (main) process entry: creates the window, wires services, registers the UI API.
-import { app, BrowserWindow, dialog, shell } from 'electron'
+import { app, BrowserWindow, dialog, nativeTheme, shell } from 'electron'
 import { join } from 'node:path'
 import { createServices, type Paths } from './composition'
 import { registerIpc } from './ipc'
@@ -37,6 +37,12 @@ function resolvePaths(): Paths {
   }
 }
 
+/** The window and taskbar icon for the current Windows colours (the taskbar's own colour where Windows tells it). */
+function windowIcon(): string {
+  const dark = process.platform === 'win32' ? nativeTheme.shouldUseDarkColorsForSystemIntegratedUI : nativeTheme.shouldUseDarkColors
+  return join(app.isPackaged ? process.resourcesPath : app.getAppPath(), 'resources', 'brand', 'icon', 'png', dark ? 'reqochet-icon-256.png' : 'reqochet-icon-light-256.png')
+}
+
 function createWindow(services: ReturnType<typeof createServices>): void {
   const win = new BrowserWindow({
     width: 1200,
@@ -45,8 +51,9 @@ function createWindow(services: ReturnType<typeof createServices>): void {
     minHeight: 560,
     show: false,
     title: PRODUCT,
-    // the brand icon also when running from source (the installed app takes it from its .exe) — BR-11
-    icon: join(app.isPackaged ? process.resourcesPath : app.getAppPath(), 'resources', 'brand', 'icon', 'png', 'reqochet-icon-256.png'),
+    // the brand icon in the taskbar follows Windows: dark tile on a dark taskbar, light tile on a light one (the owner,
+    // 8 Nov 2026); the .exe, Start menu and desktop shortcut carry the light tile (they cannot change by themselves)
+    icon: windowIcon(),
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -56,6 +63,11 @@ function createWindow(services: ReturnType<typeof createServices>): void {
     }
   })
   win.once('ready-to-show', () => win.show())
+  const followTheme = (): void => {
+    if (!win.isDestroyed()) win.setIcon(windowIcon())
+  }
+  nativeTheme.on('updated', followTheme)
+  win.on('closed', () => nativeTheme.off('updated', followTheme))
 
   // Links open in the user's browser, never inside the app.
   win.webContents.setWindowOpenHandler(({ url }) => {

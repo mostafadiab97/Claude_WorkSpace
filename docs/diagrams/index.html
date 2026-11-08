@@ -43,15 +43,15 @@
   <ul>
       <li><a href="#architecture" data-name="architecture">
         <span class="kind">Architecture</span>
-        <span class="title">ReqMan — how the parts connect</span>
-        <span class="about">Every part of ReqMan, what it may talk to, and where data lives.</span>
+        <span class="title">reqochet — how the parts connect</span>
+        <span class="about">Every part of reqochet, what it may talk to, and where data lives.</span>
         <span class="parts">Engineer · Window (renderer) · Bridge (preload) · main/ipc.ts · workspace · repository-store · index-cache · requirements/ · SQLite cache · git-adapter · Git for Windows · GitHub</span>
       </a></li>
       <li><a href="#save-flow" data-name="save-flow">
         <span class="kind">Sequence</span>
         <span class="title">Saving an item — conflict-safe</span>
         <span class="about">What happens between clicking Save and the file on disk — and how a newer version is never overwritten.</span>
-        <span class="parts">Editor · main/ipc.ts · workspace · repository-store · items/&lt;ID&gt;.md · index-cache</span>
+        <span class="parts">Editor · main/ipc.ts · workspace · repository-store · &lt;document&gt;/&lt;ID&gt;.md · index-cache</span>
       </a></li>
       <li><a href="#pull-flow" data-name="pull-flow">
         <span class="kind">Workflow</span>

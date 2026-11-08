@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 770 320" role="img" aria-label="Where your requirements live: a requirements folder with one folder per document and one file per requirement, shown in reqochet as a numbered tree per document" class="gd">
+<style>
+.gd-box{fill:var(--rm-color-surface,#ffffff);stroke:var(--rm-color-border,#c9ced8);stroke-width:1.5}
+.gd-alt{fill:var(--rm-color-surface-alt,#f1f3f6);stroke:var(--rm-color-border,#c9ced8);stroke-width:1.5}
+.gd-key{fill:var(--rm-color-surface,#ffffff);stroke:var(--rm-color-primary,#2f5bd3);stroke-width:2}
+.gd-warn{fill:var(--rm-color-surface,#ffffff);stroke:var(--rm-color-warning,#8f5600);stroke-width:2}
+.gd-t{fill:var(--rm-color-text,#1b1f27);font:600 14px system-ui,sans-serif}
+.gd-s{fill:var(--rm-color-text-muted,#5c6370);font:13px system-ui,sans-serif}
+.gd-c{fill:var(--rm-color-text,#1b1f27);font:13px ui-monospace,Consolas,monospace}
+.gd-line{stroke:var(--rm-color-text-muted,#5c6370);stroke-width:1.5;fill:none}
+.gd-arrow{stroke:var(--rm-color-primary,#2f5bd3);stroke-width:2;fill:none}
+.gd-warnline{stroke:var(--rm-color-warning,#8f5600);stroke-width:2;fill:none;stroke-dasharray:6 4}
+.gd-head{fill:var(--rm-color-primary,#2f5bd3)}
+.gd-whead{fill:var(--rm-color-warning,#8f5600)}
+.gd-ok{fill:var(--rm-color-success,#1f7a3d);font:600 13px system-ui,sans-serif}
+.gd-wt{fill:var(--rm-color-warning,#8f5600);font:600 13px system-ui,sans-serif}
+</style>
+<defs>
+<marker id="gd-a-files" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="gd-head" d="M0 0L10 5L0 10z"/></marker>
+<marker id="gd-w-files" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="gd-whead" d="M0 0L10 5L0 10z"/></marker>
+</defs>
+
+<rect class="gd-alt" x="10" y="10" width="420" height="300" rx="10"/>
+<text class="gd-t" x="26" y="36">Your Git repository</text>
+<text class="gd-s" x="26" y="54">(on GitHub, and a copy on your PC)</text>
+<rect class="gd-box" x="30" y="70" width="380" height="225" rx="8"/>
+<text class="gd-c" x="46" y="94">requirements/</text>
+<path class="gd-line" d="M54 102V272M54 122H70M54 166H70M54 254H70"/>
+<text class="gd-c" x="76" y="126">.reqochet/schema.yaml</text>
+<text class="gd-s" x="250" y="126">types and fields</text>
+<rect class="gd-key" x="74" y="146" width="320" height="86" rx="6"/>
+<text class="gd-c" x="86" y="170">System/</text>
+<text class="gd-s" x="160" y="170">← a document (a specification)</text>
+<text class="gd-c" x="104" y="194">REQ-K7Q3XMB.md</text>
+<text class="gd-s" x="240" y="194">← one requirement</text>
+<text class="gd-c" x="104" y="216">REQ-2M9RT4Q.md …</text>
+<text class="gd-c" x="76" y="258">Software/</text>
+<text class="gd-s" x="160" y="258">← another document</text>
+<path class="gd-arrow" d="M440 160H500" marker-end="url(#gd-a-files)"/>
+<rect class="gd-box" x="510" y="70" width="250" height="225" rx="8"/>
+<text class="gd-t" x="526" y="96">reqochet shows it as</text>
+<text class="gd-s" x="526" y="116">a tree per document</text>
+<text class="gd-c" x="530" y="150">▾ System</text>
+<text class="gd-c" x="550" y="174">1   Overview</text>
+<text class="gd-c" x="550" y="198">1.1 Temperature</text>
+<text class="gd-c" x="550" y="222">1.2 Display</text>
+<text class="gd-c" x="530" y="252">▸ Software</text>
+<text class="gd-s" x="526" y="282">numbers are calculated</text>
+
+</svg>

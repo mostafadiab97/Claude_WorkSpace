@@ -117,6 +117,14 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
                 </label>
               </li>
             )}
+            {/* Title is always shown and always comes right after No. — listed so the list is complete (the owner, 8 Nov) */}
+            <li className="popover__row">
+              <label className="check">
+                <input type="checkbox" checked disabled />
+                {T.columns.title}
+                <span className="muted-inline">{T.columnsMenu.alwaysFirst}</span>
+              </label>
+            </li>
             {movable.map((c, i) => (
               <li
                 key={c.key}

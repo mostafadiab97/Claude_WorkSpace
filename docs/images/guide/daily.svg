@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 770 300" role="img" aria-label="Your daily round: pull, edit and save, look at changes, commit, push to GitHub, and again" class="gd">
+<style>
+.gd-box{fill:var(--rm-color-surface,#ffffff);stroke:var(--rm-color-border,#c9ced8);stroke-width:1.5}
+.gd-alt{fill:var(--rm-color-surface-alt,#f1f3f6);stroke:var(--rm-color-border,#c9ced8);stroke-width:1.5}
+.gd-key{fill:var(--rm-color-surface,#ffffff);stroke:var(--rm-color-primary,#2f5bd3);stroke-width:2}
+.gd-warn{fill:var(--rm-color-surface,#ffffff);stroke:var(--rm-color-warning,#8f5600);stroke-width:2}
+.gd-t{fill:var(--rm-color-text,#1b1f27);font:600 14px system-ui,sans-serif}
+.gd-s{fill:var(--rm-color-text-muted,#5c6370);font:13px system-ui,sans-serif}
+.gd-c{fill:var(--rm-color-text,#1b1f27);font:13px ui-monospace,Consolas,monospace}
+.gd-line{stroke:var(--rm-color-text-muted,#5c6370);stroke-width:1.5;fill:none}
+.gd-arrow{stroke:var(--rm-color-primary,#2f5bd3);stroke-width:2;fill:none}
+.gd-warnline{stroke:var(--rm-color-warning,#8f5600);stroke-width:2;fill:none;stroke-dasharray:6 4}
+.gd-head{fill:var(--rm-color-primary,#2f5bd3)}
+.gd-whead{fill:var(--rm-color-warning,#8f5600)}
+.gd-ok{fill:var(--rm-color-success,#1f7a3d);font:600 13px system-ui,sans-serif}
+.gd-wt{fill:var(--rm-color-warning,#8f5600);font:600 13px system-ui,sans-serif}
+</style>
+<defs>
+<marker id="gd-a-daily" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="gd-head" d="M0 0L10 5L0 10z"/></marker>
+<marker id="gd-w-daily" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="gd-whead" d="M0 0L10 5L0 10z"/></marker>
+</defs>
+
+<rect class="gd-alt" x="300" y="120" width="170" height="70" rx="10"/>
+<text class="gd-t" x="385" y="150" text-anchor="middle">GitHub</text>
+<text class="gd-s" x="385" y="170" text-anchor="middle">the shared copy</text>
+<rect class="gd-key" x="20" y="20" width="200" height="64" rx="8"/>
+<text class="gd-t" x="36" y="46">1  Pull</text>
+<text class="gd-s" x="36" y="68">your colleagues' changes</text>
+<rect class="gd-box" x="285" y="20" width="200" height="64" rx="8"/>
+<text class="gd-t" x="301" y="46">2  Edit and Save</text>
+<text class="gd-s" x="301" y="68">the files on your PC change</text>
+<rect class="gd-box" x="550" y="20" width="200" height="64" rx="8"/>
+<text class="gd-t" x="566" y="46">3  Look at Changes</text>
+<text class="gd-s" x="566" y="68">what you changed, per item</text>
+<rect class="gd-box" x="550" y="226" width="200" height="64" rx="8"/>
+<text class="gd-t" x="566" y="252">4  Commit</text>
+<text class="gd-s" x="566" y="274">a snapshot with a note</text>
+<rect class="gd-key" x="20" y="226" width="200" height="64" rx="8"/>
+<text class="gd-t" x="36" y="252">5  Push</text>
+<text class="gd-s" x="36" y="274">your snapshots to GitHub</text>
+<path class="gd-arrow" d="M224 52H280" marker-end="url(#gd-a-daily)"/>
+<path class="gd-arrow" d="M489 52H545" marker-end="url(#gd-a-daily)"/>
+<path class="gd-arrow" d="M650 88V221" marker-end="url(#gd-a-daily)"/>
+<path class="gd-arrow" d="M546 258H225" marker-end="url(#gd-a-daily)"/>
+<path class="gd-line" d="M120 222V96" marker-end="url(#gd-a-daily)"/>
+<path class="gd-line" stroke-dasharray="4 4" d="M170 226L300 182M120 88L300 128"/>
+<text class="gd-s" x="130" y="160">then again</text>
+
+</svg>

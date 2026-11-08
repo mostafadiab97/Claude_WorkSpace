@@ -18,11 +18,11 @@ logo/
   reqochet-logo-on-dark.svg       name, white letters, transparent bg
   reqochet-logo-on-*-2000.png     same, 2000 px wide PNG
 icon/
-  reqochet.ico                    Windows app icon, dark tile (16,20,24,32,40,48,64,256) ← DEFAULT
-  reqochet-light.ico              same, white tile
+  reqochet.ico                    Windows app icon, dark tile (16,20,24,32,40,48,64,256) — taskbar on a dark Windows
+  reqochet-light.ico              same, white tile with a grey outline (#9aa3b2) ← DEFAULT (.exe, Start menu, desktop; owner 8 Nov 2026)
   reqochet-icon.svg               dark tile — use at ≥ 32 px
   reqochet-icon-small.svg         dark tile, heavier "small cut" — use at 16–24 px
-  reqochet-icon-light(-small).svg white tile versions
+  reqochet-icon-light(-small).svg white tile versions, grey outline (class ring) to stand out on white
   png/reqochet-icon[-light]-{16…512}.png
 motion/
   reqochet-loading-on-light.svg   splash/loading: name with the two dots bouncing (1.4 s loop)

@@ -14,7 +14,7 @@ product owner: I decide the product, install every release on my Windows 11 PC a
 
 1. Add and clone the repository <owner>/Claude_WorkSpace, and clone the test data
    <owner>/Claude_SandBox next to it (never inside).
-2. Read CLAUDE.md completely, then docs/README.md, then the open files in docs/reviews/
+2. Read CLAUDE.md completely, then docs/STATUS.md, then docs/README.md, then the open files in docs/reviews/
    (start with 2026-11-01-planning-discussion.md).
 3. Run `npm ci` and `npm run check` to confirm everything is green.
 4. Tell me in a few lines where we are (last version, what I reported, what is open) and continue with the
@@ -27,7 +27,7 @@ product owner: I decide the product, install every release on my Windows 11 PC a
 | Need | Where |
 | --- | --- |
 | Rules that must never be broken, commands, release steps | `CLAUDE.md` |
-| Current status, next step, decisions waiting | `CLAUDE.md` → "Status" and "Where we are right now" |
+| Current status, next step, decisions waiting | `docs/STATUS.md` → "Status" and "Where we are right now" |
 | Every decision with its date and reason | `docs/design/decisions.md`, `docs/design/roadmap.md`, discussion logs in `docs/reviews/` |
 | Working procedures (how releases and decision rounds are done) | `.claude/skills/` |
 | Mistakes not to repeat | `docs/PITFALLS.md` |
@@ -36,5 +36,5 @@ product owner: I decide the product, install every release on my Windows 11 PC a
 ## Before the old chat ends (checklist for the outgoing session)
 
 - Everything committed and pushed (`git status` clean, `git log origin/main..` empty).
-- `CLAUDE.md` "Where we are right now" names the last version, the owner's last report and the next open point.
+- `docs/STATUS.md` "Where we are right now" names the last version, the owner's last report and the next open point.
 - Any half-finished work is either finished, or described in "Where we are right now" with the branch/files.

@@ -13,7 +13,7 @@ import { useEditorWidth } from '../workspace/screen/EditorSplitter'
 import { setTeamFeatures } from '../lib/features'
 import { ImportDialog } from '../workspace/ImportDialog'
 import { RowMenu } from '../workspace/RowMenu'
-import { ItemTable, shownColumnKeys, withWidth, type TreeControls } from '../workspace/ItemTable'
+import { columnOrder, ItemTable, moveColumn, shownColumnKeys, withWidth, type TreeControls } from '../workspace/ItemTable'
 import { ProblemList, problemsOf } from '../workspace/screen/Problems'
 import { ALL_DOCUMENTS, DocumentBar } from '../workspace/screen/DocumentBar'
 import { Toolbar } from '../workspace/screen/Toolbar'
@@ -415,6 +415,8 @@ export function WorkspaceScreen({
             schema={schema}
             prefs={columnPrefs}
             onResize={(key, width) => setColumnPrefs({ ...columnPrefs, widths: withWidth(columnPrefs.widths, key, width) })}
+            documentGroups={document === ALL_DOCUMENTS && info.documents.length > 1 ? info.documents.map((d) => ({ name: d.name, count: d.itemCount })) : undefined}
+            onMoveColumn={(from, to) => setColumnPrefs({ ...columnPrefs, order: moveColumn(columnOrder(schema, columnPrefs.order), from, to) })}
             chosen={chosen}
             onChoose={(ids, how) =>
               setChosen((prev) => {

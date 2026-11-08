@@ -24,3 +24,5 @@ your scratch folder only; a changed drawing goes to the owner before it is used.
 - Evidence for every finding: the line, a command you ran, or a test that fails. Say F (checked) or I (inferred).
 - No personal data in the report (names, account names, e-mails) — the privacy check fails the build.
 - Plain language; explain any term in one line.
+- **Answer the builder** with three lines only: the report's path, the number of findings per severity, and the one
+  most important finding. The full table is in the file (saves the builder's context — the owner, 8 Nov 2026).

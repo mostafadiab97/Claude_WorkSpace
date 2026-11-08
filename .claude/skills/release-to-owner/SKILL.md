@@ -25,7 +25,7 @@ auto-update), typically an Electron app built and published by GitHub Actions.
   expected result. Everything else must be automated.
 - Changelog: what changed in the owner's words (fixes, speed with measured numbers, inside changes, testing),
   plus his decisions with dates. When he reports results, add them under that version.
-- Project memory (CLAUDE.md): status table, "next step", new pitfalls, test counts. Keep status only there and
+- Project status (`docs/STATUS.md`): status table, "next step", test counts; new pitfalls in `docs/PITFALLS.md`; CLAUDE.md only when a rule changes. Keep status only there and
   in the changelog; other docs link to them.
 - Test-data repository: if its data or README must change, change it directly, keep IDs stable, push, and
   tell the owner to `git pull` there. If the push is rejected, fetch, rebase your local commit on his commits,

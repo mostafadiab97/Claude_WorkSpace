@@ -8,7 +8,7 @@ import { useRowDrag } from './table/drag'
 import { useFlatRows, useTreeRows, type Row } from './table/rows'
 import { isRtlDocument, useLanguage } from '../lib/language'
 
-export { columnOrder, defaultOrder, optionalColumns, orderColumns, shownColumnKeys, columnsFor, withWidth, linkSummary, type Column, type ColumnPrefs } from './table/columns'
+export { columnOrder, defaultOrder, moveColumn, optionalColumns, orderColumns, shownColumnKeys, columnsFor, withWidth, linkSummary, type Column, type ColumnPrefs } from './table/columns'
 export type { Row } from './table/rows'
 
 const ROW_HEIGHT = 34
@@ -25,9 +25,16 @@ export interface TreeControls {
  * move them); with search or filters it is a flat list of the matches. Only visible rows are rendered and rows
  * are fetched from the index in pages (table/rows.ts), so it behaves the same with 50 or 50,000 items.
  */
+/** Drag data of a column header (not a row). */
+const COLUMN_MIME = 'application/x-reqochet-column'
+
 export function ItemTable(props: {
   schema: Schema
   prefs: ColumnPrefs
+  /** All documents (two or more): one collapsible group row per document (the owner, 8 Nov 2026). */
+  documentGroups?: { name: string; count: number }[]
+  /** A column header dragged onto another (the order is kept in the column preferences). */
+  onMoveColumn?: (from: string, to: string) => void
   mode: 'tree' | 'flat'
   query: Omit<ItemQuery, 'limit' | 'offset'>
   dataVersion: number
@@ -54,6 +61,9 @@ export function ItemTable(props: {
   const { schema, prefs, mode, query, dataVersion, selectedId, onSelect, onSort, onTotal, onMove, controlsRef, revealNonce, emptyText, onResize, chosen, onChoose, onRowMenu } = props
   const anchor = useRef<number | null>(null)
   const lang = useLanguage()
+  // a column header being dragged to a new place (rows have their own drag and drop)
+  const [colDrag, setColDrag] = useState<string | null>(null)
+  const [colOver, setColOver] = useState<string | null>(null)
   // eslint-disable-next-line react-hooks/exhaustive-deps -- the column labels follow the language
   const saved = useMemo(() => columnsFor(schema, prefs), [schema, prefs, lang])
   // while a column edge is dragged, its width lives here and is saved when the mouse is released
@@ -96,7 +106,7 @@ export function ItemTable(props: {
   const sort = query.sort ?? { by: 'order' as const }
 
   const flat = useFlatRows(!isTree, query, dataVersion, onTotal)
-  const tree = useTreeRows(isTree, sort, dataVersion, query.document)
+  const tree = useTreeRows(isTree, sort, dataVersion, query.document, props.documentGroups)
   const count = isTree ? tree.rows.length : flat.count
   const rowAt = (i: number): Row | undefined => (isTree ? tree.rows[i] : flat.rowAt(i))
   const indexOf = (id: string): number => (isTree ? tree.rows.findIndex((r) => r.kind === 'item' && r.item.id === id) : flat.indexOf(id))
@@ -218,8 +228,43 @@ export function ItemTable(props: {
     >
       <div className="table__inner" style={{ minWidth }}>
         <div className="table__head" role="row" style={{ gridTemplateColumns: template }}>
-          {columns.map((c) => (
-            <div key={c.key} role="columnheader" aria-sort={sortBy === c.key ? (desc ? 'descending' : 'ascending') : 'none'} className={`table__thcell${c.key === 'id' ? ' table__th--id' : ''}`} data-column={c.key}>
+          {columns.map((c, ci) => {
+            const movable = props.onMoveColumn !== undefined && c.key !== 'number' && c.key !== 'title'
+            const dropSide = colDrag && colOver === c.key && colDrag !== c.key && movable ? (columns.findIndex((x) => x.key === colDrag) < ci ? ' is-drop-after' : ' is-drop-before') : ''
+            return (
+            <div
+              key={c.key}
+              role="columnheader"
+              aria-sort={sortBy === c.key ? (desc ? 'descending' : 'ascending') : 'none'}
+              className={`table__thcell${c.key === 'id' ? ' table__th--id' : ''}${colDrag === c.key ? ' is-dragging' : ''}${dropSide}`}
+              data-column={c.key}
+              draggable={movable}
+              onDragStart={(e) => {
+                if (!movable) return
+                e.stopPropagation()
+                setColDrag(c.key)
+                e.dataTransfer.effectAllowed = 'move'
+                e.dataTransfer.setData(COLUMN_MIME, c.key)
+              }}
+              onDragOver={(e) => {
+                if (!colDrag) return
+                e.preventDefault()
+                e.stopPropagation()
+                if (colOver !== c.key) setColOver(c.key)
+              }}
+              onDrop={(e) => {
+                if (!colDrag) return
+                e.preventDefault()
+                e.stopPropagation()
+                if (movable) props.onMoveColumn?.(colDrag, c.key)
+                setColDrag(null)
+                setColOver(null)
+              }}
+              onDragEnd={() => {
+                setColDrag(null)
+                setColOver(null)
+              }}
+            >
               <button
                 type="button"
                 className={sortBy === c.key ? 'table__th table__th--sorted' : 'table__th'}
@@ -246,7 +291,8 @@ export function ItemTable(props: {
                 />
               )}
             </div>
-          ))}
+            )
+          })}
         </div>
         {count === 0 ? (
           typeof emptyText === 'string' ? <p className="table__empty">{emptyText}</p> : emptyText
@@ -267,6 +313,17 @@ export function ItemTable(props: {
                       ) : (
                         T.common.loading
                       )}
+                    </span>
+                  </div>
+                )
+              }
+              if (row?.kind === 'group') {
+                return (
+                  <div key={v.key} role="row" aria-level={1} aria-expanded={row.open} className="table__row table__row--group" style={style}>
+                    <span className="table__td table__td--group">
+                      <button type="button" className="table__group-toggle" aria-expanded={row.open} onClick={() => tree.setGroupOpen(row.name, !row.open)} title={row.open ? T.table.groupClose(row.name || T.documents.loose) : T.table.groupOpen(row.name || T.documents.loose)}>
+                        <span aria-hidden="true">{row.open ? '▾' : '▸'}</span> <strong>{row.name || T.documents.loose}</strong> <span className="muted-inline">{T.table.groupCount(row.count)}</span>
+                      </button>
                     </span>
                   </div>
                 )

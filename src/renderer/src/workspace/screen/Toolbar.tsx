@@ -88,7 +88,7 @@ export function Toolbar({ searchRef, newRef, ...props }: {
       </select>
       </FilterMenu>
       {f.filtered && (
-        <button type="button" className="btn" onClick={f.clear}>
+        <button type="button" className="btn btn--clear-filters" onClick={f.clear}>
           {tw.clearFilters}
         </button>
       )}

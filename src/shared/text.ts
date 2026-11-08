@@ -90,6 +90,52 @@ const en = {
       releases: 'Releases',
       releasesPage: 'Releases page (all versions, installers)'
     },
+    privacy: {
+      intro: 'What reqochet sees, keeps and sends, and what it is allowed to change. There are no accounts, no tracking and no cloud service: your requirements stay in your files and your Git repositories.',
+      sections: [
+        {
+          title: 'What it reads',
+          points: [
+            'The files in the requirements folder of a project you open (your items, the schema, the project settings).',
+            'Git information of that project: branches, changes, history, remotes and your Git name and e-mail.',
+            'Files you choose yourself in an Open or Import window (Excel, CSV, ReqIF).'
+          ]
+        },
+        {
+          title: 'What it keeps on this PC',
+          points: [
+            'A search index of your items (titles, texts, fields) so that 10,000 items open fast: %APPDATA%\\reqochet-dev\\cache. It is only a copy and can be deleted at any time.',
+            'Your settings, theme, the list of recently opened projects (their folder paths) and what you chose in an import: %APPDATA%\\reqochet-dev.',
+            'A log of what the app did (actions, file names, item IDs, Git messages; passwords and tokens are hidden): %APPDATA%\\reqochet-dev\\logs.',
+            'Small window choices (columns, the document you looked at) in the window\'s own storage.'
+          ]
+        },
+        {
+          title: 'What leaves this PC',
+          points: [
+            'Pull and Push send and receive your requirements to and from the Git remotes of the project (for example GitHub), with Git\'s own sign-in. reqochet never sees your password or token.',
+            'The update check asks GitHub for the newest reqochet-dev version and downloads it. GitHub sees your IP address and the version, as with any download.',
+            'Nothing else: no usage statistics, no crash uploads, no AI service. A problem report is a text file you save and send yourself — read it first; it contains the end of the log.'
+          ]
+        },
+        {
+          title: 'What it can change',
+          points: [
+            'reqochet runs with your Windows permissions, like any program you install. It writes only in the requirements folder of the project you opened, in its own folder above, and in files you choose in a Save window.',
+            'Git: it commits and pushes when you press Commit or Push (never a forced push), and pulls when you press Pull. Discard and Delete remove files only after you confirm.',
+            'Your Git name and e-mail: saved for the project when you enter them; in your global Git settings only when those are still empty.'
+          ]
+        },
+        {
+          title: 'Good to know',
+          points: [
+            'The index and the log keep requirement text on this PC unencrypted. For confidential projects use Windows drive encryption (BitLocker) — your company may already do so.',
+            'Git keeps every committed version: deleting an item removes it from the current version, not from the history. Everyone with access to the repository sees all of it.',
+            'The installer is not yet signed with a company certificate, so Windows may ask whether you trust it.'
+          ]
+        }
+      ]
+    },
     nav: {
       appearance: 'Appearance',
       appearanceIntro: 'Language of the window and colours. Your choice is remembered on this PC.',
@@ -101,6 +147,7 @@ const en = {
       report: 'Report a problem and diagnostics',
       features: 'Features',
       tests: 'Self-tests',
+      privacy: 'Privacy and access',
       guideNote: 'The user guide is in English for now.'
     },
     versions: {
@@ -282,6 +329,9 @@ const en = {
     sortTreeTooltip: (label: string) => `Sort by ${label} (within each parent); click again for descending, a third time for document order`,
     sortTooltip: (label: string) => `Sort by ${label}`,
     showMore: (hidden: number) => `Show more (${n(hidden)} hidden)`,
+    groupOpen: (name: string) => `Show the items of ${name}`,
+    groupClose: (name: string) => `Hide the items of ${name}`,
+    groupCount: (count: number) => `${n(count)} item${s(count)}`,
     collapse: (id: string) => `Collapse ${id}`,
     expand: (id: string) => `Expand ${id}`,
     resize: (label: string) => `Width of the ${label} column: drag (or ← →). Double-click: automatic width.`
@@ -549,7 +599,8 @@ const en = {
   columnsMenu: {
     button: (shown: number | null, all: number) => `Columns${shown !== null ? ` (${shown}/${all})` : ''} ▾`,
     label: 'Columns',
-    hint: 'Shown in the table, in this order after ID and Title. Drag a column edge in the table header to change its width.',
+    hint: 'Shown in the table in this order. Drag a row here, or a column header in the table, to move a column; drag a column edge to change its width.',
+    alwaysFirst: 'always shown first',
     builtIn: ' · built in',
     up: (label: string) => `Move ${label} column up`,
     down: (label: string) => `Move ${label} column down`,
@@ -1089,6 +1140,7 @@ export type Language = 'en' | 'ar'
 /** Deep copy that keeps functions (the texts with values). */
 function copy<V>(v: V): V {
   if (typeof v !== 'object' || v === null) return v
+  if (Array.isArray(v)) return v.map(copy) as V // lists of texts stay lists (Settings → Privacy)
   const out: Record<string, unknown> = {}
   for (const [k, x] of Object.entries(v)) out[k] = copy(x)
   return out as V
@@ -1097,7 +1149,8 @@ function copy<V>(v: V): V {
 function assign(to: Record<string, unknown>, from: Record<string, unknown>): void {
   for (const [k, x] of Object.entries(from)) {
     const cur = to[k]
-    if (typeof x === 'object' && x !== null && typeof cur === 'object' && cur !== null) assign(cur as Record<string, unknown>, x as Record<string, unknown>)
+    if (Array.isArray(x)) to[k] = copy(x) // a list is replaced whole (the two languages may differ in length)
+    else if (typeof x === 'object' && x !== null && typeof cur === 'object' && cur !== null && !Array.isArray(cur)) assign(cur as Record<string, unknown>, x as Record<string, unknown>)
     else to[k] = x
   }
 }

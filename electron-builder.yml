@@ -16,8 +16,9 @@ extraResources:
   - from: resources
     to: resources
 win:
-  # the brand package's Windows icon (dark tile, 16–256 px inside)
-  icon: resources/brand/icon/reqochet.ico
+  # the brand package's Windows icon: the light tile with its grey outline (the owner, 8 Nov 2026 — the dark one looked
+  # like another app's icon); while running, the taskbar icon follows the Windows colours (src/main/index.ts)
+  icon: resources/brand/icon/reqochet-light.ico
   target:
     - target: nsis
       arch: [x64]

@@ -2,15 +2,15 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "ReqMan \u2014 how the parts connect",
+    "title": "reqochet — how the parts connect",
     "output": "docs/diagrams/architecture.html",
     "quality_profile": "showcase",
     "locale": "en",
     "repository": {
       "url": "https://github.com/<owner>/claude_workspace",
       "provider": "github",
-      "link_mode": "web",
-      "revision": "a6e78ce3ef1e6606dcdeb613efd7b3a16df8bc95"
+      "link_mode": "local-only",
+      "revision": "ad9bfe8cd38c9b0dc04214562ef85c857403d6cc"
     }
   },
   "components": [
@@ -60,7 +60,7 @@
       "id": "bridge",
       "type": "security",
       "label": "Bridge (preload)",
-      "sublabel": "window.reqman",
+      "sublabel": "window.reqochet",
       "pos": [
         510,
         220
@@ -93,14 +93,14 @@
       "sources": [
         {
           "path": "src/main/ipc.ts",
-          "line": 80,
-          "end_line": 82,
+          "line": 137,
+          "end_line": 139,
           "label": "handler table"
         },
         {
           "path": "src/main/ipc.ts",
-          "line": 202,
-          "end_line": 204,
+          "line": 367,
+          "end_line": 369,
           "label": "registered"
         },
         {
@@ -126,13 +126,13 @@
       "sources": [
         {
           "path": "src/modules/workspace/workspace.ts",
-          "line": 45,
-          "end_line": 60
+          "line": 64,
+          "end_line": 79
         },
         {
           "path": "src/modules/workspace/workspace.ts",
-          "line": 139,
-          "end_line": 139,
+          "line": 425,
+          "end_line": 425,
           "label": "queue"
         }
       ]
@@ -153,8 +153,8 @@
       "sources": [
         {
           "path": "src/modules/repository-store/fileStore.ts",
-          "line": 182,
-          "end_line": 200,
+          "line": 302,
+          "end_line": 320,
           "label": "writeItem"
         }
       ]
@@ -175,13 +175,13 @@
       "sources": [
         {
           "path": "src/modules/index-cache/sqliteIndex.ts",
-          "line": 142,
-          "end_line": 150
+          "line": 153,
+          "end_line": 161
         },
         {
           "path": "src/modules/index-cache/sqliteIndex.ts",
-          "line": 231,
-          "end_line": 240,
+          "line": 245,
+          "end_line": 254,
           "label": "sync"
         }
       ]
@@ -205,7 +205,7 @@
       "id": "sqlite",
       "type": "database",
       "label": "SQLite cache",
-      "sublabel": "%APPDATA%\\ReqMan",
+      "sublabel": "%APPDATA%\\reqochet-dev",
       "pos": [
         970,
         560
@@ -232,8 +232,8 @@
       "sources": [
         {
           "path": "src/modules/git-adapter/systemGit.ts",
-          "line": 195,
-          "end_line": 196
+          "line": 217,
+          "end_line": 218
         }
       ]
     },
@@ -298,7 +298,7 @@
       "id": "call",
       "from": "window",
       "to": "bridge",
-      "label": "window.reqman",
+      "label": "window.reqochet",
       "variant": "emphasis"
     },
     {

@@ -94,6 +94,8 @@ person who supports reqochet in your team. Nothing is sent by itself.
 
 ## 2. Ideas you need to know
 
+![Where your requirements live: one folder per document, one file per requirement, shown as a numbered tree](images/guide/files.svg)
+
 | Idea | What it means in reqochet |
 | --- | --- |
 | **Repository** | Your project's Git folder. reqochet works inside its `requirements/` folder and never touches your code. |
@@ -149,12 +151,17 @@ with a message; **Push** shares them.
 - **Search:** type words, an ID or part of a title in the search box — best matches first, across IDs, titles and
   text. While searching, the list is flat; clear the search to see the tree again.
 - **Filters** (button shows how many are active): type, status, priority and other choice fields, and **Links** (items
-  without links, items with suspect links). **Clear filters** resets them.
-- **Columns:** show, hide and reorder columns, drag a column edge to change its width. Remembered on your PC.
+  without links, items with suspect links, **Incomplete** items). While a filter is on, an orange **Clear filters**
+  button next to Filters shows all items again.
+- **Columns:** show and hide columns in the **Columns** menu; move a column by dragging its header in the table (or its
+  row in the menu); drag a column edge to change its width. No. and Title always come first. Remembered on your PC.
+- **All documents:** each document is a group with its name and item count; click the group to fold or unfold it.
 
 ---
 
 ## 6. Traceability: links and suspect links
+
+![A link turns suspect when the item it points to changes, until someone keeps or removes it](images/guide/suspect.svg)
 
 - **Add a link:** editor → Links → **+ Add link** → type and target. The link is stored in the source item's file.
 - **Both directions:** the target shows the reverse name (*verified by*, *refined by*…).
@@ -186,6 +193,8 @@ Coming next (theme 1): coverage view, impact chain, traceability matrix with Exc
 ---
 
 ## 8. Sharing your work: changes, commit, push, pull
+
+![Your daily round: Pull, edit and save, look at Changes, Commit, Push](images/guide/daily.svg)
 
 ### Changes view
 
@@ -280,7 +289,7 @@ name**). reqochet never guesses silently and never deletes data to "fix" somethi
 ## 13. Settings
 
 Open with **⚙** (top right). The left panel switches between pages: **Appearance** (language, light/dark), **Environment and versions**, **Report a problem and
-diagnostics**, **Features**, **Self-tests**, and this **User guide** (one page per section). **← Back** at the top of the
+diagnostics**, **Features**, **Self-tests**, **Privacy and access**, and this **User guide** (one page per section). **← Back** at the top of the
 panel returns to your repository.
 
 | Card | What it does |
@@ -292,6 +301,7 @@ panel returns to your repository.
 | **Features** | Turn off a feature on this PC (Branches, Import, Export) if it causes trouble; the rest keeps working. If the team turned one off for the repository, it says so. |
 | **Release self-test** | Runs the main actions (create, edit, move, link, commit, push, a colleague's change, a pull with decisions, branches, compare, history, export, import) on a practice repository in a temporary folder, then deletes it — about a minute; your data is not touched. |
 | **Data self-test** | Measures speed on this PC with generated requirements in a temporary folder. |
+| **Privacy and access** | What reqochet reads, keeps on your PC (and where), sends (only Git pull/push and the update check — no tracking), what it may change, and what to keep in mind for confidential projects. |
 
 **Language:** English / العربية in ⚙ → Appearance (and on the start screen) — the whole window turns right-to-left in Arabic; your data stays as
 written. **Colours:** Light / Dark / System; a company can change colours, fonts and logo in a theme file

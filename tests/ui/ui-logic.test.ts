@@ -57,7 +57,7 @@ describe('tree rows (table/rows.ts) — lazy "Expand all" (P-04)', () => {
     ['', level(it_('A', undefined, 2), it_('B', undefined, 1))],
     ['A', level(it_('A1', 'A'), it_('A2', 'A'))]
   ])
-  const kinds = (rows: Row[]): string[] => rows.map((r) => (r.kind === 'item' ? `${r.item.id}@${r.depth}` : `${r.kind}:${r.parent}`))
+  const kinds = (rows: Row[]): string[] => rows.map((r) => (r.kind === 'item' ? `${r.item.id}@${r.depth}` : r.kind === 'group' ? `group:${r.name}` : `${r.kind}:${r.parent}`))
   it('shows open parents with their children', () => {
     expect(kinds(treeRows(levels, { all: false, ids: new Set(['A']) }))).toEqual(['A@0', 'A1@1', 'A2@1', 'B@0'])
   })

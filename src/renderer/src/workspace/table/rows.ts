@@ -16,6 +16,16 @@ export type Row =
   | { kind: 'more'; parent: string; depth: number; hidden: number }
   /** An open parent whose children are not loaded yet ("Expand all" loads levels as they scroll into view). */
   | { kind: 'loading'; parent: string; depth: number }
+  /** All documents: one collapsible row per document, its tree inside (the owner, 8 Nov 2026). */
+  | { kind: 'group'; name: string; count: number; open: boolean; depth: 0 }
+
+/** The tree key of a document group's top level (an item ID never starts with this character). */
+export const GROUP_KEY = (document: string): string => `\u0001${document}`
+export const isGroupKey = (key: string): boolean => key.startsWith('\u0001')
+export interface DocumentGroup {
+  name: string
+  count: number
+}
 
 type Sort = NonNullable<ItemQuery['sort']>
 
@@ -93,7 +103,7 @@ export const isOpen = (o: OpenState, id: string): boolean => (o.all ? !o.ids.has
  * The visible rows of the tree, depth-first. Pure (unit-tested): an open parent whose level is not loaded yet
  * yields one "loading" row; a level with more children than loaded ends with a "more" row.
  */
-export function treeRows(levels: ReadonlyMap<string, Level>, open: OpenState): Row[] {
+export function treeRows(levels: ReadonlyMap<string, Level>, open: OpenState, groups?: readonly DocumentGroup[], closedGroups?: ReadonlySet<string>): Row[] {
   const out: Row[] = []
   const walk = (key: string, depth: number, path: string[]): void => {
     const level = levels.get(key)
@@ -107,12 +117,33 @@ export function treeRows(levels: ReadonlyMap<string, Level>, open: OpenState): R
     }
     if (level.total > level.items.length) out.push({ kind: 'more', parent: key, depth, hidden: level.total - level.items.length })
   }
+  if (groups && groups.length > 0) {
+    for (const g of groups) {
+      const isOpenGroup = !closedGroups?.has(g.name)
+      out.push({ kind: 'group', name: g.name, count: g.count, open: isOpenGroup, depth: 0 })
+      if (isOpenGroup && g.count > 0) {
+        if (!levels.has(GROUP_KEY(g.name))) out.push({ kind: 'loading', parent: GROUP_KEY(g.name), depth: 1 })
+        else walk(GROUP_KEY(g.name), 1, [])
+      }
+    }
+    return out
+  }
   walk(ROOT, 0, [])
   return out
 }
 
-/** `document`: only that document's tree (S-10); undefined = all documents. */
-export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, document?: string) {
+/**
+ * `document`: only that document's tree (S-10); undefined = all documents — then `groups` (two or more documents)
+ * shows one collapsible row per document with its tree inside.
+ */
+export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, document?: string, groups?: readonly DocumentGroup[]) {
+  const grouped = document === undefined && groups !== undefined && groups.length > 1
+  const groupNames = grouped ? (groups as DocumentGroup[]).map((g) => g.name).join('\u0000') : ''
+  const [closedGroups, setClosedGroups] = useState<ReadonlySet<string>>(new Set())
+  const closedRef = useRef(closedGroups)
+  useEffect(() => {
+    closedRef.current = closedGroups
+  }, [closedGroups])
   const [levels, setLevels] = useState<Map<string, Level>>(new Map())
   const [open, setOpenState] = useState<OpenState>({ all: false, ids: new Set() })
   const levelsRef = useRef(levels)
@@ -124,7 +155,7 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
   const generation = useRef(0)
   const inflight = useRef(new Set<string>())
   // the document is part of the key: another document is another tree (S-10)
-  const sortKey = JSON.stringify([sort, document ?? null])
+  const sortKey = JSON.stringify([sort, document ?? null, groupNames])
   // an answer for another sort or document that arrives late must not overwrite the current tree (the e2e run showed
   // "All documents" with only the previous document's row after a save + switch)
   const sortKeyRef = useRef(sortKey)
@@ -134,7 +165,9 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
 
   const fetchLevel = useCallback(
     async (key: string, limit: number): Promise<Level> => {
-      const r = await window.reqochet.queryItems({ parent: key || null, sort, limit, brief: true, ...(document !== undefined && !key ? { document } : {}) })
+      // a document group's top level, an item's children, or the top level of one document / all documents
+      const where = isGroupKey(key) ? { parent: null, document: key.slice(1) } : { parent: key || null, ...(document !== undefined && !key ? { document } : {}) }
+      const r = await window.reqochet.queryItems({ ...where, sort, limit, brief: true })
       return { items: r.items, total: r.total, limit }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sortKey stands for sort
@@ -149,9 +182,9 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
       all.push(...r.items)
       if (r.items.length === 0 || all.length >= r.total) break
     }
-    const groups = new Map<string, IndexedItem[]>([[ROOT, []]])
+    const groups = new Map<string, IndexedItem[]>(groupNames ? groupNames.split('\u0000').map((g) => [GROUP_KEY(g), []]) : [[ROOT, []]])
     for (const it of all) {
-      const k = it.parent ?? ROOT
+      const k = it.parent ?? (groupNames ? GROUP_KEY(it.document ?? '') : ROOT)
       const g = groups.get(k)
       if (g) g.push(it)
       else groups.set(k, [it])
@@ -175,7 +208,9 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
     const gen = ++generation.current
     const asked = sortKeyRef.current
     const o = openRef.current
-    const keys = [ROOT, ...[...levelsRef.current.keys()].filter((k) => k !== ROOT && isOpen(o, k))]
+    // grouped: the open documents' top levels instead of the one top level
+    const tops = groupNames ? groupNames.split('\u0000').filter((g) => !closedRef.current.has(g)).map(GROUP_KEY) : [ROOT]
+    const keys = [...tops, ...[...levelsRef.current.keys()].filter((k) => k !== ROOT && !isGroupKey(k) && isOpen(o, k))]
     if (!o.all) for (const k of o.ids) if (!keys.includes(k)) keys.push(k)
     void (async () => {
       const next =
@@ -184,9 +219,20 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
           : new Map(await Promise.all(keys.map(async (k) => [k, await fetchLevel(k, levelsRef.current.get(k)?.limit ?? CHILD_LIMIT)] as const)))
       if (gen === generation.current) merge(next, asked)
     })()
-  }, [active, dataVersion, fetchLevel, fetchAll])
+  }, [active, dataVersion, fetchLevel, fetchAll, groupNames])
 
-  const rows = useMemo(() => treeRows(levels, open), [levels, open])
+  // compared by value: the screen passes a new list on every render
+  const groupsKey = grouped ? JSON.stringify(groups) : ''
+  const groupList = useMemo(() => (groupsKey ? (JSON.parse(groupsKey) as DocumentGroup[]) : undefined), [groupsKey])
+  const rows = useMemo(() => treeRows(levels, open, groupList, closedGroups), [levels, open, groupList, closedGroups])
+  /** Opens or closes a document group (All documents). */
+  const setGroupOpen = (name: string, value: boolean): void =>
+    setClosedGroups((prev) => {
+      const next = new Set(prev)
+      if (value) next.delete(name)
+      else next.add(name)
+      return next
+    })
 
   const load = useCallback(
     (key: string) => {
@@ -212,7 +258,7 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
       // Always fetch on open: a closed parent's children may have changed meanwhile.
       if (value) load(id)
     },
-    [load]
+    [load, setOpenState] // setOpenState is stable; listed because the React compiler asks for it
   )
 
   /** Loads the levels of "loading" rows between these row indexes (the visible part of the table). */
@@ -242,7 +288,20 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
   const reveal = async (id: string): Promise<void> => {
     const asked = sortKeyRef.current
     const ancestors = await window.reqochet.getAncestors(id)
-    const keys = [ROOT, ...ancestors]
+    let top = ROOT
+    if (groupNames) {
+      // which document holds the item's top-level ancestor: open that group
+      const topId = ancestors[0] ?? id
+      for (const g of groupNames.split('\u0000')) {
+        const level = await fetchLevel(GROUP_KEY(g), 10_000)
+        if (level.items.some((x) => x.id === topId)) {
+          top = GROUP_KEY(g)
+          setGroupOpen(g, true)
+          break
+        }
+      }
+    }
+    const keys = [top, ...ancestors]
     const loaded = await Promise.all(
       keys.map(async (k, i) => {
         const wanted = keys[i + 1] ?? id
@@ -263,5 +322,5 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
     })
   }
 
-  return { rows, levels, isOpen: (id: string) => isOpen(open, id), setOpen, ensure, showMore, expandAll, collapseAll, reveal }
+  return { rows, levels, isOpen: (id: string) => isOpen(open, id), setOpen, setGroupOpen, ensure, showMore, expandAll, collapseAll, reveal }
 }

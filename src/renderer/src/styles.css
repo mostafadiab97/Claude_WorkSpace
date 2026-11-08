@@ -1451,6 +1451,12 @@ code {
   justify-content: space-between;
   gap: var(--rm-space-md);
 }
+/* the column name starts right after the handle and takes the free space (it looked like a tree when centred) */
+.popover__row > .check {
+  flex: 1;
+  justify-content: flex-start;
+  text-align: start;
+}
 
 .fields-builtin {
   margin: 0 0 var(--rm-space-xs);
@@ -3636,4 +3642,90 @@ html {
 /* a long message (e.g. from Git) takes its own line under the document bar (UX17-17) */
 .document-bar__error {
   flex-basis: 100%;
+}
+
+/* Clear filters stands out while a filter hides rows (the owner, 8 Nov 2026) */
+.btn--clear-filters {
+  border-color: var(--rm-color-warning);
+  color: var(--rm-color-warning);
+  font-weight: 600;
+}
+.btn--clear-filters:hover {
+  background: var(--rm-color-warning);
+  color: var(--rm-color-background);
+}
+
+/* a column header dragged to a new place (the owner, 8 Nov 2026): the line shows where it lands */
+.table__thcell[draggable='true'] {
+  cursor: grab;
+}
+.table__thcell.is-dragging {
+  opacity: 0.5;
+}
+.table__thcell.is-drop-before {
+  box-shadow: inset 3px 0 0 var(--rm-color-primary);
+}
+.table__thcell.is-drop-after {
+  box-shadow: inset -3px 0 0 var(--rm-color-primary);
+}
+[dir='rtl'] .table__thcell.is-drop-before {
+  box-shadow: inset -3px 0 0 var(--rm-color-primary);
+}
+[dir='rtl'] .table__thcell.is-drop-after {
+  box-shadow: inset 3px 0 0 var(--rm-color-primary);
+}
+
+/* All documents: a group row per document (the owner, 8 Nov 2026) */
+.table__row--group {
+  background: var(--rm-color-surface-alt);
+  border-block-start: 1px solid var(--rm-color-border);
+}
+.table__td--group {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+}
+.table__group-toggle {
+  background: none;
+  border: 0;
+  color: var(--rm-color-text);
+  cursor: pointer;
+  font: inherit;
+  padding-inline: var(--rm-space-sm);
+  display: inline-flex;
+  gap: var(--rm-space-xs);
+  align-items: center;
+}
+.table__group-toggle:focus-visible {
+  outline: 2px solid var(--rm-color-focus);
+}
+
+/* Settings → Privacy and access (the owner, 8 Nov 2026) */
+.privacy__title {
+  font-size: var(--rm-font-size-md);
+  margin-block: var(--rm-space-lg) var(--rm-space-xs);
+}
+.privacy__list {
+  margin: 0;
+  padding-inline-start: var(--rm-space-lg);
+  line-height: 1.5;
+}
+.privacy__list li + li {
+  margin-block-start: var(--rm-space-xs);
+}
+
+/* pictures in the user guide (the owner, 8 Nov 2026) */
+.guide-figure {
+  margin: var(--rm-space-md) 0;
+}
+.guide-figure svg {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 760px;
+  block-size: auto;
+}
+.guide-figure figcaption {
+  color: var(--rm-color-text-muted);
+  font-size: var(--rm-font-size-small);
+  margin-block-start: var(--rm-space-xs);
 }

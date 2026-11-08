@@ -3,6 +3,26 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.17.2 — 8 Nov 2026 — Document groups, column drag, privacy page, guide pictures
+- **Owner (8 Nov 2026):** 0.17.1 steps 0–4 passed (self-test 23/23, 55.5 s; the 10,005-item rename worked). 0.17.0
+  steps 3–5 passed with points; 0.16.4 steps 2–5 passed (Shift+F10 needs Fn on his laptop keyboard — the keyboard's
+  F-key setting, not the app; no extra shortcut wanted). Spaces in folder names are fine (the 0.17.0 failure was the
+  time limit; the self-test and the CI run rename to names with spaces).
+- **All documents:** every document is a collapsible group row with its name and item count, its tree inside.
+- **Columns:** drag a column header in the table to move it (No. and Title stay first); the Columns menu's names are
+  left-aligned (they looked like a tree) and Title is listed as always shown first.
+- **Clear filters** stands out in orange while a filter hides items (one place, next to Filters).
+- **Settings → Privacy and access:** what reqochet reads, keeps on the PC (and where), sends (only Git pull/push and
+  the update check — no tracking), what it may change, and what to know for confidential projects.
+- **User guide with pictures:** where requirements live (§2), suspect links (§6), the daily round (§8) — drawn to
+  follow the window's colours. The engineering diagrams (`docs/diagrams`) are updated for reqochet and re-checked
+  against the current code.
+- **App icon:** the light tile with a grey outline is now the icon of the .exe, Start menu and desktop; while
+  reqochet runs, the taskbar icon follows Windows (dark tile on a dark taskbar, light on a light one).
+- **Fewer tokens:** the status history moved from `CLAUDE.md` (read at every session start and after every
+  compaction) to `docs/STATUS.md` — CLAUDE.md is now 45 % of its size and changes only when a rule changes; helpers
+  write their own reports and answer in three lines; reading and output rules in `docs/AGENT-WORKFLOW.md` → "Cost".
+
 ## 0.17.1 — 8 Nov 2026 — Renaming a big document safely
 - **Owner (8 Nov 2026), 0.17.0:** test 1 passed (self-test 22/22, 64.5 s). Test 2 failed: renaming the sandbox's
   "items" folder (10,005 items) to "SandBox Req" stopped with "Git refused the commit: Command failed: git … add …";

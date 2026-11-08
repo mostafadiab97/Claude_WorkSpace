@@ -14,7 +14,8 @@ Which file answers which question. Every file starts with a short "what this is"
 
 | Question | File |
 | --- | --- |
-| Rules, commands, current status, next step (project memory) | `CLAUDE.md` |
+| Rules, commands (project memory) | `CLAUDE.md` |
+| Current status, versions, next step | `docs/STATUS.md` |
 | What did the owner decide, and why? | `docs/design/decisions.md` |
 | What is the product and what must it do (FR/NFR)? | `docs/design/requirements.md` |
 | What is built, where each requirement stands, what comes next? | `docs/design/roadmap.md` |
@@ -35,7 +36,7 @@ Which file answers which question. Every file starts with a short "what this is"
 
 ## Keeping it tidy
 
-- Status lives only in `CLAUDE.md` ("Status") and `CHANGELOG.md`; other files link there.
+- Status lives only in `docs/STATUS.md` and `CHANGELOG.md`; other files link there.
 - `docs/TESTING.md` holds the current and the previous checklist; move older ones to `docs/testing/past-checklists.md`.
 - A review or analysis moves to `docs/reviews/done/` once every point in it is decided.
 - New decisions go to `docs/design/decisions.md` (and the release plan to `roadmap.md`).

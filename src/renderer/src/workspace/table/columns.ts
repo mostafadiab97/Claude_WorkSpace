@@ -99,6 +99,21 @@ export function orderColumns<C extends { key: string }>(cols: C[], order: string
     .map((x) => x.c)
 }
 
+/**
+ * A column moved by dragging its header onto another (the owner, 8 Nov 2026): `from` takes `to`'s place — before
+ * it when moving left, after it when moving right, as the drop marker shows. No. and Title stay first. Pure.
+ */
+export function moveColumn(order: string[], from: string, to: string): string[] {
+  const fixed = new Set(['number', 'title'])
+  if (from === to || fixed.has(from) || fixed.has(to)) return order
+  const i = order.indexOf(from)
+  const j = order.indexOf(to)
+  if (i < 0 || j < 0) return order
+  const next = order.filter((k) => k !== from)
+  next.splice(next.indexOf(to) + (i < j ? 1 : 0), 0, from)
+  return next
+}
+
 /** The visible optional columns in the user's order — also what the export offers by default. */
 export function shownColumnKeys(schema: Schema, prefs: ColumnPrefs): string[] {
   // No. comes first, as in the table (QA-03); the rest in the user's order

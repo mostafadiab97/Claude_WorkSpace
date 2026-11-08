@@ -1,7 +1,21 @@
-# Past manual checklists (v0.0.3 – v0.16.4)
+# Past manual checklists (v0.0.3 – v0.17.0)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## Previous checklist — v0.17.0 (1a structure: documents, editable types, required fields)
+
+Owner 8 Nov: step 1 passed; step 2 failed (rename of the 10,005-item folder) → 0.17.1. Steps 3–5 continue on 0.17.1.
+
+Try this together with steps 2–5 of the 0.16.4 checklist below. Report by version and step ("0.17.0 test 3").
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.17.0**, then **⚙ → Self-tests → Run release self-test**. | Version 0.17.0; **all 22 steps passed**. |
+| 2 | Open the sandbox. Above the table, the document bar offers to give the folder **items** a real name: rename it (e.g. "System"), then **Push**. | One commit "Rename document…" is pushed; every item is still there, with its history (Item → History). |
+| 3 | In the document picker choose **New document…**, call it "Software", add two items, then switch between **System**, **Software** and **All documents**. | Each document has its own tree and starts its numbering at 1; All documents shows both, one after the other. |
+| 4 | **Columns → Edit types…**: add an item type, rename one, try to remove a type that is in use; give one type a **required** field. | The new type can be chosen for new items; a used type cannot be removed (it says how many items use it). Items of that type without the field show under **Filters → Incomplete**. |
+| 5 | Open **Columns** and drag a column to another place in the list. | The table's columns follow the new order (↑/↓ still work too). |
 
 ## Previous checklist — v0.16.4 (stabilisation 2: speed, Arabic, first run, keyboard)
 

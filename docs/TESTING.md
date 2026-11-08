@@ -67,7 +67,21 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.17.1 (renaming a big document safely)
+## Manual test checklist — v0.17.2 (document groups, column drag, privacy page, guide pictures)
+
+First discard your 0.17.0 test changes in the sandbox (**Changes → Discard all**), as agreed.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.17.2**, then **⚙ → Self-tests → Run release self-test**. Look at the taskbar and the desktop icon. | **All 23 steps passed**. Desktop/Start icon: light tile with a grey outline (Windows may show the old one until a restart — its icon cache). Taskbar: follows Windows (dark taskbar → dark tile). |
+| 2 | In the sandbox make a second document (**New document…**), add an item, then choose **All documents**; click a group row. | One group row per document with its item count; a click folds and unfolds it. |
+| 3 | Drag a column header (e.g. **Status**) onto another; then open **Columns**. | The column moves where the line showed; the menu shows the same order, names left-aligned, Title listed first. |
+| 4 | Turn on a filter. | An orange **Clear filters** button appears next to Filters; it shows all items again. |
+| 5 | **⚙ → Privacy and access**, then **User guide → 2. Ideas you need to know** (and 6, 8). | The privacy page lists what is read, kept, sent and changed; the guide pages show pictures in the window's colours (try Dark too). |
+
+## Previous checklist — v0.17.1 (renaming a big document safely)
+
+Owner 8 Nov: all passed (steps 0–4).
 
 First make the sandbox clean again (step 0). Then steps 3–5 of 0.17.0 and steps 2–5 of 0.16.4 continue on this version.
 
@@ -78,20 +92,6 @@ First make the sandbox clean again (step 0). Then steps 3–5 of 0.17.0 and step
 | 2 | Open the sandbox; in the document bar give "items" a real name **with a space** (e.g. "SandBox Req"). It may take a minute. | One commit "Rename document…"; 10,005 items under the new name; **Changes** shows nothing. Item → History still shows its older changes. |
 | 3 | **Push**. | The push goes through. |
 | 4 | Optional, to try the safety net: in Git Bash make a test branch, move a few item files out of the document folder by hand, then **Changes → Discard all**. | The files are back where they were; no error. |
-
-## Previous checklist — v0.17.0 (1a structure: documents, editable types, required fields)
-
-Owner 8 Nov: step 1 passed; step 2 failed (rename of the 10,005-item folder) → 0.17.1. Steps 3–5 continue on 0.17.1.
-
-Try this together with steps 2–5 of the 0.16.4 checklist below. Report by version and step ("0.17.0 test 3").
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.17.0**, then **⚙ → Self-tests → Run release self-test**. | Version 0.17.0; **all 22 steps passed**. |
-| 2 | Open the sandbox. Above the table, the document bar offers to give the folder **items** a real name: rename it (e.g. "System"), then **Push**. | One commit "Rename document…" is pushed; every item is still there, with its history (Item → History). |
-| 3 | In the document picker choose **New document…**, call it "Software", add two items, then switch between **System**, **Software** and **All documents**. | Each document has its own tree and starts its numbering at 1; All documents shows both, one after the other. |
-| 4 | **Columns → Edit types…**: add an item type, rename one, try to remove a type that is in use; give one type a **required** field. | The new type can be chosen for new items; a used type cannot be removed (it says how many items use it). Items of that type without the field show under **Filters → Incomplete**. |
-| 5 | Open **Columns** and drag a column to another place in the list. | The table's columns follow the new order (↑/↓ still work too). |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

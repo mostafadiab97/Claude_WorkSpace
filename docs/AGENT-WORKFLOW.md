@@ -50,6 +50,15 @@ session; the owner talks only to the builder.
 Each helper run uses its own share of the usage allowance — roughly as much as a long reply each. That is why they run
 once per theme version, not on every small change, and only the helpers the review pack names (below).
 
+**Saving tokens without losing quality (the owner, 8 Nov 2026):**
+- The status history moved from `CLAUDE.md` to `docs/STATUS.md`: CLAUDE.md is loaded at every session start and
+  after every compaction (it was ~7,000 tokens, now about a third), and it changes only when a rule changes.
+- Give each helper the pack **and the earlier reports of the same version**, so a second round does not repeat
+  findings; tell it to write its report file itself (`Write` tool) and answer only with the findings table.
+- A second helper round after fixes runs only the helpers whose areas the fixes touched.
+- Builder: read files in parts, filter command output, look only at screenshots of screens that changed, and run the
+  one e2e scenario being fixed before the full suite.
+
 ## Fourth helper: brand / logo designer (owner, 4 Nov 2026)
 
 For the rename version and whenever the logo, icon or motion change, a **brand helper** reviews how they sit in the

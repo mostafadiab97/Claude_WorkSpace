@@ -46,3 +46,14 @@ describe('Arabic texts', () => {
     expect(same.length / ar.length).toBeLessThan(0.05)
   })
 })
+
+describe('lists of texts (Settings → Privacy, 0.17.2)', () => {
+  it('stay lists in both languages', () => {
+    expect(Array.isArray(T.settings.privacy.sections)).toBe(true)
+    setLanguage('ar')
+    expect(Array.isArray(T.settings.privacy.sections)).toBe(true)
+    expect(T.settings.privacy.sections[0]?.points.length).toBeGreaterThan(0)
+    setLanguage('en')
+    expect(T.settings.privacy.sections[0]?.title).toBe('What it reads')
+  })
+})

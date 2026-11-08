@@ -11,7 +11,7 @@ import { guidePages } from '../lib/guide'
 import { useLanguage } from '../lib/language'
 import { T } from '../../../shared/text'
 
-type SettingsPage = 'env' | 'appearance' | 'report' | 'features' | 'tests'
+type SettingsPage = 'env' | 'appearance' | 'report' | 'features' | 'tests' | 'privacy'
 type View = { kind: 'settings'; page: SettingsPage } | { kind: 'guide'; page: string; anchor?: string }
 
 /**
@@ -41,7 +41,8 @@ export function SettingsScreen(props: {
     { id: 'appearance', label: nav.appearance },
     { id: 'report', label: nav.report },
     { id: 'features', label: nav.features },
-    { id: 'tests', label: nav.tests }
+    { id: 'tests', label: nav.tests },
+    { id: 'privacy', label: nav.privacy }
   ]
   const guidePage = view.kind === 'guide' ? (pages.find((p) => p.id === view.page) ?? pages[0]) : undefined
 
@@ -115,6 +116,22 @@ export function SettingsScreen(props: {
             </>
           )}
           {view.kind === 'settings' && view.page === 'features' && <FeaturesCard />}
+          {view.kind === 'settings' && view.page === 'privacy' && (
+            // what the app sees, keeps, sends and may change (the owner, 8 Nov 2026)
+            <section className="card privacy" aria-label={nav.privacy}>
+              <p className="hint hint--flush">{T.settings.privacy.intro}</p>
+              {T.settings.privacy.sections.map((sec) => (
+                <div key={sec.title}>
+                  <h2 className="privacy__title">{sec.title}</h2>
+                  <ul className="privacy__list">
+                    {sec.points.map((pt) => (
+                      <li key={pt}>{pt}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </section>
+          )}
           {view.kind === 'settings' && view.page === 'tests' && (
             <>
               <ReleaseSelfTestCard />

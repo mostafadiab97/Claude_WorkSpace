@@ -1,7 +1,7 @@
 ---
 name: security-reviewer
 description: Security review of a frozen reqochet commit or the whole project — secrets, file paths, Electron settings, Git command building, supply chain, CI. Use for every theme version (on the diff) and the whole-project review.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Write
 model: opus
 ---
 
@@ -28,3 +28,5 @@ workflows (no secrets to pull requests, pinned actions, least permissions). Earl
 - Evidence for every finding: the line, a command you ran, or a test that fails. Say F (checked) or I (inferred).
 - No personal data in the report (names, account names, e-mails) — the privacy check fails the build.
 - Plain language; explain any term in one line.
+- **Answer the builder** with three lines only: the report's path, the number of findings per severity, and the one
+  most important finding. The full table is in the file (saves the builder's context — the owner, 8 Nov 2026).

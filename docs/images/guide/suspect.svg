@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 285" role="img" aria-label="Suspect links: a test verifies a requirement; when the requirement changes, the link is marked suspect until someone keeps or removes it" class="gd">
+<style>
+.gd-box{fill:var(--rm-color-surface,#ffffff);stroke:var(--rm-color-border,#c9ced8);stroke-width:1.5}
+.gd-alt{fill:var(--rm-color-surface-alt,#f1f3f6);stroke:var(--rm-color-border,#c9ced8);stroke-width:1.5}
+.gd-key{fill:var(--rm-color-surface,#ffffff);stroke:var(--rm-color-primary,#2f5bd3);stroke-width:2}
+.gd-warn{fill:var(--rm-color-surface,#ffffff);stroke:var(--rm-color-warning,#8f5600);stroke-width:2}
+.gd-t{fill:var(--rm-color-text,#1b1f27);font:600 14px system-ui,sans-serif}
+.gd-s{fill:var(--rm-color-text-muted,#5c6370);font:13px system-ui,sans-serif}
+.gd-c{fill:var(--rm-color-text,#1b1f27);font:13px ui-monospace,Consolas,monospace}
+.gd-line{stroke:var(--rm-color-text-muted,#5c6370);stroke-width:1.5;fill:none}
+.gd-arrow{stroke:var(--rm-color-primary,#2f5bd3);stroke-width:2;fill:none}
+.gd-warnline{stroke:var(--rm-color-warning,#8f5600);stroke-width:2;fill:none;stroke-dasharray:6 4}
+.gd-head{fill:var(--rm-color-primary,#2f5bd3)}
+.gd-whead{fill:var(--rm-color-warning,#8f5600)}
+.gd-ok{fill:var(--rm-color-success,#1f7a3d);font:600 13px system-ui,sans-serif}
+.gd-wt{fill:var(--rm-color-warning,#8f5600);font:600 13px system-ui,sans-serif}
+</style>
+<defs>
+<marker id="gd-a-suspect" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="gd-head" d="M0 0L10 5L0 10z"/></marker>
+<marker id="gd-w-suspect" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="gd-whead" d="M0 0L10 5L0 10z"/></marker>
+</defs>
+
+<rect class="gd-box" x="20" y="30" width="220" height="70" rx="8"/>
+<text class="gd-t" x="36" y="58">Test: room heats in 10 min</text>
+<text class="gd-s" x="36" y="80">holds the link</text>
+<rect class="gd-key" x="430" y="30" width="250" height="70" rx="8"/>
+<text class="gd-t" x="446" y="58">Requirement: heat a room</text>
+<text class="gd-s" x="446" y="80">in 10 minutes</text>
+<path class="gd-arrow" d="M244 65H425" marker-end="url(#gd-a-suspect)"/>
+<text class="gd-s" x="300" y="56">verifies</text>
+<text class="gd-ok" x="292" y="86">✓ checked</text>
+<text class="gd-s" x="20" y="140">Someone changes the requirement (“in 15 minutes”) …</text>
+<rect class="gd-box" x="20" y="160" width="220" height="70" rx="8"/>
+<text class="gd-t" x="36" y="188">Test: room heats in 10 min</text>
+<rect class="gd-warn" x="430" y="160" width="250" height="70" rx="8"/>
+<text class="gd-t" x="446" y="188">Requirement: heat a room</text>
+<text class="gd-wt" x="446" y="210">in 15 minutes (changed)</text>
+<path class="gd-warnline" d="M244 195H425" marker-end="url(#gd-w-suspect)"/>
+<text class="gd-wt" x="285" y="186">⚠ suspect</text>
+<text class="gd-s" x="20" y="268">… so the link turns suspect until someone looks: Keep (the test still fits — or after fixing it) or Unlink.</text>
+
+</svg>

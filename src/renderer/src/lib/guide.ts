@@ -5,6 +5,14 @@ import { Marked } from 'marked'
 import guideText from '../../../../docs/USER-GUIDE.md?raw'
 import { slug, splitGuide } from '../../../shared/guide'
 
+// The guide's pictures (the owner, 8 Nov 2026): our own SVG drawings, put into the page as they are, so they take the
+// window's colours (their styles read the --rm-* theme variables, with light colours as the fallback on GitHub)
+const figures = import.meta.glob('../../../../docs/images/guide/*.svg', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
+const figure = (href: string): string | undefined => {
+  const name = /images\/guide\/([a-z0-9-]+)\.svg$/.exec(href)?.[1]
+  return name ? figures[`../../../../docs/images/guide/${name}.svg`] : undefined
+}
+
 export interface GuidePage {
   /** Anchor of the page's "## " heading ('' for the first page: title, introduction and contents). */
   id: string
@@ -22,6 +30,10 @@ const render = (md: string, anchors: string[]): string =>
         const id = slug(inner)
         anchors.push(id)
         return `<h${depth} id="${id}">${inner}</h${depth}>\n`
+      },
+      image({ href, text }) {
+        const svg = figure(href)
+        return svg ? `<figure class="guide-figure">${svg}<figcaption>${text}</figcaption></figure>` : `<img src="${href}" alt="${text}">`
       }
     }
   }).parse(md, { async: false })

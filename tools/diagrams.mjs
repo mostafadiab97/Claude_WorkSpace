@@ -11,7 +11,7 @@
 // The diagrams cite source lines at a pinned commit (meta.repository.revision): after code changes, update that
 // revision to a pushed commit and check that the cited lines still say what the diagram claims.
 import { execFileSync } from 'node:child_process'
-import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -21,7 +21,7 @@ const srcDir = join(root, 'docs', 'diagrams', 'archify')
 
 // One line per diagram for the navigator (what a reader learns from it).
 const ABOUT = {
-  architecture: 'Every part of ReqMan, what it may talk to, and where data lives.',
+  architecture: 'Every part of reqochet, what it may talk to, and where data lives.',
   'save-flow': 'What happens between clicking Save and the file on disk — and how a newer version is never overwritten.',
   'pull-flow': 'How Pull works the merge out in memory, asks only about parts both sides changed differently, then updates the folder in one step.'
 }
@@ -141,17 +141,28 @@ const names = readdirSync(srcDir)
   .map((f) => f.replace(/\.json$/, ''))
   .filter((n) => wanted.length === 0 || wanted.includes(n))
 
+// The sources say "<owner>" (no account names in the files, the owner 3 Nov 2026); Archify checks the address against
+// this checkout's Git remote, so it gets a temporary copy with the real address, and the result says "<owner>" again.
+const remote = execFileSync('git', ['remote', 'get-url', 'origin'], { cwd: root, encoding: 'utf8' }).trim()
+const realOwner = /github\.com[/:]([^/]+)\//i.exec(remote)?.[1]
+const tmpSpecDir = join(root, 'docs', 'diagrams', '.tmp-specs')
+
 let failed = 0
 for (const name of names) {
   const spec = JSON.parse(readFileSync(join(srcDir, `${name}.json`), 'utf8'))
   const out = `docs/diagrams/${name}.html`
   try {
-    execFileSync(process.execPath, [archify, 'finalize', spec.diagram_type, `docs/diagrams/archify/${name}.json`, out, '--repo-root', '.', '--quality', spec.meta.quality_profile ?? 'showcase', '--json'], { cwd: root, stdio: 'pipe' })
+    mkdirSync(tmpSpecDir, { recursive: true })
+    const tmpSpec = join(tmpSpecDir, `${name}.json`)
+    writeFileSync(tmpSpec, realOwner ? readFileSync(join(srcDir, `${name}.json`), 'utf8').split('<owner>').join(realOwner) : readFileSync(join(srcDir, `${name}.json`), 'utf8'))
+    execFileSync(process.execPath, [archify, 'finalize', spec.diagram_type, tmpSpec, out, '--repo-root', '.', '--quality', spec.meta.quality_profile ?? 'showcase', '--json'], { cwd: root, stdio: 'pipe' })
+    if (realOwner) writeFileSync(join(root, out), readFileSync(join(root, out), 'utf8').split(realOwner).join('&lt;owner&gt;'))
     console.log(`✓ ${out}`)
   } catch (e) {
     failed++
     console.error(`✗ ${name}: ${String(e.stdout ?? e.message).slice(0, 2000)}`)
   }
+  rmSync(tmpSpecDir, { recursive: true, force: true })
   // receipts are regenerated on every run; keep only the diagram
   for (const f of readdirSync(join(root, 'docs', 'diagrams'))) if (f.startsWith(`${name}.`) && f.endsWith('.json')) rmSync(join(root, 'docs', 'diagrams', f))
 }

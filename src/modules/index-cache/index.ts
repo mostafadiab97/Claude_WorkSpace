@@ -40,6 +40,8 @@ export interface IndexCache {
   /** Every item's ID, parent and order key, siblings in document order — small and fast (for outline numbers). */
   structure(): { id: string; parent?: string; order?: string; document: string }[]
   /** How many items use each item type and how many links each link type (S-04: a used type cannot be removed). */
+  /** Item count per document (first folder of the path; '' = loose files). */
+  documentCounts(): Record<string, number>
   typeUsage(): { items: Record<string, number>; links: Record<string, number> }
   /**
    * Whole-repository problems, answered from the index in milliseconds: duplicate IDs, links to missing

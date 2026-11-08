@@ -234,7 +234,7 @@ export function createStructureOps(ctx: WorkspaceContext) {
         if (!target) return { ok: false, message: T.wsMsg.missing(parent) }
         if (createsLoop(s, id, parent)) return { ok: false, message: T.wsMsg.moveLoop(parent, id) }
         // a tree never spans documents (S-10)
-        if ((target.document ?? '') !== (s.index.get(id)?.document ?? '')) return { ok: false, message: T.wsMsg.parentOtherDocument(parent, target.document || '—') }
+        if ((target.document ?? '') !== (s.index.get(id)?.document ?? '')) return { ok: false, message: T.wsMsg.parentOtherDocument(parent, target.document || T.wsMsg.looseFiles) }
       }
       // Its own children move with it: they keep pointing at it.
       const plan = planInsert(siblings(s, parent ?? undefined, s.index.get(id)?.document ?? '').filter((x) => x.id !== id), id, before)
@@ -262,7 +262,7 @@ export function createStructureOps(ctx: WorkspaceContext) {
         // a tree never spans documents (CR-02), also when several rows are dragged at once
         const target = s.index.get(parent)
         for (const id of wanted) {
-          if ((s.index.get(id)?.document ?? '') !== (target?.document ?? '')) return { ok: false, message: T.wsMsg.parentOtherDocument(parent, target?.document || '—') }
+          if ((s.index.get(id)?.document ?? '') !== (target?.document ?? '')) return { ok: false, message: T.wsMsg.parentOtherDocument(parent, target?.document || T.wsMsg.looseFiles) }
         }
       } else if (new Set([...wanted].map((id) => s.index.get(id)?.document ?? '')).size > 1) {
         // to the top level of one document: rows of different documents cannot go together

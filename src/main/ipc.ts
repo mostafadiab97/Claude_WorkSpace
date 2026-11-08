@@ -247,7 +247,7 @@ export function registerIpc(services: Services, paths: Paths): void {
     getAncestors: (_e, id) => ws.ancestors(v.id(id)),
     renameProjectFolder: () => ws.renameProjectFolder(),
     createDocument: (_e, name) => ws.createDocument(v.str(name, 'document', 80)),
-    renameDocument: (_e, from, to) => ws.renameDocument(v.text(from, 'document', 80), v.str(to, 'document', 80)),
+    renameDocument: (_e, from, to) => ws.renameDocument(from === '' ? '' : v.str(from, 'document', 80), v.str(to, 'document', 80)),
     getFieldValues: (_e, field) => ws.fieldValues(v.str(field, 'field')),
     saveSchemaFields: (_e, fields, revision) => ws.saveSchemaFields(v.fieldDefs(fields), v.str(revision, 'revision')),
     checkFields: (_e, fields) => ws.checkFields(v.fieldDefs(fields)),

@@ -1,6 +1,6 @@
 // Where the table's rows come from: a flat, paged list (search/filters) or the document hierarchy (tree).
 // Both fetch from the index only what is needed, so the table behaves the same with 50 or 50,000 items.
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { IndexedItem, ItemQuery } from '../../../../shared/domain'
 
 const PAGE = 100
@@ -125,6 +125,12 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
   const inflight = useRef(new Set<string>())
   // the document is part of the key: another document is another tree (S-10)
   const sortKey = JSON.stringify([sort, document ?? null])
+  // an answer for another sort or document that arrives late must not overwrite the current tree (the e2e run showed
+  // "All documents" with only the previous document's row after a save + switch)
+  const sortKeyRef = useRef(sortKey)
+  useLayoutEffect(() => {
+    sortKeyRef.current = sortKey // runs before the load effect below captures it
+  }, [sortKey])
 
   const fetchLevel = useCallback(
     async (key: string, limit: number): Promise<Level> => {
@@ -154,17 +160,20 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sortKey stands for sort
   }, [sortKey])
 
-  const merge = (next: Map<string, Level>): void =>
+  const merge = (next: Map<string, Level>, asked: string = sortKeyRef.current): void => {
+    if (asked !== sortKeyRef.current) return
     setLevels((prev) => {
       const m = new Map(prev)
       for (const [k, v] of next) m.set(k, v)
       return m
     })
+  }
 
   // Load (or reload after a change) the top level and every loaded open parent.
   useEffect(() => {
     if (!active) return
     const gen = ++generation.current
+    const asked = sortKeyRef.current
     const o = openRef.current
     const keys = [ROOT, ...[...levelsRef.current.keys()].filter((k) => k !== ROOT && isOpen(o, k))]
     if (!o.all) for (const k of o.ids) if (!keys.includes(k)) keys.push(k)
@@ -173,7 +182,7 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
         keys.length > BULK_REFRESH
           ? await fetchAll()
           : new Map(await Promise.all(keys.map(async (k) => [k, await fetchLevel(k, levelsRef.current.get(k)?.limit ?? CHILD_LIMIT)] as const)))
-      if (gen === generation.current) merge(next)
+      if (gen === generation.current) merge(next, asked)
     })()
   }, [active, dataVersion, fetchLevel, fetchAll])
 
@@ -183,8 +192,9 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
     (key: string) => {
       if (inflight.current.has(key)) return
       inflight.current.add(key)
+      const asked = sortKeyRef.current
       void fetchLevel(key, levelsRef.current.get(key)?.limit ?? CHILD_LIMIT)
-        .then((l) => merge(new Map([[key, l]])))
+        .then((l) => merge(new Map([[key, l]]), asked))
         .finally(() => inflight.current.delete(key))
     },
     [fetchLevel]
@@ -218,7 +228,8 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
   )
 
   const showMore = (key: string): void => {
-    void fetchLevel(key, (levelsRef.current.get(key)?.limit ?? CHILD_LIMIT) + CHILD_LIMIT).then((l) => merge(new Map([[key, l]])))
+    const asked = sortKeyRef.current
+    void fetchLevel(key, (levelsRef.current.get(key)?.limit ?? CHILD_LIMIT) + CHILD_LIMIT).then((l) => merge(new Map([[key, l]]), asked))
   }
 
   /** Opens every level at once. Levels are then loaded as they scroll into view (review P-04). */
@@ -229,6 +240,7 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
 
   /** Open the ancestors of `id` and load the levels on the way, so the item has a row. */
   const reveal = async (id: string): Promise<void> => {
+    const asked = sortKeyRef.current
     const ancestors = await window.reqochet.getAncestors(id)
     const keys = [ROOT, ...ancestors]
     const loaded = await Promise.all(
@@ -240,7 +252,7 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
         return [k, level] as const
       })
     )
-    merge(new Map(loaded))
+    merge(new Map(loaded), asked)
     setOpenState((prev) => {
       const ids = new Set(prev.ids)
       for (const a of ancestors) {

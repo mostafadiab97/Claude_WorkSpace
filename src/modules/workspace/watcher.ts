@@ -1,5 +1,6 @@
 import { readdirSync, watch, type FSWatcher } from 'node:fs'
 import { join } from 'node:path'
+import { isDocumentName } from '../repository-store'
 
 /**
  * Notices which files in the requirements folder changed (by ReqMan, Git or an editor) so that a refresh
@@ -22,7 +23,7 @@ export interface FolderWatch {
 export const documentFolders = (folder: string): string[] => {
   try {
     return readdirSync(folder, { withFileTypes: true })
-      .filter((d) => d.isDirectory() && !d.name.startsWith('.'))
+      .filter((d) => d.isDirectory() && isDocumentName(d.name)) // only what the full check reads (SEC-17-05)
       .map((d) => d.name)
       .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
   } catch {
@@ -32,6 +33,8 @@ export const documentFolders = (folder: string): string[] => {
 
 /** More changed files than this → a normal full check is just as fast. */
 const MANY = 2000
+/** More document folders than this are not watched one by one. */
+const MAX_WATCHED_DOCUMENTS = 200
 
 export function watchRequirementsFolder(folder: string, onError?: (e: unknown) => void, metaDir: string = '.reqochet'): FolderWatch {
   const changed = new Set<string>()
@@ -78,7 +81,9 @@ export function watchRequirementsFolder(folder: string, onError?: (e: unknown) =
   }
   const docs = documentFolders(folder).filter((d) => d !== metaDir && d !== '.reqman' && d !== '.reqochet')
   add('')
-  for (const d of docs) add(d)
+  // very many folders: no handle per folder — every refresh checks everything instead (SEC-17-05)
+  if (docs.length > MAX_WATCHED_DOCUMENTS) failed = true
+  else for (const d of docs) add(d)
   add(metaDir)
 
   return {

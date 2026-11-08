@@ -383,7 +383,8 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
             if (f === 'title') return `trim(i.title, ${BLANKS}) = ''`
             if (f === 'text') return `trim(i.text, ${BLANKS}) = ''`
             params.push(f)
-            return `NOT EXISTS (SELECT 1 FROM item_fields x WHERE x.rid = i.rid AND x.field = ? AND trim(x.value, ${BLANKS}) <> '')`
+            // INDEXED BY: without it SQLite walks every row of that field for each item (3 s at 10k, 83 s at 50k — PERF-01)
+            return `NOT EXISTS (SELECT 1 FROM item_fields x INDEXED BY item_fields_rid WHERE x.rid = i.rid AND x.field = ? AND trim(x.value, ${BLANKS}) <> '')`
           })
           if (missing.length === 0) continue
           ors.push(`(i.type = ? AND (${missing.join(' OR ')}))`)
@@ -396,7 +397,8 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         // the document is the first folder of the path (S-10); '' = files directly in requirements/
         if (q.document === '') where.push("instr(i.path, '/') = 0")
         else {
-          where.push('substr(i.path, 1, length(?) + 1) = ? || \'/\'')
+          // a range on the path index: "<doc>/" ≤ path < "<doc>0" ('0' is the byte after '/') — PERF-03
+          where.push("i.path >= ? || '/' AND i.path < ? || '0'")
           params.push(q.document, q.document)
         }
       }
@@ -474,6 +476,11 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
 
     revision: () => revision,
 
+    documentCounts: () => {
+      // one pass for every document (PERF-02): '' = files directly in requirements/
+      const rows = db.prepare("SELECT CASE WHEN instr(path, '/') > 0 THEN substr(path, 1, instr(path, '/') - 1) ELSE '' END AS d, COUNT(*) AS n FROM items GROUP BY d").all() as { d: string; n: number }[]
+      return Object.fromEntries(rows.map((r) => [r.d, r.n]))
+    },
     typeUsage: () => ({
       items: Object.fromEntries((db.prepare('SELECT type AS t, COUNT(*) AS n FROM items GROUP BY type').all() as { t: string; n: number }[]).map((r) => [r.t, r.n])),
       links: Object.fromEntries((db.prepare('SELECT type AS t, COUNT(*) AS n FROM links GROUP BY type').all() as { t: string; n: number }[]).map((r) => [r.t, r.n]))

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { RepoInfo } from '../../../shared/api'
 import type { ItemTypeDef, LinkTypeDef } from '../../../shared/domain'
 import { T } from '../../../shared/text'
@@ -29,24 +29,44 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
   const [usage, setUsage] = useState<{ items: Record<string, number>; links: Record<string, number> } | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // edits are not dropped by Escape, the backdrop or Cancel without asking (UX17-04, CR-30)
+  const [dirty, setDirty] = useState(false)
+  const [askClose, setAskClose] = useState(false)
+  const panel = useRef<HTMLDivElement>(null)
+  const tryClose = (): void => (dirty ? setAskClose(true) : onClose())
   useEffect(() => {
     void window.reqochet.getTypeUsage().then(setUsage)
+    // focus goes into the window, and back to where it was when it closes (UX17-05)
+    const before = document.activeElement as HTMLElement | null
+    panel.current?.querySelector<HTMLInputElement>('input')?.focus()
+    return () => before?.focus?.()
   }, [])
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') onClose()
+      if (e.key !== 'Escape') return
+      if (askClose) setAskClose(false)
+      else if (dirty) setAskClose(true)
+      else onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [onClose, dirty, askClose])
 
   const fieldChoices = [{ id: 'title', name: T.columns.title }, { id: 'text', name: T.columns.text }, ...schema.fields.map((f) => ({ id: f.id, name: f.name }))]
-  const patchItem = (key: number, p: Partial<ItemDraft>): void => setItems((xs) => xs.map((x) => (x.key === key ? { ...x, ...p, ...(x.isNew && p.name !== undefined ? { id: idFrom(p.name) } : {}) } : x)))
-  const patchLink = (key: number, p: Partial<LinkDraft>): void => setLinks((xs) => xs.map((x) => (x.key === key ? { ...x, ...p, ...(x.isNew && p.name !== undefined ? { id: idFrom(p.name) } : {}) } : x)))
+  const patchItem = (key: number, p: Partial<ItemDraft>): void => {
+    setDirty(true)
+    setItems((xs) => xs.map((x) => (x.key === key ? { ...x, ...p, ...(x.isNew && p.name !== undefined ? { id: idFrom(p.name) } : {}) } : x)))
+  }
+  const patchLink = (key: number, p: Partial<LinkDraft>): void => {
+    setDirty(true)
+    setLinks((xs) => xs.map((x) => (x.key === key ? { ...x, ...p, ...(x.isNew && p.name !== undefined ? { id: idFrom(p.name) } : {}) } : x)))
+  }
   const ids = items.map((x) => x.id)
   const linkIds = links.map((x) => x.id)
-  const problem =
-    items.some((x) => !x.id || !x.name.trim()) || links.some((x) => !x.id || !x.name.trim() || !x.reverseName.trim())
+  const noLatin = [...items, ...links].some((x) => x.isNew && x.name.trim() !== '' && !x.id)
+  const problem = noLatin
+    ? T.typesDialog.noLatinId
+    : items.some((x) => !x.id || !x.name.trim()) || links.some((x) => !x.id || !x.name.trim() || !x.reverseName.trim())
       ? T.typesDialog.missingName
       : new Set(ids).size !== ids.length || new Set(linkIds).size !== linkIds.length
         ? T.typesDialog.duplicate
@@ -73,14 +93,14 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
   }
 
   return (
-    <div className="modal" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal__panel" role="dialog" aria-modal="true" aria-label={T.typesDialog.title}>
+    <div className="modal" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && tryClose()}>
+      <div ref={panel} className="modal__panel" role="dialog" aria-modal="true" aria-label={T.typesDialog.title}>
         <header className="modal__header">
           <div>
             <h2 className="modal__title">{T.typesDialog.title}</h2>
             <p className="muted">{T.typesDialog.intro}</p>
           </div>
-          <button type="button" className="icon-btn" aria-label={T.common.close} onClick={onClose}>
+          <button type="button" className="icon-btn" aria-label={T.common.close} onClick={tryClose}>
             ✕
           </button>
         </header>
@@ -88,11 +108,11 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
           <h3 className="types__heading">{T.typesDialog.itemTypes}</h3>
           <div className="fields-table types-table" role="table" aria-label={T.typesDialog.itemTypes}>
             <div className="fields-table__head" role="row">
-              <span>{T.typesDialog.name}</span>
-              <span>{T.typesDialog.short}</span>
-              <span>{T.typesDialog.heading}</span>
-              <span>{T.typesDialog.required}</span>
-              <span>{T.typesDialog.used}</span>
+              <span role="columnheader">{T.typesDialog.name}</span>
+              <span role="columnheader">{T.typesDialog.short}</span>
+              <span role="columnheader">{T.typesDialog.heading}</span>
+              <span role="columnheader">{T.typesDialog.required}</span>
+              <span role="columnheader">{T.typesDialog.used}</span>
             </div>
             {items.map((t) => {
               const n = usage?.items[t.id] ?? 0
@@ -100,12 +120,12 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
                 <div key={t.key} className="fields-table__row" role="row">
                   <input className="input" value={t.name} aria-label={T.typesDialog.nameOf(t.name || t.id)} onChange={(e) => patchItem(t.key, { name: e.target.value })} />
                   <input className="input" value={t.short ?? ''} aria-label={T.typesDialog.shortOf(t.name)} onChange={(e) => patchItem(t.key, { short: e.target.value })} />
-                  <label className="check">
+                  <label className="check" title={T.typesDialog.headingOf(t.name)}>
                     <input type="checkbox" checked={t.requirement === false} onChange={(e) => patchItem(t.key, { requirement: !e.target.checked })} />
                     <span className="sr-only">{T.typesDialog.headingOf(t.name)}</span>
                   </label>
                   <details className="types__required">
-                    <summary>{(t.required ?? []).length ? (t.required ?? []).map((r) => fieldChoices.find((f) => f.id === r)?.name ?? r).join(', ') : T.typesDialog.none}</summary>
+                    <summary aria-label={`${T.typesDialog.required}: ${t.name}`}>{(t.required ?? []).length ? (t.required ?? []).map((r) => fieldChoices.find((f) => f.id === r)?.name ?? r).join(', ') : T.typesDialog.none}</summary>
                     {fieldChoices.map((f) => (
                       <label key={f.id} className="check">
                         <input
@@ -117,9 +137,9 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
                       </label>
                     ))}
                   </details>
-                  <span className="types__used">
+                  <span className="types__used" role="cell">
                     {T.typesDialog.count(n)}{' '}
-                    <button type="button" className="link-btn" disabled={n > 0 || items.length === 1} title={n > 0 ? T.typesDialog.cannotRemove(n) : T.typesDialog.remove} onClick={() => setItems((xs) => xs.filter((x) => x.key !== t.key))}>
+                    <button type="button" className="link-btn" disabled={n > 0 || items.length === 1} title={n > 0 ? T.typesDialog.cannotRemove(n) : T.typesDialog.remove} onClick={() => (setDirty(true), setItems((xs) => xs.filter((x) => x.key !== t.key)))}>
                       {T.typesDialog.remove}
                     </button>
                   </span>
@@ -127,16 +147,19 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
               )
             })}
           </div>
-          <button type="button" className="btn btn--small" onClick={() => setItems((xs) => [...xs, { key: nextKey++, isNew: true, id: '', name: '', requirement: true }])}>
+          <button type="button" className="btn btn--small" onClick={() => {
+              setDirty(true)
+              setItems((xs) => [...xs, { key: nextKey++, isNew: true, id: '', name: '', requirement: true }])
+            }}>
             {T.typesDialog.addItemType}
           </button>
 
           <h3 className="types__heading">{T.typesDialog.linkTypes}</h3>
           <div className="fields-table types-table types-table--links" role="table" aria-label={T.typesDialog.linkTypes}>
             <div className="fields-table__head" role="row">
-              <span>{T.typesDialog.linkName}</span>
-              <span>{T.typesDialog.reverseName}</span>
-              <span>{T.typesDialog.used}</span>
+              <span role="columnheader">{T.typesDialog.linkName}</span>
+              <span role="columnheader">{T.typesDialog.reverseName}</span>
+              <span role="columnheader">{T.typesDialog.used}</span>
             </div>
             {links.map((l) => {
               const n = usage?.links[l.id] ?? 0
@@ -144,9 +167,9 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
                 <div key={l.key} className="fields-table__row" role="row">
                   <input className="input" value={l.name} aria-label={T.typesDialog.nameOf(l.name || l.id)} onChange={(e) => patchLink(l.key, { name: e.target.value })} />
                   <input className="input" value={l.reverseName} aria-label={T.typesDialog.reverseOf(l.name)} onChange={(e) => patchLink(l.key, { reverseName: e.target.value })} />
-                  <span className="types__used">
+                  <span className="types__used" role="cell">
                     {T.typesDialog.linkCount(n)}{' '}
-                    <button type="button" className="link-btn" disabled={n > 0} title={n > 0 ? T.typesDialog.cannotRemove(n) : T.typesDialog.remove} onClick={() => setLinks((xs) => xs.filter((x) => x.key !== l.key))}>
+                    <button type="button" className="link-btn" disabled={n > 0} title={n > 0 ? T.typesDialog.cannotRemove(n) : T.typesDialog.remove} onClick={() => (setDirty(true), setLinks((xs) => xs.filter((x) => x.key !== l.key)))}>
                       {T.typesDialog.remove}
                     </button>
                   </span>
@@ -154,7 +177,10 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
               )
             })}
           </div>
-          <button type="button" className="btn btn--small" onClick={() => setLinks((xs) => [...xs, { key: nextKey++, isNew: true, id: '', name: '', reverseName: '' }])}>
+          <button type="button" className="btn btn--small" onClick={() => {
+              setDirty(true)
+              setLinks((xs) => [...xs, { key: nextKey++, isNew: true, id: '', name: '', reverseName: '' }])
+            }}>
             {T.typesDialog.addLinkType}
           </button>
         </div>
@@ -168,10 +194,21 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
             <button type="button" className="btn btn--primary" disabled={busy || problem !== null} onClick={() => void save()}>
               {T.common.save}
             </button>
-            <button type="button" className="btn" onClick={onClose}>
+            <button type="button" className="btn" onClick={tryClose}>
               {T.common.cancel}
             </button>
           </div>
+          {askClose && (
+            <div className="notice notice--warning" role="alertdialog" aria-label={T.typesDialog.discardAsk}>
+              <span>{T.typesDialog.discardAsk}</span>
+              <button type="button" className="btn btn--small" onClick={onClose}>
+                {T.workspace.discard}
+              </button>
+              <button type="button" className="btn btn--small btn--primary" autoFocus onClick={() => setAskClose(false)}>
+                {T.workspace.keepEditing}
+              </button>
+            </div>
+          )}
         </footer>
       </div>
     </div>

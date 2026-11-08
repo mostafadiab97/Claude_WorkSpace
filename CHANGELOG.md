@@ -3,6 +3,28 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.17.0 — 8 Nov 2026 — 1a structure: documents, editable types, required fields
+- **Owner (7 Nov 2026):** "if you can start the next step now without the manual testing, go on … we can do both tests
+  together" — 0.16.4 was not tested yet; its steps 2–5 are tried on this version.
+- **Documents (S-10):** every folder under `requirements/` is a document (a specification) with its own tree and its
+  own numbers from 1; a document picker above the table (each document, or All documents), **New document…** and
+  **Rename…** (a folder rename in one commit, so every item keeps its history). A new project starts with the document
+  "Specification"; a project made before 0.17 is offered a real name for its folder "items"; item files lying directly
+  in `requirements/` are offered a move into a document. A tree never spans documents.
+- **Item and link types edited in the window (S-04):** Columns → **Edit types…** — add, rename, remove (only when no
+  item or link uses the type; the window shows how many do), stored in `schema.yaml` with its comments kept.
+- **Required fields (S-05):** per item type; an item without them is still saved but marked **incomplete**, and
+  **Filters → Incomplete** lists those items (also in the export of the filtered table).
+- **Columns menu:** drag and drop to reorder the columns (S-11); ↑ / ↓ stay for the keyboard.
+- **Checked by the helpers:** code reviewer and QA tester (every finding fixed or decided — loose files never overwrite
+  a file, Windows device names refused, a parent in another document warned and numbered at its own top level; QA tests
+  taken in: `tests/qa-0.17.0-*`, plus `tests/review-0.17.0.test.ts`), then security, Arabic, UI/UX and performance
+  (`docs/reviews/agents/0.17.0-*.md`). The release self-test now builds a project with a named document.
+- **Found on the way:** with required fields set, the Incomplete filter took 3 s at 10,000 items (83 s at 50,000) —
+  now 13 ms; document counts in one pass; Git now takes every path literally (an ID like `X[1]` could pull another
+  item's unsaved edits into a commit); item files that are links or larger than 5 MB are not read; switching documents
+  right after a save could show the previous document's rows (a late answer overwrote the tree).
+
 ## 0.16.4 — 7 Nov 2026 — Stabilisation 2: speed, Arabic, first run, keyboard
 - **The owner's points on 0.16.3:** clicking into the Text box puts the cursor where you clicked (or at the end), not at
   the start; a `"` typed inside a multi-line CSV cell (a table, a bullet list) no longer cuts the rest — a quote ends a

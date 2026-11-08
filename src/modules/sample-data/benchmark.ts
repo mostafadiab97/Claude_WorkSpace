@@ -58,7 +58,11 @@ export async function runDataBenchmark(store: RepositoryStore, count: number): P
         ['children of one item', { parent: someParent, sort: { by: 'order' } }],
         ['items with suspect links', { links: 'suspect', limit: 100 }],
         ['items without links', { links: 'none', limit: 100 }],
-        ['sort by number of links', { sort: { by: 'links', descending: true }, limit: 100 }]
+        ['sort by number of links', { sort: { by: 'links', descending: true }, limit: 100 }],
+        // 0.17 (PERF-07): documents and the Incomplete filter
+        ['one document, top level, order', { document: 'items', parent: null, sort: { by: 'order' }, limit: 100 }],
+        ['all documents, top level, order, page 50', { parent: null, sort: { by: 'order' }, limit: 100, offset: 5000 }],
+        ['incomplete (required fields set)', { incomplete: true, required: { 'system-requirement': ['priority', 'text'], 'software-requirement': ['status'] }, limit: 100 }]
       ]
       const queries: BenchmarkResult['queries'] = []
       for (const [name, q] of cases) {
@@ -66,6 +70,9 @@ export async function runDataBenchmark(store: RepositoryStore, count: number): P
         const [r, ms] = await time(() => cache.query(q))
         queries.push({ name, ms, total: r.total })
       }
+      cache.documentCounts()
+      const [counts, countMs] = await time(() => cache.documentCounts())
+      queries.push({ name: 'item count per document', ms: countMs, total: Object.keys(counts).length })
       return {
         items: count,
         writeMs,

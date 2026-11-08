@@ -127,8 +127,9 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   // the documents (folders under requirements/) with their item counts; '' = loose files, listed only when there are any
   const documentsOf = (s: Session): { name: string; itemCount: number }[] => {
     const names = documentFolders(s.repo.folder).filter((d) => d !== s.repo.metaDir && d !== '.reqman' && d !== '.reqochet')
-    const out = names.map((name) => ({ name, itemCount: s.index.query({ document: name, limit: 0 }).total }))
-    const loose = s.index.query({ document: '', limit: 0 }).total
+    const counts = s.index.documentCounts()
+    const out = names.map((name) => ({ name, itemCount: counts[name] ?? 0 }))
+    const loose = counts[''] ?? 0
     return loose > 0 ? [...out, { name: '', itemCount: loose }] : out
   }
   const info = (s: Session = need()): RepoInfo => ({

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { documentOfPath } from '../../shared/domain'
-import { mkdir, readdir, readFile, stat, writeFile, rename, rmdir } from 'node:fs/promises'
+import { mkdir, readdir, readFile, lstat, stat, writeFile, rename, rmdir } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 import { generateId, ITEM_FILE_EXTENSION, parseItemFile, serializeItem, type FieldValue, type Item } from '../items'
 import { isMap, isSeq, parseDocument, type YAMLMap, type YAMLSeq } from 'yaml'
@@ -22,9 +22,16 @@ import {
 const ITEMS_DIR = 'items'
 /** The first document of a new project (S-10: the requirements folder holds only document folders). */
 export const FIRST_DOCUMENT = 'Specification'
+/** An item file larger than this is reported, not read (a requirement is text; SEC-17-03). */
+const MAX_ITEM_FILE_BYTES = 5_000_000
 /** True when the name can be a document folder: a plain folder name, not hidden (S-10). */
 export const isDocumentName = (name: string): boolean =>
-  name.length > 0 && name.length <= 80 && !/^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\.|$)/i.test(name) && !/[\\/:*?"<>|]/.test(name) && ![...name].some((c) => c.charCodeAt(0) < 32) && !name.startsWith('.') && name.trim() === name && !name.endsWith('.')
+  name.length > 0 &&
+  name.length <= 80 &&
+  !/^(con|prn|aux|nul|com[0-9¹²³]|lpt[0-9¹²³])(\.|$)/i.test(name) &&
+  // no invisible format characters (direction marks, zero-width): a name must look like what it is (SEC-17-04)
+  !/\p{Cf}/u.test(name) &&
+  !/[\\/:*?"<>|]/.test(name) && ![...name].some((c) => c.charCodeAt(0) < 32) && !name.startsWith('.') && name.trim() === name && !name.endsWith('.')
 /** The project folder inside requirements/ (0.16: renamed with the product; owner, 31 Oct / 4 Nov 2026). */
 /** True when the ID can be used as a file name inside a document folder (no path parts). */
 export const isSafeFileId = (id: string): boolean =>
@@ -209,7 +216,8 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
           for (const n of names) if (n.endsWith(ITEM_FILE_EXTENSION) && n.toLowerCase() !== 'readme.md') files.push(d ? `${d}/${n}` : n)
         }
         const infos = await mapLimit(files, READ_CONCURRENCY, async (p) => {
-          const s = await stat(join(folder, p)).catch(() => null)
+          // lstat: a link committed as an item file is not followed outside the project (SEC-17-03)
+          const s = await lstat(join(folder, p)).catch(() => null)
           return s?.isFile() ? { path: p, mtimeMs: s.mtimeMs, size: s.size } : null
         })
         return infos.filter((x): x is ItemFileInfo => x !== null).sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))
@@ -217,6 +225,9 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
 
       async readItemFile(path, opts) {
         try {
+          const info = await lstat(join(folder, path))
+          if (!info.isFile()) return { ok: false, error: 'Not a plain file (a link or a folder): not read.' }
+          if (info.size > MAX_ITEM_FILE_BYTES) return { ok: false, error: `The file is larger than ${MAX_ITEM_FILE_BYTES / 1_000_000} MB: not read.` }
           return parseItemFile(await readFile(join(folder, path), 'utf8'), opts?.allKeysAsFields ? ALL_KEYS : fieldIds)
         } catch (e) {
           return { ok: false, error: `Could not read the file: ${(e as Error).message}` }

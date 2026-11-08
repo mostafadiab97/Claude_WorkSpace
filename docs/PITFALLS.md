@@ -145,3 +145,12 @@ under `npm run check` (coverage). Fix: delete `node_modules/.vitest-cache`. CI s
 inside a function for reading zips from S3. Vitest and e2e still passed because e2e ran the *previous* `out/` build.
 Fix: `external: ['@aws-sdk/client-s3']` in the main build of `electron.vite.config.mts`. Always run `npm run build`
 and check it printed "built in" before trusting an e2e run.
+
+## Late answers overwrite a newer tree (0.17.0)
+
+Every async table load that merges into the tree must check that the sort/document it asked for is still the current
+one (`sortKeyRef` + `merge(next, asked)` in `table/rows.ts`). `reveal()` after a save answered for the old document
+after the user had switched to "All documents" and replaced its top level — seen only when the e2e ran under load.
+Git: paths passed to Git are literal (`GIT_LITERAL_PATHSPECS=1` in `systemGit.ts`); never rely on wildcards there.
+SQLite: a correlated `NOT EXISTS` on `item_fields` may pick the `(field, value, rid)` index and walk every row of the
+field per item — keep `INDEXED BY item_fields_rid` (Incomplete went from 83 s to milliseconds at 50k).

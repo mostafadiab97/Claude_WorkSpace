@@ -1,5 +1,6 @@
 // 0.17.0 — fixes from the helper review of 1a (docs/reviews/agents/0.17.0-code-reviewer.md, 0.17.0-qa-tester.md).
-import { mkdtemp, mkdir, readdir, rename, writeFile } from 'node:fs/promises'
+import { execFileSync } from 'node:child_process'
+import { mkdtemp, mkdir, readdir, rename, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -87,5 +88,55 @@ describe('0.17.0 review fixes', () => {
     const info = await ws.refresh(false)
     const r = await ws.saveSchemaTypes([...info.schema.itemTypes, { id: '1-type', name: 'N', requirement: true }], info.schema.linkTypes, info.schemaRevision).catch(() => ({ ok: false }))
     expect(r.ok).toBe(false)
+  })
+
+  it('SEC-17-04: invisible format characters and superscript device names are refused', () => {
+    for (const n of ['Spec\u202Eabc', 'a\u200Bb', 'x\u2066y', 'COM¹', 'lpt³']) expect(isDocumentName(n), JSON.stringify(n)).toBe(false)
+    expect(isDocumentName('مستند النظام')).toBe(true)
+  })
+
+  it('SEC-17-03: an item file that is a link is not read', async () => {
+    const { ws, root } = await setup()
+    const outside = join(await mkdtemp(join(tmpdir(), 'rq-outside-')), 'secret.md')
+    await writeFile(outside, '---\nid: REQ-OUTSIDE\ntype: system-requirement\ntitle: secret\n---\n')
+    await symlink(outside, join(root, 'requirements', 'Spec', 'REQ-OUTSIDE.md')).catch(() => undefined)
+    await ws.refresh(true)
+    expect(ws.query({}).items.map((i) => i.id)).not.toContain('REQ-OUTSIDE')
+  })
+
+  it('PERF-02: item counts per document come from one query and match the documents', async () => {
+    const { ws, root } = await setup('A')
+    await mkdir(join(root, 'requirements', 'B'))
+    await ws.refresh(true)
+    await add(ws, 'a', { document: 'A' })
+    await add(ws, 'b1', { document: 'B' })
+    await add(ws, 'b2', { document: 'B' })
+    expect((await ws.refresh(false)).documents).toEqual([
+      { name: 'A', itemCount: 1 },
+      { name: 'B', itemCount: 2 }
+    ])
+    // the document range filter does not take "B2" for "B"
+    await mkdir(join(root, 'requirements', 'B2'))
+    await ws.refresh(true)
+    await add(ws, 'other', { document: 'B2' })
+    expect(ws.query({ document: 'B' }).total).toBe(2)
+  })
+
+  it('SEC-17-01: Git paths are literal — a loose "X[1]" moved into a document does not commit Doc/X1.md', async () => {
+    const { ws, root } = await setup('Doc')
+    const sh = (...a: string[]): string => execFileSync('git', a, { cwd: root, encoding: 'utf8' })
+    sh('init', '-q')
+    sh('config', 'user.name', 'T')
+    sh('config', 'user.email', 't@example.invalid')
+    await writeFile(join(root, 'requirements', 'Doc', 'X1.md'), '---\nid: X1\ntype: system-requirement\ntitle: one\n---\n')
+    await writeFile(join(root, 'requirements', 'X[1].md'), '---\nid: X[1]\ntype: system-requirement\ntitle: loose\n---\n')
+    sh('add', '-A')
+    sh('commit', '-qm', 'start')
+    await writeFile(join(root, 'requirements', 'Doc', 'X1.md'), '---\nid: X1\ntype: system-requirement\ntitle: one, edited\n---\n')
+    await ws.open(root) // now a Git repository
+    const r = await ws.renameDocument('', 'Doc')
+    expect(r.ok).toBe(true)
+    expect(sh('log', '--oneline').trim().split('\n')).toHaveLength(2) // the move was committed
+    expect(sh('status', '--porcelain')).toContain('requirements/Doc/X1.md') // still uncommitted
   })
 })

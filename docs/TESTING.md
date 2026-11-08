@@ -67,7 +67,22 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.16.4 (stabilisation 2: speed, Arabic, first run, keyboard)
+## Manual test checklist — v0.17.0 (1a structure: documents, editable types, required fields)
+
+Try this together with steps 2–5 of the 0.16.4 checklist below. Report by version and step ("0.17.0 test 3").
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.17.0**, then **⚙ → Self-tests → Run release self-test**. | Version 0.17.0; **all 22 steps passed**. |
+| 2 | Open the sandbox. Above the table, the document bar offers to give the folder **items** a real name: rename it (e.g. "System"), then **Push**. | One commit "Rename document…" is pushed; every item is still there, with its history (Item → History). |
+| 3 | In the document picker choose **New document…**, call it "Software", add two items, then switch between **System**, **Software** and **All documents**. | Each document has its own tree and starts its numbering at 1; All documents shows both, one after the other. |
+| 4 | **Columns → Edit types…**: add an item type, rename one, try to remove a type that is in use; give one type a **required** field. | The new type can be chosen for new items; a used type cannot be removed (it says how many items use it). Items of that type without the field show under **Filters → Incomplete**. |
+| 5 | Open **Columns** and drag a column to another place in the list. | The table's columns follow the new order (↑/↓ still work too). |
+
+## Previous checklist — v0.16.4 (stabilisation 2: speed, Arabic, first run, keyboard)
+
+Not tested yet: try steps 2–5 **on 0.17.0** together with the new checklist (the owner, 7 Nov: "we can do both tests
+together"); step 1 is replaced by step 1 of 0.17.0.
 
 | # | Do this | Expected result |
 | --- | --- | --- |
@@ -76,19 +91,6 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 | 3 | Export some items to CSV, put `12"` inside a table or bullet list in one Text cell, save, **Import** the file. | The whole text arrives, including what follows the `"`. |
 | 4 | In the table press **Shift+F10** (or the Menu key) on a row; then look at the **Links** column and the **Changes** button. | The row menu opens (Open, Add a child item, Delete…, Export); Links reads like "1 out · ⚠ 1 suspect"; Changes counts items. |
 | 5 | Switch to **العربية** and look at the table, the Changes button and a Compare. | IDs read left to right; counts read correctly ("عنصران", "3 عناصر"); "عنصر فرعي" for children; nothing in English except names. |
-
-## Previous checklist — v0.16.3 (stabilisation 1: data and safety)
-
-Most fixes of this version are checked automatically (30 QA tests from the review, a new e2e scenario, the acceptance
-run). Report by step number.
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.16.3**, then **⚙ → Self-tests → Run release self-test**. | Version 0.16.3; **all 22 steps passed**. |
-| 2 | In the sandbox, open an item, change its title, then click the **✕** beside the project name. | "Save / Discard / Keep editing" appears; Keep editing keeps your text; Save closes the project with the change saved. |
-| 3 | Change an item without saving, then press **Push**. | The same question first; after Save comes the usual "Pull first? / Push without pulling" (if GitHub has newer commits) or the push. |
-| 4 | Type a value into **Tags** and press **Ctrl+S** without clicking elsewhere. | The tags are saved (the item is not marked unsaved afterwards). |
-| 5 | Optional: Import a CSV that has a cell like `12" display` and an Arabic choice value. | Every row arrives; the Arabic value is the one you typed. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

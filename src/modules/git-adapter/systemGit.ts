@@ -40,7 +40,8 @@ const LOCAL_TIMEOUT = 30_000
 /** Pull and push may wait for the network or for the user to sign in (Git Credential Manager window). */
 const NETWORK_TIMEOUT = 180_000
 
-const GIT_ENV = (): NodeJS.ProcessEnv => ({ ...process.env, GIT_TERMINAL_PROMPT: '0', LC_ALL: 'C', LANG: 'C' })
+// GIT_LITERAL_PATHSPECS: a path is always a path, never a pattern — an ID like "X[1]" must not also match X1.md (SEC-17-01)
+const GIT_ENV = (): NodeJS.ProcessEnv => ({ ...process.env, GIT_TERMINAL_PROMPT: '0', GIT_LITERAL_PATHSPECS: '1', LC_ALL: 'C', LANG: 'C' })
 
 /**
  * Reads many files of one commit through a single `git cat-file --batch` process (one process instead of one

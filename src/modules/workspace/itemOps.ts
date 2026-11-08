@@ -37,7 +37,7 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
     const parent = item.parent ? s.index.get(item.parent) : undefined
     const mine = s.index.get(item.id)?.document ?? item.document ?? ''
     return parent && (parent.document ?? '') !== mine
-      ? [{ itemId: item.id, path: 'parent', message: T.wsMsg.parentOtherDocument(parent.id, parent.document || '—'), severity: 'warning' as const }]
+      ? [{ itemId: item.id, path: 'parent', message: T.wsMsg.parentOtherDocument(parent.id, parent.document || T.wsMsg.looseFiles), severity: 'warning' as const }]
       : []
   }
 
@@ -67,7 +67,7 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
         const mine = s.index.get(clean.id)?.document ?? clean.document ?? s.repo.defaultDocument
         if (!parent) issues.push({ itemId: clean.id, path: 'parent', message: T.wsMsg.parentMissing(clean.parent), severity: 'error' })
         // every document has its own tree (S-10): a parent from another document cannot hold this item
-        else if ((parent.document ?? '') !== mine) issues.push({ itemId: clean.id, path: 'parent', message: T.wsMsg.parentOtherDocument(clean.parent, parent.document || '—'), severity: 'error' })
+        else if ((parent.document ?? '') !== mine) issues.push({ itemId: clean.id, path: 'parent', message: T.wsMsg.parentOtherDocument(clean.parent, parent.document || T.wsMsg.looseFiles), severity: 'error' })
         else if (createsLoop(s, clean.id, clean.parent)) {
           issues.push({ itemId: clean.id, path: 'parent', message: T.wsMsg.parentLoop(clean.parent), severity: 'error' })
         }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { RepoInfo } from '../../../../shared/api'
 import { T } from '../../../../shared/text'
+import { useSessionState } from '../../lib/sessionState'
 
 /** "All documents" in the picker: not a folder name (a folder name never starts with NUL). */
 export const ALL_DOCUMENTS = '\u0000all'
@@ -16,7 +17,8 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
   const [name, setName] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [later, setLater] = useState(false)
+  // "Not now" holds for the rest of the session for this project, not only until the bar is drawn again (UX17-15)
+  const [later, setLater] = useSessionState(`documents.later.${info.root}`, false)
   const docs = info.documents
   const label = (d: string): string => (d === '' ? T.documents.loose : d)
   const legacy = docs.length === 1 && docs[0]?.name === 'items'
@@ -61,7 +63,19 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
             void submit()
           }}
         >
-          <input className="input" autoFocus value={name} onChange={(e) => setName(e.target.value)} aria-label={naming.kind === 'new' ? T.documents.newName : T.documents.renameName(label(naming.from))} placeholder={T.documents.placeholder} />
+          <input
+            className="input"
+            autoFocus
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                e.stopPropagation()
+                setNaming(null)
+              }
+            }}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? 'document-bar-error' : undefined} aria-label={naming.kind === 'new' ? T.documents.newName : T.documents.renameName(label(naming.from))} placeholder={T.documents.placeholder} />
           <button type="submit" className="btn btn--small btn--primary" disabled={busy || !name.trim()}>
             {naming.kind === 'new' ? T.documents.create : T.documents.rename}
           </button>
@@ -75,14 +89,14 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
             {T.documents.newDocument}
           </button>
           {document !== ALL_DOCUMENTS && (
-            <button type="button" className="link-btn" onClick={() => start('rename', document, document === 'items' || document === '' ? '' : document)}>
+            <button type="button" className="link-btn" aria-label={T.documents.renameName(label(document))} onClick={() => start('rename', document, document === 'items' || document === '' ? '' : document)}>
               {T.documents.renameDocument}
             </button>
           )}
         </>
       )}
       {error && (
-        <span className="notice notice--error" role="alert">
+        <span id="document-bar-error" className="notice notice--error document-bar__error" role="alert">
           {error}
         </span>
       )}

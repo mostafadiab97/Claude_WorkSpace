@@ -226,10 +226,12 @@ const en = {
     headingOf: (name: string) => `${name} is a heading, not a requirement`,
     reverseOf: (name: string) => `Name of ${name} read from the target`,
     none: 'none',
-    count: (n: number) => `${n} item(s)`,
-    linkCount: (n: number) => `${n} link(s)`,
+    count: (c: number) => `${n(c)} item${s(c)}`,
+    linkCount: (c: number) => `${n(c)} link${s(c)}`,
     remove: 'Remove',
-    cannotRemove: (n: number) => `Used ${n} time(s): change those first`,
+    cannotRemove: (c: number) => `Used ${n(c)} time${s(c)}: change the items or links that use it first`,
+    noLatinId: 'A new type needs at least one Latin letter in its name, for its ID in schema.yaml (e.g. "SRS Anforderung" or "srs").',
+    discardAsk: 'Close without saving your changes to the types?',
     addItemType: '+ Add item type',
     addLinkType: '+ Add link type',
     missingName: 'Every type needs a name (and every link type a reverse name).',
@@ -554,7 +556,8 @@ const en = {
     reset: 'Reset',
     editFields: 'Edit fields…',
     dragHint: 'Drag to move the column, or use ↑ / ↓',
-    editTypes: 'Edit types…'
+    editTypes: 'Edit types…',
+    moved: (column: string, position: number) => `${column} moved to position ${position}`
   },
 
   fields: {
@@ -857,7 +860,8 @@ const en = {
     linksAny: 'Links: any',
     linksSuspect: 'With suspect links',
     linksNone: 'Without any links',
-    incomplete: 'Incomplete (a required field is empty)',
+    incomplete: 'Incomplete',
+    incompleteTip: 'Incomplete: a required field is empty (required fields per type are set in the Types window)',
     clearFilters: 'Clear filters',
     export: 'Export…',
     expandAll: 'Expand all',

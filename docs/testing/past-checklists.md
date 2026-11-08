@@ -1,7 +1,20 @@
-# Past manual checklists (v0.0.3 – v0.16.2)
+# Past manual checklists (v0.0.3 – v0.16.3)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## Previous checklist — v0.16.3 (stabilisation 1: data and safety)
+
+Most fixes of this version are checked automatically (30 QA tests from the review, a new e2e scenario, the acceptance
+run). Report by step number.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.16.3**, then **⚙ → Self-tests → Run release self-test**. | Version 0.16.3; **all 22 steps passed**. |
+| 2 | In the sandbox, open an item, change its title, then click the **✕** beside the project name. | "Save / Discard / Keep editing" appears; Keep editing keeps your text; Save closes the project with the change saved. |
+| 3 | Change an item without saving, then press **Push**. | The same question first; after Save comes the usual "Pull first? / Push without pulling" (if GitHub has newer commits) or the push. |
+| 4 | Type a value into **Tags** and press **Ctrl+S** without clicking elsewhere. | The tags are saved (the item is not marked unsaved afterwards). |
+| 5 | Optional: Import a CSV that has a cell like `12" display` and an Arabic choice value. | Every row arrives; the Arabic value is the one you typed. |
 
 ## Previous checklist — v0.16.2 (the Windows icon redrawn)
 

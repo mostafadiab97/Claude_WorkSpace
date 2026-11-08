@@ -82,7 +82,9 @@ export function Toolbar({ searchRef, newRef, ...props }: {
         <option value="">{tw.linksAny}</option>
         <option value="suspect">{tw.linksSuspect}</option>
         <option value="none">{tw.linksNone}</option>
-        <option value="incomplete">{tw.incomplete}</option>
+        <option value="incomplete" title={tw.incompleteTip}>
+          {tw.incomplete}
+        </option>
       </select>
       </FilterMenu>
       {f.filtered && (

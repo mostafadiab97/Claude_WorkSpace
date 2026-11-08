@@ -130,7 +130,7 @@ On Linux CI/containers e2e needs `xvfb-run -a`; on Windows it opens real windows
 Commit messages: imperative summary with version, blank line, bullet details. End with
 `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
-## Status (v0.16.4, 7 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.17.0, 8 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -155,7 +155,8 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.16.2 Windows icon redrawn — brighter eyes + thin outline (`#7a8499`, class `ring`) on every dark-tile drawing; PNG/.ico made by `tools/brand-icons.mjs`; finished reviews moved to `docs/reviews/done/` | Released (v0.16.2) |
 | 0.16.3 stabilisation 1 — the whole-project review's data, safety, import/export and screen fixes (`docs/reviews/2026-11-05-project-review.md`); seven helpers saved in `.claude/agents/`, `tools/review-pack.mjs`; QA tests `tests/qa-whole-project-*`; e2e `fixes-0.16.3`; unzipper override (SEC-05) + `@aws-sdk/client-s3` external in electron.vite.config | Released (v0.16.3) |
 | 0.16.4 stabilisation 2 — the owner's two points (Text cursor `caretFromClick`, CSV quote rule + `checkCells`), Insert position for new items (`newItem(type, parent, after)`, `structure.orderAfter`), first-run card, Links in words, row menu by keyboard, Changes counts items, focus reload only on changed files, Compare gives way (`YIELD_EVERY`), Arabic fixes (glossary), core texts `T.validate`, guide page 19 DOORS/Jama, e2e `fixes-0.16.4` | Released (v0.16.4) |
-| **Next** | Owner's 0.16.4 checklist; then **1a structure** — documents as folders (S-10), editable item/link types (S-04), required fields (S-05), drag and drop in the Columns menu (S-11), then baselines + history list (S-06/08/09; graph library `commit-graph` to try) — decisions in `docs/reviews/2026-11-04-next-round.md`; the four open questions of the public release repository (`docs/reviews/2026-11-04-public-release-repo.md`); remaining Lows of the whole-project review (`docs/reviews/2026-11-05-project-review.md`) sorted into later versions | — |
+| 0.17.0 1a structure part 1 — documents as folders (S-10: `requirements/<document>/`, `DocumentBar.tsx`, `workspace.createDocument/renameDocument`, loose files = document ''), Types window (S-04: `TypesPanel.tsx`, `saveSchemaTypes`, `writeSchemaTypes`, `typeUsage`), required fields + Incomplete (S-05: `ItemTypeDef.required`, `withRequired`), Columns drag and drop (S-11); watcher closed during pull/switch/discard/undo (`paused`); helper reports `docs/reviews/agents/0.17.0-*.md` | Released (v0.17.0) |
+| **Next** | Owner's 0.16.4 + 0.17.0 checklists together; then **1a part 2** — baselines + history list (S-06/08/09; graph library `commit-graph` to try) — decisions in `docs/reviews/2026-11-04-next-round.md`; the four open questions of the public release repository (`docs/reviews/2026-11-04-public-release-repo.md`); later items from the 0.17.0 reviews (CR-23, CR-29, CR-30) and remaining Lows of the whole-project review | — |
 
 The owner's last report (31 Oct 2026): **0.13.1 all 4 steps passed**, 21/21 (66.8 s) — nothing open.
 Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
@@ -165,8 +166,8 @@ sandbox, `Claude_SandBox` and `Claude_SandBox_B`, still on his PC) — self-test
 points on the branch panel went into 0.12.1. He has no DOORS/Jama to try ReqIF: exports are validated against the
 official schema in `tests/reqif.test.ts` (`tests/fixtures/reqif-schema/`, xmllint-wasm).
 
-Automated tests: 446 unit tests (with a coverage floor) + 10 e2e scenarios (`journey`, `fixes`, `excel`, `branches`,
-`language`, `health`, `qa-0.15.0-polish`, `qa-0.16.0-rename`, `fixes-0.16.3`, `fixes-0.16.4`) + the 22-step in-app release self-test + the CI acceptance run on the installed app; what each covers and every speed measurement: `docs/TESTING.md` → "Automated
+Automated tests: 520 unit tests (with a coverage floor) + 11 e2e scenarios (`journey`, `fixes`, `excel`, `branches`,
+`language`, `health`, `qa-0.15.0-polish`, `qa-0.16.0-rename`, `fixes-0.16.3`, `fixes-0.16.4`, `structure-0.17`) + the 22-step in-app release self-test + the CI acceptance run on the installed app; what each covers and every speed measurement: `docs/TESTING.md` → "Automated
 checks in detail".
 
 ## Where we are right now (2 Nov 2026) — read this first
@@ -177,7 +178,7 @@ checks in detail".
   the owner's report 3 Nov: 0.14.0/0.14.1 passed with small points → **0.14.2 released 3 Nov** (Settings and help with the
   guide inside, privacy guard, sandbox history cleaned) — 0.14.2: steps 1, 3, 4 passed; step 2 → **0.14.3** (pages) —
   0.14.3 passed → **0.14.4 released 3 Nov** (no personal data in files; Check for updates on the Updates line; blue Back)
-  — 0.14.4 passed with two touches → **0.14.5 released 3 Nov** — 0.14.5 released; **0.15.0 (UI polish) released 4 Nov** — his report 4 Nov: steps 2, 5 passed, points on 1, 3, 4 → **0.15.1 released 4 Nov** — all passed with three touches → **0.15.2 released 4 Nov** — all passed → **0.16.0 (rename to reqochet-dev) released 4 Nov** — steps 1, 2, 5 passed, points on 3, 4 → **0.16.1 released 4 Nov** — all 5 passed; icon redraw asked → **0.16.2 released 4 Nov** — all 3 passed → whole-project review 5 Nov → **0.16.3 released 5 Nov** — steps 1, 3, 4 passed, points on 2 and 5 → **0.16.4 released 7 Nov** — waiting for his 0.16.4 checklist (5 steps). **Question round open:** `docs/reviews/2026-11-04-next-round.md` (1a structure S-01…S-07, whole-project review V-01/V-02, more helper agents, cheaper helper runs W-01/W-02). History question settled: not rewritten; a public release repository
+  — 0.14.4 passed with two touches → **0.14.5 released 3 Nov** — 0.14.5 released; **0.15.0 (UI polish) released 4 Nov** — his report 4 Nov: steps 2, 5 passed, points on 1, 3, 4 → **0.15.1 released 4 Nov** — all passed with three touches → **0.15.2 released 4 Nov** — all passed → **0.16.0 (rename to reqochet-dev) released 4 Nov** — steps 1, 2, 5 passed, points on 3, 4 → **0.16.1 released 4 Nov** — all 5 passed; icon redraw asked → **0.16.2 released 4 Nov** — all 3 passed → whole-project review 5 Nov → **0.16.3 released 5 Nov** — steps 1, 3, 4 passed, points on 2 and 5 → **0.16.4 released 7 Nov** — the owner asked to go on without testing → **0.17.0 (1a structure part 1) released 8 Nov** — waiting for his 0.16.4 + 0.17.0 checklists (tested together). **Question round open:** `docs/reviews/2026-11-04-next-round.md` (1a structure S-01…S-07, whole-project review V-01/V-02, more helper agents, cheaper helper runs W-01/W-02). History question settled: not rewritten; a public release repository
   will start from the files without history.
 - **Planning discussion in progress** — `docs/reviews/2026-11-01-planning-discussion.md` (method: the
   `owner-decision-walkthrough` skill; record every answer there and, when it changes the product, in

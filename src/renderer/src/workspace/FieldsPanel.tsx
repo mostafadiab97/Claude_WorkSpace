@@ -79,6 +79,8 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
     if (j < 0 || j >= keys.length) return
     ;[keys[index], keys[j]] = [keys[j] as string, keys[index] as string]
     onChange({ ...prefs, order: keys })
+    const label = movable[index]?.label
+    if (label) setMoved(T.columnsMenu.moved(label, j + 1))
   }
   // drag and drop a row to its new place, like items in the table (the owner, 5 Nov 2026 — S-11)
   const [dragging, setDragging] = useState<number | null>(null)
@@ -89,7 +91,10 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
     const [k] = keys.splice(from, 1)
     if (k !== undefined) keys.splice(to, 0, k)
     onChange({ ...prefs, order: keys })
+    const label = movable[from]?.label
+    if (label) setMoved(T.columnsMenu.moved(label, to + 1))
   }
+  const [moved, setMoved] = useState('')
 
   return (
     <div className="popover" ref={ref}>
@@ -99,6 +104,9 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
       {open && (
         <div className="popover__panel" role="dialog" aria-label={T.columnsMenu.label}>
           <p className="popover__hint">{T.columnsMenu.hint}</p>
+          <p className="sr-only" aria-live="polite">
+            {moved}
+          </p>
           <ul className="popover__list">
             {numberCol && (
               <li className="popover__row">
@@ -112,9 +120,8 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
             {movable.map((c, i) => (
               <li
                 key={c.key}
-                className={`popover__row popover__row--drag${dragging === i ? ' is-dragging' : ''}${over === i && dragging !== null && dragging !== i ? ' is-drop-target' : ''}`}
+                className={`popover__row popover__row--drag${dragging === i ? ' is-dragging' : ''}${over === i && dragging !== null && dragging !== i ? (dragging < i ? ' is-drop-target is-drop-after' : ' is-drop-target') : ''}`}
                 draggable
-                title={T.columnsMenu.dragHint}
                 onDragStart={(e) => {
                   setDragging(i)
                   e.dataTransfer.effectAllowed = 'move'
@@ -135,7 +142,9 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
                   setOver(null)
                 }}
               >
-                <span className="drag-handle" aria-hidden="true">⋮⋮</span>
+                <span className="drag-handle" aria-hidden="true" title={T.columnsMenu.dragHint}>
+                  ⋮⋮
+                </span>
                 <label className="check">
                   <input type="checkbox" checked={c.fixed === true || !hidden.has(c.key)} disabled={c.fixed} onChange={() => toggle(c.key)} />
                   {c.label}

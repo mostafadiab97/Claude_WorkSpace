@@ -22,4 +22,4 @@ export interface UpdateService {
 }
 
 export { createGithubUpdater }
-export { compareVersions, OLDEST_REVERT_TARGET, parseReleases, revertTargets, type ReleaseInfo } from './versions'
+export { compareVersions, newerRelease, OLDEST_REVERT_TARGET, parseReleases, revertTargets, type ReleaseInfo } from './versions'

@@ -79,7 +79,7 @@ describe('0.18.0 — copied files and discarded documents', () => {
   })
 })
 
-import { newerRelease } from '../src/modules/updater/versions'
+import { newerRelease } from '../src/modules/updater'
 describe('0.18.0 — update check through the API when the releases feed fails', () => {
   const r = (version: string) => ({ version, date: '', installerUrl: `https://github.com/o/r/releases/download/v${version}/x-Setup-${version}.exe` })
   it('picks the newest release only when it is newer than the running version', () => {

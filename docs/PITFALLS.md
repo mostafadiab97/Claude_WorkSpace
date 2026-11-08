@@ -188,3 +188,10 @@ A UI/UX fix gave each history row's buttons their own accessible name ("Open 1a2
 the release run failed although the build run passed (it runs only 10k). The index now stores `doc` and `top` per
 item (`top` recomputed for changed items and their children), with indexes on `(doc, top, ord)` and `(top, ord)`.
 Run `npm run test:perf:all` before a release whenever a query's WHERE changes.
+
+## A slow update after a hand install (owner, 0.17.2 → 0.18.0)
+Updates normally download only the changed parts (about 3 MB of the 121 MB installer). That needs the updater's saved
+copy of the *previous* installer. 0.17.2 was installed by hand (the feed answered 502 that day), so the saved copy
+belonged to an older version: the partial download failed its checksum (log: "sha512 checksum mismatch after
+differential download") and electron-updater fell back to the full 121 MB, about 3–4 minutes at 0.5 MB/s. Harmless and
+one-time: the next update is small again. Not a defect to fix; tell the owner if he asks.

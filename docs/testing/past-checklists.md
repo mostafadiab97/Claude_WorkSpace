@@ -1,7 +1,21 @@
-# Past manual checklists (v0.0.3 – v0.17.0)
+# Past manual checklists (v0.0.3 – v0.17.1)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## Previous checklist — v0.17.1 (renaming a big document safely)
+
+Owner 8 Nov: all passed (steps 0–4).
+
+First make the sandbox clean again (step 0). Then steps 3–5 of 0.17.0 and steps 2–5 of 0.16.4 continue on this version.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 0 | Close reqochet-dev. In the sandbox folder run `git status`. If it lists `.md` files directly in `requirements/` or a leftover document folder, run `git clean -nd -- requirements` (it only lists), check that it lists only those copies, then `git clean -fd -- requirements`. | `git status` says "nothing to commit, working tree clean"; `requirements/items/` holds the 10,005 files. |
+| 1 | Let reqochet-dev update to **0.17.1**, then **⚙ → Self-tests → Run release self-test**. | Version 0.17.1; **all 23 steps passed** (new step 23: rename a document with a space). |
+| 2 | Open the sandbox; in the document bar give "items" a real name **with a space** (e.g. "SandBox Req"). It may take a minute. | One commit "Rename document…"; 10,005 items under the new name; **Changes** shows nothing. Item → History still shows its older changes. |
+| 3 | **Push**. | The push goes through. |
+| 4 | Optional, to try the safety net: in Git Bash make a test branch, move a few item files out of the document folder by hand, then **Changes → Discard all**. | The files are back where they were; no error. |
 
 ## Previous checklist — v0.17.0 (1a structure: documents, editable types, required fields)
 

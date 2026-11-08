@@ -67,7 +67,19 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.17.2 (document groups, column drag, privacy page, guide pictures)
+## Manual test checklist — v0.18.0 (baselines and the history list)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.18.0** (or install it from the Releases page), then **⚙ → Self-tests → Run release self-test**. | **All 24 steps passed** (new: "Baseline: make one, read the old version, push it"). |
+| 2 | In the sandbox: **History → New baseline…**, name `SRS-0.1`, a note, **Make baseline**; then **Push**. | The baseline is listed with *not pushed yet* and Push is highlighted; after the push the label is gone (on GitHub it shows under Tags as `baseline/SRS-0.1`). |
+| 3 | **History** tab: search a word of an older commit message; on that commit try **Open read-only**, then **Compare with now**. | The old version shows the items as they were (nothing can be changed); Compare opens Changes with that version against now. |
+| 4 | Copy one requirement file by hand into another document folder; switch to that document; **Problems → Give the copy a new ID**. Then make a test document, add an item and **Changes → Discard all**. | The copy shows at the top of its document and gets a new ID; after Discard all the test document is gone from the list. |
+| 5 | Look at the top bars, the privacy page (**⚙ → Privacy and access**, click the diagram) and the icons. | Slimmer bars; the diagram (GitHub on top, Git on the right) opens full size; the top-bar logo has no grey outline, the desktop/taskbar icon has it. |
+
+## Previous checklist — v0.17.2 (document groups, column drag, privacy page, guide pictures)
+
+Owner 8 Nov: all 5 passed (with points → 0.18.0).
 
 First discard your 0.17.0 test changes in the sandbox (**Changes → Discard all**), as agreed.
 
@@ -78,20 +90,6 @@ First discard your 0.17.0 test changes in the sandbox (**Changes → Discard all
 | 3 | Drag a column header (e.g. **Status**) onto another; then open **Columns**. | The column moves where the line showed; the menu shows the same order, names left-aligned, Title listed first. |
 | 4 | Turn on a filter. | An orange **Clear filters** button appears next to Filters; it shows all items again. |
 | 5 | **⚙ → Privacy and access**, then **User guide → 2. Ideas you need to know** (and 6, 8). | The privacy page lists what is read, kept, sent and changed; the guide pages show pictures in the window's colours (try Dark too). |
-
-## Previous checklist — v0.17.1 (renaming a big document safely)
-
-Owner 8 Nov: all passed (steps 0–4).
-
-First make the sandbox clean again (step 0). Then steps 3–5 of 0.17.0 and steps 2–5 of 0.16.4 continue on this version.
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 0 | Close reqochet-dev. In the sandbox folder run `git status`. If it lists `.md` files directly in `requirements/` or a leftover document folder, run `git clean -nd -- requirements` (it only lists), check that it lists only those copies, then `git clean -fd -- requirements`. | `git status` says "nothing to commit, working tree clean"; `requirements/items/` holds the 10,005 files. |
-| 1 | Let reqochet-dev update to **0.17.1**, then **⚙ → Self-tests → Run release self-test**. | Version 0.17.1; **all 23 steps passed** (new step 23: rename a document with a space). |
-| 2 | Open the sandbox; in the document bar give "items" a real name **with a space** (e.g. "SandBox Req"). It may take a minute. | One commit "Rename document…"; 10,005 items under the new name; **Changes** shows nothing. Item → History still shows its older changes. |
-| 3 | **Push**. | The push goes through. |
-| 4 | Optional, to try the safety net: in Git Bash make a test branch, move a few item files out of the document folder by hand, then **Changes → Discard all**. | The files are back where they were; no error. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

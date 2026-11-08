@@ -3,6 +3,31 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.18.0 — 8 Nov 2026 — 1a structure part 2: baselines and the history list
+- **Owner (8 Nov 2026), 0.17.2:** all 5 steps passed (self-test 23/23, 73.9 s; installed by hand because GitHub
+  answered the update feed with 502 — later "Up to date"). Points: copied requirement files did not appear in the new
+  document; a discarded new document stayed in the list; clearer privacy texts and a diagram; the update check
+  should fall back to the API; incomplete items marked in the table; slimmer bars; Arabic "عنوان قسم"; the grey
+  outline only on the Windows icon.
+- **Baselines (S-06 a, S-08 a):** **History → New baseline…** — a name and a note mark the latest commit (with
+  uncommitted changes: commit them first, or leave them out); listed as *not pushed yet* until the next **Push**
+  sends it. Underneath it is the Git tag `baseline/<name>`.
+- **History of the branch (S-09 a):** newest first, search by words or commit ID; per commit **Open read-only**
+  (every item as it was), **Compare with now**, **Make baseline…**, **New branch here…** — the folder never moves to
+  an old commit.
+- **Copied files:** a requirement file copied by hand into another document shows at that document's top level;
+  **Problems → Give the copy a new ID** gives it its own ID and file name.
+- **Discard** removes the folders it leaves empty, so a discarded new document disappears.
+- **Updates:** when GitHub's releases feed fails, the check asks GitHub's API instead.
+- **Table:** a small ◐ marks items with an empty required field; slimmer top bar and toolbar; a thin document bar when
+  the project has one document.
+- **Privacy page:** clearer words on the log (sign-ins in addresses become ***) and on the Git name and e-mail; an
+  Archify diagram of what is read, kept and sent (click to enlarge; `docs/diagrams/privacy.html`).
+- **Icon:** the grey outline stays on the desktop / Start menu / taskbar icon only; the light tile inside the app is
+  plain again.
+- **Workflow:** the release and review skills, the helper rules and the hand-over notes were tightened (fewer tokens,
+  no push after a red check, sturdier CI downloads).
+
 ## 0.17.2 — 8 Nov 2026 — Document groups, column drag, privacy page, guide pictures
 - **Owner (8 Nov 2026):** 0.17.1 steps 0–4 passed (self-test 23/23, 55.5 s; the 10,005-item rename worked). 0.17.0
   steps 3–5 passed with points; 0.16.4 steps 2–5 passed (Shift+F10 needs Fn on his laptop keyboard — the keyboard's

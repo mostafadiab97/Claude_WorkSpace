@@ -163,3 +163,12 @@ command lines end at ~32,000 characters). Rules: move tracked files with `git.mo
 long path lists through standard input (`--pathspec-from-file=- --pathspec-file-nul`) or in parts
 (`PATHS_PER_COMMAND`); give bulk commands `BULK_TIMEOUT`; every multi-step file operation must put back what it did
 and re-read the folder when it fails. Tests: `tests/rename-big-0.17.1.test.ts` (a runner that records command length).
+
+## GitHub downloads from the Windows runners (0.17.2, 8 Nov 2026)
+
+For hours, GitHub answered **anonymous** downloads of release files (Electron, gitleaks) from the Windows runners with
+`504 Gateway Time-out` or a page that was not a zip — no incident on its status page — while **signed-in** downloads
+with `gh` (`GH_TOKEN: ${{ github.token }}`) worked. CI now gets Electron with `tools/ci-electron.mjs` (gh, checksum
+from `SHASUMS256.txt`, unpacked with Windows' own `tar.exe` — Git Bash's tar reads `D:` as a host) and builds the
+installer with `--config.electronDist=node_modules/electron/dist`; gitleaks also comes through `gh`. Run `npm run
+check` before pushing a new tools/ script too (ESLint covers tools/).

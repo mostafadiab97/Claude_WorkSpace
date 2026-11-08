@@ -22,7 +22,9 @@ icon/
   reqochet-light.ico              same, white tile with a grey outline (#9aa3b2) ← DEFAULT (.exe, Start menu, desktop; owner 8 Nov 2026)
   reqochet-icon.svg               dark tile — use at ≥ 32 px
   reqochet-icon-small.svg         dark tile, heavier "small cut" — use at 16–24 px
-  reqochet-icon-light(-small).svg white tile versions, grey outline (class ring) to stand out on white
+  reqochet-icon-light(-small).svg white tile versions — used inside the app, no outline
+  reqochet-icon-light-outlined(-small).svg  white tile with a grey outline (#9aa3b2, class ring) — only for the Windows
+                                  icon files (desktop, Start menu, taskbar), made by tools/brand-icons.mjs
   png/reqochet-icon[-light]-{16…512}.png
 motion/
   reqochet-loading-on-light.svg   splash/loading: name with the two dots bouncing (1.4 s loop)

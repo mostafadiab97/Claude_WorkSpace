@@ -16,7 +16,9 @@ try {
   browser = await require('playwright-core').chromium.launch({ channel: 'chrome' })
 }
 const page = await browser.newPage({ deviceScaleFactor: 1 })
-for (const [variant, prefix] of [['', 'reqochet-icon'], ['-light', 'reqochet-icon-light']]) {
+// the light Windows icon is drawn from the outlined variant: the grey outline is for the desktop, Start menu and
+// taskbar only (the owner, 8 Nov 2026); inside the app the light tile has no outline
+for (const [variant, prefix] of [['', 'reqochet-icon'], ['-light-outlined', 'reqochet-icon-light']]) {
   for (const size of sizes) {
     const svg = readFileSync(`${dir}/reqochet-icon${variant}${size <= 24 ? '-small' : ''}.svg`, 'utf8')
     await page.setViewportSize({ width: size, height: size })

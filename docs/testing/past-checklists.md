@@ -1,7 +1,20 @@
-# Past manual checklists (v0.0.3 – v0.16.3)
+# Past manual checklists (v0.0.3 – v0.16.4)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## Previous checklist — v0.16.4 (stabilisation 2: speed, Arabic, first run, keyboard)
+
+Not tested yet: try steps 2–5 **on 0.17.0** together with the new checklist (the owner, 7 Nov: "we can do both tests
+together"); step 1 is replaced by step 1 of 0.17.0.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.16.4**, then **⚙ → Self-tests → Run release self-test**. | Version 0.16.4; **all 22 steps passed**. |
+| 2 | Open an item with text, click in the middle of its text. Then select an item and press **New item** (Insert position: Below the selected item). | The cursor is where you clicked (or at the end), not at the start. The new item appears right below the selected one. |
+| 3 | Export some items to CSV, put `12"` inside a table or bullet list in one Text cell, save, **Import** the file. | The whole text arrives, including what follows the `"`. |
+| 4 | In the table press **Shift+F10** (or the Menu key) on a row; then look at the **Links** column and the **Changes** button. | The row menu opens (Open, Add a child item, Delete…, Export); Links reads like "1 out · ⚠ 1 suspect"; Changes counts items. |
+| 5 | Switch to **العربية** and look at the table, the Changes button and a Compare. | IDs read left to right; counts read correctly ("عنصران", "3 عناصر"); "عنصر فرعي" for children; nothing in English except names. |
 
 ## Previous checklist — v0.16.3 (stabilisation 1: data and safety)
 

@@ -30,7 +30,14 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
     setError(null)
     const r = naming.kind === 'new' ? await window.reqochet.createDocument(name) : await window.reqochet.renameDocument(naming.from, name)
     setBusy(false)
-    if (!r.ok) return setError(r.message)
+    if (!r.ok) {
+      setError(r.message)
+      setNaming(null) // start again from what is there now (the old name may no longer exist)
+      // the core re-read the folder: show what is on disk now, whatever happened (the owner, 8 Nov 2026)
+      const now = await window.reqochet.refreshRepository(false).catch(() => null)
+      if (now) props.onInfo(now)
+      return
+    }
     props.onInfo(r.info)
     onDocument(name.trim())
     setNaming(null)

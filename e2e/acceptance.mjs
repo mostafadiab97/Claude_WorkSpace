@@ -177,7 +177,25 @@ async function step3Sandbox() {
     await win.locator('.table__row').first().waitFor({ timeout: 300_000 })
     const secs = ((Date.now() - started) / 1000).toFixed(1)
     const count = (await win.locator('.statusbar').first().textContent())?.match(/([\d,]+) items/)?.[1] ?? '?'
-    did(`Opened the sandbox clone in the installed app: ${count} items shown after ${secs} s (first opening, builds the index). Nothing was changed.`)
+    did(`Opened the sandbox clone in the installed app: ${count} items shown after ${secs} s (first opening, builds the index).`)
+    // 0.17.1: the owner's rename of the 10,005-item "items" folder failed on Windows — do it here, in this throw-away
+    // clone (committed locally, never pushed)
+    const sg = (...a) => execFileSync('git', a, { cwd: sandbox, encoding: 'utf8' })
+    sg('config', 'user.name', 'reqochet acceptance run')
+    sg('config', 'user.email', 'acceptance@example.invalid')
+    if (existsSync(join(sandbox, 'requirements', 'items'))) {
+      const t0 = Date.now()
+      await win.locator('.document-notice').getByRole('button', { name: 'Name the document' }).click()
+      await win.getByLabel(/New name for items/).fill('Acceptance Spec')
+      await win.getByRole('button', { name: 'Rename', exact: true }).click()
+      await win.locator('#document-picker').filter({ hasText: 'Acceptance Spec' }).waitFor({ timeout: 900_000 })
+      const left = sg('status', '--porcelain', '--', 'requirements').trim()
+      const subject = sg('log', '-1', '--format=%s').trim()
+      if (existsSync(join(sandbox, 'requirements', 'items')) || left !== '' || !subject.includes('Acceptance Spec')) {
+        throw new Error(`the rename of "items" did not finish cleanly (folder left: ${existsSync(join(sandbox, 'requirements', 'items'))}, uncommitted: ${left.split('\n').length}, last commit: ${subject})`)
+      }
+      did(`Renamed the sandbox document "items" to "Acceptance Spec" in the window: one commit, nothing left uncommitted, after ${((Date.now() - t0) / 1000).toFixed(1)} s (this clone only, not pushed).`)
+    }
   } catch (e) {
     fail(`Opening the sandbox: ${e.message}`)
   } finally {

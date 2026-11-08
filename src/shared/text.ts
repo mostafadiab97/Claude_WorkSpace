@@ -1045,7 +1045,7 @@ const en = {
   wsMsg: {
     folderRenameDirty: 'The project folder has changes that are not committed yet (requirements/.reqman). Commit or discard them first, then update the project — the rename commit holds only the rename.',
     folderRenameBoth: 'requirements/ holds both .reqman and .reqochet with files in them. Keep one (with Git or Explorer), then open the project again.',
-    folderRenameRefused: (why: string) => `The folder was not renamed — Git refused the commit: ${why}`,
+    folderRenameRefused: (why: string) => `The folder was not renamed — everything was put back as it was. Reason: ${why}`,
     noRepo: 'No repository is open.',
     unreadable: (id: string) => `${id} could not be read.`,
     unknownLinkType: (type: string) => `Unknown link type "${type}".`,
@@ -1060,7 +1060,7 @@ const en = {
     severalDocuments: 'These rows belong to different documents; move them one document at a time.',
     documentCaseOnly: 'Changing only capital and small letters of a document name confuses Git on Windows. Choose a different name.',
     documentFileTaken: (path: string) => `${path} already exists; nothing was moved.`,
-    tooManyLoose: (max: number) => `More than ${max} loose files: move them in parts (or with Git).`,
+    documentNotPutBack: (why: string) => `The move stopped and could not be fully put back (${why}). No file is lost: the window now shows the folders as they are on disk. Close other programs that use the folder, then use Rename… again, or ask for help with the log file.`,
     looseFiles: 'loose files',
     parentOtherDocument: (parent: string, document: string) => `${parent} is in the document "${document}": an item and its parent must be in the same document.`,
     parentLoop: (id: string) => `${id} is this item or one of its children; choose another parent.`,

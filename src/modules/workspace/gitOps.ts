@@ -253,14 +253,16 @@ export function createGitOps(deps: GitOpsDeps) {
       if (blocked) return blocked
       const st = await state(s)
       const allowed = new Set(st.changes.map((c) => c.path))
-      // also restore the old name of a renamed file
-      const wanted = paths.filter((p) => allowed.has(p))
+      // also restore the old name of a renamed file (a staged rename lists only its new path)
+      const picked = paths.filter((p) => allowed.has(p))
+      const fromOf = new Map((await git.status(s.repo.root, reqPath(s.repo))).changes.filter((c) => c.kind === 'renamed' && c.from).map((c) => [c.path, c.from as string]))
+      const wanted = [...new Set([...picked, ...picked.flatMap((p) => (fromOf.has(p) ? [fromOf.get(p) as string] : []))])]
       if (wanted.length === 0) return fail(s, T.gitMsg.nothingToDiscard, undefined, true)
       try {
         await git.discard(s.repo.root, wanted)
         await deps.resync()
-        log.info(`Discarded changes: ${wanted.join(', ')}`)
-        return done(s, T.gitMsg.discarded(wanted.length))
+        log.info(`Discarded ${wanted.length} changes${wanted.length <= 20 ? `: ${wanted.join(', ')}` : ''}`)
+        return done(s, T.gitMsg.discarded(picked.length))
       } catch (e) {
         log.error('Discard failed', e)
         return fail(s, explainGitError(e))

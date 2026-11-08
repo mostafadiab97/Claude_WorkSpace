@@ -3,7 +3,8 @@
 //   gitOps (M4) and compare (M5).
 // Every operation that writes files, changes the index or runs Git goes through one queue (review D-03).
 import { createHash } from 'node:crypto'
-import { access, mkdir, rename, writeFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { access, mkdir, rename, rmdir, writeFile } from 'node:fs/promises'
 import { basename, join, relative, resolve } from 'node:path'
 import type { FolderCheck, GitResult, ImportSettings, MergeAnswers, MergePlan, ImportSource, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
 import type { GitAdapter } from '../git-adapter'
@@ -56,7 +57,6 @@ export function cacheFileName(root: string): string {
 const exists = (p: string): Promise<boolean> => access(p).then(() => true, () => false)
 
 /** Loose files moved in one commit at most: two paths each must fit on a Windows command line (CR-07). */
-const MAX_LOOSE_MOVE = 300
 
 export const DOCUMENT_RENAME_COMMIT = (from: string, to: string): string => `Rename the document ${from} to ${to} (reqochet)`
 export const FOLDER_RENAME_COMMIT = 'Rename the project folder .reqman to .reqochet (reqochet)'
@@ -238,55 +238,81 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     const p = (x: string): string => (base === '.' ? x : `${base}/${x}`)
     // the files that move: the whole folder, or each loose item file the index knows (not README or notes — QA-09)
     const loose = from === '' ? queryAll(s.index, { document: '' }).map((i) => i.path).filter((x) => !x.includes('/')) : []
-    if (loose.length > MAX_LOOSE_MOVE) return { ok: false, message: T.wsMsg.tooManyLoose(MAX_LOOSE_MOVE) }
     const moves = from === '' ? loose.map((f) => ({ a: f, b: `${target}/${f}` })) : [{ a: from, b: target }]
     // never over an existing file (CR-01, QA-02): an item there would be lost
     for (const m of moves) if (from === '' && (await exists(join(s.repo.folder, m.b)))) return { ok: false, message: T.wsMsg.documentFileTaken(m.b) }
-    try {
-      const trackedAll = s.isGit ? new Set(await git.trackedFiles(root, base === '.' ? '.' : base)) : new Set<string>()
-      const tracked = [...trackedAll].filter((t) => moves.some((m) => t === p(m.a) || t.startsWith(`${p(m.a)}/`)))
-      if (tracked.length > 0 && (await git.status(root, from === '' ? base : p(from))).changes.some((c) => moves.some((m) => c.path === p(m.a) || c.path.startsWith(`${p(m.a)}/`)))) {
-        return { ok: false, message: T.wsMsg.documentDirty }
-      }
-      s.watch?.close() // Windows refuses to rename a watched folder
-      s.watch = null
-      if (from === '') await mkdir(join(s.repo.folder, target), { recursive: true })
-      const done: typeof moves = []
-      const undo = async (): Promise<void> => {
-        for (const m of [...done].reverse()) await rename(join(s.repo.folder, m.b), join(s.repo.folder, m.a)).catch(() => {})
-      }
-      try {
-        for (const m of moves) {
-          await rename(join(s.repo.folder, m.a), join(s.repo.folder, m.b))
-          done.push(m)
-        }
-      } catch (e) {
-        // a file was locked halfway (an editor, a virus scanner): put back what moved, so folder and window agree (CR-06)
-        await undo()
-        rewatch(s)
-        return { ok: false, message: T.wsMsg.folderRenameRefused(e instanceof Error ? e.message : String(e)) }
-      }
-      if (tracked.length > 0) {
-        const paths = moves.flatMap((m) => [p(m.a), p(m.b)])
-        try {
-          await git.commitFiles(root, paths, DOCUMENT_RENAME_COMMIT(from || 'loose files', target))
-        } catch (e) {
-          await git.unstage(root, paths)
-          await undo()
-          rewatch(s)
-          return { ok: false, message: T.wsMsg.folderRenameRefused(explainGitError(e)) }
-        }
-      }
-      log.info(`Document ${from || '(loose files)'} → ${target}${tracked.length > 0 ? ' (committed)' : ''}`)
-      s.repo = await ctx.openRepo(root)
-      rewatch(s)
-      s.lastSync = syncInfo(await s.index.sync(s.repo))
-      gitOps.invalidate()
-      return { ok: true, info: info() }
-    } catch (e) {
-      rewatch(s)
-      return { ok: false, message: e instanceof Error ? e.message : String(e) }
+    const trackedAll = s.isGit ? new Set(await git.trackedFiles(root, base === '.' ? '.' : base)) : new Set<string>()
+    const isTracked = (a: string): boolean => trackedAll.has(p(a)) || [...trackedAll].some((t) => t.startsWith(`${p(a)}/`))
+    const viaGit = moves.filter((m) => (from === '' ? trackedAll.has(p(m.a)) : isTracked(m.a)))
+    const onDisk = moves.filter((m) => !viaGit.includes(m))
+    if (viaGit.length > 0 && (await git.status(root, from === '' ? base : p(from))).changes.some((c) => moves.some((m) => c.path === p(m.a) || c.path.startsWith(`${p(m.a)}/`)))) {
+      return { ok: false, message: T.wsMsg.documentDirty }
     }
+    const createdTarget = from === '' && !(await exists(join(s.repo.folder, target)))
+    // Put back whatever already moved, so the folder, Git and the window agree again (CR-06; the owner, 8 Nov 2026:
+    // a stopped Git left the folder renamed). Windows may hold a file for a moment after a stopped process: retry.
+    const putBack = async (): Promise<boolean> => {
+      let ok = true
+      const back = async (fn: () => Promise<void>): Promise<void> => {
+        for (let attempt = 0; ; attempt++) {
+          try {
+            return await fn()
+          } catch (e) {
+            if (attempt >= 4) {
+              ok = false
+              log.error('Putting a moved document back failed', e)
+              return
+            }
+            await new Promise((r) => setTimeout(r, 500 * (attempt + 1)))
+          }
+        }
+      }
+      const gitBack = viaGit.filter((m) => existsSync(join(s.repo.folder, m.b)))
+      if (from !== '' && gitBack.length > 0) await back(() => git.move(root, [p(target)], p(from)))
+      else if (gitBack.length > 0) await back(() => git.move(root, gitBack.map((m) => p(m.b)), base))
+      for (const m of onDisk.filter((x) => existsSync(join(s.repo.folder, x.b)))) await back(() => rename(join(s.repo.folder, m.b), join(s.repo.folder, m.a)))
+      if (createdTarget) await rmdir(join(s.repo.folder, target)).catch(() => undefined)
+      return ok
+    }
+    const failed = async (why: string): Promise<{ ok: false; message: string }> => {
+      const back = await putBack()
+      // re-read the folder in every case: the window must show what is really on disk
+      try {
+        s.repo = await ctx.openRepo(root)
+        s.lastSync = syncInfo(await s.index.sync(s.repo))
+      } catch (e) {
+        log.error('Re-reading the project after a failed document move', e)
+      }
+      rewatch(s)
+      gitOps.invalidate()
+      return { ok: false, message: back ? T.wsMsg.folderRenameRefused(why) : T.wsMsg.documentNotPutBack(why) }
+    }
+    s.watch?.close() // Windows refuses to rename a watched folder
+    s.watch = null
+    try {
+      if (from === '') await mkdir(join(s.repo.folder, target), { recursive: true })
+      // tracked files move with `git mv` — on disk and in the index at once, without reading 10,000 files again
+      if (viaGit.length > 0) {
+        if (from !== '') await git.move(root, [p(from)], p(target))
+        else await git.move(root, viaGit.map((m) => p(m.a)), p(target))
+      }
+      for (const m of onDisk) await rename(join(s.repo.folder, m.a), join(s.repo.folder, m.b))
+    } catch (e) {
+      return failed(explainGitError(e))
+    }
+    if (viaGit.length > 0) {
+      try {
+        await git.commitFiles(root, viaGit.flatMap((m) => [p(m.a), p(m.b)]), DOCUMENT_RENAME_COMMIT(from || 'loose files', target), true)
+      } catch (e) {
+        return failed(explainGitError(e))
+      }
+    }
+    log.info(`Document ${from || '(loose files)'} → ${target}${viaGit.length > 0 ? ' (committed)' : ''}`)
+    s.repo = await ctx.openRepo(root)
+    rewatch(s)
+    s.lastSync = syncInfo(await s.index.sync(s.repo))
+    gitOps.invalidate()
+    return { ok: true, info: info() }
   }
 
   const links = createLinkOps(ctx)

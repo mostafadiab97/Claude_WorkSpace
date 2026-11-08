@@ -154,3 +154,12 @@ after the user had switched to "All documents" and replaced its top level — se
 Git: paths passed to Git are literal (`GIT_LITERAL_PATHSPECS=1` in `systemGit.ts`); never rely on wildcards there.
 SQLite: a correlated `NOT EXISTS` on `item_fields` may pick the `(field, value, rid)` index and walk every row of the
 field per item — keep `INDEXED BY item_fields_rid` (Incomplete went from 83 s to milliseconds at 50k).
+
+## Git over thousands of files on Windows (0.17.1)
+
+The owner's rename of a 10,005-item folder failed: `git add` took longer than the 30 s limit on Windows, Git was
+stopped, and the put-back failed silently. "Discard all" of 10,000 paths failed with `spawn ENAMETOOLONG` (Windows
+command lines end at ~32,000 characters). Rules: move tracked files with `git.move` (`git mv`, no re-hashing); pass
+long path lists through standard input (`--pathspec-from-file=- --pathspec-file-nul`) or in parts
+(`PATHS_PER_COMMAND`); give bulk commands `BULK_TIMEOUT`; every multi-step file operation must put back what it did
+and re-read the folder when it fails. Tests: `tests/rename-big-0.17.1.test.ts` (a runner that records command length).

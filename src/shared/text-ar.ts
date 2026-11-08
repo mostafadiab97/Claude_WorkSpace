@@ -1045,7 +1045,7 @@ const raw: Texts = {
   wsMsg: {
     folderRenameDirty: 'في مجلد المشروع تغييرات لم تُودَع بعد (requirements/.reqman). أودِعها أو تجاهلها أولًا، ثم حدّث المشروع — إيداع إعادة التسمية يحمل إعادة التسمية فقط.',
     folderRenameBoth: 'يحتوي requirements/ على المجلدين .reqman و.reqochet وفيهما ملفات. احتفظ بأحدهما (عبر Git أو مستكشف الملفات)، ثم افتح المشروع مجددًا.',
-    folderRenameRefused: (why: string) => `لم يُعَد تسمية المجلد — رفض Git الإيداع: ${why}`,
+    folderRenameRefused: (why: string) => `لم تُعَد تسمية المجلد — أُعيد كل شيء كما كان. السبب: ${why}`,
     noRepo: 'لا يوجد مستودع مفتوح.',
     unreadable: (id: string) => `تعذّرت قراءة ${id}.`,
     unknownLinkType: (type: string) => `نوع رابط غير معروف "${type}".`,
@@ -1060,7 +1060,7 @@ const raw: Texts = {
     severalDocuments: 'هذه الصفوف من مستندات مختلفة؛ انقلها مستندًا مستندًا.',
     documentCaseOnly: 'تغيير حالة الأحرف فقط في اسم المستند يربك Git على Windows. اختر اسمًا مختلفًا.',
     documentFileTaken: (path: string) => `الملف ⁦${path}⁩ موجود بالفعل؛ لم يُنقل شيء.`,
-    tooManyLoose: (max: number) => `أكثر من ${max} ملفًا منفردًا: انقلها على دفعات (أو باستخدام Git).`,
+    documentNotPutBack: (why: string) => `توقف النقل وتعذّرت إعادته كاملًا (${why}). لم يُفقد أي ملف: تعرض النافذة الآن المجلدات كما هي على القرص. أغلق البرامج الأخرى التي تستخدم المجلد ثم استخدم إعادة تسمية… مرة أخرى، أو اطلب المساعدة مع ملف السجل.`,
     looseFiles: 'الملفات المنفردة',
     parentOtherDocument: (parent: string, document: string) => `${parent} في المستند "${document}": يجب أن يكون العنصر وأصله في المستند نفسه.`,
     parentLoop: (id: string) => `${id} هو هذا العنصر أو أحد عناصره الفرعية؛ اختر أصلًا آخر.`,

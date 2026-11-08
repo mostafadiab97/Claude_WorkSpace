@@ -67,7 +67,21 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.17.0 (1a structure: documents, editable types, required fields)
+## Manual test checklist — v0.17.1 (renaming a big document safely)
+
+First make the sandbox clean again (step 0). Then steps 3–5 of 0.17.0 and steps 2–5 of 0.16.4 continue on this version.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 0 | Close reqochet-dev. In the sandbox folder run `git status`. If it lists `.md` files directly in `requirements/` or a leftover document folder, run `git clean -nd -- requirements` (it only lists), check that it lists only those copies, then `git clean -fd -- requirements`. | `git status` says "nothing to commit, working tree clean"; `requirements/items/` holds the 10,005 files. |
+| 1 | Let reqochet-dev update to **0.17.1**, then **⚙ → Self-tests → Run release self-test**. | Version 0.17.1; **all 23 steps passed** (new step 23: rename a document with a space). |
+| 2 | Open the sandbox; in the document bar give "items" a real name **with a space** (e.g. "SandBox Req"). It may take a minute. | One commit "Rename document…"; 10,005 items under the new name; **Changes** shows nothing. Item → History still shows its older changes. |
+| 3 | **Push**. | The push goes through. |
+| 4 | Optional, to try the safety net: in Git Bash make a test branch, move a few item files out of the document folder by hand, then **Changes → Discard all**. | The files are back where they were; no error. |
+
+## Previous checklist — v0.17.0 (1a structure: documents, editable types, required fields)
+
+Owner 8 Nov: step 1 passed; step 2 failed (rename of the 10,005-item folder) → 0.17.1. Steps 3–5 continue on 0.17.1.
 
 Try this together with steps 2–5 of the 0.16.4 checklist below. Report by version and step ("0.17.0 test 3").
 
@@ -78,19 +92,6 @@ Try this together with steps 2–5 of the 0.16.4 checklist below. Report by vers
 | 3 | In the document picker choose **New document…**, call it "Software", add two items, then switch between **System**, **Software** and **All documents**. | Each document has its own tree and starts its numbering at 1; All documents shows both, one after the other. |
 | 4 | **Columns → Edit types…**: add an item type, rename one, try to remove a type that is in use; give one type a **required** field. | The new type can be chosen for new items; a used type cannot be removed (it says how many items use it). Items of that type without the field show under **Filters → Incomplete**. |
 | 5 | Open **Columns** and drag a column to another place in the list. | The table's columns follow the new order (↑/↓ still work too). |
-
-## Previous checklist — v0.16.4 (stabilisation 2: speed, Arabic, first run, keyboard)
-
-Not tested yet: try steps 2–5 **on 0.17.0** together with the new checklist (the owner, 7 Nov: "we can do both tests
-together"); step 1 is replaced by step 1 of 0.17.0.
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.16.4**, then **⚙ → Self-tests → Run release self-test**. | Version 0.16.4; **all 22 steps passed**. |
-| 2 | Open an item with text, click in the middle of its text. Then select an item and press **New item** (Insert position: Below the selected item). | The cursor is where you clicked (or at the end), not at the start. The new item appears right below the selected one. |
-| 3 | Export some items to CSV, put `12"` inside a table or bullet list in one Text cell, save, **Import** the file. | The whole text arrives, including what follows the `"`. |
-| 4 | In the table press **Shift+F10** (or the Menu key) on a row; then look at the **Links** column and the **Changes** button. | The row menu opens (Open, Add a child item, Delete…, Export); Links reads like "1 out · ⚠ 1 suspect"; Changes counts items. |
-| 5 | Switch to **العربية** and look at the table, the Changes button and a Compare. | IDs read left to right; counts read correctly ("عنصران", "3 عناصر"); "عنصر فرعي" for children; nothing in English except names. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

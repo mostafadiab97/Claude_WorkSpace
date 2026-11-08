@@ -323,6 +323,20 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       expect(r.ok && !r.info.legacyFolder, r.ok ? 'The folder was not renamed.' : r.message)
       expect((await W().gitState()).lastCommitMessage?.includes('.reqochet'), 'The rename was not committed.')
     })
+
+    await step('Rename a document with a space in its name (one commit, history kept)', async () => {
+      // 0.17.1: the owner's rename of "items" failed on Windows (Git stopped by a time limit, folder not put back)
+      const before = (await W().refresh()).documents.find((d) => d.name === FIRST_DOCUMENT)?.itemCount ?? 0
+      const r = await W().renameDocument(FIRST_DOCUMENT, 'Practice Spec')
+      expect(r.ok, r.ok ? '' : r.message)
+      if (!r.ok) return
+      expect(r.info.documents.some((d) => d.name === 'Practice Spec' && d.itemCount === before), 'The renamed document does not hold all its items.')
+      const st = await W().gitState()
+      expect(st.changes.length === 0, `The rename left ${st.changes.length} uncommitted changes.`)
+      expect(st.lastCommitMessage?.includes('Practice Spec'), 'The rename was not committed.')
+      const back = await W().renameDocument('Practice Spec', FIRST_DOCUMENT)
+      expect(back.ok, back.ok ? '' : back.message)
+    })
   } finally {
     ;(ws as WorkspaceService | null)?.close()
     // always runs, even after a failed step

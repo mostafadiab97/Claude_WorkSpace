@@ -85,11 +85,17 @@ export interface GitAdapter {
   /** Commits every change under `pathspec` and nothing else. Returns the new commit's hash. */
   commit(root: string, pathspec: string, message: string): Promise<string>
   /** Commits exactly these files (paths from the repository top), nothing else that may be staged or changed. */
-  commitFiles(root: string, paths: string[], message: string): Promise<string>
+  /** Commits only these paths (other staged changes stay staged). `alreadyStaged`: skip `git add` (after `move`). */
+  commitFiles(root: string, paths: string[], message: string, alreadyStaged?: boolean): Promise<string>
   /** Files Git tracks under a path (relative to the repository). */
   trackedFiles(root: string, path: string): Promise<string[]>
   /** Takes paths out of the index again (after a refused commit); the files stay as they are. */
   unstage(root: string, paths: string[]): Promise<void>
+  /**
+   * `git mv`: one source → renamed to `destination`; several → moved into the existing folder `destination`.
+   * Renames on disk and in the index together (no re-reading of the files).
+   */
+  move(root: string, sources: string[], destination: string): Promise<void>
   fetch(root: string): Promise<void>
   /** Would merging `upstream` into `ours` (default HEAD) conflict? Computed without touching the working folder. */
   checkMerge(root: string, upstream: string, ours?: string): Promise<MergeCheck>

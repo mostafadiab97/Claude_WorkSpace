@@ -37,6 +37,16 @@ export class GitError extends Error {
 }
 
 const LOCAL_TIMEOUT = 30_000
+/**
+ * Commands over many files (a document folder of 10,000 items) — on Windows with a virus scanner, adding thousands of
+ * files took longer than 30 s, Git was stopped halfway and the rename could not be put back (the owner, 8 Nov 2026).
+ */
+const BULK_TIMEOUT = 15 * 60_000
+/** Paths per command: Windows refuses a command line over ~32,000 characters ("spawn ENAMETOOLONG"). */
+const PATHS_PER_COMMAND = 200
+const chunks = <X>(xs: X[], n = PATHS_PER_COMMAND): X[][] => Array.from({ length: Math.ceil(xs.length / n) }, (_, i) => xs.slice(i * n, i * n + n))
+/** A path list for `--pathspec-from-file=- --pathspec-file-nul` (no command-line length limit). */
+const nulList = (paths: string[]): string => paths.map((p) => `${p}\0`).join('')
 /** Pull and push may wait for the network or for the user to sign in (Git Credential Manager window). */
 const NETWORK_TIMEOUT = 180_000
 
@@ -115,7 +125,9 @@ const defaultRunner: CommandRunner = (file, args, options = {}) =>
       (error, stdout, stderr) => {
         if (!error) return resolve(stdout)
         const code = typeof error.code === 'number' ? error.code : null
-        const detail = (stderr || stdout || error.message).trim()
+        // stopped by the time limit: say so — "Command failed: git …" alone hid the cause (the owner, 8 Nov 2026)
+        const stopped = (error as { killed?: boolean }).killed === true || (error as { signal?: string | null }).signal ? 'Git was stopped: it timed out. ' : ''
+        const detail = `${stopped}${(stderr || stdout || error.message).trim()}`
         reject(new GitError(detail || `git ${args[0] ?? ''} failed`, args, code, stdout, stderr))
       }
     )
@@ -264,13 +276,23 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
 
     async unstage(root, paths) {
       // works before the first commit too (no HEAD to reset to)
-      await git(root, ['rm', '-r', '--cached', '--quiet', '--ignore-unmatch', '--', ...paths]).catch(() => undefined)
-      await git(root, ['reset', '-q', '--', ...paths]).catch(() => undefined)
+      for (const part of chunks(paths)) {
+        await git(root, ['rm', '-r', '--cached', '--quiet', '--ignore-unmatch', '--', ...part], BULK_TIMEOUT).catch(() => undefined)
+        await git(root, ['reset', '-q', '--', ...part], BULK_TIMEOUT).catch(() => undefined)
+      }
     },
 
-    async commitFiles(root, paths, message) {
-      await git(root, ['add', '--', ...paths])
-      await git(root, ['commit', '--quiet', '-m', message, '--only', '--', ...paths])
+    async move(root, sources, destination) {
+      // `git mv` renames on disk and in Git's index in one step, without reading the files again (fast for 10,000)
+      if (sources.length === 1) await git(root, ['mv', '--', sources[0] as string, destination], BULK_TIMEOUT)
+      else for (const part of chunks(sources, 100)) await git(root, ['mv', '--', ...part, `${destination}/`], BULK_TIMEOUT)
+    },
+
+    async commitFiles(root, paths, message, alreadyStaged = false) {
+      // the path list goes through standard input: no command-line limit, and a long time limit for many files
+      // (after `git mv` the index already holds the change; adding the old, now empty path would fail)
+      if (!alreadyStaged) await git(root, ['add', '--pathspec-from-file=-', '--pathspec-file-nul'], BULK_TIMEOUT, { input: nulList(paths) })
+      await git(root, ['commit', '--quiet', '-m', message, '--only', '--pathspec-from-file=-', '--pathspec-file-nul'], BULK_TIMEOUT, { input: nulList(paths) })
       return (await git(root, ['rev-parse', 'HEAD'])).trim()
     },
 
@@ -594,20 +616,22 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
     async discard(root, paths) {
       if (paths.length === 0) return
       // Files Git knows go back to the last commit; new (untracked) files are deleted.
-      const tracked = (await git(root, ['ls-files', '-z', '--', ...paths])).split('\0').filter(Boolean)
+      // in parts: "Discard all" of 10,000 files was one command line too long for Windows (spawn ENAMETOOLONG)
+      const tracked = new Set<string>()
+      for (const part of chunks(paths)) for (const p of (await git(root, ['ls-files', '-z', '--', ...part], BULK_TIMEOUT)).split('\0')) if (p) tracked.add(p)
       const inHead = new Set<string>()
-      if (tracked.length > 0) {
+      if (tracked.size > 0) {
         try {
-          for (const p of (await git(root, ['ls-tree', '-r', '-z', '--name-only', 'HEAD', '--', ...paths])).split('\0')) if (p) inHead.add(p)
+          for (const part of chunks(paths)) for (const p of (await git(root, ['ls-tree', '-r', '-z', '--name-only', 'HEAD', '--', ...part], BULK_TIMEOUT)).split('\0')) if (p) inHead.add(p)
         } catch {
           // no commit yet: nothing is in HEAD
         }
       }
       const restore = paths.filter((p) => inHead.has(p))
       const remove = paths.filter((p) => !inHead.has(p))
-      if (restore.length > 0) await git(root, ['restore', '--source=HEAD', '--staged', '--worktree', '--', ...restore])
-      const stagedNew = remove.filter((p) => tracked.includes(p))
-      if (stagedNew.length > 0) await git(root, ['rm', '--cached', '--quiet', '--', ...stagedNew])
+      for (const part of chunks(restore)) await git(root, ['restore', '--source=HEAD', '--staged', '--worktree', '--', ...part], BULK_TIMEOUT)
+      const stagedNew = remove.filter((p) => tracked.has(p))
+      for (const part of chunks(stagedNew)) await git(root, ['rm', '--cached', '--quiet', '--', ...part], BULK_TIMEOUT)
       for (const p of remove) await rm(join(root, p), { force: true })
     }
   }

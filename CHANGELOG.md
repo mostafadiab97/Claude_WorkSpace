@@ -3,6 +3,22 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.17.1 — 8 Nov 2026 — Renaming a big document safely
+- **Owner (8 Nov 2026), 0.17.0:** test 1 passed (self-test 22/22, 64.5 s). Test 2 failed: renaming the sandbox's
+  "items" folder (10,005 items) to "SandBox Req" stopped with "Git refused the commit: Command failed: git … add …";
+  the folder stayed renamed, a second try said "items does not exist"; after moving the files by hand, **Discard all**
+  failed with "spawn ENAMETOOLONG", and the loose-files offer said "More than 300 loose files". He had to repair the
+  folder with Git by hand.
+- **Cause:** Git was given 30 seconds to add the 10,005 renamed files; on Windows that took longer, Git was stopped,
+  and putting the folder back failed silently. "Discard all" put all 10,000 paths on one command line, longer than
+  Windows allows.
+- **Fixed:** a document is renamed with `git mv` (renames on disk and in Git at once, without reading every file
+  again), path lists go to Git through standard input or in parts, Git commands over many files may take up to 15
+  minutes, a stopped Git now says "it timed out", and if anything fails the move is put back (retried while Windows
+  still holds a file) and the window re-reads the folder so it shows what is really on disk. Discarding a rename
+  restores the old name too. No more 300-file limit for loose files. The release self-test has a new step 23:
+  rename a document with a space in its name.
+
 ## 0.17.0 — 8 Nov 2026 — 1a structure: documents, editable types, required fields
 - **Owner (7 Nov 2026):** "if you can start the next step now without the manual testing, go on … we can do both tests
   together" — 0.16.4 was not tested yet; its steps 2–5 are tried on this version.

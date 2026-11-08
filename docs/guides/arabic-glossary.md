@@ -25,14 +25,11 @@ the Arabic reviewer proposes additions or corrections, the builder updates this 
 | history (of commits) | السجلّ | |
 | read-only | للقراءة فقط | |
 | repository | مستودع (مستودعات) | |
-| document | مستند | from 1a: one folder of items (S-10) |
-| baseline | خط أساس | from 1a (proposal) |
 | branch | فرع (فروع) | |
 | commit (noun / verb) | إيداع (إيداعات) | |
 | push | دفع | |
 | pull | سحب | never جلب (that is fetch) — AR-05 |
 | changes | تغييرات | |
-| history | سجلّ | |
 | siblings (items) | العناصر المجاورة | AR-04 |
 | Git tag | علامة إصدار | the field "Tags" stays الوسوم (AR-06) |
 | defect (item type) | خلل | AR-12 |

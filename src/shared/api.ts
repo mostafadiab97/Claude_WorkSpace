@@ -201,6 +201,8 @@ export interface Matrix {
   cells: { r: number; c: number; type: string; dir: 'out' | 'in'; suspect: boolean }[]
   /** More rows matched than are shown (the export has them all). */
   truncatedRows: boolean
+  /** How many rows matched. */
+  totalRows: number
 }
 
 export interface GitState {
@@ -626,6 +628,8 @@ export interface ReqochetApi {
   saveSchemaTypes(itemTypes: ItemTypeDef[], linkTypes: LinkTypeDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   /** The coverage rules (theme 1b, T-03): `[]` = the team chose none. Same conflict check as the types. */
   saveSchemaRules(rules: CoverageRule[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** The starter coverage rules for this project's types (T-02), for "Add the starter rules". */
+  starterRules(): Promise<CoverageRule[]>
   /** Coverage per rule (T-01): one document, or all when missing. */
   getCoverage(document?: string): Promise<CoverageReport>
   /** Everything that depends on an item, all levels down (T-06). */
@@ -816,6 +820,7 @@ export const Channels = {
   saveSchemaTypes: 'ws:saveSchemaTypes',
   saveSchemaRules: 'ws:saveSchemaRules',
   getCoverage: 'trace:coverage',
+  starterRules: 'trace:starterRules',
   getImpact: 'trace:impact',
   getMatrix: 'trace:matrix',
   exportMatrix: 'trace:exportMatrix',

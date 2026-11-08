@@ -7,6 +7,7 @@ import { FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
 import { TypesDialog } from '../workspace/TypesPanel'
 import { HistoryDialog } from '../workspace/HistoryDialog'
 import { ChangesSide, ChangesView } from '../workspace/ChangesView'
+import { TraceabilityView } from '../workspace/TraceabilityView'
 import { GitBar } from '../workspace/GitPanels'
 import { MergeDialog } from '../workspace/MergeDialog'
 import { ExportDialog } from '../workspace/ExportDialog'
@@ -108,6 +109,9 @@ export function WorkspaceScreen({
   const tree = useRef<TreeControls | null>(null)
   const [revealNonce, setRevealNonce] = useState(0)
   const [showChanges, setShowChanges] = useState(false)
+  // theme 1b (T-01): the Traceability view takes the table's place like Changes
+  const [showTrace, setShowTrace] = useState(false)
+  const [typesTab, setTypesTab] = useState<'items' | 'links' | 'rules'>('items')
   // the team's feature switches from schema.yaml (P-40a); cleared when the repository closes
   useEffect(() => {
     setTeamFeatures(info.schema.features)
@@ -240,6 +244,7 @@ export function WorkspaceScreen({
   }, [onShortcuts])
 
   const toggleChanges = (): void => {
+    setShowTrace(false)
     if (!showChanges) {
       git.reload()
       changes.reset() // opens on uncommitted changes (O-06)
@@ -302,6 +307,30 @@ export function WorkspaceScreen({
     editorSave.current = save
   }, [])
   const problems = problemsOf(info)
+  // items that break a coverage rule (T-08), counted for the status bar and the Problems panel
+  const rulesKey = JSON.stringify(schema.rules ?? [])
+  const [gapTotal, setGapCount] = useState(0)
+  const gapCount = (schema.rules?.length ?? 0) > 0 ? gapTotal : 0
+  useEffect(() => {
+    if (!(schema.rules?.length ?? 0)) return
+    let live = true
+    void window.reqochet.queryItems({ gaps: true, limit: 0 }).then((r) => live && setGapCount(r.total))
+    return () => {
+      live = false
+    }
+  }, [rulesKey, dataVersion, info, schema.rules?.length])
+  const decideRules = async (take: boolean): Promise<void> => {
+    try {
+      const rules = take ? await window.reqochet.starterRules() : []
+      const r = await window.reqochet.saveSchemaRules(rules, info.schemaRevision)
+      if (r.ok) {
+        onInfo(r.info)
+        setDataVersion((v) => v + 1)
+      } else setNotice(r.message)
+    } catch (e) {
+      setNotice(errorMessage(e))
+    }
+  }
   const openVersion = async (ref: string): Promise<void> => {
     setHistoryOpen(false)
     setVersionBusy(true)
@@ -364,6 +393,11 @@ export function WorkspaceScreen({
           blockedReason={git.blocked}
           changesOpen={showChanges}
           onToggleChanges={toggleChanges}
+          traceOpen={showTrace}
+          onToggleTrace={() => {
+            setShowChanges(false)
+            setShowTrace((v) => !v)
+          }}
           onOpenHistory={() => setHistoryOpen(true)}
           onRun={(a) => (a === 'push' ? push() : void git.run(a))}
           notice={git.notice}
@@ -399,6 +433,29 @@ export function WorkspaceScreen({
             else changes.reset()
           }}
         />
+        {showTrace && !showChanges && (
+          <TraceabilityView
+            schema={schema}
+            info={info}
+            document={document === ALL_DOCUMENTS ? undefined : document}
+            query={query}
+            dataVersion={dataVersion}
+            onOpenItem={(id) => {
+              setShowTrace(false)
+              select(id)
+            }}
+            onShowGaps={(type) => {
+              setShowTrace(false)
+              filters.setTypes(type)
+              filters.setLinkFilter('gaps')
+            }}
+            onEditRules={() => {
+              setTypesTab('rules')
+              setEditTypes(true)
+            }}
+            onClose={() => setShowTrace(false)}
+          />
+        )}
         {showChanges && git.state?.available && (
           <ChangesView
             schema={schema}
@@ -415,11 +472,17 @@ export function WorkspaceScreen({
               git.onPanelResult(r)
             }}
             onOpenItem={select}
+            onOpenImpact={(id) =>
+              guarded(() => {
+                setShowChanges(false)
+                setTarget({ kind: 'item', id, tab: 'impact' })
+              })
+            }
             onClose={() => setShowChanges(false)}
           />
         )}
         {/* The table stays mounted while the Changes view is open, so its opened levels and scroll position survive. */}
-        <div className={showChanges && git.state?.available ? 'is-hidden' : 'workspace__items'}>
+        <div className={(showChanges && git.state?.available) || showTrace ? 'is-hidden' : 'workspace__items'}>
           <DocumentBar info={info} document={document} onDocument={setDocument} onInfo={onInfo} guard={guarded} readOnly={viewing !== undefined} />
           <Toolbar
             searchRef={searchRef}
@@ -467,6 +530,20 @@ export function WorkspaceScreen({
                 </button>
                 <button type="button" className="btn btn--small" onClick={() => setFolderLater(true)}>
                   {T.workspace.legacyFolderLater}
+                </button>
+              </span>
+            </div>
+          )}
+          {/* theme 1b (T-02): a project that never decided about coverage rules is offered the starter set once */}
+          {info.schema.rules === undefined && !viewing && (
+            <div className="notice table-notice folder-notice folder-notice--ask" role="status">
+              <span className="folder-notice__text">{T.trace.offer}</span>
+              <span className="actions">
+                <button type="button" className="btn btn--small btn--primary" onClick={() => void decideRules(true)}>
+                  {T.trace.offerYes}
+                </button>
+                <button type="button" className="btn btn--small" onClick={() => void decideRules(false)}>
+                  {T.trace.offerNo}
                 </button>
               </span>
             </div>
@@ -556,7 +633,25 @@ export function WorkspaceScreen({
           )}
         </div>
 
-        {showProblems && problems.length > 0 && <ProblemList problems={problems} onOpen={select} onFixed={() => void afterChange()} onClose={() => setShowProblems(false)} guard={guarded} />}
+        {showProblems && problems.length + gapCount > 0 && (
+          <ProblemList
+            problems={problems}
+            gapCount={gapCount}
+            onShowGaps={() => {
+              setShowProblems(false)
+              filters.setLinkFilter('gaps')
+            }}
+            onOpenCoverage={() => {
+              setShowProblems(false)
+              setShowChanges(false)
+              setShowTrace(true)
+            }}
+            onOpen={select}
+            onFixed={() => void afterChange()}
+            onClose={() => setShowProblems(false)}
+            guard={guarded}
+          />
+        )}
         <footer className="statusbar">
           <span>{filtered ? T.workspace.of(total, info.itemCount) : T.common.items(info.itemCount)}</span>
           {problems.length > 0 ? (
@@ -569,6 +664,12 @@ export function WorkspaceScreen({
             </button>
           ) : (
             <span className="statusbar__ok">{T.workspace.noProblems}</span>
+          )}
+          {/* coverage gaps are warnings, counted on their own (a big project can have thousands — T-08) */}
+          {gapCount > 0 && (
+            <button type="button" className="link-btn statusbar__problems statusbar__problems--warn" title={T.trace.gapMark} onClick={() => setShowProblems((s) => !s)}>
+              {T.trace.statusGaps(gapCount)}
+            </button>
           )}
           {chosen.size > 0 ? (
             <span className="statusbar__hint">
@@ -601,7 +702,7 @@ export function WorkspaceScreen({
       {showChanges && git.state?.available && changes.preset === 'uncommitted' && <ChangesSide git={git.state} blocked={git.blocked} onResult={git.onPanelResult} onPush={push} />}
 
       {target && (
-        <div className={showChanges && git.state?.available ? 'is-hidden' : 'workspace__side'}>
+        <div className={(showChanges && git.state?.available) || showTrace ? 'is-hidden' : 'workspace__side'}>
           {editorWidth.handle}
           <ItemEditor
             // Same key for a draft and the saved item, so the editor stays in place when a new item is saved.
@@ -700,7 +801,11 @@ export function WorkspaceScreen({
       {editTypes && (
         <TypesDialog
           info={info}
-          onClose={() => setEditTypes(false)}
+          tab={typesTab}
+          onClose={() => {
+            setEditTypes(false)
+            setTypesTab('items')
+          }}
           onSaved={(i) => {
             setEditTypes(false)
             onInfo(i)

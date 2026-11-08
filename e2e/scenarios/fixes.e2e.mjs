@@ -61,6 +61,8 @@ await scenario('E2E fixes', async (ctx) => {
   check(true, 'one click renames the file; no problems left')
 
   console.log('P-04 — Expand all opens every level')
+  // one line per item, so all 21 rows fit on the screen to be counted (rows with text are taller, 0.19.0)
+  await win.getByRole('button', { name: 'Show text' }).click()
   await win.getByRole('button', { name: 'Collapse all' }).click()
   await win.getByRole('button', { name: 'Expand all' }).click()
   await win.locator('.table__row[aria-level="3"]').first().waitFor()

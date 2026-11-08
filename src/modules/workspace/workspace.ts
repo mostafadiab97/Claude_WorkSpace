@@ -14,6 +14,7 @@ import { isDocumentName, type RepositoryStore } from '../repository-store'
 import { createBaselineOps } from './baselines'
 import { closeVersion, openVersion, type VersionView } from './versionView'
 import { createTraceabilityOps } from './traceability'
+import { starterRules } from '../schema'
 import { writeXlsx } from '../import-export'
 import { createCompare } from './compare'
 import { queryAll, syncInfo, withRequired, type Session, type WorkspaceContext } from './context'
@@ -542,6 +543,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     saveSchemaRules: q(fields.saveSchemaRules),
     getCoverage: (document?: string) => trace.coverage(reading(), document),
     getImpact: (id: string) => trace.impact(reading(), id),
+    starterRules: () => starterRules(need().repo.schema),
     getMatrix: (req: MatrixRequest) => trace.matrix(reading(), req),
     async exportMatrix(req: MatrixRequest) {
       const sheet = trace.matrixSheet(reading(), req)

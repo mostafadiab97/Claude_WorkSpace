@@ -44,6 +44,8 @@ export function ChangesView(props: {
   /** Discards these files (several chosen items, or everything) — the owner, 0.11.0. */
   onDiscardPaths: (paths: string[]) => Promise<void>
   onOpenItem: (id: string) => void
+  /** Opens the item on its Impact tab (theme 1b, T-06). */
+  onOpenImpact?: (id: string) => void
   onClose: () => void
 }) {
   const { schema, changes: c, git } = props
@@ -535,6 +537,11 @@ export function ChangesView(props: {
                         {e.kind !== 'deleted' && (
                           <button type="button" className="btn btn--small" onClick={() => props.onOpenItem(e.id)}>
                             {T.compare.openItem}
+                          </button>
+                        )}
+                        {e.kind !== 'deleted' && props.onOpenImpact && (
+                          <button type="button" className="btn btn--small" title={T.trace.impactHint} onClick={() => props.onOpenImpact?.(e.id)}>
+                            {T.trace.impactTab}
                           </button>
                         )}
                       </header>

@@ -14,9 +14,16 @@ export function ProblemList({
   onOpen,
   onFixed,
   onClose,
-  guard = (then) => then()
+  guard = (then) => then(),
+  gapCount = 0,
+  onShowGaps,
+  onOpenCoverage
 }: {
   problems: Problem[]
+  /** Items that break a coverage rule (theme 1b, T-08): one group with a count and two ways to look at them. */
+  gapCount?: number
+  onShowGaps?: () => void
+  onOpenCoverage?: () => void
   onOpen: (id: string) => void
   onFixed: () => void
   onClose: () => void
@@ -109,6 +116,29 @@ export function ProblemList({
             </details>
           )
         })}
+        {gapCount > 0 && (
+          <details className="problems__group" open>
+            <summary>
+              {T.trace.problemsGroup} ({gapCount.toLocaleString('en')})
+            </summary>
+            <p className="problems__row problems__row--warning">
+              <span className="problems__mark" aria-label={T.workspace.severityWarning}>
+                ⚠
+              </span>
+              <span className="problems__msg">{T.trace.problemsCount(gapCount)}</span>
+              {onShowGaps && (
+                <button type="button" className="btn btn--small" onClick={onShowGaps}>
+                  {T.trace.problemsShow}
+                </button>
+              )}
+              {onOpenCoverage && (
+                <button type="button" className="btn btn--small" onClick={onOpenCoverage}>
+                  {T.trace.problemsOpen}
+                </button>
+              )}
+            </p>
+          </details>
+        )}
         {done && (
           <p className="notice" role="status">
             {done}

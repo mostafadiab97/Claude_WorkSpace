@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { RepoInfo } from '../../../shared/api'
 import type { ItemTypeDef, LinkTypeDef } from '../../../shared/domain'
+import { RulesPanel } from './RulesPanel'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
 
@@ -22,7 +23,10 @@ let nextKey = 1
  * "is a heading"; a type can be removed only when nothing uses it (the window shows how many items or links do).
  * Required fields per item type (S-05): an item without them is saved but marked incomplete.
  */
-export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSaved: (i: RepoInfo) => void; onClose: () => void }) {
+export function TypesDialog({ info, onSaved, onClose, tab: firstTab = 'items' }: { info: RepoInfo; onSaved: (i: RepoInfo) => void; onClose: () => void; tab?: 'items' | 'links' | 'rules' }) {
+  // theme 1b (T-03): a Rules tab next to the types; each tab saves its own part of schema.yaml
+  const [tab, setTab] = useState<'types' | 'rules'>(firstTab === 'rules' ? 'rules' : 'types')
+  const [rulesDirty, setRulesDirty] = useState(false)
   const schema = info.schema
   const [items, setItems] = useState<ItemDraft[]>(() => schema.itemTypes.map((t) => ({ ...t, key: nextKey++, isNew: false })))
   const [links, setLinks] = useState<LinkDraft[]>(() => schema.linkTypes.map((t) => ({ ...t, key: nextKey++, isNew: false })))
@@ -33,7 +37,7 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
   const [dirty, setDirty] = useState(false)
   const [askClose, setAskClose] = useState(false)
   const panel = useRef<HTMLDivElement>(null)
-  const tryClose = (): void => (dirty ? setAskClose(true) : onClose())
+  const tryClose = (): void => (dirty || rulesDirty ? setAskClose(true) : onClose())
   useEffect(() => {
     void window.reqochet.getTypeUsage().then(setUsage)
     // focus goes into the window, and back to where it was when it closes (UX17-05)
@@ -45,12 +49,12 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
     const onKey = (e: KeyboardEvent): void => {
       if (e.key !== 'Escape') return
       if (askClose) setAskClose(false)
-      else if (dirty) setAskClose(true)
+      else if (dirty || rulesDirty) setAskClose(true)
       else onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose, dirty, askClose])
+  }, [onClose, dirty, rulesDirty, askClose])
 
   const fieldChoices = [{ id: 'title', name: T.columns.title }, { id: 'text', name: T.columns.text }, ...schema.fields.map((f) => ({ id: f.id, name: f.name }))]
   const patchItem = (key: number, p: Partial<ItemDraft>): void => {
@@ -92,6 +96,18 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
     }
   }
 
+  const closeAsk = askClose && (
+    <div className="notice notice--warning" role="alertdialog" aria-label={T.typesDialog.discardAsk}>
+      <span>{T.typesDialog.discardAsk}</span>
+      <button type="button" className="btn btn--small" onClick={onClose}>
+        {T.workspace.discard}
+      </button>
+      <button type="button" className="btn btn--small btn--primary" autoFocus onClick={() => setAskClose(false)}>
+        {T.workspace.keepEditing}
+      </button>
+    </div>
+  )
+
   return (
     <div className="modal" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && tryClose()}>
       <div ref={panel} className="modal__panel" role="dialog" aria-modal="true" aria-label={T.typesDialog.title}>
@@ -104,6 +120,33 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
             ✕
           </button>
         </header>
+        <div className="tabs types__tabs" role="tablist" aria-label={T.typesDialog.title}>
+          <button type="button" role="tab" aria-selected={tab === 'types'} className={tab === 'types' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('types')}>
+            {T.typesDialog.typesTab}
+          </button>
+          <button type="button" role="tab" aria-selected={tab === 'rules'} className={tab === 'rules' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('rules')}>
+            {T.trace.rulesTab}
+          </button>
+        </div>
+        {tab === 'rules' ? (
+          <RulesPanel
+            info={info}
+            onSaved={onSaved}
+            onDirty={setRulesDirty}
+            footer={(saveButton) => (
+              <footer className="modal__footer">
+                <div className="actions">
+                  {saveButton}
+                  <button type="button" className="btn" onClick={tryClose}>
+                    {T.common.cancel}
+                  </button>
+                </div>
+                {closeAsk}
+              </footer>
+            )}
+          />
+        ) : (
+        <>
         <div className="modal__body scroll">
           <h3 className="types__heading">{T.typesDialog.itemTypes}</h3>
           <div className="fields-table types-table" role="table" aria-label={T.typesDialog.itemTypes}>
@@ -198,18 +241,10 @@ export function TypesDialog({ info, onSaved, onClose }: { info: RepoInfo; onSave
               {T.common.cancel}
             </button>
           </div>
-          {askClose && (
-            <div className="notice notice--warning" role="alertdialog" aria-label={T.typesDialog.discardAsk}>
-              <span>{T.typesDialog.discardAsk}</span>
-              <button type="button" className="btn btn--small" onClick={onClose}>
-                {T.workspace.discard}
-              </button>
-              <button type="button" className="btn btn--small btn--primary" autoFocus onClick={() => setAskClose(false)}>
-                {T.workspace.keepEditing}
-              </button>
-            </div>
-          )}
+          {closeAsk}
         </footer>
+        </>
+        )}
       </div>
     </div>
   )

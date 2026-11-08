@@ -2,7 +2,7 @@
 // dialogs, count checks, take screenshots. Each scenario uses its own repository and profile, so scenarios
 // are independent and can run at the same time (review T-01).
 import { execFileSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -12,7 +12,13 @@ export const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 export const outDir = join(root, 'e2e', 'out')
 mkdirSync(outDir, { recursive: true })
 
-export const temp = (name) => mkdtempSync(join(tmpdir(), `reqman-e2e-${name}-`))
+/** Temporary folders of this scenario: removed when it passes (kept for a look when it fails). */
+const made = []
+export const temp = (name) => {
+  const dir = mkdtempSync(join(tmpdir(), `reqman-e2e-${name}-`))
+  made.push(dir)
+  return dir
+}
 export const gitIn = (cwd, ...args) => execFileSync('git', args, { cwd, encoding: 'utf8' })
 
 /** A Git repository with a bare "GitHub" remote and an author. */
@@ -102,6 +108,8 @@ export async function scenario(name, body) {
     await ctx.t?.close()
   }
   const failures = (ctx.t?.failures ?? 0) + (crashed ? 1 : 0)
+  // every run made new projects (the 1,500-item one is large): a full disk once made all scenarios fail (0.20.0)
+  if (failures === 0) for (const d of made) rmSync(d, { recursive: true, force: true, maxRetries: 3 })
   console.log(failures === 0 ? `\n${name}: passed` : `\n${name}: ${failures} failure(s)`)
   process.exit(failures === 0 ? 0 : 1)
 }

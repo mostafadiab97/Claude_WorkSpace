@@ -342,6 +342,23 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       expect((await git(remote, ['tag', '-l'])).includes('baseline/practice-1.0'), 'The fake GitHub did not receive the baseline.')
     })
 
+    await step('Traceability: coverage rules, gaps, matrix and impact', async () => {
+      // 0.20.0 (theme 1b): a new project starts with the starter rules; a requirement without a test is a gap
+      const rules = W().repoInfo().schema.rules ?? []
+      expect(rules.some((r) => r.id === 'system-verified'), 'The new project has no starter coverage rules.')
+      const draft = { ...W().newItem('system-requirement'), title: 'Practice: untested requirement' }
+      const saved = await W().saveItem(draft, null)
+      expect(saved.ok, saved.ok ? '' : saved.message)
+      const sys = W().getCoverage().rules.find((r) => r.rule.id === 'system-verified')
+      expect(sys?.gaps.some((g) => g.id === draft.id) === true, 'The untested requirement is not listed as a coverage gap.')
+      expect(W().query({ gaps: true, limit: 1000 }).items.some((i) => i.id === draft.id), 'The Coverage gaps filter does not find it.')
+      const m = W().getMatrix({ rowType: 'system-requirement', colType: 'test-case' })
+      expect(m.rows.some((r) => r.id === draft.id), 'The matrix does not list the requirement as a row.')
+      expect(W().getImpact(draft.id).nodes.length === 0, 'A new requirement should have nothing depending on it.')
+      const del = await W().deleteItem(draft.id, saved.ok ? saved.details.revision : '')
+      expect(del.ok, del.ok ? '' : del.message)
+    })
+
     await step('Rename a document with a space in its name (one commit, history kept)', async () => {
       // 0.17.1: the owner's rename of "items" failed on Windows (Git stopped by a time limit, folder not put back)
       const before = (await W().refresh()).documents.find((d) => d.name === FIRST_DOCUMENT)?.itemCount ?? 0

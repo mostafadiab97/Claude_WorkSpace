@@ -33,6 +33,9 @@ export function GitBar(props: {
   onToggleChanges: () => void
   /** History and baselines (1a part 2). */
   onOpenHistory: () => void
+  /** Theme 1b (T-01): the Traceability view, next to Changes and Versions. */
+  traceOpen?: boolean
+  onToggleTrace?: () => void
   onRun: (action: 'pull' | 'push') => void
   notice: GitNotice | null
   onDismiss: () => void
@@ -151,6 +154,14 @@ export function GitBar(props: {
           }}>
           {T.baselines.button}
         </button>
+        {props.onToggleTrace && (
+          <button type="button" className={props.traceOpen ? 'btn btn--active' : 'btn'} aria-pressed={props.traceOpen === true} title={T.trace.buttonTooltip} onClick={() => {
+              onDismiss()
+              props.onToggleTrace?.()
+            }}>
+            {T.trace.button}
+          </button>
+        )}
         {state.hasRemote && (
           <>
         <button

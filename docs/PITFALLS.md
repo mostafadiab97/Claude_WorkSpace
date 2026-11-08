@@ -220,3 +220,9 @@ owner, 0.19.0 test 2). Each mode now has its own keys (`getItemKey`) and a switc
 `tests/qa-0.17.0-types.test.ts` → "incomplete combined with document, type, …" failed in 2 of about 11 full `npm run check`
 runs (never alone, fails in ~85 ms, so not a timeout). Since 0.19.1 every check prints the query and the index content;
 when it fails again (here or in CI), read that message before changing code. If CI fails on it, re-run the job once.
+
+## A full disk makes everything fail (0.20.0)
+Every e2e run made new temporary projects and never removed them; with the 1,500-item `rows-0.19` scenario and the
+helpers' measurement folders the session's disk allowance ran out, and suddenly all unit and e2e tests failed with odd
+errors ("No space left on device"). Since 0.20.0 the harness removes a passing scenario's folders. When many tests
+fail at once, check `df -h /` and `du -sh /tmp/*` first; helpers' scratch folders under `/tmp` can be deleted.

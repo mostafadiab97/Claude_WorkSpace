@@ -3,6 +3,7 @@ import type { ItemDetails, LinkInfo } from '../../../shared/api'
 import type { FieldDef, FieldValue, Item, ItemIssue, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { renderItemText } from '../lib/markdown'
+import { ImpactView } from './ImpactView'
 import { focusUsesArrows, workspaceHasKeyboard } from '../lib/shortcuts'
 import { fieldLabel, optionLabel, typeLabel, typeName } from '../lib/schema'
 import { HistoryView } from './HistoryView'
@@ -12,7 +13,7 @@ import { SuspectLinksDialog } from './SuspectLinksDialog'
 import { T } from '../../../shared/text'
 
 /** askDelete: opened from the row menu's Delete — the editor shows its delete question at once (UX-W03). */
-export type EditorTarget = { kind: 'item'; id: string; askDelete?: boolean } | { kind: 'draft'; item: Item }
+export type EditorTarget = { kind: 'item'; id: string; askDelete?: boolean; /** Open on this tab (Changes → Impact, T-06). */ tab?: 'impact' } | { kind: 'draft'; item: Item }
 
 type Status = { kind: 'idle' } | { kind: 'saving' } | { kind: 'saved' } | { kind: 'error'; message: string; conflict?: boolean }
 
@@ -47,7 +48,7 @@ export function ItemEditor(props: {
   const [status, setStatus] = useState<Status>({ kind: 'idle' })
   const [issues, setIssues] = useState<ItemIssue[]>([])
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [tab, setTab] = useState<'details' | 'history'>('details')
+  const [tab, setTab] = useState<'details' | 'history' | 'impact'>(target.kind === 'item' && target.tab === 'impact' ? 'impact' : 'details')
   const [removeIncoming, setRemoveIncoming] = useState(true)
   /** Links from other items to review after a save changed the type, title or text (O-04). */
   const [review, setReview] = useState<{ incoming: LinkInfo[]; before: Item; after: Item } | null>(null)
@@ -259,12 +260,20 @@ export function ItemEditor(props: {
           <button type="button" role="tab" aria-selected={tab === 'history'} className={tab === 'history' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('history')}>
             {T.editor.history}
           </button>
+          {/* theme 1b (T-06): what depends on this item */}
+          <button type="button" role="tab" aria-selected={tab === 'impact'} className={tab === 'impact' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('impact')}>
+            {T.trace.impactTab}
+          </button>
         </div>
       )}
 
       {tab === 'history' && !isNew ? (
         <div className="editor__body">
           <HistoryView schema={schema} itemId={form.id} reloadToken={reloadToken} />
+        </div>
+      ) : tab === 'impact' && !isNew ? (
+        <div className="editor__body">
+          <ImpactView schema={schema} itemId={form.id} reloadToken={reloadToken} onOpen={props.onOpen} />
         </div>
       ) : (
       <fieldset className="editor__body editor__fieldset" disabled={props.readOnly === true}>

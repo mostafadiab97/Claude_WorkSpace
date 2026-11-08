@@ -87,6 +87,9 @@ export function Toolbar({ searchRef, newRef, ...props }: {
         <option value="incomplete" title={tw.incompleteTip}>
           {tw.incomplete}
         </option>
+        <option value="gaps" title={T.trace.filterTooltip}>
+          {T.trace.filter}
+        </option>
       </select>
       </FilterMenu>
       {f.filtered && (

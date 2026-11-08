@@ -261,6 +261,7 @@ const en = {
     duplicateLink: (t: string, target: string) => `Duplicate link "${t}" to ${target}.`
   },
   typesDialog: {
+    typesTab: 'Types',
     title: 'Item and link types',
     intro: 'The kinds of items and links of this project, shared through schema.yaml. A type can be removed only when nothing uses it. Required fields: an item of that type without them is saved, but marked incomplete (Filters → Incomplete).',
     itemTypes: 'Item types',
@@ -1000,6 +1001,8 @@ const en = {
   /** Messages the core sends after Git actions (shown in the Git bar and the Changes panel). */
   /** Baselines and the history list (1a part 2 — S-06, S-08, S-09). */
   trace: {
+    statusGaps: (count: number) => (count === 1 ? '1 coverage gap' : `${n(count)} coverage gaps`),
+    noItems: 'No items of this type here yet.',
     button: 'Traceability',
     buttonTooltip: 'Coverage against your rules, and the traceability matrix',
     title: 'Traceability',

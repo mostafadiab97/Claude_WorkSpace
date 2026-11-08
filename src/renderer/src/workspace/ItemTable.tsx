@@ -68,29 +68,21 @@ export function ItemTable(props: {
   const lang = useLanguage()
   // items with an empty required field get a small mark in their row (the owner, 8 Nov 2026 — S-05)
   const hasRequired = schema.itemTypes.some((t) => (t.required?.length ?? 0) > 0)
-  const [incompleteIds, setIncompleteIds] = useState<ReadonlySet<string>>(new Set())
-  useEffect(() => {
-    if (!hasRequired) return
-    let live = true
-    // every page, not only the first 10,000 (UX18-14)
-    void (async () => {
-      const ids = new Set<string>()
-      for (let offset = 0; ; offset += 10_000) {
-        const r = await window.reqochet.queryItems({ incomplete: true, limit: 10_000, offset, brief: true })
-        for (const i of r.items) ids.add(i.id)
-        if (r.items.length === 0 || ids.size >= r.total) break
-      }
-      if (live) setIncompleteIds(ids)
-    })()
-    return () => {
-      live = false
-    }
-  }, [hasRequired, dataVersion])
+  const incompleteIds = useIdSet(hasRequired, 'incomplete', dataVersion)
+  // items that break a coverage rule get a mark too (theme 1b, T-08)
+  const hasRules = (schema.rules?.length ?? 0) > 0
+  const gapIds = useIdSet(hasRules, 'gaps', dataVersion)
   const isIncomplete = (id: string): boolean => hasRequired && incompleteIds.has(id)
   const incompleteMark = (id: string): ReactNode =>
     isIncomplete(id) ? (
       <span className="table__incomplete" role="img" aria-label={T.table.incomplete} title={T.table.incompleteTip}>
         !
+      </span>
+    ) : null
+  const gapMark = (id: string): ReactNode =>
+    hasRules && gapIds.has(id) ? (
+      <span className="table__gap" role="img" aria-label={T.trace.gapMark} title={T.trace.gapMark}>
+        ◌
       </span>
     ) : null
   // a column header being dragged to a new place (rows have their own drag and drop)
@@ -452,6 +444,7 @@ export function ItemTable(props: {
                               </span>
                             )}
                             {incompleteMark(item.id)}
+                            {gapMark(item.id)}
                             {item.childCount > 0 && !open && <span className="table__count">{item.childCount.toLocaleString('en')}</span>}
                           </span>
                         ) : (
@@ -466,6 +459,7 @@ export function ItemTable(props: {
                           >
                             {c.key === 'title' && full ? <MainCell heading={isHeading(schema, item.type)} title={c.value(item)} text={item.text} /> : c.value(item)}
                             {c.key === 'title' && incompleteMark(item.id)}
+                            {c.key === 'title' && gapMark(item.id)}
                           </span>
                         )
                       )
@@ -493,4 +487,26 @@ function MainCell({ heading, title, text }: { heading: boolean; title: string; t
       {html && <span className="table__main-text markdown" dangerouslySetInnerHTML={{ __html: html }} />}
     </span>
   )
+}
+
+/** The IDs of every item that matches one marker filter (incomplete, coverage gap), all pages (UX18-14). */
+function useIdSet(enabled: boolean, kind: 'incomplete' | 'gaps', dataVersion: number): ReadonlySet<string> {
+  const [ids, setIds] = useState<ReadonlySet<string>>(new Set())
+  useEffect(() => {
+    if (!enabled) return
+    let live = true
+    void (async () => {
+      const found = new Set<string>()
+      for (let offset = 0; ; offset += 10_000) {
+        const r = await window.reqochet.queryItems({ [kind]: true, limit: 10_000, offset, brief: true })
+        for (const i of r.items) found.add(i.id)
+        if (r.items.length === 0 || found.size >= r.total) break
+      }
+      if (live) setIds(found)
+    })()
+    return () => {
+      live = false
+    }
+  }, [enabled, kind, dataVersion])
+  return ids
 }

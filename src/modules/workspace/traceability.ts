@@ -46,7 +46,7 @@ export function createTraceabilityOps(ctx: WorkspaceContext) {
     const cols = [...new Set(raw.map((x) => x.col))].map((id) => head(s, colTypeOf.get(id) as IndexedItem)).sort(byNumber)
     const colIndex = new Map(cols.map((c, k) => [c.id, k]))
     const cells = raw.map((x) => ({ r: rowIndex.get(x.row) as number, c: colIndex.get(x.col) as number, type: x.type, dir: x.dir, suspect: x.suspect }))
-    return { rows: allRows, allRows, cols, cells, truncatedRows: false }
+    return { rows: allRows, allRows, cols, cells, truncatedRows: false, totalRows: allRows.length }
   }
 
   return {
@@ -99,13 +99,13 @@ export function createTraceabilityOps(ctx: WorkspaceContext) {
 
     matrix(s: Session, req: MatrixRequest): Matrix {
       const m = fullMatrix(s, req)
-      if (m.rows.length <= MATRIX_ROWS) return { rows: m.rows, cols: m.cols, cells: m.cells, truncatedRows: false }
+      if (m.rows.length <= MATRIX_ROWS) return { rows: m.rows, cols: m.cols, cells: m.cells, truncatedRows: false, totalRows: m.rows.length }
       // the view draws the first rows; the columns and cells follow them
       const rows = m.rows.slice(0, MATRIX_ROWS)
       const cells = m.cells.filter((c) => c.r < MATRIX_ROWS)
       const used = [...new Set(cells.map((c) => c.c))].sort((a, b) => a - b)
       const remap = new Map(used.map((c, k) => [c, k]))
-      return { rows, cols: used.map((c) => m.cols[c] as MatrixHead), cells: cells.map((c) => ({ ...c, c: remap.get(c.c) as number })), truncatedRows: true }
+      return { rows, cols: used.map((c) => m.cols[c] as MatrixHead), cells: cells.map((c) => ({ ...c, c: remap.get(c.c) as number })), truncatedRows: true, totalRows: m.rows.length }
     },
 
     /** The whole grid for Excel: one row per row item, one column per linked item, the link type in the cell. */

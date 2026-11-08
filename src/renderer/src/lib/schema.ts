@@ -1,5 +1,5 @@
-import type { FieldDef, FieldValue, ItemTypeDef, Labels, LinkTypeDef, Schema } from '../../../shared/domain'
-import { getLanguage } from '../../../shared/text'
+import type { CoverageRule, FieldDef, FieldValue, ItemTypeDef, Labels, LinkTypeDef, Schema } from '../../../shared/domain'
+import { getLanguage, T } from '../../../shared/text'
 
 // Names from schema.yaml in the window's language (UI review UX-22): `labels: { ar: … }` next to `name`. Read at
 // render time — the language switch swaps the language in place (never keep the result in a module constant).
@@ -56,4 +56,12 @@ export const staleTranslations = (
     name: hasLabels && name.trim() !== was.name,
     options: Object.keys(was.optionLabels ?? {}).filter((o) => !options.includes(o))
   }
+}
+
+/** A coverage rule in words (theme 1b): "Every System Requirement is verified by at least 1 Test Case". */
+export const ruleText = (schema: Schema, r: CoverageRule): string => {
+  const from = r.from?.length ? r.from.map((t) => typeName(schema, t)).join(' / ') : T.trace.anyItem
+  return r.direction === 'incoming'
+    ? T.trace.rule(typeName(schema, r.type), linkName(schema, r.link, true), r.min, from)
+    : T.trace.ruleOut(typeName(schema, r.type), linkName(schema, r.link), r.min, from)
 }

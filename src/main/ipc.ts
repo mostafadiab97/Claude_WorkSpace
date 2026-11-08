@@ -256,6 +256,7 @@ export function registerIpc(services: Services, paths: Paths): void {
     saveSchemaRules: (_e, rules, revision) => ws.saveSchemaRules(v.coverageRules(rules), v.str(revision, 'revision')),
     getCoverage: (_e, document) => ws.getCoverage(document === undefined || document === null ? undefined : v.str(document, 'document', 300)),
     getImpact: (_e, id) => ws.getImpact(v.id(id)),
+    starterRules: () => ws.starterRules(),
     getMatrix: (_e, req) => ws.getMatrix(v.matrixRequest(req)),
     exportMatrix: (e, req) => {
       const r = v.matrixRequest(req)

@@ -114,6 +114,7 @@ export interface WorkspaceService {
   /** Traceability (theme 1b): coverage per rule, the impact chain of one item, the matrix and its Excel file. */
   saveSchemaRules(rules: CoverageRule[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   getCoverage(document?: string): CoverageReport
+  starterRules(): CoverageRule[]
   getImpact(id: string): ImpactResult
   getMatrix(req: MatrixRequest): Matrix
   exportMatrix(req: MatrixRequest): Promise<{ content: Uint8Array; count: number }>

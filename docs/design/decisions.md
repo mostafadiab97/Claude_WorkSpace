@@ -313,3 +313,18 @@ adds new test files only, in its own worktree. Details: `docs/AGENT-WORKFLOW.md`
   one after another in one scrolling list on the right; no right-hand panel — Export CSV / Markdown sit at the top
   next to Close changes.
 - Privacy diagram: a dark version and a tighter layout.
+
+## Traceability views — theme 1b (the owner, 8 Nov 2026; details in `docs/reviews/2026-11-08-1b-traceability.md`)
+
+- **Place (T-01):** a **Traceability** button in the top bar opens a full-width view (like Changes) with **Coverage** and
+  **Matrix** tabs; the **impact chain** is an **Impact** tab in the item editor.
+- **Rules (T-02/T-03/T-04):** coverage rules live in `schema.yaml` (P-07) and are edited in a **Rules** tab of the
+  item-types window. A rule = item type + link type + direction + at least N, with a level (warning / error) stored
+  for the later CI check; the app only warns. New projects start with a starter set (Need refined by a System
+  Requirement; System/Software/Hardware/Interface Requirement verified by a Test Case; Risk mitigated by a
+  requirement); existing projects are offered it once.
+- **Counting (T-05):** Obsolete items are not counted; links count across documents; the view follows the document picker.
+- **Impact (T-06):** all levels down, as a tree with suspect marks; also reachable from a changed item in Changes.
+- **Gaps (T-08):** a mark in table rows, a **Coverage gaps** group in Problems, and a **Coverage gaps** filter.
+- Matrix (P-08; T-07 technical): rows = filtered items of one type, columns = linked items of another; a list form above
+  ~300 columns; Excel export has the full grid.

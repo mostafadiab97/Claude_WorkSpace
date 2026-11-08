@@ -298,3 +298,18 @@ adds new test files only, in its own worktree. Details: `docs/AGENT-WORKFLOW.md`
   icon for long waits; the assistant "eyes" are shown now; Changes / Pull / Push move next to the branch button.
 - Details and open points: `docs/reviews/done/2026-11-04-rename-reqochet.md`.
 - **Two tools (4 Nov 2026):** the tool built from this development repository is **reqochet-dev** (own app identity, `%APPDATA%\reqochet-dev`, installer `reqochet-dev-Setup-x.y.z.exe`, a "dev" mark beside the logo) and updates from this repository; the release repository builds plain **reqochet** and updates from there. Both use the project folder `requirements/.reqochet`.
+
+## Reading the table and old versions (the owner, 8 Nov 2026, after testing 0.18.0)
+
+- **Main column (D-19a):** like the DOORS module view, the table gets one main column: a heading shows its title in
+  bold; any other item shows its title in bold and its full text below; the row grows to fit. A switch returns to one
+  line per item. Background: neither the tool study nor the feature catalogue compared this; DOORS (Classic and Next),
+  ReqView and Polarion's document view show one growing main column, Jama and Jira a title column.
+- **Old version in the table (D-19b):** "Open read-only" switches the whole table (tree, filters, columns, full width)
+  to that version, with a coloured bar "Viewing <commit> (read-only) · Back to now"; editing, saving and Git actions
+  are off until Back to now. Replaces the floating read-only window of 0.18.0.
+- **Compare layout (D-19c), every compare screen** (Changes before a commit, what a Pull brought, Compare two
+  versions, Compare with now): changed items listed on the left like the files of a GitHub pull request; every change
+  one after another in one scrolling list on the right; no right-hand panel — Export CSV / Markdown sit at the top
+  next to Close changes.
+- Privacy diagram: a dark version and a tighter layout.

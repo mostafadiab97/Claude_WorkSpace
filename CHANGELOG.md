@@ -3,6 +3,13 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.19.0 — in progress — reading the table, old versions, compare layout
+- **Owner (8 Nov 2026), 0.18.0:** all 5 steps passed (self-test 24/24, 95.5 s). The update downloaded the full
+  installer once (0.17.2 was installed by hand, so the small download could not be used — see PITFALLS). Points:
+  the read-only version should open in the table itself; Compare wastes its right panel while the changes are crammed
+  at the bottom; the privacy diagram needs a dark version and less empty space; the table should show the text like
+  DOORS (decisions D-19a/b/c in `docs/design/decisions.md`).
+
 ## 0.18.0 — 8 Nov 2026 — 1a structure part 2: baselines and the history list
 - **Owner (8 Nov 2026), 0.17.2:** all 5 steps passed (self-test 23/23, 73.9 s; installed by hand because GitHub
   answered the update feed with 502 — later "Up to date"). Points: copied requirement files did not appear in the new

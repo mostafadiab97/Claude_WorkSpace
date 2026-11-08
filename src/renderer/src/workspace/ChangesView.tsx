@@ -12,6 +12,8 @@ import { T } from '../../../shared/text'
 const SHOW = 400
 /** Changes rendered at a time in the continuous list (D-19c). */
 const PAGE = 25
+/** At most this many changes are drawn at once while scrolling (CR19-08). */
+const MAX_CARDS = 150
 
 type Kind = CompareEntry['kind']
 const KIND_LABEL: Record<Kind, string> = T.compare.kinds
@@ -125,13 +127,18 @@ export function ChangesView(props: {
   const scrollTo = useRef<string | null>(null)
   const diffsRef = useRef<HTMLDivElement | null>(null)
   const sentinelRef = useRef<HTMLParagraphElement | null>(null)
-  const listKey = `${data?.from.ref ?? ''}..${data?.to.ref ?? ''}|${visible.length}|${filter}|${[...kinds].join()}`
+  // a new comparison or filter starts at the top; a Discard or ↶ (fewer entries) keeps the place (CR19-09)
+  const listKey = `${data?.from.ref ?? ''}..${data?.to.ref ?? ''}|${filter}|${[...kinds].join()}`
   const [shownKey, setShownKey] = useState(listKey)
   if (shownKey !== listKey) {
     setShownKey(listKey)
     setRange({ from: 0, to: PAGE })
     setCurrent(null)
+  } else if (range.from > 0 && range.from >= visible.length) {
+    setRange({ from: Math.max(0, visible.length - PAGE), to: visible.length })
   }
+  // the change at the top of the right side is marked on the left; before any scrolling, the first one (UX-05)
+  const shownCurrent = current ?? visible[range.from]?.id ?? null
   const goTo = (id: string): void => {
     const k = visible.findIndex((e) => e.id === id)
     if (k < 0) return
@@ -154,11 +161,16 @@ export function ChangesView(props: {
     const el = sentinelRef.current
     if (!el) return
     const io = new IntersectionObserver((seen) => {
-      if (seen.some((x) => x.isIntersecting)) setRange((r) => ({ from: r.from, to: Math.min(visible.length, r.to + PAGE) }))
+      if (!seen.some((x) => x.isIntersecting)) return
+      // at most MAX_CARDS are drawn: the oldest leave at the top ("Show earlier changes" brings them back) — CR19-08
+      setRange((r) => {
+        const to = Math.min(visible.length, r.to + PAGE)
+        return { from: Math.max(r.from, to - MAX_CARDS), to }
+      })
     }, { root: diffsRef.current, rootMargin: '400px' })
     io.observe(el)
     return () => io.disconnect()
-  }, [range, visible.length])
+  }, [range, visible.length, tab])
   // the left list follows the scrolling: the first card at the top is marked there
   useEffect(() => {
     const box = diffsRef.current
@@ -411,8 +423,8 @@ export function ChangesView(props: {
                       )}
                       <button
                         type="button"
-                        className={e.id === current ? 'compare__file compare__row--selected' : 'compare__file'}
-                        aria-current={e.id === current ? 'true' : undefined}
+                        className={e.id === shownCurrent ? 'compare__file compare__row--selected' : 'compare__file'}
+                        aria-current={e.id === shownCurrent ? 'true' : undefined}
                         title={e.summary}
                         onClick={() => goTo(e.id)}
                       >
@@ -420,8 +432,10 @@ export function ChangesView(props: {
                           {KIND_LETTER[e.kind]}
                         </span>
                         <span className="compare__number">{numberLabel(e)}</span>
-                        <span className="compare__name" dir="auto">
-                          {e.title || T.common.noTitle}
+                        <span className="compare__file-text">
+                          <span className="compare__name" dir="auto">
+                            {e.title || T.common.noTitle}
+                          </span>
                           <span className="compare__file-id">{e.id}</span>
                         </span>
                         {e.kind === 'modified' && e.contentChanged && e.incoming > 0 && (

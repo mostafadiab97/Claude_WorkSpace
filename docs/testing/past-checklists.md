@@ -1,7 +1,21 @@
-# Past manual checklists (v0.0.3 – v0.17.1)
+# Past manual checklists (v0.0.3 – v0.17.2)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.17.2 (document groups, column drag, privacy page, guide pictures)
+
+Owner 8 Nov: all 5 passed (with points → 0.18.0).
+
+First discard your 0.17.0 test changes in the sandbox (**Changes → Discard all**), as agreed.
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.17.2**, then **⚙ → Self-tests → Run release self-test**. Look at the taskbar and the desktop icon. | **All 23 steps passed**. Desktop/Start icon: light tile with a grey outline (Windows may show the old one until a restart — its icon cache). Taskbar: follows Windows (dark taskbar → dark tile). |
+| 2 | In the sandbox make a second document (**New document…**), add an item, then choose **All documents**; click a group row. | One group row per document with its item count; a click folds and unfolds it. |
+| 3 | Drag a column header (e.g. **Status**) onto another; then open **Columns**. | The column moves where the line showed; the menu shows the same order, names left-aligned, Title listed first. |
+| 4 | Turn on a filter. | An orange **Clear filters** button appears next to Filters; it shows all items again. |
+| 5 | **⚙ → Privacy and access**, then **User guide → 2. Ideas you need to know** (and 6, 8). | The privacy page lists what is read, kept, sent and changed; the guide pages show pictures in the window's colours (try Dark too). |
 
 ## Previous checklist — v0.17.1 (renaming a big document safely)
 

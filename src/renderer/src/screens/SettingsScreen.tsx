@@ -36,7 +36,24 @@ export function SettingsScreen(props: {
   const main = useRef<HTMLDivElement>(null)
   // the guide's topics fold under "User guide" (the owner on 0.14.4 step 2); open while a guide page is shown
   const [guideOpen, setGuideOpen] = useState(false)
-  const [zoom, setZoom] = useState(false)
+  const [zoom, setZoomState] = useState(false)
+  const zoomButton = useRef<HTMLButtonElement>(null)
+  // closing the large picture puts the focus back on the picture button (UX19-17)
+  const setZoom = (on: boolean): void => {
+    setZoomState(on)
+    if (!on) window.setTimeout(() => zoomButton.current?.focus(), 0)
+  }
+  useEffect(() => {
+    if (!zoom) return
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') {
+        setZoomState(false)
+        window.setTimeout(() => zoomButton.current?.focus(), 0)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [zoom])
   const pages = useMemo(() => guidePages(), [])
   const nav = T.settings.nav
   const settingsPages: { id: SettingsPage; label: string }[] = [
@@ -125,7 +142,7 @@ export function SettingsScreen(props: {
               <p className="hint hint--flush">{T.settings.privacy.intro}</p>
               {/* the Archify drawing of the same facts (docs/diagrams/archify/privacy.json — the owner, 8 Nov 2026) */}
               <figure className="privacy__figure">
-                <button type="button" className="privacy__zoom" title={T.settings.privacy.enlarge} aria-label={T.settings.privacy.enlarge} onClick={() => setZoom(true)}>
+                <button type="button" ref={zoomButton} className="privacy__zoom" title={T.settings.privacy.enlarge} aria-label={`${T.settings.privacy.enlarge}: ${T.settings.privacy.diagramShortAlt}`} onClick={() => setZoom(true)}>
                   <img className="only-light" src={privacyDiagram} alt="" />
                   <img className="only-dark" src={privacyDiagramDark} alt="" />
                 </button>

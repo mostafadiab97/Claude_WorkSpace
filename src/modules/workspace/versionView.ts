@@ -86,8 +86,16 @@ export async function openVersion(deps: {
     writeSchemaTypes: refuse,
     fixFileName: refuse
   } as unknown as RequirementsRepo
-  const stats = await index.sync(repo)
-  const info = await git.commitInfo(root, commit)
+  let stats: Awaited<ReturnType<IndexCache['sync']>>
+  let info: Awaited<ReturnType<GitAdapter['commitInfo']>>
+  try {
+    stats = await index.sync(repo)
+    info = await git.commitInfo(root, commit)
+  } catch (e) {
+    // nothing half-made stays behind (CR19-06)
+    await closeVersion({ session: { index } as Session, file: deps.indexFile(key) } as VersionView)
+    throw e
+  }
   return {
     ref: commit,
     label: info ? `${commit.slice(0, 7)} ${info.message}` : commit.slice(0, 7),

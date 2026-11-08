@@ -157,6 +157,8 @@ export interface ItemQuery {
   offset?: number
   /** Return only the start of the text, as plain text (smaller results for tables and trees). */
   brief?: boolean
+  /** Return at most this many characters of the text (the table's main column, SEC-19-03); ignored with `brief`. */
+  textUpTo?: number
 }
 
 export interface QueryResult {

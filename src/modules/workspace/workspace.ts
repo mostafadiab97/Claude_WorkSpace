@@ -4,9 +4,9 @@
 // Every operation that writes files, changes the index or runs Git goes through one queue (review D-03).
 import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
-import { access, mkdir, rename, rmdir, writeFile } from 'node:fs/promises'
+import { access, mkdir, rename, rm, rmdir, writeFile } from 'node:fs/promises'
 import { basename, join, relative, resolve } from 'node:path'
-import type { CreateBaselineRequest, FolderCheck, GitResult, ImportSettings, MergeAnswers, MergePlan, ImportSource, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
+import type { CreateBaselineRequest, FolderCheck, GitResult, GitState, ImportSettings, MergeAnswers, MergePlan, ImportSource, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
 import type { GitAdapter } from '../git-adapter'
 import type { IndexCache } from '../index-cache'
 import type { Logger } from '../logger'
@@ -37,6 +37,8 @@ export interface WorkspaceDeps {
   openIndex(root: string): IndexCache
   /** Folder for per-user state (recent repositories list). */
   userDir: string
+  /** Opens an index at this file (an old version's temporary index, D-19b); without it `openIndex(key)` is used. */
+  openIndexAt?(file: string): IndexCache
   log: Pick<Logger, 'info' | 'warn' | 'error'>
   /** Watch the requirements folder so refreshes re-read only changed files (default true). */
   watchFiles?: boolean
@@ -70,6 +72,9 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   let session: Session | null = null
   /** An old version shown in the table (D-19b): read calls go to it, writes and Git actions are refused. */
   let viewing: VersionView | null = null
+  const versionsDir = join(deps.userDir, 'cache', 'versions')
+  // left over from a quit while a version was shown (SEC-19-05): nothing in there is needed any more
+  void rm(versionsDir, { recursive: true, force: true }).catch(() => undefined)
 
   const need = (): Session => {
     if (!session) throw new Error(T.wsMsg.noRepo)
@@ -145,8 +150,9 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   }
   const info = (s: Session = reading()): RepoInfo => ({
     ...(viewing && s === viewing.session ? { version: { ref: viewing.ref, label: viewing.label } } : {}),
-    root: s.repo.root,
-    name: basename(s.repo.root),
+    // an old version's repo.root is an internal key: the window always gets the project folder (CR19-02)
+    root: need().repo.root,
+    name: basename(need().repo.root),
     isGitRepository: s.isGit,
     schema: s.repo.schema,
     schemaProblems: s.repo.schemaProblems,
@@ -340,6 +346,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   const viewStructure = createStructureOps(viewCtx)
   const viewItems = createItemOps(viewCtx, createLinkOps(viewCtx), viewStructure)
   const viewExporting = createExportOps(viewCtx, viewStructure, compare)
+  const viewFields = createSchemaFieldOps(viewCtx, () => info())
   const gitOps = createGitOps({
     git,
     log,
@@ -401,6 +408,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   }
 
   async function startSession(repoRoot: string, isGit: boolean, init?: () => Promise<void>): Promise<RepoInfo> {
+    await endVersion() // its temporary index is removed before another project opens (QA19-07)
     closeSession()
     gitOps.invalidate()
     if (init) await init()
@@ -444,14 +452,22 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     } else {
       s.lastSync = { durationMs: 0, full: false, changedFiles: 0 }
     }
-    return info(s)
+    // while an old version is shown, the live project is refreshed quietly and the window keeps the version (QA19-03)
+    return info(viewing ? viewing.session : s)
   }
 
   /** Queued, and allowed while an old version is shown (reads, opening, refresh). */
   const qr = <A extends unknown[], R>(fn: (...a: A) => Promise<R>) => (...a: A): Promise<R> => queue.run(() => fn(...a))
   /** Queued writes and Git actions: refused while an old version is shown (D-19b — nothing can change there). */
+  // the refusal fits every result these calls return: OpResult, SaveResult (reason) and GitResult (state) — CR19-03
+  const refusal = async (): Promise<{ ok: false; message: string; reason: 'error'; state: GitState }> => ({
+    ok: false,
+    message: T.version.readOnly,
+    reason: 'error',
+    state: await gitOps.state(need())
+  })
   const q = <A extends unknown[], R>(fn: (...a: A) => Promise<R>) => (...a: A): Promise<R> =>
-    queue.run(() => (viewing ? Promise.resolve({ ok: false, message: T.version.readOnly } as R) : fn(...a)))
+    queue.run(() => (viewing ? (refusal() as Promise<unknown> as Promise<R>) : fn(...a)))
 
   return {
     async checkFolder(path): Promise<FolderCheck> {
@@ -515,9 +531,9 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     reparentItem: q(structure.reparentItem),
     reparentItems: q(structure.reparentItems),
     moveItem: q(structure.moveItem),
-    checkFields: fields.checkFields,
+    checkFields: viewFields.checkFields,
     saveSchemaFields: q(fields.saveSchemaFields),
-    typeUsage: fields.typeUsage,
+    typeUsage: viewFields.typeUsage,
     saveSchemaTypes: q(fields.saveSchemaTypes),
     renameProjectFolder: q(renameProjectFolder),
     createDocument: q(createDocument),
@@ -540,11 +556,31 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     getHistory: (req: { search?: string; skip?: number }) => baselineOps.history(need(), req),
     openVersion: qr(async (ref: string) => {
       const s = need()
-      await endVersion()
+      let next: VersionView
+      // temporary indexes live in cache/versions/, emptied when the app starts (a quit while one is shown — CR19-07)
+      const fileOf = (key: string): string => join(versionsDir, cacheFileName(key))
       try {
-        viewing = await openVersion({ git, s, ref, openIndex: deps.openIndex, indexFile: (key) => join(deps.userDir, 'cache', cacheFileName(key)) })
+        // the one shown stays until the new one is ready: a failed open changes nothing (QA19-06)
+        // without openIndexAt the index is wherever openIndex puts it — by convention cache/<hash>.sqlite
+        const at = deps.openIndexAt
+        if (at) await mkdir(versionsDir, { recursive: true })
+        next = at
+          ? await openVersion({ git, s, ref, openIndex: (key) => at(fileOf(key)), indexFile: fileOf })
+          : await openVersion({ git, s, ref, openIndex: deps.openIndex, indexFile: (key) => join(deps.userDir, 'cache', cacheFileName(key)) })
       } catch (e) {
         return { ok: false as const, message: explainGitError(e) }
+      }
+      if (session !== s) {
+        // the project was closed while the version was being read (CR19-05)
+        await closeVersion(next)
+        return { ok: false as const, message: T.wsMsg.noRepo }
+      }
+      if (viewing?.ref === next.ref) {
+        // the same commit again: the same index file — keep the one that is open
+        next.session.index.close()
+      } else {
+        await endVersion()
+        viewing = next
       }
       log.info(`Showing the old version ${viewing.label} (${viewing.session.index.count()} items, ${viewing.session.lastSync.durationMs} ms)`)
       return { ok: true as const, info: info() }

@@ -15,6 +15,8 @@ export type { Row } from './table/rows'
 const ROW_HEIGHT = 34
 /** First guess for a row with title and text (D-19a); each row is then measured. */
 const FULL_ROW_GUESS = 72
+/** The main column formats at most this much of a text; the editor shows all of it (SEC-19-02). */
+const MAIN_TEXT_CHARS = 3000
 const HEADER_HEIGHT = 37
 const INDENT = 14
 
@@ -337,7 +339,7 @@ export function ItemTable(props: {
               const style = full ? { gridTemplateColumns: template, minHeight: ROW_HEIGHT, transform: `translateY(${v.start - HEADER_HEIGHT}px)` } : { gridTemplateColumns: template, height: ROW_HEIGHT, transform: `translateY(${v.start - HEADER_HEIGHT}px)` }
               if (row?.kind === 'more' || row?.kind === 'loading') {
                 return (
-                  <div key={v.key} role="row" className={`table__row table__row--more${row.kind === 'loading' ? ' table__row--loading' : ''}`} style={style}>
+                  <div key={v.key} role="row" data-index={v.index} ref={full ? virtualizer.measureElement : undefined} className={`table__row table__row--more${row.kind === 'loading' ? ' table__row--loading' : ''}`} style={style}>
                     <span className="table__td table__td--id" />
                     <span className="table__td" style={{ paddingInlineStart: `${8 + row.depth * INDENT + INDENT}px` }}>
                       {row.kind === 'more' ? (
@@ -353,7 +355,7 @@ export function ItemTable(props: {
               }
               if (row?.kind === 'group') {
                 return (
-                  <div key={v.key} role="row" aria-level={1} className="table__row table__row--group" style={style}>
+                  <div key={v.key} role="row" aria-level={1} data-index={v.index} ref={full ? virtualizer.measureElement : undefined} className="table__row table__row--group" style={style}>
                     <span role="gridcell" className="table__td table__td--group">
                       <button type="button" className="table__group-toggle" aria-expanded={row.open} onClick={() => tree.setGroupOpen(row.name, !row.open)} title={row.open ? T.table.groupClose(row.name || T.documents.loose) : T.table.groupOpen(row.name || T.documents.loose)}>
                         <span aria-hidden="true">{row.open ? '▾' : '▸'}</span> <strong>{row.name || T.documents.loose}</strong> <span className="muted-inline">{T.table.groupCount(row.count)}</span>
@@ -473,9 +475,10 @@ export function ItemTable(props: {
  * its whole text below (formatted as in the editor's preview).
  */
 function MainCell({ heading, title, text }: { heading: boolean; title: string; text: string }) {
-  const html = useMemo(() => (heading || !text.trim() ? '' : renderItemText(text)), [heading, text])
+  const html = useMemo(() => (heading || !text.trim() ? '' : renderItemText(text, MAIN_TEXT_CHARS)), [heading, text])
   return (
-    <span className="table__main" dir="auto">
+    // a link in the text does not open from the table: a click there selects the row (CR19-11)
+    <span className="table__main" dir="auto" onClickCapture={(e) => (e.target as HTMLElement).closest('a') && e.preventDefault()}>
       <span className={heading ? 'table__text table__text--heading' : 'table__text table__main-title'}>{title}</span>
       {html && <span className="table__main-text markdown" dangerouslySetInnerHTML={{ __html: html }} />}
     </span>

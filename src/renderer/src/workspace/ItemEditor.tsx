@@ -387,11 +387,7 @@ export function ItemEditor(props: {
       </fieldset>
       )}
 
-      {props.readOnly ? (
-        <footer className="editor__footer">
-          <p className="muted-inline">{T.version.hint}</p>
-        </footer>
-      ) : (
+      {props.readOnly ? null : (
       <footer className="editor__footer">
         {status.kind === 'error' && (
           <p className="notice notice--error" role="alert">

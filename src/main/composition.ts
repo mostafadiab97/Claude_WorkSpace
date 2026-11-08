@@ -66,6 +66,7 @@ export function createServices(paths: Paths, version = '0.0.0'): Services {
             store: repositories,
             git,
             openIndex: (root) => createSqliteIndexCache(join(userDir, 'cache', cacheFileName(root))),
+            openIndexAt: (file) => createSqliteIndexCache(file),
             userDir,
             log: { info: () => {}, warn: (m) => log.warn(`Self-test: ${m}`), error: (m, e) => log.error(`Self-test: ${m}`, e) }
           })
@@ -75,6 +76,8 @@ export function createServices(paths: Paths, version = '0.0.0'): Services {
       git,
       // One index file per repository, outside the repository: %APPDATA%\ReqMan\cache\<hash>.sqlite
       openIndex: (root) => createSqliteIndexCache(join(paths.userDir, 'cache', cacheFileName(root))),
+      // an old version's temporary index (D-19b): in cache\versions\, emptied at start
+      openIndexAt: (file) => createSqliteIndexCache(file),
       userDir: paths.userDir,
       log
     })

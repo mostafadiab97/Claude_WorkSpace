@@ -258,6 +258,7 @@ export function query(v: unknown): ItemQuery {
   if (v.limit !== undefined) q.limit = num(v.limit, 'limit', 0, 10_000)
   if (v.offset !== undefined) q.offset = num(v.offset, 'offset', 0, 10_000_000)
   if (v.brief === true) q.brief = true
+  if (v.textUpTo !== undefined) q.textUpTo = num(v.textUpTo, 'text length', 1, 1_000_000)
   return q
 }
 
@@ -278,6 +279,7 @@ export function exportRequest(v: unknown): ExportItemsRequest {
     delete q.limit
     delete q.offset
     delete q.brief
+    delete q.textUpTo
     r.query = q
   }
   return r

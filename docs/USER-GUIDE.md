@@ -121,8 +121,8 @@ with a message; **Push** shares them.
 | Area | What is there |
 | --- | --- |
 | **Top bar** | Repository name and ✕ (close), branch button ⎇, **Changes**, **Pull** and **Push** (with the number of commits to get or send), ⚙ Settings. Language and colours: **Settings → Appearance** (and on the start screen). |
-| **Toolbar** | Search box, ⊞ expand all, ⊟ collapse all, **Filters**, **Columns**, **Import…**, **Export…**, **+ New item**. |
-| **Table** | One row per item, in document order; ▸ opens a branch of the tree; numbers in the title show how many children. |
+| **Toolbar** | Search box, ⊞ expand all, ⊟ collapse all, **Filters**, **Columns**, **Show text**, **Import…**, **Export…**, **+ New item**. |
+| **Table** | One row per item, in document order; ▸ opens a branch of the tree; numbers in the title show how many children. With **Show text** on (the default), the main column reads like a document: a heading shows its title in bold, any other item its title in bold and its whole text below, and each row is as tall as it needs to be. **Show text** off: one line per item, and the **Text** column shows the start of the text. |
 | **Editor (right)** | Details (title, type, fields, parent, text, links) and **History**; Save, ↑ ↓ (move), + Child…, Delete. The text is shown formatted; click it to edit. Drag the left edge to make the editor wider. |
 | **Status bar** | Number of items, problems found (click to see them, grouped by kind), how many rows are chosen, what the table is filtered by (✕ clears it), the time of your last pull. |
 | **Floating messages** | Results of Git actions under the top bar: green frame = done, red = problem, blue = nothing to do. Success messages close by themselves. A question (e.g. "pull first?") opens under the buttons; Esc closes it. |
@@ -198,9 +198,12 @@ Coming next (theme 1): coverage view, impact chain, traceability matrix with Exc
 
 ### Changes view
 
-**Changes** shows your **uncommitted changes**, one row per requirement (added, changed, moved, deleted), and for the
-selected one exactly what changed: fields before → after, text side by side with the changed words marked, links
-added/removed, and which links became suspect.
+**Changes** shows your **uncommitted changes** like a pull request on GitHub: the changed requirements are listed on
+the left (added, changed, moved, deleted), and on the right every change follows the next in one scrolling list —
+fields before → after, text side by side with the changed words marked, links added/removed, and which links became
+suspect. Click an item on the left to jump to its change; the left list follows as you scroll. The same layout is used
+for every comparison (what a pull brought in, two versions, a branch); there **Export CSV** and **Export Markdown**
+sit at the top next to **Close changes**.
 
 - Take back one part with **↶** (a field, the text, one link), one item with **Discard this item's changes**, chosen
   items with **Discard N chosen**, or everything with **Discard all changes**.
@@ -238,8 +241,9 @@ The **Versions** button in the top bar opens two lists:
   Push button is highlighted meanwhile). Behind the scenes it is a Git tag `baseline/<name>`, so every Git tool sees it.
 - **History** — the commits of the current branch, newest first, 100 at a time; search by a word of the message or by
   a commit ID. For each commit (and each baseline):
-  - **Open read-only** — every item as it was then, with its fields, text, links and outline number. Nothing can be
-    changed there, and your folder stays as it is.
+  - **Open read-only** — the whole table shows that version: tree, filters, search, columns and export work as usual,
+    under a coloured bar *Viewing … (read-only)*. Nothing can be changed and no Git action runs meanwhile; your folder
+    stays as it is. **Back to now** returns to today's items.
   - **Compare with now** — opens Changes with that version against your working folder.
   - **Make baseline…** — a baseline at that older commit.
   - **New branch here…** — a branch that starts at that commit (to fix an older version); switch to it with the

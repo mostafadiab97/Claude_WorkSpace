@@ -67,7 +67,17 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.18.0 (baselines and the history list)
+## Manual test checklist — v0.19.0 (main column, old version in the table, compare layout)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.19.0**, then **⚙ → Self-tests → Run release self-test**. | **All 24 steps passed** (step 22 now: "Baseline: make one, show the old version, push it"). |
+| 2 | Open the sandbox. The new toolbar button **Show text** is on. Scroll quickly through the whole table, open and close a few levels; then switch **Show text** off and on. | On: headings show their bold title only; other items their bold title with the whole text below, rows as tall as needed; scrolling stays smooth. Off: one line per item and the **Text** column is back. |
+| 3 | **Versions → History**: on an older commit choose **Open read-only**. Use the tree, a filter and the search; open an item; then **Back to now**. | The whole table shows that version under a coloured bar *Viewing … (read-only)*; no Git buttons, no New item; the item opens greyed out; **Back to now** brings today's items back. |
+| 4 | **Versions → History → Compare with now** on an older commit (or **Changes → Compare two versions**). Click an item in the left list; scroll the right side; try **Export CSV**. | Changed items on the left, every change one after another on the right using the full width; a click jumps to that change and the left list follows your scrolling; the exports sit at the top next to **Close changes**. |
+| 5 | **⚙ → Privacy and access** in Light, then Dark (**⚙ → Theme**). | The diagram matches the theme, no boxes overlap, the arrows are short. |
+
+## Previous checklist — v0.18.0 (baselines and the history list)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
@@ -76,20 +86,6 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 | 3 | **Versions → History** tab: search a word of an older commit message; on that commit try **Open read-only**, then **Compare with now**. | The old version shows the items as they were (nothing can be changed); Compare opens Changes with that version against now. |
 | 4 | Copy one requirement file by hand into another document folder; switch to that document; **Problems → Give the copy a new ID**. Then make a test document, add an item and **Changes → Discard all**. | The copy shows at the top of its document and gets a new ID; after Discard all the test document is gone from the list. |
 | 5 | Look at the top bars, the privacy page (**⚙ → Privacy and access**, click the diagram) and the icons. | Slimmer bars; the diagram (GitHub on top, Git on the right) opens full size; the top-bar logo has no grey outline, the desktop/taskbar icon has it. |
-
-## Previous checklist — v0.17.2 (document groups, column drag, privacy page, guide pictures)
-
-Owner 8 Nov: all 5 passed (with points → 0.18.0).
-
-First discard your 0.17.0 test changes in the sandbox (**Changes → Discard all**), as agreed.
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.17.2**, then **⚙ → Self-tests → Run release self-test**. Look at the taskbar and the desktop icon. | **All 23 steps passed**. Desktop/Start icon: light tile with a grey outline (Windows may show the old one until a restart — its icon cache). Taskbar: follows Windows (dark taskbar → dark tile). |
-| 2 | In the sandbox make a second document (**New document…**), add an item, then choose **All documents**; click a group row. | One group row per document with its item count; a click folds and unfolds it. |
-| 3 | Drag a column header (e.g. **Status**) onto another; then open **Columns**. | The column moves where the line showed; the menu shows the same order, names left-aligned, Title listed first. |
-| 4 | Turn on a filter. | An orange **Clear filters** button appears next to Filters; it shows all items again. |
-| 5 | **⚙ → Privacy and access**, then **User guide → 2. Ideas you need to know** (and 6, 8). | The privacy page lists what is read, kept, sent and changed; the guide pages show pictures in the window's colours (try Dark too). |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

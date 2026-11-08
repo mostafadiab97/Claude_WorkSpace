@@ -4027,3 +4027,34 @@ html {
 .table--full .table__main {
   flex: 1;
 }
+
+/* UX19-02: the ID on its own line, so a narrow list never cuts it */
+.compare__file-text {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  padding-block: 2px;
+}
+.compare__file-text .compare__file-id {
+  margin-inline-start: 0;
+}
+/* UX19-07: an old version's item reads as text, not as a form — no input frames, no actions */
+.editor__fieldset:disabled .input,
+.editor__fieldset:disabled .select-btn,
+.editor__fieldset:disabled select,
+.editor__fieldset:disabled textarea {
+  background: transparent;
+  border-color: transparent;
+  color: var(--rm-color-text);
+  opacity: 1;
+  cursor: default;
+}
+.editor__fieldset:disabled button {
+  display: none;
+}
+/* UX19-12: the search box keeps room for its hint when the toolbar is full */
+.toolbar__search {
+  flex: 1 1 220px;
+  min-width: 170px;
+  max-width: 320px;
+}

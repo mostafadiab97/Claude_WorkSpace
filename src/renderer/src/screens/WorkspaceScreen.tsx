@@ -586,7 +586,7 @@ export function WorkspaceScreen({
               </button>
             </span>
           ) : (
-            info.itemCount > 1 && showDragTip() && <span className="statusbar__hint">{T.workspace.dragHint}</span>
+            info.itemCount > 1 && !showChanges && !viewing && showDragTip() && <span className="statusbar__hint">{T.workspace.dragHint}</span>
           )}
           {!info.isGitRepository && <span className="statusbar__warn">{T.workspace.notGit}</span>}
           {refreshError && <span className="statusbar__warn">{T.workspace.refreshFailed(refreshError)}</span>}
@@ -684,7 +684,8 @@ export function WorkspaceScreen({
       {historyOpen && (
         <HistoryDialog
           onClose={() => setHistoryOpen(false)}
-          onOpenSnapshot={(ref) => void openVersion(ref)}
+          // unsaved edits are asked about first, as before any other switch (CR19-01)
+          onOpenSnapshot={(ref) => guarded(() => void openVersion(ref))}
           onCompare={(ref) => {
             // an older version against the working folder, in the Changes view (S-09)
             setHistoryOpen(false)

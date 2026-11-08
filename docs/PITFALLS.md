@@ -195,3 +195,17 @@ copy of the *previous* installer. 0.17.2 was installed by hand (the feed answere
 belonged to an older version: the partial download failed its checksum (log: "sha512 checksum mismatch after
 differential download") and electron-updater fell back to the full 121 MB, about 3–4 minutes at 0.5 MB/s. Harmless and
 one-time: the next update is small again. Not a defect to fix; tell the owner if he asks.
+
+## Old version in the table (0.19.0)
+- `openVersion` opens a second index. A test workspace whose `openIndex` ignores its argument (`() => …index.sqlite`)
+  would open the **live** index file again and wipe it: key test indexes by root (`cacheFileName(r)`) or pass
+  `openIndexAt`. With `openIndexAt` the file is in `cache/versions/` (emptied at start); without it, in `cache/`.
+- Every queued write is refused while a version is shown. The refusal must fit every result type the window reads
+  (`state` for GitResult, `reason` for SaveResult) — a bare `{ ok, message }` made `setState(undefined)` (CR19-03).
+- `refresh` runs on every window focus: it must return the shown version's info, or the version bar disappears while
+  reads still come from the old commit (QA19-03).
+
+## Formatting item text in every table row (0.19.0)
+`marked` throws "Maximum call stack size exceeded" on a 2,000-level quote and takes seconds on some long texts
+(100,000 `_`). Since the main column formats every visible row, one such item would break or freeze the table:
+`renderItemText` catches and falls back to plain text, and the table formats at most 3,000 characters (`textUpTo`).

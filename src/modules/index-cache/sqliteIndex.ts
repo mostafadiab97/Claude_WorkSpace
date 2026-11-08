@@ -483,7 +483,7 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       const rows = db
         .prepare(`SELECT i.*, ${COUNTS} FROM items i ${whereSql} ORDER BY ${orderSql} LIMIT ? OFFSET ?`)
         .all(...params, ...orderParams, limit, offset) as unknown as ItemRow[]
-      return { total, items: rows.map((r) => rowToItem(q.brief ? { ...r, text: preview(r.text) } : r, fieldIds)) }
+      return { total, items: rows.map((r) => rowToItem(q.brief ? { ...r, text: preview(r.text) } : q.textUpTo !== undefined && r.text.length > q.textUpTo ? { ...r, text: r.text.slice(0, q.textUpTo) } : r, fieldIds)) }
     },
 
     pathsOf: (id) => (db.prepare('SELECT path FROM items WHERE id = ? ORDER BY path').all(id) as { path: string }[]).map((r) => r.path),

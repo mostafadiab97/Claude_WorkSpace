@@ -4,7 +4,7 @@ CLAUDE.md is read at the start of every session and again after every context co
 history there cost thousands of tokens each time (the owner asked to save tokens, 8 Nov 2026). **This file is the
 status**: update it with every release (the version table, "Next", the owner's last report, test counts).
 
-## Status (v0.18.0, 8 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.19.0, 8 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -33,7 +33,8 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.17.1 the owner's 0.17.0 test 2 — renaming the 10,005-item folder failed on Windows (30 s Git limit, folder not put back, ENAMETOOLONG on Discard all): `git.move` (`git mv`), `commitFiles` path list via stdin, `PATHS_PER_COMMAND`/`BULK_TIMEOUT` in `systemGit.ts`, put-back with retries + re-read in `renameDocument`, discard restores a rename's old path, self-test step 23 | Released (v0.17.1) |
 | 0.17.2 the owner's points on 0.17.0 — document group rows in All documents (`rows.ts` `GROUP_KEY`, `treeRows(…, groups)`), column header drag (`moveColumn`), Columns menu alignment + Title row, orange Clear filters, Settings → Privacy and access (`T.settings.privacy`, lists in texts), guide pictures (`docs/images/guide/*.svg` inlined by `lib/guide.ts`), diagrams re-checked (`tools/diagrams.mjs` with a temporary spec copy), light .ico + theme-following taskbar icon (`windowIcon()`), status moved here from CLAUDE.md | Released (v0.17.2) |
 | 0.18.0 1a structure part 2 — baselines (`workspace/baselines.ts`; annotated tags `baseline/<name>`; waiting/refused lists in the repository's Git config `reqochet.baselinesToPush` / `reqochet.baselinesRefused`, pushed one by one with the next Push), the branch history (`git.history`, search by words or commit ID), read-only snapshot (`SnapshotDialog.tsx`), branch at a commit; **Versions** button (`HistoryDialog.tsx`); copied files: `renewCopyId` + Problems button; Discard removes emptied folders (level by level); updater API fallback (`newerRelease`); incomplete **!** in rows; slimmer bars + compact document bar; privacy diagram (Archify `privacy.json`); outline only on the Windows icon; six helper reports `docs/reviews/agents/0.18.0-*.md` | Released (v0.18.0) |
-| **Next** | 0.19.0: D-19a main column with growing rows, D-19b old version in the table, D-19c compare layout, dark + tighter privacy diagram (decisions.md, 8 Nov); then the later items of the 0.18.0 reviews (PERF-02 snapshot cache, PERF-03 incomplete-IDs call, updater fallback wiring test, SEC-18-09 total size, UX18-09/12/17/19/21, CR18 Lows), the commit graph (`commit-graph` to try), the four open questions of the public release repository (`docs/reviews/2026-11-04-public-release-repo.md`), Arabic diagram labels; then the next theme of the release plan (`docs/design/roadmap.md`) | — |
+| 0.19.0 reading the table and old versions (D-19a/b/c, the owner 8 Nov) — main column with growing rows (`ItemTable.tsx` `MainCell`, measured rows, toolbar **Show text**, `textUpTo` 3,001), an old version in the table (`workspace/versionView.ts`, temporary index in `cache/versions/`, `openVersion`/`closeVersion`, write guard `q` vs `qr`, version bar; `SnapshotDialog`/`getSnapshot` removed), compare layout (`ChangesView.tsx`: left list + continuous changes, at most 150 cards; exports in the header; `ChangesSide` only for committing), privacy diagram dark + tighter; six helper reports `docs/reviews/agents/0.19.0-*.md` | Released (v0.19.0) |
+| **Next** | Owner's 0.19.0 checklist; then the later items of the 0.18.0/0.19.0 reviews (PERF19-02 old version at 50k, PERF19-04 text only for rows on screen, PERF-02/03 of 0.18.0, editor preview limit, toast placement UX19-01, Arabic diagram labels, an Arabic e2e screenshot of the new screens), the commit graph, the four questions of the public release repository (`docs/reviews/2026-11-04-public-release-repo.md`); then the next theme of the release plan (`docs/design/roadmap.md`) | — |
 
 The owner's last report (8 Nov 2026): **0.18.0 all 5 steps passed**, self-test 24/24 (95.5 s), with points — D-19a/b/c (main column, old version in the table, compare layout) and a dark privacy diagram, all planned for 0.19.0.
 Before: 0.17.2 all 5 passed (23/23). Before: 0.13.1 all 4 steps passed, 21/21 (66.8 s). Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
@@ -43,7 +44,7 @@ sandbox, `Claude_SandBox` and `Claude_SandBox_B`, still on his PC) — self-test
 points on the branch panel went into 0.12.1. He has no DOORS/Jama to try ReqIF: exports are validated against the
 official schema in `tests/reqif.test.ts` (`tests/fixtures/reqif-schema/`, xmllint-wasm).
 
-Automated tests: 563 unit tests (with a coverage floor) + 12 e2e scenarios (`history-0.18`, `journey`, `fixes`, `excel`, `branches`,
+Automated tests: 578 unit tests (with a coverage floor) + 12 e2e scenarios (`history-0.18`, `journey`, `fixes`, `excel`, `branches`,
 `language`, `health`, `qa-0.15.0-polish`, `qa-0.16.0-rename`, `fixes-0.16.3`, `fixes-0.16.4`, `structure-0.17`) + the 24-step in-app release self-test + the CI acceptance run on the installed app; what each covers and every speed measurement: `docs/TESTING.md` → "Automated
 checks in detail".
 

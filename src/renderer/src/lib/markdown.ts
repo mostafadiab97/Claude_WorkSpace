@@ -23,9 +23,21 @@ const marked = new Marked({
   }
 })
 
-/** Markdown → safe HTML for the editor's Text preview. */
-export function renderItemText(md: string): string {
-  return marked.parse(md, { async: false })
+/**
+ * Markdown → safe HTML for the editor's Text preview and the table's main column. `maxChars` formats only the start
+ * (the table: some texts take seconds to format — SEC-19-02). A text the formatter cannot handle (a 2,000-level quote
+ * overflows its stack — SEC-19-01) is shown as plain text instead of breaking the window.
+ */
+export function renderItemText(md: string, maxChars?: number): string {
+  const cut = maxChars !== undefined && md.length > maxChars
+  const src = cut ? md.slice(0, maxChars) : md
+  let html: string
+  try {
+    html = marked.parse(src, { async: false })
+  } catch {
+    html = `<p>${escape(src).replace(/\n/g, '<br>')}</p>`
+  }
+  return cut ? `${html}<p class="markdown__more">…</p>` : html
 }
 
 /** The text without Markdown markers, for one-line places such as the table's Text column. */

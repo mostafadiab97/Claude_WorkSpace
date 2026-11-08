@@ -3,12 +3,30 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
-## 0.19.0 — in progress — reading the table, old versions, compare layout
+## 0.19.0 — 8 Nov 2026 — reading the table, old versions, compare layout
 - **Owner (8 Nov 2026), 0.18.0:** all 5 steps passed (self-test 24/24, 95.5 s). The update downloaded the full
   installer once (0.17.2 was installed by hand, so the small download could not be used — see PITFALLS). Points:
   the read-only version should open in the table itself; Compare wastes its right panel while the changes are crammed
   at the bottom; the privacy diagram needs a dark version and less empty space; the table should show the text like
   DOORS (decisions D-19a/b/c in `docs/design/decisions.md`).
+- **Main column (D-19a):** the table reads like a document — a heading shows its title in bold, any other item its
+  title in bold and its whole text below (formatted), each row as tall as needed. Toolbar button **Show text** (saved
+  with the columns): off = one line per item with the **Text** column.
+- **Old version in the table (D-19b):** **Versions → History → Open read-only** switches the whole table — tree,
+  filters, search, columns, export — to that commit, under a coloured bar *Viewing … (read-only)* with **Back to now**.
+  The commit's files are read from Git into a temporary index (deleted on Back to now); every write and Git action is
+  refused meanwhile, the Git bar and New item are hidden and the editor shows the item as text. Replaces the floating
+  read-only window of 0.18.0.
+- **Compare layout (D-19c), every compare screen:** changed items on the left like the files of a GitHub pull request
+  (title with the ID below), every change one after another on the right (more load as you scroll; a click on the left
+  jumps there; the left list follows the scrolling). Export CSV / Markdown at the top next to **Close changes**; the
+  side panel only for committing.
+- **Privacy diagram:** a dark version, tighter, no overlapping boxes; Settings shows the one matching the theme. The
+  diagram script no longer takes pictures of a drawing whose layout check failed.
+- **Helper review (`docs/reviews/agents/0.19.0-*.md`):** the old-version bar no longer disappears when the window gets
+  focus; field checks follow the shown version; a failed open keeps the version shown; Arabic: "النسخ المحفوظة" for
+  Versions, one word each for version / app release / copy; the read-only editor looks read-only; the left list never
+  cuts the ID; the search box keeps its room.
 
 ## 0.18.0 — 8 Nov 2026 — 1a structure part 2: baselines and the history list
 - **Owner (8 Nov 2026), 0.17.2:** all 5 steps passed (self-test 23/23, 73.9 s; installed by hand because GitHub

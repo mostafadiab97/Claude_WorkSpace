@@ -24,6 +24,11 @@ the Arabic reviewer proposes additions or corrections, the builder updates this 
 | baseline | خط أساس (خطوط أساس) | a named, fixed version (Git tag `baseline/<name>`) |
 | history (of commits) | السجلّ | |
 | read-only | للقراءة فقط | |
+| version (of the requirements, a commit or baseline) | نسخة | 0.19.0; the Versions button = النسخ المحفوظة |
+| app version / release (reqochet-dev 0.19.0) | إصدار | |
+| copy (of a file) | نسخة مكررة / نسخة احتياطية | a copied item file / a safety copy before an update |
+| Back to now | العودة إلى الآن | leaves an old version shown in the table |
+| Compare with now | المقارنة بالحالي | |
 | repository | مستودع (مستودعات) | |
 | branch | فرع (فروع) | |
 | commit (noun / verb) | إيداع (إيداعات) | |
@@ -31,7 +36,7 @@ the Arabic reviewer proposes additions or corrections, the builder updates this 
 | pull | سحب | never جلب (that is fetch) — AR-05 |
 | changes | تغييرات | |
 | siblings (items) | العناصر المجاورة | AR-04 |
-| Git tag | علامة إصدار | the field "Tags" stays الوسوم (AR-06) |
+| Git tag | علامة Git | the field "Tags" stays الوسوم (AR-06); 0.19.0: no longer علامة إصدار, because إصدار is an app release |
 | defect (item type) | خلل | AR-12 |
 | import / export | استيراد / تصدير | |
 | reqochet, Git, GitHub, Excel, ReqIF, Markdown | stay in Latin letters | with a right-to-left mark before the sentence when it starts with them |

@@ -20,8 +20,8 @@
       "label": "reqochet releases",
       "sublabel": "new reqochet-dev versions",
       "pos": [
-        240,
-        60
+        200,
+        40
       ],
       "size": [
         220,
@@ -34,8 +34,8 @@
       "label": "Your project's repository",
       "sublabel": "on GitHub — the shared copy",
       "pos": [
-        900,
-        60
+        760,
+        40
       ],
       "size": [
         260,
@@ -48,8 +48,8 @@
       "label": "No tracking server",
       "sublabel": "no statistics, no AI service",
       "pos": [
-        1240,
-        60
+        1080,
+        40
       ],
       "size": [
         220,
@@ -64,7 +64,7 @@
       "sublabel": "Windows 11",
       "pos": [
         20,
-        330
+        250
       ],
       "size": [
         120,
@@ -77,8 +77,8 @@
       "label": "reqochet",
       "sublabel": "the app on your PC",
       "pos": [
-        250,
-        330
+        180,
+        250
       ],
       "size": [
         190,
@@ -99,8 +99,8 @@
       "label": "Project folder",
       "sublabel": "requirements/ — your items",
       "pos": [
-        580,
-        215
+        440,
+        160
       ],
       "size": [
         220,
@@ -114,8 +114,8 @@
       "label": "Git program",
       "sublabel": "git.exe, run without a shell",
       "pos": [
-        920,
-        330
+        770,
+        250
       ],
       "size": [
         220,
@@ -136,8 +136,8 @@
       "label": "Git settings",
       "sublabel": "project .git\\config · your .gitconfig",
       "pos": [
-        1240,
-        250
+        1070,
+        180
       ],
       "size": [
         270,
@@ -164,8 +164,8 @@
       "label": "Credential Manager",
       "sublabel": "your GitHub sign-in",
       "pos": [
-        1240,
-        420
+        1070,
+        330
       ],
       "size": [
         220,
@@ -179,8 +179,8 @@
       "label": "reqochet's folder",
       "sublabel": "%APPDATA%: index, settings, log",
       "pos": [
-        120,
-        600
+        100,
+        410
       ],
       "size": [
         250,
@@ -207,8 +207,8 @@
       "label": "Files you choose",
       "sublabel": "Excel, CSV, ReqIF, exports",
       "pos": [
-        470,
-        600
+        400,
+        410
       ],
       "size": [
         220,

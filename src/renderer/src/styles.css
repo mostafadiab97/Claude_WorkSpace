@@ -3960,3 +3960,82 @@ html {
   display: flex;
   gap: var(--rm-space-sm);
 }
+
+/* a picture with a light and a dark version: show the one matching the theme (privacy diagram, 0.19.0) */
+:root[data-theme='dark'] .only-light,
+:root:not([data-theme='dark']) .only-dark {
+  display: none;
+}
+
+/* D-19c (0.19.0): the changed items on the left, every change one after another on the right */
+.compare__body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(220px, 30%) 1fr;
+  gap: var(--rm-space-md);
+}
+.compare__files {
+  border-inline-end: var(--rm-shape-border-width) solid var(--rm-color-border);
+}
+.compare__file {
+  font: inherit;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 22px auto minmax(0, 1fr) auto;
+  gap: var(--rm-space-xs);
+  align-items: center;
+  min-height: 30px;
+  padding: 0 var(--rm-space-sm);
+  border: 0;
+  border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
+  background: transparent;
+  color: var(--rm-color-text);
+  text-align: start;
+  cursor: pointer;
+  unicode-bidi: plaintext;
+}
+.compare__file:hover {
+  background: var(--rm-color-row-hover);
+}
+.changes-view__item > .compare__file {
+  flex: 1;
+  min-width: 0;
+}
+.compare__diffs {
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-md);
+  padding-bottom: var(--rm-space-lg);
+}
+.compare__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-sm);
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius);
+  padding: var(--rm-space-sm) var(--rm-space-md) var(--rm-space-md);
+  scroll-margin-top: var(--rm-space-xs);
+}
+.compare__card-head {
+  position: sticky;
+  top: calc(-1 * var(--rm-space-sm));
+  z-index: 1;
+  background: var(--rm-color-background);
+  padding-block: var(--rm-space-xs);
+}
+.compare__earlier {
+  align-self: center;
+}
+.compare__sentinel {
+  text-align: center;
+  padding: var(--rm-space-md);
+}
+.compare__file-id {
+  margin-inline-start: var(--rm-space-xs);
+  font-family: var(--rm-font-family-mono);
+  font-size: var(--rm-font-size-small);
+  color: var(--rm-color-text-muted);
+}

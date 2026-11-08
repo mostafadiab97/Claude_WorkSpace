@@ -11,6 +11,7 @@ import { guidePages } from '../lib/guide'
 import { useLanguage } from '../lib/language'
 import { T } from '../../../shared/text'
 import privacyDiagram from '../../../../docs/images/privacy.png'
+import privacyDiagramDark from '../../../../docs/images/privacy-dark.png'
 
 type SettingsPage = 'env' | 'appearance' | 'report' | 'features' | 'tests' | 'privacy'
 type View = { kind: 'settings'; page: SettingsPage } | { kind: 'guide'; page: string; anchor?: string }
@@ -125,7 +126,8 @@ export function SettingsScreen(props: {
               {/* the Archify drawing of the same facts (docs/diagrams/archify/privacy.json — the owner, 8 Nov 2026) */}
               <figure className="privacy__figure">
                 <button type="button" className="privacy__zoom" title={T.settings.privacy.enlarge} aria-label={T.settings.privacy.enlarge} onClick={() => setZoom(true)}>
-                  <img src={privacyDiagram} alt="" />
+                  <img className="only-light" src={privacyDiagram} alt="" />
+                  <img className="only-dark" src={privacyDiagramDark} alt="" />
                 </button>
               </figure>
               {zoom && (
@@ -135,7 +137,8 @@ export function SettingsScreen(props: {
                       ✕
                     </button>
                     <div className="scroll" tabIndex={0} aria-label={T.settings.privacy.diagramShortAlt}>
-                      <img src={privacyDiagram} alt={T.settings.privacy.diagramAlt} />
+                      <img className="only-light" src={privacyDiagram} alt={T.settings.privacy.diagramAlt} />
+                      <img className="only-dark" src={privacyDiagramDark} alt={T.settings.privacy.diagramAlt} />
                     </div>
                   </div>
                 </div>

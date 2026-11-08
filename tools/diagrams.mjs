@@ -169,6 +169,7 @@ for (const name of names) {
 }
 
 // pictures for the Markdown documents: the diagram canvas only, light theme, 2× for sharp text
+const DARK_TOO = new Set(['privacy'])
 const require = createRequire(join(root, 'package.json'))
 const { chromium } = require('playwright-core')
 const browser = await chromium.launch(process.env.ARCHIFY_CHROME ? { executablePath: process.env.ARCHIFY_CHROME } : { channel: 'msedge' }).catch(() => chromium.launch())
@@ -191,6 +192,17 @@ for (const name of names) {
   await svg.asElement().screenshot({ path: join(root, 'docs', 'images', `${name}.png`) })
   console.log(`✓ docs/images/${name}.png`)
   await page.close()
+  // the app shows this one inside Settings, so it also needs a dark picture (the owner, 8 Nov 2026)
+  if (DARK_TOO.has(name)) {
+    const dark = await browser.newPage({ viewport: { width: 1440, height: 1000 }, colorScheme: 'dark', deviceScaleFactor: 2 })
+    await dark.goto(`file://${join(root, 'docs', 'diagrams', `${name}.html`)}`)
+    await dark.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'))
+    await dark.waitForTimeout(1500)
+    const svgDark = await dark.evaluateHandle(() => [...document.querySelectorAll('svg')].sort((a, b) => b.getBoundingClientRect().width * b.getBoundingClientRect().height - a.getBoundingClientRect().width * a.getBoundingClientRect().height)[0])
+    await svgDark.asElement().screenshot({ path: join(root, 'docs', 'images', `${name}-dark.png`) })
+    console.log(`✓ docs/images/${name}-dark.png`)
+    await dark.close()
+  }
 }
 await browser.close()
 writeIndex()

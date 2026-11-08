@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CompareEntry, CompareOptions, GitResult, GitState, LinkChange, RevertPart } from '../../../shared/api'
 import type { Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
@@ -10,6 +10,8 @@ import type { ChangesState } from './screen/useChanges'
 import { T } from '../../../shared/text'
 
 const SHOW = 400
+/** Changes rendered at a time in the continuous list (D-19c). */
+const PAGE = 25
 
 type Kind = CompareEntry['kind']
 const KIND_LABEL: Record<Kind, string> = T.compare.kinds
@@ -113,9 +115,78 @@ export function ChangesView(props: {
     </>
   )
 
-  const sel = c.selected
   const locked = props.blocked ?? (working ? T.changesView.working : null)
   const offerPull = c.preset === 'lastPull' && git?.hasRemote === true && !c.pullAnswered
+
+  // the continuous list shows a window of the changes (10,000 cards at once would freeze the window): more load as the
+  // end scrolls into view, earlier ones with a button; picking an item on the left moves the window to it
+  const [range, setRange] = useState({ from: 0, to: PAGE })
+  const [current, setCurrent] = useState<string | null>(null)
+  const scrollTo = useRef<string | null>(null)
+  const diffsRef = useRef<HTMLDivElement | null>(null)
+  const sentinelRef = useRef<HTMLParagraphElement | null>(null)
+  const listKey = `${data?.from.ref ?? ''}..${data?.to.ref ?? ''}|${visible.length}|${filter}|${[...kinds].join()}`
+  const [shownKey, setShownKey] = useState(listKey)
+  if (shownKey !== listKey) {
+    setShownKey(listKey)
+    setRange({ from: 0, to: PAGE })
+    setCurrent(null)
+  }
+  const goTo = (id: string): void => {
+    const k = visible.findIndex((e) => e.id === id)
+    if (k < 0) return
+    setCurrent(id)
+    c.select(id)
+    if (k < range.from || k >= range.to) setRange({ from: k, to: Math.min(visible.length, k + PAGE) })
+    scrollTo.current = id
+  }
+  // after the render that shows the picked card
+  useEffect(() => {
+    const id = scrollTo.current
+    if (!id) return
+    const el = diffsRef.current?.querySelector(`[data-id="${CSS.escape(id)}"]`)
+    if (el) {
+      el.scrollIntoView({ block: 'start' })
+      scrollTo.current = null
+    }
+  })
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const io = new IntersectionObserver((seen) => {
+      if (seen.some((x) => x.isIntersecting)) setRange((r) => ({ from: r.from, to: Math.min(visible.length, r.to + PAGE) }))
+    }, { root: diffsRef.current, rootMargin: '400px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [range, visible.length])
+  // the left list follows the scrolling: the first card at the top is marked there
+  useEffect(() => {
+    const box = diffsRef.current
+    if (!box) return
+    const onScroll = (): void => {
+      const top = box.getBoundingClientRect().top
+      for (const card of box.querySelectorAll<HTMLElement>('.compare__card')) {
+        if (card.getBoundingClientRect().bottom > top + 8) {
+          setCurrent(card.dataset['id'] ?? null)
+          return
+        }
+      }
+    }
+    box.addEventListener('scroll', onScroll, { passive: true })
+    return () => box.removeEventListener('scroll', onScroll)
+  }, [range, tab])
+
+  const [exported, setExported] = useState<string | null>(null)
+  const exportAs = async (format: 'csv' | 'markdown'): Promise<void> => {
+    if (!data) return
+    try {
+      const r = await window.reqochet.exportCompare(data.from.ref, data.to.ref, format)
+      if (r.ok) setExported(r.path)
+      else if (!r.canceled) c.setError(r.message)
+    } catch (e) {
+      c.setError(errorMessage(e))
+    }
+  }
 
   return (
     <section className="compare changes-view" aria-label={T.changesView.label}>
@@ -145,10 +216,28 @@ export function ChangesView(props: {
           <option value="branch">{T.compare.branch}</option>
         </select>
         <span className="toolbar__spacer" />
+        {!uncommitted && data && (
+          <>
+            <button type="button" className="btn" onClick={() => void exportAs('csv')} title={T.compare.exportCsvTooltip}>
+              {T.compare.exportCsv}
+            </button>
+            <button type="button" className="btn" onClick={() => void exportAs('markdown')} title={T.compare.exportMdTooltip}>
+              {T.compare.exportMd}
+            </button>
+          </>
+        )}
         <button type="button" className="btn" onClick={props.onClose}>
           {T.changesView.close}
         </button>
       </div>
+      {exported && (
+        <p className="compare__pull" role="status">
+          {T.compare.exportedTo(exported)}{' '}
+          <button type="button" className="link-btn" onClick={() => void window.reqochet.showInFolder(exported)}>
+            {T.exportDialog.showInFolder}
+          </button>
+        </p>
+      )}
 
       {c.preset === 'custom' && options && (
         <div className="compare__custom">
@@ -295,152 +384,172 @@ export function ChangesView(props: {
           </div>
 
           {tab === 'items' ? (
-            data.entries.length === 0 ? (
+            data.entries.length === 0 && data.reviewedOnly.length === 0 ? (
               <p className="muted compare__empty">{uncommitted ? T.changesPanel.none : T.compare.noChange}</p>
             ) : (
-              <ul className="compare__list changes-view__list scroll" aria-label={T.compare.changedItems}>
-                {visible.slice(0, shown).map((e) => (
-                  <li key={e.id} className={uncommitted ? 'changes-view__item' : undefined}>
-                    {uncommitted && (
-                      <input
-                        type="checkbox"
-                        className="changes-view__pick"
-                        aria-label={T.changesView.pick(e.id)}
-                        checked={picked.has(e.id)}
-                        onChange={(ev) =>
-                          setPicked((p) => {
-                            const n = new Set(p)
-                            if (ev.target.checked) n.add(e.id)
-                            else n.delete(e.id)
-                            return n
-                          })
-                        }
-                      />
-                    )}
-                    <button
-                      type="button"
-                      className={e.id === sel?.id ? 'compare__row compare__row--selected' : 'compare__row'}
-                      aria-pressed={e.id === sel?.id}
-                      onClick={() => {
-                        c.select(e.id)
-                        setConfirmDiscard(null)
-                      }}
-                    >
-                      <span className={`changes__kind changes__kind--${e.kind === 'modified' ? 'modified' : e.kind === 'moved' ? 'renamed' : e.kind}`} title={KIND_LABEL[e.kind]}>
-                        {KIND_LETTER[e.kind]}
-                      </span>
-                      <span className="compare__number">{numberLabel(e)}</span>
-                      <span className="tree__id">{e.id}</span>
-                      <span className="compare__name" dir="auto">
-                        {e.title || T.common.noTitle}
-                      </span>
-                      <span className="compare__type">{typeName(schema, e.type)}</span>
-                      <span className="compare__summary">{e.summary}</span>
-                      {e.kind === 'modified' && e.contentChanged && e.incoming > 0 && (
-                        <span className="compare__impact" title={T.compare.impactTooltip}>
-                          {T.compare.impact(e.incoming)}
-                        </span>
+              // D-19c (the owner, 8 Nov 2026): the changed items on the left like the files of a GitHub pull request,
+              // every change one after another on the right
+              <div className="compare__body">
+                <ul className="compare__list compare__files scroll" aria-label={T.compare.changedItems}>
+                  {visible.slice(0, shown).map((e) => (
+                    <li key={e.id} className={uncommitted ? 'changes-view__item' : undefined}>
+                      {uncommitted && (
+                        <input
+                          type="checkbox"
+                          className="changes-view__pick"
+                          aria-label={T.changesView.pick(e.id)}
+                          checked={picked.has(e.id)}
+                          onChange={(ev) =>
+                            setPicked((p) => {
+                              const n = new Set(p)
+                              if (ev.target.checked) n.add(e.id)
+                              else n.delete(e.id)
+                              return n
+                            })
+                          }
+                        />
                       )}
-                    </button>
-                  </li>
-                ))}
-                {visible.length > shown && (
-                  <li>
-                    <button type="button" className="link-btn compare__more" onClick={() => setShown((x) => x + SHOW)}>
-                      {T.compare.showMore(visible.length - shown)}
-                    </button>
-                  </li>
-                )}
-                {visible.length === 0 && data.reviewedOnly.length === 0 && <li className="muted compare__empty">{T.compare.noMatch}</li>}
-                {/* items whose file changed only by a link review: one row in the list, like the others (owner, 0.15.1 step 3) */}
-                {data.reviewedOnly.length > 0 && (
-                  <li className="compare__reviewed">
-                    <button type="button" className="compare__row compare__row--reviewed" aria-expanded={showReviewed} onClick={() => setShowReviewed((v) => !v)}>
-                      <span className="changes__kind changes__kind--reviewed" title={T.compare.reviewedTooltip}>
-                        L
-                      </span>
-                      <span className="compare__name">{T.compare.reviewedOnly(data.reviewedOnly.length)}</span>
-                      <span className="compare__summary">
-                        {showReviewed ? '▾' : '▸'} {T.compare.reviewedWhy}
-                      </span>
-                    </button>
-                    {showReviewed && (
-                      <span className="compare__reviewed-ids">
-                        {data.reviewedOnly.slice(0, 500).map((id) => (
-                          <button key={id} type="button" className="link-btn tree__id" title={T.compare.openTooltip} onClick={() => props.onOpenItem(id)}>
-                            {id}
-                          </button>
-                        ))}
-                        {data.reviewedOnly.length > 500 && T.common.ellipsis}
-                      </span>
-                    )}
-                  </li>
-                )}
-              </ul>
-            )
-          ) : (
-            <LinkList schema={schema} links={data.links} filter={filter} onOpen={(id) => c.select(id)} />
-          )}
-          {data.otherFiles.length > 0 && <p className="muted-inline compare__other">{T.compare.otherFiles(data.otherFiles.join(', '))}</p>}
-
-          {tab === 'items' && sel && (
-            <div className="changes-view__detail scroll" aria-label={T.compare.detailLabel(sel.id)} role="region">
-              <header className="changes-view__detail-head">
-                <span className="compare__number">{numberLabel(sel)}</span>
-                <span className="tree__id">{sel.id}</span>
-                <strong className="compare__detail-title">{sel.title || T.common.noTitle}</strong>
-                <span className="muted-inline">
-                  {typeName(schema, sel.type)} · {KIND_LABEL[sel.kind].toLowerCase()}
-                </span>
-                <span className="toolbar__spacer" />
-                {uncommitted &&
-                  (confirmDiscard === sel.id ? (
-                    <span className="actions">
                       <button
                         type="button"
-                        className="btn btn--small btn--danger"
-                        disabled={locked !== null}
-                        onClick={() =>
-                          void act(async () => {
-                            await props.onDiscard(sel)
-                            setConfirmDiscard(null)
-                          })
-                        }
+                        className={e.id === current ? 'compare__file compare__row--selected' : 'compare__file'}
+                        aria-current={e.id === current ? 'true' : undefined}
+                        title={e.summary}
+                        onClick={() => goTo(e.id)}
                       >
-                        {sel.kind === 'added' ? T.changesPanel.deleteIt : T.changesPanel.undoChange}
+                        <span className={`changes__kind changes__kind--${e.kind === 'modified' ? 'modified' : e.kind === 'moved' ? 'renamed' : e.kind}`} title={KIND_LABEL[e.kind]}>
+                          {KIND_LETTER[e.kind]}
+                        </span>
+                        <span className="compare__number">{numberLabel(e)}</span>
+                        <span className="compare__name" dir="auto">
+                          {e.title || T.common.noTitle}
+                          <span className="compare__file-id">{e.id}</span>
+                        </span>
+                        {e.kind === 'modified' && e.contentChanged && e.incoming > 0 && (
+                          <span className="compare__impact" title={T.compare.impactTooltip}>
+                            {T.compare.impact(e.incoming)}
+                          </span>
+                        )}
                       </button>
-                      <button type="button" className="btn btn--small" onClick={() => setConfirmDiscard(null)}>
-                        {T.changesPanel.keep}
-                      </button>
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      className="btn btn--small"
-                      disabled={locked !== null}
-                      title={locked ?? (sel.kind === 'added' ? T.changesPanel.discardNewTooltip : T.changesPanel.discardTooltip)}
-                      onClick={() => setConfirmDiscard(sel.id)}
-                    >
-                      {T.changesView.discardItem}
-                    </button>
+                    </li>
                   ))}
-                {sel.kind !== 'deleted' && (
-                  <button type="button" className="btn btn--small" onClick={() => props.onOpenItem(sel.id)}>
-                    {T.compare.openItem}
-                  </button>
-                )}
-              </header>
-              {sel.kind === 'modified' && sel.contentChanged && sel.incoming > 0 && <p className="notice notice--warn">{T.compare.suspectWarning(sel.incoming)}</p>}
-              <ChangeView
-                key={`${data.from.ref}..${data.to.ref}:${sel.id}`}
-                schema={schema}
-                diff={sel.diff}
-                unreadable={sel.unreadable}
-                revertLocked={locked}
-                {...(uncommitted ? { onRevert: (part: RevertPart) => void act(() => props.onRevert(sel.id, part)) } : {})}
-              />
-            </div>
+                  {visible.length > shown && (
+                    <li>
+                      <button type="button" className="link-btn compare__more" onClick={() => setShown((x) => x + SHOW)}>
+                        {T.compare.showMore(visible.length - shown)}
+                      </button>
+                    </li>
+                  )}
+                  {visible.length === 0 && data.reviewedOnly.length === 0 && <li className="muted compare__empty">{T.compare.noMatch}</li>}
+                  {/* items whose file changed only by a link review: one row in the list, like the others (owner, 0.15.1 step 3) */}
+                  {data.reviewedOnly.length > 0 && (
+                    <li className="compare__reviewed">
+                      <button type="button" className="compare__file compare__row--reviewed" aria-expanded={showReviewed} onClick={() => setShowReviewed((v) => !v)}>
+                        <span className="changes__kind changes__kind--reviewed" title={T.compare.reviewedTooltip}>
+                          L
+                        </span>
+                        <span className="compare__name">
+                          {showReviewed ? '▾' : '▸'} {T.compare.reviewedOnly(data.reviewedOnly.length)}
+                        </span>
+                      </button>
+                      {showReviewed && (
+                        <span className="compare__reviewed-ids">
+                          <span className="muted-inline">{T.compare.reviewedWhy}</span>
+                          {data.reviewedOnly.slice(0, 500).map((id) => (
+                            <button key={id} type="button" className="link-btn tree__id" title={T.compare.openTooltip} onClick={() => props.onOpenItem(id)}>
+                              {id}
+                            </button>
+                          ))}
+                          {data.reviewedOnly.length > 500 && T.common.ellipsis}
+                        </span>
+                      )}
+                    </li>
+                  )}
+                </ul>
+
+                <div className="compare__diffs scroll" ref={diffsRef} role="region" aria-label={T.compare.allChanges}>
+                  {range.from > 0 && (
+                    <button type="button" className="btn btn--small compare__earlier" onClick={() => setRange((r) => ({ from: Math.max(0, r.from - PAGE), to: r.to }))}>
+                      {T.compare.showEarlier(range.from)}
+                    </button>
+                  )}
+                  {visible.slice(range.from, range.to).map((e) => (
+                    <section key={e.id} className="compare__card" data-id={e.id} aria-label={T.compare.detailLabel(e.id)}>
+                      <header className="changes-view__detail-head compare__card-head">
+                        <span className={`changes__kind changes__kind--${e.kind === 'modified' ? 'modified' : e.kind === 'moved' ? 'renamed' : e.kind}`} title={KIND_LABEL[e.kind]}>
+                          {KIND_LETTER[e.kind]}
+                        </span>
+                        <span className="compare__number">{numberLabel(e)}</span>
+                        <span className="tree__id">{e.id}</span>
+                        <strong className="compare__detail-title" dir="auto">
+                          {e.title || T.common.noTitle}
+                        </strong>
+                        <span className="muted-inline">
+                          {typeName(schema, e.type)} · {e.summary}
+                        </span>
+                        <span className="toolbar__spacer" />
+                        {uncommitted &&
+                          (confirmDiscard === e.id ? (
+                            <span className="actions">
+                              <button
+                                type="button"
+                                className="btn btn--small btn--danger"
+                                disabled={locked !== null}
+                                onClick={() =>
+                                  void act(async () => {
+                                    await props.onDiscard(e)
+                                    setConfirmDiscard(null)
+                                  })
+                                }
+                              >
+                                {e.kind === 'added' ? T.changesPanel.deleteIt : T.changesPanel.undoChange}
+                              </button>
+                              <button type="button" className="btn btn--small" onClick={() => setConfirmDiscard(null)}>
+                                {T.changesPanel.keep}
+                              </button>
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn btn--small"
+                              disabled={locked !== null}
+                              title={locked ?? (e.kind === 'added' ? T.changesPanel.discardNewTooltip : T.changesPanel.discardTooltip)}
+                              onClick={() => setConfirmDiscard(e.id)}
+                            >
+                              {T.changesView.discardItem}
+                            </button>
+                          ))}
+                        {e.kind !== 'deleted' && (
+                          <button type="button" className="btn btn--small" onClick={() => props.onOpenItem(e.id)}>
+                            {T.compare.openItem}
+                          </button>
+                        )}
+                      </header>
+                      {e.kind === 'modified' && e.contentChanged && e.incoming > 0 && <p className="notice notice--warn">{T.compare.suspectWarning(e.incoming)}</p>}
+                      <ChangeView
+                        key={`${data.from.ref}..${data.to.ref}:${e.id}`}
+                        schema={schema}
+                        diff={e.diff}
+                        unreadable={e.unreadable}
+                        revertLocked={locked}
+                        {...(uncommitted ? { onRevert: (part: RevertPart) => void act(() => props.onRevert(e.id, part)) } : {})}
+                      />
+                    </section>
+                  ))}
+                  {range.to < visible.length && (
+                    <p className="muted-inline compare__sentinel" ref={sentinelRef}>
+                      {T.compare.loadingMore}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )
+          ) : (
+            <LinkList schema={schema} links={data.links} filter={filter} onOpen={(id) => {
+              setTab('items')
+              goTo(id)
+            }} />
           )}
+          {data.otherFiles.length > 0 && <p className="muted-inline compare__other">{T.compare.otherFiles(data.otherFiles.join(', '))}</p>}
         </>
       )}
     </section>
@@ -471,63 +580,20 @@ function LinkList({ schema, links, filter, onOpen }: { schema: Schema; links: Li
 }
 
 /**
- * The side panel next to the Changes view (O-06): commit tools for uncommitted changes; for other comparisons
- * what is compared and the export.
+ * The commit panel next to the Changes view when it shows uncommitted changes (O-06). Comparing other versions has
+ * no side panel since 0.19.0 (D-19c): what is compared and the export sit at the top of the Changes view.
  */
-export function ChangesSide(props: { changes: ChangesState; git: GitState; blocked: string | null; onResult: (r: GitResult) => void; onPush: () => void }) {
-  const { changes: c } = props
-  const [exported, setExported] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const exportAs = async (format: 'csv' | 'markdown'): Promise<void> => {
-    if (!c.data) return
-    try {
-      const r = await window.reqochet.exportCompare(c.data.from.ref, c.data.to.ref, format)
-      if (r.ok) setExported(r.path)
-      else if (!r.canceled) setError(r.message)
-    } catch (e) {
-      setError(errorMessage(e))
-    }
-  }
-  const uncommitted = c.preset === 'uncommitted'
+export function ChangesSide(props: { git: GitState; blocked: string | null; onResult: (r: GitResult) => void; onPush: () => void }) {
   return (
-    <aside className="editor changes scroll" aria-label={uncommitted ? T.changesView.commitLabel : T.changesView.compareLabel}>
+    <aside className="editor changes scroll" aria-label={T.changesView.commitLabel}>
       <header className="editor__header">
         <div>
-          <h2 className="editor__heading">{uncommitted ? T.changesView.commitTitle : T.changesView.compareTitle}</h2>
-          <div className="editor__type">{uncommitted ? T.changesPanel.subtitle : T.changesView.compareSubtitle}</div>
+          <h2 className="editor__heading">{T.changesView.commitTitle}</h2>
+          <div className="editor__type">{T.changesPanel.subtitle}</div>
         </div>
       </header>
       <div className="editor__body">
-        {uncommitted && props.git.available ? (
-          <CommitTools state={props.git} blockedReason={props.blocked} onResult={props.onResult} onPush={props.onPush} />
-        ) : (
-          <>
-            {c.data && (
-              <p className="changes-side__range">
-                <span className="field__label">{T.compare.from}</span> {c.data.from.label}
-                <br />
-                <span className="field__label">{T.compare.to}</span> {c.data.to.label}
-              </p>
-            )}
-            <div className="actions">
-              <button type="button" className="btn" disabled={!c.data} onClick={() => void exportAs('csv')} title={T.compare.exportCsvTooltip}>
-                {T.compare.exportCsv}
-              </button>
-              <button type="button" className="btn" disabled={!c.data} onClick={() => void exportAs('markdown')} title={T.compare.exportMdTooltip}>
-                {T.compare.exportMd}
-              </button>
-            </div>
-            {exported && (
-              <p className="compare__pull" role="status">
-                {T.compare.exportedTo(exported)}{' '}
-                <button type="button" className="link-btn" onClick={() => void window.reqochet.showInFolder(exported)}>
-                  {T.exportDialog.showInFolder}
-                </button>
-              </p>
-            )}
-            {error && <p className="notice notice--error" role="alert">{error}</p>}
-          </>
-        )}
+        <CommitTools state={props.git} blockedReason={props.blocked} onResult={props.onResult} onPush={props.onPush} />
       </div>
     </aside>
   )

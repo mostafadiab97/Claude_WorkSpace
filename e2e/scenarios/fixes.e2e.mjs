@@ -108,7 +108,7 @@ await scenario('E2E fixes', async (ctx) => {
   await win.evaluate(() => window.dispatchEvent(new Event('focus')))
   await win.getByRole('button', { name: /^Changes/ }).click()
   const view = win.getByRole('region', { name: 'Changes', exact: true })
-  await view.locator('.compare__row', { hasText: editedId }).waitFor()
+  await view.locator('.compare__file', { hasText: editedId }).waitFor()
   check((await view.getByLabel('Show', { exact: true }).inputValue()) === 'uncommitted', 'opens on uncommitted changes')
   check(!(await win.locator('.table__row[data-id]').first().isVisible()), 'the view takes the place of the table')
   const side = await win.getByRole('complementary', { name: 'Commit' }).boundingBox()
@@ -142,7 +142,7 @@ await scenario('E2E fixes', async (ctx) => {
   await win.waitForTimeout(500)
   check(movedIds.every((id) => readFileSync(join(items, `${id}.md`), 'utf8').includes(`parent: ${sectionId}`)), 'dragging one chosen row moves both under the new parent')
   await win.getByRole('button', { name: /^Changes/ }).click()
-  await view.locator('.compare__row').first().waitFor()
+  await view.locator('.compare__file').first().waitFor()
   await view.getByRole('group', { name: 'Discard several' }).getByLabel('All').check()
   await view.getByRole('button', { name: 'Discard 2 chosen' }).click()
   await view.getByRole('button', { name: 'Discard 2 chosen' }).click() // the confirmation

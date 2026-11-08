@@ -544,7 +544,7 @@ export function WorkspaceScreen({
         </footer>
       </section>
 
-      {showChanges && git.state?.available && <ChangesSide changes={changes} git={git.state} blocked={git.blocked} onResult={git.onPanelResult} onPush={push} />}
+      {showChanges && git.state?.available && changes.preset === 'uncommitted' && <ChangesSide git={git.state} blocked={git.blocked} onResult={git.onPanelResult} onPush={push} />}
 
       {target && (
         <div className={showChanges && git.state?.available ? 'is-hidden' : 'workspace__side'}>

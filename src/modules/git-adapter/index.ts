@@ -54,6 +54,16 @@ export interface ReflogEntry {
   date: string
 }
 
+export interface BaselineTag {
+  name: string
+  /** The commit the baseline marks. */
+  commit: string
+  /** Who made it and when (the tag's tagger). */
+  by: string
+  date: string
+  note: string
+}
+
 export interface GitRef {
   /** e.g. "main", "origin/main", "v1.0" */
   name: string
@@ -132,6 +142,21 @@ export interface GitAdapter {
   commitInfo(root: string, ref: string): Promise<CommitInfo | null>
   /** Recent commits that changed something under `pathspec`, newest first. */
   commits(root: string, pathspec: string, limit?: number): Promise<CommitInfo[]>
+  /** Baselines: annotated tags refs/tags/baseline/<name>, newest first (S-06). */
+  baselines(root: string): Promise<BaselineTag[]>
+  /** True when `name` can be a baseline name (git check-ref-format). */
+  checkBaselineName(root: string, name: string): Promise<boolean>
+  /** Creates the annotated tag baseline/<name> at `commit`, with `note` as its message. */
+  createBaseline(root: string, name: string, commit: string, note: string): Promise<void>
+  /** Sends these baselines to `remote`. */
+  pushBaselines(root: string, remote: string, names: string[]): Promise<void>
+  /** Baselines made here that are not sent yet (kept in the repository's own Git config). */
+  pendingBaselines(root: string): Promise<string[]>
+  setPendingBaselines(root: string, names: string[]): Promise<void>
+  /** The commits of the current branch that touch `pathspec`, newest first, a page at a time; `search` = a commit ID or words of the message (S-09). */
+  history(root: string, pathspec: string, opts: { limit: number; skip: number; search?: string }): Promise<{ commits: CommitInfo[]; more: boolean }>
+  /** A new branch at `commit` (the current branch stays). */
+  createBranchAt(root: string, name: string, commit: string): Promise<void>
   /** Where HEAD has been on this PC (commits, pulls, merges, resets), newest first. */
   reflog(root: string, limit?: number): Promise<ReflogEntry[]>
   /** Branches, remote branches and tags. */

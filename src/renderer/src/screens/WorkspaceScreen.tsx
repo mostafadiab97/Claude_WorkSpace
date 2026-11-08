@@ -5,6 +5,8 @@ import { errorMessage } from '../lib/hooks'
 import { ItemEditor, type EditorTarget } from '../workspace/ItemEditor'
 import { FieldsDialog, useColumnPrefs } from '../workspace/FieldsPanel'
 import { TypesDialog } from '../workspace/TypesPanel'
+import { HistoryDialog } from '../workspace/HistoryDialog'
+import { SnapshotDialog } from '../workspace/SnapshotDialog'
 import { ChangesSide, ChangesView } from '../workspace/ChangesView'
 import { GitBar } from '../workspace/GitPanels'
 import { MergeDialog } from '../workspace/MergeDialog'
@@ -21,6 +23,7 @@ import { useFilters } from '../workspace/screen/useFilters'
 import { middleEllipsis, showDragTip } from '../lib/statusbar'
 import { workspaceHasKeyboard } from '../lib/shortcuts'
 import { useChanges } from '../workspace/screen/useChanges'
+import { WORKING } from '../workspace/compareRange'
 import { useGit } from '../workspace/screen/useGit'
 
 /**
@@ -138,6 +141,9 @@ export function WorkspaceScreen({
     setDataVersion((v) => v + 1)
     onInfo(await window.reqochet.refreshRepository())
   }, [onInfo])
+  // History and baselines (1a part 2): the dialog, and an older version opened read-only
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [snapshotRef, setSnapshotRef] = useState<string | null>(null)
   const git = useGit({ dataVersion, dirty, afterChange })
   const changes = useChanges(showChanges, dataVersion)
 
@@ -305,6 +311,7 @@ export function WorkspaceScreen({
           blockedReason={git.blocked}
           changesOpen={showChanges}
           onToggleChanges={toggleChanges}
+          onOpenHistory={() => setHistoryOpen(true)}
           onRun={(a) => (a === 'push' ? push() : void git.run(a))}
           notice={git.notice}
           onDismiss={git.dismiss}
@@ -619,6 +626,22 @@ export function WorkspaceScreen({
         />
       )}
 
+      {historyOpen && (
+        <HistoryDialog
+          onClose={() => setHistoryOpen(false)}
+          onOpenSnapshot={(ref) => setSnapshotRef(ref)}
+          onCompare={(ref) => {
+            // an older version against the working folder, in the Changes view (S-09)
+            setHistoryOpen(false)
+            git.reload()
+            changes.choose('custom')
+            changes.setCustom({ from: ref, to: WORKING })
+            setShowChanges(true)
+          }}
+          onResult={(r) => git.onPanelResult(r)}
+        />
+      )}
+      {snapshotRef && <SnapshotDialog gitRef={snapshotRef} schema={schema} onClose={() => setSnapshotRef(null)} />}
       {editTypes && (
         <TypesDialog
           info={info}

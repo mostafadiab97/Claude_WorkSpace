@@ -1,0 +1,88 @@
+// 0.18.0 — baselines and the history list (S-06 a, S-08 a, S-09 a) in the real window, plus the owner's points on
+// 0.17.2: a file copied into another document appears and gets a new ID; incomplete items are marked in the table.
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { gitIn, gitRepo, launch, root, scenario } from '../harness.mjs'
+
+const item = (id, title, order) => `---\nid: ${id}\ntype: system-requirement\ntitle: ${title}\norder: ${order}\n---\ntext\n`
+
+await scenario('E2E history-0.18', async (ctx) => {
+  const { repo, remote } = gitRepo('hist018')
+  const req = join(repo, 'requirements')
+  mkdirSync(join(req, '.reqochet'), { recursive: true })
+  mkdirSync(join(req, 'System'), { recursive: true })
+  copyFileSync(join(root, 'config', 'default-schema.yaml'), join(req, '.reqochet', 'schema.yaml'))
+  writeFileSync(join(req, 'System', 'REQ-AAAAAAA.md'), item('REQ-AAAAAAA', 'Heat the room', 'a0'))
+  gitIn(repo, 'add', '-A')
+  gitIn(repo, 'commit', '-q', '-m', 'first version')
+  gitIn(repo, 'push', '-q', '-u', 'origin', 'main')
+  writeFileSync(join(req, 'System', 'REQ-AAAAAAA.md'), item('REQ-AAAAAAA', 'Heat the room fast', 'a0'))
+  gitIn(repo, 'commit', '-q', '-am', 'second version')
+
+  const t = (ctx.t = await launch({ openPath: repo }))
+  const { win, check } = t
+  await win.getByRole('button', { name: 'Open repository…' }).click()
+  await win.locator('.table__row', { hasText: 'Heat the room fast' }).waitFor()
+
+  console.log('S-06 — a baseline, sent with the next Push')
+  await win.getByRole('button', { name: 'History', exact: true }).click()
+  const dlg = win.getByRole('dialog', { name: 'History and baselines' })
+  await dlg.getByRole('button', { name: 'New baseline…' }).click()
+  await dlg.getByLabel('Name').fill('SRS-1.0')
+  await dlg.getByLabel('Note').fill('for the design review')
+  await dlg.getByRole('button', { name: 'Make baseline' }).click()
+  await dlg.locator('.history__row', { hasText: 'SRS-1.0' }).waitFor()
+  check((await dlg.locator('.history__row', { hasText: 'SRS-1.0' }).getByText('not pushed yet').count()) === 1, 'the new baseline is listed as not pushed yet')
+  check((await dlg.getByText('for the design review').count()) === 1, 'the note is shown')
+  await t.shot('history-0.18-baselines')
+
+  console.log('S-09 — the history list: read-only, compare with now, a branch at an old commit')
+  await dlg.getByRole('tab', { name: 'History' }).click()
+  await dlg.locator('.history__row', { hasText: 'first version' }).waitFor()
+  const rows = await dlg.locator('.history__row .history__message').allTextContents()
+  check(rows[0] === 'second version' && rows[1] === 'first version', `newest first (${rows.join(' | ')})`)
+  await dlg.getByRole('searchbox').fill('FIRST')
+  await dlg.getByRole('searchbox').press('Enter')
+  await win.waitForTimeout(400)
+  check((await dlg.locator('.history__row').count()) === 1, 'the search finds the commit by a word of its message')
+  const old = dlg.locator('.history__row', { hasText: 'first version' })
+  await old.getByRole('button', { name: 'Open read-only' }).click()
+  const snap = win.locator('.snapshot')
+  await snap.locator('.snapshot__row', { hasText: 'Heat the room' }).click()
+  await snap.locator('.snapshot__item h3').waitFor()
+  check(((await snap.locator('.snapshot__item h3').textContent()) ?? '').includes('Heat the room') && !((await snap.locator('.snapshot__item h3').textContent()) ?? '').includes('fast'), 'the old version shows the old title')
+  await t.shot('history-0.18-snapshot')
+  await snap.getByRole('button', { name: 'Close' }).click()
+  await old.getByRole('button', { name: 'New branch here…' }).click()
+  await dlg.getByLabel('Name of the new branch').fill('fix-first')
+  await dlg.getByRole('button', { name: 'Create branch' }).click()
+  await dlg.getByText(/Branch fix-first created/).waitFor()
+  check(gitIn(repo, 'rev-parse', 'fix-first').trim() === gitIn(repo, 'rev-parse', 'HEAD~1').trim() && gitIn(repo, 'rev-parse', '--abbrev-ref', 'HEAD').trim() === 'main', 'the branch starts at the old commit and the window stays on main')
+  await old.getByRole('button', { name: 'Compare with now' }).click()
+  await win.getByText('What changed').waitFor()
+  check((await win.getByText('Heat the room fast').count()) > 0, 'Compare with now lists the changed requirement')
+
+  console.log('S-06 — Push sends the baseline')
+  await win.getByRole('button', { name: /^Push/ }).click()
+  const offer = win.getByRole('button', { name: 'Push without pulling' })
+  if (await offer.waitFor({ timeout: 5000 }).then(() => true, () => false)) await offer.click()
+  await win.locator('.gitbar__notice', { hasText: 'sent too' }).waitFor({ timeout: 60_000 })
+  check(gitIn(remote, 'tag', '-l').includes('baseline/SRS-1.0'), 'the baseline is on the remote')
+
+  console.log('owner on 0.17.2 — a file copied into another document')
+  await win.getByRole('button', { name: /^Changes/ }).click() // back to the table
+  mkdirSync(join(req, 'Software'), { recursive: true })
+  writeFileSync(join(req, 'Software', '.gitkeep'), '')
+  writeFileSync(join(req, 'Software', 'REQ-AAAAAAA.md'), readFileSync(join(req, 'System', 'REQ-AAAAAAA.md'), 'utf8'))
+  await win.evaluate(() => window.dispatchEvent(new Event('focus')))
+  await win.locator('#document-picker option', { hasText: 'Software (1)' }).waitFor({ state: 'attached', timeout: 15_000 })
+  await win.locator('#document-picker').selectOption({ label: 'Software (1)' })
+  await win.locator('.table__row', { hasText: 'Heat the room fast' }).waitFor()
+  check(true, 'the copy appears in its new document')
+  await win.locator('.statusbar').getByRole('button', { name: /problem/ }).click()
+  await win.getByRole('button', { name: 'Give the copy a new ID' }).click()
+  const renewed = win.locator('.table__row[data-id]:not([data-id="REQ-AAAAAAA"])', { hasText: 'Heat the room fast' })
+  await renewed.waitFor({ timeout: 15_000 }).catch(() => {})
+  const copyId = await renewed.first().getAttribute('data-id').catch(() => null)
+  check(copyId !== null && copyId !== 'REQ-AAAAAAA', `the copy has a new ID (${copyId})`)
+})

@@ -227,6 +227,25 @@ frame and a ✓), or choose **Write it myself**. Nothing changes until you click
 - **Changes → Show:** uncommitted changes; *what the last pull brought in*; *what a branch would bring in*; or any two
   versions. Each can be exported as CSV or Markdown for a review record.
 
+### Baselines and the branch history
+
+The **History** button in the top bar opens two lists:
+
+- **Baselines** — a baseline is a named, fixed version of the requirements, for a review, a delivery or a release
+  (e.g. `SRS-1.0`). **New baseline…** asks for a name and a note and marks the latest commit of your branch. If you
+  have uncommitted changes, it asks first: **Commit first, then make the baseline** (they become part of it) or
+  **Baseline without them**. A new baseline shows *not pushed yet* and goes to GitHub with your next **Push** (the
+  Push button is highlighted meanwhile). Behind the scenes it is a Git tag `baseline/<name>`, so every Git tool sees it.
+- **History** — the commits of the current branch, newest first, 100 at a time; search by a word of the message or by
+  a commit ID. For each commit (and each baseline):
+  - **Open read-only** — every item as it was then, with its fields, text, links and outline number. Nothing can be
+    changed there, and your folder stays as it is.
+  - **Compare with now** — opens Changes with that version against your working folder.
+  - **Make baseline…** — a baseline at that older commit.
+  - **New branch here…** — a branch that starts at that commit (to fix an older version); switch to it with the
+    branch button when you want to work there. reqochet never moves your folder to an old commit, so no work can
+    end up outside a branch.
+
 ---
 
 ## 10. Branches

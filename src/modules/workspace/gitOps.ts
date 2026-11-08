@@ -84,11 +84,12 @@ export function createGitOps(deps: GitOpsDeps) {
 
   // Things that rarely change are asked once and kept until `invalidate()` (window focus, identity saved):
   // starting a Git process is slow on Windows, and the Git bar refreshes after every change (review P-02).
-  let cached: { root: string; info: Awaited<ReturnType<GitAdapter['getGitInfo']>>; remotes: string[]; identity: GitState['identity'] } | null = null
+  // the baselines waiting for a push (S-06) are one of these facts: they change only through reqochet's own actions
+  let cached: { root: string; info: Awaited<ReturnType<GitAdapter['getGitInfo']>>; remotes: string[]; identity: GitState['identity']; pendingBaselines: number } | null = null
   async function slowFacts(s: GitSession): Promise<NonNullable<typeof cached>> {
     if (cached && cached.root === s.repo.root) return cached
-    const [info, remotes, identity] = await Promise.all([git.getGitInfo(), git.remotes(s.repo.root), git.identity(s.repo.root)])
-    cached = { root: s.repo.root, info, remotes, identity }
+    const [info, remotes, identity, pending] = await Promise.all([git.getGitInfo(), git.remotes(s.repo.root), git.identity(s.repo.root), git.pendingBaselines(s.repo.root).catch(() => [] as string[])])
+    cached = { root: s.repo.root, info, remotes, identity, pendingBaselines: pending.length }
     return cached
   }
   const invalidate = (): void => {
@@ -162,7 +163,8 @@ export function createGitOps(deps: GitOpsDeps) {
       mergeInProgress: merging || st.changes.some((c) => c.kind === 'conflict'),
       // only commits that never left this PC: with an upstream they are "ahead"; without one, none was pushed
       canUndoCommit: hasParent && !lastIsPull && !merging && (st.upstream ? st.ahead > 0 : remotes.length === 0 || !(await branchOnRemote(s, st.branch, remotes))),
-      lastCommitMessage: lastMessage
+      lastCommitMessage: lastMessage,
+      pendingBaselines: (await slowFacts(s)).pendingBaselines
     }
   }
 
@@ -233,15 +235,23 @@ export function createGitOps(deps: GitOpsDeps) {
       if (!st.hasRemote) return fail(s, T.gitMsg.noRemotePush)
       if (!(await git.head(s.repo.root))) return fail(s, T.gitMsg.nothingToPushYet, undefined, true)
       const { remote } = await remoteBranch(s, st)
-      if (st.upstream && st.ahead === 0) {
+      // baselines made here go with the push (S-06), also when no commit is waiting
+      const baselines = await git.pendingBaselines(s.repo.root).catch(() => [] as string[])
+      if (st.upstream && st.ahead === 0 && baselines.length === 0) {
         return done(s, st.changes.length > 0 ? T.gitMsg.notCommittedYet : T.gitMsg.remoteHasAll)
       }
       // the owner's rule (28 Oct 2026): keep order keys short, but only in groups this user changed
       const tidied = st.upstream && deps.tidyBeforePush ? await deps.tidyBeforePush(s, st.upstream).catch((e: unknown) => (log.warn(`Tidying positions skipped: ${String(e)}`), 0)) : 0
       try {
-        await git.push(s.repo.root, st.upstream || !remote || !st.branch ? undefined : { remote, branch: st.branch })
+        if (!st.upstream || st.ahead > 0) await git.push(s.repo.root, st.upstream || !remote || !st.branch ? undefined : { remote, branch: st.branch })
+        if (baselines.length > 0 && remote) {
+          await git.pushBaselines(s.repo.root, remote, baselines)
+          await git.setPendingBaselines(s.repo.root, [])
+          invalidate()
+          log.info(`Pushed baselines: ${baselines.join(', ')}`)
+        }
         log.info(`Pushed ${st.branch ?? ''}${tidied ? ` (positions of ${tidied} items tidied)` : ''}`)
-        return done(s, T.gitMsg.pushed(st.changes.length))
+        return done(s, `${T.gitMsg.pushed(st.changes.length)}${baselines.length > 0 ? T.gitMsg.baselinesPushed(baselines.length) : ''}`)
       } catch (e) {
         log.warn(`Push failed: ${String(e)}`)
         return fail(s, explainGitError(e))

@@ -4,6 +4,10 @@
 // with the rules that need the whole repository (no parent loops, conflict-safe saving).
 // Implementation: workspace.ts (facade + queue) over small services — see the file list there.
 import type {
+  Baseline,
+  CreateBaselineRequest,
+  HistoryPage,
+  Snapshot,
   FieldCheck,
   CompareOptions,
   CompareResult,
@@ -98,6 +102,12 @@ export interface WorkspaceService {
   finishPull(plan: MergePlan, answers: MergeAnswers): Promise<GitResult>
   listBranches(): Promise<BranchInfo[]>
   createBranch(name: string): Promise<GitResult>
+  /** Baselines (S-06) and the history list (S-09). */
+  listBaselines(): Promise<Baseline[]>
+  createBaseline(req: CreateBaselineRequest): Promise<GitResult & { baseline?: Baseline; needs?: 'uncommitted-decision' }>
+  getHistory(req: { search?: string; skip?: number }): Promise<HistoryPage>
+  getSnapshot(ref: string): Promise<Snapshot>
+  createBranchAt(name: string, commit: string): Promise<GitResult>
   switchBranch(name: string, changes: 'take' | 'discard'): Promise<GitResult>
   branchRange(name: string): Promise<{ from: string; to: string } | null>
   deleteBranch(name: string, force: boolean): Promise<GitResult>

@@ -6,11 +6,12 @@ import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { access, mkdir, rename, rmdir, writeFile } from 'node:fs/promises'
 import { basename, join, relative, resolve } from 'node:path'
-import type { FolderCheck, GitResult, ImportSettings, MergeAnswers, MergePlan, ImportSource, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
+import type { CreateBaselineRequest, FolderCheck, GitResult, ImportSettings, MergeAnswers, MergePlan, ImportSource, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
 import type { GitAdapter } from '../git-adapter'
 import type { IndexCache } from '../index-cache'
 import type { Logger } from '../logger'
 import { isDocumentName, type RepositoryStore } from '../repository-store'
+import { createBaselineOps } from './baselines'
 import { createCompare } from './compare'
 import { queryAll, syncInfo, withRequired, type Session, type WorkspaceContext } from './context'
 import { createExportOps } from './exporting'
@@ -368,6 +369,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   })
 
   const merging = createMerging({ git, log, resync: () => ctx.resyncAll(need()), ops: gitOps })
+  const baselineOps = createBaselineOps({ git, log, gitOps })
 
   function closeSession(): void {
     session?.watch?.close()
@@ -506,6 +508,11 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     finishPull: q((plan: MergePlan, answers: MergeAnswers) => paused((s) => merging.finishPull(s, plan, answers))),
     listBranches: () => merging.listBranches(need()),
     createBranch: q((name: string) => merging.createBranch(need(), name)),
+    listBaselines: () => baselineOps.list(need()),
+    createBaseline: q((req: CreateBaselineRequest) => baselineOps.create(need(), req)),
+    getHistory: (req: { search?: string; skip?: number }) => baselineOps.history(need(), req),
+    getSnapshot: (ref: string) => baselineOps.snapshot(need(), ref),
+    createBranchAt: q((name: string, commit: string) => baselineOps.branchAt(need(), name, commit)),
     switchBranch: q((name: string, changes: 'take' | 'discard') => paused((s) => merging.switchBranch(s, name, changes))),
     branchRange: (name: string) => merging.branchRange(need(), name),
     deleteBranch: q((name: string, force: boolean) => merging.deleteBranch(need(), name, force)),

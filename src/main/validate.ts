@@ -1,7 +1,7 @@
 // Input checks for every call that arrives from the window (review X-01). The window is ReqMan's own code, so
 // this is about robustness: a wrong value is refused with a clear message instead of reaching a file write.
 // Each function either returns a clean value of the expected type or throws.
-import type { ExportItemsRequest, FieldDef, ImportSettings, ImportTarget, Item, ItemQuery, ItemTypeDef, LinkTypeDef, Link, LinkDecision, MergeAnswers, MergeChoice, MergePlan, RevertPart, SortKey } from '../shared/api'
+import type { CreateBaselineRequest, ExportItemsRequest, FieldDef, ImportSettings, ImportTarget, Item, ItemQuery, ItemTypeDef, LinkTypeDef, Link, LinkDecision, MergeAnswers, MergeChoice, MergePlan, RevertPart, SortKey } from '../shared/api'
 
 const MAX = 4096
 /** Order keys (see modules/items/orderKey.ts): base-62 digits, at most 200 characters. */
@@ -281,4 +281,34 @@ export function exportRequest(v: unknown): ExportItemsRequest {
     r.query = q
   }
   return r
+}
+
+// ---- baselines and history (0.18.0) ----
+const COMMIT_REF = /^[0-9a-f]{7,40}$/i
+/** A commit ID (7–40 hex digits): never a branch or option name. */
+export function commitRef(v: unknown): string {
+  const s = str(v, 'commit', 40)
+  if (!COMMIT_REF.test(s)) throw new Error('Invalid commit ID')
+  return s
+}
+export function baselineRequest(v: unknown): CreateBaselineRequest {
+  if (typeof v !== 'object' || v === null) throw new Error('Invalid baseline request')
+  const r = v as Record<string, unknown>
+  const name = str(r.name, 'baseline name', 100)
+  if (/[\s~^:?*[\\]/.test(name) || [...name].some((c) => c.charCodeAt(0) < 32) || name.startsWith('-')) throw new Error('Invalid baseline name')
+  return {
+    name,
+    note: r.note === undefined ? '' : text(r.note, 'note', 2000),
+    ...(r.commit !== undefined ? { commit: commitRef(r.commit) } : {}),
+    ...(r.uncommitted !== undefined ? { uncommitted: oneOf(r.uncommitted, ['commit', 'without'] as const, 'uncommitted') } : {}),
+    ...(r.commitMessage !== undefined ? { commitMessage: text(r.commitMessage, 'commit message', 2000) } : {})
+  }
+}
+export function historyRequest(v: unknown): { search?: string; skip?: number } {
+  if (typeof v !== 'object' || v === null) return {}
+  const r = v as Record<string, unknown>
+  return {
+    ...(r.search !== undefined && r.search !== '' ? { search: text(r.search, 'search', 200) } : {}),
+    ...(r.skip !== undefined ? { skip: num(r.skip, 'skip', 0, 10_000_000) } : {})
+  }
 }

@@ -324,6 +324,20 @@ export async function runReleaseSelfTest(deps: SelfTestDeps): Promise<ReleaseSel
       expect((await W().gitState()).lastCommitMessage?.includes('.reqochet'), 'The rename was not committed.')
     })
 
+    await step('Baseline: make one, read the old version, push it', async () => {
+      // 0.18.0 (S-06, S-09): a baseline is the tag baseline/<name>, sent with the next Push
+      const r = await W().createBaseline({ name: 'practice-1.0', note: 'self-test', uncommitted: 'commit', commitMessage: 'Practice: before the baseline' })
+      expect(r.ok, r.message)
+      const list = await W().listBaselines()
+      const b = list.find((x) => x.name === 'practice-1.0')
+      expect(b?.pending === true, 'The new baseline is not listed as waiting for the push.')
+      const snap = await W().getSnapshot(b?.commit ?? '')
+      expect(snap.items.length > 0, 'The baseline version could not be read.')
+      const p = await W().push()
+      expect(p.ok, p.message)
+      expect((await git(remote, ['tag', '-l'])).includes('baseline/practice-1.0'), 'The fake GitHub did not receive the baseline.')
+    })
+
     await step('Rename a document with a space in its name (one commit, history kept)', async () => {
       // 0.17.1: the owner's rename of "items" failed on Windows (Git stopped by a time limit, folder not put back)
       const before = (await W().refresh()).documents.find((d) => d.name === FIRST_DOCUMENT)?.itemCount ?? 0

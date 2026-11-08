@@ -29,6 +29,8 @@ export function GitBar(props: {
   blockedReason: string | null
   changesOpen: boolean
   onToggleChanges: () => void
+  /** History and baselines (1a part 2). */
+  onOpenHistory: () => void
   onRun: (action: 'pull' | 'push') => void
   notice: GitNotice | null
   onDismiss: () => void
@@ -141,6 +143,12 @@ export function GitBar(props: {
           }} title={T.git.changesTooltip}>
           {T.git.changes(changedItems, otherFiles)}
         </button>
+        <button type="button" className="btn" disabled={busy !== null} title={T.baselines.buttonTooltip} onClick={() => {
+            onDismiss()
+            props.onOpenHistory()
+          }}>
+          {T.baselines.button}
+        </button>
         {state.hasRemote && (
           <>
         <button
@@ -154,9 +162,9 @@ export function GitBar(props: {
         </button>
         <button
           type="button"
-          className={state.ahead > 0 ? 'btn btn--accent' : 'btn'}
+          className={state.ahead > 0 || (state.pendingBaselines ?? 0) > 0 ? 'btn btn--accent' : 'btn'}
           disabled={busy !== null || !state.hasRemote}
-          title={T.git.pushTooltip}
+          title={(state.pendingBaselines ?? 0) > 0 ? `${T.git.pushTooltip}\n${T.baselines.pendingTooltip}` : T.git.pushTooltip}
           onClick={() => props.onRun('push')}
         >
           {T.git.push(state.ahead)}

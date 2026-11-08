@@ -15,13 +15,56 @@
   },
   "components": [
     {
+      "id": "ghrel",
+      "type": "cloud",
+      "label": "reqochet releases",
+      "sublabel": "new reqochet-dev versions",
+      "pos": [
+        240,
+        60
+      ],
+      "size": [
+        220,
+        64
+      ]
+    },
+    {
+      "id": "ghrepo",
+      "type": "cloud",
+      "label": "Your project's repository",
+      "sublabel": "on GitHub — the shared copy",
+      "pos": [
+        900,
+        60
+      ],
+      "size": [
+        260,
+        64
+      ]
+    },
+    {
+      "id": "none",
+      "type": "external",
+      "label": "No tracking server",
+      "sublabel": "no statistics, no AI service",
+      "pos": [
+        1240,
+        60
+      ],
+      "size": [
+        220,
+        64
+      ],
+      "tag": "does not exist"
+    },
+    {
       "id": "you",
       "type": "external",
       "label": "You",
       "sublabel": "Windows 11",
       "pos": [
-        40,
-        300
+        20,
+        330
       ],
       "size": [
         120,
@@ -34,11 +77,11 @@
       "label": "reqochet",
       "sublabel": "the app on your PC",
       "pos": [
-        240,
-        300
+        250,
+        330
       ],
       "size": [
-        170,
+        190,
         64
       ],
       "sources": [
@@ -56,56 +99,14 @@
       "label": "Project folder",
       "sublabel": "requirements/ — your items",
       "pos": [
-        520,
-        100
+        580,
+        215
       ],
       "size": [
-        190,
+        220,
         64
       ],
       "tag": "yours"
-    },
-    {
-      "id": "appdata",
-      "type": "database",
-      "label": "reqochet's folder",
-      "sublabel": "%APPDATA%: index, settings, log",
-      "pos": [
-        520,
-        220
-      ],
-      "size": [
-        230,
-        64
-      ],
-      "sources": [
-        {
-          "path": "src/main/composition.ts",
-          "line": 77,
-          "end_line": 77,
-          "label": "index location"
-        },
-        {
-          "path": "src/modules/logger/report.ts",
-          "line": 8,
-          "end_line": 8,
-          "label": "sign-ins masked"
-        }
-      ]
-    },
-    {
-      "id": "chosen",
-      "type": "database",
-      "label": "Files you choose",
-      "sublabel": "Excel, CSV, ReqIF, exports",
-      "pos": [
-        520,
-        340
-      ],
-      "size": [
-        200,
-        64
-      ]
     },
     {
       "id": "git",
@@ -113,11 +114,11 @@
       "label": "Git program",
       "sublabel": "git.exe, run without a shell",
       "pos": [
-        520,
-        480
+        920,
+        330
       ],
       "size": [
-        200,
+        220,
         64
       ],
       "sources": [
@@ -135,11 +136,11 @@
       "label": "Git settings",
       "sublabel": "project .git\\config · your .gitconfig",
       "pos": [
-        820,
-        400
+        1240,
+        250
       ],
       "size": [
-        250,
+        270,
         64
       ],
       "sources": [
@@ -163,60 +164,67 @@
       "label": "Credential Manager",
       "sublabel": "your GitHub sign-in",
       "pos": [
-        820,
-        560
-      ],
-      "size": [
-        200,
-        64
-      ],
-      "tag": "reqochet never sees it"
-    },
-    {
-      "id": "ghrel",
-      "type": "cloud",
-      "label": "GitHub releases",
-      "sublabel": "new reqochet-dev versions",
-      "pos": [
-        1160,
-        220
-      ],
-      "size": [
-        210,
-        64
-      ]
-    },
-    {
-      "id": "ghrepo",
-      "type": "cloud",
-      "label": "GitHub repository",
-      "sublabel": "the shared copy of your project",
-      "pos": [
-        1160,
-        480
-      ],
-      "size": [
-        230,
-        64
-      ]
-    },
-    {
-      "id": "none",
-      "type": "external",
-      "label": "No tracking server",
-      "sublabel": "no statistics, no AI service",
-      "pos": [
-        1160,
-        60
+        1240,
+        420
       ],
       "size": [
         220,
         64
       ],
-      "tag": "does not exist"
+      "tag": "reqochet never sees it"
+    },
+    {
+      "id": "appdata",
+      "type": "database",
+      "label": "reqochet's folder",
+      "sublabel": "%APPDATA%: index, settings, log",
+      "pos": [
+        120,
+        600
+      ],
+      "size": [
+        250,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/main/composition.ts",
+          "line": 77,
+          "end_line": 77,
+          "label": "index location"
+        },
+        {
+          "path": "src/modules/logger/report.ts",
+          "line": 8,
+          "end_line": 8,
+          "label": "sign-ins masked"
+        }
+      ]
+    },
+    {
+      "id": "chosen",
+      "type": "database",
+      "label": "Files you choose",
+      "sublabel": "Excel, CSV, ReqIF, exports",
+      "pos": [
+        470,
+        600
+      ],
+      "size": [
+        220,
+        64
+      ]
     }
   ],
   "boundaries": [
+    {
+      "kind": "region",
+      "label": "GitHub",
+      "wraps": [
+        "ghrel",
+        "ghrepo"
+      ]
+    },
     {
       "kind": "region",
       "label": "Your PC",
@@ -224,18 +232,16 @@
         "app",
         "project",
         "appdata",
-        "chosen",
-        "git",
-        "gitcfg",
-        "gcm"
+        "chosen"
       ]
     },
     {
       "kind": "region",
-      "label": "GitHub",
+      "label": "Git on your PC",
       "wraps": [
-        "ghrel",
-        "ghrepo"
+        "git",
+        "gitcfg",
+        "gcm"
       ]
     }
   ],
@@ -248,28 +254,36 @@
       "variant": "emphasis"
     },
     {
+      "id": "update",
+      "from": "app",
+      "to": "ghrel",
+      "label": "update check + download",
+      "variant": "dashed"
+    },
+    {
       "id": "items",
       "from": "app",
       "to": "project",
       "label": "reads and writes items"
     },
     {
-      "id": "keep",
-      "from": "app",
-      "to": "appdata",
-      "label": "index, settings, log"
-    },
-    {
-      "id": "pick",
-      "from": "app",
-      "to": "chosen",
-      "label": "only what you pick"
-    },
-    {
       "id": "rungit",
       "from": "app",
       "to": "git",
       "label": "runs Git"
+    },
+    {
+      "id": "gitfiles",
+      "from": "git",
+      "to": "project",
+      "label": "commits it · brings in pulled changes"
+    },
+    {
+      "id": "pushpull",
+      "from": "git",
+      "to": "ghrepo",
+      "label": "pull / push your requirements",
+      "variant": "emphasis"
     },
     {
       "id": "cfg",
@@ -285,18 +299,16 @@
       "variant": "security"
     },
     {
-      "id": "pushpull",
-      "from": "git",
-      "to": "ghrepo",
-      "label": "pull / push",
-      "variant": "emphasis"
+      "id": "keep",
+      "from": "app",
+      "to": "appdata",
+      "label": "index, settings, log"
     },
     {
-      "id": "update",
+      "id": "pick",
       "from": "app",
-      "to": "ghrel",
-      "label": "update check + download",
-      "variant": "dashed"
+      "to": "chosen",
+      "label": "only what you pick"
     }
   ],
   "cards": [

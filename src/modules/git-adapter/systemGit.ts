@@ -428,6 +428,67 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
       }
     },
 
+    // ---- baselines (S-06): annotated tags refs/tags/baseline/<name>; history list (S-09) ----
+    async baselines(root) {
+      const out = await git(root, ['for-each-ref', '--sort=-creatordate', '--format=%(refname:strip=3)%1f%(*objectname)%1f%(objectname)%1f%(taggername)%1f%(creatordate:iso-strict)%1f%(contents)%1e', 'refs/tags/baseline/'])
+      return out
+        .split('\x1e')
+        .map((r) => r.replace(/^\r?\n/, ''))
+        .filter((r) => r.trim() !== '')
+        .map((r) => {
+          const [name, peeled, oid, by, date, ...note] = r.split('\x1f')
+          return { name: name ?? '', commit: peeled || oid || '', by: by ?? '', date: date ?? '', note: note.join('\x1f').trim() }
+        })
+    },
+    async checkBaselineName(root, name) {
+      try {
+        await git(root, ['check-ref-format', `refs/tags/baseline/${name}`])
+        return true
+      } catch {
+        return false
+      }
+    },
+    async createBaseline(root, name, commit, note) {
+      await git(root, ['tag', '-a', '-m', note || name, `baseline/${name}`, commit])
+    },
+    async pushBaselines(root, remote, names) {
+      if (names.length > 0) await git(root, ['push', '--quiet', remote, ...names.map((n) => `refs/tags/baseline/${n}:refs/tags/baseline/${n}`)], NETWORK_TIMEOUT)
+    },
+    async pendingBaselines(root) {
+      try {
+        return (await git(root, ['config', '--local', '--get-all', 'reqochet.baselineToPush'])).split(/\r?\n/).filter(Boolean)
+      } catch {
+        return [] // none recorded
+      }
+    },
+    async setPendingBaselines(root, names) {
+      await git(root, ['config', '--local', '--unset-all', 'reqochet.baselineToPush']).catch(() => undefined)
+      for (const n of names) await git(root, ['config', '--local', '--add', 'reqochet.baselineToPush', n])
+    },
+    async history(root, pathspec, opts) {
+      const args = ['log', `-n${opts.limit + 1}`, `--skip=${opts.skip}`, '--format=%x1e%H%x1f%an%x1f%ae%x1f%aI%x1f%s']
+      const search = opts.search?.trim()
+      // a commit ID (or its start) finds that commit; other words are searched in the commit messages
+      if (search && /^[0-9a-f]{4,40}$/i.test(search)) {
+        const hash = await git(root, ['rev-parse', '--verify', '--quiet', `${search}^{commit}`]).then((h) => h.trim(), () => '')
+        if (hash) args.push(hash, '-n1')
+        else args.push('--regexp-ignore-case', '--fixed-strings', `--grep=${search}`)
+      } else if (search) args.push('--regexp-ignore-case', '--fixed-strings', `--grep=${search}`)
+      args.push('--', pathspec)
+      const list = (await git(root, args))
+        .split('\x1e')
+        .map((c) => c.trim())
+        .filter(Boolean)
+        .map((c) => {
+          const [hash, author, email, date, ...subject] = c.split('\x1f')
+          return { hash: hash ?? '', author: author ?? '', email: email ?? '', date: date ?? '', message: subject.join('\x1f'), path: pathspec }
+        })
+      return { commits: list.slice(0, opts.limit), more: list.length > opts.limit }
+    },
+    async createBranchAt(root, name, commit) {
+      await git(root, ['branch', '--', name, commit])
+    },
+
     async commits(root, pathspec, limit = 100): Promise<CommitInfo[]> {
       const out = await git(root, ['log', `-n${limit}`, '--format=%x1e%H%x1f%an%x1f%ae%x1f%aI%x1f%s', '--', pathspec])
       return out

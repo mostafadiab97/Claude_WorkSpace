@@ -1,5 +1,5 @@
 // The ONE contract between the UI (renderer) and the core (main process).
-import type { FieldDef, Item, ItemDiff, ItemIssue, ItemQuery, ItemTypeDef, LinkTypeDef, QueryResult, Schema, SchemaProblem } from './domain'
+import type { FieldDef, FieldValue, Item, ItemDiff, ItemIssue, ItemQuery, ItemTypeDef, LinkTypeDef, QueryResult, Schema, SchemaProblem } from './domain'
 export type * from './domain'
 
 // The UI can do exactly what is listed here and nothing else. Adding a capability = a method in ReqochetApi,
@@ -121,6 +121,52 @@ export interface ItemChange {
   label: string
 }
 
+/** A baseline: a named, fixed version of the requirements (Git tag baseline/<name>, S-06). */
+export interface Baseline {
+  name: string
+  commit: string
+  by: string
+  /** ISO 8601 */
+  date: string
+  note: string
+  /** Made on this PC and not sent yet: it goes with the next Push. */
+  pending: boolean
+}
+
+/** One page of the current branch's history (S-09), newest first. */
+export interface HistoryPage {
+  commits: { hash: string; author: string; email: string; date: string; message: string }[]
+  more: boolean
+}
+
+export interface CreateBaselineRequest {
+  name: string
+  note: string
+  /** A commit from the history; omitted = the latest commit of the current branch. */
+  commit?: string
+  /** With uncommitted changes and no `commit`: commit them first (with this message), or make the baseline without them. */
+  uncommitted?: 'commit' | 'without'
+  commitMessage?: string
+}
+
+/** The items of an older version, to look at only (S-09: "open read-only"). */
+export interface Snapshot {
+  ref: string
+  label: string
+  items: SnapshotItem[]
+}
+export interface SnapshotItem {
+  id: string
+  title: string
+  type: string
+  document: string
+  number?: string
+  parent?: string
+  text: string
+  fields: Record<string, FieldValue>
+  links: { type: string; target: string }[]
+}
+
 export interface GitState {
   /** False when the folder is not a Git repository or Git is missing; `reason` says which. */
   available: boolean
@@ -143,6 +189,8 @@ export interface GitState {
   lastCommitMessage: string | null
   /** The repository is in the middle of a merge with conflicts (started outside ReqMan). */
   mergeInProgress: boolean
+  /** Baselines made on this PC that go to the remote with the next Push (S-06). */
+  pendingBaselines?: number
 }
 
 export type GitResult =
@@ -572,6 +620,16 @@ export interface ReqochetApi {
   listBranches(): Promise<BranchInfo[]>
   /** Creates a branch from the current one and switches to it; uncommitted changes come along. */
   createBranch(name: string): Promise<GitResult>
+  /** Baselines of this repository, newest first (S-06). */
+  listBaselines(): Promise<Baseline[]>
+  /** Makes a baseline; `needs: 'uncommitted-decision'` = ask "commit first / without them" and call again. */
+  createBaseline(req: CreateBaselineRequest): Promise<GitResult & { baseline?: Baseline; needs?: 'uncommitted-decision' }>
+  /** The current branch's commits, newest first, 100 at a time (S-09). */
+  getHistory(req: { search?: string; skip?: number }): Promise<HistoryPage>
+  /** The items of an older version, to look at only. */
+  getSnapshot(ref: string): Promise<Snapshot>
+  /** A new branch starting at an older commit (the current branch stays). */
+  createBranchAt(name: string, commit: string): Promise<GitResult>
   /**
    * Switches branch. Uncommitted changes: `take` brings them along (refused, with the blocking items, when the
    * other branch has a different version of those files); `discard` throws them away first.
@@ -720,6 +778,11 @@ export const Channels = {
   finishPull: 'git:finishPull',
   listBranches: 'git:listBranches',
   createBranch: 'git:createBranch',
+  listBaselines: 'git:listBaselines',
+  createBaseline: 'git:createBaseline',
+  getHistory: 'git:getHistory',
+  getSnapshot: 'git:getSnapshot',
+  createBranchAt: 'git:createBranchAt',
   switchBranch: 'git:switchBranch',
   branchRange: 'git:branchRange',
   deleteBranch: 'git:deleteBranch',

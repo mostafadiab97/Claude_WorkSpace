@@ -181,3 +181,10 @@ tries a parent before a shorter-named child is gone, and the parent then stays.
 ## e2e and per-row button names (0.18.0)
 A UI/UX fix gave each history row's buttons their own accessible name ("Open 1a2b3c4 read-only"), so `getByRole('button',
 { name: 'Open read-only' })` no longer matched. When a label gains the row's name, match with a regular expression.
+
+## A correlated subquery per row in the tree query (0.18.0)
+"Top level = no parent, or the parent is in another document" written as `NOT EXISTS (SELECT … p.id = i.parent AND
+<document of p> = <document of i>)` ran once per item: 492 ms at 50,000 items on the Windows runner (limit 300), so
+the release run failed although the build run passed (it runs only 10k). The index now stores `doc` and `top` per
+item (`top` recomputed for changed items and their children), with indexes on `(doc, top, ord)` and `(top, ord)`.
+Run `npm run test:perf:all` before a release whenever a query's WHERE changes.

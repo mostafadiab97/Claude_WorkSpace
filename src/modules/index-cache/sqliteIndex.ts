@@ -10,14 +10,13 @@ import { T } from '../../shared/text'
 import type { IndexCache, IndexedItem, ItemQuery, LinkRef, QueryResult, SyncStats } from './index'
 
 /** Bump when the table layout changes; an old cache file is then rebuilt automatically. */
-const FORMAT_VERSION = '4'
+const FORMAT_VERSION = '5'
 
 /** A text used inside LIKE: its wildcards and the escape character itself stand for themselves (QA-WP-02). */
 /** White space as JavaScript's trim() sees it (the common kinds): the filter and the editor agree on "empty" (CR-20). */
 const BLANKS = "' ' || char(9) || char(10) || char(11) || char(12) || char(13) || char(160) || char(8239) || char(12288) || char(65279)"
 
 /** The document of an item row: the first folder of its path ('' = a loose file). */
-const DOC_OF = (t: string): string => `(CASE WHEN instr(${t}.path, '/') > 0 THEN substr(${t}.path, 1, instr(${t}.path, '/') - 1) ELSE '' END)`
 
 const likeEscape = (s: string): string => s.replace(/[\\%_]/g, (c) => `\\${c}`)
 
@@ -35,11 +34,15 @@ CREATE TABLE IF NOT EXISTS items (
   text TEXT NOT NULL,
   fields_json TEXT NOT NULL,
   links_json TEXT NOT NULL,
-  fp TEXT NOT NULL
+  fp TEXT NOT NULL,
+  doc TEXT NOT NULL DEFAULT '',
+  top INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS items_id ON items(id);
 CREATE INDEX IF NOT EXISTS items_type ON items(type);
 CREATE INDEX IF NOT EXISTS items_parent ON items(parent, ord);
+CREATE INDEX IF NOT EXISTS items_doc_top ON items(doc, top, ord);
+CREATE INDEX IF NOT EXISTS items_top ON items(top, ord);
 CREATE TABLE IF NOT EXISTS item_fields (rid INTEGER NOT NULL, field TEXT NOT NULL, value TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS item_fields_lookup ON item_fields(field, value, rid);
 CREATE INDEX IF NOT EXISTS item_fields_rid ON item_fields(rid);
@@ -171,9 +174,16 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     allFiles: db.prepare('SELECT path, mtime, size FROM files'),
     upsertFile: db.prepare('INSERT INTO files(path, mtime, size, ok) VALUES(?, ?, ?, ?) ON CONFLICT(path) DO UPDATE SET mtime = excluded.mtime, size = excluded.size, ok = excluded.ok'),
     deleteFile: db.prepare('DELETE FROM files WHERE path = ?'),
-    ridByPath: db.prepare('SELECT rid FROM items WHERE path = ?'),
+    ridByPath: db.prepare('SELECT rid, id FROM items WHERE path = ?'),
     insertItem: db.prepare(
-      'INSERT INTO items(path, id, type, title, parent, ord, text, fields_json, links_json, fp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      'INSERT INTO items(path, id, type, title, parent, ord, text, fields_json, links_json, fp, doc) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ),
+    // "top level" of its document: no parent, or the parent is in another document or missing (0.18.0). Stored, so
+    // the tree's first level is an index lookup; recomputed for the changed items and their children only
+    setTopAll: db.prepare(`UPDATE items SET top = (parent IS NULL OR NOT EXISTS (SELECT 1 FROM items p WHERE p.id = items.parent AND p.doc = items.doc))`),
+    setTopFor: db.prepare(
+      `UPDATE items SET top = (parent IS NULL OR NOT EXISTS (SELECT 1 FROM items p WHERE p.id = items.parent AND p.doc = items.doc))
+       WHERE id IN (SELECT value FROM json_each(?1)) OR parent IN (SELECT value FROM json_each(?1))`
     ),
     deleteItem: db.prepare('DELETE FROM items WHERE rid = ?'),
     insertField: db.prepare('INSERT INTO item_fields(rid, field, value) VALUES(?, ?, ?)'),
@@ -205,9 +215,12 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     }
   }
 
+  /** IDs whose top-level flag (theirs and their children's) must be recomputed before the transaction ends. */
+  const touched = new Set<string>()
   const removePath = (path: string): void => {
-    const row = stmt.ridByPath.get(path) as { rid: number } | undefined
+    const row = stmt.ridByPath.get(path) as { rid: number; id: string } | undefined
     if (row) {
+      touched.add(row.id)
       stmt.deleteFields.run(row.rid)
       stmt.deleteLinks.run(row.rid)
       stmt.deleteFts.run(row.rid)
@@ -226,8 +239,10 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       item.text,
       JSON.stringify(item.fields),
       JSON.stringify(item.links),
-      contentFingerprint(item)
+      contentFingerprint(item),
+      path.includes('/') ? path.slice(0, path.indexOf('/')) : ''
     )
+    touched.add(item.id)
     const rid = Number(res.lastInsertRowid)
     for (const [field, value] of Object.entries(item.fields)) {
       for (const v of Array.isArray(value) ? value : [value]) stmt.insertField.run(rid, field, String(v))
@@ -270,6 +285,7 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     let updated = 0
     let unreadable = 0
     transaction(() => {
+      touched.clear()
       if (full) clearAll()
       for (const p of removed) {
         removePath(p)
@@ -284,6 +300,9 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         if (existed) updated++
         else added++
       }
+      if (full) stmt.setTopAll.run()
+      else if (touched.size > 0) stmt.setTopFor.run(JSON.stringify([...touched]))
+      touched.clear()
       stmt.setMeta.run('signature', sig)
     })
     return {
@@ -308,6 +327,7 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         return { path, s, r: s ? await repo.readItemFile(path, { allKeysAsFields: true }) : null }
       })
       transaction(() => {
+        touched.clear()
         for (const { path, s, r } of results) {
           removePath(path)
           if (!s || !r) {
@@ -317,6 +337,8 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
           if (r.ok) insertItem(path, r.item)
           stmt.upsertFile.run(path, s.mtimeMs, s.size, r.ok ? 1 : 0)
         }
+        if (touched.size > 0) stmt.setTopFor.run(JSON.stringify([...touched]))
+        touched.clear()
       })
     },
 
@@ -400,23 +422,20 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       }
       if (q.document !== undefined) {
         // the document is the first folder of the path (S-10); '' = files directly in requirements/
-        if (q.document === '') where.push("instr(i.path, '/') = 0")
-        else {
-          // a range on the path index: "<doc>/" ≤ path < "<doc>0" ('0' is the byte after '/') — PERF-03
-          where.push("i.path >= ? || '/' AND i.path < ? || '0'")
-          params.push(q.document, q.document)
-        }
+        // stored at indexing time (0.18.0; before: a range on the path)
+        where.push('i.doc = ?')
+        params.push(q.document)
       }
       if (q.parent !== undefined) {
-        if (q.parent === null && q.document !== undefined) {
-          // one document's top level: also items whose parent is in another document or missing — a file copied by
-          // hand from another document keeps its old parent and would otherwise have no place (the owner on 0.17.2)
-          where.push(`(i.parent IS NULL OR NOT EXISTS (SELECT 1 FROM items p WHERE p.id = i.parent AND ${DOC_OF('p')} = ${DOC_OF('i')}))`)
-        } else if (q.parent === null) where.push('i.parent IS NULL')
-        else {
+        if (q.parent === null) {
+          // the top level: also items whose parent is in another document or missing — a file copied by hand from
+          // another document keeps its old parent and would otherwise have no place (the owner on 0.17.2); stored as
+          // `top` so this is an index lookup (the subquery cost 0.5 s at 50,000 items on CI)
+          where.push('i.top = 1')
+        } else {
           // children in the parent's own document only: a hand-moved child shows at its own document's top level,
           // not also under its old parent (CR18-04)
-          where.push(`i.parent = ? AND ${DOC_OF('i')} IN (SELECT ${DOC_OF('p')} FROM items p WHERE p.id = ?)`)
+          where.push('i.parent = ? AND i.doc IN (SELECT p.doc FROM items p WHERE p.id = ?)')
           params.push(q.parent, q.parent)
         }
       }
@@ -455,7 +474,7 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         }[by as 'id']
         orderSql = `${col} ${dir}, i.id`
         // All documents, top level, document order: one document after the other, each in its own order (CR-22)
-        if (by === 'order' && q.parent === null && q.document === undefined) orderSql = `(CASE WHEN instr(i.path, '/') > 0 THEN substr(i.path, 1, instr(i.path, '/') - 1) ELSE '' END), ${orderSql}`
+        if (by === 'order' && q.parent === null && q.document === undefined) orderSql = `i.doc, ${orderSql}`
       }
 
       const total = (db.prepare(`SELECT COUNT(*) AS n FROM items i ${whereSql}`).get(...params) as { n: number }).n
@@ -490,7 +509,7 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
 
     documentCounts: () => {
       // one pass for every document (PERF-02): '' = files directly in requirements/
-      const rows = db.prepare("SELECT CASE WHEN instr(path, '/') > 0 THEN substr(path, 1, instr(path, '/') - 1) ELSE '' END AS d, COUNT(*) AS n FROM items GROUP BY d").all() as { d: string; n: number }[]
+      const rows = db.prepare('SELECT doc AS d, COUNT(*) AS n FROM items GROUP BY doc').all() as { d: string; n: number }[]
       return Object.fromEntries(rows.map((r) => [r.d, r.n]))
     },
     typeUsage: () => ({

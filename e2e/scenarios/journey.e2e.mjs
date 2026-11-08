@@ -57,7 +57,13 @@ await scenario('E2E journey', async (ctx) => {
     await rowOf(stkId).click()
     await win.locator('.editor__id', { hasText: stkId }).waitFor()
     await win.getByLabel('Add child item').selectOption('system-requirement')
-    await win.getByPlaceholder('Short name of the requirement').fill(title)
+    // the new editor must be there before typing (a slow Windows runner once typed into the old one — 0.18.0)
+    await win.locator('.editor__id', { hasText: stkId }).waitFor({ state: 'detached', timeout: 10_000 }).catch(() => {})
+    const titleBox = win.getByPlaceholder('Short name of the requirement')
+    for (let i = 0; i < 5 && (await titleBox.inputValue()) !== title; i++) {
+      await titleBox.fill(title)
+      await win.waitForTimeout(150)
+    }
     await editText(win, text)
     await win.locator('.editor').getByLabel('Priority').selectOption('High')
     await save()

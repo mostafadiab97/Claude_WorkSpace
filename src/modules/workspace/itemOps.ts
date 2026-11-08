@@ -1,7 +1,10 @@
 // Reading, creating, saving and deleting single items, with the rules that need the whole repository
 // (the parent must exist and must not create a loop; saves are refused if the file changed meanwhile).
 import type { Item, ItemDetails, LinkInfo, SaveResult } from '../../shared/api'
-import { validateItem } from '../items'
+import { rm, stat } from 'node:fs/promises'
+import { join } from 'node:path'
+import { documentOfPath } from '../../shared/domain'
+import { generateId, validateItem } from '../items'
 import { ConflictError } from '../repository-store'
 import type { OpResult, Session, WorkspaceContext } from './context'
 import type { LinkOps } from './links'
@@ -111,6 +114,44 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
     },
 
     /** Renames a file whose name does not match its ID to <ID>.md (review D-01). */
+    /**
+     * Two files hold one ID — usually a file copied by hand into another document (the owner on 0.17.2). The copy
+     * (the file Git does not know yet, else the newer one) gets a new ID and a matching file name; a parent from
+     * another document is dropped, so the copy sits at the top of its own document.
+     */
+    async renewCopyId(id: string): Promise<OpResult & { newId?: string }> {
+      const s = ctx.need()
+      const paths = s.index.pathsOf(id)
+      if (paths.length < 2) return { ok: true }
+      try {
+        const tracked = s.isGit ? new Set(await ctx.git.trackedFiles(s.repo.root, s.repo.folder)) : new Set<string>()
+        const rel = (p: string): string => join(s.repo.folder, p).slice(s.repo.root.length + 1).split('\\').join('/')
+        const untracked = paths.filter((p) => !tracked.has(rel(p)))
+        const newest = async (ps: string[]): Promise<string> => {
+          const times = await Promise.all(ps.map(async (p) => [p, (await stat(join(s.repo.folder, p))).mtimeMs] as const))
+          return times.sort((a, b) => b[1] - a[1])[0]?.[0] as string
+        }
+        const copy = untracked.length === 1 ? (untracked[0] as string) : await newest(untracked.length > 1 ? untracked : paths)
+        const read = await s.repo.readItemFile(copy)
+        if (!read.ok) return { ok: false, message: read.error }
+        const document = documentOfPath(copy)
+        const newId = generateId((x) => s.index.get(x) !== undefined)
+        const item: Item = { ...read.item, id: newId, document }
+        const parent = item.parent ? s.index.get(item.parent) : undefined
+        if (item.parent && (!parent || (parent.document ?? '') !== document)) {
+          delete item.parent
+          item.order = structure.nextOrder(s, undefined, document)
+        }
+        await s.repo.writeItem(item, { expectedRevision: null })
+        await rm(join(s.repo.folder, copy))
+        await s.index.syncPaths(s.repo, [copy, s.repo.itemPath(newId, document)])
+        log.info(`Copied file ${copy}: ${id} → ${newId}`)
+        return { ok: true, newId }
+      } catch (e) {
+        return { ok: false, message: (e as Error).message }
+      }
+    },
+
     async fixFileName(id: string): Promise<OpResult> {
       const s = ctx.need()
       try {

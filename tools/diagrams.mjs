@@ -23,6 +23,7 @@ const srcDir = join(root, 'docs', 'diagrams', 'archify')
 const ABOUT = {
   architecture: 'Every part of reqochet, what it may talk to, and where data lives.',
   'save-flow': 'What happens between clicking Save and the file on disk — and how a newer version is never overwritten.',
+  privacy: 'What reqochet reads, keeps on the PC and sends — and what never leaves it (the Settings → Privacy page).',
   'pull-flow': 'How Pull works the merge out in memory, asks only about parts both sides changed differently, then updates the folder in one step.'
 }
 const KIND = { architecture: 'Architecture', sequence: 'Sequence', workflow: 'Workflow' }

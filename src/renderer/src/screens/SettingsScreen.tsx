@@ -10,6 +10,7 @@ import { VersionsCard } from '../components/VersionsCard'
 import { guidePages } from '../lib/guide'
 import { useLanguage } from '../lib/language'
 import { T } from '../../../shared/text'
+import privacyDiagram from '../../../../docs/images/privacy.png'
 
 type SettingsPage = 'env' | 'appearance' | 'report' | 'features' | 'tests' | 'privacy'
 type View = { kind: 'settings'; page: SettingsPage } | { kind: 'guide'; page: string; anchor?: string }
@@ -34,6 +35,7 @@ export function SettingsScreen(props: {
   const main = useRef<HTMLDivElement>(null)
   // the guide's topics fold under "User guide" (the owner on 0.14.4 step 2); open while a guide page is shown
   const [guideOpen, setGuideOpen] = useState(false)
+  const [zoom, setZoom] = useState(false)
   const pages = useMemo(() => guidePages(), [])
   const nav = T.settings.nav
   const settingsPages: { id: SettingsPage; label: string }[] = [
@@ -120,6 +122,24 @@ export function SettingsScreen(props: {
             // what the app sees, keeps, sends and may change (the owner, 8 Nov 2026)
             <section className="card privacy" aria-label={nav.privacy}>
               <p className="hint hint--flush">{T.settings.privacy.intro}</p>
+              {/* the Archify drawing of the same facts (docs/diagrams/archify/privacy.json — the owner, 8 Nov 2026) */}
+              <figure className="privacy__figure">
+                <button type="button" className="privacy__zoom" title={T.settings.privacy.enlarge} onClick={() => setZoom(true)}>
+                  <img src={privacyDiagram} alt={T.settings.privacy.diagramAlt} />
+                </button>
+              </figure>
+              {zoom && (
+                <div className="modal" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && setZoom(false)} onKeyDown={(e) => e.key === 'Escape' && setZoom(false)}>
+                  <div className="modal__panel privacy__zoomed" role="dialog" aria-modal="true" aria-label={nav.privacy}>
+                    <button type="button" className="icon-btn" autoFocus aria-label={T.common.close} onClick={() => setZoom(false)}>
+                      ✕
+                    </button>
+                    <div className="scroll">
+                      <img src={privacyDiagram} alt={T.settings.privacy.diagramAlt} />
+                    </div>
+                  </div>
+                </div>
+              )}
               {T.settings.privacy.sections.map((sec) => (
                 <div key={sec.title}>
                   <h2 className="privacy__title">{sec.title}</h2>

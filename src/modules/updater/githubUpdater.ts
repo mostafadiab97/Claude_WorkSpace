@@ -7,7 +7,7 @@ import { autoUpdater } from 'electron-updater'
 import { parse as parseYaml } from 'yaml'
 import type { UpdateStatus } from '../../shared/api'
 import type { UpdateService } from './index'
-import { parseReleases, revertTargets, type ReleaseInfo } from './versions'
+import { newerRelease, parseReleases, revertTargets, type ReleaseInfo } from './versions'
 
 interface Deps {
   /** Only an installed build can update itself; in development the updater is inert. */
@@ -59,13 +59,57 @@ export function createGithubUpdater({ enabled, log, holdFile, updateConfigFile }
     autoUpdater.on('update-downloaded', (info) => set({ state: 'ready', version: info.version }))
     autoUpdater.on('error', (e) => {
       log.error('Update check failed', e)
-      // Offline is normal for ReqMan; report it gently.
+      // the releases feed failed (8 Nov 2026: GitHub answered it with 502 for hours): ask GitHub's API instead, once
+      if (!triedApi) {
+        triedApi = true
+        void viaApi().then(
+          (ok) => ok || set({ state: 'error', message: 'Could not check for updates (offline or GitHub unreachable).' }),
+          (e2) => {
+            log.warn(`Update check through the API failed too: ${String(e2)}`)
+            set({ state: 'error', message: 'Could not check for updates (offline or GitHub unreachable).' })
+          }
+        )
+        return
+      }
+      // Offline is normal for reqochet; report it gently.
       set({ state: 'error', message: 'Could not check for updates (offline or GitHub unreachable).' })
     })
   }
 
+  // The fallback: the newest release from GitHub's API (another service than the releases feed); its update file
+  // (latest.yml) is then read straight from that release's downloads.
+  let triedApi = false
+  let feedChanged = false
+  const viaApi = async (): Promise<boolean> => {
+    const { owner, repo } = feedConfig()
+    const res = await net.fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/releases?per_page=30`, { headers: { Accept: 'application/vnd.github+json' } })
+    if (!res.ok) throw new Error(`GitHub API answered ${res.status}`)
+    const target = newerRelease(parseReleases(await res.json()), app.getVersion())
+    if (!target) {
+      log.info('Update check through the API: up to date')
+      set({ state: 'up-to-date', checkedAt: new Date().toISOString() })
+      return true
+    }
+    log.info(`Update check through the API: ${target.version} — reading its update file from the release`)
+    autoUpdater.setFeedURL({ provider: 'generic', url: `https://github.com/${owner}/${repo}/releases/download/v${target.version}` })
+    feedChanged = true
+    await autoUpdater.checkForUpdates()
+    return true
+  }
+  const feedConfig = (): { owner: string; repo: string } => {
+    const feed = parseYaml(readFileSync(updateConfigFile, 'utf8')) as { owner?: unknown; repo?: unknown } | null
+    if (typeof feed?.owner !== 'string' || typeof feed.repo !== 'string') throw new Error('no GitHub release feed configured')
+    return { owner: feed.owner, repo: feed.repo }
+  }
+
   const checkNow = async (): Promise<void> => {
     if (!enabled || held) return
+    // every check starts with the normal releases feed again
+    triedApi = false
+    if (feedChanged) {
+      autoUpdater.setFeedURL({ provider: 'github', ...feedConfig() })
+      feedChanged = false
+    }
     try {
       await autoUpdater.checkForUpdates()
     } catch {
@@ -75,8 +119,7 @@ export function createGithubUpdater({ enabled, log, holdFile, updateConfigFile }
 
   let releases: ReleaseInfo[] = []
   const listEarlier = async (): Promise<ReleaseInfo[]> => {
-    const feed = parseYaml(readFileSync(updateConfigFile, 'utf8')) as { owner?: unknown; repo?: unknown } | null
-    if (typeof feed?.owner !== 'string' || typeof feed.repo !== 'string') throw new Error('no GitHub release feed configured')
+    const feed = feedConfig()
     const releasesUrl = `https://api.github.com/repos/${encodeURIComponent(feed.owner)}/${encodeURIComponent(feed.repo)}/releases?per_page=100`
     const res = await net.fetch(releasesUrl, { headers: { Accept: 'application/vnd.github+json' } })
     if (!res.ok) throw new Error(`GitHub answered ${res.status}`)

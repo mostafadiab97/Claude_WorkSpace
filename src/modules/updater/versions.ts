@@ -36,6 +36,15 @@ export function parseReleases(json: unknown): ReleaseInfo[] {
   return out
 }
 
+/**
+ * The release to update to when the releases feed failed (the owner, 8 Nov 2026: GitHub answered the feed with 502):
+ * the newest published release with an installer, if it is newer than `current`; null = up to date. Pure.
+ */
+export function newerRelease(releases: ReleaseInfo[], current: string): ReleaseInfo | null {
+  const newest = [...releases].sort((a, b) => compareVersions(b.version, a.version))[0]
+  return newest && compareVersions(newest.version, current) > 0 ? newest : null
+}
+
 /** Versions older than `current` and not older than OLDEST_REVERT_TARGET, newest first. */
 export function revertTargets(releases: ReleaseInfo[], current: string, oldest = OLDEST_REVERT_TARGET): ReleaseInfo[] {
   return releases

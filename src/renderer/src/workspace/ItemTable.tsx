@@ -61,6 +61,26 @@ export function ItemTable(props: {
   const { schema, prefs, mode, query, dataVersion, selectedId, onSelect, onSort, onTotal, onMove, controlsRef, revealNonce, emptyText, onResize, chosen, onChoose, onRowMenu } = props
   const anchor = useRef<number | null>(null)
   const lang = useLanguage()
+  // items with an empty required field get a small mark in their row (the owner, 8 Nov 2026 — S-05)
+  const hasRequired = schema.itemTypes.some((t) => (t.required?.length ?? 0) > 0)
+  const [incompleteIds, setIncompleteIds] = useState<ReadonlySet<string>>(new Set())
+  useEffect(() => {
+    if (!hasRequired) return
+    let live = true
+    void window.reqochet.queryItems({ incomplete: true, limit: 10_000, brief: true }).then((r) => {
+      if (live) setIncompleteIds(new Set(r.items.map((i) => i.id)))
+    })
+    return () => {
+      live = false
+    }
+  }, [hasRequired, dataVersion])
+  const isIncomplete = (id: string): boolean => hasRequired && incompleteIds.has(id)
+  const incompleteMark = (id: string): ReactNode =>
+    isIncomplete(id) ? (
+      <span className="table__incomplete" role="img" aria-label={T.table.incomplete} title={T.table.incompleteTip}>
+        ◐
+      </span>
+    ) : null
   // a column header being dragged to a new place (rows have their own drag and drop)
   const [colDrag, setColDrag] = useState<string | null>(null)
   const [colOver, setColOver] = useState<string | null>(null)
@@ -399,6 +419,7 @@ export function ItemTable(props: {
                             <span className={isHeading(schema, item.type) ? 'table__text table__text--heading' : 'table__text'} dir="auto">
                               {c.value(item)}
                             </span>
+                            {incompleteMark(item.id)}
                             {item.childCount > 0 && !open && <span className="table__count">{item.childCount.toLocaleString('en')}</span>}
                           </span>
                         ) : (
@@ -412,6 +433,7 @@ export function ItemTable(props: {
                             dir={c.key === 'number' || c.key === 'id' || c.key === 'links' ? undefined : 'auto'}
                           >
                             {c.value(item)}
+                            {c.key === 'title' && incompleteMark(item.id)}
                           </span>
                         )
                       )

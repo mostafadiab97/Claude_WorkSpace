@@ -43,6 +43,19 @@ export function ProblemList({
       setBusy(false)
     }
   }
+  const renew = async (id: string): Promise<void> => {
+    setError(null)
+    setBusy(true)
+    try {
+      const r = await window.reqochet.renewCopyId(id)
+      if (!r.ok) setError(T.workspace.fixFailed(r.message))
+      onFixed()
+    } catch (e) {
+      setError(T.workspace.fixFailed(errorMessage(e)))
+    } finally {
+      setBusy(false)
+    }
+  }
   return (
     <section className="problems" aria-label={T.workspace.problems}>
       <header className="problems__head">
@@ -78,6 +91,11 @@ export function ProblemList({
                       <span className="problems__id">{p.subject}</span>
                     )}
                     <span className="problems__msg">{p.message}</span>
+                    {p.fix === 'copy-id' && p.id && (
+                      <button type="button" className="btn btn--small" disabled={busy} title={T.workspace.renewCopyIdTooltip(p.id)} onClick={() => p.id && guard(() => void renew(p.id as string))}>
+                        {T.workspace.renewCopyId}
+                      </button>
+                    )}
                     {p.fix === 'file-name' && p.id && (
                       <button type="button" className="btn btn--small" disabled={busy} title={T.workspace.fixFileNameTooltip(p.id)} onClick={() => p.id && guard(() => void fix([p.id as string]))}>
                         {T.workspace.fixFileName}

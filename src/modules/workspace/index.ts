@@ -67,6 +67,8 @@ export interface WorkspaceService {
   revertChange(id: string, part: RevertPart): Promise<OpResult>
   /** Renames a file whose name does not match the ID inside it to <ID>.md. */
   fixFileName(id: string): Promise<OpResult>
+  /** Two files hold one ID: the copied one gets a new ID (and file name). */
+  renewCopyId(id: string): Promise<OpResult & { newId?: string }>
   /** Before saving field definitions: items whose values the changed definitions would not allow. */
   checkFields(fields: FieldDef[]): FieldCheck[]
   moveItem(id: string, direction: 'up' | 'down'): Promise<OpResult>

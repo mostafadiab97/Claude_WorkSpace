@@ -98,7 +98,8 @@ code {
   align-items: center;
   justify-content: space-between;
   gap: var(--rm-space-md);
-  padding: var(--rm-space-sm) var(--rm-space-lg);
+  /* slimmer bars (the owner, 8 Nov 2026): 4 px above and below; the buttons keep their size */
+  padding: var(--rm-space-xs) var(--rm-space-lg);
   background: var(--rm-color-surface);
   border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
   flex-shrink: 0;
@@ -620,7 +621,7 @@ code {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--rm-space-sm);
-  padding: var(--rm-space-sm) var(--rm-space-md);
+  padding: var(--rm-space-xs) var(--rm-space-md);
   border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
   background: var(--rm-color-surface);
 }
@@ -3728,4 +3729,59 @@ html {
   color: var(--rm-color-text-muted);
   font-size: var(--rm-font-size-small);
   margin-block-start: var(--rm-space-xs);
+}
+
+/* an item with an empty required field (the owner, 8 Nov 2026) */
+.table__incomplete {
+  color: var(--rm-color-warning);
+  margin-inline-start: var(--rm-space-xs);
+  font-size: var(--rm-font-size-small);
+  flex: none;
+}
+
+/* one document and nothing to offer: a thin line (the owner, 8 Nov 2026); controls stay at least 24 px high (WCAG 2.2) */
+.document-bar--compact {
+  padding-block: 2px;
+  font-size: var(--rm-font-size-small);
+}
+.document-bar--compact .select-btn {
+  min-height: 24px;
+  padding-block: 0;
+  font-size: var(--rm-font-size-small);
+}
+
+/* the privacy diagram (an Archify picture on a light background, framed in both modes) */
+.privacy__figure {
+  margin: var(--rm-space-md) 0;
+  padding: var(--rm-space-sm);
+  background: var(--rm-color-surface);
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-radius: var(--rm-shape-button-radius);
+}
+.privacy__figure img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+.privacy__zoom {
+  display: block;
+  inline-size: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+.privacy__zoomed {
+  max-inline-size: 96vw;
+  inline-size: 96vw;
+}
+.privacy__zoomed .scroll {
+  overflow: auto;
+  max-block-size: 85vh;
+}
+.privacy__zoomed img {
+  display: block;
+  inline-size: 1800px;
+  max-inline-size: none;
 }

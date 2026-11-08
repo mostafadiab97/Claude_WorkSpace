@@ -18,7 +18,7 @@ export interface Problem {
   /** What the row is about when it is not an item (a file path, a schema key). */
   subject?: string
   /** ReqMan can fix it with one click. */
-  fix?: 'file-name'
+  fix?: 'file-name' | 'copy-id'
 }
 
 const groupOf = (path: string): ProblemGroup => ((PROBLEM_GROUPS as readonly string[]).includes(path) ? (path as ProblemGroup) : 'other')

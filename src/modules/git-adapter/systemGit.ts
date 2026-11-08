@@ -2,9 +2,9 @@
 // with exactly the credentials, SSH keys and configuration the user already has.
 // Every call passes arguments as an array (no shell), so file names and messages are never interpreted.
 import { execFile, spawn } from 'node:child_process'
-import { mkdtemp, rm } from 'node:fs/promises'
+import { mkdtemp, readdir, rm, rmdir } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join, normalize } from 'node:path'
+import { dirname, join, normalize } from 'node:path'
 import type { GitInfo } from '../../shared/api'
 import type { CommitInfo, FileChange, GitAdapter, GitRef, GitStatus, MergeCheck, NameStatus, ReflogEntry } from './index'
 
@@ -633,6 +633,15 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
       const stagedNew = remove.filter((p) => tracked.has(p))
       for (const part of chunks(stagedNew)) await git(root, ['rm', '--cached', '--quiet', '--', ...part], BULK_TIMEOUT)
       for (const p of remove) await rm(join(root, p), { force: true })
+      // a folder the discard left empty goes too (the owner on 0.17.2: a discarded new document stayed in the list)
+      const dirs = [...new Set(remove.map((p) => dirname(p)))].sort((a, b) => b.length - a.length)
+      for (let d of dirs) {
+        while (d && d !== '.' && d !== '/') {
+          if ((await readdir(join(root, d)).catch(() => ['?'])).length > 0) break
+          await rmdir(join(root, d)).catch(() => undefined)
+          d = dirname(d)
+        }
+      }
     }
   }
 }

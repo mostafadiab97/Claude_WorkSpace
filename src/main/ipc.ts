@@ -259,6 +259,7 @@ export function registerIpc(services: Services, paths: Paths): void {
     decideLinks: (_e, decisions) => ws.decideLinks(v.linkDecisions(decisions)),
     revertChange: (_e, id, part) => ws.revertChange(v.id(id), v.revertPart(part)),
     fixFileName: (_e, id) => ws.fixFileName(v.id(id)),
+    renewCopyId: (_e, id) => ws.renewCopyId(v.id(id)),
 
     // ---------- Git, Compare
     getGitState: () => ws.gitState(),

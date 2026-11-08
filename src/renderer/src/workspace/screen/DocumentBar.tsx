@@ -50,7 +50,7 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
     })
 
   return (
-    <div className="document-bar">
+    <div className={docs.length <= 1 && !naming && !error && (later || !(legacy || loose)) ? 'document-bar document-bar--compact' : 'document-bar'}>
       <label className="document-bar__label" htmlFor="document-picker">
         {T.documents.label}
       </label>

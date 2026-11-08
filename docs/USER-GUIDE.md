@@ -301,7 +301,7 @@ panel returns to your repository.
 | **Features** | Turn off a feature on this PC (Branches, Import, Export) if it causes trouble; the rest keeps working. If the team turned one off for the repository, it says so. |
 | **Release self-test** | Runs the main actions (create, edit, move, link, commit, push, a colleague's change, a pull with decisions, branches, compare, history, export, import) on a practice repository in a temporary folder, then deletes it — about a minute; your data is not touched. |
 | **Data self-test** | Measures speed on this PC with generated requirements in a temporary folder. |
-| **Privacy and access** | What reqochet reads, keeps on your PC (and where), sends (only Git pull/push and the update check — no tracking), what it may change, and what to keep in mind for confidential projects. |
+| **Privacy and access** | What reqochet reads, keeps on your PC (and where), sends (only Git pull/push and the update check — no tracking), what it may change, and what to keep in mind for confidential projects, with a diagram of who reads or sends what (`docs/diagrams/privacy.html`). |
 
 **Language:** English / العربية in ⚙ → Appearance (and on the start screen) — the whole window turns right-to-left in Arabic; your data stays as
 written. **Colours:** Light / Dark / System; a company can change colours, fonts and logo in a theme file

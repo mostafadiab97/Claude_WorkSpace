@@ -104,8 +104,8 @@ export interface ItemIssue {
   path: string
   message: string
   severity: 'error' | 'warning'
-  /** ReqMan can fix this with one click: 'file-name' = rename the file to <ID>.md. */
-  fix?: 'file-name'
+  /** reqochet can fix this with one click: 'file-name' = rename the file to <ID>.md; 'copy-id' = give the copied file a new ID. */
+  fix?: 'file-name' | 'copy-id'
 }
 
 // ---------- index queries

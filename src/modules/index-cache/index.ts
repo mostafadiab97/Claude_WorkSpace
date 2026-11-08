@@ -28,6 +28,8 @@ export interface IndexCache {
   rebuild(repo: RequirementsRepo): Promise<SyncStats>
   query(q: ItemQuery): QueryResult
   get(id: string): IndexedItem | undefined
+  /** Every file that holds this ID (more than one = a duplicate, e.g. a copied file). */
+  pathsOf(id: string): string[]
   /** Links pointing TO this item (the reverse view: "verified by …"). */
   incomingLinks(id: string): LinkRef[]
   /** Content fingerprint of an item (for confirming links), or undefined if it does not exist. */

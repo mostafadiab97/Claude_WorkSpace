@@ -480,6 +480,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     saveItem: q(items.saveItem),
     deleteItem: q(items.deleteItem),
     fixFileName: q(items.fixFileName),
+    renewCopyId: q(items.renewCopyId),
     ancestors: structure.ancestors,
     fieldValues: (field) => need().index.fieldValues(field, 200),
     reparentItem: q(structure.reparentItem),

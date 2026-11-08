@@ -6,6 +6,7 @@ import { DatabaseSync } from 'node:sqlite'
 import { contentFingerprint, type FieldValue, type Item } from '../items'
 import type { RequirementsRepo } from '../repository-store'
 import { documentOfPath, type ItemIssue } from '../../shared/domain'
+import { T } from '../../shared/text'
 import type { IndexCache, IndexedItem, ItemQuery, LinkRef, QueryResult, SyncStats } from './index'
 
 /** Bump when the table layout changes; an old cache file is then rebuilt automatically. */
@@ -14,6 +15,9 @@ const FORMAT_VERSION = '4'
 /** A text used inside LIKE: its wildcards and the escape character itself stand for themselves (QA-WP-02). */
 /** White space as JavaScript's trim() sees it (the common kinds): the filter and the editor agree on "empty" (CR-20). */
 const BLANKS = "' ' || char(9) || char(10) || char(11) || char(12) || char(13) || char(160) || char(8239) || char(12288) || char(65279)"
+
+/** The document of an item row: the first folder of its path ('' = a loose file). */
+const DOC_OF = (t: string): string => `(CASE WHEN instr(${t}.path, '/') > 0 THEN substr(${t}.path, 1, instr(${t}.path, '/') - 1) ELSE '' END)`
 
 const likeEscape = (s: string): string => s.replace(/[\\%_]/g, (c) => `\\${c}`)
 
@@ -319,7 +323,8 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     repositoryIssues(): ItemIssue[] {
       const issues: ItemIssue[] = []
       for (const r of db.prepare('SELECT id, COUNT(*) AS n FROM items GROUP BY id HAVING n > 1').all() as { id: string; n: number }[]) {
-        issues.push({ itemId: r.id, path: 'id', message: `${r.n} files have the ID ${r.id}.`, severity: 'error' })
+        // usually a file copied by hand: "Give the copy a new ID" (the owner on 0.17.2)
+        issues.push({ itemId: r.id, path: 'id', message: T.validate.sameIdFiles(r.n, r.id), severity: 'error', fix: 'copy-id' })
       }
       const broken = db
         .prepare('SELECT l.source, l.type, l.target FROM links l WHERE l.target <> l.source AND NOT EXISTS (SELECT 1 FROM items t WHERE t.id = l.target) ORDER BY l.source')
@@ -403,7 +408,11 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         }
       }
       if (q.parent !== undefined) {
-        if (q.parent === null) where.push('i.parent IS NULL')
+        if (q.parent === null && q.document !== undefined) {
+          // one document's top level: also items whose parent is in another document or missing — a file copied by
+          // hand from another document keeps its old parent and would otherwise have no place (the owner on 0.17.2)
+          where.push(`(i.parent IS NULL OR NOT EXISTS (SELECT 1 FROM items p WHERE p.id = i.parent AND ${DOC_OF('p')} = ${DOC_OF('i')}))`)
+        } else if (q.parent === null) where.push('i.parent IS NULL')
         else {
           where.push('i.parent = ?')
           params.push(q.parent)
@@ -456,6 +465,7 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       return { total, items: rows.map((r) => rowToItem(q.brief ? { ...r, text: preview(r.text) } : r, fieldIds)) }
     },
 
+    pathsOf: (id) => (db.prepare('SELECT path FROM items WHERE id = ? ORDER BY path').all(id) as { path: string }[]).map((r) => r.path),
     get(id) {
       const r = stmt.getById.get(id) as ItemRow | undefined
       return r ? rowToItem(r, fieldIds) : undefined

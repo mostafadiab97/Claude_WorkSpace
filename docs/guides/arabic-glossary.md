@@ -12,6 +12,18 @@ the Arabic reviewer proposes additions or corrections, the builder updates this 
 | suspect (link) | مشكوك فيه | the linked item changed since the link was confirmed |
 | field | حقل (حقول) | |
 | type | نوع (أنواع) | item type / link type |
+| heading (item type) | عنوان قسم | the owner, 8 Nov 2026 — not عنوان alone (that is an item's title) |
+| title | عنوان | an item's title |
+| required field | حقل مطلوب | S-05 |
+| incomplete | غير مكتمل | a required field is empty |
+| document | مستند (مستندات) | a folder under requirements/ (S-10) |
+| loose files | ملفات منفردة | item files directly in requirements/ |
+| Filters | التصفية | the toolbar button |
+| rename | إعادة تسمية | |
+| discard | إهمال | |
+| baseline | خط أساس (خطوط أساس) | a named, fixed version (Git tag `baseline/<name>`) |
+| history (of commits) | السجلّ | |
+| read-only | للقراءة فقط | |
 | repository | مستودع (مستودعات) | |
 | document | مستند | from 1a: one folder of items (S-10) |
 | baseline | خط أساس | from 1a (proposal) |

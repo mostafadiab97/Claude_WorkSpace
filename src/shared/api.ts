@@ -551,6 +551,8 @@ export interface ReqochetApi {
   revertChange(id: string, part: RevertPart): Promise<{ ok: true } | { ok: false; message: string }>
   /** Renames the file holding `id` to <ID>.md when its name does not match (a repository problem). */
   fixFileName(id: string): Promise<{ ok: true } | { ok: false; message: string }>
+  /** Two files hold one ID (usually a copied file): the copy gets a new ID and file name. */
+  renewCopyId(id: string): Promise<{ ok: true; newId?: string } | { ok: false; message: string }>
   /** Before saving field definitions: how many items have values the changed definitions do not allow. */
   checkFields(fields: FieldDef[]): Promise<FieldCheck[]>
   // --- Git (all operate on the open repository; only requirements/ is committed)
@@ -709,6 +711,7 @@ export const Channels = {
   decideLinks: 'ws:decideLinks',
   revertChange: 'ws:revertChange',
   fixFileName: 'ws:fixFileName',
+  renewCopyId: 'ws:renewCopyId',
   checkFields: 'ws:checkFields',
   getGitState: 'git:state',
   commit: 'git:commit',

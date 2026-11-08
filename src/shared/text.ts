@@ -91,6 +91,8 @@ const en = {
       releasesPage: 'Releases page (all versions, installers)'
     },
     privacy: {
+      enlarge: 'Show the diagram full size',
+      diagramAlt: 'Diagram: reqochet on your PC reads and writes the project folder, keeps its index, settings and log in its own folder, reads and writes only files you choose, and runs Git; Git reads your name and e-mail from its settings, asks the Credential Manager for your sign-in and pulls and pushes to your GitHub repository; reqochet asks GitHub releases for updates; there is no tracking server.',
       intro: 'What reqochet sees, keeps and sends, and what it is allowed to change. There are no accounts, no tracking and no cloud service: your requirements stay in your files and your Git repositories.',
       sections: [
         {
@@ -106,7 +108,7 @@ const en = {
           points: [
             'A search index of your items (titles, texts, fields) so that 10,000 items open fast: %APPDATA%\\reqochet-dev\\cache. It is only a copy and can be deleted at any time.',
             'Your settings, theme, the list of recently opened projects (their folder paths) and what you chose in an import: %APPDATA%\\reqochet-dev.',
-            'A log of what the app did (actions, file names, item IDs, Git messages; passwords and tokens are hidden): %APPDATA%\\reqochet-dev\\logs.',
+            'A log of what the app did (actions, file names, item IDs, Git messages): %APPDATA%\\reqochet-dev\\logs. reqochet never asks for or keeps a password or token; if a server address has a sign-in written into it (https://name:token@…), that part is replaced by *** before the address reaches the log or a problem report.',
             'Small window choices (columns, the document you looked at) in the window\'s own storage.'
           ]
         },
@@ -123,7 +125,7 @@ const en = {
           points: [
             'reqochet runs with your Windows permissions, like any program you install. It writes only in the requirements folder of the project you opened, in its own folder above, and in files you choose in a Save window.',
             'Git: it commits and pushes when you press Commit or Push (never a forced push), and pulls when you press Pull. Discard and Delete remove files only after you confirm.',
-            'Your Git name and e-mail: saved for the project when you enter them; in your global Git settings only when those are still empty.'
+            'Your Git name and e-mail: Git puts them on every commit (that is how History shows who changed what) and needs them to commit. Git keeps them in two text files on this PC: the project\'s settings (.git\\config in the project folder, this project only) and your global Git settings (C:\\Users\\<you>\\.gitconfig, every Git project on this PC). reqochet asks Git for them to show who will be the author; what you type in goes into the project\'s settings, and into the global file only when that file has none yet. reqochet sends them nowhere itself — they travel inside your commits when you push, so everyone who can see the repository sees them (many people use GitHub\'s private noreply e-mail for this).'
           ]
         },
         {
@@ -242,6 +244,7 @@ const en = {
   },
 
   validate: {
+    sameIdFiles: (count: number, id: string) => `${n(count)} files have the ID ${id} — usually a file copied by hand.`,
     idFormat: (id: string) => `"${id}" is not in the reqochet ID format (e.g. REQ-K7Q3XMB).`,
     unknownType: (t: string) => `Unknown item type "${t}".`,
     emptyTitle: 'The title is empty.',
@@ -329,6 +332,8 @@ const en = {
     sortTreeTooltip: (label: string) => `Sort by ${label} (within each parent); click again for descending, a third time for document order`,
     sortTooltip: (label: string) => `Sort by ${label}`,
     showMore: (hidden: number) => `Show more (${n(hidden)} hidden)`,
+    incomplete: 'Incomplete',
+    incompleteTip: 'Incomplete: a field this item type requires is empty (Filters → Incomplete lists them all)',
     groupOpen: (name: string) => `Show the items of ${name}`,
     groupClose: (name: string) => `Hide the items of ${name}`,
     groupCount: (count: number) => `${n(count)} item${s(count)}`,
@@ -956,6 +961,8 @@ const en = {
     problemCount: (count: number, open: boolean) => `${count} problem${s(count)} ${open ? '▾' : '▸'}`,
     noProblems: 'No problems',
     schemaProblem: (path: string, message: string) => `schema.yaml ${path}: ${message}`,
+    renewCopyId: 'Give the copy a new ID',
+    renewCopyIdTooltip: (id: string) => `The file copied last (or not yet committed) gets a new ID and file name; the original ${id} stays as it is`,
     fixFileName: 'Fix file name',
     fixFileNameTooltip: (id: string) => `Rename the file to ${id}.md (Git sees it as a rename, so the history is kept)`,
     fixFailed: (why: string) => `Could not fix the file name: ${why}`,

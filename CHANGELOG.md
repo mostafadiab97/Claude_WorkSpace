@@ -4,6 +4,7 @@ Each version was installed and tried by the owner (product owner) on Windows 11;
 version it was about, and what it led to.
 
 ## 0.19.1 — 8 Nov 2026 — fix: empty space between rows after Show text off
+- **Owner (8 Nov 2026), 0.19.1:** all 3 steps passed (self-test 24/24, 174.6 s).
 - **Owner (8 Nov 2026), 0.19.0:** all 5 steps passed (self-test 24/24, 187.6 s while another 20-minute build ran).
   Test 2: with Show text off, opening levels left empty rows. Test 5: the privacy diagram passes but can have a better
   layout — revisit all diagrams at the final touches (reminder list added to `docs/design/roadmap.md`).

@@ -37,7 +37,7 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.19.1 fix: no empty space between rows after Show text off (`ItemTable.tsx`: row keys per mode + `virtualizer.measure()` on a switch); e2e `rows-0.19`; final-touches reminder list in `docs/design/roadmap.md` | Released (v0.19.1) |
 | **Next** | Owner's 0.19.1 checklist; the rare full-suite failure of the qa-0.17.0 "incomplete combined" test (PITFALLS: it now prints its cause); then the later items of the 0.18.0/0.19.0 reviews (PERF19-02 old version at 50k, PERF19-04 text only for rows on screen, PERF-02/03 of 0.18.0, editor preview limit, toast placement UX19-01, Arabic diagram labels, an Arabic e2e screenshot of the new screens), the commit graph, the four questions of the public release repository (`docs/reviews/2026-11-04-public-release-repo.md`); then the next theme of the release plan (`docs/design/roadmap.md`) | — |
 
-The owner's last report (8 Nov 2026): **0.19.0 all 5 steps passed** (24/24, 187.6 s), test 2 found empty rows after Show text off — fixed in 0.19.1; diagrams to revisit at the final touches.
+The owner's last report (8 Nov 2026): **0.19.1 all 3 steps passed** (24/24, 174.6 s) — nothing open from his tests. 0.19.0: all 5 passed, test 2 → 0.19.1; diagrams to revisit at the final touches.
 Before: 0.18.0 all 5 passed (24/24). Before: 0.17.2 all 5 passed (23/23). Before: 0.13.1 all 4 steps passed, 21/21 (66.8 s). Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
 Before: 0.12.1 steps 1–3, 5 passed, 21/21 (50.7 s); step 4 (pull from a branch
 committed at once) and three requests → 0.13.0. Before: **0.12.0 all 5 steps passed** — that was the two-folder trial (two clones of the

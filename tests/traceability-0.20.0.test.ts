@@ -129,8 +129,8 @@ describe('0.20.0 impact chain and matrix', () => {
 
   it('matrix: rows of one type (filtered), columns only the linked items of the other; the Excel export has every row', async () => {
     const { ws } = await setup()
-    const a = await add(ws, 'system-requirement', 'A')
-    const b = await add(ws, 'system-requirement', 'B')
+    const a = await add(ws, 'system-requirement', 'Alpha')
+    const b = await add(ws, 'system-requirement', 'Bravo')
     const t1 = await add(ws, 'test-case', 'T1', { document: 'Tests' })
     await add(ws, 'test-case', 'T2 unlinked', { document: 'Tests' })
     await ws.addLink(t1, 'verifies', a)
@@ -138,7 +138,7 @@ describe('0.20.0 impact chain and matrix', () => {
     expect(m.rows.map((r) => r.id)).toEqual([a, b])
     expect(m.cols.map((c) => c.id)).toEqual([t1])
     expect(m.cells).toEqual([{ r: 0, c: 0, type: 'verifies', dir: 'in', suspect: false }])
-    expect(ws.getMatrix({ rowType: 'system-requirement', colType: 'test-case', query: { text: 'B' } }).rows.map((r) => r.id)).toEqual([b])
+    expect(ws.getMatrix({ rowType: 'system-requirement', colType: 'test-case', query: { text: 'Bravo' } }).rows.map((r) => r.id)).toEqual([b])
     expect(ws.getMatrix({ rowType: 'system-requirement', colType: 'test-case', link: 'refines' }).cells).toEqual([])
     const x = await ws.exportMatrix({ rowType: 'system-requirement', colType: 'test-case' })
     expect(x.count).toBe(2)

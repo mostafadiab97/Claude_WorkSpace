@@ -65,6 +65,9 @@ await scenario('E2E fixes-0.16.4', async (ctx) => {
   if (await box.count()) {
     await box.fill('first line\nsecond line')
     await win.keyboard.press('Control+s')
+    // wait until the save is done (Save greys out): on a slow runner the next click otherwise asks "unsaved changes?"
+    const save = win.locator('.editor').getByRole('button', { name: 'Save', exact: true }).first()
+    for (let i = 0; i < 100 && !(await save.isDisabled().catch(() => true)); i++) await win.waitForTimeout(100)
     await win.locator('.table__row', { hasText: 'Bravo' }).first().click()
     await win.locator('.table__row', { hasText: 'Alpha' }).first().click()
   }

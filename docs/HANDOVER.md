@@ -8,7 +8,7 @@ no memory of the old one — only these files.
 Copy everything in the box into the first message of the new chat:
 
 ```
-You are continuing the development of reqochet (working name; a new name is being chosen), a serverless,
+You are continuing the development of reqochet (the development build is called reqochet-dev), a serverless,
 Git-based requirements-management desktop app. You write all the code, tests and docs; I (the owner) am the
 product owner: I decide the product, install every release on my Windows 11 PC and report back.
 
@@ -31,6 +31,8 @@ product owner: I decide the product, install every release on my Windows 11 PC a
 | Every decision with its date and reason | `docs/design/decisions.md`, `docs/design/roadmap.md`, discussion logs in `docs/reviews/` |
 | Working procedures (how releases and decision rounds are done) | `.claude/skills/` |
 | Mistakes not to repeat | `docs/PITFALLS.md` |
+| Helper agents and how to run them cheaply | `docs/AGENT-WORKFLOW.md`, `.claude/agents/`, skill `review-pack` |
+| How the parts connect, what data goes where | `docs/diagrams/` (Archify: architecture, save, pull, privacy) — rebuild with `node tools/diagrams.mjs` |
 | Working agreement (how releases are tested, how decisions are asked) | `CLAUDE.md` → "How to work with the owner" |
 
 ## Before the old chat ends (checklist for the outgoing session)
@@ -38,3 +40,5 @@ product owner: I decide the product, install every release on my Windows 11 PC a
 - Everything committed and pushed (`git status` clean, `git log origin/main..` empty).
 - `docs/STATUS.md` "Where we are right now" names the last version, the owner's last report and the next open point.
 - Any half-finished work is either finished, or described in "Where we are right now" with the branch/files.
+- New lessons are in `docs/PITFALLS.md`; a changed procedure is in its skill (`.claude/skills/`) and, if it is a rule,
+  in `CLAUDE.md`. The owner prefers to keep one long session (8 Nov 2026): the files must still be enough for a new one.

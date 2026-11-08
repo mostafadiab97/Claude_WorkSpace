@@ -6,7 +6,8 @@ Scripts for developing and releasing ReqMan. Each file's header explains its opt
 | --- | --- | --- |
 | `ci.mjs` | GitHub Actions without GraphQL: latest runs, wait for one, read failures (annotations), start the release by hand, check a release has all installer files | `node tools/ci.mjs status \| wait [id] \| failures [id] \| release \| released [version]` |
 | `check-deps.mjs` | Library security problems and updates; runs before every build; only warns | `npm run check:deps` |
-| `diagrams.mjs` | Rebuilds the Archify diagrams (`docs/diagrams/*.html`, `docs/images/*.png`) and the navigator `docs/diagrams/index.html` | `node tools/diagrams.mjs [name …]` · `--index` = navigator only |
+| `diagrams.mjs` | Rebuilds the Archify diagrams (`docs/diagrams/*.html`, `docs/images/*.png`: architecture, save-flow, pull-flow, privacy) and the navigator `docs/diagrams/index.html`. The sources say `<owner>`; Archify gets a temporary copy with the real address from the Git remote, and the result says `<owner>` again (no account names in files) | `ARCHIFY_CHROME=<chrome> node tools/diagrams.mjs [name …]` · `--index` = navigator only |
+| `ci-electron.mjs` | CI only: puts Electron into `node_modules/electron` through a signed-in `gh` download, checked against Electron's `SHASUMS256.txt` (GitHub refused the anonymous download for hours on 8 Nov 2026) | in the workflows, after `npm ci` with `ELECTRON_SKIP_BINARY_DOWNLOAD=1` |
 | `generate-test-repo.mts` | Uniform generated items, for performance tests | `npm run gen:repo -- <folder> [count]` |
 | `generate-scenario-repo.mts` | Rich fictional data covering every case (what `Claude_SandBox` was made with) | `npm run gen:scenario -- <folder> [count]` |
 | `make_sample_xlsx.py` | The sample spreadsheet `samples/sample-requirements.xlsx` (for the Excel import, M7) | `python tools/make_sample_xlsx.py <file>` |

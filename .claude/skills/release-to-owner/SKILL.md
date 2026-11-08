@@ -15,6 +15,10 @@ auto-update), typically an Electron app built and published by GitHub Actions.
 - Bundle small fixes into the next planned version when the owner says so; otherwise a patch version.
 - Run locally: typecheck + lint + unit tests, production build, end-to-end scenarios (on Linux with
   `xvfb-run -a`). Fix flaky waits by waiting for what the user would see, not by sleeping.
+- **Never push after a red check** — read the check's last lines before `git commit` (twice on 8 Nov 2026 a push went
+  out with a lint error and CI failed for nothing). New files in `tools/` are linted too.
+- Run the e2e suite twice when a scenario was changed or added: two scenarios run at a time, and timing problems
+  show only under that load.
 
 ## 2. Documents (same commit as the bump)
 
@@ -43,8 +47,17 @@ auto-update), typically an Electron app built and published by GitHub Actions.
   the release exists with all installer files. Never delete releases, rewrite history or force-push.
 - Windows runners are slow with Git and files (antivirus): generous test timeouts; never let two processes
   download/unpack the same tool at once.
+- A red run that is not about the code (a download that timed out, a 502/504 from GitHub): read the job log
+  (`gh api repos/<o>/<r>/actions/jobs/<id>/logs | grep -E "⨯|504|Error"`), rerun only the failed jobs
+  (`gh api -X POST repos/<o>/<r>/actions/runs/<id>/rerun-failed-jobs`), and if it repeats, make the step sturdier
+  (signed-in downloads with `gh` and the run's token, retries, checksums) instead of waiting — tell the owner
+  plainly what failed and that it was not his account.
+- A change that touches only `tools/` or docs starts no release run: start it by hand
+  (`node tools/ci.mjs release`).
 
 ## 4. Report to the owner
+
+Report in plain words, for someone with no CI background: name the failing step and the fix in one sentence each.
 
 Short and plain: the version is out and the update will be offered; what changed for him (3–6 bullets, no
 jargon); where the checklist is and that he reports by step number; anything he must do (e.g. `git pull` in the

@@ -26,7 +26,7 @@ for (let attempt = 1; ; attempt++) {
     execFileSync('gh', ['release', 'download', `v${version}`, '-R', 'electron/electron', '-p', file, '-p', 'SHASUMS256.txt', '-D', dir, '--clobber'], { stdio: 'inherit' })
     break
   } catch (e) {
-    if (attempt >= 4) throw new Error(`Could not download ${file} with gh (4 attempts): ${e.message}`)
+    if (attempt >= 4) throw new Error(`Could not download ${file} with gh (4 attempts): ${e.message}`, { cause: e })
     console.log(`Electron download attempt ${attempt} failed; waiting`)
     await sleep(30_000 * attempt)
   }

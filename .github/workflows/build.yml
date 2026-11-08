@@ -48,8 +48,15 @@ jobs:
 
       - name: Install (retried)
         shell: bash
-        # GitHub's file downloads sometimes time out (8 Nov 2026: 504 for the Electron zip for an hour) — try again
-        run: for attempt in 1 2 3 4; do npm ci && node -e "require('electron')" && exit 0; echo "npm ci attempt $attempt failed; waiting"; sleep 90; done; exit 1
+        # Electron comes through gh, signed in with this run's token, checksum checked (tools/ci-electron.mjs):
+        # 8 Nov 2026 GitHub answered the anonymous Electron download with 504 for hours, signed-in downloads worked
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: |
+          for attempt in 1 2 3; do npm ci && break; echo "npm ci attempt $attempt failed; waiting"; sleep 60; done
+          node tools/ci-electron.mjs
+          node -e "require('electron')"
       - run: npm run check
       - name: Performance tests (10,000 items; 50,000 runs for releases)
         run: npm run test:perf
@@ -72,7 +79,7 @@ jobs:
           path: e2e/out/*.png
           if-no-files-found: ignore
       - name: Build installer
-        run: npx electron-builder --win --publish never --config.publish.owner=${{ github.repository_owner }} --config.publish.repo=${{ github.event.repository.name }}
+        run: npx electron-builder --win --publish never --config.electronDist=node_modules/electron/dist --config.publish.owner=${{ github.repository_owner }} --config.publish.repo=${{ github.event.repository.name }}
       - name: Acceptance run on the installed app (P-41 — replaces the owner's manual checklist steps)
         shell: bash
         env:

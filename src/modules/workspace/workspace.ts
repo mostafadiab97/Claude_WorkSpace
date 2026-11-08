@@ -6,13 +6,15 @@ import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { access, mkdir, rename, rm, rmdir, writeFile } from 'node:fs/promises'
 import { basename, join, relative, resolve } from 'node:path'
-import type { CreateBaselineRequest, FolderCheck, GitResult, GitState, ImportSettings, MergeAnswers, MergePlan, ImportSource, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
+import type { CreateBaselineRequest, FolderCheck, GitResult, GitState, MatrixRequest, ImportSettings, MergeAnswers, MergePlan, ImportSource, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
 import type { GitAdapter } from '../git-adapter'
 import type { IndexCache } from '../index-cache'
 import type { Logger } from '../logger'
 import { isDocumentName, type RepositoryStore } from '../repository-store'
 import { createBaselineOps } from './baselines'
 import { closeVersion, openVersion, type VersionView } from './versionView'
+import { createTraceabilityOps } from './traceability'
+import { writeXlsx } from '../import-export'
 import { createCompare } from './compare'
 import { queryAll, syncInfo, withRequired, type Session, type WorkspaceContext } from './context'
 import { createExportOps } from './exporting'
@@ -347,6 +349,8 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
   const viewItems = createItemOps(viewCtx, createLinkOps(viewCtx), viewStructure)
   const viewExporting = createExportOps(viewCtx, viewStructure, compare)
   const viewFields = createSchemaFieldOps(viewCtx, () => info())
+  // traceability answers from whatever the table shows (an old version too)
+  const trace = createTraceabilityOps(viewCtx)
   const gitOps = createGitOps({
     git,
     log,
@@ -535,6 +539,14 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     saveSchemaFields: q(fields.saveSchemaFields),
     typeUsage: viewFields.typeUsage,
     saveSchemaTypes: q(fields.saveSchemaTypes),
+    saveSchemaRules: q(fields.saveSchemaRules),
+    getCoverage: (document?: string) => trace.coverage(reading(), document),
+    getImpact: (id: string) => trace.impact(reading(), id),
+    getMatrix: (req: MatrixRequest) => trace.matrix(reading(), req),
+    async exportMatrix(req: MatrixRequest) {
+      const sheet = trace.matrixSheet(reading(), req)
+      return { content: await writeXlsx([sheet]), count: sheet.rows.length }
+    },
     renameProjectFolder: q(renameProjectFolder),
     createDocument: q(createDocument),
     renameDocument: q(renameDocument),

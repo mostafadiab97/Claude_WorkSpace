@@ -5,6 +5,10 @@
 // Implementation: workspace.ts (facade + queue) over small services — see the file list there.
 import type {
   Baseline,
+  CoverageReport,
+  ImpactResult,
+  Matrix,
+  MatrixRequest,
   CreateBaselineRequest,
   HistoryPage,
   FieldCheck,
@@ -37,6 +41,7 @@ import type {
   RepoInfo,
   SaveResult
 } from '../../shared/api'
+import type { CoverageRule } from '../../shared/domain'
 import type { CellEdit } from '../import-export'
 import { cacheFileName, createWorkspace, type WorkspaceDeps } from './workspace'
 
@@ -106,6 +111,12 @@ export interface WorkspaceService {
   createBaseline(req: CreateBaselineRequest): Promise<GitResult & { baseline?: Baseline; needs?: 'uncommitted-decision' }>
   getHistory(req: { search?: string; skip?: number }): Promise<HistoryPage>
   openVersion(ref: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** Traceability (theme 1b): coverage per rule, the impact chain of one item, the matrix and its Excel file. */
+  saveSchemaRules(rules: CoverageRule[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  getCoverage(document?: string): CoverageReport
+  getImpact(id: string): ImpactResult
+  getMatrix(req: MatrixRequest): Matrix
+  exportMatrix(req: MatrixRequest): Promise<{ content: Uint8Array; count: number }>
   closeVersion(): Promise<RepoInfo>
   createBranchAt(name: string, commit: string): Promise<GitResult>
   switchBranch(name: string, changes: 'take' | 'discard'): Promise<GitResult>

@@ -2,7 +2,7 @@
 // Responsibility: fast search, filtering, sorting and reverse-link lookup over all items of a repository.
 // The cache is a local SQLite file OUTSIDE the repository. It is never the source of truth: it can be
 // deleted at any time and is rebuilt from the item files; normally only changed files are re-read.
-import type { IndexedItem, ItemIssue, ItemQuery, LinkRef, QueryResult } from '../../shared/domain'
+import type { CoverageRule, IndexedItem, ItemIssue, ItemQuery, LinkRef, QueryResult } from '../../shared/domain'
 import type { RequirementsRepo } from '../repository-store'
 import { createSqliteIndexCache, preview } from './sqliteIndex'
 
@@ -45,6 +45,8 @@ export interface IndexCache {
   /** Item count per document (first folder of the path; '' = loose files). */
   documentCounts(): Record<string, number>
   typeUsage(): { items: Record<string, number>; links: Record<string, number> }
+  /** Per coverage rule: the items it applies to (not Obsolete) and those that break it, in document order (theme 1b). */
+  coverage(rules: CoverageRule[], document?: string): { rule: CoverageRule; total: number; gaps: { id: string; title: string; document: string }[] }[]
   /**
    * Whole-repository problems, answered from the index in milliseconds: duplicate IDs, links to missing
    * items, missing parents, and files that could not be read (`itemId` is then the file path).

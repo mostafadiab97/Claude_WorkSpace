@@ -1,7 +1,7 @@
 // Input checks for every call that arrives from the window (review X-01). The window is ReqMan's own code, so
 // this is about robustness: a wrong value is refused with a clear message instead of reaching a file write.
 // Each function either returns a clean value of the expected type or throws.
-import type { CreateBaselineRequest, ExportItemsRequest, FieldDef, ImportSettings, ImportTarget, Item, ItemQuery, ItemTypeDef, LinkTypeDef, Link, LinkDecision, MergeAnswers, MergeChoice, MergePlan, RevertPart, SortKey } from '../shared/api'
+import type { CoverageRule, CreateBaselineRequest, ExportItemsRequest, FieldDef, ImportSettings, ImportTarget, Item, ItemQuery, ItemTypeDef, LinkTypeDef, Link, LinkDecision, MatrixRequest, MergeAnswers, MergeChoice, MergePlan, RevertPart, SortKey } from '../shared/api'
 
 const MAX = 4096
 /** Order keys (see modules/items/orderKey.ts): base-62 digits, at most 200 characters. */
@@ -202,6 +202,45 @@ export function itemTypeDefs(v: unknown): ItemTypeDef[] {
   })
 }
 
+/** Coverage rules from the Rules tab (theme 1b); the schema writer checks the types and links exist. */
+export function coverageRules(v: unknown): CoverageRule[] {
+  if (!Array.isArray(v) || v.length > 500) return bad('coverage rules')
+  return v.map((r) => {
+    if (!isObj(r)) return bad('coverage rule')
+    const ruleId = str(r.id, 'rule ID', 64)
+    if (!TYPE_ID.test(ruleId)) return bad('rule ID')
+    const type = str(r.type, 'rule item type', 64)
+    const link = str(r.link, 'rule link type', 64)
+    if (!TYPE_ID.test(type) || !TYPE_ID.test(link)) return bad('coverage rule')
+    const from = r.from === undefined ? [] : strings(r.from, 'rule types', 200)
+    if (from.some((f) => !TYPE_ID.test(f))) return bad('rule types')
+    return {
+      id: ruleId,
+      type,
+      link,
+      direction: oneOf(r.direction, ['incoming', 'outgoing'] as const, 'rule direction'),
+      ...(from.length ? { from } : {}),
+      min: num(r.min, 'rule minimum', 1, 99),
+      level: oneOf(r.level, ['warning', 'error'] as const, 'rule level')
+    }
+  })
+}
+
+/** A matrix request: two item types, an optional link type, the table's filter. */
+export function matrixRequest(v: unknown): MatrixRequest {
+  if (!isObj(v)) return bad('matrix request')
+  const rowType = str(v.rowType, 'row type', 64)
+  const colType = str(v.colType, 'column type', 64)
+  if (!TYPE_ID.test(rowType) || !TYPE_ID.test(colType)) return bad('matrix types')
+  const req: MatrixRequest = { rowType, colType }
+  if (v.link !== undefined && v.link !== null) {
+    req.link = str(v.link, 'matrix link type', 64)
+    if (!TYPE_ID.test(req.link)) return bad('matrix link type')
+  }
+  if (v.query !== undefined && v.query !== null) req.query = query(v.query)
+  return req
+}
+
 /** Link types from the Types window (S-04). */
 export function linkTypeDefs(v: unknown): LinkTypeDef[] {
   if (!Array.isArray(v) || v.length > 200) return bad('link types')
@@ -259,6 +298,7 @@ export function query(v: unknown): ItemQuery {
   if (v.offset !== undefined) q.offset = num(v.offset, 'offset', 0, 10_000_000)
   if (v.brief === true) q.brief = true
   if (v.textUpTo !== undefined) q.textUpTo = num(v.textUpTo, 'text length', 1, 1_000_000)
+  if (v.gaps === true) q.gaps = true
   return q
 }
 

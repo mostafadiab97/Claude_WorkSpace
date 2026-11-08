@@ -53,6 +53,27 @@ export interface Schema {
   linkTypes: LinkTypeDef[]
   /** Features the team turned off (or on) for this repository: `features: { branches: false }` (P-40a). */
   features?: Record<string, boolean>
+  /**
+   * Coverage rules (theme 1b, the owner 8 Nov 2026 — T-02…T-05), shared through Git. `undefined` = the project has
+   * never decided (the starter set is offered once); `[]` = the team chose no rules.
+   */
+  rules?: CoverageRule[]
+}
+
+/**
+ * "Every <type> has at least <min> <link> links <direction> (from items of <from>)". Incoming: other items link to
+ * this one (a test case `verifies` a requirement → the requirement is "verified by"); outgoing: this item links out.
+ * Obsolete items are never counted, on either end (T-05). The app only warns; `level` is for the later CI check (T-04).
+ */
+export interface CoverageRule {
+  id: string
+  type: string
+  link: string
+  direction: 'incoming' | 'outgoing'
+  /** Item types at the other end; empty or missing = any type. */
+  from?: string[]
+  min: number
+  level: 'warning' | 'error'
 }
 
 export interface SchemaProblem {
@@ -148,6 +169,10 @@ export interface ItemQuery {
   incomplete?: boolean
   /** Filled in by the workspace from the schema (never by the window): item type → required field ids. */
   required?: Record<string, string[]>
+  /** Only items that break a coverage rule (T-08 filter). */
+  gaps?: boolean
+  /** Filled in by the workspace from the schema (never by the window): the coverage rules. */
+  rules?: CoverageRule[]
   /** Only direct children of this item; `null` = only top-level items. */
   parent?: string | null
   /** Only items of this document (folder under requirements/); leave out for all documents (S-10). */

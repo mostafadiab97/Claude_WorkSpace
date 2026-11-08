@@ -207,6 +207,23 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
         await atomicWrite(schemaFile, text)
       },
 
+      async writeSchemaRules(rules, expectedRevision) {
+        const current = await readFile(schemaFile, 'utf8')
+        if (revisionOf(current) !== expectedRevision) {
+          throw new ConflictError('schema.yaml was changed outside reqochet since the repository was opened. Refresh and try again.')
+        }
+        // only the "rules" list is replaced; comments and every other section stay as written
+        const doc = parseDocument(current)
+        const plain = rules.map((r) => ({ id: r.id, type: r.type, link: r.link, direction: r.direction, ...(r.from?.length ? { from: r.from } : {}), min: r.min, level: r.level }))
+        const seq = doc.createNode(plain) as YAMLSeq
+        for (const n of seq.items) if (isMap(n)) n.flow = true // one rule per line, like the types
+        doc.set('rules', seq)
+        const text = doc.toString({ lineWidth: 0 })
+        const own = parseSchema(text).problems.filter((p) => p.path === 'rules' || p.path.startsWith('rules['))
+        if (own.length > 0) throw new Error(own.map((p) => `${p.path}: ${p.message}`).join(' '))
+        await atomicWrite(schemaFile, text)
+      },
+
       // every .md file of every document folder, plus .md files directly in requirements/ (loose items, S-10)
       async listItemFiles(): Promise<ItemFileInfo[]> {
         const docs = await listDocuments()

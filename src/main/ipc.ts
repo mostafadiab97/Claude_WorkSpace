@@ -253,6 +253,14 @@ export function registerIpc(services: Services, paths: Paths): void {
     checkFields: (_e, fields) => ws.checkFields(v.fieldDefs(fields)),
     getTypeUsage: () => ws.typeUsage(),
     saveSchemaTypes: (_e, itemTypes, linkTypes, revision) => ws.saveSchemaTypes(v.itemTypeDefs(itemTypes), v.linkTypeDefs(linkTypes), v.str(revision, 'revision')),
+    saveSchemaRules: (_e, rules, revision) => ws.saveSchemaRules(v.coverageRules(rules), v.str(revision, 'revision')),
+    getCoverage: (_e, document) => ws.getCoverage(document === undefined || document === null ? undefined : v.str(document, 'document', 300)),
+    getImpact: (_e, id) => ws.getImpact(v.id(id)),
+    getMatrix: (_e, req) => ws.getMatrix(v.matrixRequest(req)),
+    exportMatrix: (e, req) => {
+      const r = v.matrixRequest(req)
+      return saveExport(e, `traceability-matrix-${today()}`, 'xlsx', () => ws.exportMatrix(r))
+    },
     addLink: (_e, source, type, target) => ws.addLink(v.str(source, 'source'), v.str(type, 'link type'), v.str(target, 'target')),
     removeLink: (_e, source, type, target) => ws.removeLink(v.str(source, 'source'), v.str(type, 'link type'), v.str(target, 'target')),
     confirmLinks: (_e, source, target) => ws.confirmLinks(v.str(source, 'source'), v.optStr(target, 'target')),

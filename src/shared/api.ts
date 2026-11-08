@@ -1,5 +1,5 @@
 // The ONE contract between the UI (renderer) and the core (main process).
-import type { FieldDef, Item, ItemDiff, ItemIssue, ItemQuery, ItemTypeDef, LinkTypeDef, QueryResult, Schema, SchemaProblem } from './domain'
+import type { CoverageRule, FieldDef, Item, ItemDiff, ItemIssue, ItemQuery, ItemTypeDef, LinkTypeDef, QueryResult, Schema, SchemaProblem } from './domain'
 export type * from './domain'
 
 // The UI can do exactly what is listed here and nothing else. Adding a capability = a method in ReqochetApi,
@@ -151,6 +151,56 @@ export interface CreateBaselineRequest {
   /** With uncommitted changes and no `commit`: commit them first (with this message), or make the baseline without them. */
   uncommitted?: 'commit' | 'without'
   commitMessage?: string
+}
+
+/** Coverage per rule (theme 1b): the items the rule applies to and those that break it ("gaps"). */
+export interface CoverageReport {
+  rules: { rule: CoverageRule; total: number; gaps: { id: string; title: string; document: string; number?: string }[] }[]
+}
+
+/** One item of an impact chain (T-06): everything below the root that depends on it, each item once. */
+export interface ImpactNode {
+  id: string
+  title: string
+  type: string
+  document: string
+  number?: string
+  /** 1 = depends on the root directly. */
+  depth: number
+  /** The item it hangs under in the tree (the root's ID for depth 1). */
+  parent: string
+  /** How it depends: 'child' (it sits below in the hierarchy) or the link type it links with (verifies, refines…). */
+  via: string
+  /** Its link to the item above is suspect (that item changed since the link was confirmed). */
+  suspect: boolean
+}
+export interface ImpactResult {
+  nodes: ImpactNode[]
+  /** Stopped at the size limit. */
+  truncated: boolean
+}
+
+/** A traceability matrix (P-08): rows = filtered items of one type, columns = linked items of another. */
+export interface MatrixRequest {
+  rowType: string
+  colType: string
+  /** One link type only; all link types when missing. */
+  link?: string
+  /** The table's current filter (document, search, fields…); its types are replaced by `rowType`. */
+  query?: ItemQuery
+}
+export interface MatrixHead {
+  id: string
+  title: string
+  number?: string
+}
+export interface Matrix {
+  rows: MatrixHead[]
+  cols: MatrixHead[]
+  /** A link between row `r` and column `c`: `out` = the row item links to the column item. */
+  cells: { r: number; c: number; type: string; dir: 'out' | 'in'; suspect: boolean }[]
+  /** More rows matched than are shown (the export has them all). */
+  truncatedRows: boolean
 }
 
 export interface GitState {
@@ -574,6 +624,16 @@ export interface ReqochetApi {
   getTypeUsage(): Promise<{ items: Record<string, number>; links: Record<string, number> }>
   /** Saves the item and link types (S-04) with their required fields (S-05). */
   saveSchemaTypes(itemTypes: ItemTypeDef[], linkTypes: LinkTypeDef[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** The coverage rules (theme 1b, T-03): `[]` = the team chose none. Same conflict check as the types. */
+  saveSchemaRules(rules: CoverageRule[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** Coverage per rule (T-01): one document, or all when missing. */
+  getCoverage(document?: string): Promise<CoverageReport>
+  /** Everything that depends on an item, all levels down (T-06). */
+  getImpact(id: string): Promise<ImpactResult>
+  /** The traceability matrix (P-08). */
+  getMatrix(req: MatrixRequest): Promise<Matrix>
+  /** The whole matrix as an Excel file (asks where to save it). */
+  exportMatrix(req: MatrixRequest): Promise<ExportResult>
   /** Adds a link stored in `source` ("source verifies target"); confirmed against the target as it is now. */
   addLink(source: string, type: string, target: string): Promise<{ ok: true } | { ok: false; message: string }>
   removeLink(source: string, type: string, target: string): Promise<{ ok: true } | { ok: false; message: string }>
@@ -754,6 +814,11 @@ export const Channels = {
   saveSchemaFields: 'ws:saveSchemaFields',
   getTypeUsage: 'ws:getTypeUsage',
   saveSchemaTypes: 'ws:saveSchemaTypes',
+  saveSchemaRules: 'ws:saveSchemaRules',
+  getCoverage: 'trace:coverage',
+  getImpact: 'trace:impact',
+  getMatrix: 'trace:matrix',
+  exportMatrix: 'trace:exportMatrix',
   addLink: 'ws:addLink',
   removeLink: 'ws:removeLink',
   confirmLinks: 'ws:confirmLinks',

@@ -44,9 +44,11 @@ export const syncInfo = (stats: SyncStats): RepoInfo['lastSync'] => ({
 /** Reads all pages of a query (the index returns at most 10,000 rows per call). */
 /** "incomplete" needs the required fields of every type (S-05): the index gets them from the schema (query and export, CR-05). */
 export function withRequired<Q extends ItemQuery>(s: Session, q: Q): Q {
-  if (!q.incomplete) return q
+  // "coverage gaps" needs the rules the same way (theme 1b, T-08)
+  const out = q.gaps ? { ...q, rules: s.repo.schema.rules ?? [] } : q
+  if (!q.incomplete) return out
   const required = Object.fromEntries(s.repo.schema.itemTypes.filter((t) => t.required?.length).map((t) => [t.id, t.required as string[]]))
-  return { ...q, required }
+  return { ...out, required }
 }
 
 export function queryAll(index: IndexCache, q: Parameters<IndexCache['query']>[0]): ReturnType<IndexCache['query']>['items'] {

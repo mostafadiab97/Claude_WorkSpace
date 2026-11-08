@@ -1,5 +1,5 @@
 import { parse as parseYaml } from 'yaml'
-import type { FieldDef, FieldType, ItemTypeDef, LinkTypeDef, ParsedSchema, SchemaProblem } from './index'
+import type { CoverageRule, FieldDef, FieldType, ItemTypeDef, LinkTypeDef, ParsedSchema, SchemaProblem } from './index'
 
 /** Properties every item has; a schema may not redefine them as fields. */
 export const BUILT_IN_PROPERTIES = ['id', 'type', 'title', 'parent', 'order', 'links', 'text'] as const
@@ -145,6 +145,34 @@ export function parseSchema(text: string): ParsedSchema {
     }
   }
 
+  // ---- coverage rules (theme 1b): `rules:` missing = never decided; `rules: []` = none
+  let rules: CoverageRule[] | undefined
+  if (root.rules !== undefined && root.rules !== null) {
+    rules = []
+    list('rules').forEach((v, i) => {
+      const p = `rules[${i}]`
+      if (!isObj(v)) return add(p, 'Must be a mapping with type, link, direction and min.')
+      const type = str(v.type)
+      const link = str(v.link)
+      if (!type || !itemTypes.some((t) => t.id === type)) return add(`${p}.type`, `Unknown item type "${String(v.type)}".`)
+      if (!link || !linkTypes.some((l) => l.id === link)) return add(`${p}.link`, `Unknown link type "${String(v.link)}".`)
+      const direction = v.direction === 'outgoing' ? 'outgoing' : v.direction === 'incoming' || v.direction === undefined ? 'incoming' : undefined
+      if (!direction) return add(`${p}.direction`, 'Must be incoming or outgoing.')
+      const fromRaw = v.from === undefined || v.from === null ? [] : Array.isArray(v.from) ? v.from : [v.from]
+      const from = fromRaw.map((x) => str(x)).filter((x): x is string => x !== undefined)
+      const unknown = from.filter((f) => !itemTypes.some((t) => t.id === f))
+      if (unknown.length) return add(`${p}.from`, `Unknown item type "${unknown.join('", "')}".`)
+      const min = v.min === undefined ? 1 : typeof v.min === 'number' && Number.isInteger(v.min) && v.min >= 1 && v.min <= 99 ? v.min : undefined
+      if (min === undefined) return add(`${p}.min`, 'Must be a whole number from 1 to 99.')
+      const level = v.level === 'error' ? 'error' : v.level === 'warning' || v.level === undefined ? 'warning' : undefined
+      if (!level) return add(`${p}.level`, 'Must be warning or error.')
+      const id = str(v.id) ?? `${type}-${link}-${direction}`
+      if (!ID_RE.test(id)) return add(`${p}.id`, 'Must be lower-case letters, digits and dashes.')
+      if (rules?.some((r) => r.id === id)) return add(`${p}.id`, `Duplicate rule "${id}".`)
+      rules?.push({ id, type, link, direction, ...(from.length ? { from } : {}), min, level })
+    })
+  }
+
   const version = typeof root.version === 'number' ? root.version : 1
-  return { schema: { version, itemTypes, fields, linkTypes, ...(features ? { features } : {}) }, problems }
+  return { schema: { version, itemTypes, fields, linkTypes, ...(features ? { features } : {}), ...(rules ? { rules } : {}) }, problems }
 }

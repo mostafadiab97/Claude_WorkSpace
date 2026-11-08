@@ -55,3 +55,14 @@ linkTypes:
   - { id: verifies,   name: verifies,      reverseName: verified by, labels: { ar: يتحقّق من }, reverseLabels: { ar: متحقَّق منه بـ } }
   - { id: mitigates,  name: mitigates,     reverseName: mitigated by, labels: { ar: يخفّف }, reverseLabels: { ar: مخفَّف بـ } }
   - { id: relates-to, name: relates to,    reverseName: related to, labels: { ar: مرتبط بـ }, reverseLabels: { ar: مرتبط بـ } }
+
+# Coverage rules (theme 1b): what a complete project looks like. reqochet only warns — an item that breaks a rule is
+# a "coverage gap" (Traceability → Coverage, the table, Problems). Incoming = other items link to this one.
+# Obsolete items are not counted. Edit them in the window: Columns → Edit item types… → Rules.
+rules:
+  - { id: need-refined, type: stakeholder-need, link: refines, direction: incoming, from: [system-requirement], min: 1, level: warning }
+  - { id: system-verified, type: system-requirement, link: verifies, direction: incoming, from: [test-case], min: 1, level: warning }
+  - { id: software-verified, type: software-requirement, link: verifies, direction: incoming, from: [test-case], min: 1, level: warning }
+  - { id: hardware-verified, type: hardware-requirement, link: verifies, direction: incoming, from: [test-case], min: 1, level: warning }
+  - { id: interface-verified, type: interface-requirement, link: verifies, direction: incoming, from: [test-case], min: 1, level: warning }
+  - { id: risk-mitigated, type: risk, link: mitigates, direction: incoming, from: [system-requirement, software-requirement, hardware-requirement, interface-requirement], min: 1, level: warning }

@@ -1,7 +1,7 @@
 // Changing the project's field definitions (schema.yaml → fields), and telling the user beforehand how many
 // items hold values the new definition does not allow (review D-08).
 import type { FieldCheck, FieldDef, RepoInfo } from '../../shared/api'
-import type { ItemTypeDef, LinkTypeDef } from '../../shared/domain'
+import type { CoverageRule, ItemTypeDef, LinkTypeDef } from '../../shared/domain'
 import { T } from '../../shared/text'
 import { validateItem } from '../items'
 import { queryAll, syncInfo, type WorkspaceContext } from './context'
@@ -42,6 +42,21 @@ export function createSchemaFieldOps(ctx: WorkspaceContext, info: () => RepoInfo
       try {
         await s.repo.writeSchemaTypes(itemTypes, linkTypes, schemaRevision)
         log.info(`Schema types changed: ${itemTypes.map((t) => t.id).join(', ')} / ${linkTypes.map((t) => t.id).join(', ')}`)
+        const repo = await ctx.openRepo(s.repo.root)
+        s.repo = repo
+        s.lastSync = syncInfo(await s.index.sync(repo))
+        return { ok: true, info: info() }
+      } catch (e) {
+        return { ok: false, message: (e as Error).message }
+      }
+    },
+
+    /** The coverage rules (theme 1b, T-03); `[]` = the team chose none (the starter set is no longer offered). */
+    async saveSchemaRules(rules: CoverageRule[], schemaRevision: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }> {
+      const s = ctx.need()
+      try {
+        await s.repo.writeSchemaRules(rules, schemaRevision)
+        log.info(`Coverage rules changed: ${rules.map((r) => r.id).join(', ') || '(none)'}`)
         const repo = await ctx.openRepo(s.repo.root)
         s.repo = repo
         s.lastSync = syncInfo(await s.index.sync(repo))

@@ -4,7 +4,7 @@
 import type { Schema, SchemaProblem } from '../../shared/domain'
 import { parseSchema, BUILT_IN_PROPERTIES } from './parse'
 
-export type { FieldType, ItemTypeDef, FieldDef, LinkTypeDef, Schema, SchemaProblem } from '../../shared/domain'
+export type { CoverageRule, FieldType, ItemTypeDef, FieldDef, LinkTypeDef, Schema, SchemaProblem } from '../../shared/domain'
 
 export interface ParsedSchema {
   /** Usable schema: invalid entries are left out, so the app keeps working. */
@@ -13,3 +13,4 @@ export interface ParsedSchema {
 }
 
 export { parseSchema, BUILT_IN_PROPERTIES }
+export { starterRules } from './rules'

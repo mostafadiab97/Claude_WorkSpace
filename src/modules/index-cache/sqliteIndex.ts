@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import { contentFingerprint, type FieldValue, type Item } from '../items'
 import type { RequirementsRepo } from '../repository-store'
-import { documentOfPath, type ItemIssue } from '../../shared/domain'
+import { documentOfPath, type CoverageRule, type ItemIssue } from '../../shared/domain'
 import { T } from '../../shared/text'
 import type { IndexCache, IndexedItem, ItemQuery, LinkRef, QueryResult, SyncStats } from './index'
 
@@ -71,6 +71,22 @@ interface ItemRow {
 
 /** Outgoing links whose target changed since the link was confirmed. */
 const SUSPECT_SQL = 'SELECT 1 FROM links l JOIN items t ON t.id = l.target WHERE l.rid = i.rid AND l.confirmed IS NOT NULL AND l.confirmed <> t.fp'
+
+// ---- coverage rules (theme 1b, T-02…T-05): Obsolete items are counted on neither end
+const NOT_OBSOLETE = (a: string): string =>
+  `NOT EXISTS (SELECT 1 FROM item_fields o INDEXED BY item_fields_rid WHERE o.rid = ${a}.rid AND o.field = 'status' AND lower(trim(o.value)) = 'obsolete')`
+/** SQL for "item i breaks this rule"; its parameters are pushed in the order they appear. */
+function gapSql(r: CoverageRule, params: (string | number | null)[]): string {
+  params.push(r.type)
+  const from = r.from?.length ? ` AND x.type IN (${r.from.map(() => '?').join(',')})` : ''
+  params.push(r.link, ...(r.from ?? []))
+  const count =
+    r.direction === 'incoming'
+      ? `(SELECT COUNT(DISTINCT x.id) FROM links l JOIN items x ON x.rid = l.rid WHERE l.target = i.id AND l.type = ?${from} AND ${NOT_OBSOLETE('x')})`
+      : `(SELECT COUNT(DISTINCT x.id) FROM links l JOIN items x ON x.id = l.target WHERE l.rid = i.rid AND l.type = ?${from} AND ${NOT_OBSOLETE('x')})`
+  params.push(r.min)
+  return `(i.type = ? AND ${NOT_OBSOLETE('i')} AND ${count} < ?)`
+}
 const COUNTS = `(SELECT COUNT(*) FROM items c WHERE c.parent = i.id) AS child_count,
   (SELECT COUNT(*) FROM links l WHERE l.target = i.id) AS incoming_count,
   (SELECT COUNT(*) FROM links l JOIN items t ON t.id = l.target WHERE l.rid = i.rid AND l.confirmed IS NOT NULL AND l.confirmed <> t.fp) AS suspect_count`
@@ -420,6 +436,11 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         }
         where.push(ors.length ? `(${ors.join(' OR ')})` : '0')
       }
+      if (q.gaps) {
+        // items that break a coverage rule (T-08); the rules come from the schema through the workspace
+        const ors = (q.rules ?? []).map((r) => gapSql(r, params))
+        where.push(ors.length ? `(${ors.join(' OR ')})` : '0')
+      }
       if (q.document !== undefined) {
         // the document is the first folder of the path (S-10); '' = files directly in requirements/
         // stored at indexing time (0.18.0; before: a range on the path)
@@ -511,6 +532,17 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       // one pass for every document (PERF-02): '' = files directly in requirements/
       const rows = db.prepare('SELECT doc AS d, COUNT(*) AS n FROM items GROUP BY doc').all() as { d: string; n: number }[]
       return Object.fromEntries(rows.map((r) => [r.d, r.n]))
+    },
+    coverage(rules, document) {
+      const docSql = document !== undefined ? ' AND i.doc = ?' : ''
+      const docParams = document !== undefined ? [document] : []
+      return rules.map((rule) => {
+        const total = (db.prepare(`SELECT COUNT(*) AS n FROM items i WHERE i.type = ? AND ${NOT_OBSOLETE('i')}${docSql}`).get(rule.type, ...docParams) as { n: number }).n
+        const params: (string | number | null)[] = []
+        const sql = gapSql(rule, params)
+        const gaps = db.prepare(`SELECT i.id, i.title, i.doc FROM items i WHERE ${sql}${docSql} ORDER BY i.doc, i.ord, i.id`).all(...params, ...docParams) as { id: string; title: string; doc: string }[]
+        return { rule, total, gaps: gaps.map((g) => ({ id: g.id, title: g.title, document: g.doc })) }
+      })
     },
     typeUsage: () => ({
       items: Object.fromEntries((db.prepare('SELECT type AS t, COUNT(*) AS n FROM items GROUP BY type').all() as { t: string; n: number }[]).map((r) => [r.t, r.n])),

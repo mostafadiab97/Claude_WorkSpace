@@ -25,7 +25,8 @@ export function TraceabilityView(props: {
   onOpenItem: (id: string) => void
   /** Shows the gaps of one rule in the table (Coverage gaps filter + the rule's type). */
   onShowGaps: (type: string) => void
-  onEditRules: () => void
+  /** Missing while an old version is shown: nothing can be saved then (CR20-19). */
+  onEditRules?: () => void
   onClose: () => void
 }) {
   const [tab, setTab] = useState<'coverage' | 'matrix'>('coverage')
@@ -43,9 +44,11 @@ export function TraceabilityView(props: {
         </div>
         <span className="muted-inline">{props.document === undefined ? T.trace.allDocuments : T.trace.document(props.document || T.documents.loose)}</span>
         <span className="toolbar__spacer" />
-        <button type="button" className="btn" onClick={props.onEditRules}>
-          {T.trace.editRules}
-        </button>
+        {props.onEditRules && (
+          <button type="button" className="btn" onClick={props.onEditRules}>
+            {T.trace.editRules}
+          </button>
+        )}
         <button type="button" className="btn" onClick={props.onClose}>
           {T.trace.close}
         </button>
@@ -55,7 +58,7 @@ export function TraceabilityView(props: {
   )
 }
 
-function CoverageTab(props: { schema: Schema; document: string | undefined; dataVersion: number; onOpenItem: (id: string) => void; onShowGaps: (type: string) => void; onEditRules: () => void }) {
+function CoverageTab(props: { schema: Schema; document: string | undefined; dataVersion: number; onOpenItem: (id: string) => void; onShowGaps: (type: string) => void; onEditRules?: () => void }) {
   const [report, setReport] = useState<CoverageReport | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set())
@@ -63,7 +66,11 @@ function CoverageTab(props: { schema: Schema; document: string | undefined; data
   useEffect(() => {
     let live = true
     window.reqochet.getCoverage(props.document).then(
-      (r) => live && setReport(r),
+      (r) => {
+        if (!live) return
+        setReport(r)
+        setError(null)
+      },
       (e: unknown) => live && setError(errorMessage(e))
     )
     return () => {
@@ -76,15 +83,17 @@ function CoverageTab(props: { schema: Schema; document: string | undefined; data
     return (
       <div className="trace__empty">
         <p className="muted">{T.trace.noRules}</p>
-        <button type="button" className="btn btn--primary" onClick={props.onEditRules}>
-          {T.trace.editRules}
-        </button>
+        {props.onEditRules && (
+          <button type="button" className="btn btn--primary" onClick={props.onEditRules}>
+            {T.trace.editRules}
+          </button>
+        )}
       </div>
     )
   return (
     <ul className="trace__rules scroll" aria-label={T.trace.coverageTab}>
-      {[...report.rules].sort((a, b) => Number(a.total === 0) - Number(b.total === 0)).map(({ rule, total, gaps }) => {
-        const covered = total - gaps.length
+      {[...report.rules].sort((a, b) => Number(a.total === 0) - Number(b.total === 0)).map(({ rule, total, gapCount, gaps }) => {
+        const covered = total - gapCount
         const pct = total === 0 ? 100 : Math.floor((covered / total) * 100)
         const shown = open.has(rule.id)
         return (
@@ -107,7 +116,7 @@ function CoverageTab(props: { schema: Schema; document: string | undefined; data
               aria-label={ruleText(props.schema, rule)}
             >
               {/* UI-09: gaps colour the bar (warning, or danger for an error-level rule) */}
-              <span className={gaps.length === 0 ? 'trace__bar-fill' : `trace__bar-fill trace__bar-fill--${rule.level}`} style={{ inlineSize: total === 0 ? '0%' : `${pct}%` }} />
+              <span className={gapCount === 0 ? 'trace__bar-fill' : `trace__bar-fill trace__bar-fill--${rule.level}`} style={{ inlineSize: total === 0 ? '0%' : `${pct}%` }} />
             </div>
             <div className="trace__rule-foot">
               {total === 0 ? (
@@ -117,12 +126,12 @@ function CoverageTab(props: { schema: Schema; document: string | undefined; data
                   {T.trace.covered(covered, total)} · {T.trace.percent(pct)}
                 </span>
               )}
-              {total === 0 ? null : gaps.length === 0 ? (
+              {total === 0 ? null : gapCount === 0 ? (
                 <span className="muted-inline">{T.trace.noGaps}</span>
               ) : (
                 <>
                   <button type="button" className="link-btn" aria-expanded={shown} onClick={() => setOpen((s) => (s.has(rule.id) ? new Set([...s].filter((x) => x !== rule.id)) : new Set(s).add(rule.id)))}>
-                    {shown ? '▾' : isRtlDocument() ? '◂' : '▸'} {T.trace.gaps(gaps.length)}
+                    {shown ? '▾' : isRtlDocument() ? '◂' : '▸'} {T.trace.gaps(gapCount)}
                   </button>
                   <button type="button" className="link-btn" onClick={() => props.onShowGaps(rule.type)}>
                     {T.trace.showInTable}
@@ -141,10 +150,10 @@ function CoverageTab(props: { schema: Schema; document: string | undefined; data
                     </button>
                   </li>
                 ))}
-                {gaps.length > 200 && (
+                {gapCount > 200 && (
                   <li>
                     <button type="button" className="link-btn" onClick={() => props.onShowGaps(rule.type)}>
-                      {T.compare.showMore(gaps.length - 200)}
+                      {T.compare.showMore(gapCount - 200)}
                     </button>
                   </li>
                 )}
@@ -160,7 +169,7 @@ function CoverageTab(props: { schema: Schema; document: string | undefined; data
 function MatrixTab(props: { schema: Schema; query: Omit<ItemQuery, 'limit' | 'offset'>; dataVersion: number; onOpenItem: (id: string) => void }) {
   const types = props.schema.itemTypes.filter((t) => t.requirement !== false)
   const [rowType, setRowType] = useState(types.find((t) => t.id === 'system-requirement')?.id ?? types[0]?.id ?? '')
-  const [colType, setColType] = useState(types.find((t) => t.id === 'test-case')?.id ?? types[1]?.id ?? '')
+  const [colType, setColType] = useState(types.find((t) => t.id === 'test-case')?.id ?? types[1]?.id ?? types[0]?.id ?? '')
   const [link, setLink] = useState('')
   const [m, setM] = useState<Matrix | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -194,7 +203,11 @@ function MatrixTab(props: { schema: Schema; query: Omit<ItemQuery, 'limit' | 'of
   const relation = (type: string, dir: 'out' | 'in'): string => linkName(props.schema, type, dir === 'in')
   const byRow = useMemo(() => {
     const map = new Map<number, Matrix['cells']>()
-    for (const c of m?.cells ?? []) map.set(c.r, [...(map.get(c.r) ?? []), c])
+    for (const c of m?.cells ?? []) {
+      const row = map.get(c.r)
+      if (row) row.push(c)
+      else map.set(c.r, [c])
+    }
     return map
   }, [m])
   const label = (h: { id: string; number?: string }): string => `${h.number ? `${h.number} ` : ''}${h.id}`
@@ -297,7 +310,13 @@ function MatrixTab(props: { schema: Schema; query: Omit<ItemQuery, 'limit' | 'of
                 </thead>
                 <tbody>
                   {m.rows.map((r, k) => {
-                    const here = new Map((byRow.get(k) ?? []).map((c) => [c.c, c]))
+                    // a row and column can be linked more than once (both ways, two link types): one cell shows them all (CR20-07)
+                    const here = new Map<number, Matrix['cells']>()
+                    for (const c of byRow.get(k) ?? []) {
+                      const list = here.get(c.c)
+                      if (list) list.push(c)
+                      else here.set(c.c, [c])
+                    }
                     return (
                       <tr key={r.id} className={here.size === 0 ? 'matrix__row--empty' : undefined}>
                         <th scope="row" className="matrix__row" title={r.title}>
@@ -312,15 +331,14 @@ function MatrixTab(props: { schema: Schema; query: Omit<ItemQuery, 'limit' | 'of
                           <span dir="auto">{r.title}</span>
                         </th>
                         {m.cols.map((c, ci) => {
-                          const cell = here.get(ci)
+                          const links = here.get(ci)
+                          const suspect = links?.some((x) => x.suspect) === true
+                          const out = links?.some((x) => x.dir === 'out') === true
+                          const into = links?.some((x) => x.dir === 'in') === true
+                          const words = links?.map((x) => `${T.trace.matrixCell(r.id, relation(x.type, x.dir), c.id)}${x.suspect ? ` (${T.trace.matrixSuspect})` : ''}`).join(T.trace.listJoin)
                           return (
-                            <td
-                              key={c.id}
-                              className={cell ? (cell.suspect ? 'matrix__cell matrix__cell--suspect' : 'matrix__cell matrix__cell--on') : 'matrix__cell'}
-                              title={cell ? `${T.trace.matrixCell(r.id, relation(cell.type, cell.dir), c.id)}${cell.suspect ? ` (${T.trace.matrixSuspect})` : ''}` : undefined}
-                              aria-label={cell ? T.trace.matrixCell(r.id, relation(cell.type, cell.dir), c.id) : undefined}
-                            >
-                              {cell ? (cell.suspect ? '⚠' : cell.dir === 'out' ? '→' : '←') : ''}
+                            <td key={c.id} className={links ? (suspect ? 'matrix__cell matrix__cell--suspect' : 'matrix__cell matrix__cell--on') : 'matrix__cell'} title={words} aria-label={words}>
+                              {links ? (suspect ? '⚠' : out && into ? '↔' : out ? '→' : '←') : ''}
                             </td>
                           )
                         })}

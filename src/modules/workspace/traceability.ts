@@ -3,7 +3,7 @@
 import type { CoverageReport, ImpactNode, ImpactResult, Matrix, MatrixHead, MatrixRequest } from '../../shared/api'
 import type { IndexedItem, ItemQuery } from '../../shared/domain'
 import type { SheetData } from '../import-export'
-import { queryAll, type Session, type WorkspaceContext } from './context'
+import { queryAll, withRequired, type Session, type WorkspaceContext } from './context'
 import { compareOutline } from './structure'
 import { T } from '../../shared/text'
 
@@ -11,6 +11,9 @@ import { T } from '../../shared/text'
 export const IMPACT_LIMIT = 5000
 /** Rows drawn in the matrix view; the Excel export has them all. */
 export const MATRIX_ROWS = 2000
+/** The Excel file is a grid up to this size, else a list (SEC20-01). */
+export const GRID_COLS = 1000
+export const GRID_CELLS = 200_000
 /** "relates to" is a loose association, not a dependency: it does not carry impact (T-06). */
 const NOT_A_DEPENDENCY = new Set(['relates-to'])
 
@@ -21,32 +24,41 @@ export function createTraceabilityOps(ctx: WorkspaceContext) {
   }
   const byNumber = (a: MatrixHead, b: MatrixHead): number => compareOutline(a.number, b.number) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
 
-  function fullMatrix(s: Session, req: MatrixRequest): Matrix & { allRows: MatrixHead[] } {
+  /**
+   * The matrix: rows = the filtered row items (sorted by number), columns = the column-type items linked to the first
+   * `rowLimit` rows. Rows past the limit are only counted (P7/SEC20-07: the links of rows not shown are not read).
+   */
+  function buildMatrix(s: Session, req: MatrixRequest, rowLimit: number): Matrix {
     const filter: ItemQuery = { ...(req.query ?? {}), types: [req.rowType] }
     delete filter.limit
     delete filter.offset
-    const withRules = { ...filter, ...(filter.gaps ? { rules: s.repo.schema.rules ?? [] } : {}) }
-    const rowItems = queryAll(s.index, withRules)
-    const allRows = rowItems.map((i) => head(s, i)).sort(byNumber)
-    const rowIndex = new Map(allRows.map((r, k) => [r.id, k]))
+    // the table's filter as the table uses it: Incomplete needs the required fields, Coverage gaps the rules (CR20-04)
+    const rowItems = queryAll(s.index, withRequired(s, filter))
+    const sorted = rowItems.map((i) => ({ head: head(s, i), item: i })).sort((a, b) => byNumber(a.head, b.head))
+    const shown = sorted.slice(0, rowLimit)
     const colTypeOf = new Map<string, IndexedItem>()
     for (const c of queryAll(s.index, { types: [req.colType] })) colTypeOf.set(c.id, c)
-    const raw: { row: string; col: string; type: string; dir: 'out' | 'in'; suspect: boolean }[] = []
-    for (const it of rowItems) {
+    const raw: { r: number; col: string; type: string; dir: 'out' | 'in'; suspect: boolean }[] = []
+    shown.forEach(({ item: it }, r) => {
       for (const l of it.links) {
         if ((req.link && l.type !== req.link) || !colTypeOf.has(l.target)) continue
         const fp = s.index.fingerprint(l.target)
-        raw.push({ row: it.id, col: l.target, type: l.type, dir: 'out', suspect: l.confirmed !== undefined && fp !== undefined && l.confirmed !== fp })
+        raw.push({ r, col: l.target, type: l.type, dir: 'out', suspect: l.confirmed !== undefined && fp !== undefined && l.confirmed !== fp })
       }
       for (const l of s.index.incomingLinks(it.id)) {
         if ((req.link && l.type !== req.link) || !colTypeOf.has(l.id)) continue
-        raw.push({ row: it.id, col: l.id, type: l.type, dir: 'in', suspect: l.suspect })
+        raw.push({ r, col: l.id, type: l.type, dir: 'in', suspect: l.suspect })
       }
-    }
+    })
     const cols = [...new Set(raw.map((x) => x.col))].map((id) => head(s, colTypeOf.get(id) as IndexedItem)).sort(byNumber)
     const colIndex = new Map(cols.map((c, k) => [c.id, k]))
-    const cells = raw.map((x) => ({ r: rowIndex.get(x.row) as number, c: colIndex.get(x.col) as number, type: x.type, dir: x.dir, suspect: x.suspect }))
-    return { rows: allRows, allRows, cols, cells, truncatedRows: false, totalRows: allRows.length }
+    return {
+      rows: shown.map((x) => x.head),
+      cols,
+      cells: raw.map((x) => ({ r: x.r, c: colIndex.get(x.col) as number, type: x.type, dir: x.dir, suspect: x.suspect })),
+      truncatedRows: sorted.length > shown.length,
+      totalRows: sorted.length
+    }
   }
 
   return {
@@ -98,31 +110,43 @@ export function createTraceabilityOps(ctx: WorkspaceContext) {
     },
 
     matrix(s: Session, req: MatrixRequest): Matrix {
-      const m = fullMatrix(s, req)
-      if (m.rows.length <= MATRIX_ROWS) return { rows: m.rows, cols: m.cols, cells: m.cells, truncatedRows: false, totalRows: m.rows.length }
-      // the view draws the first rows; the columns and cells follow them
-      const rows = m.rows.slice(0, MATRIX_ROWS)
-      const cells = m.cells.filter((c) => c.r < MATRIX_ROWS)
-      const used = [...new Set(cells.map((c) => c.c))].sort((a, b) => a - b)
-      const remap = new Map(used.map((c, k) => [c, k]))
-      return { rows, cols: used.map((c) => m.cols[c] as MatrixHead), cells: cells.map((c) => ({ ...c, c: remap.get(c.c) as number })), truncatedRows: true, totalRows: m.rows.length }
+      return buildMatrix(s, req, MATRIX_ROWS)
     },
 
-    /** The whole grid for Excel: one row per row item, one column per linked item, the link type in the cell. */
+    /**
+     * For Excel: the grid when it is small enough to open (rows × columns ≤ GRID_CELLS, columns ≤ GRID_COLS), else a
+     * list — one row per row item with its linked items. A dense grid of 10,000 × 1,500 ran the main process out of
+     * memory (SEC20-01/P1); Excel also stops at 16,384 columns.
+     */
     matrixSheet(s: Session, req: MatrixRequest): SheetData {
-      const m = fullMatrix(s, req)
+      const m = buildMatrix(s, req, Number.MAX_SAFE_INTEGER)
       const label = (h: MatrixHead): string => `${h.number ? `${h.number} ` : ''}${h.id}`
-      const grid = m.allRows.map(() => m.cols.map(() => ''))
+      const text = (type: string, dir: 'out' | 'in'): string => {
+        const name = s.repo.schema.linkTypes.find((l) => l.id === type)
+        return dir === 'out' ? (name?.name ?? type) : (name?.reverseName ?? type)
+      }
+      const byRow = new Map<number, Matrix['cells']>()
       for (const c of m.cells) {
-        const row = grid[c.r] as string[]
-        const name = s.repo.schema.linkTypes.find((l) => l.id === c.type)
-        const text = c.dir === 'out' ? (name?.name ?? c.type) : (name?.reverseName ?? c.type)
-        row[c.c] = row[c.c] ? `${row[c.c]}, ${text}` : text
+        const row = byRow.get(c.r)
+        if (row) row.push(c)
+        else byRow.set(c.r, [c])
+      }
+      if (m.cols.length <= GRID_COLS && m.rows.length * m.cols.length <= GRID_CELLS) {
+        return {
+          name: T.trace.matrixSheet,
+          header: [T.columns.number, T.columns.id, T.columns.title, ...m.cols.map(label)],
+          rows: m.rows.map((r, k) => {
+            const line = new Array<string>(m.cols.length).fill('')
+            for (const c of byRow.get(k) ?? []) line[c.c] = line[c.c] ? `${line[c.c]}, ${text(c.type, c.dir)}` : text(c.type, c.dir)
+            return [r.number ?? '', r.id, r.title, ...line]
+          })
+        }
       }
       return {
         name: T.trace.matrixSheet,
-        header: [T.columns.number, T.columns.id, T.columns.title, ...m.cols.map(label)],
-        rows: m.allRows.map((r, k) => [r.number ?? '', r.id, r.title, ...(grid[k] as string[])])
+        header: [T.columns.number, T.columns.id, T.columns.title, T.trace.linkedItems],
+        rows: m.rows.map((r, k) => [r.number ?? '', r.id, r.title, (byRow.get(k) ?? []).map((c) => `${text(c.type, c.dir)} ${label(m.cols[c.c] as MatrixHead)}`).join('; ')]),
+        wrapColumns: [3]
       }
     }
   }

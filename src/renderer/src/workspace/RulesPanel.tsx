@@ -35,12 +35,17 @@ export function RulesPanel(props: { info: RepoInfo; onSaved: (i: RepoInfo) => vo
     setBusy(true)
     setError(null)
     try {
-      const taken = new Set<string>()
+      // a rule keeps its ID (the starter ones are named, e.g. need-refined); a new rule gets one from its parts (CR20-03)
+      const taken = new Set(rules.map((r) => r.id).filter((id) => id !== ''))
       const plain = rules.map(({ key: _key, ...r }) => {
         void _key
-        const id = ruleId(r, taken)
-        taken.add(id)
-        return { ...r, id, ...(r.from?.length ? { from: r.from } : {}) }
+        let id = r.id
+        if (id === '') {
+          id = ruleId(r, taken)
+          taken.add(id)
+        }
+        const { from, ...rest } = r
+        return { ...rest, id, ...(from?.length ? { from } : {}) }
       })
       const r = await window.reqochet.saveSchemaRules(plain, props.info.schemaRevision)
       if (!r.ok) setError(r.message)
@@ -57,7 +62,13 @@ export function RulesPanel(props: { info: RepoInfo; onSaved: (i: RepoInfo) => vo
   const [note, setNote] = useState<string | null>(null)
   const starter = async (): Promise<void> => {
     // the starter set comes from the core, so it is the same as for a new project
-    const r = await window.reqochet.starterRules()
+    let r: CoverageRule[]
+    try {
+      r = await window.reqochet.starterRules()
+    } catch (e) {
+      setError(errorMessage(e))
+      return
+    }
     const missing = r.filter((x) => !rules.some((y) => y.type === x.type && y.link === x.link && y.direction === x.direction))
     // UI-11: say so when nothing was missing
     setNote(missing.length === 0 ? T.trace.starterAll : null)

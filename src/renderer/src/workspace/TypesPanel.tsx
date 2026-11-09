@@ -128,7 +128,8 @@ export function TypesDialog({ info, onSaved, onClose, tab: firstTab = 'items' }:
             {T.trace.rulesTab}
           </button>
         </div>
-        {tab === 'rules' ? (
+        {/* both tabs stay mounted, so switching keeps unsaved edits (CR20-06) */}
+        <div className={tab === 'rules' ? 'types__pane' : 'is-hidden'}>
           <RulesPanel
             info={info}
             onSaved={onSaved}
@@ -145,8 +146,8 @@ export function TypesDialog({ info, onSaved, onClose, tab: firstTab = 'items' }:
               </footer>
             )}
           />
-        ) : (
-        <>
+        </div>
+        <div className={tab === 'types' ? 'types__pane' : 'is-hidden'}>
         <div className="modal__body scroll">
           <h3 className="types__heading">{T.typesDialog.itemTypes}</h3>
           <div className="fields-table types-table" role="table" aria-label={T.typesDialog.itemTypes}>
@@ -243,8 +244,7 @@ export function TypesDialog({ info, onSaved, onClose, tab: firstTab = 'items' }:
           </div>
           {closeAsk}
         </footer>
-        </>
-        )}
+        </div>
       </div>
     </div>
   )

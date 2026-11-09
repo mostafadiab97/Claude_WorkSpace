@@ -109,7 +109,15 @@ export async function scenario(name, body) {
   }
   const failures = (ctx.t?.failures ?? 0) + (crashed ? 1 : 0)
   // every run made new projects (the 1,500-item one is large): a full disk once made all scenarios fail (0.20.0)
-  if (failures === 0) for (const d of made) rmSync(d, { recursive: true, force: true, maxRetries: 3 })
+  // clean-up never changes the result (Windows may still hold a file: EBUSY)
+  if (failures === 0)
+    for (const d of made) {
+      try {
+        rmSync(d, { recursive: true, force: true, maxRetries: 3 })
+      } catch (e) {
+        console.log(`(could not remove ${d}: ${e.code ?? e.message})`)
+      }
+    }
   console.log(failures === 0 ? `\n${name}: passed` : `\n${name}: ${failures} failure(s)`)
   process.exit(failures === 0 ? 0 : 1)
 }

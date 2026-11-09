@@ -28,6 +28,10 @@ function labelsOf(v: unknown, path: string, add: (path: string, message: string)
   return Object.keys(out).length > 0 ? out : undefined
 }
 
+/** Limits for coverage rules (SEC20-02): one SQL query checks them all. */
+export const MAX_RULES = 100
+export const MAX_FROM = 20
+
 export function parseSchema(text: string): ParsedSchema {
   const problems: SchemaProblem[] = []
   const add = (path: string, message: string): void => void problems.push({ path, message })
@@ -147,10 +151,14 @@ export function parseSchema(text: string): ParsedSchema {
 
   // ---- coverage rules (theme 1b): `rules:` missing = never decided; `rules: []` = none
   let rules: CoverageRule[] | undefined
-  if (root.rules !== undefined && root.rules !== null) {
+  // a value that is not a list is reported and counts as "never decided", not as "none" (QA-2 of 0.20.0)
+  if (root.rules !== undefined && root.rules !== null && !Array.isArray(root.rules)) add('rules', 'Must be a list of rules.')
+  else if (root.rules !== undefined && root.rules !== null) {
     rules = []
     list('rules').forEach((v, i) => {
       const p = `rules[${i}]`
+      // a pulled schema could hold thousands: SQLite refuses a query that large (SEC20-02)
+      if (i >= MAX_RULES) return i === MAX_RULES ? add('rules', `At most ${MAX_RULES} rules; the rest are ignored.`) : undefined
       if (!isObj(v)) return add(p, 'Must be a mapping with type, link, direction and min.')
       const type = str(v.type)
       const link = str(v.link)
@@ -159,7 +167,10 @@ export function parseSchema(text: string): ParsedSchema {
       const direction = v.direction === 'outgoing' ? 'outgoing' : v.direction === 'incoming' || v.direction === undefined ? 'incoming' : undefined
       if (!direction) return add(`${p}.direction`, 'Must be incoming or outgoing.')
       const fromRaw = v.from === undefined || v.from === null ? [] : Array.isArray(v.from) ? v.from : [v.from]
-      const from = fromRaw.map((x) => str(x)).filter((x): x is string => x !== undefined)
+      // every entry must be a type name (QA-4); a repeated one counts once (QA-6)
+      if (fromRaw.some((x) => str(x) === undefined)) return add(`${p}.from`, 'Must be a list of item type names.')
+      if (fromRaw.length > MAX_FROM) return add(`${p}.from`, `At most ${MAX_FROM} item types.`)
+      const from = [...new Set(fromRaw.map((x) => str(x) as string))]
       const unknown = from.filter((f) => !itemTypes.some((t) => t.id === f))
       if (unknown.length) return add(`${p}.from`, `Unknown item type "${unknown.join('", "')}".`)
       const min = v.min === undefined ? 1 : typeof v.min === 'number' && Number.isInteger(v.min) && v.min >= 1 && v.min <= 99 ? v.min : undefined

@@ -31,8 +31,8 @@ await t(`getCoverage one document (${docs[0]})`, () => ws.getCoverage(typeof doc
 await t('query gaps paged 10000', () => ws.query({ gaps: true, limit: 10000, offset: 0, sort: { by: 'order' }, brief: true }), 5, (r) => `${r.total} matches, ${r.items.length} rows`)
 await t('query gaps limit 0 (count)', () => ws.query({ gaps: true, limit: 0 }), 5, (r) => `${r.total}`)
 await t('query gaps limit 100', () => ws.query({ gaps: true, limit: 100 }), 5, (r) => `${r.total}`)
-const all = ws.query({ limit: 100000, brief: true, sort: { by: 'order' } }).items
-const top = all.find((i) => !i.parent) ; const tops = all.filter((i) => !i.parent)
+const all = []; for (let o = 0; ; o += 10000) { const r = ws.query({ limit: 10000, offset: o, brief: true, sort: { by: 'order' } }).items; all.push(...r); if (r.length < 10000) break }
+const tops = all.filter((i) => !i.parent)
 const childCount = new Map(); for (const i of all) if (i.parent) childCount.set(i.parent, (childCount.get(i.parent) || 0) + 1)
 const size = (id) => ws.getImpact(id).nodes.length
 const biggest = tops.map((i) => ({ ...i, n: size(i.id) })).sort((a, b) => b.n - a.n)[0]

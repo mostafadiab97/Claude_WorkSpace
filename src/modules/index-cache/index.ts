@@ -46,7 +46,7 @@ export interface IndexCache {
   documentCounts(): Record<string, number>
   typeUsage(): { items: Record<string, number>; links: Record<string, number> }
   /** Per coverage rule: the items it applies to (not Obsolete) and those that break it, in document order (theme 1b). */
-  coverage(rules: CoverageRule[], document?: string): { rule: CoverageRule; total: number; gaps: { id: string; title: string; document: string }[] }[]
+  coverage(rules: CoverageRule[], document?: string): { rule: CoverageRule; total: number; gapCount: number; gaps: { id: string; title: string; document: string }[] }[]
   /**
    * Whole-repository problems, answered from the index in milliseconds: duplicate IDs, links to missing
    * items, missing parents, and files that could not be read (`itemId` is then the file path).

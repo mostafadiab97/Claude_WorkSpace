@@ -28,3 +28,5 @@ loads them automatically from this folder; a person can read them as checklists)
 | `owner-decision-walkthrough` | discussing open questions or findings with the owner one point at a time, recording each answer |
 
 - `brand-icons.mjs` — remakes `resources/brand/icon/png/*.png` and the two `.ico` files from the icon drawings (Playwright's Chromium + Python Pillow).
+
+- `perf-qa-trace.mjs` — traceability timings on a big repository (coverage, gaps filter, impact, matrix, Excel export, rules save): `node --import tsx tools/perf-qa-trace.mjs <repo>`; `SKIP_EXPORT=1` skips the exports (0.20.0 performance review).

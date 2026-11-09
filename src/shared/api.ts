@@ -155,7 +155,8 @@ export interface CreateBaselineRequest {
 
 /** Coverage per rule (theme 1b): the items the rule applies to and those that break it ("gaps"). */
 export interface CoverageReport {
-  rules: { rule: CoverageRule; total: number; gaps: { id: string; title: string; document: string; number?: string }[] }[]
+  /** `gaps` lists at most the first 1,000; `gapCount` is exact. */
+  rules: { rule: CoverageRule; total: number; gapCount: number; gaps: { id: string; title: string; document: string; number?: string }[] }[]
 }
 
 /** One item of an impact chain (T-06): everything below the root that depends on it, each item once. */

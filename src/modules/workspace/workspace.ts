@@ -543,7 +543,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     saveSchemaRules: q(fields.saveSchemaRules),
     getCoverage: (document?: string) => trace.coverage(reading(), document),
     getImpact: (id: string) => trace.impact(reading(), id),
-    starterRules: () => starterRules(need().repo.schema),
+    starterRules: () => starterRules(reading().repo.schema),
     getMatrix: (req: MatrixRequest) => trace.matrix(reading(), req),
     async exportMatrix(req: MatrixRequest) {
       const sheet = trace.matrixSheet(reading(), req)

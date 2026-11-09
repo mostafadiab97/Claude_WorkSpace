@@ -4,7 +4,7 @@ CLAUDE.md is read at the start of every session and again after every context co
 history there cost thousands of tokens each time (the owner asked to save tokens, 8 Nov 2026). **This file is the
 status**: update it with every release (the version table, "Next", the owner's last report, test counts).
 
-## Status (v0.19.1, 8 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.20.0, 9 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -35,7 +35,8 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.18.0 1a structure part 2 — baselines (`workspace/baselines.ts`; annotated tags `baseline/<name>`; waiting/refused lists in the repository's Git config `reqochet.baselinesToPush` / `reqochet.baselinesRefused`, pushed one by one with the next Push), the branch history (`git.history`, search by words or commit ID), read-only snapshot (`SnapshotDialog.tsx`), branch at a commit; **Versions** button (`HistoryDialog.tsx`); copied files: `renewCopyId` + Problems button; Discard removes emptied folders (level by level); updater API fallback (`newerRelease`); incomplete **!** in rows; slimmer bars + compact document bar; privacy diagram (Archify `privacy.json`); outline only on the Windows icon; six helper reports `docs/reviews/agents/0.18.0-*.md` | Released (v0.18.0) |
 | 0.19.0 reading the table and old versions (D-19a/b/c, the owner 8 Nov) — main column with growing rows (`ItemTable.tsx` `MainCell`, measured rows, toolbar **Show text**, `textUpTo` 3,001), an old version in the table (`workspace/versionView.ts`, temporary index in `cache/versions/`, `openVersion`/`closeVersion`, write guard `q` vs `qr`, version bar; `SnapshotDialog`/`getSnapshot` removed), compare layout (`ChangesView.tsx`: left list + continuous changes, at most 150 cards; exports in the header; `ChangesSide` only for committing), privacy diagram dark + tighter; six helper reports `docs/reviews/agents/0.19.0-*.md` | Released (v0.19.0) |
 | 0.19.1 fix: no empty space between rows after Show text off (`ItemTable.tsx`: row keys per mode + `virtualizer.measure()` on a switch); e2e `rows-0.19`; final-touches reminder list in `docs/design/roadmap.md` | Released (v0.19.1) |
-| **Next** | **0.20.0 theme 1b traceability views** (decided 8 Nov — `docs/reviews/2026-11-08-1b-traceability.md`, decisions.md "Traceability views"): coverage rules in schema.yaml + Rules tab, Traceability view (Coverage, Matrix with Excel export), Impact tab, gap mark + Problems group + filter; the pilot can start after it. Then a stabilisation patch with the later review items (PERF19-02/04, PERF-02/03, editor preview limit, toasts UX19-01, the rare qa-0.17.0 test failure, Arabic diagram labels) | — |
+| 0.20.0 theme 1b traceability (decisions T-01…T-08, 8 Nov) — coverage rules in schema.yaml (`schema/parse.ts` + `rules.ts`, writer keeps hand edits, ≤ 100 rules), coverage and the gaps filter in SQL (`gapSql`), `workspace/traceability.ts` (coverage, impact ≤ 5,000, matrix ≤ 2,000 rows drawn, Excel grid or list), window: `TraceabilityView.tsx` (Coverage, Matrix), `RulesPanel.tsx` (Rules tab), `ImpactView.tsx`, gap mark, Problems group, status-bar count, starter offer; self-test 25 steps; six helper reports `docs/reviews/agents/0.20.0-*.md` | Released (v0.20.0) |
+| **Next** | Owner's 0.20.0 checklist; then **the pilot can start** (release plan). Then a stabilisation patch with the later review items (gap SQL at 50k P3/P5, PERF19-02/04, PERF-02/03, editor preview limit, toasts UX19-01, tab pattern UI-02, the rare qa-0.17.0 test failure, Arabic diagram labels) and the owner's answer on SEC20-05 (Excel cells starting with = + - @) | — |
 
 The owner's last report (8 Nov 2026): **0.19.1 all 3 steps passed** (24/24, 174.6 s) — nothing open from his tests. 0.19.0: all 5 passed, test 2 → 0.19.1; diagrams to revisit at the final touches.
 Before: 0.18.0 all 5 passed (24/24). Before: 0.17.2 all 5 passed (23/23). Before: 0.13.1 all 4 steps passed, 21/21 (66.8 s). Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
@@ -45,8 +46,8 @@ sandbox, `Claude_SandBox` and `Claude_SandBox_B`, still on his PC) — self-test
 points on the branch panel went into 0.12.1. He has no DOORS/Jama to try ReqIF: exports are validated against the
 official schema in `tests/reqif.test.ts` (`tests/fixtures/reqif-schema/`, xmllint-wasm).
 
-Automated tests: 578 unit tests (with a coverage floor) + 13 e2e scenarios (`rows-0.19`, `history-0.18`, `journey`, `fixes`, `excel`, `branches`,
-`language`, `health`, `qa-0.15.0-polish`, `qa-0.16.0-rename`, `fixes-0.16.3`, `fixes-0.16.4`, `structure-0.17`) + the 24-step in-app release self-test + the CI acceptance run on the installed app; what each covers and every speed measurement: `docs/TESTING.md` → "Automated
+Automated tests: 617 unit tests (with a coverage floor) + 14 e2e scenarios (`trace-0.20`, `rows-0.19`, `history-0.18`, `journey`, `fixes`, `excel`, `branches`,
+`language`, `health`, `qa-0.15.0-polish`, `qa-0.16.0-rename`, `fixes-0.16.3`, `fixes-0.16.4`, `structure-0.17`) + the 25-step in-app release self-test + the CI acceptance run on the installed app; what each covers and every speed measurement: `docs/TESTING.md` → "Automated
 checks in detail".
 
 ## Where we are right now (2 Nov 2026) — read this first

@@ -314,7 +314,11 @@ export function WorkspaceScreen({
   useEffect(() => {
     if (!(schema.rules?.length ?? 0)) return
     let live = true
-    void window.reqochet.queryItems({ gaps: true, limit: 0 }).then((r) => live && setGapCount(r.total))
+    window.reqochet.queryItems({ gaps: true, limit: 0 }).then(
+      (r) => live && setGapCount(r.total),
+      // the count must never break the window; the rules are listed under Problems if they cannot be checked (SEC20-04)
+      () => live && setGapCount(0)
+    )
     return () => {
       live = false
     }
@@ -449,10 +453,14 @@ export function WorkspaceScreen({
               filters.setTypes(type)
               filters.setLinkFilter('gaps')
             }}
-            onEditRules={() => {
-              setTypesTab('rules')
-              setEditTypes(true)
-            }}
+            {...(viewing
+              ? {}
+              : {
+                  onEditRules: () => {
+                    setTypesTab('rules')
+                    setEditTypes(true)
+                  }
+                })}
             onClose={() => setShowTrace(false)}
           />
         )}

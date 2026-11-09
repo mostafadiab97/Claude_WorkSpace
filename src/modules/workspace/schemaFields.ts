@@ -38,6 +38,12 @@ export function createSchemaFieldOps(ctx: WorkspaceContext, info: () => RepoInfo
       const goneLinks = s.repo.schema.linkTypes.filter((t) => !linkTypes.some((x) => x.id === t.id) && (used.links[t.id] ?? 0) > 0)
       if (goneItems.length) return { ok: false, message: T.types.stillUsed(goneItems.map((t) => `${t.name} (${used.items[t.id]})`).join(', ')) }
       if (goneLinks.length) return { ok: false, message: T.types.stillUsed(goneLinks.map((t) => `${t.name} (${used.links[t.id]})`).join(', ')) }
+      // a type a coverage rule names cannot be removed either: the rule would silently disappear (QA-3 of 0.20.0)
+      const rules = s.repo.schema.rules ?? []
+      const ruled = rules.filter(
+        (r) => !itemTypes.some((t) => t.id === r.type) || !linkTypes.some((l) => l.id === r.link) || (r.from ?? []).some((f) => !itemTypes.some((t) => t.id === f))
+      )
+      if (ruled.length) return { ok: false, message: T.types.usedByRule(ruled.map((r) => r.id).join(', ')) }
       if (itemTypes.length === 0) return { ok: false, message: T.types.atLeastOne }
       try {
         await s.repo.writeSchemaTypes(itemTypes, linkTypes, schemaRevision)

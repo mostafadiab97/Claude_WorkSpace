@@ -73,6 +73,8 @@ interface ItemRow {
 const SUSPECT_SQL = 'SELECT 1 FROM links l JOIN items t ON t.id = l.target WHERE l.rid = i.rid AND l.confirmed IS NOT NULL AND l.confirmed <> t.fp'
 
 // ---- coverage rules (theme 1b, T-02…T-05): Obsolete items are counted on neither end
+/** Gaps listed per rule in the Coverage view (the count is exact). */
+const GAPS_LISTED = 1000
 const NOT_OBSOLETE = (a: string): string =>
   `NOT EXISTS (SELECT 1 FROM item_fields o INDEXED BY item_fields_rid WHERE o.rid = ${a}.rid AND o.field = 'status' AND lower(trim(o.value)) = 'obsolete')`
 /** SQL for "item i breaks this rule"; its parameters are pushed in the order they appear. */
@@ -540,8 +542,10 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         const total = (db.prepare(`SELECT COUNT(*) AS n FROM items i WHERE i.type = ? AND ${NOT_OBSOLETE('i')}${docSql}`).get(rule.type, ...docParams) as { n: number }).n
         const params: (string | number | null)[] = []
         const sql = gapSql(rule, params)
-        const gaps = db.prepare(`SELECT i.id, i.title, i.doc FROM items i WHERE ${sql}${docSql} ORDER BY i.doc, i.ord, i.id`).all(...params, ...docParams) as { id: string; title: string; doc: string }[]
-        return { rule, total, gaps: gaps.map((g) => ({ id: g.id, title: g.title, document: g.doc })) }
+        const gapCount = (db.prepare(`SELECT COUNT(*) AS n FROM items i WHERE ${sql}${docSql}`).get(...params, ...docParams) as { n: number }).n
+        // the view lists the first ones; the table's filter shows them all (SEC20-03)
+        const gaps = db.prepare(`SELECT i.id, i.title, i.doc FROM items i WHERE ${sql}${docSql} ORDER BY i.doc, i.ord, i.id LIMIT ${GAPS_LISTED}`).all(...params, ...docParams) as { id: string; title: string; doc: string }[]
+        return { rule, total, gapCount, gaps: gaps.map((g) => ({ id: g.id, title: g.title, document: g.doc })) }
       })
     },
     typeUsage: () => ({

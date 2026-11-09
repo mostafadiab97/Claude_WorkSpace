@@ -254,7 +254,8 @@ export function registerIpc(services: Services, paths: Paths): void {
     getTypeUsage: () => ws.typeUsage(),
     saveSchemaTypes: (_e, itemTypes, linkTypes, revision) => ws.saveSchemaTypes(v.itemTypeDefs(itemTypes), v.linkTypeDefs(linkTypes), v.str(revision, 'revision')),
     saveSchemaRules: (_e, rules, revision) => ws.saveSchemaRules(v.coverageRules(rules), v.str(revision, 'revision')),
-    getCoverage: (_e, document) => ws.getCoverage(document === undefined || document === null ? undefined : v.str(document, 'document', 300)),
+    // '' = the loose files in requirements/ (QA-1 of 0.20.0)
+    getCoverage: (_e, document) => ws.getCoverage(document === undefined || document === null ? undefined : document === '' ? '' : v.str(document, 'document', 300)),
     getImpact: (_e, id) => ws.getImpact(v.id(id)),
     starterRules: () => ws.starterRules(),
     getMatrix: (_e, req) => ws.getMatrix(v.matrixRequest(req)),

@@ -4,7 +4,7 @@ import { mkdir, readdir, readFile, lstat, stat, writeFile, rename, rmdir } from 
 import { basename, dirname, join } from 'node:path'
 import { generateId, ITEM_FILE_EXTENSION, parseItemFile, serializeItem, type FieldValue, type Item } from '../items'
 import { isMap, isSeq, parseDocument, type YAMLMap, type YAMLSeq } from 'yaml'
-import { parseSchema, type FieldDef } from '../schema'
+import { parseSchema, type CoverageRule, type FieldDef } from '../schema'
 import { removeFile, renameFile, writeFileAtomic } from '../safe-files'
 import { checkRepository } from './checks'
 import { ConflictError } from './errors'
@@ -212,14 +212,48 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
         if (revisionOf(current) !== expectedRevision) {
           throw new ConflictError('schema.yaml was changed outside reqochet since the repository was opened. Refresh and try again.')
         }
-        // only the "rules" list is replaced; comments and every other section stay as written
+        // only the "rules" list changes; comments and every other section stay as written. Inside the list a rule the
+        // window knows is updated in place (its unknown keys and comments stay), a rule reqochet could not read (a typo,
+        // listed under Problems) is kept as written, and only the rules the user removed go (CR20-01/02)
         const doc = parseDocument(current)
-        const plain = rules.map((r) => ({ id: r.id, type: r.type, link: r.link, direction: r.direction, ...(r.from?.length ? { from: r.from } : {}), min: r.min, level: r.level }))
-        const seq = doc.createNode(plain) as YAMLSeq
-        for (const n of seq.items) if (isMap(n)) n.flow = true // one rule per line, like the types
+        const readable = new Set((parseSchema(current).schema.rules ?? []).map((r) => r.id))
+        const plain = (r: CoverageRule): Record<string, unknown> => ({ id: r.id, type: r.type, link: r.link, direction: r.direction, ...(r.from?.length ? { from: r.from } : {}), min: r.min, level: r.level })
+        const old = doc.get('rules', true)
+        const seq = (isSeq(old) ? old : doc.createNode([])) as YAMLSeq
+        const wanted = new Map(rules.map((r) => [r.id, r]))
+        const idOf = (n: unknown): string | undefined => {
+          if (!isMap(n)) return undefined
+          const v = n.get('id')
+          if (typeof v === 'string') return v
+          // a rule without an id is known by the id the parser gives it
+          const t = n.get('type'), l = n.get('link'), d = n.get('direction') ?? 'incoming'
+          return typeof t === 'string' && typeof l === 'string' ? `${t}-${l}-${String(d)}` : undefined
+        }
+        const kept: unknown[] = []
+        const seen = new Set<string>()
+        for (const n of seq.items) {
+          const id = idOf(n)
+          if (id !== undefined && wanted.has(id) && isMap(n)) {
+            const r = wanted.get(id) as CoverageRule
+            for (const [k, v] of Object.entries(plain(r))) n.set(k, Array.isArray(v) ? doc.createNode(v, { flow: true }) : v)
+            if (!r.from?.length) n.delete('from')
+            kept.push(n)
+            seen.add(id)
+          } else if (id === undefined || !readable.has(id)) kept.push(n) // not readable: keep it as written
+        }
+        for (const r of rules) {
+          if (seen.has(r.id)) continue
+          const n = doc.createNode(plain(r))
+          if (isMap(n)) n.flow = true // one rule per line, like the types
+          kept.push(n)
+        }
+        seq.items = kept as YAMLSeq['items']
         doc.set('rules', seq)
         const text = doc.toString({ lineWidth: 0 })
-        const own = parseSchema(text).problems.filter((p) => p.path === 'rules' || p.path.startsWith('rules['))
+        // refuse only problems this save brings in: a rule kept as written may still have the problem it had
+        const rulesProblems = (t: string): string[] => parseSchema(t).problems.filter((p) => p.path === 'rules' || p.path.startsWith('rules[')).map((p) => p.message)
+        const before = new Set(rulesProblems(current))
+        const own = parseSchema(text).problems.filter((p) => (p.path === 'rules' || p.path.startsWith('rules[')) && !before.has(p.message))
         if (own.length > 0) throw new Error(own.map((p) => `${p.path}: ${p.message}`).join(' '))
         await atomicWrite(schemaFile, text)
       },

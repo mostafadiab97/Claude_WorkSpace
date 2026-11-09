@@ -3,7 +3,7 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
-## 0.20.0 — 8 Nov 2026 — theme 1b: traceability views
+## 0.20.0 — 9 Nov 2026 — theme 1b: traceability views
 - **Owner (8 Nov 2026):** 1b next (the pilot can start after it); decisions T-01…T-08, all as recommended
   (`docs/reviews/2026-11-08-1b-traceability.md`); helper reviews as before (all six).
 - **Coverage rules** in `schema.yaml` (`rules:` — shared through Git): a starter set in new projects, offered once to
@@ -14,6 +14,11 @@ version it was about, and what it led to.
   **Export Excel**).
 - **Impact** tab in the editor (also from a change in Changes): everything that depends on the item, all levels down.
 - **Coverage gaps**: a ◌ mark in rows, **Filters → Coverage gaps**, a group in Problems and a count in the status bar.
+- **Helper review (`docs/reviews/agents/0.20.0-*.md`):** a big matrix no longer crashes the Excel export (very large
+  ones are written as a list); saving rules keeps hand-written keys, comments and a rule with a typo; rules keep their
+  IDs; the matrix follows the Incomplete filter; an item type a rule uses cannot be removed; at most 100 rules are read
+  from schema.yaml; loose files work in Coverage; Arabic plurals and word order; matrix marks for direction with a
+  legend and titles in the column headers.
 - Self-test step 25; e2e `trace-0.20`. The e2e harness removes a passing scenario's temporary projects (a full disk
   broke a test run).
 

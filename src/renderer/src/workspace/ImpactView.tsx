@@ -15,7 +15,11 @@ export function ImpactView(props: { schema: Schema; itemId: string; reloadToken:
   useEffect(() => {
     let live = true
     window.reqochet.getImpact(props.itemId).then(
-      (x) => live && setR(x),
+      (x) => {
+        if (!live) return
+        setR(x)
+        setError(null)
+      },
       (e: unknown) => live && setError(errorMessage(e))
     )
     return () => {
@@ -61,7 +65,7 @@ export function ImpactView(props: { schema: Schema; itemId: string; reloadToken:
                 <span className="muted-inline">{typeName(props.schema, n.type)}</span>
               </li>
             ))}
-            {ordered.length > 1000 && <li className="muted-inline">{T.compare.showMore(ordered.length - 1000)}</li>}
+            {ordered.length > 1000 && <li className="muted-inline">{T.trace.notShown(ordered.length - 1000)}</li>}
           </ul>
         </>
       )}

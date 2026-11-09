@@ -290,6 +290,7 @@ const en = {
     duplicate: 'Two types have the same name — give each its own.'
   },
   types: {
+    usedByRule: (rules: string) => `A coverage rule uses this type (${rules}). Change or remove the rule first (Traceability → Edit rules).`,
     stillUsed: (list: string) => `These types are still used and cannot be removed: ${list}. Change those items or links first.`,
     atLeastOne: 'Keep at least one item type.'
   },
@@ -1001,11 +1002,13 @@ const en = {
   /** Messages the core sends after Git actions (shown in the Git bar and the Changes panel). */
   /** Baselines and the history list (1a part 2 — S-06, S-08, S-09). */
   trace: {
+    notShown: (count: number) => `${n(count)} more not shown.`,
+    linkedItems: 'Linked items',
     starterAll: 'The starter rules are already in the list.',
     orJoin: (names: string[]) => (names.length < 2 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} or ${names[names.length - 1]}`),
     listJoin: ', ',
     matrixNoLink: 'no link',
-    matrixLegend: '→ the row item links to it · ← it links to the row item · ⚠ suspect link · ◌ row without any link. Hover a mark for the link type.',
+    matrixLegend: '→ the row item links to it · ← it links to the row item · ↔ both · ⚠ suspect link · ◌ row without any link. Hover a mark for the link type.',
     listSep: ': ',
     statusGaps: (count: number) => (count === 1 ? '1 coverage gap' : `${n(count)} coverage gaps`),
     noItems: 'No items of this type here yet.',

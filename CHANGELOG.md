@@ -3,6 +3,10 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.20.1 — in progress
+- **Owner (9 Nov 2026), SEC20-05:** yes — every Excel export marks a cell that starts like a formula (`=`, `+`, `-`,
+  `@`) as text (Text format), so editing it in Excel later never turns it into a live formula.
+
 ## 0.20.0 — 9 Nov 2026 — theme 1b: traceability views
 - **Owner (8 Nov 2026):** 1b next (the pilot can start after it); decisions T-01…T-08, all as recommended
   (`docs/reviews/2026-11-08-1b-traceability.md`); helper reviews as before (all six).

@@ -328,3 +328,6 @@ adds new test files only, in its own worktree. Details: `docs/AGENT-WORKFLOW.md`
 - **Gaps (T-08):** a mark in table rows, a **Coverage gaps** group in Problems, and a **Coverage gaps** filter.
 - Matrix (P-08; T-07 technical): rows = filtered items of one type, columns = linked items of another; a list form above
   ~300 columns; Excel export has the full grid.
+
+- **Excel exports (the owner, 9 Nov 2026 — SEC20-05):** a cell whose text starts like a formula (`=`, `+`, `-`, `@`)
+  is marked as text in every Excel export (the cell gets the Text format), so editing it in Excel later never runs it.

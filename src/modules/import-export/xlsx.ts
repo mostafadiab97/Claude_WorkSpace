@@ -52,13 +52,23 @@ export interface SheetData {
 }
 
 /** A workbook with one sheet per entry: bold, frozen header row with filters; numbers stay text. */
+/** Cell texts Excel would treat as a formula when typed (=, +, -, @, tab, carriage return at the start). */
+const FORMULA_START = /^[=+\-@\t\r]/
+
 export async function writeXlsx(sheets: SheetData[]): Promise<Uint8Array> {
   const wb = new Workbook()
   wb.creator = 'reqochet'
   for (const s of sheets) {
     const ws = wb.addWorksheet(safeSheetName(s.name), { views: [{ state: 'frozen', ySplit: 1 }] })
     ws.addRow(s.header)
-    for (const r of s.rows) ws.addRow(r)
+    for (const r of s.rows) {
+      const row = ws.addRow(r)
+      // a text that starts like a formula gets the Text format, so editing the cell in Excel later keeps what is typed
+      // as text and never turns it into a live formula (the owner, 9 Nov 2026 — SEC20-05)
+      r.forEach((v, c) => {
+        if (FORMULA_START.test(v)) row.getCell(c + 1).numFmt = '@'
+      })
+    }
     const head = ws.getRow(1)
     head.font = { bold: true }
     head.alignment = { vertical: 'middle' }

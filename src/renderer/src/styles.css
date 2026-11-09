@@ -4184,7 +4184,7 @@ html {
 }
 .matrix thead th {
   position: sticky;
-  top: 0;
+  inset-block-start: 0;
   z-index: 2;
 }
 .matrix__corner {
@@ -4269,4 +4269,38 @@ html {
 }
 .impact__suspect {
   color: var(--rm-color-warning);
+}
+
+/* UI-15 (0.20.0): the incomplete and gap marks sit right after the title, at text size */
+.table__main-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rm-space-xs);
+}
+.table__main-head .table__gap,
+.table__main-head .table__incomplete {
+  font-size: inherit;
+}
+.trace__rule--idle {
+  opacity: 0.7;
+}
+.trace__bar-fill--warning {
+  background: var(--rm-color-warning);
+}
+.trace__bar-fill--error {
+  background: var(--rm-color-danger);
+}
+.matrix__col .link-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.matrix__col-title {
+  max-block-size: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.matrix__col-id {
+  font-size: var(--rm-font-size-small);
+  color: var(--rm-color-text-muted);
 }

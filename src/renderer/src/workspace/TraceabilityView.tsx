@@ -3,6 +3,7 @@ import type { CoverageReport, Matrix, RepoInfo } from '../../../shared/api'
 import type { ItemQuery, Schema } from '../../../shared/domain'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
+import { isRtlDocument } from '../lib/language'
 import { linkName, ruleText, typeName, typeLabel } from '../lib/schema'
 
 /** Above this many columns the matrix is shown as a list (T-07); the Excel file always has the grid. */
@@ -82,12 +83,12 @@ function CoverageTab(props: { schema: Schema; document: string | undefined; data
     )
   return (
     <ul className="trace__rules scroll" aria-label={T.trace.coverageTab}>
-      {report.rules.map(({ rule, total, gaps }) => {
+      {[...report.rules].sort((a, b) => Number(a.total === 0) - Number(b.total === 0)).map(({ rule, total, gaps }) => {
         const covered = total - gaps.length
         const pct = total === 0 ? 100 : Math.floor((covered / total) * 100)
         const shown = open.has(rule.id)
         return (
-          <li key={rule.id} className="trace__rule">
+          <li key={rule.id} className={total === 0 ? 'trace__rule trace__rule--idle' : 'trace__rule'}>
             <div className="trace__rule-head">
               <span className="trace__rule-text" dir="auto">
                 {ruleText(props.schema, rule)}
@@ -96,8 +97,17 @@ function CoverageTab(props: { schema: Schema; document: string | undefined; data
                 {rule.level === 'error' ? T.trace.levelError : T.trace.levelWarning}
               </span>
             </div>
-            <div className="trace__bar" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={ruleText(props.schema, rule)}>
-              <span className="trace__bar-fill" style={{ inlineSize: total === 0 ? '0%' : `${pct}%` }} />
+            <div
+              className="trace__bar"
+              role="meter"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={total === 0 ? 0 : pct}
+              aria-valuetext={total === 0 ? T.trace.noItems : T.trace.covered(covered, total)}
+              aria-label={ruleText(props.schema, rule)}
+            >
+              {/* UI-09: gaps colour the bar (warning, or danger for an error-level rule) */}
+              <span className={gaps.length === 0 ? 'trace__bar-fill' : `trace__bar-fill trace__bar-fill--${rule.level}`} style={{ inlineSize: total === 0 ? '0%' : `${pct}%` }} />
             </div>
             <div className="trace__rule-foot">
               {total === 0 ? (
@@ -112,7 +122,7 @@ function CoverageTab(props: { schema: Schema; document: string | undefined; data
               ) : (
                 <>
                   <button type="button" className="link-btn" aria-expanded={shown} onClick={() => setOpen((s) => (s.has(rule.id) ? new Set([...s].filter((x) => x !== rule.id)) : new Set(s).add(rule.id)))}>
-                    {shown ? '▾' : '▸'} {T.trace.gaps(gaps.length)}
+                    {shown ? '▾' : isRtlDocument() ? '◂' : '▸'} {T.trace.gaps(gaps.length)}
                   </button>
                   <button type="button" className="link-btn" onClick={() => props.onShowGaps(rule.type)}>
                     {T.trace.showInTable}
@@ -228,6 +238,7 @@ function MatrixTab(props: { schema: Schema; query: Omit<ItemQuery, 'limit' | 'of
         </button>
       </div>
       <p className="muted-inline">{T.trace.matrixHint}</p>
+      <p className="muted-inline trace__legend">{T.trace.matrixLegend}</p>
       {saved && (
         <p className="compare__pull" role="status">
           {T.trace.exportedTo(saved)}{' '}
@@ -257,8 +268,8 @@ function MatrixTab(props: { schema: Schema; query: Omit<ItemQuery, 'limit' | 'of
                     </button>{' '}
                     <span dir="auto">{r.title}</span>
                     <span className="muted-inline">
-                      {' → '}
-                      {(byRow.get(k) ?? []).map((c) => `${relation(c.type, c.dir)} ${label(m.cols[c.c] ?? { id: '?' })}`).join(', ') || '—'}
+                      {T.trace.listSep}
+                      {(byRow.get(k) ?? []).map((c) => `${relation(c.type, c.dir)} ${label(m.cols[c.c] ?? { id: '?' })}`).join(T.trace.listJoin) || T.trace.matrixNoLink}
                     </span>
                   </li>
                 ))}
@@ -275,7 +286,10 @@ function MatrixTab(props: { schema: Schema; query: Omit<ItemQuery, 'limit' | 'of
                     {m.cols.map((c) => (
                       <th key={c.id} scope="col" className="matrix__col" title={`${label(c)} — ${c.title}`}>
                         <button type="button" className="link-btn" onClick={() => props.onOpenItem(c.id)}>
-                          {label(c)}
+                          <span className="matrix__col-title" dir="auto">
+                            {c.title || T.common.noTitle}
+                          </span>
+                          <span className="matrix__col-id">{label(c)}</span>
                         </button>
                       </th>
                     ))}
@@ -287,6 +301,11 @@ function MatrixTab(props: { schema: Schema; query: Omit<ItemQuery, 'limit' | 'of
                     return (
                       <tr key={r.id} className={here.size === 0 ? 'matrix__row--empty' : undefined}>
                         <th scope="row" className="matrix__row" title={r.title}>
+                          {here.size === 0 && (
+                            <span className="table__gap" role="img" aria-label={T.trace.matrixNoLink} title={T.trace.matrixNoLink}>
+                              ◌
+                            </span>
+                          )}
                           <button type="button" className="link-btn" onClick={() => props.onOpenItem(r.id)}>
                             {label(r)}
                           </button>{' '}
@@ -301,7 +320,7 @@ function MatrixTab(props: { schema: Schema; query: Omit<ItemQuery, 'limit' | 'of
                               title={cell ? `${T.trace.matrixCell(r.id, relation(cell.type, cell.dir), c.id)}${cell.suspect ? ` (${T.trace.matrixSuspect})` : ''}` : undefined}
                               aria-label={cell ? T.trace.matrixCell(r.id, relation(cell.type, cell.dir), c.id) : undefined}
                             >
-                              {cell ? (cell.suspect ? '⚠' : '●') : ''}
+                              {cell ? (cell.suspect ? '⚠' : cell.dir === 'out' ? '→' : '←') : ''}
                             </td>
                           )
                         })}

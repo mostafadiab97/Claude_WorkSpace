@@ -437,14 +437,14 @@ export function ItemTable(props: {
                               <span className="tree__toggle tree__toggle--leaf" aria-hidden="true" />
                             )}
                             {full ? (
-                              <MainCell heading={isHeading(schema, item.type)} title={c.value(item)} text={item.text} />
+                              <MainCell heading={isHeading(schema, item.type)} title={c.value(item)} text={item.text} marks={[incompleteMark(item.id), gapMark(item.id)]} />
                             ) : (
                               <span className={isHeading(schema, item.type) ? 'table__text table__text--heading' : 'table__text'} dir="auto">
                                 {c.value(item)}
                               </span>
                             )}
-                            {incompleteMark(item.id)}
-                            {gapMark(item.id)}
+                            {!full && incompleteMark(item.id)}
+                            {!full && gapMark(item.id)}
                             {item.childCount > 0 && !open && <span className="table__count">{item.childCount.toLocaleString('en')}</span>}
                           </span>
                         ) : (
@@ -457,9 +457,9 @@ export function ItemTable(props: {
                             // user content takes its own direction, so it is cut at the right end in either window (UX-02)
                             dir={c.key === 'number' || c.key === 'id' || c.key === 'links' ? undefined : 'auto'}
                           >
-                            {c.key === 'title' && full ? <MainCell heading={isHeading(schema, item.type)} title={c.value(item)} text={item.text} /> : c.value(item)}
-                            {c.key === 'title' && incompleteMark(item.id)}
-                            {c.key === 'title' && gapMark(item.id)}
+                            {c.key === 'title' && full ? <MainCell heading={isHeading(schema, item.type)} title={c.value(item)} text={item.text} marks={[incompleteMark(item.id), gapMark(item.id)]} /> : c.value(item)}
+                            {c.key === 'title' && !full && incompleteMark(item.id)}
+                            {c.key === 'title' && !full && gapMark(item.id)}
                           </span>
                         )
                       )
@@ -478,12 +478,16 @@ export function ItemTable(props: {
  * The main column (D-19a), like the DOORS module view: a heading shows its title; any other item its title in bold and
  * its whole text below (formatted as in the editor's preview).
  */
-function MainCell({ heading, title, text }: { heading: boolean; title: string; text: string }) {
+/** `marks`: the incomplete and coverage-gap marks, right after the title (UI-15 of 0.20.0). */
+function MainCell({ heading, title, text, marks }: { heading: boolean; title: string; text: string; marks?: ReactNode[] }) {
   const html = useMemo(() => (heading || !text.trim() ? '' : renderItemText(text, MAIN_TEXT_CHARS)), [heading, text])
   return (
     // a link in the text does not open from the table: a click there selects the row (CR19-11)
     <span className="table__main" dir="auto" onClickCapture={(e) => (e.target as HTMLElement).closest('a') && e.preventDefault()}>
-      <span className={heading ? 'table__text table__text--heading' : 'table__text table__main-title'}>{title}</span>
+      <span className="table__main-head">
+        <span className={heading ? 'table__text table__text--heading' : 'table__text table__main-title'}>{title}</span>
+        {marks}
+      </span>
       {html && <span className="table__main-text markdown" dangerouslySetInnerHTML={{ __html: html }} />}
     </span>
   )

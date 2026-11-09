@@ -34,7 +34,8 @@ await t('query gaps limit 100', () => ws.query({ gaps: true, limit: 100 }), 5, (
 const all = ws.query({ limit: 100000, brief: true, sort: { by: 'order' } }).items
 const top = all.find((i) => !i.parent) ; const tops = all.filter((i) => !i.parent)
 const childCount = new Map(); for (const i of all) if (i.parent) childCount.set(i.parent, (childCount.get(i.parent) || 0) + 1)
-const biggest = tops.sort((a, b) => (childCount.get(b.id) || 0) - (childCount.get(a.id) || 0))[0]
+const size = (id) => ws.getImpact(id).nodes.length
+const biggest = tops.map((i) => ({ ...i, n: size(i.id) })).sort((a, b) => b.n - a.n)[0]
 const leaf = all.find((i) => !childCount.has(i.id) && i.type === 'system-requirement')
 await t(`getImpact top heading (${biggest.id})`, () => ws.getImpact(biggest.id), 5, (r) => `${r.nodes.length} nodes truncated=${r.truncated} payload ${JSON.stringify(r).length >> 10} KB`)
 await t('getImpact leaf system-requirement', () => ws.getImpact(leaf.id), 5, (r) => `${r.nodes.length} nodes`)
@@ -43,8 +44,11 @@ await t('getMatrix sysreq x test-case', () => ws.getMatrix(mreq), 5, (r) => `row
 await t('getMatrix sysreq x test-case link=verifies', () => ws.getMatrix({ ...mreq, link: 'verifies' }), 3, (r) => `cells ${r.cells.length}`)
 await t('getMatrix sw-req x test-case', () => ws.getMatrix({ rowType: 'software-requirement', colType: 'test-case' }), 3, (r) => `rows ${r.rows.length}/${r.totalRows} cols ${r.cols.length} cells ${r.cells.length}`)
 await t('getMatrix sysreq x test-case gaps only', () => ws.getMatrix({ ...mreq, query: { gaps: true } }), 3, (r) => `rows ${r.totalRows}`)
+await t('exportMatrix need x sysreq (small)', () => ws.exportMatrix({ rowType: 'stakeholder-need', colType: 'system-requirement' }), 3, (r) => `${r.count} rows, ${(r.content.length / 1024).toFixed(0)} KB`)
+if (!process.env.SKIP_EXPORT) {
 await t('exportMatrix (xlsx)', () => ws.exportMatrix(mreq), 3, (r) => `${r.count} rows, ${(r.content.length / 1024).toFixed(0)} KB`)
 await t('exportMatrix sw-req x test-case (xlsx)', () => ws.exportMatrix({ rowType: 'software-requirement', colType: 'test-case' }), 2, (r) => `${r.count} rows, ${(r.content.length / 1024).toFixed(0)} KB`)
+}
 // saveSchemaRules: re-sync time (alternate none / starter)
 const starter = ws.starterRules()
 for (let i = 0; i < 4; i++) {

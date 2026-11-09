@@ -1001,6 +1001,12 @@ const en = {
   /** Messages the core sends after Git actions (shown in the Git bar and the Changes panel). */
   /** Baselines and the history list (1a part 2 — S-06, S-08, S-09). */
   trace: {
+    starterAll: 'The starter rules are already in the list.',
+    orJoin: (names: string[]) => (names.length < 2 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} or ${names[names.length - 1]}`),
+    listJoin: ', ',
+    matrixNoLink: 'no link',
+    matrixLegend: '→ the row item links to it · ← it links to the row item · ⚠ suspect link · ◌ row without any link. Hover a mark for the link type.',
+    listSep: ': ',
     statusGaps: (count: number) => (count === 1 ? '1 coverage gap' : `${n(count)} coverage gaps`),
     noItems: 'No items of this type here yet.',
     button: 'Traceability',
@@ -1047,9 +1053,9 @@ const en = {
     exportExcel: 'Export Excel',
     exportedTo: (path: string) => `Saved to ${path}.`,
     loading: 'Calculating…',
-    offer: 'Start with the usual coverage rules? For example "every System Requirement is verified by a Test Case". reqochet only warns; the team can change them in Rules.',
+    offer: 'Start with the usual coverage rules? For example "every System Requirement is verified by a Test Case". reqochet only warns; rules can be added or changed later in Traceability → Edit rules.',
     offerYes: 'Add the rules',
-    offerNo: 'No rules',
+    offerNo: 'No rules for now',
     impactTab: 'Impact',
     impactHint: 'Everything that depends on this item, all levels down: items linked to it and the items below it.',
     impactNone: 'Nothing depends on this item.',

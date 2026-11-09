@@ -122,7 +122,7 @@ export function ProblemList({
               {T.trace.problemsGroup} ({gapCount.toLocaleString('en')})
             </summary>
             <p className="problems__row problems__row--warning">
-              <span className="problems__mark" aria-label={T.workspace.severityWarning}>
+              <span className="problems__mark" role="img" aria-label={T.workspace.severityWarning}>
                 ⚠
               </span>
               <span className="problems__msg">{T.trace.problemsCount(gapCount)}</span>

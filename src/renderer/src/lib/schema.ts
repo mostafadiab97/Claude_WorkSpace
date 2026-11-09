@@ -60,7 +60,7 @@ export const staleTranslations = (
 
 /** A coverage rule in words (theme 1b): "Every System Requirement is verified by at least 1 Test Case". */
 export const ruleText = (schema: Schema, r: CoverageRule): string => {
-  const from = r.from?.length ? r.from.map((t) => typeName(schema, t)).join(' / ') : T.trace.anyItem
+  const from = r.from?.length ? T.trace.orJoin(r.from.map((t) => typeName(schema, t))) : T.trace.anyItem
   return r.direction === 'incoming'
     ? T.trace.rule(typeName(schema, r.type), linkName(schema, r.link, true), r.min, from)
     : T.trace.ruleOut(typeName(schema, r.type), linkName(schema, r.link), r.min, from)

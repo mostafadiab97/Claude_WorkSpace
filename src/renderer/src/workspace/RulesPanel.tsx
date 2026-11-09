@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { RepoInfo } from '../../../shared/api'
 import type { CoverageRule } from '../../../shared/domain'
 import { T } from '../../../shared/text'
@@ -54,17 +54,31 @@ export function RulesPanel(props: { info: RepoInfo; onSaved: (i: RepoInfo) => vo
       setBusy(false)
     }
   }
+  const [note, setNote] = useState<string | null>(null)
   const starter = async (): Promise<void> => {
     // the starter set comes from the core, so it is the same as for a new project
     const r = await window.reqochet.starterRules()
-    change([...rules, ...r.filter((x) => !rules.some((y) => y.type === x.type && y.link === x.link && y.direction === x.direction)).map((x) => ({ ...x, key: nextKey++ }))])
+    const missing = r.filter((x) => !rules.some((y) => y.type === x.type && y.link === x.link && y.direction === x.direction))
+    // UI-11: say so when nothing was missing
+    setNote(missing.length === 0 ? T.trace.starterAll : null)
+    if (missing.length) change([...rules, ...missing.map((x) => ({ ...x, key: nextKey++ }))])
   }
+  // UI-10: a new rule's row comes into view with its first field focused
+  const listRef = useRef<HTMLUListElement>(null)
+  const added = useRef(false)
+  useEffect(() => {
+    if (!added.current) return
+    added.current = false
+    const last = listRef.current?.lastElementChild
+    last?.scrollIntoView({ block: 'nearest' })
+    last?.querySelector('select')?.focus()
+  }, [rules.length])
   return (
     <>
       <div className="modal__body scroll">
         <p className="muted">{T.trace.rulesHint}</p>
         {rules.length === 0 && <p className="muted">{T.trace.rulesNone}</p>}
-        <ul className="rules">
+        <ul className="rules" ref={listRef}>
           {rules.map((r) => (
             <li key={r.key} className="rules__row">
               <p className="rules__text" dir="auto">
@@ -132,7 +146,10 @@ export function RulesPanel(props: { info: RepoInfo; onSaved: (i: RepoInfo) => vo
           <button
             type="button"
             className="btn btn--small"
-            onClick={() => change([...rules, { key: nextKey++, id: '', type: types.find((t) => t.requirement !== false)?.id ?? types[0]?.id ?? '', link: schema.linkTypes[0]?.id ?? '', direction: 'incoming', min: 1, level: 'warning' }])}
+            onClick={() => {
+              added.current = true
+              change([...rules, { key: nextKey++, id: '', type: types.find((t) => t.requirement !== false)?.id ?? types[0]?.id ?? '', link: schema.linkTypes[0]?.id ?? '', direction: 'incoming', min: 1, level: 'warning' }])
+            }}
           >
             {T.trace.ruleAdd}
           </button>
@@ -140,6 +157,11 @@ export function RulesPanel(props: { info: RepoInfo; onSaved: (i: RepoInfo) => vo
             {T.trace.starterAdd}
           </button>
         </div>
+        {note && (
+          <p className="muted-inline" role="status">
+            {note}
+          </p>
+        )}
         {error && (
           <p className="notice notice--error" role="alert">
             {error}

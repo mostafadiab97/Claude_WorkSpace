@@ -29,6 +29,11 @@ the Arabic reviewer proposes additions or corrections, the builder updates this 
 | copy (of a file) | نسخة مكررة / نسخة احتياطية | a copied item file / a safety copy before an update |
 | Back to now | العودة إلى الآن | leaves an old version shown in the table |
 | Compare with now | المقارنة بالحالي | |
+| traceability | التتبّع | 0.20.0 |
+| coverage / coverage rule / coverage gap | التغطية / قاعدة تغطية / ثغرة تغطية (ثغرات) | |
+| matrix | المصفوفة | |
+| impact | الأثر | |
+| rule sentence | «كل X … ما لا يقل عن N من نوع Y» | avoids a singular noun after a number; names isolated (user-defined) |
 | repository | مستودع (مستودعات) | |
 | branch | فرع (فروع) | |
 | commit (noun / verb) | إيداع (إيداعات) | |

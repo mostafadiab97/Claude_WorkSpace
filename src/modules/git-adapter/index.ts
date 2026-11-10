@@ -4,7 +4,7 @@
 // and change the single line in src/main/composition.ts.
 // Paths given to and returned by these methods are relative to the repository top folder, with forward slashes.
 import type { GitInfo } from '../../shared/api'
-import { createSystemGitAdapter, GitError, parseOverwrittenFiles, parseStatusV2, readBlobs } from './systemGit'
+import { createSystemGitAdapter, GitError, parseOverwrittenFiles, parseStatusV2, PUSH_NO_UPSTREAM, PUSH_OTHER_NAME, readBlobs } from './systemGit'
 
 export interface FileChange {
   path: string
@@ -196,5 +196,5 @@ export interface GitAdapter {
   addRemote(root: string, name: string, url: string): Promise<void>
 }
 
-export { createSystemGitAdapter, GitError, parseOverwrittenFiles, parseStatusV2, readBlobs }
+export { createSystemGitAdapter, GitError, parseOverwrittenFiles, parseStatusV2, PUSH_NO_UPSTREAM, PUSH_OTHER_NAME, readBlobs }
 export type { CommandRunner, RunOptions } from './systemGit'

@@ -235,3 +235,21 @@ A new colour token must be added to `config/theme.json` **and** to the built-in 
 A header cell with `transform: rotate(…)` did not stay at the top of the scrolling matrix, and `max-block-size` on
 vertical text limits its width, not its height. Rotate the text inside the cell, and limit vertical text with
 `max-inline-size`.
+
+## Git output, push and CI install (0.20.2, whole-project review)
+
+- **Every Git call goes through `git()` in `systemGit.ts`** (or adds `GIT_CONFIG_ARGS` itself, like `readBlobs`): it
+  adds `-c core.quotePath=false` and, on Windows, `-c core.longpaths=true`. Without the first, Git prints non-English
+  paths escaped (`"requirements/\331\205…"`), and every path comparison fails silently (W-02: pulls refused, history
+  incomplete for an Arabic document name).
+- **Push names what it sends:** `push <remote> HEAD:refs/heads/<same branch>`, to `pushRemote`/`remote.pushDefault`
+  when set; an upstream of another name is refused (`PUSH_OTHER_NAME`), like plain `git push`. Never go back to a plain
+  `git push`: a user's `push.default=matching` or `+` push rule would push other branches or force (W-11, CR-01).
+- **CI installs with `npm ci --ignore-scripts`** (W-31): a new dependency that needs an install script (a native
+  module, a downloaded binary) fails in CI without a clear message — run its step by hand in the workflow, as
+  `tools/ci-electron.mjs` does for Electron.
+- **A save that must hit one exact file** (the same ID in two files, a copied document) passes `writeItem(item,
+  { path, expectedRevision })` with the revision from `readItemAt(path)`; without `path` the index locator picks the
+  first file in byte order (W-01).
+- **Git's rename guess in diffs:** item files are mostly header, so Git pairs two different items as a "rename";
+  Compare treats a rename between different IDs as a deletion plus an addition (W-07).

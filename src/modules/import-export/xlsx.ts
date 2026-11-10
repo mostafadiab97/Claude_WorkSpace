@@ -154,7 +154,7 @@ export async function updateXlsx(data: Uint8Array, sheet: string, edits: CellEdi
   if (!ws) throw new Error(`The sheet "${sheet}" is not in the file any more.`)
   for (const e of edits) ws.getCell(e.row, e.col).value = e.value
   let last = ws.actualRowCount === 0 ? 0 : ws.lastRow?.number ?? 0
-  if (last > EXCEL_MAX_ROWS) throw new Error(T.importMsg.tooManyRows(ws.name, last))
+  if (last + append.length > EXCEL_MAX_ROWS) throw new Error(T.importMsg.tooManyRows(ws.name, last + append.length))
   for (const r of append) {
     last++
     r.forEach((v, c) => {

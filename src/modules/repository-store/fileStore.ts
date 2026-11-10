@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { documentOfPath } from '../../shared/domain'
 import { mkdir, readdir, readFile, lstat, stat, writeFile, rename, rmdir } from 'node:fs/promises'
-import { basename, dirname, join } from 'node:path'
+import { basename, dirname, isAbsolute, join } from 'node:path'
 import { generateId, ITEM_FILE_EXTENSION, parseItemFile, serializeItem, type FieldValue, type Item } from '../items'
 import { isMap, isSeq, parseDocument, type YAMLMap, type YAMLSeq } from 'yaml'
 import { parseSchema, type CoverageRule, type FieldDef } from '../schema'
@@ -111,6 +111,10 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
     // locator (the index) knows the real path, so such an item can be read, saved and deleted in place.
     const pathOf = (id: string, document?: string): string => options.locate?.(id) ?? defaultPath(id, document)
     const fileFor = (id: string, document?: string): string => join(folder, pathOf(id, document))
+
+    /** A relative path to an item file that stays inside the folder (CR-08): no absolute path, no "..", ends in .md. */
+    const isSafeItemPath = (rel: string): boolean =>
+      rel.endsWith(ITEM_FILE_EXTENSION) && !isAbsolute(rel) && !rel.split(/[\\/]/).some((part) => part === '..' || part === '') && !rel.includes(':') && !rel.includes(String.fromCharCode(0))
 
     /** One item file with its revision; null when it does not exist. */
     const readAt = async (rel: string): Promise<{ ok: true; item: Item; revision: string } | { ok: false; error: string; revision: string } | null> => {
@@ -298,6 +302,8 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
         }
       },
 
+      readItemAt: (rel) => (isSafeItemPath(rel) ? readAt(rel) : Promise.resolve(null)),
+
       itemPath: pathOf,
       defaultItemPath: defaultPath,
 
@@ -358,6 +364,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
       async writeItem(item, options = {}) {
         // the file this save writes; the conflict check reads that same file (W-01: a duplicated ID must not let the
         // check or the write land on the other copy; CRC-19: a new item is checked in its own document)
+        if (options.path !== undefined && !isSafeItemPath(options.path)) throw new Error(`"${options.path}" is not an item file inside the requirements folder.`)
         const rel = options.path ?? pathOf(item.id, item.document)
         const file = join(folder, rel)
         const current = await readAt(rel)

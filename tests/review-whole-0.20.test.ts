@@ -4,7 +4,7 @@ import { copyFile, mkdtemp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { createSystemGitAdapter } from '../src/modules/git-adapter'
+import { createSystemGitAdapter, type CommandRunner } from '../src/modules/git-adapter'
 import { mergeItems, type Item } from '../src/modules/items'
 import { parseCsv, readXlsx } from '../src/modules/import-export'
 import ExcelJS from 'exceljs'
@@ -113,7 +113,7 @@ describe('0.20.2 whole-project review fixes', () => {
     expect(got?.item.title).toBe('title from B')
     expect(got?.item.fields.status).toBe('Review')
     const h = await ws.itemHistory(id)
-    expect(JSON.stringify(h)).toMatch(/title from B|b\b/)
+    expect(JSON.stringify(h)).toContain('"message":"b"')
     expect(Array.isArray(h) ? h.length : (h as { entries?: unknown[] }).entries?.length ?? 0).toBeGreaterThanOrEqual(3)
   })
   it('W-03: a merge keeps extra keys on links, and a change only to such a key is not lost', () => {
@@ -130,6 +130,11 @@ describe('0.20.2 whole-project review fixes', () => {
     // only theirs changed the note: the merge must not treat the item as unchanged
     const r2 = mergeItems(item('t', 'old'), item('t', 'old'), item('t', 'new'), schema)
     expect(r2.item?.links[0]?.extra).toEqual({ note: 'new' })
+    // both changed the note differently: asked, not silently decided (CR-04)
+    const r3 = mergeItems(item('t', 'old'), item('t', 'mine'), item('t', 'theirs'), schema)
+    expect(r3.conflicts).toHaveLength(1)
+    expect(r3.conflicts[0]?.key).toMatch(/^link:.*:note$/)
+    expect(mergeItems(item('t', 'old'), item('t', 'mine'), item('t', 'theirs'), schema, { [r3.conflicts[0]!.key]: 'theirs' }).item?.links[0]?.extra).toEqual({ note: 'theirs' })
   })
   it('W-04: exporting while an old version is shown gives valid ReqIF (no NUL characters in the title)', async () => {
     const { ws } = await setup()
@@ -166,6 +171,10 @@ describe('0.20.2 whole-project review fixes', () => {
     // the 0.16.3 case still works: a list line ending in 12" inside a quoted cell that is not the last column
     const kept = parseCsv('ID,Text,Status\nA-1,"- a 12"\n- b",Draft\n')
     expect(kept[1]).toEqual(['A-1', '- a 12"\n- b', 'Draft'])
+    // CR-02: the continuation line has commas of its own
+    const commas = parseCsv('ID,Text,Status\nA-1,"- a 12"\n- b, c, d",Draft\nA-2,y,Done\n')
+    expect(commas[1]).toEqual(['A-1', '- a 12"\n- b, c, d', 'Draft'])
+    expect(commas[2]).toEqual(['A-2', 'y', 'Done'])
   })
   it('W-06: an Excel file with a cell in row 50,000,000 is refused quickly instead of running out of memory', async () => {
     const wb = new ExcelJS.Workbook()
@@ -188,5 +197,39 @@ describe('0.20.2 whole-project review fixes', () => {
     expect(report).not.toMatch(/other/)
     expect(report).toContain('%USERPROFILE%\\AppData\\Roaming')
     expect(report).toContain('%USERPROFILE%/Projects/demo')
+    // a profile name with a space, not the home folder (CR-10)
+    const other = buildProblemReport({ description: '', diagnostics: 'C:\\Users\\Sam Ple\\docs', log: '', home: 'C:\\Users\\Other' })
+    expect(other).not.toMatch(/Ple/)
+  })
+  it('W-02/W-08/W-12: every Git call gets plain paths, and heavy steps get the long time limit', async () => {
+    const calls: { args: string[]; timeoutMs?: number }[] = []
+    const run: CommandRunner = async (_f, args, o) => {
+      calls.push({ args, timeoutMs: o?.timeoutMs })
+      return args.includes('rev-parse') ? 'abc\n' : ''
+    }
+    const g = createSystemGitAdapter(run)
+    await g.commit('/r', 'requirements', 'm')
+    await g.switchBranch('/r', 'other')
+    for (const c of calls) expect(c.args.slice(0, 2)).toEqual(['-c', 'core.quotePath=false'])
+    const longOnes = calls.filter((c) => c.args.includes('add') || c.args.includes('commit') || c.args.includes('switch'))
+    expect(longOnes.length).toBe(3)
+    for (const c of longOnes) expect(c.timeoutMs).toBeGreaterThanOrEqual(15 * 60_000)
+  })
+
+  it('CR-01: Push refuses when the branch follows an upstream of another name (never onto the shared main)', async () => {
+    const { ws, remote, sh } = await setup()
+    await add(ws, 'a')
+    expect((await ws.commit('a')).ok).toBe(true)
+    expect((await ws.push()).ok).toBe(true)
+    sh('fetch', '-q')
+    sh('switch', '-q', '-c', 'fix', '--track', 'origin/main')
+    await ws.refresh(true)
+    await add(ws, 'on fix')
+    expect((await ws.commit('fix work')).ok).toBe(true)
+    const before = execFileSync('git', ['rev-parse', 'main'], { cwd: remote, encoding: 'utf8' })
+    const r = await ws.push()
+    expect(r.ok).toBe(false)
+    expect(r.message).toMatch(/another name/)
+    expect(execFileSync('git', ['rev-parse', 'main'], { cwd: remote, encoding: 'utf8' })).toBe(before)
   })
 })

@@ -152,13 +152,13 @@ export function mergeItems(
     const r = pick(bl.get(k)?.confirmed, ml.get(k)?.confirmed, tl.get(k)?.confirmed)
     const confirmed = r.conflict ? tl.get(k)?.confirmed : r.value
     // a link's own extra keys (a note, another tool's key) merge key by key like the item's extra keys; the side
-    // that changed wins, both changed differently keeps mine (W-03: they were dropped by every merge)
+    // that changed wins, both changed differently is a question (W-03: they were dropped by every merge; CR-04)
     const be = bl.get(k)?.extra ?? {}
     const me = ml.get(k)?.extra ?? {}
     const te = tl.get(k)?.extra ?? {}
     const extra: Record<string, unknown> = {}
     for (const x of [...new Set([...Object.keys(be), ...Object.keys(me), ...Object.keys(te)])].sort()) {
-      const v = pick(be[x], me[x], te[x]).value
+      const v = decide(`link:${k}:${x}`, `${l.type} → ${l.target}: ${x}`, be[x], me[x], te[x], false, () => me[x])
       if (v !== undefined && v !== null) extra[x] = v
     }
     const out: Link = confirmed ? { type: l.type, target: l.target, confirmed } : { type: l.type, target: l.target }

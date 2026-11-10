@@ -575,7 +575,7 @@ export interface ReqochetApi {
   /** Published versions one can go back to (older than this one, from GitHub Releases) — 0.14.1. */
   listEarlierVersions(): Promise<{ ok: true; versions: { version: string; date: string }[] } | { ok: false; message: string }>
   /** Downloads that version's installer, pauses automatic updates and installs it (ReqMan closes and reopens). */
-  installEarlierVersion(version: string): Promise<{ ok: false; message: string } | { ok: true }>
+  installEarlierVersion(version: string): Promise<{ ok: false; message: string; canceled?: boolean } | { ok: true }>
   /** Ends the pause after going back: automatic updates run again. */
   resumeUpdates(): Promise<void>
   /** Subscribes to update status changes; returns an unsubscribe function. */

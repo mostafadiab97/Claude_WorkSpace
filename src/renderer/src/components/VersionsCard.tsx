@@ -27,7 +27,8 @@ export function VersionsCard({ appInfo, update }: { appInfo: AppInfo | null; upd
     const r = await window.reqochet.installEarlierVersion(version)
     if (!r.ok) {
       setBusy(null)
-      setError(r.message)
+      // canceled: the user chose "Keep editing" in the unsaved-changes question — nothing to report (CR-15)
+      if (!r.canceled) setError(r.message)
     }
   }
 

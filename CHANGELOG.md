@@ -28,6 +28,7 @@ first, then speed, then screens, Arabic and documents. Each fix below was reprod
 - **W-31** CI: libraries are installed without running their install scripts (the release token is never near
   library code); a release is made only from main. **W-32** Electron 45.0.0 → 45.2.3 (security fixes).
 - **W-33** Problem reports show `%USERPROFILE%` instead of the Windows user folder (O-7).
+- Code reviewer on the patch (`docs/reviews/agents/0.20.2-code-reviewer.md`, 16 findings, all handled): Push refuses a branch that follows an upstream of another name (CR-01) and uses a push remote when set; the CSV fix no longer ends a multi-line cell early (CR-02); the app quits by itself if no installer takes over (CR-03); link notes changed on both PCs become a merge question; the unsaved-changes question is in Arabic too.
 - Owner's answers recorded: O-2 the `gh api` permission stays, every GitHub change is reported (CLAUDE.md); O-3 10k
   items a must, 50k a should; O-4 keep "Changes + settings" with a tooltip; O-5 coverage gaps as their own chip; O-6
   clearer message when two PCs rename the same document. The Word AI prompt now reads a whole folder (one file per

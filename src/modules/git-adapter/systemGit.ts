@@ -221,6 +221,10 @@ export function parseOverwrittenFiles(stderr: string): string[] {
   return files
 }
 
+/** Markers in push errors the workspace turns into texts (core messages come from shared/text there). */
+export const PUSH_NO_UPSTREAM = 'reqochet:push-no-upstream'
+export const PUSH_OTHER_NAME = 'reqochet:push-other-name'
+
 export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitAdapter {
   const git = (root: string, args: string[], timeoutMs = LOCAL_TIMEOUT, extra: Omit<RunOptions, 'timeoutMs'> = {}): Promise<string> =>
     run('git', [...GIT_CONFIG_ARGS, '-C', root, ...args], { timeoutMs, ...extra })
@@ -427,11 +431,18 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
       // name exactly what is sent — this branch to its upstream branch, never with "+" — so the user's Git settings
       // (push.default=matching, a "+" push rule) can never push other branches or force a push (W-11)
       const branch = (await git(root, ['symbolic-ref', '--short', 'HEAD'])).trim()
-      const setting = async (key: string): Promise<string> => (await git(root, ['config', '--get', `branch.${branch}.${key}`]).catch(() => '')).trim()
-      const remote = await setting('remote')
-      const merge = await setting('merge')
-      if (!remote || !merge) throw new GitError('This branch has no upstream branch to push to.', ['push'], null, '', '')
-      await git(root, ['push', '--quiet', remote, `HEAD:${merge}`], NETWORK_TIMEOUT)
+      const config = async (key: string): Promise<string> => (await git(root, ['config', '--get', key]).catch(() => '')).trim()
+      const upstreamRemote = await config(`branch.${branch}.remote`)
+      const merge = await config(`branch.${branch}.merge`)
+      // where Git itself would push: a push remote (fork workflow) wins over the upstream's remote (CR-05)
+      const remote = (await config(`branch.${branch}.pushRemote`)) || (await config('remote.pushDefault')) || upstreamRemote
+      if (!remote) throw new GitError(PUSH_NO_UPSTREAM, ['push'], null, '', '')
+      // the branch goes to the branch of the same name; an upstream of another name (git switch -c fix origin/main)
+      // is refused like plain `git push` does, so "fix" never lands on the shared main (CR-01)
+      if (remote === upstreamRemote && merge && merge !== `refs/heads/${branch}`) {
+        throw new GitError(`${PUSH_OTHER_NAME}\n${branch}\n${merge.replace(/^refs\/heads\//, '')}`, ['push'], null, '', '')
+      }
+      await git(root, ['push', '--quiet', remote, `HEAD:refs/heads/${branch}`], NETWORK_TIMEOUT)
     },
 
     async log(root, path, limit = 200): Promise<CommitInfo[]> {

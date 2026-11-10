@@ -63,6 +63,8 @@ export interface RequirementsRepo {
    * the schema defines it (the index stores them all, so adding or removing a field needs no re-index).
    */
   readItemFile(path: string, opts?: { allKeysAsFields?: boolean }): Promise<{ ok: true; item: Item } | { ok: false; error: string }>
+  /** One item file by its path, with the revision a later write is checked against; null when it does not exist. */
+  readItemAt(path: string): Promise<{ ok: true; item: Item; revision: string } | { ok: false; error: string; revision: string } | null>
   /** Path of an item's file relative to the requirements folder — where it really is (see OpenOptions.locate). */
   itemPath(id: string, document?: string): string
   /** Where the item's file should be: <document>/<ID>.md (the default document when none is given; '' = loose). */

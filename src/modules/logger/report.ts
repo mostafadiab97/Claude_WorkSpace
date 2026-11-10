@@ -19,7 +19,8 @@ export function maskHome(text: string, home?: string): string {
     out = out.replace(new RegExp(pattern, 'gi'), '%USERPROFILE%')
   }
   // any other C:\Users\<name> (another profile, a path written differently)
-  return out.replace(/\b([A-Za-z]:[\\/]+Users[\\/]+)(?!%USERPROFILE%)[^\\/\s"'<>|]+/gi, '%USERPROFILE%')
+  // (a profile name may hold spaces: mask up to the next separator — CR-10)
+  return out.replace(/\b([A-Za-z]:[\\/]+Users[\\/]+)(?!%USERPROFILE%)[^\\/"'<>|\r\n]+/gi, '%USERPROFILE%')
 }
 
 /** How many log lines go into a report (the newest ones). */

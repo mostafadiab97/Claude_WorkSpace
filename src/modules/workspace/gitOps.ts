@@ -6,7 +6,7 @@ import { readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 import type { GitResult, GitState, HistoryEntry, ItemChange, ItemVersionCompare } from '../../shared/api'
 import type { Item } from '../../shared/domain'
-import { GitError, type FileChange, type GitAdapter } from '../git-adapter'
+import { GitError, PUSH_NO_UPSTREAM, PUSH_OTHER_NAME, type FileChange, type GitAdapter } from '../git-adapter'
 import type { IndexCache } from '../index-cache'
 import { diffItems, parseItemFile } from '../items'
 import type { Logger } from '../logger'
@@ -40,6 +40,11 @@ export const reqPath = (repo: RequirementsRepo): string => relative(repo.root, r
 /** Turns Git's often technical messages into something a requirements engineer can act on. */
 export function explainGitError(e: unknown): string {
   const text = e instanceof GitError ? `${e.stderr}\n${e.stdout}\n${e.message}` : String(e instanceof Error ? e.message : e)
+  if (text.includes(PUSH_NO_UPSTREAM)) return T.gitMsg.noRemotePush
+  if (text.includes(PUSH_OTHER_NAME)) {
+    const [, branch = '', upstream = ''] = text.slice(text.indexOf(PUSH_OTHER_NAME)).split('\n')
+    return T.gitMsg.upstreamOtherName(branch, upstream)
+  }
   if (/Authentication failed|could not read Username|terminal prompts disabled|Permission denied \(publickey\)|\b403\b/i.test(text)) {
     return T.gitMsg.signIn
   }

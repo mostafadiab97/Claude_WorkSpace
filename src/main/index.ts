@@ -5,6 +5,7 @@ import { createServices, type Paths } from './composition'
 import { registerIpc } from './ipc'
 import { moveLegacyUserData, removeLegacyUpdaterCache } from './legacyData'
 import { quitHeld } from './closeForInstall'
+import { T } from '../shared/text'
 import { Channels } from '../shared/api'
 
 // The name comes from package.json "productName": reqochet-dev in the development repository, reqochet in the release
@@ -87,12 +88,12 @@ function createWindow(services: ReturnType<typeof createServices>): void {
   win.webContents.on('will-prevent-unload', (event) => {
     const choice = dialog.showMessageBoxSync(win, {
       type: 'warning',
-      buttons: ['Discard changes and close', 'Keep editing'],
+      buttons: [T.app.unsavedDiscard, T.app.unsavedKeep],
       defaultId: 1,
       cancelId: 1,
-      title: 'Unsaved changes',
-      message: 'You have unsaved changes.',
-      detail: 'If you close the window now, they are lost.'
+      title: T.app.unsavedTitle,
+      message: T.app.unsavedMessage,
+      detail: T.app.unsavedDetail
     })
     if (choice === 0) event.preventDefault() // preventDefault here means: allow the window to close
   })

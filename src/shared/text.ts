@@ -40,6 +40,11 @@ const en = {
   },
 
   app: {
+    unsavedTitle: 'Unsaved changes',
+    unsavedMessage: 'You have unsaved changes.',
+    unsavedDetail: 'If the window closes now (also to install an update), they are lost.',
+    unsavedDiscard: 'Discard changes and close',
+    unsavedKeep: 'Keep editing',
     closeRepository: 'Close repository',
     settings: 'Settings and diagnostics',
     settingsTooltip: 'Settings & diagnostics',
@@ -1165,6 +1170,8 @@ const en = {
     upToDate: 'Already up to date.',
     wouldOverwrite: 'Pull stopped — nothing was changed. These items have changes you have not committed, and the pull would overwrite them. Commit them first (or discard them), then pull again.',
     noRemotePush: 'This repository has no remote (for example GitHub) to push to.',
+    upstreamOtherName: (branch: string, upstream: string) =>
+      `The branch "${branch}" follows "${upstream}", a branch with another name — Push would put your commits on "${upstream}". Push was not done. Make a branch with its own name in the branch list and push that.`,
     nothingToPushYet: 'Nothing to push yet — commit your changes first.',
     notCommittedYet: 'Nothing to push. Your changes are not committed yet — commit them first.',
     remoteHasAll: 'Nothing to push — the remote already has everything.',

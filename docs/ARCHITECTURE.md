@@ -49,7 +49,7 @@ The preload needs no change: it exposes every `Channels` entry as `window.reqoch
 
 | `schema` | `parseSchema(text)` → `{ schema, problems }`; types `Schema`, `ItemTypeDef`, `FieldDef`, `LinkTypeDef` | `parse.ts`: reads `requirements/.reqochet/schema.yaml`, skips invalid entries with a message | `items`, `repository-store` |
 | `items` (domain core) | `Item`, `Link`; `parseItemFile`, `serializeItem`, `generateId`, `validateItem`, `contentFingerprint`, `diffItems` | Pure logic, no I/O: file format, IDs, per-item validation, suspect-link fingerprint | `repository-store`, `index-cache`, `sample-data` |
-| `repository-store` | `RepositoryStore` — `inspect()`, `initialize()`, `open(root, { locate })`; `RequirementsRepo` — `loadAll()`, `createItem()`, `writeItem()`, `deleteItem()`, `itemPath()`, `fixFileName()`… | `fileStore.ts`: files in `requirements/`, atomic writes (`safe-files`), never overwrites unreadable files; `locate` (the index) says where an item's file really is, so a file renamed by hand is read and written in place; `checks.ts`: duplicate IDs, broken links, parent loops | `main/composition.ts`, `index-cache`, `sample-data` |
+| `repository-store` | `RepositoryStore` — `inspect()`, `initialize()`, `open(root, { locate })`; `RequirementsRepo` — `loadAll()`, `createItem()`, `writeItem()`, `deleteItem()`, `itemPath()`, `fixFileName()`… | `fileStore.ts`: files in `requirements/`, atomic writes (`safe-files`), never overwrites unreadable files; `locate` (the index) says where an item's file really is, so a file renamed by hand is read and written in place; `checks.ts`: duplicate IDs, broken links, parent loops | `main/composition.ts`, `index-cache`, `sample-data` `writeItem(item, { path, expectedRevision })` writes one exact file (the same ID in two files), checked against `readItemAt(path)`'s revision (0.20.2). |
 | `safe-files` | `writeFileAtomic()`, `removeFile()`, `renameFile()`, `withRetry()` | Temporary file + rename; retries for ~1.5 s while Windows briefly locks a file (antivirus, indexer, OneDrive); keeps the temporary file if the final rename fails | `repository-store`, `workspace`, `main/ipc.ts` |
 | `self-test` | `runReleaseSelfTest(deps)` | The in-app release self-test: the main actions on a practice repository with a bare "GitHub" in a temporary folder; never touches the user's data or Git settings | `main/composition.ts` |
 | `index-cache` | `IndexCache` — `sync()`, `syncPaths()`, `rebuild()`, `query()` (incl. link filters/counts), `get()`, `incomingLinks()`, `fingerprint()`, `repositoryIssues()` | `sqliteIndex.ts`: SQLite (built into Electron) with full-text search, outside the repo, re-reads only changed files; stores **every** header key, results show the schema's fields only — so a field change re-reads no file; each item's document (`doc`) and whether it is at its document's top level (`top`) are stored (format 5, 0.18.0); whole-repository checks as SQL (incl. "file name ≠ ID") | `workspace` |
@@ -102,7 +102,7 @@ requirements/
   "items with suspect links" is one SQL query.
 - **Unknown header keys are preserved**, so files written by a newer reqochet or another tool lose nothing.
 - **The index is a cache**: `%APPDATA%\reqochet-dev\cache\…sqlite`, rebuilt automatically when missing or when its
-  format changes (format 4 since 0.9.0: positions are text). It stores every header key, so a field change
+  format changes (format 5 since 0.18.0; 4 since 0.9.0: positions are text). It stores every header key, so a field change
   re-reads nothing.
 
 ## Decisions changed during implementation

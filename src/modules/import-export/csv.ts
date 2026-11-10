@@ -32,13 +32,36 @@ export function detectSeparator(text: string): ',' | ';' | '\t' {
 /** The protecting ' an export put before a formula-like value comes off again on import (CR3-06b). */
 const unprotect = (cell: string): string => (cell.startsWith("'") && FORMULA_START.test(cell.slice(1)) ? cell.slice(1) : cell)
 
-/** Does the line after position `from` (a line end) hold at least `columns` cells? Counted naively, quotes ignored. */
+/**
+ * Does the line after position `from` (a line end) look like a row of its own — at least `columns` cells, and no
+ * quote that closes a cell opened on an earlier line? (W-05; CR-02: "- b, c, d",Draft continues a cell)
+ */
 function nextLineIsRow(t: string, from: number, separator: string, columns: number): boolean {
   let i = from
   if (t[i] === '\r') i++
   if (t[i] === '\n') i++
   let count = 1
-  for (; i < t.length && t[i] !== '\n' && t[i] !== '\r'; i++) if (t[i] === separator) count++
+  let inQuote = false
+  let cellStart = true
+  for (; i < t.length && t[i] !== '\n' && t[i] !== '\r'; i++) {
+    const ch = t[i]
+    const next = t[i + 1]
+    if (inQuote) {
+      if (ch === '"' && next === '"') i++
+      else if (ch === '"' && (next === separator || next === undefined || next === '\n' || next === '\r')) inQuote = false
+      cellStart = false
+    } else if (ch === '"' && cellStart) {
+      inQuote = true
+      cellStart = false
+    } else if (ch === separator) {
+      count++
+      cellStart = true
+    } else {
+      // a quote ending a cell that did not start with one: the rest of a quoted cell from the line before
+      if (ch === '"' && (next === separator || next === undefined || next === '\n' || next === '\r')) return false
+      cellStart = false
+    }
+  }
   return count >= columns
 }
 

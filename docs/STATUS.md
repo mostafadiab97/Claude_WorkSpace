@@ -39,7 +39,7 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.20.1 the owner's points on 0.20.0 — solid gap dot (theme colour `gap`), Back to Traceability, matrix header sticky and short (inner text rotated), top bar order, Excel cells starting like a formula get the Text format (SEC20-05) | Released (v0.20.1) |
 | **Next** | Owner's 0.20.1 checklist; then **the pilot can start** (release plan). Then a stabilisation patch with the later review items (gap SQL at 50k P3/P5, PERF19-02/04, PERF-02/03, editor preview limit, toasts UX19-01, tab pattern UI-02, the rare qa-0.17.0 test failure, Arabic diagram labels) and the owner's answer on SEC20-05 (Excel cells starting with = + - @) | — |
 
-The owner's last report (10 Nov 2026): **0.20.0 all 5 steps passed** (25/25, 84.0 s) with four points — all in 0.20.1. Before: 0.19.1 all 3 passed.
+The owner's last report (10 Nov 2026): **0.20.1 all 5 steps passed** (25/25, 90.9 s) — nothing open from his tests; theme 1b is done and the pilot can start. Before: 0.20.0 all 5 passed with four points (→ 0.20.1).
 Before: 0.18.0 all 5 passed (24/24). Before: 0.17.2 all 5 passed (23/23). Before: 0.13.1 all 4 steps passed, 21/21 (66.8 s). Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
 Before: 0.12.1 steps 1–3, 5 passed, 21/21 (50.7 s); step 4 (pull from a branch
 committed at once) and three requests → 0.13.0. Before: **0.12.0 all 5 steps passed** — that was the two-folder trial (two clones of the

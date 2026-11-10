@@ -4,6 +4,7 @@ Each version was installed and tried by the owner (product owner) on Windows 11;
 version it was about, and what it led to.
 
 ## 0.20.1 — 10 Nov 2026 — the owner's points on 0.20.0
+- **Owner (10 Nov 2026), 0.20.1:** all 5 steps passed (self-test 25/25, 90.9 s).
 - **Owner (10 Nov 2026), 0.20.0:** all 5 steps passed (self-test 25/25, 84.0 s), with points: the gap mark is hard to
   see (test 2); a way back to Traceability from the gaps table (test 3); the matrix header row scrolled away and was
   very tall (test 4 — reproduced first in the `trace-0.20` e2e: a rotated header cell does not stay at the top, and its

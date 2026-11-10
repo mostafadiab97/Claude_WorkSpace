@@ -35,6 +35,12 @@ first, then speed, then screens, Arabic and documents. Each fix below was reprod
   version → Git history with baselines), reports conflicts, keeps shared requirements in both modules and records the
   documents' format (`docs/guides/word-template-prompt.md`).
 
+**Owner (10 Nov 2026, evening), 0.20.2:** all 4 steps passed (self-test 25/25 in 120.9 s, 0.20.1 took 90.9 s;
+Arabic-named document committed, pushed, history shown; Compare showed one Deleted and one Added; the problem report
+shows `%USERPROFILE%`). Found in the attached report: the opened project's path (a folder on drive D: named after the
+owner) and the update download addresses (the GitHub account) still show personal names — `%USERPROFILE%` only covers
+the Windows user folder. Waiting for the owner's choice.
+
 ## 0.20.1 — 10 Nov 2026 — the owner's points on 0.20.0
 - **Owner (10 Nov 2026), 0.20.1:** all 5 steps passed (self-test 25/25, 90.9 s).
 - **Owner (10 Nov 2026), 0.20.0:** all 5 steps passed (self-test 25/25, 84.0 s), with points: the gap mark is hard to

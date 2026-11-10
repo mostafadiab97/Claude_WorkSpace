@@ -37,7 +37,8 @@ export function createExportOps(ctx: WorkspaceContext, structure: StructureOps, 
         const top = Math.min(...rows.map((r) => r.depth))
         rows = rows.map((r) => ({ ...r, depth: r.depth - top }))
       }
-      const title = `${basename(s.repo.root)} — requirements`
+      // an old version's session root is an internal key "<root>\0version\0<commit>": the name is the real folder's (W-04)
+      const title = `${basename(s.repo.root.split('\u0000')[0] ?? s.repo.root)} — requirements`
       if (request.format === 'reqif') {
         // objects that came from ReqIF keep their identifier, so the other tool recognises them
         const sourceIds = new Map<string, string>()

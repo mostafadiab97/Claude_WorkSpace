@@ -97,7 +97,9 @@ export function xhtmlToMarkdown(n: XNode): string {
     .trim()
 }
 
-const esc = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+// XML 1.0 forbids control characters other than tab, LF and CR, even escaped: they are left out (CR3-08, W-04)
+// eslint-disable-next-line no-control-regex
+const esc = (s: string): string => s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 /** For attribute values: XML turns raw line breaks and tabs there into spaces, so they are written as references. */
 const escAttr = (s: string): string => esc(s).replace(/\r/g, '&#13;').replace(/\n/g, '&#10;').replace(/\t/g, '&#9;')
 

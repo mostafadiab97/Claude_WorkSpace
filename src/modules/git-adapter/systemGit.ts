@@ -52,6 +52,12 @@ const NETWORK_TIMEOUT = 180_000
 
 // GIT_LITERAL_PATHSPECS: a path is always a path, never a pattern — an ID like "X[1]" must not also match X1.md (SEC-17-01)
 const GIT_ENV = (): NodeJS.ProcessEnv => ({ ...process.env, GIT_TERMINAL_PROMPT: '0', GIT_LITERAL_PATHSPECS: '1', LC_ALL: 'C', LANG: 'C' })
+/**
+ * Settings every Git call gets: paths printed as they are, not quoted with octal escapes (W-02: an Arabic document
+ * name made merge-tree and log print "requirements/\331\205…", so pulls and history missed those files), and on
+ * Windows paths over 260 characters (W-12: a deep project folder + a long document name made commit fail).
+ */
+export const GIT_CONFIG_ARGS: readonly string[] = ['-c', 'core.quotePath=false', ...(process.platform === 'win32' ? ['-c', 'core.longpaths=true'] : [])]
 
 /**
  * Reads many files of one commit through a single `git cat-file --batch` process (one process instead of one
@@ -64,7 +70,7 @@ export function readBlobs(root: string, oids: string[], timeoutMs = 120_000): Pr
     const result = new Map<string, string | null>()
     const wanted = [...new Set(oids)]
     if (wanted.length === 0) return resolve(result)
-    const child = spawn('git', ['-C', root, 'cat-file', '--batch'], { windowsHide: true, env: GIT_ENV() })
+    const child = spawn('git', [...GIT_CONFIG_ARGS, '-C', root, 'cat-file', '--batch'], { windowsHide: true, env: GIT_ENV() })
     const timer = setTimeout(() => child.kill(), timeoutMs)
     let buf: Buffer = Buffer.alloc(0)
     let index = 0
@@ -126,7 +132,8 @@ const defaultRunner: CommandRunner = (file, args, options = {}) =>
         if (!error) return resolve(stdout)
         const code = typeof error.code === 'number' ? error.code : null
         // stopped by the time limit: say so — "Command failed: git …" alone hid the cause (the owner, 8 Nov 2026)
-        const stopped = (error as { killed?: boolean }).killed === true || (error as { signal?: string | null }).signal ? 'Git was stopped: it timed out. ' : ''
+        const tooMuch = (error as { code?: unknown }).code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'
+        const stopped = tooMuch ? 'Git was stopped: its output was too large. ' : (error as { killed?: boolean }).killed === true || (error as { signal?: string | null }).signal ? 'Git was stopped: it timed out. ' : ''
         const detail = `${stopped}${(stderr || stdout || error.message).trim()}`
         reject(new GitError(detail || `git ${args[0] ?? ''} failed`, args, code, stdout, stderr))
       }
@@ -216,7 +223,7 @@ export function parseOverwrittenFiles(stderr: string): string[] {
 
 export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitAdapter {
   const git = (root: string, args: string[], timeoutMs = LOCAL_TIMEOUT, extra: Omit<RunOptions, 'timeoutMs'> = {}): Promise<string> =>
-    run('git', ['-C', root, ...args], { timeoutMs, ...extra })
+    run('git', [...GIT_CONFIG_ARGS, '-C', root, ...args], { timeoutMs, ...extra })
   // a list in one repository config value, written in one call (CR18-11)
   const configList = async (root: string, key: string): Promise<string[]> => {
     try {
@@ -277,8 +284,9 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
     async commit(root, pathspec, message) {
       // Stage everything under the path (new, changed, deleted files), then commit ONLY that path:
       // other files the user may have staged for their own commits stay untouched.
-      await git(root, ['add', '--all', '--', pathspec])
-      await git(root, ['commit', '--quiet', '-m', message, '--only', '--', pathspec])
+      // thousands of files (a first commit, an import) with a virus scanner: the bulk limit, not 30 s (W-08)
+      await git(root, ['add', '--all', '--', pathspec], BULK_TIMEOUT)
+      await git(root, ['commit', '--quiet', '-m', message, '--only', '--', pathspec], BULK_TIMEOUT)
       return (await git(root, ['rev-parse', 'HEAD'])).trim()
     },
 
@@ -328,7 +336,7 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
     },
 
     async merge(root, upstream, fastForwardOnly, reflogAction) {
-      await git(root, fastForwardOnly ? ['merge', '--ff-only', '--quiet', upstream] : ['merge', '--no-edit', '--quiet', upstream], LOCAL_TIMEOUT, reflogAction ? { env: { GIT_REFLOG_ACTION: reflogAction } } : {})
+      await git(root, fastForwardOnly ? ['merge', '--ff-only', '--quiet', upstream] : ['merge', '--no-edit', '--quiet', upstream], BULK_TIMEOUT, reflogAction ? { env: { GIT_REFLOG_ACTION: reflogAction } } : {})
     },
 
     async mergeBase(root, a, b) {
@@ -373,7 +381,7 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
 
     async restoreFrom(root, ref, paths) {
       // a few hundred paths per call keeps the command line short enough for Windows
-      for (let i = 0; i < paths.length; i += 200) await git(root, ['restore', `--source=${ref}`, '--worktree', '--', ...paths.slice(i, i + 200)])
+      for (let i = 0; i < paths.length; i += 200) await git(root, ['restore', `--source=${ref}`, '--worktree', '--', ...paths.slice(i, i + 200)], BULK_TIMEOUT)
     },
 
     async treeOf(root, ref) {
@@ -399,8 +407,8 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
 
     async switchBranch(root, name, create) {
       // `git switch` carries uncommitted changes along when they do not clash, and refuses otherwise (nothing lost)
-      if (create) await git(root, ['switch', '--quiet', '-c', name, create.startPoint, ...(create.track ? ['--track'] : ['--no-track'])])
-      else await git(root, ['switch', '--quiet', name])
+      if (create) await git(root, ['switch', '--quiet', '-c', name, create.startPoint, ...(create.track ? ['--track'] : ['--no-track'])], BULK_TIMEOUT)
+      else await git(root, ['switch', '--quiet', name], BULK_TIMEOUT)
     },
 
     async init(root) {
@@ -412,7 +420,18 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
     },
 
     async push(root, setUpstream) {
-      await git(root, setUpstream ? ['push', '--quiet', '-u', setUpstream.remote, `HEAD:refs/heads/${setUpstream.branch}`] : ['push', '--quiet'], NETWORK_TIMEOUT)
+      if (setUpstream) {
+        await git(root, ['push', '--quiet', '-u', setUpstream.remote, `HEAD:refs/heads/${setUpstream.branch}`], NETWORK_TIMEOUT)
+        return
+      }
+      // name exactly what is sent — this branch to its upstream branch, never with "+" — so the user's Git settings
+      // (push.default=matching, a "+" push rule) can never push other branches or force a push (W-11)
+      const branch = (await git(root, ['symbolic-ref', '--short', 'HEAD'])).trim()
+      const setting = async (key: string): Promise<string> => (await git(root, ['config', '--get', `branch.${branch}.${key}`]).catch(() => '')).trim()
+      const remote = await setting('remote')
+      const merge = await setting('merge')
+      if (!remote || !merge) throw new GitError('This branch has no upstream branch to push to.', ['push'], null, '', '')
+      await git(root, ['push', '--quiet', remote, `HEAD:${merge}`], NETWORK_TIMEOUT)
     },
 
     async log(root, path, limit = 200): Promise<CommitInfo[]> {
@@ -635,7 +654,7 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
     },
 
     async undoLastCommit(root) {
-      await git(root, ['reset', '--soft', '--quiet', 'HEAD~1'])
+      await git(root, ['reset', '--soft', '--quiet', 'HEAD~1'], BULK_TIMEOUT)
     },
 
     async headSummary(root) {

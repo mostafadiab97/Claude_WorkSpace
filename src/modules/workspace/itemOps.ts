@@ -165,7 +165,7 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
         for (const childPath of s.index.query({ document, parent: id, limit: 10_000 }).items.map((c) => c.path).filter((p) => p && documentOfPath(p) === document)) {
           const c = await s.repo.readItemFile(childPath)
           if (!c.ok || c.item.parent !== id) continue
-          await s.repo.writeItem({ ...c.item, parent: newId, document })
+          await s.repo.writeItem({ ...c.item, parent: newId, document }, { path: childPath })
           touched.push(childPath)
         }
         await s.index.syncPaths(s.repo, touched)

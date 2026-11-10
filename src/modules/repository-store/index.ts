@@ -84,9 +84,10 @@ export interface RequirementsRepo {
   /**
    * Saves an item atomically (a crash never leaves a half-written file) and returns its new revision.
    * With `expectedRevision`, refuses with a ConflictError if the file changed since it was read
-   * (`null` = the file must not exist yet).
+   * (`null` = the file must not exist yet). With `path` (relative to the requirements folder), that exact file is
+   * checked and written — needed when the same ID exists in two files (a copied document).
    */
-  writeItem(item: Item, options?: { expectedRevision?: string | null }): Promise<string>
+  writeItem(item: Item, options?: { expectedRevision?: string | null; path?: string }): Promise<string>
   deleteItem(id: string, options?: { expectedRevision?: string }): Promise<void>
 }
 

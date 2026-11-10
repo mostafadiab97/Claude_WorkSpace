@@ -165,14 +165,24 @@ export function createCompare(git: GitAdapter) {
         }
         const before = c.status === 'A' ? { item: null } : parse(beforeText(c))
         const after = c.status === 'D' ? { item: null } : parse(afterText(c))
+        const put = (id: string, b: Side, a: Side, paths: string[]): void => {
+          const known = pairs.get(id)
+          if (known) {
+            // the same item deleted in one file and added in another
+            if (!known.before.item && b.item) known.before = b
+            if (!known.after.item && a.item) known.after = a
+            for (const x of paths) known.paths.add(x)
+          } else pairs.set(id, { before: b, after: a, paths: new Set(paths) })
+        }
+        // Git pairs a deleted file with a similar new one as a "rename" (item files are mostly header, so two
+        // different items look alike): different IDs mean one item deleted and another added (W-07)
+        if (c.status === 'R' && before.item && after.item && before.item.id !== after.item.id) {
+          put(before.item.id, before, { item: null }, [oldPath])
+          put(after.item.id, { item: null }, after, [c.path])
+          continue
+        }
         const id = after.item?.id ?? before.item?.id ?? ITEM_FILE.exec(c.path)?.[1] ?? c.path
-        const known = pairs.get(id)
-        if (known) {
-          // the same item deleted in one file and added in another
-          if (!known.before.item && before.item) known.before = before
-          if (!known.after.item && after.item) known.after = after
-          known.paths.add(oldPath).add(c.path)
-        } else pairs.set(id, { before, after, paths: new Set([oldPath, c.path]) })
+        put(id, before, after, [oldPath, c.path])
       }
 
       // a folder rename with identical content (.reqman → .reqochet) is no schema change (QA-08)

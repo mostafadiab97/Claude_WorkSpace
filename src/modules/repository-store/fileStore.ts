@@ -112,6 +112,19 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
     const pathOf = (id: string, document?: string): string => options.locate?.(id) ?? defaultPath(id, document)
     const fileFor = (id: string, document?: string): string => join(folder, pathOf(id, document))
 
+    /** One item file with its revision; null when it does not exist. */
+    const readAt = async (rel: string): Promise<{ ok: true; item: Item; revision: string } | { ok: false; error: string; revision: string } | null> => {
+      let content: string
+      try {
+        content = await readFile(join(folder, rel), 'utf8')
+      } catch (e) {
+        if ((e as NodeJS.ErrnoException).code === 'ENOENT') return null
+        return { ok: false, error: `Could not read the file: ${(e as Error).message}`, revision: '' }
+      }
+      const r = parseItemFile(content, fieldIds)
+      return r.ok ? { ok: true, item: r.item, revision: revisionOf(content) } : { ok: false, error: r.error, revision: revisionOf(content) }
+    }
+
     const repo: RequirementsRepo = {
       root,
       folder,
@@ -303,15 +316,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
       },
 
       async readItem(id) {
-        let content: string
-        try {
-          content = await readFile(fileFor(id), 'utf8')
-        } catch (e) {
-          if ((e as NodeJS.ErrnoException).code === 'ENOENT') return null
-          return { ok: false, error: `Could not read the file: ${(e as Error).message}`, revision: '' }
-        }
-        const r = parseItemFile(content, fieldIds)
-        return r.ok ? { ok: true, item: r.item, revision: revisionOf(content) } : { ok: false, error: r.error, revision: revisionOf(content) }
+        return readAt(pathOf(id))
       },
 
       async loadAll(): Promise<LoadResult> {
@@ -351,8 +356,11 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
       },
 
       async writeItem(item, options = {}) {
-        const file = fileFor(item.id, item.document)
-        const current = await repo.readItem(item.id)
+        // the file this save writes; the conflict check reads that same file (W-01: a duplicated ID must not let the
+        // check or the write land on the other copy; CRC-19: a new item is checked in its own document)
+        const rel = options.path ?? pathOf(item.id, item.document)
+        const file = join(folder, rel)
+        const current = await readAt(rel)
         if (options.expectedRevision !== undefined) {
           const actual = current ? current.revision : null
           if (actual !== options.expectedRevision) {

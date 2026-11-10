@@ -779,7 +779,7 @@ describe('QA-W20 more combinations', { timeout: 180_000 }, () => {
     expect(JSON.stringify(d!.item.fields.owner ?? '')).toMatch(/Alice/)
   })
 
-  it.fails('W20-76: compareVersions between a commit before and after a document rename and a deleted item reports modified/added/deleted, no throw', async () => {
+  it('W20-76: compareVersions between a commit before and after a document rename and a deleted item reports modified/added/deleted, no throw', async () => {
     const { ws, sh } = await setup()
     const a = await add(ws, 'A')
     const b = await add(ws, 'B')
@@ -816,7 +816,7 @@ describe('QA-W20 more combinations', { timeout: 180_000 }, () => {
     expect(ws.repoInfo().issues).toEqual([])
   })
 
-  it.fails('W20-78: delete one item and add a different one in the same range: Compare shows one deleted and one added item, not "B became C"', async () => {
+  it('W20-78: delete one item and add a different one in the same range: Compare shows one deleted and one added item, not "B became C"', async () => {
     const { ws, sh } = await setup()
     const b = await add(ws, 'Brake', { text: 'The brake shall stop.' })
     await ws.commit('c1')

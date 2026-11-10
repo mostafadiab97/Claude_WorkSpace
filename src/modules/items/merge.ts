@@ -31,7 +31,7 @@ export function sameItem(a: Item | null, b: Item | null): boolean {
       .sort()
       .map((k) => [k, canon(o[k])])
   const strip = (i: Item): string =>
-    JSON.stringify([i.id, i.type, i.title, i.parent ?? '', i.order ?? '', i.text.replace(/\s+$/, ''), i.links.map(linkKey), sorted(i.fields), sorted(i.extra)])
+    JSON.stringify([i.id, i.type, i.title, i.parent ?? '', i.order ?? '', i.text.replace(/\s+$/, ''), i.links.map((l) => [linkKey(l), sorted(l.extra ?? {})]), sorted(i.fields), sorted(i.extra)])
   return strip(a) === strip(b)
 }
 
@@ -151,7 +151,19 @@ export function mergeItems(
     const k = linkKey(l)
     const r = pick(bl.get(k)?.confirmed, ml.get(k)?.confirmed, tl.get(k)?.confirmed)
     const confirmed = r.conflict ? tl.get(k)?.confirmed : r.value
-    return confirmed ? { type: l.type, target: l.target, confirmed } : { type: l.type, target: l.target }
+    // a link's own extra keys (a note, another tool's key) merge key by key like the item's extra keys; the side
+    // that changed wins, both changed differently keeps mine (W-03: they were dropped by every merge)
+    const be = bl.get(k)?.extra ?? {}
+    const me = ml.get(k)?.extra ?? {}
+    const te = tl.get(k)?.extra ?? {}
+    const extra: Record<string, unknown> = {}
+    for (const x of [...new Set([...Object.keys(be), ...Object.keys(me), ...Object.keys(te)])].sort()) {
+      const v = pick(be[x], me[x], te[x]).value
+      if (v !== undefined && v !== null) extra[x] = v
+    }
+    const out: Link = confirmed ? { type: l.type, target: l.target, confirmed } : { type: l.type, target: l.target }
+    if (Object.keys(extra).length > 0) out.extra = extra
+    return out
   })
   return { item, conflicts }
 }

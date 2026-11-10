@@ -1,7 +1,6 @@
 // 0.20.2 — data-safety fixes from the whole-project review (docs/reviews/2026-11-10-project-review.md, W-nn).
 import { execFileSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
-import { copyFile, mkdir, mkdtemp, readFile, rename, writeFile } from 'node:fs/promises'
+import { copyFile, mkdtemp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -139,7 +138,7 @@ describe('0.20.2 whole-project review fixes', () => {
     expect((await ws.openVersion(first)).ok).toBe(true)
     const out = await ws.exportItems({ scope: 'all', columns: ['id', 'title'], format: 'reqif' } as Parameters<WorkspaceService['exportItems']>[0])
     const xml = String(out.content)
-    expect(xml).not.toMatch(/\u0000/)
+    expect(xml.includes(String.fromCharCode(0))).toBe(false)
     expect(xml).toMatch(/<TITLE>[^<]*work — requirements<\/TITLE>/)
     await ws.closeVersion()
   })

@@ -61,6 +61,9 @@ Map of all documents: **`docs/README.md`**. Starting a new chat or handing over:
   new test files only, in its own worktree; reports in `docs/reviews/agents/`).
 - He asked to be asked before steps that affect his accounts/repos (e.g. repository visibility). Never change
   repo visibility, delete releases, rewrite history or force-push.
+- **Report every GitHub change (owner, 10 Nov 2026):** the session may call `gh api repos/…` without a prompt, but every
+  call that changes something on GitHub (settings, releases, tags, branches, workflows) is reported to the owner in
+  the next reply — what was called and why. The never-do list above still applies.
 - Only free, open-source dependencies whose licences allow commercial use (NFR-07). No paid services.
 
 ## Non-negotiable rules (from the design; enforced by lint/tests where possible)

@@ -140,8 +140,8 @@ are not documented (CRA-23); unused window call `confirmLinks` (CRA-18).
 
 | ID | Question | Recommendation |
 | --- | --- | --- |
-| O-1 | Order and bundling as in H (data safety first, then speed, then screens + docs)? | As in H |
-| O-2 | W-30: remove the blanket permission so an AI session must ask before any GitHub change to your repositories? | Yes, remove it |
+| O-1 | Order and bundling as in H (data safety first, then speed, then screens + docs)? | As in H — **C 10 Nov: yes** |
+| O-2 | W-30: remove the blanket permission so an AI session must ask before any GitHub change to your repositories? | Yes, remove it — **C 10 Nov: keep the permission; report every such action** (rule added to CLAUDE.md) |
 | O-3 | Is 50,000 items a must for the first release, or is 10,005 (the sandbox) the target and 50k "should"? This decides how much of B goes into 0.21.0 | 10k must, 50k should (fix W-20…W-23 now, W-24/W-25 later) |
 | O-4 | W-44: rename "Changes + settings" — e.g. "Changes" with settings moved behind a gear icon? | Gear icon for settings |
 | O-5 | W-45: the status bar — show "3 coverage gaps" as a separate amber chip, with "No problems" meaning file problems only? | Separate chip with a tooltip |
@@ -151,3 +151,4 @@ are not documented (CRA-23); unused window call `confirmLinks` (CRA-18).
 ## Discussion log
 
 - 10 Nov 2026 — review run (8 helpers, without Fable, on the owner's instruction); findings merged; waiting for the owner.
+- 10 Nov 2026 — O-1 yes (order as in H); O-2 keep `gh api repos/*`, but every GitHub call that changes something must be reported to the owner.

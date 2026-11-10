@@ -64,6 +64,12 @@ once per theme version, not on every small change, and only the helpers the revi
 - Builder: read files in parts, filter command output, look only at screenshots of screens that changed, and run the
   one e2e scenario being fixed before the full suite.
 
+**Which model does what (the owner, 10 Nov 2026, Pro plan):** Fable shares the weekly limit (up to half of it) and
+uses it faster, so it is kept for judgment work — the code reviewer on a theme version, the whole-project review's
+merge, planning rounds and the user guide. The security reviewer stays on Opus (Fable hands cyber topics back to
+Opus anyway); the other helpers stay on Sonnet. Fable is used only when the owner says so for that round (the
+whole-project review of 10 Nov ran without it); trials planned: one UI/UX review and one logo variant.
+
 ## Fourth helper: brand / logo designer (owner, 4 Nov 2026)
 
 For the rename version and whenever the logo, icon or motion change, a **brand helper** reviews how they sit in the

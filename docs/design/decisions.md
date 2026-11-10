@@ -288,6 +288,9 @@ The owner added three helper agents for every theme version: code reviewer, QA t
 review was discussed, not added for now). One builder writes the product; helpers check a frozen commit; the QA tester
 adds new test files only, in its own worktree. Details: `docs/AGENT-WORKFLOW.md`.
 
+**Model split (C, 10 Nov 2026):** Fable for judgment work (code review, review merges, planning, user guide), only
+when the owner says so per round; security on Opus; other helpers on Sonnet. Details: `docs/AGENT-WORKFLOW.md` → Cost.
+
 ## The new name: reqochet (C, 4 Nov 2026)
 
 - **Name: reqochet**, written all lower case everywhere (window, installer `reqochet-Setup-x.y.z.exe`, Start menu,

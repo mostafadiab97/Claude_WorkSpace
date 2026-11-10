@@ -1,7 +1,7 @@
 {
   "name": "reqochet-dev",
   "productName": "reqochet-dev",
-  "version": "0.20.1",
+  "version": "0.20.2",
   "description": "Local, Git-based requirements management tool (proof of concept)",
   "main": "./out/main/index.js",
   "author": "ReqMan",
@@ -35,7 +35,7 @@
     "@vitejs/plugin-react": "^6.1.2",
     "@vitest/coverage-v8": "^5.0.5",
     "diff": "^9.0.0",
-    "electron": "^45.0.0",
+    "electron": "^45.2.3",
     "electron-builder": "^26.18.0",
     "electron-vite": "^6.0.0",
     "eslint": "^10.13.0",

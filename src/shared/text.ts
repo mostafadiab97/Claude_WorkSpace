@@ -1224,6 +1224,8 @@ const en = {
   /** Messages the core sends after item operations. */
   importMsg: {
     empty: 'No title and no text — row skipped.',
+    tooManyRows: (sheet: string, row: number) =>
+      `The sheet "${sheet}" has a cell in row ${row.toLocaleString('en')}, beyond Excel's 1,048,576 rows — the file looks damaged and was not read.`,
     duplicate: (id: string) => `The ID ${id} appears twice in the file — only its first row is imported.`,
     unknownType: (value: string, used: string) => `Unknown item type "${value}" — imported as ${used}.`,
     badValue: (value: string, field: string, options: string[] | null, existing: boolean) =>

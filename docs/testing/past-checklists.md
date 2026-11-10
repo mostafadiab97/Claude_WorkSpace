@@ -1,7 +1,17 @@
-# Past manual checklists (v0.0.3 – v0.19.1)
+# Past manual checklists (v0.0.3 – v0.20.0)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.20.0 (traceability views)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.20.0**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed** (new: "Traceability: coverage rules, gaps, matrix and impact"). |
+| 2 | Open the sandbox. Above the table: *Start with the usual coverage rules?* → **Add the rules**. | The question goes away; items without the needed links get a small **◌** next to their title, and the status bar shows *N coverage gaps*. (schema.yaml changed — commit it when you like.) |
+| 3 | Top bar **Traceability** → **Coverage**: open the gaps of one rule, click one; then **Show the gaps in the table** on another rule. | Each rule shows *x of y covered* with a bar; the item opens in the table; the table then lists only that rule's gaps (Filters → Coverage gaps). |
+| 4 | **Traceability → Matrix**: rows *System Requirement*, columns *Test Case*; then **Export Excel**. | A grid with a dot where they are linked, rows without a test marked; the Excel file has the whole grid. |
+| 5 | Open a stakeholder need → editor tab **Impact**. Then **Edit rules…** (in Traceability), change *At least* of one rule to 2, **Save**. | Impact lists everything that depends on the need, level by level. After the rule change the coverage numbers and ◌ marks follow it. |
 
 ## v0.19.1 (no empty rows after Show text off)
 

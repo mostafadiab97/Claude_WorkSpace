@@ -67,7 +67,16 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.20.1 (the owner's points on 0.20.0)
+## Manual test checklist — v0.20.2 (data safety)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.20.2**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed.** |
+| 2 | Open the sandbox. Make a new document with an Arabic name (e.g. *متطلبات تجربة*), add one item, **Commit**, then **Push**. Open the item's **History** tab. | Push succeeds; History lists your commit. |
+| 3 | Delete one item of that document and add a different one, Commit; **Changes → Compare → The last commit that changed requirements**. | One item listed as *Deleted* and one as *Added* — not one item "changed into" the other. (Delete the test document afterwards if you like — it is only in the sandbox.) |
+| 4 | **⚙ → Report a problem and diagnostics → Save report…**; open the saved file. | No Windows user name in it; paths start with `%USERPROFILE%`. |
+
+## Previous checklist — v0.20.1 (the owner's points on 0.20.0)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
@@ -76,16 +85,6 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 | 3 | **Traceability → Coverage → Show the gaps in the table**, then **← Back to Traceability** above the table. | The Traceability view opens again. |
 | 4 | **Traceability → Matrix** with a filter that gives a grid (e.g. Type = Software Requirement); scroll down; then **Export Excel** and edit a cell that starts with = in Excel. | The column titles stay at the top and the header row is short, so many rows show; in Excel the edited cell stays text. |
 | 5 | Look at the top bar. | Pull, Push, Changes, Versions, Traceability. |
-
-## Previous checklist — v0.20.0 (traceability views)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.20.0**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed** (new: "Traceability: coverage rules, gaps, matrix and impact"). |
-| 2 | Open the sandbox. Above the table: *Start with the usual coverage rules?* → **Add the rules**. | The question goes away; items without the needed links get a small **◌** next to their title, and the status bar shows *N coverage gaps*. (schema.yaml changed — commit it when you like.) |
-| 3 | Top bar **Traceability** → **Coverage**: open the gaps of one rule, click one; then **Show the gaps in the table** on another rule. | Each rule shows *x of y covered* with a bar; the item opens in the table; the table then lists only that rule's gaps (Filters → Coverage gaps). |
-| 4 | **Traceability → Matrix**: rows *System Requirement*, columns *Test Case*; then **Export Excel**. | A grid with a dot where they are linked, rows without a test marked; the Excel file has the whole grid. |
-| 5 | Open a stakeholder need → editor tab **Impact**. Then **Edit rules…** (in Traceability), change *At least* of one rule to 2, **Save**. | Impact lists everything that depends on the need, level by level. After the rule change the coverage numbers and ◌ marks follow it. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

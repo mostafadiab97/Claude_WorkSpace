@@ -13,6 +13,7 @@ import { buildProblemReport, problemReportName } from '../modules/logger'
 import { createImportFiles, loadImportFile, updateTarget, writeSourceUpdate } from './importFiles'
 import type { Paths, Services } from './composition'
 import * as v from './validate'
+import { closeForInstall } from './closeForInstall'
 import { setLanguage, T } from '../shared/text'
 
 /** The file types import reads (the dialog filter and the drop zone). */
@@ -171,9 +172,10 @@ export function registerIpc(services: Services, paths: Paths): void {
         return { ok: false, message: T.settings.versions.listFailed }
       }
     },
-    installEarlierVersion: (_e, version) => services.updater.installEarlier(v.str(version, 'version', 40)),
+    installEarlierVersion: (e, version) => services.updater.installEarlier(v.str(version, 'version', 40), () => closeForInstall(e.sender)),
     resumeUpdates: () => services.updater.resume(),
-    installUpdate: () => {
+    installUpdate: async (e) => {
+      if (!(await closeForInstall(e.sender))) return // the user kept editing (W-09)
       log.info('Restarting to install update')
       services.updater.installAndRestart()
     },
@@ -186,7 +188,8 @@ export function registerIpc(services: Services, paths: Paths): void {
           description: text,
           diagnostics: await diagnostics(),
           log: await readLog(log.filePath),
-          olderLog: await readLog(join(dirname(log.filePath), 'reqochet.old.log'))
+          olderLog: await readLog(join(dirname(log.filePath), 'reqochet.old.log')),
+          home: app.getPath('home')
         })
         const win = BrowserWindow.fromWebContents(e.sender)
         const opts = { title: T.settings.report.title, defaultPath: join(app.getPath('downloads'), problemReportName()), filters: [{ name: 'Text', extensions: ['txt'] }] }

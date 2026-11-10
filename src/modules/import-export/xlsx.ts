@@ -3,6 +3,7 @@
 // No file access here: bytes in, bytes out (the main process reads and writes the files the user chose).
 import { Workbook, type CellValue, type Worksheet } from 'exceljs'
 import JSZip from 'jszip'
+import { T } from '../../shared/text'
 
 /**
  * Some programs (e.g. Python's openpyxl, used for many generated sheets) point to tables and drawings with absolute
@@ -115,9 +116,14 @@ export async function readXlsx(data: Uint8Array): Promise<{ name: string; rows: 
   return wb.worksheets.map((ws) => ({ name: ws.name, rows: sheetRows(ws) }))
 }
 
+/** Excel's own limit; a file claiming a cell beyond it is damaged or crafted (W-06: row 50,000,000 ran out of memory). */
+const EXCEL_MAX_ROWS = 1_048_576
+
 function sheetRows(ws: Worksheet): string[][] {
   const rows: string[][] = []
-  ws.eachRow({ includeEmpty: true }, (row, n) => {
+  // only rows that exist in the file (includeEmpty made one object per empty row up to the last one)
+  ws.eachRow((row, n) => {
+    if (n > EXCEL_MAX_ROWS) throw new Error(T.importMsg.tooManyRows(ws.name, n))
     const cells: string[] = []
     row.eachCell({ includeEmpty: true }, (cell, c) => {
       cells[c - 1] = cellText(cell.value).replace(/\r\n/g, '\n')
@@ -148,6 +154,7 @@ export async function updateXlsx(data: Uint8Array, sheet: string, edits: CellEdi
   if (!ws) throw new Error(`The sheet "${sheet}" is not in the file any more.`)
   for (const e of edits) ws.getCell(e.row, e.col).value = e.value
   let last = ws.actualRowCount === 0 ? 0 : ws.lastRow?.number ?? 0
+  if (last > EXCEL_MAX_ROWS) throw new Error(T.importMsg.tooManyRows(ws.name, last))
   for (const r of append) {
     last++
     r.forEach((v, c) => {

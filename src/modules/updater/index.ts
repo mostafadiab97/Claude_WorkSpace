@@ -15,8 +15,11 @@ export interface UpdateService {
   current(): UpdateStatus
   /** Versions one can go back to (newest first). */
   listEarlier(): Promise<ReleaseInfo[]>
-  /** Downloads and installs an earlier version; pauses automatic updates first. Resolves only on failure. */
-  installEarlier(version: string): Promise<{ ok: false; message: string } | { ok: true }>
+  /**
+   * Downloads and installs an earlier version; pauses automatic updates first. `closeWindow` runs after the download
+   * and before the installer starts: false (the user kept editing unsaved changes) stops it (W-09).
+   */
+  installEarlier(version: string, closeWindow?: () => Promise<boolean>): Promise<{ ok: false; message: string; canceled?: boolean } | { ok: true }>
   /** Ends the pause after going back. */
   resume(): Promise<void>
 }

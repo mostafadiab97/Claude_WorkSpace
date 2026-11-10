@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { createServices, type Paths } from './composition'
 import { registerIpc } from './ipc'
 import { moveLegacyUserData, removeLegacyUpdaterCache } from './legacyData'
+import { quitHeld } from './closeForInstall'
 import { Channels } from '../shared/api'
 
 // The name comes from package.json "productName": reqochet-dev in the development repository, reqochet in the release
@@ -150,5 +151,6 @@ void app.whenReady().then(async () => {
 })
 
 app.on('window-all-closed', () => {
+  if (quitHeld()) return // an installer is about to take over and quits the app itself (W-09)
   if (process.platform !== 'darwin') app.quit()
 })

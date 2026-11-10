@@ -1223,6 +1223,8 @@ const raw: Texts = {
 
   importMsg: {
     empty: 'لا عنوان ولا نص — تُخطّي الصف.',
+    tooManyRows: (sheet: string, row: number) =>
+      `في الورقة "\u2068${sheet}\u2069" خلية في الصف ${row.toLocaleString('en')}، بعد حدّ Excel البالغ 1,048,576 صفًا — يبدو الملف تالفًا ولم يُقرأ.`,
     duplicate: (id: string) => `المعرّف ${id} يظهر مرتين في الملف — يُستورَد صفه الأول فقط.`,
     unknownType: (value: string, used: string) => `نوع عنصر غير معروف "${value}" — استُورد كـ ${used}.`,
     badValue: (value: string, field: string, options: string[] | null, existing: boolean) =>

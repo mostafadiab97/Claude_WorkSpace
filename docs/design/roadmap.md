@@ -21,7 +21,7 @@ The prototype is built in seven milestones, each ending with a Windows build you
 | M5 Compare | Pick two commits/branches/tags; per-item and per-link difference view | Journey step 6 works |
 | M6 Export and hardening | CSV export; end-to-end tests of the whole journey; bug fixes from your trials | The full 8-step journey passes on two Windows PCs; success measures met |
 
-**Progress:** M0–M6 are complete (v0.7.0) — the prototype scope FR-01 to FR-10 is built; 0.8.0 (review fixes), 0.9.0 (new data format), 0.10.0 (Changes view), 0.11.0 (Excel + ReqIF), 0.12.0 (M8 branches, per-requirement pull), 0.12.1 (branch drop-down) and 0.13.0 (Arabic, fewer bars, delete branch) are released. The current version and next step are kept in `CLAUDE.md` ("Status") and `CHANGELOG.md` only (review T-04); the plan for the next versions is "Release plan" below.
+**Progress:** M0–M6 are complete (v0.7.0) — the prototype scope FR-01 to FR-10 is built; 0.8.0 (review fixes), 0.9.0 (new data format), 0.10.0 (Changes view), 0.11.0 (Excel + ReqIF), 0.12.0 (M8 branches, per-requirement pull), 0.12.1 (branch drop-down) and 0.13.0 (Arabic, fewer bars, delete branch) are released. The current version and next step are kept in `docs/STATUS.md` and `CHANGELOG.md` only (review T-04); the plan for the next versions is "Release plan" below.
 
 **How we work:** I write the code, tests and architecture notes in a Git repository; after each milestone you install the build, try it and comment here or in chat. Specs and decisions stay in this document and the repo, so work continues across sessions.
 
@@ -159,6 +159,8 @@ X-02).
 | **0.19.1** | Fix from the owner's 0.19.0 test | No empty space between rows after Show text off |
 | **0.20.0** | Theme 1b traceability views | Coverage rules (starter set, Rules tab), Traceability view with Coverage and Matrix (Excel export), Impact tab, coverage-gap mark, Problems group and filter — decisions 8 Nov 2026; the pilot can start after it |
 | **0.20.1** | The owner's points on 0.20.0 | Visible gap dot, Back to Traceability, sticky short matrix header, top bar order, Excel formula-like cells as text |
+| **0.20.2** | Whole-project review: data safety (`docs/reviews/2026-11-10-project-review.md`) | Copied children, Arabic document names in Git, link extras in merges, old-version export, CSV/Excel import limits, Compare rename pairing, Git time limits, close before installers, explicit push, CI install without scripts, Electron 45.2.3, `%USERPROFILE%` in reports |
+| *0.21.0 (next)* | *Speed at 50k (O-3: 10k must, 50k should)* | *Compare of two commits, save, sort by number, first open of an old version, CI speed test; then screens, Arabic and documents* |
 | **Release plan (C, 2 Nov 2026)** | — | 0.14 rename + health → 0.15 1a structure → 0.16 1b traceability views (pilot can start) → 0.17 daily comfort → 0.18 rich text → 0.19 documents out → 0.20 review basics → 0.21 pull requests in the app → 0.22 verification → 0.23 sharing + help → 0.24 AI → later commercial; a stabilisation patch after every theme; details in `docs/reviews/2026-11-01-planning-discussion.md` |
 | *Proposal A (R)* | *New name + traceability* | *Proposed 31 Oct 2026; order to be settled in the planning discussion (the owner, 31 Oct):* the rename (`docs/reviews/done/2026-10-31-rename-impact.md`) once the name is chosen; traceability matrix and coverage; item and link types in the GUI; saved views; bulk edit |
 | *Proposal B (R)* | *Documents out* | Word and PDF export, HTML publishing, Markdown preview |

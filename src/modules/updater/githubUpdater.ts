@@ -150,7 +150,7 @@ export function createGithubUpdater({ enabled, log, holdFile, updateConfigFile }
     },
     current: () => status,
     listEarlier,
-    async installEarlier(version) {
+    async installEarlier(version, closeWindow) {
       if (!enabled) return { ok: false, message: 'Only the installed Windows app can change its version.' }
       try {
         const target = (releases.length ? revertTargets(releases, app.getVersion()) : await listEarlier()).find((r) => r.version === version)
@@ -160,6 +160,10 @@ export function createGithubUpdater({ enabled, log, holdFile, updateConfigFile }
         if (!res.ok) throw new Error(`download failed (${res.status})`)
         const file = join(tmpdir(), `${app.getName()}-Setup-${version}.exe`)
         writeFileSync(file, Buffer.from(await res.arrayBuffer()))
+        if (closeWindow && !(await closeWindow())) {
+          log.info(`Going back to ${version} stopped: the user kept editing`)
+          return { ok: false, message: '', canceled: true }
+        }
         writeFileSync(holdFile, JSON.stringify({ version, since: new Date().toISOString() }))
         log.info(`Updates paused at ${version}; starting the installer`)
         // silent install over the current version, then start the app again (electron-builder's NSIS options)

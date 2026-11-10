@@ -7,10 +7,26 @@
  */
 export const maskSecrets = (text: string): string => text.replace(/\b([a-z][a-z0-9+.-]*:\/\/)[^\s/@]+@/gi, '$1***@')
 
+/**
+ * Replaces the user's home folder with %USERPROFILE% — every path in the log carries the Windows user name, which is
+ * personal data in a file meant for someone else (W-33, the owner's decision O-7, 10 Nov 2026).
+ */
+export function maskHome(text: string, home?: string): string {
+  let out = text
+  if (home && home.length > 3) {
+    // the same folder written with \ or /, any letter case (Windows paths are not case-sensitive)
+    const pattern = home.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\\|\//g, '[\\\\/]')
+    out = out.replace(new RegExp(pattern, 'gi'), '%USERPROFILE%')
+  }
+  // any other C:\Users\<name> (another profile, a path written differently)
+  return out.replace(/\b([A-Za-z]:[\\/]+Users[\\/]+)(?!%USERPROFILE%)[^\\/\s"'<>|]+/gi, '%USERPROFILE%')
+}
+
 /** How many log lines go into a report (the newest ones). */
 export const REPORT_LOG_LINES = 400
 
-export function buildProblemReport(input: { description: string; diagnostics: string; log: string; olderLog?: string; now?: Date }): string {
+export function buildProblemReport(input: { description: string; diagnostics: string; log: string; olderLog?: string; now?: Date; home?: string }): string {
+  const clean = (t: string): string => maskHome(maskSecrets(t), input.home)
   const lines = [...(input.olderLog ?? '').split(/\r?\n/), ...input.log.split(/\r?\n/)].filter((l) => l !== '')
   const tail = lines.slice(-REPORT_LOG_LINES)
   const when = (input.now ?? new Date()).toISOString()
@@ -22,10 +38,10 @@ export function buildProblemReport(input: { description: string; diagnostics: st
     input.description.trim() || '(no description)',
     '',
     '== Diagnostics ==',
-    maskSecrets(input.diagnostics.trim()),
+    clean(input.diagnostics.trim()),
     '',
     `== Log (last ${tail.length} lines) ==`,
-    ...tail.map(maskSecrets),
+    ...tail.map(clean),
     ''
   ].join('\r\n')
 }

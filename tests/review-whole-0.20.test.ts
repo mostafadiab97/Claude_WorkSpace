@@ -6,6 +6,9 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { createSystemGitAdapter } from '../src/modules/git-adapter'
 import { mergeItems, type Item } from '../src/modules/items'
+import { parseCsv, readXlsx } from '../src/modules/import-export'
+import ExcelJS from 'exceljs'
+import { buildProblemReport } from '../src/modules/logger'
 import { createSqliteIndexCache } from '../src/modules/index-cache'
 import { createFileRepositoryStore } from '../src/modules/repository-store'
 import { cacheFileName, createWorkspace, type WorkspaceService } from '../src/modules/workspace'
@@ -155,5 +158,35 @@ describe('0.20.2 whole-project review fixes', () => {
     expect((await ws.push()).ok).toBe(true)
     const heads = execFileSync('git', ['for-each-ref', '--format=%(refname)', 'refs/heads/'], { cwd: remote, encoding: 'utf8' })
     expect(heads.trim()).toBe('refs/heads/main')
+  })
+  it('W-05: CSV — a short row ending in a quoted cell does not swallow the rows after it', () => {
+    const rows = parseCsv('ID,Title,Text,Status\r\nA-1,"Short row"\r\nA-2,Second,x,Draft\r\nA-3,"Third",y,Done')
+    expect(rows.map((r) => r[0])).toEqual(['ID', 'A-1', 'A-2', 'A-3'])
+    expect(rows[1]).toEqual(['A-1', 'Short row'])
+    // the 0.16.3 case still works: a list line ending in 12" inside a quoted cell that is not the last column
+    const kept = parseCsv('ID,Text,Status\nA-1,"- a 12"\n- b",Draft\n')
+    expect(kept[1]).toEqual(['A-1', '- a 12"\n- b', 'Draft'])
+  })
+  it('W-06: an Excel file with a cell in row 50,000,000 is refused quickly instead of running out of memory', async () => {
+    const wb = new ExcelJS.Workbook()
+    const sheet = wb.addWorksheet('Items')
+    sheet.getCell(1, 1).value = 'ID'
+    sheet.getCell(50_000_000, 1).value = 'x'
+    const data = new Uint8Array(await wb.xlsx.writeBuffer())
+    const started = Date.now()
+    await expect(readXlsx(data)).rejects.toThrow(/row 50,000,000/)
+    expect(Date.now() - started).toBeLessThan(5000)
+  })
+  it('W-33: a problem report shows %USERPROFILE% instead of the Windows user folder', () => {
+    const report = buildProblemReport({
+      description: 'x',
+      diagnostics: 'Log file: C:\\Users\\Sample.Person\\AppData\\Roaming\\reqochet-dev\\reqochet.log',
+      log: 'opened c:/users/sample.person/Projects/demo\nopened D:\\Users\\other\\x',
+      home: 'C:\\Users\\Sample.Person'
+    })
+    expect(report).not.toMatch(/Sample\.Person/i)
+    expect(report).not.toMatch(/other/)
+    expect(report).toContain('%USERPROFILE%\\AppData\\Roaming')
+    expect(report).toContain('%USERPROFILE%/Projects/demo')
   })
 })

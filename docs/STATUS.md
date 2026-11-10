@@ -4,7 +4,7 @@ CLAUDE.md is read at the start of every session and again after every context co
 history there cost thousands of tokens each time (the owner asked to save tokens, 8 Nov 2026). **This file is the
 status**: update it with every release (the version table, "Next", the owner's last report, test counts).
 
-## Status (v0.20.1, 10 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.20.2, 10 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -37,9 +37,10 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.19.1 fix: no empty space between rows after Show text off (`ItemTable.tsx`: row keys per mode + `virtualizer.measure()` on a switch); e2e `rows-0.19`; final-touches reminder list in `docs/design/roadmap.md` | Released (v0.19.1) |
 | 0.20.0 theme 1b traceability (decisions T-01…T-08, 8 Nov) — coverage rules in schema.yaml (`schema/parse.ts` + `rules.ts`, writer keeps hand edits, ≤ 100 rules), coverage and the gaps filter in SQL (`gapSql`), `workspace/traceability.ts` (coverage, impact ≤ 5,000, matrix ≤ 2,000 rows drawn, Excel grid or list), window: `TraceabilityView.tsx` (Coverage, Matrix), `RulesPanel.tsx` (Rules tab), `ImpactView.tsx`, gap mark, Problems group, status-bar count, starter offer; self-test 25 steps; six helper reports `docs/reviews/agents/0.20.0-*.md` | Released (v0.20.0) |
 | 0.20.1 the owner's points on 0.20.0 — solid gap dot (theme colour `gap`), Back to Traceability, matrix header sticky and short (inner text rotated), top bar order, Excel cells starting like a formula get the Text format (SEC20-05) | Released (v0.20.1) |
-| **Next** | Owner's 0.20.1 checklist; then **the pilot can start** (release plan). Then a stabilisation patch with the later review items (gap SQL at 50k P3/P5, PERF19-02/04, PERF-02/03, editor preview limit, toasts UX19-01, tab pattern UI-02, the rare qa-0.17.0 test failure, Arabic diagram labels) and the owner's answer on SEC20-05 (Excel cells starting with = + - @) | — |
+| 0.20.2 data safety — the whole-project review's High/Medium data and Git fixes (`docs/reviews/2026-11-10-project-review.md` W-01…W-12, W-31…W-33): exact-path save for copied children, plain Git paths (Arabic document names), link extras in merges, old-version export title, CSV short rows, Excel row limit, Compare rename pairing, bulk Git time limits, close before installers, explicit push, `--ignore-scripts` + release only from main, Electron 45.2.3, `%USERPROFILE%` in reports | Released (v0.20.2) |
+| **Next** | Owner's 0.20.2 checklist; then **0.21.0 speed** (review W-20…W-23, W-27: compare of two commits, save at 50k, sort by number, first open of an old version, CI speed test), then screens + Arabic + documents (W-10, W-40…W-54, W-60…W-63) — order confirmed by the owner (O-1), details in `docs/reviews/2026-11-10-project-review.md` → H |
 
-The owner's last report (10 Nov 2026): **0.20.1 all 5 steps passed** (25/25, 90.9 s) — nothing open from his tests; theme 1b is done and the pilot can start. Before: 0.20.0 all 5 passed with four points (→ 0.20.1).
+The owner's last report (10 Nov 2026): **0.20.1 all 5 steps passed**; review questions O-1…O-7 answered the same day (25/25, 90.9 s) — nothing open from his tests; theme 1b is done and the pilot can start. Before: 0.20.0 all 5 passed with four points (→ 0.20.1).
 Before: 0.18.0 all 5 passed (24/24). Before: 0.17.2 all 5 passed (23/23). Before: 0.13.1 all 4 steps passed, 21/21 (66.8 s). Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
 Before: 0.12.1 steps 1–3, 5 passed, 21/21 (50.7 s); step 4 (pull from a branch
 committed at once) and three requests → 0.13.0. Before: **0.12.0 all 5 steps passed** — that was the two-folder trial (two clones of the
@@ -51,57 +52,21 @@ Automated tests: 617 unit tests (with a coverage floor) + 14 e2e scenarios (`tra
 `language`, `health`, `qa-0.15.0-polish`, `qa-0.16.0-rename`, `fixes-0.16.3`, `fixes-0.16.4`, `structure-0.17`) + the 25-step in-app release self-test + the CI acceptance run on the installed app; what each covers and every speed measurement: `docs/TESTING.md` → "Automated
 checks in detail".
 
-## Where we are right now (2 Nov 2026) — read this first
+## Where we are right now (10 Nov 2026) — read this first
 
-- **Built and accepted by the owner:** everything up to **0.13.1**. **0.14.0 released 2 Nov** (health tools +
-  acceptance run; its first acceptance run passed: update 0.13.1 → 0.14.0, self-test, 10,005-item sandbox, real push
-  to `ci/acceptance-*` and delete) — **0.14.1 released 3 Nov** (user guide, go back to an earlier version, security check, calmer notes) —
-  the owner's report 3 Nov: 0.14.0/0.14.1 passed with small points → **0.14.2 released 3 Nov** (Settings and help with the
-  guide inside, privacy guard, sandbox history cleaned) — 0.14.2: steps 1, 3, 4 passed; step 2 → **0.14.3** (pages) —
-  0.14.3 passed → **0.14.4 released 3 Nov** (no personal data in files; Check for updates on the Updates line; blue Back)
-  — 0.14.4 passed with two touches → **0.14.5 released 3 Nov** — 0.14.5 released; **0.15.0 (UI polish) released 4 Nov** — his report 4 Nov: steps 2, 5 passed, points on 1, 3, 4 → **0.15.1 released 4 Nov** — all passed with three touches → **0.15.2 released 4 Nov** — all passed → **0.16.0 (rename to reqochet-dev) released 4 Nov** — steps 1, 2, 5 passed, points on 3, 4 → **0.16.1 released 4 Nov** — all 5 passed; icon redraw asked → **0.16.2 released 4 Nov** — all 3 passed → whole-project review 5 Nov → **0.16.3 released 5 Nov** — steps 1, 3, 4 passed, points on 2 and 5 → **0.16.4 released 7 Nov** — the owner asked to go on without testing → **0.17.0 (1a structure part 1) released 8 Nov** — step 1 passed, step 2 (rename of the big folder) failed → **0.17.1 released 8 Nov** — all passed; 0.17.0 steps 3–5 and 0.16.4 steps 2–5 passed with points → **0.17.2 released 8 Nov** — waiting for his 0.17.2 checklist. **Question round open:** `docs/reviews/2026-11-04-next-round.md` (1a structure S-01…S-07, whole-project review V-01/V-02, more helper agents, cheaper helper runs W-01/W-02). History question settled: not rewritten; a public release repository
-  will start from the files without history.
-- **Planning discussion in progress** — `docs/reviews/2026-11-01-planning-discussion.md` (method: the
-  `owner-decision-walkthrough` skill; record every answer there and, when it changes the product, in
-  `docs/design/decisions.md` / `roadmap.md`). Decided so far (1 Nov 2026):
-  - P-01 next phase = **a pilot team** (~50 users, embedded devices, ISO 26262 + ASPICE, today DOORS/Jama, Excel
-    without licence, one client wants Word; all know Git/GitHub).
-  - P-02/P-03 six themes, one per minor version, fixes as patches: **1 traceability you can see** → 2 daily comfort →
-    3 documents out → 4 review on GitHub → 5 engineering traceability → 6 later/commercial (details per theme still to
-    discuss: themes 2–5).
-  - P-04 the **rename gets its own version before the pilot** starts.
-  - **Theme 1 version contents:** item and link types editable in the window, required fields, coverage view (rules
-    shared in `schema.yaml`), impact chain, traceability matrix (rows/columns by type, current filter, Excel export),
-    completeness warnings, **documents** (several specifications in one repository, each with its own tree and
-    outline numbers — replaces "one tree per repository"; cross-repository links later with a repository alias before
-    the ID), **baselines** (Git tags with note, list, compare with baseline, open read-only).
-  - **Theme 2 (2 Nov, P-12…P-16, all as recommended):** bulk edit, duplicate (no links copied), saved views
-    (personal + shared), templates with EARS/user-story patterns, wording hints, spell check, restore an older item
-    version; external references → theme 5. 
-  - **Theme 3 (2 Nov):** Word (company template in the repo; AI prompt `docs/guides/word-template-prompt.md`), PDF,
-    Markdown, CSV; document = title page with baseline/commit, contents, items, optional trace table; HTML site +
-    JSON → theme 5. Split: **3a rich text** (toolbar editor storing Markdown, tables, images + diagrams as files
-    beside the item, equations) → **3b documents out**. 
-  - **Theme 4 (2 Nov, P-25…P-29):** github.com, other hosts via a host adapter; browser sign-in; approvals per item;
-    PRs created/approved/merged in the app; change requests; comment files in the repo; optional "Approved only via
-    merged PR"; review sessions. Split 4a → 4b.
-  - **Theme 5 (2 Nov):** 5a verification (code links from a code folder or Doxygen output — code is in other repos;
-    JUnit + manual test results; check on demand, locally, chosen branch) → 5b sharing (spec website, JSON, graph,
-    external refs); built-in user guide. All AI parts (AI guide, AI export, MCP) → last versions.
-    P-38 approval: status of an edited Approved item changes only when pushed; P-39 one-file HTML instead of a
-    website; P-40 feature switches + stabilisation patch per theme + coverage floor + report-a-problem.
-    **Release plan confirmed 2 Nov** (planning file / roadmap: 0.14 rename+health … 0.24 AI). P-41 **yes**: automated Windows
-    acceptance run in CI (install previous → update → self-test → 10k sandbox → real push to `ci/acceptance-*`, deleted
-    after → version e2e); every run/report lists numbered what it did. **Next: build 0.14 health parts (feature switches,
-    coverage floor, Report a problem) + the acceptance run now; apply the rename when the owner picks the name**
-    (considering ShallWe, Plumbline, Keelson).
-  - P-11 **no Word import**. Import: Excel, ReqIF, CSV, ReqMan repositories. Export: Excel, ReqIF, CSV, ReqMan
-    repositories, Markdown, Word, PDF.
-- **3 Nov 2026: the CTO approved a pilot with a complete team** — the rename must ship before the team gets the tool.
-- **New name:** the owner is choosing (decision expected 3 Nov). Candidates 3 Nov: reqochet, reqoin, reqornea (his), Reqoncile, Reqonnect, Reqosmos, Reqompass, Reqollect, Reqipe; avoid Reqord (existing tool). Latest candidates (2 Nov): ShallWe (recommended), Plumbline, Keelson; earlier: reqochet (felt long, "misses the target"), Shallmark, Threadwise, Linkwell. Rename plan: `docs/reviews/done/2026-10-31-rename-impact.md` (section 5:
-  uninstall old → install new, `.reqman` folder renamed by Git rename, copy the user's settings first).
-- **Rust: no migration now** (31 Oct). Feature input: `docs/reviews/2026-10-31-feature-catalogue.md` (163 features),
-  market list `docs/reviews/2026-10-31-rm-tools-market-list.md`.
+- **Built and accepted by the owner:** everything up to **0.20.1** (theme 1 traceability is complete: documents,
+  types window, baselines, old versions in the table, coverage, impact, matrix). The CTO approved a pilot with a
+  complete team (3 Nov); the name is **reqochet** (0.16.0; this repository builds reqochet-dev).
+- **Whole-project review before the first release (10 Nov):** `docs/reviews/2026-11-10-project-review.md` —
+  136 findings (6 High), all owner questions answered (O-1…O-7). Order: **0.20.2 data safety** → **0.21.0 speed**
+  (10k items a must, 50k a should) → screens, Arabic and documents → later items when their area is touched.
+- **Release plan and themes:** `docs/design/roadmap.md` (theme 2 daily comfort, 3a rich text, 3b documents out,
+  4 review on GitHub, 5 engineering traceability, 6 later/commercial); decisions in `docs/design/decisions.md`;
+  the planning discussion (P-xx) in `docs/reviews/2026-11-01-planning-discussion.md`.
+- **Word:** no Word import in the app (P-11); an AI prompt turns a folder of Word specifications (several versions
+  per module) into a reqochet project and records their format for the Word export — `docs/guides/word-template-prompt.md`.
+- **Models (10 Nov):** Fable only when the owner says so per round; security on Opus; other helpers on Sonnet
+  (`docs/AGENT-WORKFLOW.md` → Cost).
 
 **Testing rule from 0.8.0 (the owner, 28 Oct 2026):** the manual checklist per version has **at most 5 steps** (update
 arrives, release self-test, open the sandbox, one real push only when Git changed, the version's new feature).

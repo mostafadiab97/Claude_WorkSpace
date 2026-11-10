@@ -52,7 +52,9 @@ jobs:
         # 8 Nov 2026 GitHub answered the anonymous Electron download with 504 for hours, signed-in downloads worked
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
-        run: for attempt in 1 2 3; do npm ci && exit 0; echo "npm ci attempt $attempt failed; waiting"; sleep 60; done; exit 1
+        # --ignore-scripts: no library runs code at install time, so none can change files that later steps run with
+        # the token (W-31, SEC-WP2-02); the only scripts were esbuild's (optional) and electron-winstaller's (unused)
+        run: for attempt in 1 2 3; do npm ci --ignore-scripts && exit 0; echo "npm ci attempt $attempt failed; waiting"; sleep 60; done; exit 1
       # the token only here, not while libraries' install scripts run (SEC-18-01)
       - name: Electron (signed-in download, checksum from the locked package)
         shell: bash

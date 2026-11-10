@@ -32,6 +32,16 @@ export function detectSeparator(text: string): ',' | ';' | '\t' {
 /** The protecting ' an export put before a formula-like value comes off again on import (CR3-06b). */
 const unprotect = (cell: string): string => (cell.startsWith("'") && FORMULA_START.test(cell.slice(1)) ? cell.slice(1) : cell)
 
+/** Does the line after position `from` (a line end) hold at least `columns` cells? Counted naively, quotes ignored. */
+function nextLineIsRow(t: string, from: number, separator: string, columns: number): boolean {
+  let i = from
+  if (t[i] === '\r') i++
+  if (t[i] === '\n') i++
+  let count = 1
+  for (; i < t.length && t[i] !== '\n' && t[i] !== '\r'; i++) if (t[i] === separator) count++
+  return count >= columns
+}
+
 /** Reads CSV text (RFC 4180; BOM and CRLF tolerated; comma unless another separator is given). */
 export function parseCsv(text: string, separator = ','): string[][] {
   const rows: string[][] = []
@@ -51,7 +61,10 @@ export function parseCsv(text: string, separator = ','): string[][] {
         const next = t[i + 1]
         // before a line end it closes only if the row then has all its columns: a list line ending in 12" inside a
         // cell that is not the last column keeps going
-        const rowEndsEarly = (next === '\n' || next === '\r') && rows.length > 0 && row.length + 1 < (rows[0]?.length ?? 0)
+        // — unless the next line has a full row's separators: then this row is simply short (W-05: a short row ending
+        // in a quoted cell swallowed every row after it)
+        const rowEndsEarly =
+          (next === '\n' || next === '\r') && rows.length > 0 && row.length + 1 < (rows[0]?.length ?? 0) && !nextLineIsRow(t, i + 1, separator, rows[0]?.length ?? 0)
         if ((next === undefined || next === separator || next === '\n' || next === '\r') && !rowEndsEarly) quoted = false
         else cell += ch
       } else cell += ch

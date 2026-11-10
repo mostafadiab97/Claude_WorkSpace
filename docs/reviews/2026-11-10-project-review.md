@@ -145,7 +145,7 @@ are not documented (CRA-23); unused window call `confirmLinks` (CRA-18).
 | O-3 | Is 50,000 items a must for the first release, or is 10,005 (the sandbox) the target and 50k "should"? This decides how much of B goes into 0.21.0 | 10k must, 50k should (fix W-20…W-23 now, W-24/W-25 later) — **C 10 Nov: A, as recommended** |
 | O-4 | W-44: rename "Changes + settings" — e.g. "Changes" with settings moved behind a gear icon? | Gear icon for settings — **C 10 Nov: keep the button as it is** (settings = changed project files such as schema.yaml, committed together with the item changes); **add a description** of \"settings\" to its tooltip |
 | O-5 | W-45: the status bar — show "3 coverage gaps" as a separate amber chip, with "No problems" meaning file problems only? | Separate chip with a tooltip — **C 10 Nov: A, as recommended** (\"No problems\" = file problems; gaps a separate amber chip with a tooltip saying they are missing links, not file errors) |
-| O-6 | W-13: both PCs rename the same document — just a clearer message (rare), or merge the folders automatically? | Clearer message only |
+| O-6 | W-13: both PCs rename the same document — just a clearer message (rare), or merge the folders automatically? | Clearer message only — **C 10 Nov: A** (explain that both PCs renamed the document; offer to keep one name and move the items back into one folder) |
 | O-7 | W-33: replace your Windows user name in problem reports with `%USERPROFILE%`? | Yes |
 
 ## Discussion log
@@ -155,3 +155,4 @@ are not documented (CRA-23); unused window call `confirmLinks` (CRA-18).
 - 10 Nov 2026 — O-3 A: 10k items a must, 50k a should (W-20…W-23 in 0.21.0, W-24/W-25 later). The owner also asked to update the Word AI prompt (folder of documents, one file per version, format extraction) → `docs/guides/word-template-prompt.md` rewritten.
 - 10 Nov 2026 — O-4: keep "Changes + settings", explain "settings" in the tooltip (screens batch). Word prompt: report conflicts between requirements (tagged `import-conflict`); a requirement touching two modules is kept in both, linked with relates-to.
 - 10 Nov 2026 — O-5 A: coverage gaps as a separate chip with a tooltip (screens batch).
+- 10 Nov 2026 — O-6 A: clearer message + offer to keep one name (W-13).

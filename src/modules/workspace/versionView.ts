@@ -57,6 +57,7 @@ export async function openVersion(deps: {
   const refuse = (): never => {
     throw new Error(T.version.readOnly)
   }
+  let reads = 0
   // only what the index and the read calls use; anything that would write is refused
   const repo = {
     root: key,
@@ -69,6 +70,9 @@ export async function openVersion(deps: {
     listItemFiles: async () => [...files.keys()].map((path) => ({ path, mtimeMs: 0, size: 0 })),
     listDocuments: async () => [...new Set([...files.keys()].filter((p) => p.includes('/')).map((p) => p.slice(0, p.indexOf('/'))))].sort(),
     async readItemFile(path: string, opts?: { allKeysAsFields?: boolean }) {
+      // everything here is in memory: without a pause the first build of a big version kept the main process busy
+      // for 13 s at 50,000 items and the window could not even draw (W-23)
+      if (++reads % 200 === 0) await new Promise((r) => setImmediate(r))
       const text = textOf(path)
       if (text === null) return { ok: false as const, error: T.version.notInVersion }
       if (text.length > MAX_BLOB) return { ok: false as const, error: T.version.tooLarge }

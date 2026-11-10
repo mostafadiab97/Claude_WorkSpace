@@ -77,8 +77,13 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
       }
       if (issues.length > 0) return { ok: false, reason: 'invalid', message: issues.map((i) => i.message).join(' '), issues }
       try {
+        const was = revision === null ? undefined : s.index.get(clean.id)
+        const indexBefore = s.index.revision()
         await s.repo.writeItem(clean, { expectedRevision: revision })
         await s.index.syncPaths(s.repo, [s.repo.itemPath(clean.id, clean.document)])
+        // a text or field change leaves every outline number as it was: keep them instead of renumbering 50,000
+        // items for the reply (W-21)
+        if (was && was.parent === clean.parent && was.order === clean.order && (was.document ?? '') === (s.index.get(clean.id)?.document ?? '')) ctx.keepNumbers(s, indexBefore)
         const d = await details(s, clean.id)
         if (!d) return { ok: false, reason: 'error', message: T.wsMsg.savedUnreadable }
         log.info(`Saved ${clean.id}${revision === null ? ' (new)' : ''}`)

@@ -1094,7 +1094,7 @@ const en = {
     banner: (label: string) => `Viewing ${label}`,
     readOnlyTag: 'read-only',
     back: 'Back to now',
-    opening: 'Opening the old version…',
+    opening: 'Opening the old version… The first time, every requirement of that version is read — a few seconds in a big project; opening it again before reqochet closes is quick.',
     hint: 'Every item as it was in that version. Your working folder has not changed.'
   },
   baselines: {

@@ -1,7 +1,17 @@
-# Past manual checklists (v0.0.3 – v0.20.0)
+# Past manual checklists (v0.0.3 – v0.20.1)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.20.1 (the owner's points on 0.20.0)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.20.1**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed.** |
+| 2 | Look at the coverage-gap marks in the table, in Light and in Dark. | A solid amber dot right after the title, easy to see in both. |
+| 3 | **Traceability → Coverage → Show the gaps in the table**, then **← Back to Traceability** above the table. | The Traceability view opens again. |
+| 4 | **Traceability → Matrix** with a filter that gives a grid (e.g. Type = Software Requirement); scroll down; then **Export Excel** and edit a cell that starts with = in Excel. | The column titles stay at the top and the header row is short, so many rows show; in Excel the edited cell stays text. |
+| 5 | Look at the top bar. | Pull, Push, Changes, Versions, Traceability. |
 
 ## v0.20.0 (traceability views)
 

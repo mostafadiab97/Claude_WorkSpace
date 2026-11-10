@@ -84,7 +84,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     return session
   }
 
-  let outline: { index: IndexCache; revision: number; map: Map<string, string> } | null = null
+  let outline: { index: IndexCache; revision: number; map: Map<string, string>; ranks?: Map<string, number> } | null = null
 
   /** The session the read calls answer from: the old version while one is shown, else the open repository. */
   const reading = (): Session => viewing?.session ?? need()
@@ -101,6 +101,20 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       const revision = s.index.revision()
       if (!outline || outline.index !== s.index || outline.revision !== revision) outline = { index: s.index, revision, map: outlineNumbers(s.index.structure()) }
       return outline.map
+    },
+    keepNumbers(s, before) {
+      if (outline && outline.index === s.index && outline.revision === before) outline.revision = s.index.revision()
+    },
+    numberRanks(s) {
+      const numbers = ctx.numbers(s)
+      if (!outline?.ranks) {
+        // every item's place when sorted by outline number, worked out once per index state (W-22): sorting the
+        // matching rows is then an integer compare instead of splitting "3.12.4" strings 50,000 × log times
+        const sorted = [...numbers.entries()].sort(([ia, a], [ib, b]) => compareOutline(a, b) || (ia < ib ? -1 : ia > ib ? 1 : 0))
+        if (outline) outline.ranks = new Map(sorted.map(([id], k) => [id, k]))
+        else return new Map(sorted.map(([id], k) => [id, k]))
+      }
+      return outline.ranks
     },
     async resyncAll(s) {
       s.watch?.take() // everything is re-checked now; keep only changes that happen from here on
@@ -521,9 +535,12 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       if (query.sort?.by !== 'number') return withNumbers(s.index.query(query))
       // sorted by outline number: the index cannot do that in SQL, so sort the matching rows here
       const { limit = 200, offset = 0, ...rest } = query
-      const all = queryAll(s.index, { ...rest, sort: { by: 'id' } }).map((i) => withNumber(i, numbers))
-      all.sort((a, b) => compareOutline(a.number, b.number) * (query.sort?.descending ? -1 : 1) || a.id.localeCompare(b.id))
-      return { total: all.length, items: all.slice(offset, offset + limit) }
+      const ranks = ctx.numberRanks(s)
+      const rank = (id: string): number => ranks.get(id) ?? Number.MAX_SAFE_INTEGER // no number (orphan): last
+      const all = queryAll(s.index, { ...rest, sort: { by: 'id' } })
+      const dir = query.sort?.descending ? -1 : 1
+      all.sort((a, b) => (rank(a.id) - rank(b.id)) * dir || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+      return { total: all.length, items: all.slice(offset, offset + limit).map((i) => withNumber(i, numbers)) }
     },
     getItem: viewItems.getItem,
     newItem: items.newItem,

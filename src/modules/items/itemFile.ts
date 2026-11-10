@@ -137,3 +137,34 @@ export function serializeItem(item: Item, schema: Pick<Schema, 'fields'>): strin
   const body = item.text.replace(/\r\n?/g, '\n').replace(/\n+$/, '')
   return `---\n${yamlText}---\n${body ? `${body}\n` : ''}`
 }
+
+/**
+ * Only `id`, `parent` and `order` of an item file, read from the header lines without the YAML library — for outline
+ * numbers of a whole commit (Compare, W-20: parsing 50,000 files took 10 s). Returns null when the header is not in
+ * the plain form reqochet writes (quotes, comments, special values): the caller then uses parseItemFile.
+ */
+export function readStructure(content: string): { id: string; parent?: string; order?: string } | null {
+  let i = content.charCodeAt(0) === 0xfeff ? 1 : 0
+  if (!content.startsWith('---', i)) return null
+  i = content.indexOf('\n', i)
+  if (i < 0) return null
+  const out: { id?: string; parent?: string; order?: string } = {}
+  for (;;) {
+    const end = content.indexOf('\n', i + 1)
+    const line = content.slice(i + 1, end < 0 ? undefined : end).replace(/\r$/, '')
+    if (line.startsWith('---')) break
+    if (end < 0) return null
+    const m = /^(id|parent|order):[ \t]*(.*)$/.exec(line)
+    if (m) {
+      const value = (m[2] as string).trimEnd()
+      if (value === '' || /^['"[{&*!|>%@`]/.test(value) || value.includes(' #') || /^(null|~|true|false|yes|no|on|off)$/i.test(value)) return null
+      if (m[1] === 'id') out.id = value
+      else if (m[1] === 'parent') out.parent = value
+      else if (/^-?\d+(\.\d+)?$/.test(value)) out.order = keyOfNumber(Number(value))
+      else if (isOrderKey(value)) out.order = value
+    }
+    i = end
+  }
+  if (!out.id) return null
+  return { id: out.id, ...(out.parent ? { parent: out.parent } : {}), ...(out.order !== undefined ? { order: out.order } : {}) }
+}

@@ -430,12 +430,12 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
       }
       // name exactly what is sent — this branch to its upstream branch, never with "+" — so the user's Git settings
       // (push.default=matching, a "+" push rule) can never push other branches or force a push (W-11)
-      const branch = (await git(root, ['symbolic-ref', '--short', 'HEAD'])).trim()
-      const config = async (key: string): Promise<string> => (await git(root, ['config', '--get', key]).catch(() => '')).trim()
-      const upstreamRemote = await config(`branch.${branch}.remote`)
-      const merge = await config(`branch.${branch}.merge`)
-      // where Git itself would push: a push remote (fork workflow) wins over the upstream's remote (CR-05)
-      const remote = (await config(`branch.${branch}.pushRemote`)) || (await config('remote.pushDefault')) || upstreamRemote
+      // one Git call for the branch, its upstream and where Git would push it (each call costs time on Windows)
+      const rows = await git(root, ['for-each-ref', '--format=%(HEAD)%00%(refname:short)%00%(upstream:remotename)%00%(upstream:remoteref)%00%(push:remotename)', 'refs/heads/'])
+      const current = rows.split('\n').find((r) => r.startsWith('*\u0000'))?.split('\u0000') ?? []
+      const [, branch = '', upstreamRemote = '', merge = '', pushRemote = ''] = current
+      if (!branch) throw new GitError(PUSH_NO_UPSTREAM, ['push'], null, '', '')
+      const remote = pushRemote || upstreamRemote
       if (!remote) throw new GitError(PUSH_NO_UPSTREAM, ['push'], null, '', '')
       // the branch goes to the branch of the same name; an upstream of another name (git switch -c fix origin/main)
       // is refused like plain `git push` does, so "fix" never lands on the shared main (CR-01)

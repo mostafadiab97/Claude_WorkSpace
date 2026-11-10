@@ -3,7 +3,7 @@
 // against the project schema. Pure logic: no file or Git access. The data types live in src/shared/domain.ts.
 export type { FieldValue, Link, Item, ItemIssue, ItemDiff, DiffRow } from '../../shared/domain'
 
-export { parseItemFile, serializeItem, ITEM_FILE_EXTENSION, type ParseResult } from './itemFile'
+export { parseItemFile, readStructure, serializeItem, ITEM_FILE_EXTENSION, type ParseResult } from './itemFile'
 export { generateId, isValidId, ID_ALPHABET, ID_PREFIX } from './ids'
 export { missingRequired, validateItem } from './validate'
 export { contentFingerprint } from './fingerprint'

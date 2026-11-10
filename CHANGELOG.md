@@ -35,6 +35,30 @@ first, then speed, then screens, Arabic and documents. Each fix below was reprod
   version → Git history with baselines), reports conflicts, keeps shared requirements in both modules and records the
   documents' format (`docs/guides/word-template-prompt.md`).
 
+## 0.21.0 — 11 Nov 2026 — speed at 50,000 items (review W-20…W-23, W-27)
+The owner's decision O-3 (10 Nov 2026): 10,000 items a must, 50,000 a should. Measured with the new
+`tests/perf-workspace.test.ts` (Linux container; Windows is slower, the ratios hold):
+
+| Action | 50,000 items before | 50,000 items now | 10,000 now |
+| --- | --- | --- | --- |
+| Compare two commits, 1 change (W-20) | 10.5 s (window frozen) | 1.1 s | 0.18 s |
+| Save one item (W-21) | 0.16–0.6 s | 6 ms | 22 ms |
+| Sort by outline number (W-22) | 0.9–4 s | 0.66 s | 0.12 s |
+| Open an old version, first time (W-23) | 8–14 s, window frozen | 7.4 s, window stays usable | 1.3 s |
+
+- **W-20** Compare reads only `id`, `parent` and `order` from each file of a commit for the outline numbers (a small
+  header reader; the full parser only for files not in reqochet's own form), and keeps the numbers of the last few
+  commits (Compare, then its export, ask twice).
+- **W-21** Saving a text or field change keeps the outline numbers instead of renumbering every item.
+- **W-22** Sort by number uses each item's place, worked out once per change of the project.
+- **W-23** The first build of an old version pauses every 200 files, so the window keeps answering; the message
+  says the first time takes a few seconds in a big project.
+- **W-27** The speed test now covers these actions (1,000 items every run, 10,000 every build, 50,000 for releases).
+- Push asks Git for the branch details in one call instead of five (the 0.20.2 self-test was 30 s slower than
+  0.20.1; each Git call costs time on Windows).
+- O-8 (owner, 10 Nov): nothing more is masked in problem reports — the GitHub account in update addresses is the
+  release repository's owner.
+
 **Owner (10 Nov 2026, evening), 0.20.2:** all 4 steps passed (self-test 25/25 in 120.9 s, 0.20.1 took 90.9 s;
 Arabic-named document committed, pushed, history shown; Compare showed one Deleted and one Added; the problem report
 shows `%USERPROFILE%`). Found in the attached report: the opened project's path (a folder on drive D: named after the

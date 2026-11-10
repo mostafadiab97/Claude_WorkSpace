@@ -33,6 +33,10 @@ export interface WorkspaceContext {
   resyncAll(s: Session): Promise<void>
   /** Outline numbers of all items (calculated, cached until the index changes). */
   numbers(s: Session): Map<string, string>
+  /** Each numbered item's place in outline-number order (cached with the numbers). */
+  numberRanks(s: Session): Map<string, number>
+  /** The last change did not touch the structure: numbers valid at index state `before` stay valid now. */
+  keepNumbers(s: Session, before: number): void
 }
 
 export const syncInfo = (stats: SyncStats): RepoInfo['lastSync'] => ({

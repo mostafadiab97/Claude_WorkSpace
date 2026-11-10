@@ -67,7 +67,17 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.20.2 (data safety)
+## Manual test checklist — v0.21.0 (speed)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.21.0**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed**, total time back near 0.20.1's (about 90 s, not 120 s). |
+| 2 | Open the sandbox. **Changes → Compare → Choose two versions…**: pick an old commit and the newest. | The list appears in about a second (it took several seconds before). |
+| 3 | Sort the table by **#** (outline number), then click the header again (descending). | Each sort takes well under a second; the order follows the outline numbers. |
+| 4 | Edit an item's text and save it a few times. | Each save is instant; the item keeps its number. |
+| 5 | **Versions** → open an old baseline or commit for the first time. | The message "Opening the old version… The first time…" shows, the window stays usable, and the version opens within a few seconds. |
+
+## Previous checklist — v0.20.2 (data safety)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
@@ -75,16 +85,6 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 | 2 | Open the sandbox. Make a new document with an Arabic name (e.g. *متطلبات تجربة*), add one item, **Commit**, then **Push**. Open the item's **History** tab. | Push succeeds; History lists your commit. |
 | 3 | Delete one item of that document and add a different one, Commit; **Changes → Compare → The last commit that changed requirements**. | One item listed as *Deleted* and one as *Added* — not one item "changed into" the other. (Delete the test document afterwards if you like — it is only in the sandbox.) |
 | 4 | **⚙ → Report a problem and diagnostics → Save report…**; open the saved file. | No Windows user name in it; paths start with `%USERPROFILE%`. |
-
-## Previous checklist — v0.20.1 (the owner's points on 0.20.0)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.20.1**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed.** |
-| 2 | Look at the coverage-gap marks in the table, in Light and in Dark. | A solid amber dot right after the title, easy to see in both. |
-| 3 | **Traceability → Coverage → Show the gaps in the table**, then **← Back to Traceability** above the table. | The Traceability view opens again. |
-| 4 | **Traceability → Matrix** with a filter that gives a grid (e.g. Type = Software Requirement); scroll down; then **Export Excel** and edit a cell that starts with = in Excel. | The column titles stay at the top and the header row is short, so many rows show; in Excel the edited cell stays text. |
-| 5 | Look at the top bar. | Pull, Push, Changes, Versions, Traceability. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

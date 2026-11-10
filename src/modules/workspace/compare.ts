@@ -6,7 +6,7 @@ import type { CompareEntry, CompareOptions, CompareResult, LinkChange, SchemaCha
 import type { Item, ItemDiff, Schema } from '../../shared/domain'
 import type { GitAdapter, NameStatus } from '../git-adapter'
 import type { IndexCache } from '../index-cache'
-import { contentFingerprint, diffItems, parseItemFile } from '../items'
+import { contentFingerprint, diffItems, parseItemFile, readStructure } from '../items'
 import { parseSchema } from '../schema'
 import { outlineNumbers } from './structure'
 import { documentOfPath } from '../../shared/domain'
@@ -67,7 +67,20 @@ function schemaChange(before: Schema | null, after: Schema | null): SchemaChange
 }
 
 export function createCompare(git: GitAdapter) {
-  const numbersAt = (s: Session, ref: string): Promise<Map<string, string>> => numbersFromTree(git, s, ref)
+  // a commit never changes: its numbers are kept for the last few commits asked (Compare, then its export; W-20)
+  const numbersCache = new Map<string, Map<string, string>>()
+  const numbersAt = async (s: Session, ref: string): Promise<Map<string, string>> => {
+    const commit = await git.resolve(s.repo.root, ref).catch(() => null)
+    const key = commit ? `${s.repo.root}\0${commit}` : null
+    const known = key ? numbersCache.get(key) : undefined
+    if (known) return known
+    const numbers = await numbersFromTree(git, s, commit ?? ref)
+    if (key) {
+      numbersCache.set(key, numbers)
+      while (numbersCache.size > 4) numbersCache.delete(numbersCache.keys().next().value as string)
+    }
+    return numbers
+  }
   async function label(s: Session, ref: string): Promise<VersionLabel> {
     if (ref === WORKING) return { ref, label: T.compare.workingLabel }
     if (ref === EMPTY_TREE) return { ref: EMPTY, label: T.compare.emptyLabel }
@@ -295,11 +308,18 @@ async function numbersFromTree(git: GitAdapter, s: Session, ref: string): Promis
   const docOf = new Map<string, string>()
   for (const [p, oid] of tree) docOf.set(oid, documentOfPath(p.slice(prefix.length)))
   const rows: { id: string; parent?: string; order?: string; document: string }[] = []
+  let n = 0
   for (const [oid, text] of blobs) {
+    if (++n % (YIELD_EVERY * 10) === 0) await giveWay()
     if (text === null) continue
-    const r = parseItemFile(text, new Set())
-    if (!r.ok) continue
-    rows.push({ id: r.item.id, document: docOf.get(oid) ?? '', ...(r.item.parent ? { parent: r.item.parent } : {}), ...(r.item.order !== undefined ? { order: r.item.order } : {}) })
+    // the three header keys only (W-20); the full parser only for headers not in reqochet's own plain form
+    let st = readStructure(text)
+    if (!st) {
+      const r = parseItemFile(text, new Set())
+      if (!r.ok) continue
+      st = { id: r.item.id, ...(r.item.parent ? { parent: r.item.parent } : {}), ...(r.item.order !== undefined ? { order: r.item.order } : {}) }
+    }
+    rows.push({ ...st, document: docOf.get(oid) ?? '' })
   }
   rows.sort((a, b) => (a.order === undefined ? 1 : 0) - (b.order === undefined ? 1 : 0) || cmp(a.order ?? '', b.order ?? '') || cmp(a.id, b.id))
   return outlineNumbers(rows)

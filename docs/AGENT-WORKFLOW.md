@@ -56,6 +56,11 @@ once per theme version, not on every small change, and only the helpers the revi
 - Give each helper the pack **and the earlier reports of the same version**, so a second round does not repeat
   findings; tell it to write its report file itself (`Write` tool) and answer only with the findings table.
 - A second helper round after fixes runs only the helpers whose areas the fixes touched.
+- Every helper file ends with the same **token budget** rules (10 Nov 2026): search first and read in parts, never the
+  whole test suite, only the named screenshots, write the report with `Write` (an explicit request) and answer in
+  three lines.
+- **docs-reviewer** (Sonnet, 10 Nov 2026) checks the documents against the code — for the whole-project review and
+  before a public release.
 - Builder: read files in parts, filter command output, look only at screenshots of screens that changed, and run the
   one e2e scenario being fixed before the full suite.
 

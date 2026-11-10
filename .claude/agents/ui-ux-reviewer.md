@@ -27,3 +27,12 @@ also changed, review it in the same run with `resources/brand/README.md` (one vi
 - Plain language; explain any term in one line.
 - **Answer the builder** with three lines only: the report's path, the number of findings per severity, and the one
   most important finding. The full table is in the file (saves the builder's context — the owner, 8 Nov 2026).
+
+**Token budget (the owner, 10 Nov 2026 — the usage limit is shared with all the work):**
+- Search first (`Grep`, `grep -n`), then `Read` with `offset`/`limit` around the match; never read a file over 300 lines
+  whole unless your area is that file.
+- Never run `npm run check`, the whole unit suite or all e2e scenarios: run only the test files you need
+  (`npx vitest run tests/<file>`), and filter output (`| grep -E "✓|×|Error|Tests"`).
+- Look only at the screenshots your task names; one look per screen.
+- Writing the report file is an **explicit request** of this task: use the `Write` tool for it. Your final answer is the
+  three lines below, never the table again.

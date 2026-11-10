@@ -83,7 +83,8 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
         await s.index.syncPaths(s.repo, [s.repo.itemPath(clean.id, clean.document)])
         // a text or field change leaves every outline number as it was: keep them instead of renumbering 50,000
         // items for the reply (W-21)
-        if (was && was.parent === clean.parent && was.order === clean.order && (was.document ?? '') === (s.index.get(clean.id)?.document ?? '')) ctx.keepNumbers(s, indexBefore)
+        const now = s.index.get(clean.id) // as the index read it back (R6)
+        if (was && now && was.parent === now.parent && was.order === now.order && (was.document ?? '') === (now.document ?? '')) ctx.keepNumbers(s, indexBefore)
         const d = await details(s, clean.id)
         if (!d) return { ok: false, reason: 'error', message: T.wsMsg.savedUnreadable }
         log.info(`Saved ${clean.id}${revision === null ? ' (new)' : ''}`)

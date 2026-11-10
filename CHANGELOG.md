@@ -56,6 +56,7 @@ The owner's decision O-3 (10 Nov 2026): 10,000 items a must, 50,000 a should. Me
 - **W-27** The speed test now covers these actions (1,000 items every run, 10,000 every build, 50,000 for releases).
 - Push asks Git for the branch details in one call instead of five (the 0.20.2 self-test was 30 s slower than
   0.20.1; each Git call costs time on Windows).
+- Code reviewer on the patch (`docs/reviews/agents/0.21.0-code-reviewer.md`, 10 findings): the fast header reader now gives up on anything not in reqochet's plain form (numbers like 1e3, repeated keys, no type), so it always agrees with the full parser; unnumbered items stay last when sorting descending.
 - O-8 (owner, 10 Nov): nothing more is masked in problem reports — the GitHub account in update addresses is the
   release repository's owner.
 

@@ -26,4 +26,24 @@ describe('readStructure (W-20)', () => {
     expect(readStructure('no header')).toBeNull()
     expect(readStructure('---\nid: REQ-AAAAAAA\n')).toBeNull()
   })
+  it('is either null or equal to the full parser, for awkward headers too (0.21.0 review R1–R5)', () => {
+    const base = 'type: x\ntitle: T'
+    const headers = [
+      'id: REQ-AAAAAAA\norder: 1e3', 'id: REQ-AAAAAAA\norder: +5', 'id: REQ-AAAAAAA\norder: 5.', 'id: REQ-AAAAAAA\norder: 0x1F',
+      'id: REQ-AAAAAAA\norder: 007', 'id: REQ-AAAAAAA\norder: -3', 'id: REQ-AAAAAAA\norder: 2.5', 'id: REQ-AAAAAAA\norder: 30',
+      'id: REQ-AAAAAAA\norder: a1\norder: a2', 'id: 123', 'id: REQ-AAAAAAA\nparent: 007', 'id: REQ-AAAAAAA\tx',
+      'id: REQ-AAAAAAA\t# c', 'id: REQ-AAAAAAA\nparent: REQ-BBBBBBB\u2028', 'id: REQ-AAAAAAA\norder: a1 ',
+      'id: REQ-AAAAAAA\ntitle: again'
+    ]
+    for (const h of headers) {
+      for (const text of [`---\n${h}\n${base}\n---\nx\n`, `---\n${h}\ntitle: T\n---\nx\n`]) {
+        const fast = readStructure(text)
+        if (fast === null) continue
+        const full = parseItemFile(text, new Set())
+        expect(full.ok, `fast path accepted a file the parser refuses: ${JSON.stringify(text)}`).toBe(true)
+        if (!full.ok) continue
+        expect(fast, JSON.stringify(text)).toEqual({ id: full.item.id, ...(full.item.parent ? { parent: full.item.parent } : {}), ...(full.item.order !== undefined ? { order: full.item.order } : {}) })
+      }
+    }
+  })
 })

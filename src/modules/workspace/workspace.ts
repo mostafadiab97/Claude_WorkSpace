@@ -536,10 +536,15 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
       // sorted by outline number: the index cannot do that in SQL, so sort the matching rows here
       const { limit = 200, offset = 0, ...rest } = query
       const ranks = ctx.numberRanks(s)
-      const rank = (id: string): number => ranks.get(id) ?? Number.MAX_SAFE_INTEGER // no number (orphan): last
       const all = queryAll(s.index, { ...rest, sort: { by: 'id' } })
       const dir = query.sort?.descending ? -1 : 1
-      all.sort((a, b) => (rank(a.id) - rank(b.id)) * dir || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+      // items without a number (outside the tree) come last in both directions (R7)
+      all.sort((a, b) => {
+        const ra = ranks.get(a.id)
+        const rb = ranks.get(b.id)
+        if (ra === undefined || rb === undefined) return (ra === undefined ? 1 : 0) - (rb === undefined ? 1 : 0) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+        return (ra - rb) * dir
+      })
       return { total: all.length, items: all.slice(offset, offset + limit).map((i) => withNumber(i, numbers)) }
     },
     getItem: viewItems.getItem,

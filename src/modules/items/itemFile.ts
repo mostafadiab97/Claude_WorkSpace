@@ -19,6 +19,7 @@ import { parse as parseYaml, stringify as stringifyYaml } from 'yaml'
 import type { Schema } from '../schema'
 import type { FieldValue, Item, Link } from './index'
 import { isOrderKey, keyOfNumber } from './orderKey'
+import { isValidId } from './ids'
 
 export const ITEM_FILE_EXTENSION = '.md'
 
@@ -149,22 +150,36 @@ export function readStructure(content: string): { id: string; parent?: string; o
   i = content.indexOf('\n', i)
   if (i < 0) return null
   const out: { id?: string; parent?: string; order?: string } = {}
+  const seen = new Set<string>()
   for (;;) {
     const end = content.indexOf('\n', i + 1)
     const line = content.slice(i + 1, end < 0 ? undefined : end).replace(/\r$/, '')
     if (line.startsWith('---')) break
     if (end < 0) return null
-    const m = /^(id|parent|order):[ \t]*(.*)$/.exec(line)
+    // any top-level key: repeated keys make the full parser refuse the file, so this reader must not accept it (R2)
+    const key = /^([^\s:#][^:]*):(?:[ \t]|$)/.exec(line)?.[1]
+    if (key !== undefined) {
+      if (seen.has(key)) return null
+      seen.add(key)
+    }
+    const m = /^(id|parent|order):[ \t]*([\s\S]*)$/.exec(line)
     if (m) {
       const value = (m[2] as string).trimEnd()
-      if (value === '' || /^['"[{&*!|>%@`]/.test(value) || value.includes(' #') || /^(null|~|true|false|yes|no|on|off)$/i.test(value)) return null
-      if (m[1] === 'id') out.id = value
-      else if (m[1] === 'parent') out.parent = value
-      else if (/^-?\d+(\.\d+)?$/.test(value)) out.order = keyOfNumber(Number(value))
-      else if (isOrderKey(value)) out.order = value
+      // anything not in the plain form reqochet writes: let the full parser decide (R1, R3, R4)
+      if (value === '' || /[#\u2028\u2029]/.test(value) || /^['"[{&*!|>%@`]/.test(value)) return null
+      if (m[1] === 'order') {
+        if (isOrderKey(value) && !/^[+-]?[\d.]/.test(value)) out.order = value
+        else if (/^(0|[1-9]\d{0,14})$/.test(value)) out.order = keyOfNumber(Number(value))
+        else return null
+      } else {
+        if (!isValidId(value)) return null
+        if (m[1] === 'id') out.id = value
+        else out.parent = value
+      }
     }
     i = end
   }
-  if (!out.id) return null
+  // a file without a type is refused by the full parser (R2)
+  if (!out.id || !seen.has('type')) return null
   return { id: out.id, ...(out.parent ? { parent: out.parent } : {}), ...(out.order !== undefined ? { order: out.order } : {}) }
 }

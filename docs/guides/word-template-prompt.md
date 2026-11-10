@@ -116,6 +116,22 @@ requirement's file. Resolve the Word IDs to reqochet IDs within the SAME version
 of every other group at that point in time). A reference you cannot resolve: leave it out and list it in the report.
 Do NOT write "confirmed:" on links (links without it are never marked suspect).
 
+══ STEP 5b — Requirements that touch two modules ══
+A requirement that belongs to two modules (it states what BOTH must do — e.g. an interface, a shared signal, a
+timing that spans two subsystems — or the documents of both modules contain it) is kept in BOTH module folders:
+- If it is already written in both modules' documents, keep both items as they are and only link them.
+- If it is written in one module only, keep it there and add a COPY in the other module's folder: a new reqochet ID,
+  the same title and text, header key  shared-from: <ID of the original>, placed under the best-fitting heading of
+  that module (or at the end of its top level, in a heading "Shared requirements" if nothing fits). Do this only
+  when the text clearly makes the other module responsible — when in doubt, list it under "Questions" instead.
+- Link the two items to each other with ONE link of type relates-to, written in the item of the module that comes
+  later in the alphabet. reqochet shows it on both items ("relates to" on one, "related to" on the other), so a
+  second link back would show it twice.
+- The copy follows the original through the versions (same copy ID while the original exists; deleted when the
+  original is deleted) and appears from the version of the original in which the requirement first appears.
+- A requirement touching three or more modules: one item per module, each linked to the original.
+List every such pair (both IDs, both modules, why) in the report.
+
 ══ STEP 6 — Write the project files exactly in reqochet's format ══
 Folder layout of the output repository:
   requirements/.gitattributes              exactly two lines:
@@ -160,7 +176,9 @@ first). For each version of a group, in that order:
   3. make an annotated tag  baseline/<Module name>-v<version>  (spaces → "-"; it must pass
      git check-ref-format), message = the version's revision-history line.
 The first commit also adds requirements/.gitattributes and schema.yaml. When the history is done, the working folder
-holds the newest version of every group. Zip the whole repository INCLUDING the .git folder as reqochet-project.zip.
+holds the newest version of every group. If step 8 finds conflicts, add one last commit "Mark conflicts found by
+the import" that adds the tag  import-conflict  to the "tags" field of every item in a conflict (newest version only;
+the text stays unchanged). Zip the whole repository INCLUDING the .git folder as reqochet-project.zip.
 
 ══ STEP 8 — Check, then report ══
 Before you finish, check with code: every file parses as YAML + text; header key order as in step 6; every ID
@@ -171,6 +189,12 @@ fails. Then write import-report.md:
 - per version: items added / changed / deleted, compared with the previous version;
 - attribute → field and value mappings; new types, fields or link types you added and why;
 - matches by text similarity (step 3, rule 3), unresolved references (step 5), images saved;
+- shared requirements (step 5b);
+- "Conflicts": requirements that contradict each other — within one module or across modules, in the newest
+  versions (e.g. 150 ms in one, 200 ms in another for the same reaction; "shall" vs "shall not"; two values for the
+  same limit, signal or unit; a requirement that a later one in another module makes impossible). Also requirements
+  that say the same thing twice (duplicates). For each: both reqochet IDs and Word IDs, modules, the two sentences
+  quoted, and why they conflict. Never resolve a conflict by changing or dropping text — report it only;
 - "Questions": files left out, unclear versions, anything you were unsure about.
 
 ══ PART B — The format of the documents (for the later Word export) ══
@@ -227,7 +251,11 @@ Questions list.
    or from a command line `git remote add origin <address>` and `git push -u origin --all` and `git push origin --tags`.
 4. **Images:** keep the `attachments/` folder beside the project until theme 3a can show images; the item texts say
    which image belongs where.
-5. **Format:** keep the `format/` folder. When the Word export is built (theme 3b), save the template as
+5. **Conflicts:** in reqochet, filter the table by the tag `import-conflict` to see every item the report lists
+   under "Conflicts". Decide each one with the authors, fix the text, and remove the tag.
+6. **Shared requirements:** the copies carry `shared-from:` and a "relates to" link to the original. When one of
+   them changes, change the other in the same commit.
+7. **Format:** keep the `format/` folder. When the Word export is built (theme 3b), save the template as
    `requirements/.reqochet/templates/<name>.docx` in the project, commit and push; `word-format.json` is used to check
    that an export looks like the originals.
 

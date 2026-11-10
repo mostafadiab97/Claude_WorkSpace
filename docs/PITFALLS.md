@@ -226,3 +226,12 @@ Every e2e run made new temporary projects and never removed them; with the 1,500
 helpers' measurement folders the session's disk allowance ran out, and suddenly all unit and e2e tests failed with odd
 errors ("No space left on device"). Since 0.20.0 the harness removes a passing scenario's folders. When many tests
 fail at once, check `df -h /` and `du -sh /tmp/*` first; helpers' scratch folders under `/tmp` can be deleted.
+
+## A theme colour lives in two places (0.20.1)
+A new colour token must be added to `config/theme.json` **and** to the built-in copy in `src/modules/theme/defaults.ts`
+(a test compares them), for Light and Dark. The renderer then has it as `--rm-color-<kebab-name>`.
+
+## Sticky table headers and transforms (0.20.1)
+A header cell with `transform: rotate(…)` did not stay at the top of the scrolling matrix, and `max-block-size` on
+vertical text limits its width, not its height. Rotate the text inside the cell, and limit vertical text with
+`max-inline-size`.

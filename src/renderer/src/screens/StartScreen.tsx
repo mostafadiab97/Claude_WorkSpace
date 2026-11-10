@@ -108,7 +108,7 @@ export function StartScreen({
           </span>
           {/* UX-24: the Git check right where the first step happens */}
           {git && !git.installed && <p className="hint notice--warn">{T.start.noGit}</p>}
-          {git?.installed && <p className="hint start__git">{T.start.gitFound(git.version)}</p>}
+          {/* no "Git found" line: the self-test checks Git (the owner, 10 Nov 2026); the missing-Git warning above stays */}
         </section>
 
         {pending.kind === 'busy' &&

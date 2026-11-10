@@ -56,7 +56,6 @@ const raw: Texts = {
 
   start: {
     quickStart: 'اقرأ البداية السريعة (15 دقيقة)',
-    gitFound: (version: string) => `✓ تم العثور على Git ${version}`,
     fromFile: 'مشروع جديد من ملف…',
     fromFileTooltip: 'ابدأ من ملف Excel أو CSV: ينشئ reqochet المجلد ومستودع Git ويستورد الملف',
     headline: 'متطلبات بإصدارات، مثل الكود تمامًا.',
@@ -1003,13 +1002,14 @@ const raw: Texts = {
   },
 
   trace: {
+    backToTrace: 'العودة إلى التتبّع →',
     notShown: (count: number) => `${n(count)} غير معروضة.`,
     linkedItems: 'العناصر المرتبطة',
     starterAll: 'القواعد الأولية موجودة في القائمة بالفعل.',
     orJoin: (names: string[]) => (names.length < 2 ? (names[0] ?? '') : `${names.slice(0, -1).join('، ')} أو ${names[names.length - 1]}`),
     listJoin: '، ',
     matrixNoLink: 'لا رابط',
-    matrixLegend: '→ عنصر الصف يرتبط به · ← هو يرتبط بعنصر الصف · ↔ كلاهما · ⚠ رابط مشكوك فيه · ◌ صف بلا أي رابط. مرّر المؤشر فوق العلامة لمعرفة نوع الرابط.',
+    matrixLegend: '→ عنصر الصف يرتبط به · ← هو يرتبط بعنصر الصف · ↔ كلاهما · ⚠ رابط مشكوك فيه · ● (كهرماني) صف بلا أي رابط. مرّر المؤشر فوق العلامة لمعرفة نوع الرابط.',
     listSep: ': ',
     statusGaps: (count: number) => pl(count, 'ثغرة تغطية واحدة', 'ثغرتا تغطية', 'ثغرات تغطية', 'ثغرة تغطية'),
     noItems: 'لا توجد عناصر من هذا النوع هنا بعد.',

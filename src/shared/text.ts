@@ -51,7 +51,6 @@ const en = {
 
   start: {
     quickStart: 'Read the quick start (15 minutes)',
-    gitFound: (version: string) => `✓ Git ${version} found`,
     fromFile: 'New project from a file…',
     fromFileTooltip: 'Start from an Excel or CSV file: reqochet creates the folder, the Git repository and imports the file',
     headline: 'Requirements, versioned like code.',
@@ -1002,13 +1001,14 @@ const en = {
   /** Messages the core sends after Git actions (shown in the Git bar and the Changes panel). */
   /** Baselines and the history list (1a part 2 — S-06, S-08, S-09). */
   trace: {
+    backToTrace: '← Back to Traceability',
     notShown: (count: number) => `${n(count)} more not shown.`,
     linkedItems: 'Linked items',
     starterAll: 'The starter rules are already in the list.',
     orJoin: (names: string[]) => (names.length < 2 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} or ${names[names.length - 1]}`),
     listJoin: ', ',
     matrixNoLink: 'no link',
-    matrixLegend: '→ the row item links to it · ← it links to the row item · ↔ both · ⚠ suspect link · ◌ row without any link. Hover a mark for the link type.',
+    matrixLegend: '→ the row item links to it · ← it links to the row item · ↔ both · ⚠ suspect link · ● (amber) row without any link. Hover a mark for the link type.',
     listSep: ': ',
     statusGaps: (count: number) => (count === 1 ? '1 coverage gap' : `${n(count)} coverage gaps`),
     noItems: 'No items of this type here yet.',

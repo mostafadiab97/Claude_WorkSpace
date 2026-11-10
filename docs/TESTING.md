@@ -67,7 +67,17 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.20.0 (traceability views)
+## Manual test checklist — v0.20.1 (the owner's points on 0.20.0)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.20.1**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed.** |
+| 2 | Look at the coverage-gap marks in the table, in Light and in Dark. | A solid amber dot right after the title, easy to see in both. |
+| 3 | **Traceability → Coverage → Show the gaps in the table**, then **← Back to Traceability** above the table. | The Traceability view opens again. |
+| 4 | **Traceability → Matrix** with a filter that gives a grid (e.g. Type = Software Requirement); scroll down; then **Export Excel** and edit a cell that starts with = in Excel. | The column titles stay at the top and the header row is short, so many rows show; in Excel the edited cell stays text. |
+| 5 | Look at the top bar. | Pull, Push, Changes, Versions, Traceability. |
+
+## Previous checklist — v0.20.0 (traceability views)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
@@ -76,14 +86,6 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 | 3 | Top bar **Traceability** → **Coverage**: open the gaps of one rule, click one; then **Show the gaps in the table** on another rule. | Each rule shows *x of y covered* with a bar; the item opens in the table; the table then lists only that rule's gaps (Filters → Coverage gaps). |
 | 4 | **Traceability → Matrix**: rows *System Requirement*, columns *Test Case*; then **Export Excel**. | A grid with a dot where they are linked, rows without a test marked; the Excel file has the whole grid. |
 | 5 | Open a stakeholder need → editor tab **Impact**. Then **Edit rules…** (in Traceability), change *At least* of one rule to 2, **Save**. | Impact lists everything that depends on the need, level by level. After the rule change the coverage numbers and ◌ marks follow it. |
-
-## Previous checklist — v0.19.1 (no empty rows after Show text off)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.19.1**, then **⚙ → Self-tests → Run release self-test**. | **All 24 steps passed.** |
-| 2 | In the sandbox with **Show text** on: **⊞ Expand all** and scroll down a few screens. Then switch **Show text** off, **⊟ Collapse all**, **⊞ Expand all** and scroll again. | With Show text off every row is one line high, with no empty space between rows anywhere. |
-| 3 | Switch **Show text** on again and scroll. | Titles with their text again; no rows drawn on top of each other. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

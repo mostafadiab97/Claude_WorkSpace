@@ -111,6 +111,8 @@ export function WorkspaceScreen({
   const [showChanges, setShowChanges] = useState(false)
   // theme 1b (T-01): the Traceability view takes the table's place like Changes
   const [showTrace, setShowTrace] = useState(false)
+  // the table came from Traceability → Show the gaps: offer the way back (owner, 10 Nov 2026 — 0.20.0 test 3)
+  const [fromTrace, setFromTrace] = useState(false)
   const [typesTab, setTypesTab] = useState<'items' | 'links' | 'rules'>('items')
   // the team's feature switches from schema.yaml (P-40a); cleared when the repository closes
   useEffect(() => {
@@ -450,6 +452,7 @@ export function WorkspaceScreen({
             }}
             onShowGaps={(type) => {
               setShowTrace(false)
+              setFromTrace(true)
               filters.setTypes(type)
               filters.setLinkFilter('gaps')
             }}
@@ -556,7 +559,24 @@ export function WorkspaceScreen({
               </span>
             </div>
           )}
-          {filtered && <div className="table-mode">{T.workspace.searchMode}</div>}
+          {filtered && (
+            <div className="table-mode">
+              {fromTrace && filters.linkFilter === 'gaps' && (
+                <button
+                  type="button"
+                  className="btn btn--small table-mode__back"
+                  onClick={() => {
+                    setFromTrace(false)
+                    setShowChanges(false)
+                    setShowTrace(true)
+                  }}
+                >
+                  {T.trace.backToTrace}
+                </button>
+              )}
+              {T.workspace.searchMode}
+            </div>
+          )}
           <ItemTable
             schema={schema}
             prefs={columnPrefs}

@@ -16,6 +16,12 @@ await scenario('E2E trace-0.20', async (ctx) => {
   writeFileSync(join(req, 'Spec', 'REQ-SYSA001.md'), item('REQ-SYSA001', 'system-requirement', 'Heat the room', 'a1', 'links:\n  - type: refines\n    target: REQ-NEED001\n'))
   writeFileSync(join(req, 'Spec', 'REQ-SYSB001.md'), item('REQ-SYSB001', 'system-requirement', 'Show the temperature', 'a2'))
   writeFileSync(join(req, 'Spec', 'REQ-TEST001.md'), item('REQ-TEST001', 'test-case', 'Measure the heating', 'a3', 'links:\n  - type: verifies\n    target: REQ-SYSA001\n'))
+  // 40 more requirements, each with its test, so the matrix has to scroll (owner on 0.20.0 test 4)
+  for (let k = 0; k < 40; k++) {
+    const n = String(k).padStart(3, '0')
+    writeFileSync(join(req, 'Spec', `REQ-SYSM${n}.md`), item(`REQ-SYSM${n}`, 'system-requirement', `Extra requirement ${n}`, `b${n}`))
+    writeFileSync(join(req, 'Spec', `REQ-TSTM${n}.md`), item(`REQ-TSTM${n}`, 'test-case', `A test with a rather long title number ${n}`, `c${n}`, `links:\n  - type: verifies\n    target: REQ-SYSM${n}\n`))
+  }
   gitIn(repo, 'add', '-A')
   gitIn(repo, 'commit', '-q', '-m', 'data')
 
@@ -37,7 +43,7 @@ await scenario('E2E trace-0.20', async (ctx) => {
   const view = win.getByRole('region', { name: 'Traceability' })
   await view.locator('.trace__rule').first().waitFor()
   const sysRule = view.locator('.trace__rule', { hasText: 'Every System Requirement is verified by at least 1 Test Case' })
-  check((await sysRule.textContent()).includes('1 of 2 covered'), 'the system rule: 1 of 2 covered')
+  check((await sysRule.textContent()).includes('41 of 42 covered'), 'the system rule: 41 of 42 covered')
   await t.shot('trace-0.20-coverage')
   await sysRule.getByRole('button', { name: /1 gap/ }).click()
   check((await sysRule.locator('.trace__gap').allTextContents()).some((x) => x.includes('REQ-SYSB001')), 'the gap list names the untested requirement')
@@ -45,7 +51,19 @@ await scenario('E2E trace-0.20', async (ctx) => {
   console.log('P-08 — Matrix')
   await view.getByRole('tab', { name: 'Matrix' }).click()
   await view.locator('table.matrix').waitFor()
-  check((await view.locator('.matrix__cell--on').count()) === 1, 'one link mark in the grid')
+  check((await view.locator('.matrix__cell--on').count()) === 41, 'a link mark per tested requirement')
+  // owner on 0.20.0 test 4: the header row must stay at the top when the grid scrolls, and must not be very tall
+  const grid = view.locator('.trace__grid')
+  const header = view.locator('.matrix__col').first()
+  const headerHeight = (await header.boundingBox())?.height ?? 999
+  check(headerHeight <= 160, `the column header row is short (${Math.round(headerHeight)} px)`)
+  await grid.evaluate((el) => (el.scrollTop = 600))
+  await win.waitForTimeout(200)
+  const gridTop = (await grid.boundingBox())?.y ?? 0
+  const headerTop = (await header.boundingBox())?.y ?? -1
+  check(Math.abs(headerTop - gridTop) <= 2, `the column headers stay at the top when scrolling (grid ${Math.round(gridTop)}, header ${Math.round(headerTop)})`)
+  check(((await view.locator('.matrix thead').textContent()) ?? '').includes('A test with'), 'the column headers show the test titles')
+  await grid.evaluate((el) => (el.scrollTop = 0))
   check((await view.locator('.matrix__row--empty').count()) === 1, 'the row without a test is marked')
   await t.shot('trace-0.20-matrix')
 
@@ -56,6 +74,16 @@ await scenario('E2E trace-0.20', async (ctx) => {
   await win.waitForTimeout(400)
   const shown = await win.locator('.table__row[data-id]').evaluateAll((rs) => rs.map((r) => r.getAttribute('data-id')))
   check(JSON.stringify(shown) === JSON.stringify(['REQ-SYSB001']), `the table shows only the gap (${shown.join(', ')})`)
+  // owner on 0.20.0 test 3: back to Traceability from the gaps
+  await win.getByRole('button', { name: '← Back to Traceability' }).click()
+  await view.locator('.trace__rule').first().waitFor()
+  check(true, 'Back to Traceability opens the view again')
+  await view.getByRole('button', { name: 'Close traceability' }).click()
+  // owner on 0.20.0 test 2: the gap mark is a visible solid dot
+  const dot = win.locator('.table__gap').first()
+  const box = await dot.boundingBox()
+  const bg = await dot.evaluate((el) => getComputedStyle(el).backgroundColor)
+  check((box?.width ?? 0) >= 7 && bg !== 'rgba(0, 0, 0, 0)', `the gap mark is a solid dot (${Math.round(box?.width ?? 0)} px, ${bg})`)
   await win.getByRole('button', { name: /Clear filters/ }).click()
 
   console.log('T-06 — Impact tab')

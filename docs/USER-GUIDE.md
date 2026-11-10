@@ -120,7 +120,7 @@ with a message; **Push** shares them.
 
 | Area | What is there |
 | --- | --- |
-| **Top bar** | Repository name and ✕ (close), branch button ⎇, **Changes**, **Versions**, **Traceability**, **Pull** and **Push** (with the number of commits to get or send), ⚙ Settings. Language and colours: **Settings → Appearance** (and on the start screen). |
+| **Top bar** | Repository name and ✕ (close), branch button ⎇, **Pull**, **Push**, **Changes**, **Versions**, **Traceability** (with the number of commits to get or send), ⚙ Settings. Language and colours: **Settings → Appearance** (and on the start screen). |
 | **Toolbar** | Search box, ⊞ expand all, ⊟ collapse all, **Filters**, **Columns**, **Show text**, **Import…**, **Export…**, **+ New item**. |
 | **Table** | One row per item, in document order; ▸ opens a branch of the tree; numbers in the title show how many children. With **Show text** on (the default), the main column reads like a document: a heading shows its title in bold, any other item its title in bold and its whole text below, and each row is as tall as it needs to be. **Show text** off: one line per item, and the **Text** column shows the start of the text. |
 | **Editor (right)** | Details (title, type, fields, parent, text, links) and **History**; Save, ↑ ↓ (move), + Child…, Delete. The text is shown formatted; click it to edit. Drag the left edge to make the editor wider. |
@@ -180,11 +180,11 @@ with a message; **Push** shares them.
   (*other items link to it* / *it links to other items*), link type, from which type, *at least* how many, and a level.
   reqochet only **warns** — nothing is ever blocked; the level *error* is for a planned automatic check on GitHub.
   Items with status *Obsolete* are not counted, on either end; links count across documents.
-- **Coverage gaps** — items that break a rule — show a small **◌** next to their title, a count in the status bar, a
+- **Coverage gaps** — items that break a rule — show a small amber **●** next to their title, a count in the status bar, a
   group in the Problems panel and a filter (**Filters → Coverage gaps**).
 - **Traceability** (top bar) opens a full-width view, following the document you picked:
   - **Coverage**: each rule with *x of y covered* and a bar; open its gaps, click one to open it, or **Show the gaps
-    in the table**.
+    in the table** (the table then offers **← Back to Traceability**).
   - **Matrix**: rows = items of one type (they follow the table's filter), columns = the items of another type linked
     to them, a dot where they are linked (⚠ when the link is suspect), rows without any link marked. Very wide matrices
     are shown as a list. **Export Excel** writes the whole grid.

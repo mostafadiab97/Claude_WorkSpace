@@ -4,7 +4,7 @@ CLAUDE.md is read at the start of every session and again after every context co
 history there cost thousands of tokens each time (the owner asked to save tokens, 8 Nov 2026). **This file is the
 status**: update it with every release (the version table, "Next", the owner's last report, test counts).
 
-## Status (v0.20.0, 9 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.20.1, 10 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -36,9 +36,10 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.19.0 reading the table and old versions (D-19a/b/c, the owner 8 Nov) — main column with growing rows (`ItemTable.tsx` `MainCell`, measured rows, toolbar **Show text**, `textUpTo` 3,001), an old version in the table (`workspace/versionView.ts`, temporary index in `cache/versions/`, `openVersion`/`closeVersion`, write guard `q` vs `qr`, version bar; `SnapshotDialog`/`getSnapshot` removed), compare layout (`ChangesView.tsx`: left list + continuous changes, at most 150 cards; exports in the header; `ChangesSide` only for committing), privacy diagram dark + tighter; six helper reports `docs/reviews/agents/0.19.0-*.md` | Released (v0.19.0) |
 | 0.19.1 fix: no empty space between rows after Show text off (`ItemTable.tsx`: row keys per mode + `virtualizer.measure()` on a switch); e2e `rows-0.19`; final-touches reminder list in `docs/design/roadmap.md` | Released (v0.19.1) |
 | 0.20.0 theme 1b traceability (decisions T-01…T-08, 8 Nov) — coverage rules in schema.yaml (`schema/parse.ts` + `rules.ts`, writer keeps hand edits, ≤ 100 rules), coverage and the gaps filter in SQL (`gapSql`), `workspace/traceability.ts` (coverage, impact ≤ 5,000, matrix ≤ 2,000 rows drawn, Excel grid or list), window: `TraceabilityView.tsx` (Coverage, Matrix), `RulesPanel.tsx` (Rules tab), `ImpactView.tsx`, gap mark, Problems group, status-bar count, starter offer; self-test 25 steps; six helper reports `docs/reviews/agents/0.20.0-*.md` | Released (v0.20.0) |
-| **Next** | Owner's 0.20.0 checklist; then **the pilot can start** (release plan). Then a stabilisation patch with the later review items (gap SQL at 50k P3/P5, PERF19-02/04, PERF-02/03, editor preview limit, toasts UX19-01, tab pattern UI-02, the rare qa-0.17.0 test failure, Arabic diagram labels) and the owner's answer on SEC20-05 (Excel cells starting with = + - @) | — |
+| 0.20.1 the owner's points on 0.20.0 — solid gap dot (theme colour `gap`), Back to Traceability, matrix header sticky and short (inner text rotated), top bar order, Excel cells starting like a formula get the Text format (SEC20-05) | Released (v0.20.1) |
+| **Next** | Owner's 0.20.1 checklist; then **the pilot can start** (release plan). Then a stabilisation patch with the later review items (gap SQL at 50k P3/P5, PERF19-02/04, PERF-02/03, editor preview limit, toasts UX19-01, tab pattern UI-02, the rare qa-0.17.0 test failure, Arabic diagram labels) and the owner's answer on SEC20-05 (Excel cells starting with = + - @) | — |
 
-The owner's last report (8 Nov 2026): **0.19.1 all 3 steps passed** (24/24, 174.6 s) — nothing open from his tests. 0.19.0: all 5 passed, test 2 → 0.19.1; diagrams to revisit at the final touches.
+The owner's last report (10 Nov 2026): **0.20.0 all 5 steps passed** (25/25, 84.0 s) with four points — all in 0.20.1. Before: 0.19.1 all 3 passed.
 Before: 0.18.0 all 5 passed (24/24). Before: 0.17.2 all 5 passed (23/23). Before: 0.13.1 all 4 steps passed, 21/21 (66.8 s). Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.
 Before: 0.12.1 steps 1–3, 5 passed, 21/21 (50.7 s); step 4 (pull from a branch
 committed at once) and three requests → 0.13.0. Before: **0.12.0 all 5 steps passed** — that was the two-folder trial (two clones of the

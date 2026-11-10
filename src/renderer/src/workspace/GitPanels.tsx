@@ -141,27 +141,7 @@ export function GitBar(props: {
         >
           <span aria-hidden="true">⎇</span> {state.detached ? T.git.noBranch : (state.branch ?? '—')} <span aria-hidden="true">▾</span>
         </button>
-        {/* Changes, Pull and Push right next to the branch (owner, 4 Nov 2026) */}
-        <button type="button" className={props.changesOpen ? 'btn btn--active' : 'btn'} aria-pressed={props.changesOpen} onClick={() => {
-            onDismiss()
-            props.onToggleChanges()
-          }} title={T.git.changesTooltip}>
-          {T.git.changes(changedItems, otherFiles)}
-        </button>
-        <button type="button" className="btn" disabled={busy !== null} title={T.baselines.buttonTooltip} onClick={() => {
-            onDismiss()
-            props.onOpenHistory()
-          }}>
-          {T.baselines.button}
-        </button>
-        {props.onToggleTrace && (
-          <button type="button" className={props.traceOpen ? 'btn btn--active' : 'btn'} aria-pressed={props.traceOpen === true} title={T.trace.buttonTooltip} onClick={() => {
-              onDismiss()
-              props.onToggleTrace?.()
-            }}>
-            {T.trace.button}
-          </button>
-        )}
+        {/* the owner's order (10 Nov 2026, 0.20.0 test 5): Pull, Push, Changes, Versions, Traceability */}
         {state.hasRemote && (
           <>
         <button
@@ -183,6 +163,26 @@ export function GitBar(props: {
           {state.ahead === 0 && (state.pendingBaselines ?? 0) > 0 ? T.git.pushBaselines(state.pendingBaselines ?? 0) : T.git.push(state.ahead)}
         </button>
           </>
+        )}
+        <button type="button" className={props.changesOpen ? 'btn btn--active' : 'btn'} aria-pressed={props.changesOpen} onClick={() => {
+            onDismiss()
+            props.onToggleChanges()
+          }} title={T.git.changesTooltip}>
+          {T.git.changes(changedItems, otherFiles)}
+        </button>
+        <button type="button" className="btn" disabled={busy !== null} title={T.baselines.buttonTooltip} onClick={() => {
+            onDismiss()
+            props.onOpenHistory()
+          }}>
+          {T.baselines.button}
+        </button>
+        {props.onToggleTrace && (
+          <button type="button" className={props.traceOpen ? 'btn btn--active' : 'btn'} aria-pressed={props.traceOpen === true} title={T.trace.buttonTooltip} onClick={() => {
+              onDismiss()
+              props.onToggleTrace?.()
+            }}>
+            {T.trace.button}
+          </button>
         )}
         {/* UX-13: the counts live on Pull and Push; only "not pushed yet" stays here */}
         {state.hasRemote && !state.upstream && (

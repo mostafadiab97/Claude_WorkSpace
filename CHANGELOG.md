@@ -3,7 +3,17 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
-## 0.20.1 — in progress
+## 0.20.1 — 10 Nov 2026 — the owner's points on 0.20.0
+- **Owner (10 Nov 2026), 0.20.0:** all 5 steps passed (self-test 25/25, 84.0 s), with points: the gap mark is hard to
+  see (test 2); a way back to Traceability from the gaps table (test 3); the matrix header row scrolled away and was
+  very tall (test 4 — reproduced first in the `trace-0.20` e2e: a rotated header cell does not stay at the top, and its
+  height limit acted sideways on the vertical text); the top bar order Pull, Push, Changes, Versions, Traceability
+  (test 5). The "1,315 columns … shown as a list" message was expected: without a filter the rows linked to 1,315
+  different tests, too many for a grid in the window.
+- **Fixes:** the gap mark is a solid dot in its own theme colour (`gap`, amber in Light and Dark); **← Back to
+  Traceability** above the table after *Show the gaps in the table*; the matrix header stays at the top and is about
+  140 px high (only the text runs upwards, cut to 130 px); the top bar order; the start screen no longer says
+  "✓ Git … found" (the self-test checks Git; a missing Git is still warned about).
 - **Owner (9 Nov 2026), SEC20-05:** yes — every Excel export marks a cell that starts like a formula (`=`, `+`, `-`,
   `@`) as text (Text format), so editing it in Excel later never turns it into a live formula.
 

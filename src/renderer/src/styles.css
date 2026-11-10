@@ -4058,12 +4058,17 @@ html {
   min-width: 170px;
   max-width: 320px;
 }
-/* theme 1b: an item that breaks a coverage rule */
+/* theme 1b: an item that breaks a coverage rule — a solid dot in its own theme colour (owner on 0.20.0 test 2:
+   the small ◌ was hard to see, above all in light mode) */
 .table__gap {
-  color: var(--rm-color-warning);
-  margin-inline-start: var(--rm-space-xs);
-  font-size: var(--rm-font-size-small);
+  display: inline-block;
   flex: none;
+  inline-size: 0.7em;
+  block-size: 0.7em;
+  border-radius: 50%;
+  background: var(--rm-color-gap);
+  margin-inline: var(--rm-space-xs);
+  vertical-align: middle;
 }
 
 /* theme 1b (0.20.0): the Traceability view, the Rules tab and the Impact tab */
@@ -4192,11 +4197,11 @@ html {
   z-index: 3 !important;
   text-align: start;
 }
+/* owner on 0.20.0 test 4: the header cell itself is not rotated (a transformed cell stops staying at the top); only
+   its text runs upwards, and its length is limited along the text (inline axis), so the row stays short */
 .matrix__col {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
+  vertical-align: bottom;
   white-space: nowrap;
-  max-block-size: 140px;
 }
 .matrix__row {
   position: sticky;
@@ -4277,9 +4282,11 @@ html {
   align-items: baseline;
   gap: var(--rm-space-xs);
 }
-.table__main-head .table__gap,
 .table__main-head .table__incomplete {
   font-size: inherit;
+}
+.table__main-head .table__gap {
+  align-self: center;
 }
 .trace__rule--idle {
   opacity: 0.7;
@@ -4291,12 +4298,16 @@ html {
   background: var(--rm-color-danger);
 }
 .matrix__col .link-btn {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  max-inline-size: 130px;
 }
-.matrix__col-title {
-  max-block-size: 120px;
+.matrix__col-title,
+.matrix__col-id {
+  max-inline-size: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -4307,4 +4318,9 @@ html {
 
 .types__pane {
   display: contents;
+}
+
+/* owner on 0.20.0 test 3: back to the Traceability view from its gaps in the table */
+.table-mode__back {
+  margin-inline-end: var(--rm-space-sm);
 }

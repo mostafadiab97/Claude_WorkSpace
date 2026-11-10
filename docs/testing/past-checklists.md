@@ -1,7 +1,15 @@
-# Past manual checklists (v0.0.3 – v0.19.0)
+# Past manual checklists (v0.0.3 – v0.19.1)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.19.1 (no empty rows after Show text off)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.19.1**, then **⚙ → Self-tests → Run release self-test**. | **All 24 steps passed.** |
+| 2 | In the sandbox with **Show text** on: **⊞ Expand all** and scroll down a few screens. Then switch **Show text** off, **⊟ Collapse all**, **⊞ Expand all** and scroll again. | With Show text off every row is one line high, with no empty space between rows anywhere. |
+| 3 | Switch **Show text** on again and scroll. | Titles with their text again; no rows drawn on top of each other. |
 
 ## v0.19.0 (main column, old version in the table, compare layout)
 

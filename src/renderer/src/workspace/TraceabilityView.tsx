@@ -321,9 +321,7 @@ function MatrixTab(props: { schema: Schema; query: Omit<ItemQuery, 'limit' | 'of
                       <tr key={r.id} className={here.size === 0 ? 'matrix__row--empty' : undefined}>
                         <th scope="row" className="matrix__row" title={r.title}>
                           {here.size === 0 && (
-                            <span className="table__gap" role="img" aria-label={T.trace.matrixNoLink} title={T.trace.matrixNoLink}>
-                              ◌
-                            </span>
+                            <span className="table__gap" role="img" aria-label={T.trace.matrixNoLink} title={T.trace.matrixNoLink} />
                           )}
                           <button type="button" className="link-btn" onClick={() => props.onOpenItem(r.id)}>
                             {label(r)}

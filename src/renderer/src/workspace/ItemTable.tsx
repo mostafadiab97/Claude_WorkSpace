@@ -81,9 +81,7 @@ export function ItemTable(props: {
     ) : null
   const gapMark = (id: string): ReactNode =>
     hasRules && gapIds.has(id) ? (
-      <span className="table__gap" role="img" aria-label={T.trace.gapMark} title={T.trace.gapMark}>
-        ◌
-      </span>
+      <span className="table__gap" role="img" aria-label={T.trace.gapMark} title={T.trace.gapMark} />
     ) : null
   // a column header being dragged to a new place (rows have their own drag and drop)
   const [colDrag, setColDrag] = useState<string | null>(null)

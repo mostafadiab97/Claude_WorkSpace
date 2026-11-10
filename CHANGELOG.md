@@ -39,7 +39,7 @@ first, then speed, then screens, Arabic and documents. Each fix below was reprod
 Arabic-named document committed, pushed, history shown; Compare showed one Deleted and one Added; the problem report
 shows `%USERPROFILE%`). Found in the attached report: the opened project's path (a folder on drive D: named after the
 owner) and the update download addresses (the GitHub account) still show personal names — `%USERPROFILE%` only covers
-the Windows user folder. **Owner's choice (O-8): mask only the GitHub account; folder paths stay whole** (in 0.21.0).
+the Windows user folder. **Owner's choice (O-8): leave both** — the account is the release repository's owner (public, the same in every copy), and folder paths are useful.
 
 ## 0.20.1 — 10 Nov 2026 — the owner's points on 0.20.0
 - **Owner (10 Nov 2026), 0.20.1:** all 5 steps passed (self-test 25/25, 90.9 s).

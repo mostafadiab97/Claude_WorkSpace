@@ -156,3 +156,5 @@ are not documented (CRA-23); unused window call `confirmLinks` (CRA-18).
 - 10 Nov 2026 — O-4: keep "Changes + settings", explain "settings" in the tooltip (screens batch). Word prompt: report conflicts between requirements (tagged `import-conflict`); a requirement touching two modules is kept in both, linked with relates-to.
 - 10 Nov 2026 — O-5 A: coverage gaps as a separate chip with a tooltip (screens batch).
 - 10 Nov 2026 — O-6 A: clearer message + offer to keep one name (W-13).
+- 10 Nov 2026 — O-7 A: `%USERPROFILE%` in problem reports. All questions answered; 0.20.2 (data safety) built and released; the owner passed all 4 steps.
+- 10 Nov 2026 — O-8 (from the owner's 0.20.2 report): mask only the GitHub account in problem reports (`github.com/<owner>/`); project folder paths stay whole — a folder named after a person is rare and the path is useful (0.21.0).

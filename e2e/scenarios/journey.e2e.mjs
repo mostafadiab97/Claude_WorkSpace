@@ -145,7 +145,7 @@ await scenario('E2E journey', async (ctx) => {
 
   // drag it back out to the top level: drop on the empty space below the rows
   const area = await win.locator('.table__scroll').boundingBox()
-  await rowOf(stkId).dragTo(win.locator('.table__scroll'), { targetPosition: { x: 300, y: area.height - 30 } })
+  await rowOf(stkId).dragTo(win.locator('.table__scroll'), { targetPosition: { x: 300, y: area.height - 12 } })
   await win.waitForTimeout(600)
   check(!/^parent:/m.test(fileOf('Comfortable temperature')), 'drop below the rows: back to the top level')
   // drop on the upper edge of a row: placed before it
@@ -168,6 +168,9 @@ await scenario('E2E journey', async (ctx) => {
   await win.getByLabel('Search').fill('thermostat')
   await win.waitForTimeout(500)
   check((await rows().count()) === 1, 'search "thermostat": 1 match')
+  // close the Filters pop-up first, as a user would: since 0.21.1 the toolbar can wrap, and the open pop-up then
+  // lies over the first row
+  await win.keyboard.press('Escape')
   await rows().first().click()
   await win.locator('.editor__body input').first().waitFor()
   check((await win.locator('.editor__body input').first().inputValue()) === 'Temperature accuracy', 'clicking the row opens the item')
@@ -245,6 +248,7 @@ await scenario('E2E journey', async (ctx) => {
 
   console.log('M3 — links')
   const openItem = async (title) => {
+    await win.keyboard.press('Escape') // close an open Filters pop-up (it can lie over the rows since 0.21.1)
     await win.getByLabel('Search').fill(title)
     await win.waitForTimeout(500)
     await rows().filter({ hasText: title }).first().click()

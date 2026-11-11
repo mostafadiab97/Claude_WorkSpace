@@ -253,3 +253,9 @@ vertical text limits its width, not its height. Rotate the text inside the cell,
   first file in byte order (W-01).
 - **Git's rename guess in diffs:** item files are mostly header, so Git pairs two different items as a "rename";
   Compare treats a rename between different IDs as a deletion plus an addition (W-07).
+
+## Toolbar wraps (0.21.1)
+
+- Since 0.21.1 the table toolbar wraps to a second row when the editor is open. The **Filters** pop-up then opens
+  further left and can lie over the first rows: an e2e step that clicks a row after using `filters()` must press
+  **Escape** first (as `openItem` in `journey.e2e.mjs` does), or Playwright reports "subtree intercepts pointer events".

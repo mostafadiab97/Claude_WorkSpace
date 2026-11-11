@@ -1,6 +1,6 @@
 // 0.21.0 speed (review 2026-11-10 W-20…W-23, W-27): the user actions that were slow at 50,000 items, measured
 // through the workspace service. 1,000 items with every test run (correctness of the timing code); 10,000 with
-// `npm run test:perf` (every build); 50,000 with `test:perf:all` (releases).
+// `npm run test:perf` (every build) and the release run; 50,000 with PERF=all PERF_WS50=1 (by hand).
 import { execFileSync } from 'node:child_process'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -13,7 +13,9 @@ import { generateItems } from '../src/modules/sample-data'
 import { cacheFileName, createWorkspace } from '../src/modules/workspace'
 
 const PERF = process.env['PERF'] === '1' || process.env['PERF'] === 'all'
-const PERF_ALL = process.env['PERF'] === 'all'
+// 50,000 only on request (PERF_WS50=1): building and committing 50,000 files took over 15 min on the Windows release
+// runner (0.21.1); the data-layer test still covers 50,000 there
+const PERF_ALL = process.env['PERF_WS50'] === '1'
 const schemaFile = join(__dirname, '..', 'config', 'default-schema.yaml')
 const quiet = { info: () => undefined, warn: () => undefined, error: () => undefined }
 

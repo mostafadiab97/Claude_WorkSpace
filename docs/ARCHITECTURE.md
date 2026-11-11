@@ -57,7 +57,7 @@ The preload needs no change: it exposes every `Channels` entry as `window.reqoch
 | `import-export` | CSV (`toCsv`, `parseCsv`, `detectSeparator`), Markdown, Excel (`writeXlsx`, `readXlsx`, `updateXlsx` — ExcelJS), ReqIF (`readReqif`, `writeReqif` — saxes), import planning (`guessMapping`, `guessHeaderRow`, `planImport`) | Pure functions, bytes/text in and out. **Every import format becomes a table** (ReqIF: one row per object in hierarchy order, a column per attribute and per relation type), so one wizard, one column guess and one plan serve Excel, CSV and ReqIF. `planImport` decides create / update / unchanged / skip per row and lists problems; IDs from other tools are kept as `source-id` so a re-import updates. `readXlsx` first rewrites absolute part paths (openpyxl files) that ExcelJS 4.4 cannot follow | `workspace` |
 | `sample-data` | `generateItems()`, `runDataBenchmark()` | Fictional thermostat requirements; used by tests, `npm run gen:repo` and the in-app self-test | `main/ipc.ts`, tests |
 
-Planned (see milestones): `diff-merge` (per-item merge, M8), `git-host` (GitHub pull requests).
+Planned (see the release plan): `git-host` (GitHub pull requests, theme 4). The per-item merge of M8 lives in `items/merge.ts` and `workspace/merging.ts` (0.12.0).
 Keep this table up to date with every change.
 
 ## Data format (in the project's Git repository)
@@ -102,7 +102,7 @@ requirements/
   "items with suspect links" is one SQL query.
 - **Unknown header keys are preserved**, so files written by a newer reqochet or another tool lose nothing.
 - **The index is a cache**: `%APPDATA%\reqochet-dev\cache\…sqlite`, rebuilt automatically when missing or when its
-  format changes (format 5 since 0.18.0; 4 since 0.9.0: positions are text). It stores every header key, so a field change
+  format changes (format 5 since 0.18.0 — `FORMAT_VERSION` in `sqliteIndex.ts`). It stores every header key, so a field change
   re-reads nothing.
 
 ## Decisions changed during implementation
@@ -138,7 +138,7 @@ samples/, tools/   sample data and its generator
 | --- | --- | --- |
 | Start | `screens/StartScreen.tsx` | Open repository (folder picker → Git root detection → create `requirements/` if missing), recent list |
 | Workspace | `screens/WorkspaceScreen.tsx` | Selection, unsaved-changes guard, refresh on window focus; filters in `workspace/screen/useFilters.ts`, Git state in `useGit.ts`, toolbar and problem list (with "Fix file name") in `Toolbar.tsx` / `Problems.tsx` |
-| Toolbar (one row since 0.13.0) | `workspace/screen/Toolbar.tsx` | Search, **Filters** pop-up (type, enum/list fields, links; count of active filters), Clear filters, Columns, Import, Export, ⊞/⊟, New item |
+| Toolbar (one row since 0.13.0; wraps when narrow since 0.21.1) | `workspace/screen/Toolbar.tsx` | Search, **Filters** pop-up (type, enum/list fields, links; count of active filters), Clear filters, Columns, Import, Export, ⊞/⊟, New item |
 | Language (0.13.0) | `lib/language.ts`, `shared/text.ts` + `shared/text-ar.ts` | `setLanguage()` swaps the texts of `T` in place (never copy a text into a module-level constant — read `T` when rendering); `document.dir = rtl` for Arabic; CSS uses only logical properties (`margin-inline-start`, `inset-inline-end`, `text-align: start` …); memoised parts read `useLanguage()`; the core is told with `setLanguage` (IPC) so its messages follow; choice in local storage |
 | Table | `workspace/ItemTable.tsx` + `workspace/table/` | Tree mode (no search/filter): the hierarchy, children loaded per parent when opened (500, then "Show more"); Expand all opens every level at once and loads levels as they scroll into view (`rows.ts`); drag & drop calls `reparentItem(id, parent, before)`. Flat mode (search/filter): rows fetched 100 at a time. Virtual scrolling in both; sticky header and ID column |
 | Columns & fields | `workspace/FieldsPanel.tsx` | Hidden columns, column order and widths (drag a header edge; double-click = automatic) per repository in the PC's local storage (personal); built-in parts (ID, Title, Type, Parent, Text, Links) cannot be added as fields; field definitions saved to `schema.yaml` through `saveSchemaFields` (comment-preserving, refused if the file changed since it was read) |
@@ -157,4 +157,9 @@ samples/, tools/   sample data and its generator
 | Error boundary | `components/ErrorBoundary.tsx` | Around the workspace and settings: logs, offers Try again / Copy diagnostics / Reload |
 | Change view | `workspace/ChangeView.tsx` + `lib/textDiff.ts` | Shared by History and the Changes view (O-05): Fields, Text and Links blocks, old left (red) / new right (green), changed words marked (`diff` library), unchanged text lines folded; stacked old-above-new in a narrow column (container query) |
 | History | `workspace/HistoryView.tsx` | Editor tab: commits of the item (plus "Not committed yet"), and for the selected one a field/text/link comparison |
+| Documents (0.17.0) | `workspace/screen/DocumentBar.tsx` | Document picker above the table; new / rename / delete a document (a folder under `requirements/`) |
+| Item types and rules (0.17.0, 0.20.0) | `workspace/TypesPanel.tsx` + `workspace/RulesPanel.tsx` | Tabs Types / Coverage rules, both mounted; required fields per type; a type a rule uses cannot be removed |
+| Versions and history (0.18.0) | `workspace/HistoryDialog.tsx`, `components/VersionsCard.tsx` | Baselines and commits; "Show in the table" opens an old version read-only (version bar, `versionView.ts`); VersionsCard = going back to an earlier app version |
+| Traceability (0.20.0) | `workspace/TraceabilityView.tsx`, `workspace/ImpactView.tsx` | Full-width view with Coverage and Matrix tabs; the Impact tab in the editor; gaps marked in the table (`MainCell`) and listed in Problems |
+| Keyboard (0.21.1) | `lib/keys.ts` | Arrow keys in the reading direction (`arrowDirection`), the tab-row keyboard (`onTabListKeyDown`), the closed triangle (`closedMark`) |
 | Settings | `screens/SettingsScreen.tsx` | One page per group: Appearance, Updates and Versions, Features, Environment and diagnostics, Report a problem, Self-tests (`components/ReleaseSelfTestCard.tsx`), and the built-in user guide (one page per section, `src/shared/guide.ts`); the workspace stays mounted behind it |

@@ -21,7 +21,7 @@ The prototype is built in seven milestones, each ending with a Windows build you
 | M5 Compare | Pick two commits/branches/tags; per-item and per-link difference view | Journey step 6 works |
 | M6 Export and hardening | CSV export; end-to-end tests of the whole journey; bug fixes from your trials | The full 8-step journey passes on two Windows PCs; success measures met |
 
-**Progress:** M0–M6 are complete (v0.7.0) — the prototype scope FR-01 to FR-10 is built; 0.8.0 (review fixes), 0.9.0 (new data format), 0.10.0 (Changes view), 0.11.0 (Excel + ReqIF), 0.12.0 (M8 branches, per-requirement pull), 0.12.1 (branch drop-down) and 0.13.0 (Arabic, fewer bars, delete branch) are released. The current version and next step are kept in `docs/STATUS.md` and `CHANGELOG.md` only (review T-04); the plan for the next versions is "Release plan" below.
+**Progress:** M0–M6 complete (v0.7.0); M7 exchange (0.11.0) and M8 branches with per-requirement merge (0.12.0); theme 1 traceability complete (documents, types, baselines, old versions, coverage, impact, matrix — 0.17.0–0.20.1); the whole-project review's fixes 0.20.2 (data safety), 0.21.0 (speed), 0.21.1 (screens, Arabic). Every version: the "Release plan" table below; the current state and next step: `docs/STATUS.md`.
 
 **How we work:** I write the code, tests and architecture notes in a Git repository; after each milestone you install the build, try it and comment here or in chat. Specs and decisions stay in this document and the repo, so work continues across sessions.
 
@@ -50,11 +50,11 @@ after his test round and the project review (`docs/reviews/done/2026-10-25-proje
 | FR-09 | Compare two versions per requirement and link | Done (Changes view, 0.10.0; no automatic pulls) |
 | FR-10 | Export to CSV | Done (+ Markdown, Excel, ReqIF; Compare export) |
 | FR-11 | Schema editor | Partly — fields done; item types and link types still in `schema.yaml` |
-| FR-12 | Branches and tag baselines | Branches done (0.12.0); tag baselines delayed by the owner (29 Oct 2026) |
+| FR-12 | Branches and tag baselines | Done — branches (0.12.0), baselines (0.18.0), old versions in the table (0.19.0) |
 | FR-13 | Merge and resolve conflicts per requirement | Done (0.12.0): field-level 3-way merge, decision window, duplicate-ID repair |
 | FR-14 | Word, PDF, Excel and Markdown export | Markdown, Excel (and ReqIF) done; Word/PDF → proposed (planning discussion) |
 | FR-15 | Excel/CSV import with column mapping | Done (0.11.0, also ReqIF) |
-| FR-16 | Coverage view and rule warnings | Not started → proposed (planning discussion) |
+| FR-16 | Coverage view and rule warnings | Done (0.20.0) — coverage rules, gaps in the table and Problems, impact chain, matrix |
 | FR-17 | Suspect links | Done (v0.4.0) |
 | FR-18 | GitHub pull-request view per requirement (stage 1) | Local PR review done (Compare a branch, 0.12.0); PR status/approval → proposed (planning discussion) |
 | FR-19, FR-20 | PR create/approve/merge in the tool; Word import, ReqIF | ReqIF done (0.11.0); the rest later |

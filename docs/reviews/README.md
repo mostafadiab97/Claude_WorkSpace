@@ -8,9 +8,10 @@ recorded in `docs/design/decisions.md` and `docs/design/roadmap.md` (source of t
 
 | Date | File | What it is | State |
 | --- | --- | --- | --- |
-| 10 Nov 2026 | `2026-11-10-project-review.md` | Whole-project review before the first release, eight helpers on 0.20.1: 6 High / 44 Medium / 86 Low; plan 0.20.2 data safety → 0.21.0 speed → screens, Arabic, docs | **Open** — 7 questions (O-1…O-7) |
-| 5 Nov 2026 | `2026-11-05-project-review.md` | Whole-project review by seven helpers: 6 High / 41 Medium / 101 Low; plan 0.16.3 → 0.16.4 → 1a | **Open** — 11 questions |
-| 4 Nov 2026 | `2026-11-04-next-round.md` | 1a structure questions, the whole-project review plan, more helper agents, cheaper helper runs | **Open** — waiting for the owner |
+| 10 Nov 2026 | `2026-11-10-project-review.md` | Whole-project review before the first release, eight helpers on 0.20.1: 6 High / 44 Medium / 86 Low; plan 0.20.2 data safety → 0.21.0 speed → screens, Arabic, docs | **Decided** — O-1…O-8 answered; built in 0.20.2, 0.21.0, 0.21.1; documents in 0.21.2 |
+| 8 Nov 2026 | `2026-11-08-1b-traceability.md` | Theme 1b open details T-01…T-08 (where the views live, starter rules, matrix size…) | **Done** — answered 8 Nov, built in 0.20.0 |
+| 5 Nov 2026 | `2026-11-05-project-review.md` | Whole-project review by seven helpers: 6 High / 41 Medium / 101 Low; plan 0.16.3 → 0.16.4 → 1a | **Done** — answered and built in 0.16.3–0.18.0 (move to `done/` with the next tidy-up) |
+| 4 Nov 2026 | `2026-11-04-next-round.md` | 1a structure questions, the whole-project review plan, more helper agents, cheaper helper runs | **Done** — decided 5 Nov, built in 0.17.0–0.18.0 |
 | 4 Nov 2026 | `2026-11-04-public-release-repo.md` | How files would move to a public release repository (first time and per release), which files go, options — **open, not decided**; decided so far: two tools, two update feeds | **Open** — 4 questions in section 5 |
 | 1 Nov 2026 | `2026-11-01-planning-discussion.md` | The planning discussion for the versions after 0.13: open points P-xx with answers, release plan (0.14 … 0.24) | **Decided** — the plan in use; each theme's details are settled when it starts |
 | 2 Nov 2026 | `2026-11-02-requiem-analysis.md` | Requiem (`requirements-manager`, Rust command-line tool, Markdown + YAML in Git): how it works, side by side with ReqMan, ideas worth taking | Reference — ideas placed in themes 1, 2, 5 |

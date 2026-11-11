@@ -1,6 +1,6 @@
 # reqochet — User Guide
 
-Version 0.16.0 · November 2026 · *reqochet was called ReqMan until version 0.15. The development tool is named reqochet-dev; the release tool is reqochet — they work the same.*
+Matches reqochet-dev 0.21 · November 2026 · *reqochet was called ReqMan until version 0.15. The development tool is named reqochet-dev; the release tool is reqochet — they work the same.*
 
 reqochet is a Windows desktop application for writing, structuring and tracing requirements. Every requirement is a
 small text file in your project's own Git repository, so requirements get the same history, branches, reviews and
@@ -429,12 +429,15 @@ against lost edits and against overwriting a colleague's newer version.
 **Finding** — full-text search with ranking; filters by type, fields, missing links and suspect links; configurable, resizable columns.
 
 **Traceability** — typed links in both directions; suspect-link detection on meaning changes with keep / unlink /
-decide later; broken-link and duplicate-ID detection with guided fixes.
+decide later; broken-link and duplicate-ID detection with guided fixes; coverage rules (for example "every system
+requirement is verified by a test case") with gaps marked in the table and listed in Problems; the impact chain of an
+item; a traceability matrix with Excel export (section 6).
 
 **Change control (Git, per requirement)** — uncommitted changes per requirement and per field with side-by-side text
 differences; take back any part; commit only the requirements folder; push with pull-first offer; pull with automatic
 field-level merging and a decision window for real clashes; history per item; compare any two versions, the last pull
-or a branch; export comparisons.
+or a branch; export comparisons; baselines (named, fixed versions that go to GitHub with Push); any old version
+shown read-only in the table.
 
 **Branches** — create, switch (commit first / take along / discard), compare like a pull request, pull from another
 branch as reviewable uncommitted changes, delete safely, search among many branches.
@@ -452,10 +455,10 @@ data self-test; feature switches per PC and per team; problem reports; going bac
 paused; automatic updates.
 
 **Platform and data** — Windows 10/11 desktop, per-user install; offline first; no server, no database, no accounts;
-plain Markdown files in your own Git repository; tested with 10,000 and 50,000 requirements.
+plain Markdown files in your own Git repository; tested with 10,000 and 50,000 requirements (compare, save, sort and
+search stay around a second or less at 50,000).
 
-**Planned** (decided release plan) — coverage view, impact chain, traceability
-matrix; bulk edit, templates, saved views, wording hints; rich text
+**Planned** (decided release plan) — bulk edit, templates, saved views, wording hints; rich text
 with tables, images and diagrams; Word / PDF / HTML documents; approvals, comments and pull requests in the app; links to
 code and test results; AI access.
 

@@ -52,6 +52,7 @@ The architecture picture in section 1 shows these parts and how calls travel bet
 | **main/ipc.ts** | Receives calls, checks inputs, shows native dialogs (open folder, save file), forwards to modules | one file | preload |
 | **main/composition.ts** | Builds all modules and wires them together — the only place to swap an implementation | one file | `main/index.ts` |
 | **workspace** | "The open repository": opens/creates it and runs every user operation with the rules that need the whole set (no parent loops, conflict-safe saves, links, moves, schema fields, export). `workspace.ts` is the facade and runs every write and Git action through one queue (one at a time, like a mutex); the work is in small files: `itemOps`, `links`, `structure`, `schemaFields`, `importing`, `exporting`, `revert`, `gitOps` (commit/push/discard/history), `merging` (pull, pull from a branch, decisions, branches, duplicate-ID repair), `compare`, `watcher` (which files changed) | `workspace.ts` + the files named | ipc |
+| **workspace — newer parts** | Documents (0.17), baselines and old versions in the table (`versionView.ts`, 0.18–0.19), traceability: coverage, impact, matrix (`traceability.ts`, 0.20) | `documents.ts`, `baselines.ts`, `versionView.ts`, `traceability.ts` | workspace |
 | **safe-files** | Writes files atomically and retries while Windows briefly locks a file | `index.ts` | store, workspace, ipc |
 | **self-test** | The release self-test the owner runs in the app: the main actions on a practice repository | `index.ts` | composition |
 | **repository-store** | Reads and writes the files in `requirements/` — atomic, revision-checked | `fileStore.ts` | workspace |
@@ -59,7 +60,7 @@ The architecture picture in section 1 shows these parts and how calls travel bet
 | **git-adapter** | Runs the installed `git` (argument arrays, no shell, timeouts) and parses its output | `systemGit.ts` | workspace |
 | **import-export** | Pure functions: items or a comparison → CSV, Markdown, Excel, ReqIF; Excel/CSV/ReqIF files → rows → an import plan (column mapping guessed, preview, update by ID) | `csv.ts`, `items.ts`, `compare.ts`, `xlsx.ts`, `reqif.ts`, `importPlan.ts` | workspace, main |
 | **items** | The domain core: item file format, IDs, validation, content fingerprint, order keys, field-level diff, field-level 3-way merge | `itemFile.ts`, `ids.ts`, `validate.ts`, `diff.ts`, `orderKey.ts`, `merge.ts` | store, index, workspace |
-| **schema** | Reads `schema.yaml` (item types, fields, link types) and reports problems | `parse.ts` | store, items |
+| **schema** | Reads `schema.yaml` (item types, fields, link types, coverage rules) and reports problems | `parse.ts` | store, items |
 | **logger / theme / updater** | Log file with rotation · layered theme file · automatic updates from GitHub Releases | one implementation each | main |
 | **sample-data** | Fictional requirement sets for tests and the in-app self-test | `generate.ts`, `benchmark.ts` | tests, ipc |
 

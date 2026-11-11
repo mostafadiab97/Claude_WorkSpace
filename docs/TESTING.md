@@ -3,7 +3,7 @@
 Three kinds of checks protect each version:
 
 1. **Automated checks** run on a Windows machine on GitHub for every push: type checking, lint rules
-   (including the module-boundary rules), about 400 unit tests (real Git with a fake "GitHub", the sandbox's
+   (including the module-boundary rules), about 690 unit tests (real Git with a fake "GitHub", the sandbox's
    broken files, …), performance tests, and end-to-end scenarios that click through the real app. A build that
    fails any of them produces no installer. To see them: repository → **Actions** → latest **Build** run.
 2. **The release self-test** (from 0.8.0) — on *your* PC, inside reqochet-dev: **⚙ Settings & diagnostics → Run
@@ -15,9 +15,9 @@ Three kinds of checks protect each version:
 
 ## Automated checks in detail (moved from `CLAUDE.md`, 1 Nov 2026)
 
-Automated tests: 192 unit tests (+2 perf skipped by default) including real-Git tests with a bare "GitHub"
+Automated tests: about 690 unit tests in 77 files (the speed tests are skipped by default; the count of the last release is in `docs/STATUS.md`) including real-Git tests with a bare "GitHub"
 repository and two clones ("PC A", "PC B"), the release self-test itself, the sandbox's chapter-9 promises
-(`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); e2e scenarios: `language` (Arabic switch, right-to-left, unsaved edit kept, restart), `branches` (create, switch by clicking the name, pull from a branch → uncommitted, delete, Compare with… / Pull from…, the uncommitted-changes question, 41 branches: panel size, search, Esc), `excel` (new project from the sample file, chosen-items export, update the file, ReqIF round trip,
+(`tests/sandbox-expectations.test.ts`) and window logic (`tests/ui/`); 14 e2e scenarios (`e2e/scenarios/*.e2e.mjs`), among them `language` (Arabic switch, right-to-left, unsaved edit kept, restart), `branches` (create, switch by clicking the name, pull from a branch → uncommitted, delete, Compare with… / Pull from…, the uncommitted-changes question, 41 branches: panel size, search, Esc), `excel` (new project from the sample file, chosen-items export, update the file, ReqIF round trip,
 publish), `journey` (~75 checks, the
 whole user story, incl. the Changes view, ↶, Keep/Unlink window, push offer) and `fixes` (renamed file, lazy Expand all,
 column width drag, Changes view layout + split difference, second start, release self-test in the window).
@@ -50,14 +50,14 @@ From 0.14.0: **⚙ → Report a problem** — describe what happened and click *
 Each tested version is published on the repository's **Releases** page
 (`https://github.com/<owner>/Claude_WorkSpace/releases`). Download `reqochet-dev-Setup-<version>.exe` from
 the release's **Assets** and run it — there is no zip and no GitHub sign-in needed. From v0.0.3 onwards,
-an installed ReqMan also finds newer releases by itself and offers **Restart and update**.
+an installed reqochet-dev also finds newer releases by itself and offers **Restart and update**.
 
 ### If the browser blocks the download
 
-ReqMan is not yet code-signed (signing certificates cost money and are planned for the commercial version),
+reqochet-dev is not yet code-signed (signing certificates cost money and are planned for the commercial version),
 so browsers treat the installer as unknown:
 
-- **Chrome:** press **Ctrl+J** to open Downloads, find `ReqMan-Setup-….exe`, click **Download suspicious file**
+- **Chrome:** press **Ctrl+J** to open Downloads, find `reqochet-dev-Setup-….exe`, click **Download suspicious file**
   (or **⋮ → Keep**), then **Download anyway**.
 - **Edge:** open Downloads (**Ctrl+J**), hover the file, **⋯ → Keep**, then **Show more → Keep anyway**.
 - From v0.0.4, each release also has a **.zip** of the installer, which browsers block less often:
@@ -89,15 +89,15 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 
 ## Two-PC trial (prototype journey, with a colleague)
 
-The prototype's goal: two engineers replace an Excel sheet with ReqMan and find the comparison better than GitHub's
+The prototype's goal: two engineers replace an Excel sheet with reqochet and find the comparison better than GitHub's
 diffs. Use a real project repository (or a new one on GitHub) that both of you can push to.
 
-1. **You:** open the cloned repository in ReqMan → **Create requirements folder**.
+1. **You:** open the cloned repository in reqochet → **Create requirements folder**.
 2. **You:** create a few stakeholder needs, system requirements and test cases; arrange them (drag rows), link them
    (refines, verifies).
 3. **You:** filter (e.g. System Requirement + Status Draft); open an item and look at its links.
 4. **You:** **Changes → Commit**, then **Push**.
-5. **Colleague:** clones the repository, opens it in ReqMan, edits two requirements, adds a link, commits, pushes.
+5. **Colleague:** clones the repository, opens it in reqochet, edits two requirements, adds a link, commits, pushes.
 6. **You:** **Compare** (it pulls first) — it lists "<ID> Text…", "1 link added" rather than file lines.
 7. **You:** open one of the changed requirements → **History**: who changed it and when.
 8. **You:** **Export…** → CSV, open it in Excel and send it to someone outside the repository.

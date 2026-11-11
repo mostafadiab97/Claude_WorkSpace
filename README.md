@@ -7,12 +7,19 @@ Requirements live as plain-text files (one Markdown file per requirement) in a f
 repository; reqochet is the Windows desktop app to view, edit, structure, link, compare, merge, import and export them.
 No server, no accounts — access is whatever the Git host (e.g. GitHub) allows.
 
-**What it does today (v0.13.0):** tree table with calculated outline numbers, editor, custom fields, typed links with
-suspect-link review (Keep / Unlink), commit / pull / push of the requirements folder only (never forced), branches
-(create, switch, pull from any branch, compare a branch like a pull request), a pull that combines changes field by
-field and asks only about real clashes, a Changes view per requirement with side-by-side differences and ↶ per part,
-per-item history, Excel / CSV / ReqIF import (wizard) and export, writing changes back into the original Excel file,
-an in-app release self-test, light/dark themes, **English / Arabic** (right-to-left), automatic updates.
+**What it does today** (the installed version's details: `CHANGELOG.md`):
+
+- **Requirements:** tree table with calculated outline numbers, documents (one folder each), editor with Markdown
+  text, item types and custom fields set up in the window, typed links with suspect-link review (Keep / Unlink).
+- **Git at requirement level:** commit / pull / push of the requirements folder only (never forced), branches, a pull
+  that combines changes field by field and asks only about real clashes, a Changes view per requirement with ↶ per
+  part, per-item history, baselines, and any old version shown read-only in the table.
+- **Traceability:** coverage rules with gaps marked in the table, the impact chain of an item, and a traceability
+  matrix with Excel export.
+- **Exchange:** Excel / CSV / ReqIF import (wizard) and export, writing changes back into the original Excel file;
+  an AI prompt turns a folder of Word specifications into a project (`docs/guides/word-template-prompt.md`).
+- **Around it:** an in-app release self-test, light/dark themes, **English / Arabic** (right-to-left), automatic
+  updates, problem reports without your user name.
 
 ## Try it (Windows 11)
 
@@ -24,10 +31,9 @@ an in-app release self-test, light/dark themes, **English / Arabic** (right-to-l
 
 ## Status
 
-Prototype (M0–M6), Excel/ReqIF exchange (M7) and branches with per-requirement merge (M8) are complete. What
-each version changed is in `CHANGELOG.md`; the current state and the next step are in `CLAUDE.md` ("Status"), and the
-release plan in `docs/design/roadmap.md` ("Release plan"). (The status is kept in those places only, so it cannot drift
-— review T-04.)
+The current version, the owner's last test report and the next step are in **`docs/STATUS.md`**; what each version
+changed is in `CHANGELOG.md`; the release plan in `docs/design/roadmap.md` ("Release plan"). (The status is kept in
+those places only, so it cannot drift — review T-04.)
 
 ## Develop
 

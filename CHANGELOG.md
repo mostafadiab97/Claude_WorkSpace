@@ -52,6 +52,9 @@ first, then speed, then screens, Arabic and documents. Each fix below was reprod
   right-to-left direction.
 - **W-50** Arabic: a version of the requirements is «نسخة» everywhere (15 texts), «إصدار» stays for app releases;
   «علامات الإصدار» → «علامات Git».
+- Release: two runs failed on the Windows runner and the release workflow was started by hand twice (reported to the
+  owner): the 3,000-file rename test needed more than 120 s (now 300 s), and the new workspace speed test at 50,000
+  items took over 15 min (now 10,000 in CI, 50,000 by hand with `PERF_WS50=1`).
 - Not changed: the success message position (UW-03) — it already closes by itself after 9 s and keeps the look the
   owner chose in 0.14.1.
 

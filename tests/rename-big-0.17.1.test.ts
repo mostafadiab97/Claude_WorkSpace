@@ -69,7 +69,7 @@ describe('0.17.1 — renaming a big document safely', () => {
     expect(mdOnly.length).toBe(3000)
     expect(stat.every((l) => l.startsWith('R100'))).toBe(true)
     expect(ws.query({ document: 'SandBox Req', limit: 0 }).total).toBe(3000)
-  }, 120_000)
+  }, 300_000) // 3,000 files on the Windows CI runner: usually 40–90 s, once over 120 s (0.21.1 release)
 
   it('when Git stops halfway (time limit), everything is put back and the window shows the old folder', async () => {
     const stopped = runner((args) => {

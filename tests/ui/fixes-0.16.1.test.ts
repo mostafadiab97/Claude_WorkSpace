@@ -4,7 +4,7 @@ import { staleTranslations } from '../../src/renderer/src/lib/schema'
 import type { FieldDef } from '../../src/shared/domain'
 
 describe('translations left behind by a rename (0.16.1)', () => {
-  const field: FieldDef = { id: 'priority', name: 'Priority', type: 'enum', options: ['High', 'Low'], labels: { ar: 'الأولوية' }, optionLabels: { High: { ar: 'عالية' }, Low: { ar: 'منخفضة' } } }
+  const field: FieldDef = { id: 'priority', name: 'Priority', type: 'enum', options: ['High', 'Low'], labels: { ar: 'الأولوية' }, optionLabels: { ar: { High: 'عالية', Low: 'منخفضة' } } } // language → choices, as schema.yaml stores it (UW-01)
   it('warns when a translated field is renamed', () => {
     expect(staleTranslations(field, 'Importance', ['High', 'Low'])).toEqual({ name: true, options: [] })
   })

@@ -8,6 +8,7 @@ import { clampWidth, columnTemplate, columnsFor, linkTitle, tableMinWidth, type 
 import { useRowDrag } from './table/drag'
 import { useFlatRows, useTreeRows, type Row } from './table/rows'
 import { isRtlDocument, useLanguage } from '../lib/language'
+import { arrowDirection, closedMark } from '../lib/keys'
 
 export { columnOrder, defaultOrder, moveColumn, optionalColumns, orderColumns, shownColumnKeys, columnsFor, withWidth, linkSummary, type Column, type ColumnPrefs } from './table/columns'
 export type { Row } from './table/rows'
@@ -119,11 +120,12 @@ export function ItemTable(props: {
     handle.addEventListener('pointercancel', up)
   }
   const resizeByKey = (e: KeyboardEvent<HTMLSpanElement>, key: string): void => {
-    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+    const dir = arrowDirection(e.key) // wider/narrower follows the reading direction (W-51)
+    if (!dir) return
     e.preventDefault()
     e.stopPropagation()
     const now = (e.currentTarget.parentElement as HTMLElement).getBoundingClientRect().width
-    onResize?.(key, clampWidth(now + (e.key === 'ArrowRight' ? 16 : -16)))
+    onResize?.(key, clampWidth(now + (dir === 'forward' ? 16 : -16)))
   }
   const isTree = mode === 'tree'
   const sort = query.sort ?? { by: 'order' as const }
@@ -212,12 +214,13 @@ export function ItemTable(props: {
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>): void => {
     const index = selectedId ? indexOf(selectedId) : -1
     const row = index >= 0 ? rowAt(index) : undefined
-    if (isTree && row?.kind === 'item' && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+    const dir = arrowDirection(e.key) // open/close follows the reading direction (W-51: in Arabic → closes)
+    if (isTree && row?.kind === 'item' && dir) {
       e.preventDefault()
       const open = tree.isOpen(row.item.id)
-      if (e.key === 'ArrowRight' && row.item.childCount > 0 && !open) tree.setOpen(row.item.id, true)
-      else if (e.key === 'ArrowLeft' && open && row.item.childCount > 0) tree.setOpen(row.item.id, false)
-      else if (e.key === 'ArrowLeft' && row.path.length > 0) onSelect(row.path.at(-1) as string)
+      if (dir === 'forward' && row.item.childCount > 0 && !open) tree.setOpen(row.item.id, true)
+      else if (dir === 'back' && open && row.item.childCount > 0) tree.setOpen(row.item.id, false)
+      else if (dir === 'back' && row.path.length > 0) onSelect(row.path.at(-1) as string)
       return
     }
     // the row menu from the keyboard (Menu key, Shift+F10, Delete) and Enter into the editor (UX-W03)
@@ -358,7 +361,7 @@ export function ItemTable(props: {
                   <div key={v.key} role="row" aria-level={1} data-index={v.index} ref={full ? virtualizer.measureElement : undefined} className="table__row table__row--group" style={style}>
                     <span role="gridcell" className="table__td table__td--group">
                       <button type="button" className="table__group-toggle" aria-expanded={row.open} onClick={() => tree.setGroupOpen(row.name, !row.open)} title={row.open ? T.table.groupClose(row.name || T.documents.loose) : T.table.groupOpen(row.name || T.documents.loose)}>
-                        <span aria-hidden="true">{row.open ? '▾' : '▸'}</span> <strong>{row.name || T.documents.loose}</strong> <span className="muted-inline">{T.table.groupCount(row.count)}</span>
+                        <span aria-hidden="true">{row.open ? '▾' : closedMark()}</span> <strong>{row.name || T.documents.loose}</strong> <span className="muted-inline">{T.table.groupCount(row.count)}</span>
                       </button>
                     </span>
                   </div>
@@ -429,7 +432,7 @@ export function ItemTable(props: {
                                   tree.setOpen(item.id, !open)
                                 }}
                               >
-                                {open ? '▾' : '▸'}
+                                {open ? '▾' : closedMark()}
                               </button>
                             ) : (
                               <span className="tree__toggle tree__toggle--leaf" aria-hidden="true" />

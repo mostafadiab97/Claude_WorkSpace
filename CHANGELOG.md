@@ -35,6 +35,26 @@ first, then speed, then screens, Arabic and documents. Each fix below was reprod
   version → Git history with baselines), reports conflicts, keeps shared requirements in both modules and records the
   documents' format (`docs/guides/word-template-prompt.md`).
 
+## 0.21.1 — 11 Nov 2026 — screens and Arabic (review W-40…W-54, O-4, O-5, O-6)
+- **UW-01 (bug)** The Fields window warned "the choices ar are gone…" for every translated field: it read the
+  language code as a choice name. It now names the real choices that lost their translation.
+- **W-40 / UW-02** The table toolbar wraps to a second row when the editor makes the table narrow, so "+ New item" is
+  never hidden under the editor (English and Arabic).
+- **O-4** The Changes button keeps "+ settings"; its tooltip now says what that is (schema.yaml — item types, fields,
+  link types, coverage rules — committed together with the requirement changes).
+- **O-5 / W-45** The status bar says "No file problems"; the amber coverage-gaps label has its own tooltip ("missing
+  links a coverage rule asks for — not an error in the files").
+- **O-6 / W-13** The message for one ID in two files now also names the case "the same document renamed differently
+  on two PCs" and how to keep one name (compare, copy edits over, delete the other folder, commit).
+- **W-43 / UW-06** Arrow keys, Home and End move between tabs in all six tab rows (editor, Changes, Traceability,
+  item types, Versions), in the reading direction.
+- **W-51** Arabic: the tree opens with ← and closes with →, column width keys and the closed triangle (◂) follow the
+  right-to-left direction.
+- **W-50** Arabic: a version of the requirements is «نسخة» everywhere (15 texts), «إصدار» stays for app releases;
+  «علامات الإصدار» → «علامات Git».
+- Not changed: the success message position (UW-03) — it already closes by itself after 9 s and keeps the look the
+  owner chose in 0.14.1.
+
 ## 0.21.0 — 11 Nov 2026 — speed at 50,000 items (review W-20…W-23, W-27)
 The owner's decision O-3 (10 Nov 2026): 10,000 items a must, 50,000 a should. Measured with the new
 `tests/perf-workspace.test.ts` (Linux container; Windows is slower, the ratios hold):

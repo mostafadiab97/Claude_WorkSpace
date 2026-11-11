@@ -12,6 +12,7 @@ import { useLanguage } from '../lib/language'
 import { T } from '../../../shared/text'
 import privacyDiagram from '../../../../docs/images/privacy.png'
 import privacyDiagramDark from '../../../../docs/images/privacy-dark.png'
+import { closedMark } from '../lib/keys'
 
 type SettingsPage = 'env' | 'appearance' | 'report' | 'features' | 'tests' | 'privacy'
 type View = { kind: 'settings'; page: SettingsPage } | { kind: 'guide'; page: string; anchor?: string }
@@ -105,7 +106,7 @@ export function SettingsScreen(props: {
         <ul>{settingsPages.map((p) => entry(p.id, p.label, view.kind === 'settings' && view.page === p.id, () => setView({ kind: 'settings', page: p.id })))}</ul>
         <h2 className="settings-nav__group">
           <button type="button" className="settings-nav__fold" aria-expanded={guideOpen || view.kind === 'guide'} onClick={() => setGuideOpen((o) => !(o || view.kind === 'guide'))}>
-            <span aria-hidden="true">{guideOpen || view.kind === 'guide' ? '▾' : '▸'}</span> {nav.guide}
+            <span aria-hidden="true">{guideOpen || view.kind === 'guide' ? '▾' : closedMark()}</span> {nav.guide}
           </button>
         </h2>
         {(guideOpen || view.kind === 'guide') && (

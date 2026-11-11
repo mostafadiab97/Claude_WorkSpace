@@ -2639,10 +2639,12 @@ code {
   box-shadow: 0 6px 24px color-mix(in srgb, var(--rm-color-text) 18%, transparent);
 }
 
-/* compact toolbar: one row; filters in a pop-up */
+/* compact toolbar: one row while it fits; filters in a pop-up. It wraps to a second row when the editor makes the
+   table narrow — on one row "+ New item" ran under the editor panel (UW-02) */
 
 .toolbar {
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  row-gap: var(--rm-space-xs);
 }
 
 .toolbar__search {

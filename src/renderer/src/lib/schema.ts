@@ -54,7 +54,9 @@ export const staleTranslations = (
   const hasLabels = Object.keys(was.labels ?? {}).length > 0
   return {
     name: hasLabels && name.trim() !== was.name,
-    options: Object.keys(was.optionLabels ?? {}).filter((o) => !options.includes(o))
+    // optionLabels is language → { choice: name } (UW-01: the language code "ar" was read as a choice, so every
+    // translated field warned "the choices ar are gone")
+    options: [...new Set(Object.values(was.optionLabels ?? {}).flatMap((m) => Object.keys(m ?? {})))].filter((o) => !options.includes(o))
   }
 }
 

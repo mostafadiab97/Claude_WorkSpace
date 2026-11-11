@@ -1,7 +1,7 @@
 {
   "name": "reqochet-dev",
   "productName": "reqochet-dev",
-  "version": "0.21.0",
+  "version": "0.21.1",
   "description": "Local, Git-based requirements management tool (proof of concept)",
   "main": "./out/main/index.js",
   "author": "ReqMan",

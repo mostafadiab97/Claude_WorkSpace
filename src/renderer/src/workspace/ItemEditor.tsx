@@ -11,6 +11,7 @@ import { LinksSection } from './LinksSection'
 import { ParentPicker } from './ParentPicker'
 import { SuspectLinksDialog } from './SuspectLinksDialog'
 import { T } from '../../../shared/text'
+import { onTabListKeyDown } from '../lib/keys'
 
 /** askDelete: opened from the row menu's Delete — the editor shows its delete question at once (UX-W03). */
 export type EditorTarget = { kind: 'item'; id: string; askDelete?: boolean; /** Open on this tab (Changes → Impact, T-06). */ tab?: 'impact' } | { kind: 'draft'; item: Item }
@@ -253,7 +254,7 @@ export function ItemEditor(props: {
       </header>
 
       {!isNew && (
-        <div className="tabs" role="tablist" aria-label={T.editor.tabs}>
+        <div className="tabs" role="tablist" aria-label={T.editor.tabs} onKeyDown={onTabListKeyDown}>
           <button type="button" role="tab" aria-selected={tab === 'details'} className={tab === 'details' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('details')}>
             {T.editor.details}
           </button>

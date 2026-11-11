@@ -167,7 +167,7 @@ export function GitBar(props: {
         <button type="button" className={props.changesOpen ? 'btn btn--active' : 'btn'} aria-pressed={props.changesOpen} onClick={() => {
             onDismiss()
             props.onToggleChanges()
-          }} title={T.git.changesTooltip}>
+          }} title={otherFiles ? `${T.git.changesTooltip}\n${T.git.settingsTooltip}` : T.git.changesTooltip}>
           {T.git.changes(changedItems, otherFiles)}
         </button>
         <button type="button" className="btn" disabled={busy !== null} title={T.baselines.buttonTooltip} onClick={() => {

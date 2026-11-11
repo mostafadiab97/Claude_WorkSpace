@@ -1,7 +1,16 @@
-# Past manual checklists (v0.0.3 – v0.20.1)
+# Past manual checklists (v0.0.3 – v0.20.2)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.20.2 (data safety)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.20.2**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed.** |
+| 2 | Open the sandbox. Make a new document with an Arabic name (e.g. *متطلبات تجربة*), add one item, **Commit**, then **Push**. Open the item's **History** tab. | Push succeeds; History lists your commit. |
+| 3 | Delete one item of that document and add a different one, Commit; **Changes → Compare → The last commit that changed requirements**. | One item listed as *Deleted* and one as *Added* — not one item "changed into" the other. (Delete the test document afterwards if you like — it is only in the sandbox.) |
+| 4 | **⚙ → Report a problem and diagnostics → Save report…**; open the saved file. | No Windows user name in it; paths start with `%USERPROFILE%`. |
 
 ## v0.20.1 (the owner's points on 0.20.0)
 

@@ -695,7 +695,7 @@ export function WorkspaceScreen({
           )}
           {/* coverage gaps are warnings, counted on their own (a big project can have thousands — T-08) */}
           {gapCount > 0 && (
-            <button type="button" className="link-btn statusbar__problems statusbar__problems--warn" aria-expanded={showProblems} title={T.trace.gapMark} onClick={() => setShowProblems((s) => !s)}>
+            <button type="button" className="link-btn statusbar__problems statusbar__problems--warn" aria-expanded={showProblems} title={T.trace.statusGapsTooltip} onClick={() => setShowProblems((s) => !s)}>
               {T.trace.statusGaps(gapCount)}
             </button>
           )}

@@ -57,7 +57,7 @@ await scenario('E2E fixes', async (ctx) => {
   await win.locator('.editor__id', { hasText: renamedId }).waitFor()
   check((await win.getByPlaceholder('Short name of the requirement').inputValue()) === 'Requirement 3.2.2', 'it opens normally in the editor')
   await win.getByRole('button', { name: 'Fix file name' }).click()
-  await win.locator('.statusbar__ok', { hasText: 'No problems' }).waitFor()
+  await win.locator('.statusbar__ok', { hasText: 'No file problems' }).waitFor()
   check(true, 'one click renames the file; no problems left')
 
   console.log('P-04 — Expand all opens every level')

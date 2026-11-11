@@ -3,8 +3,8 @@ import type { CoverageReport, Matrix, RepoInfo } from '../../../shared/api'
 import type { ItemQuery, Schema } from '../../../shared/domain'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
-import { isRtlDocument } from '../lib/language'
 import { linkName, ruleText, typeName, typeLabel } from '../lib/schema'
+import { closedMark, onTabListKeyDown } from '../lib/keys'
 
 /** Above this many columns the matrix is shown as a list (T-07); the Excel file always has the grid. */
 const GRID_COLUMNS = 300
@@ -34,7 +34,7 @@ export function TraceabilityView(props: {
     <section className="trace" aria-label={T.trace.title}>
       <div className="compare__head">
         <h2 className="compare__title">{T.trace.title}</h2>
-        <div className="tabs trace__tabs" role="tablist" aria-label={T.trace.tabs}>
+        <div className="tabs trace__tabs" role="tablist" aria-label={T.trace.tabs} onKeyDown={onTabListKeyDown}>
           <button type="button" role="tab" aria-selected={tab === 'coverage'} className={tab === 'coverage' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('coverage')}>
             {T.trace.coverageTab}
           </button>
@@ -131,7 +131,7 @@ function CoverageTab(props: { schema: Schema; document: string | undefined; data
               ) : (
                 <>
                   <button type="button" className="link-btn" aria-expanded={shown} onClick={() => setOpen((s) => (s.has(rule.id) ? new Set([...s].filter((x) => x !== rule.id)) : new Set(s).add(rule.id)))}>
-                    {shown ? '▾' : isRtlDocument() ? '◂' : '▸'} {T.trace.gaps(gapCount)}
+                    {shown ? '▾' : closedMark()} {T.trace.gaps(gapCount)}
                   </button>
                   <button type="button" className="link-btn" onClick={() => props.onShowGaps(rule.type)}>
                     {T.trace.showInTable}

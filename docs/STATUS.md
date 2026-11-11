@@ -4,7 +4,7 @@ CLAUDE.md is read at the start of every session and again after every context co
 history there cost thousands of tokens each time (the owner asked to save tokens, 8 Nov 2026). **This file is the
 status**: update it with every release (the version table, "Next", the owner's last report, test counts).
 
-## Status (v0.21.0, 11 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.21.1, 11 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -39,7 +39,8 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.20.1 the owner's points on 0.20.0 — solid gap dot (theme colour `gap`), Back to Traceability, matrix header sticky and short (inner text rotated), top bar order, Excel cells starting like a formula get the Text format (SEC20-05) | Released (v0.20.1) |
 | 0.20.2 data safety — the whole-project review's High/Medium data and Git fixes (`docs/reviews/2026-11-10-project-review.md` W-01…W-12, W-31…W-33): exact-path save for copied children, plain Git paths (Arabic document names), link extras in merges, old-version export title, CSV short rows, Excel row limit, Compare rename pairing, bulk Git time limits, close before installers, explicit push, `--ignore-scripts` + release only from main, Electron 45.2.3, `%USERPROFILE%` in reports | Released (v0.20.2) |
 | 0.21.0 speed at 50,000 items — review W-20…W-23, W-27: Compare reads only the structure of a commit and keeps it, saves keep the numbers, sort by number by place, old version builds without freezing the window, workspace speed test in every build; push in one Git call | Released (v0.21.0) |
-| **Next** | Owner's 0.21.0 checklist; then **screens + Arabic + documents** (review W-10, W-40…W-54, W-60…W-63, O-4 tooltip, O-5 gaps chip, O-6 rename message) — `docs/reviews/2026-11-10-project-review.md` → H |
+| 0.21.1 screens and Arabic — review UW-01 (Fields warning bug), W-40 toolbar wraps, O-4 settings tooltip, O-5 "No file problems" + gaps tooltip, O-6 double-rename message, W-43 tab arrow keys, W-51 Arabic arrows and ◂, W-50 «نسخة» | Released (v0.21.1) |
+| **Next** | Owner's 0.21.1 checklist; then **0.21.2 documents** (review W-60…W-63: STATUS done in 0.20.2; README, USER-GUIDE §16, ARCHITECTURE/ONBOARDING details, the other docs findings) and the remaining review Medium items (W-10 English messages in Arabic, W-41 toast, W-44, W-46…W-48, W-52…W-54) |
 
 The owner's last report (11 Nov 2026): **0.21.0 steps 1, 3, 4, 5 passed** (self-test 25/25 in 77.6 s — faster than 0.20.1's 90.9 s and 0.20.2's 120.9 s); step 2 passed too: Compare took about 4 s for **10,007 changed items** and under a second for a few — **all 5 passed**. Before: 0.20.2 all 4 steps passed (self-test 25/25, 120.9 s — 30 s slower than 0.20.1; nothing more to mask — O-8). Earlier: 0.20.1 all 5 steps passed; review questions O-1…O-7 answered (25/25, 90.9 s) — nothing open from his tests; theme 1b is done and the pilot can start. Before: 0.20.0 all 5 passed with four points (→ 0.20.1).
 Before: 0.18.0 all 5 passed (24/24). Before: 0.17.2 all 5 passed (23/23). Before: 0.13.1 all 4 steps passed, 21/21 (66.8 s). Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.

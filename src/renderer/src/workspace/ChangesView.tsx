@@ -8,6 +8,7 @@ import { describeSchema, numberLabel, WORKING, type Preset } from './compareRang
 import { CommitTools } from './GitPanels'
 import type { ChangesState } from './screen/useChanges'
 import { T } from '../../../shared/text'
+import { closedMark, onTabListKeyDown } from '../lib/keys'
 
 const SHOW = 400
 /** Changes rendered at a time in the continuous list (D-19c). */
@@ -388,7 +389,7 @@ export function ChangesView(props: {
             </div>
           )}
 
-          <div className="tabs compare__tabs" role="tablist" aria-label={T.compare.view}>
+          <div className="tabs compare__tabs" role="tablist" aria-label={T.compare.view} onKeyDown={onTabListKeyDown}>
             <button type="button" role="tab" aria-selected={tab === 'items'} className={tab === 'items' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('items')}>
               {T.compare.itemsTab(data.entries.length)}
             </button>
@@ -464,7 +465,7 @@ export function ChangesView(props: {
                           L
                         </span>
                         <span className="compare__name">
-                          {showReviewed ? '▾' : '▸'} {T.compare.reviewedOnly(data.reviewedOnly.length)}
+                          {showReviewed ? '▾' : closedMark()} {T.compare.reviewedOnly(data.reviewedOnly.length)}
                         </span>
                       </button>
                       {showReviewed && (

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { Baseline, GitResult, HistoryPage } from '../../../shared/api'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
+import { onTabListKeyDown } from '../lib/keys'
 
 const when = (iso: string): string => iso.slice(0, 16).replace('T', ' ')
 
@@ -141,7 +142,7 @@ export function HistoryDialog(props: { onClose: () => void; onCompare: (ref: str
             ✕
           </button>
         </header>
-        <div className="history__tabs" role="tablist">
+        <div className="history__tabs" role="tablist" onKeyDown={onTabListKeyDown}>
           {(['baselines', 'history'] as const).map((t) => (
             <button
               key={t}
@@ -154,14 +155,6 @@ export function HistoryDialog(props: { onClose: () => void; onCompare: (ref: str
               autoFocus={t === 'baselines'}
               className={tab === t ? 'tab tab--active' : 'tab'}
               onClick={() => setTab(t)}
-              onKeyDown={(e) => {
-                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-                  e.preventDefault()
-                  const next = tab === 'baselines' ? 'history' : 'baselines'
-                  setTab(next)
-                  document.getElementById(`history-tab-${next}`)?.focus()
-                }
-              }}
             >
               {t === 'baselines' ? T.baselines.tabBaselines : T.baselines.tabHistory}
             </button>

@@ -7,6 +7,7 @@ import type { LinkDecision, LinkInfo } from '../../../shared/api'
 import type { Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { T } from '../../../shared/text'
+import { closedMark } from '../lib/keys'
 
 type Choice = 'keep' | 'unlink'
 
@@ -97,7 +98,7 @@ export function SuspectLinksDialog(props: {
                     {l.id}
                   </button>
                   <button type="button" className="link-btn suspect__name" dir="auto" aria-expanded={open.has(key(l))} title={T.suspect.showText} onClick={() => toggle(l)}>
-                    {open.has(key(l)) ? '▾' : '▸'} {l.title || T.common.noTitle}
+                    {open.has(key(l)) ? '▾' : closedMark()} {l.title || T.common.noTitle}
                   </button>
                   {/* UX-16: one segmented control per link; the chosen half is filled */}
                   <span className="choice-pair suspect__choice" role="group" aria-label={T.suspect.choiceFor(l.id)}>

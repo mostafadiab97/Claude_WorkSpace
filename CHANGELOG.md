@@ -60,6 +60,11 @@ The owner's decision O-3 (10 Nov 2026): 10,000 items a must, 50,000 a should. Me
 - O-8 (owner, 10 Nov): nothing more is masked in problem reports — the GitHub account in update addresses is the
   release repository's owner.
 
+**Owner (11 Nov 2026), 0.21.0:** self-test 25/25 in **77.6 s** (0.20.2: 120.9 s, 0.20.1: 90.9 s — the one-call push
+helped); sort by number almost instant; saves instant; old version opens with the message and the window usable.
+Compare of an old commit with the newest on the sandbox: **about 4 s** (expected about 1 s — the measurement had one
+changed item; the owner's comparison probably many). Being checked.
+
 **Owner (10 Nov 2026, evening), 0.20.2:** all 4 steps passed (self-test 25/25 in 120.9 s, 0.20.1 took 90.9 s;
 Arabic-named document committed, pushed, history shown; Compare showed one Deleted and one Added; the problem report
 shows `%USERPROFILE%`). Found in the attached report: the opened project's path (a folder on drive D: named after the

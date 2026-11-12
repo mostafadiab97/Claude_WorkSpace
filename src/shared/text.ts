@@ -1233,7 +1233,7 @@ const en = {
   /** Messages the core sends after item operations. */
   importMsg: {
     empty: 'No title and no text — row skipped.',
-    tooWide: (sheet: string) => `The sheet "${sheet}" spans more than 5 million cells (cells far to the right in many rows) — the file looks damaged and was not read.`,
+    tooWide: (sheet: string) => `The sheet "${sheet}" has more than 5 million empty cells between its values (cells far to the right in many rows) — the file looks damaged and was not read.`,
     tooManyRows: (sheet: string, row: number) =>
       `The sheet "${sheet}" has a cell in row ${row.toLocaleString('en')}, beyond Excel's 1,048,576 rows — the file looks damaged and was not read.`,
     duplicate: (id: string) => `The ID ${id} appears twice in the file — only its first row is imported.`,

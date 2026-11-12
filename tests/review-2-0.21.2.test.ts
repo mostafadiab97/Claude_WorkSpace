@@ -9,6 +9,7 @@ import { createSystemGitAdapter } from '../src/modules/git-adapter'
 import { createSqliteIndexCache } from '../src/modules/index-cache'
 import { createFileRepositoryStore } from '../src/modules/repository-store'
 import { cacheFileName, createWorkspace, type WorkspaceService } from '../src/modules/workspace'
+import { parseCsv } from '../src/modules/import-export'
 
 const quiet = { info: () => undefined, warn: () => undefined, error: () => undefined }
 
@@ -49,5 +50,13 @@ describe('0.21.2 review 2 fixes', () => {
     expect(existsSync(from)).toBe(true) // the original is still there
     const save = await ws.saveItem({ ...got.item, title: 'changed' }, got.revision)
     expect(save.ok).toBe(false)
+  })
+
+  it('CR-1/CR-2 (0.21.2 review): a row with a space before its quote stays a row; many short quoted rows stay fast', () => {
+    expect(parseCsv('a,b,c,d\n1,"x"\n2, "y",3,4\n')).toEqual([['a', 'b', 'c', 'd'], ['1', 'x'], ['2', ' "y"', '3', '4']])
+    const many = 'a,b,c,d\n' + '1,"x"\n'.repeat(100_000)
+    const t = Date.now()
+    expect(parseCsv(many).length).toBe(100_001)
+    expect(Date.now() - t).toBeLessThan(5_000)
   })
 })

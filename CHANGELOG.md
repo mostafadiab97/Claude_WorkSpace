@@ -17,6 +17,9 @@ QA's `tests/qa-whole-0.21-*.test.ts`, more cases in `tests/review-whole-0.20.tes
 - **Compare's fast reader** takes only headers in reqochet's own plain form (a hand-written `title: Note: the pump`
   now goes to the full parser, like in the table — B-01, QW21-01).
 - **Merge:** a link one PC removed while the other changed its note is kept with the note, not lost (QW21-43).
+- Code reviewer on the patch (`docs/reviews/agents/0.21.2-code-reviewer.md`, 7 findings): a row with a space before its
+  quote stays its own row, the CSV look-ahead is bounded (100,000 short rows stay fast), the Excel cap counts only
+  skipped empty cells, link notes compared regardless of key order.
 - Moving or adding items in a flat group of more than 10,000 now sees every sibling (A-02); tests for the long Git
   time limit on merge, restore and undo (A-03).
 

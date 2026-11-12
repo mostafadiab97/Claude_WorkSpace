@@ -173,7 +173,7 @@ export function readStructure(content: string): { id: string; parent?: string; o
     const value = (m[2] ?? '').trimEnd()
     blockOpen = value === ''
     if (!blockOpen && !/^"(?:[^"\\]|\\.)*"$|^'(?:[^']|'')*'$/.test(value)) {
-      if (/^['"[{&*!|>%@`]|: | #|:$/.test(value)) return null
+      if (/^['"[{&*!|>%@`]|^[-?:](?: |$)| #|: |:$/.test(value)) return null // incl. "- x", "? x" (CR-3)
     }
     if (key === 'id' || key === 'parent' || key === 'order') {
       if (blockOpen || /^['"]/.test(value)) return null

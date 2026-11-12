@@ -118,7 +118,7 @@ export async function readXlsx(data: Uint8Array): Promise<{ name: string; rows: 
 
 /** Excel's own limit; a file claiming a cell beyond it is damaged or crafted (W-06: row 50,000,000 ran out of memory). */
 const EXCEL_MAX_ROWS = 1_048_576
-/** Cells (including the empty ones between) a sheet may span when read: far more than any requirements sheet. */
+/** Empty cells skipped over that a sheet may hold when read: far more than any requirements sheet. */
 const MAX_GRID_CELLS = 5_000_000
 
 function sheetRows(ws: Worksheet): string[][] {
@@ -132,7 +132,7 @@ function sheetRows(ws: Worksheet): string[][] {
     row.eachCell((cell, c) => {
       // a merged range: ExcelJS repeats the first cell's value in every cell of it — read it once (review 2, QW21-67)
       if (cell.isMerged && cell.master !== cell) return
-      width += c - cells.length
+      width += Math.max(0, c - cells.length - 1) // only the empty cells skipped over (CR-5: a dense 100,000 × 50 sheet is fine)
       if (width > MAX_GRID_CELLS) throw new Error(T.importMsg.tooWide(ws.name))
       cells[c - 1] = cellText(cell.value).replace(/\r\n/g, '\n')
     })

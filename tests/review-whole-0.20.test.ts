@@ -200,7 +200,7 @@ describe('0.20.2 whole-project review fixes', () => {
     const sheet = wb.addWorksheet('Items')
     for (let r = 1; r <= 1500; r++) sheet.getCell(r, 16_384).value = 'x'
     const data = new Uint8Array(await wb.xlsx.writeBuffer())
-    await expect(readXlsx(data)).rejects.toThrow(/5 million cells/)
+    await expect(readXlsx(data)).rejects.toThrow(/5 million empty cells/)
     // a normal sheet still reads, gaps between cells included
     const ok = new ExcelJS.Workbook()
     const s2 = ok.addWorksheet('Items')

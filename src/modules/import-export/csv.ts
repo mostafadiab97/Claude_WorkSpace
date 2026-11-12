@@ -53,7 +53,9 @@ function separatorsToLineEnd(t: string, from: number, separator: string): number
 }
 
 /** How far ahead a quoted cell may run over lines while the reader decides (keeps big files linear). */
-const LOOKAHEAD = 64 * 1024
+const LOOKAHEAD = 16 * 1024
+/** …and over this many lines at most (CR-2: 100,000 short rows took 47 s with a 64 KB look-ahead each). */
+const LOOKAHEAD_LINES = 50
 
 /**
  * A quote before a line end, in a row that is still short: does the cell go on to the next line? Only when, further on,
@@ -69,6 +71,7 @@ function cellGoesOn(t: string, quoteAt: number, separator: string, cellsBefore: 
   // that closes something without having opened on its own line is the candidate end of our cell.
   let cellStart = false
   let inLineQuote = false
+  let lines = 0
   for (let i = quoteAt + 1; i < end; i++) {
     const ch = t[i]
     const next = t[i + 1]
@@ -76,7 +79,14 @@ function cellGoesOn(t: string, quoteAt: number, separator: string, cellsBefore: 
       // a quoted cell that opened at a cell start on a later line may itself run over lines ("multi⏎line")
       if (ch === '"' && next === '"') i++
       else if (ch === '"') inLineQuote = false
-    } else if (ch === '\n' || ch === '\r' || ch === separator) cellStart = true
+    } else if (ch === '\n' || ch === '\r') {
+      cellStart = true
+      if (ch === '\n' && ++lines > LOOKAHEAD_LINES) return false
+    } else if (ch === separator) {
+      cellStart = true
+    } else if (ch === ' ' && cellStart) {
+      // spaces before a quote still count as the cell's start: ` "y"` opens a quoted cell (CR-1)
+    }
     else if (ch === '"' && cellStart) {
       inLineQuote = true
       cellStart = false

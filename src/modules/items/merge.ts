@@ -149,7 +149,8 @@ export function mergeItems(
   const [bl, ml, tl] = [byKey(b.links), byKey(mine.links), byKey(theirs.links)]
   // a link one side removed while the other changed its own keys (a note): the change is kept, not lost without a
   // word — the link stays and can be removed again (review 2, QW21-43)
-  const extraOf = (l: Link | undefined): string => JSON.stringify(l?.extra ?? {})
+  // key order does not count (CR-6: another tool may rewrite a file with the keys reordered)
+  const extraOf = (l: Link | undefined): string => JSON.stringify(Object.entries(l?.extra ?? {}).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
   for (const [k, base] of bl) {
     if (merged.some((l) => linkKey(l) === k)) continue
     const changed = [ml.get(k), tl.get(k)].find((l) => l !== undefined && extraOf(l) !== extraOf(base))

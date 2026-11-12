@@ -34,7 +34,7 @@ export function createExportOps(ctx: WorkspaceContext, structure: StructureOps, 
       }
       // a Markdown document of chosen items starts its headings at the highest chosen item
       if (request.scope === 'chosen' && request.format === 'markdown' && rows.length > 0) {
-        const top = Math.min(...rows.map((r) => r.depth))
+        const top = rows.reduce((m, r) => Math.min(m, r.depth), Number.POSITIVE_INFINITY) // no spread (A-27)
         rows = rows.map((r) => ({ ...r, depth: r.depth - top }))
       }
       // an old version's session root is an internal key "<root>\0version\0<commit>": the name is the real folder's (W-04)

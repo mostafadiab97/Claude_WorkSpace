@@ -177,18 +177,23 @@ export function createStructureOps(ctx: WorkspaceContext) {
   /** Writes the planned order values (and the new parent of `moved`), conflict-safe, then updates the index. */
   async function apply(s: Session, plan: { id: string; order: string }[], moved?: { ids: ReadonlySet<string>; parent: string | null }): Promise<OpResult> {
     const paths = plan.map((p) => s.repo.itemPath(p.id))
-    for (const step of plan) {
-      const cur = await s.repo.readItem(step.id)
-      if (!cur?.ok) return { ok: false, message: T.wsMsg.movingStopped(step.id) }
-      const next: Item = { ...cur.item, order: step.order }
-      if (moved && moved.ids.has(step.id)) {
-        if (moved.parent === null) delete next.parent
-        else next.parent = moved.parent
+    // whatever happens part way (a conflict, an unreadable file), the index learns about the files already written,
+    // so the table never shows the old order for them (review 2, A-04)
+    try {
+      for (const step of plan) {
+        const cur = await s.repo.readItem(step.id)
+        if (!cur?.ok) return { ok: false, message: T.wsMsg.movingStopped(step.id) }
+        const next: Item = { ...cur.item, order: step.order }
+        if (moved && moved.ids.has(step.id)) {
+          if (moved.parent === null) delete next.parent
+          else next.parent = moved.parent
+        }
+        await s.repo.writeItem(next, { expectedRevision: cur.revision })
       }
-      await s.repo.writeItem(next, { expectedRevision: cur.revision })
+      return { ok: true }
+    } finally {
+      await s.index.syncPaths(s.repo, paths)
     }
-    await s.index.syncPaths(s.repo, paths)
-    return { ok: true }
   }
 
   return {

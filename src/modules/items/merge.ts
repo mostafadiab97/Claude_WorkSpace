@@ -168,7 +168,8 @@ export function mergeItems(
     const extra: Record<string, unknown> = {}
     for (const x of [...new Set([...Object.keys(be), ...Object.keys(me), ...Object.keys(te)])].sort()) {
       const v = decide(`link:${k}:${x}`, `${l.type} → ${l.target}: ${x}`, be[x], me[x], te[x], false, () => me[x])
-      if (v !== undefined && v !== null) extra[x] = v
+      // a key kept with an empty value (null) stays, as the parser keeps it (B-03)
+      if (v !== undefined) extra[x] = v
     }
     const out: Link = confirmed ? { type: l.type, target: l.target, confirmed } : { type: l.type, target: l.target }
     if (Object.keys(extra).length > 0) out.extra = extra

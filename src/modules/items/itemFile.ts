@@ -94,17 +94,20 @@ export function parseItemFile(content: string, schemaFieldIds: ReadonlySet<strin
   const item: Item = {
     id,
     type,
-    title: header.title === undefined || header.title === null ? '' : String(header.title),
+    title: header.title === undefined || header.title === null || typeof header.title === 'object' ? '' : String(header.title),
     fields,
     links,
     text: body.replace(/\n+$/, ''),
     extra
   }
+  // a title reqochet cannot show (a list, a mapping) is kept as it was until the user types a new one (A-20, NFR-05)
+  if (header.title !== null && typeof header.title === 'object') item.extra['title'] = header.title
   if (typeof header.parent === 'string' && header.parent.trim()) item.parent = header.parent.trim()
   else if (typeof header.parent === 'number') item.parent = String(header.parent)
   // a parent ReqMan cannot read (a list, a mapping) is kept as it was, never dropped (CR1-02)
   else if (header.parent !== undefined && header.parent !== null) item.extra['parent'] = header.parent
-  if (typeof header.order === 'number' && Number.isFinite(header.order)) item.order = keyOfNumber(header.order)
+  // a whole number keyOfNumber can encode becomes a key; huge, negative or fractional ones are kept as they were (A-21)
+  if (typeof header.order === 'number' && Number.isSafeInteger(header.order) && header.order >= 0) item.order = keyOfNumber(header.order)
   else if (typeof header.order === 'string' && isOrderKey(header.order.trim())) item.order = header.order.trim()
   // an order value ReqMan cannot read is kept as it was (never lost), but gives no position
   else if (header.order !== undefined && header.order !== null) item.extra['order'] = header.order
@@ -113,7 +116,7 @@ export function parseItemFile(content: string, schemaFieldIds: ReadonlySet<strin
 
 /** Writes an item in the canonical layout. */
 export function serializeItem(item: Item, schema: Pick<Schema, 'fields'>): string {
-  const header: Record<string, unknown> = { id: item.id, type: item.type, title: item.title }
+  const header: Record<string, unknown> = { id: item.id, type: item.type, title: item.title === '' && item.extra['title'] !== undefined ? item.extra['title'] : item.title }
   const isEmpty = (v: FieldValue): boolean => v === '' || (Array.isArray(v) && v.length === 0)
   for (const f of schema.fields) {
     const v = item.fields[f.id]

@@ -259,3 +259,16 @@ vertical text limits its width, not its height. Rotate the text inside the cell,
 - Since 0.21.1 the table toolbar wraps to a second row when the editor is open. The **Filters** pop-up then opens
   further left and can lie over the first rows: an e2e step that clicks a row after using `filters()` must press
   **Escape** first (as `openItem` in `journey.e2e.mjs` does), or Playwright reports "subtree intercepts pointer events".
+
+## Speed shortcuts that a later change can break (0.21.0–0.21.3)
+
+- **`readStructure`** (`items/itemFile.ts`, used by Compare for outline numbers) must return either `null` or exactly
+  what `parseItemFile` gives. It accepts only reqochet's own plain header form; anything else goes to the full parser.
+  If the serializer's output changes, extend `tests/speed-0.21.0.test.ts` (it checks both readers agree).
+- **`keepNumbers` / `numberRanks`** (`workspace.ts`): outline numbers are cached per index state and carried over a
+  save only when the saved item's parent, order and document did not change. A new operation that moves items must
+  not call `keepNumbers`.
+- **Fresh index builds run in slices** (`sqliteIndex.ts`, `SYNC_CHUNK`): syncs are queued one at a time and
+  `syncPaths` waits for a running sync. A new write path into the index must go through the same chain.
+- **Same ID in two files:** saving and deleting are refused (`T.wsMsg.idInTwoFiles`) until "Give the copy a new ID" —
+  never by-pass it with a write by ID only.

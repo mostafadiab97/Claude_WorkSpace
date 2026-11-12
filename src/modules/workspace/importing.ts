@@ -50,7 +50,8 @@ export function createImportOps(ctx: WorkspaceContext, structure: StructureOps, 
     if (!s.repo.schema.itemTypes.some((t) => t.id === settings.defaultType)) throw new Error(T.importMsg.unknownType2(settings.defaultType))
     const headers = (sheet[settings.headerRow] ?? []).map((h) => h.trim())
     const rows = sheet.slice(settings.headerRow + 1)
-    const width = Math.max(headers.length, ...rows.map((r) => r.length))
+    // a loop, not Math.max(...rows): spreading 120,000+ rows overflows the call stack (A-27)
+    const width = rows.reduce((m, r) => Math.max(m, r.length), headers.length)
     for (let c = headers.length; c < width; c++) headers.push('')
     const mapping = settings.mapping && settings.mapping.length === width ? settings.mapping : guessMapping(headers, s.repo.schema)
     const idCol = mapping.indexOf('id')
@@ -165,13 +166,20 @@ export function createImportOps(ctx: WorkspaceContext, structure: StructureOps, 
       // "Verified by" columns: links stored in existing items outside the file
       const bySource = new Map<string, Link[]>()
       for (const e of p.extraLinks) bySource.set(e.source, [...(bySource.get(e.source) ?? []), e.link])
-      for (const [source, links] of bySource) {
-        const cur = await s.repo.readItem(source)
-        if (!cur?.ok) continue
-        const next = [...cur.item.links]
-        for (const l of links) if (!next.some((x) => x.type === l.type && x.target === l.target)) next.push(confirm(l))
-        await s.repo.writeItem({ ...cur.item, links: next }, { expectedRevision: cur.revision })
-        paths.push(s.repo.itemPath(source))
+      try {
+        for (const [source, links] of bySource) {
+          const cur = await s.repo.readItem(source)
+          if (!cur?.ok) continue
+          const next = [...cur.item.links]
+          for (const l of links) if (!next.some((x) => x.type === l.type && x.target === l.target)) next.push(confirm(l))
+          await s.repo.writeItem({ ...cur.item, links: next }, { expectedRevision: cur.revision })
+          paths.push(s.repo.itemPath(source))
+        }
+      } catch (e) {
+        // a conflict in the "Verified by" step: the rows are written; report it like a stopped import (A-22)
+        await s.index.syncPaths(s.repo, paths)
+        ctx.log.warn(`Import: the "Verified by" links stopped: ${String(e)}`)
+        return { ok: false, message: T.importMsg.stopped(paths.length, writes.length, (e as Error).message ?? String(e)) }
       }
       await s.index.syncPaths(s.repo, paths)
       ctx.log.info(`Imported ${source.path} (${settings.sheet}): ${p.counts.create} new, ${p.counts.update} updated, ${p.counts.unchanged} unchanged, ${p.counts.skip} skipped`)

@@ -264,7 +264,7 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
 
     async findRepositoryRoot(path: string): Promise<string | null> {
       try {
-        const out = (await run('git', ['-C', path, 'rev-parse', '--show-toplevel'])).trim()
+        const out = (await run('git', [...GIT_CONFIG_ARGS, '-C', path, 'rev-parse', '--show-toplevel'])).trim()
         // Git prints forward slashes on Windows; normalise to the platform's form.
         return out ? normalize(out) : null
       } catch {
@@ -746,11 +746,13 @@ export function createSystemGitAdapter(run: CommandRunner = defaultRunner): GitA
       for (const part of chunks(paths)) for (const p of (await git(root, ['ls-files', '-z', '--', ...part], BULK_TIMEOUT)).split('\0')) if (p) tracked.add(p)
       const inHead = new Set<string>()
       if (tracked.size > 0) {
-        try {
-          for (const part of chunks(paths)) for (const p of (await git(root, ['ls-tree', '-r', '-z', '--name-only', 'HEAD', '--', ...part], BULK_TIMEOUT)).split('\0')) if (p) inHead.add(p)
-        } catch {
-          // no commit yet: nothing is in HEAD
-        }
+        // "no commit yet" only when HEAD really does not exist; any other failure stops here — treating it as "no
+        // commit" would delete committed files from disk (review 2, A-24)
+        const hasHead = await git(root, ['rev-parse', '--verify', '--quiet', 'HEAD']).then(
+          () => true,
+          () => false
+        )
+        if (hasHead) for (const part of chunks(paths)) for (const p of (await git(root, ['ls-tree', '-r', '-z', '--name-only', 'HEAD', '--', ...part], BULK_TIMEOUT)).split('\0')) if (p) inHead.add(p)
       }
       const restore = paths.filter((p) => inHead.has(p))
       const remove = paths.filter((p) => !inHead.has(p))

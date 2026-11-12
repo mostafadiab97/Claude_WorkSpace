@@ -10,6 +10,7 @@ import { createSqliteIndexCache } from '../src/modules/index-cache'
 import { createFileRepositoryStore } from '../src/modules/repository-store'
 import { cacheFileName, createWorkspace, type WorkspaceService } from '../src/modules/workspace'
 import { parseCsv } from '../src/modules/import-export'
+import { parseItemFile, serializeItem } from '../src/modules/items'
 
 const quiet = { info: () => undefined, warn: () => undefined, error: () => undefined }
 
@@ -84,5 +85,17 @@ describe('0.21.2 review 2 fixes', () => {
     expect(existsSync(join(root, 'requirements', 'Brakes', 'REQ-AAAAAAA.md'))).toBe(false) // identical: removed
     expect(existsSync(join(root, 'requirements', 'Brakes', 'REQ-BBBBBBB.md'))).toBe(true) // differs: stays
     expect(existsSync(join(root, 'requirements', 'Brake System', 'REQ-CCCCCCC.md'))).toBe(true) // moved
+  })
+
+  it('A-20/A-21: a list as title and a huge order number are kept as they were, never lost or crashing', () => {
+    const text = '---\nid: REQ-AAAAAAA\ntype: x\ntitle:\n  - a\n  - b\norder: 1e60\n---\nT\n'
+    const r = parseItemFile(text, new Set())
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.item.title).toBe('')
+    expect(r.item.order).toBeUndefined()
+    const back = serializeItem(r.item, { fields: [] })
+    expect(back).toContain('title:\n  - a\n  - b')
+    expect(back).toMatch(/order: 1e\+?60/)
   })
 })

@@ -217,7 +217,8 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
       `SELECT l.source AS id, l.type, (l.confirmed IS NOT NULL AND l.confirmed <> t.fp) AS suspect
        FROM links l LEFT JOIN items t ON t.id = l.target WHERE l.target = ? ORDER BY l.type, l.source`
     ),
-    fingerprint: db.prepare('SELECT fp FROM items WHERE id = ? LIMIT 1'),
+    // the same file as getById (ordered by path) when an ID is in two files (A-12)
+    fingerprint: db.prepare('SELECT fp FROM items WHERE id = ? ORDER BY path LIMIT 1'),
     count: db.prepare('SELECT COUNT(*) AS n FROM items')
   }
 

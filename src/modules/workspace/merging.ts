@@ -276,8 +276,14 @@ export function createMerging(deps: MergingDeps) {
     if (dirty.length > 0) return fail(s, T.gitMsg.wouldOverwrite, dirty)
     const restore = diff.filter((d) => d.status !== 'D').map((d) => d.path)
     const remove = [...diff.filter((d) => d.status === 'D').map((d) => d.path), ...diff.flatMap((d) => (d.status === 'R' && d.from ? [d.from] : []))]
-    if (restore.length > 0) await git.restoreFrom(root, commit, restore)
-    for (const r of remove) await rm(join(root, r), { force: true })
+    try {
+      if (restore.length > 0) await git.restoreFrom(root, commit, restore)
+      for (const r of remove) await rm(join(root, r), { force: true })
+    } catch (e) {
+      // part of it is already in the folder: the window must show it (review 2, A-23)
+      await deps.resync()
+      throw e
+    }
     return diff.length
   }
 
@@ -406,7 +412,9 @@ export function createMerging(deps: MergingDeps) {
         const paths = st.changes.map((c) => c.path)
         if (changes === 'discard') {
           try {
-            await git.discard(root, paths)
+            // a renamed file: its old path comes back too, as Discard in Changes does (B-04)
+            const fromOf = new Map((await git.status(root, reqPath(s.repo))).changes.filter((c) => c.kind === 'renamed' && c.from).map((c) => [c.path, c.from as string]))
+            await git.discard(root, [...new Set(paths.flatMap((p) => (fromOf.has(p) ? [p, fromOf.get(p) as string] : [p])))])
           } catch (e) {
             return fail(s, explainGitError(e))
           }

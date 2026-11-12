@@ -470,7 +470,15 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     // Watch before the first sync, so nothing that changes during it is missed.
     const watch = deps.watchFiles === false ? null : watchRequirementsFolder(repo.folder, (e) => log.warn(`Folder watch: ${String(e)}`), repo.metaDir)
     const tWatch = lap()
-    const stats = await index.sync(repo)
+    let stats: Awaited<ReturnType<typeof index.sync>>
+    try {
+      stats = await index.sync(repo)
+    } catch (e) {
+      // nothing stays open behind a failed open: on Windows the cache file stayed locked (review 2, A-26)
+      watch?.close()
+      index.close()
+      throw e
+    }
     watch?.take()
     session = { repo, index, isGit, watch, watchedMeta: repo.metaDir, lastSync: syncInfo(stats) }
     log.info(

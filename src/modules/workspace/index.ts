@@ -98,6 +98,8 @@ export interface WorkspaceService {
   /** Renames a document folder, or moves the loose files ('') into a new one — one commit, history kept (S-10). */
   renameDocument(from: string, to: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   /** Moves every item of document `from` into `into`; copies that differ stay in `from` (O-6). */
+  /** Deletes a document folder and its items; Discard brings it back until committed. */
+  deleteDocument(name: string): Promise<{ ok: true; info: RepoInfo; removed: number } | { ok: false; message: string }>
   mergeDocument(from: string, into: string): Promise<{ ok: true; info: RepoInfo; differing: string[] } | { ok: false; message: string }>
   // Git (M4) — see gitOps.ts for the rules
   gitState(): Promise<GitState>

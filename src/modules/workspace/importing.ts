@@ -154,7 +154,7 @@ export function createImportOps(ctx: WorkspaceContext, structure: StructureOps, 
       try {
         for (const x of writes) {
           await s.repo.writeItem(x.item, { expectedRevision: x.action === 'create' ? null : (revisions.get(x.item.id) ?? null) })
-          paths.push(s.repo.itemPath(x.item.id))
+          paths.push(s.repo.itemPath(x.item.id, x.item.document)) // a new item is not in the index yet: its own document (0.21.3 report)
         }
       } catch (e) {
         // a write still failed (disk, a file changed meanwhile): keep the index true to what is on disk and say how far

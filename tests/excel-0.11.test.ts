@@ -55,6 +55,18 @@ describe('Excel import into a repository (M7)', { timeout: 120_000 }, () => {
     expect(await ws.importSource()).toMatchObject({ name: 'sample-requirements.xlsx', sheet: 'Requirements' })
   })
 
+  it('importing into a new document shows the rows at once, without refreshing (the owner, 0.21.2 test 3)', async () => {
+    const { ws, base } = await workspace()
+    const root = join(base, 'docs')
+    await ws.createProject(root)
+    await ws.createDocument('Imported')
+    const rows = await sampleRows()
+    const r = await ws.runImport(rows, { ...settings, document: 'Imported' }, source)
+    expect(r.ok).toBe(true)
+    // the index must know the new files without a full refresh (paths were taken in the default document)
+    expect(ws.query({ document: 'Imported' }).total).toBe(59)
+  })
+
   it('imports again: one changed cell = one update; "Update the Excel file" writes ReqMan edits back', async () => {
     const { ws, base } = await workspace()
     const root = join(base, 'repo')

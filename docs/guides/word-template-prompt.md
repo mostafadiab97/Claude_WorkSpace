@@ -24,24 +24,32 @@ AI model read **all Word documents in a folder** and produce:
   your company allows for such documents, or remove customer names first.
 - **The files:** the `.docx` files themselves, not PDFs (styles, numbering and tables are lost in a PDF). Old `.doc`
   files: open and save them as `.docx` in Word first.
-- **One folder:** put all documents in one folder (sub-folders are fine), zip it, and attach the zip. Mixed kinds of
-  document (requirements, test specifications, interface documents) are fine: the AI groups them by module and kind.
-- **An AI that can run code is required** — for example Claude with file and code tools. It writes hundreds of files
-  and a Git history; a chat-only AI cannot. It uses `python-docx` (or reads the XML inside the `.docx`) and `git`.
+- **Two folders on your PC:** an **input folder** with all the Word documents (sub-folders are fine; mixed kinds —
+  requirements, test specifications, interface documents — are fine, the AI groups them by module and kind) and an
+  **empty output folder** where the AI writes the reqochet project. You give both paths in the first two lines of the
+  prompt; the AI only reads the input folder and writes only into the output folder.
+- **An AI that can work with files and run code on your PC is required** — for example Claude Code (in VS Code or a
+  terminal) or the Claude desktop app with your folders connected. It writes hundreds of files and a Git history; a
+  chat-only AI cannot. It uses `python-docx` (or reads the XML inside the `.docx`) and `git`. (With an AI that cannot
+  reach your folders — a cloud chat — zip the input folder, attach it, and ask for the output as a zip instead.)
 - **Size:** around 50 documents per run work well. For more, run it per group of modules.
 
 ## The prompt
 
-Copy everything inside the box, attach the zip, and send it.
+Copy everything inside the box, **replace the two paths in the first lines** with your folders, and send it.
 
 ```text
+INPUT FOLDER:  D:\Specs\Word            <- the folder with the Word documents (only read, never changed)
+OUTPUT FOLDER: D:\Specs\reqochet-project <- an empty folder: the reqochet project is written here
+
 You are converting a team's Word requirement specifications into a project for reqochet, a requirements tool that
 stores every requirement as a Markdown file with a YAML header in a Git repository. You also record how the documents
 look, so the tool can later export Word documents in the same style. Work with code (python-docx, or the XML inside
 each .docx) and git. Never invent requirement content: everything in the output must come from the documents.
 
 ══ STEP 1 — Inventory and grouping ══
-Read every .docx in the attached folder (all sub-folders). For each file record: file name, title, document number,
+Read every .docx in the INPUT FOLDER (all sub-folders). Never change, move or delete anything in the INPUT FOLDER.
+If the OUTPUT FOLDER does not exist, create it; if it is not empty, stop and ask before writing anything. For each file record: file name, title, document number,
 module/subsystem, kind of document (e.g. system requirements, software requirements, interface, test cases, risks),
 version, date, author, and the revision-history table if there is one.
 Group the files: one GROUP = one module + one kind of document. Files of the same group are VERSIONS of the same
@@ -133,7 +141,7 @@ timing that spans two subsystems — or the documents of both modules contain it
 List every such pair (both IDs, both modules, why) in the report.
 
 ══ STEP 6 — Write the project files exactly in reqochet's format ══
-Folder layout of the output repository:
+Folder layout of the OUTPUT FOLDER (it becomes the Git repository):
   requirements/.gitattributes              exactly two lines:
                                            # Written by reqochet: identical line endings on every PC keep diffs clean.
                                            * text=auto eol=lf
@@ -178,7 +186,7 @@ first). For each version of a group, in that order:
 The first commit also adds requirements/.gitattributes and schema.yaml. When the history is done, the working folder
 holds the newest version of every group. If step 8 finds conflicts, add one last commit "Mark conflicts found by
 the import" that adds the tag  import-conflict  to the "tags" field of every item in a conflict (newest version only;
-the text stays unchanged). Zip the whole repository INCLUDING the .git folder as reqochet-project.zip.
+the text stays unchanged). The OUTPUT FOLDER is now a complete Git repository (with its .git folder).
 
 ══ STEP 8 — Check, then report ══
 Before you finish, check with code: every file parses as YAML + text; header key order as in step 6; every ID
@@ -233,16 +241,16 @@ Replace project-specific text in fixed sections with a short instruction in squa
 purpose of this specification]". Do not copy requirement text, customer data or names of people into templates.
 
 ══ ANSWER ══
-Give: (1) reqochet-project.zip, (2) import-report.md, (3) the format folder zipped (word-format.json, templates,
-images), and (4) a short summary: number of groups, versions, items per module in the newest version, and the
-Questions list.
+Everything is in the OUTPUT FOLDER: the Git repository with requirements/, attachments/, import-report.md and
+format/ (word-format.json, templates, images). Reply with a short summary: the output path, number of groups,
+versions, items per module in the newest version, and the Questions list.
 ```
 
 ## After the AI has answered
 
 1. **Read `import-report.md` first,** especially "Questions". Fix the documents or answer the AI and run again if a
    group or version is wrong — it is cheaper than fixing hundreds of files.
-2. **Unzip `reqochet-project.zip`** into an empty folder and open that folder in reqochet. Check:
+2. **Open the output folder in reqochet** (Open repository…). Check:
    - each module appears as a document, with headings and outline numbers as in Word;
    - the Problems panel (status bar) — it lists anything that is still wrong in the files;
    - **Versions:** one baseline per document version; **Compare** two baselines of the same module to see what

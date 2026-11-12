@@ -89,8 +89,9 @@ match "the tool files with the documentation".
 1. **Source + docs public** (as proposed in §2): app source, tests, user guide and engineering docs; planning,
    reviews and AI files stay in this repository.
 2. ~~Update feed~~ — decided: each tool updates from its own repository (4a).
-3. **Licence: source-available** (free for internal / non-commercial use, commercial use needs a licence — the exact
-   licence text, e.g. Business Source License or PolyForm, is chosen when the public repository is made).
+3. **Licence: source-available.** The owner's intent (12 Nov 2026): free for everyone, companies included; only
+   someone who builds on reqochet and sells their own version must pay. That is a no-compete licence (PolyForm Shield
+   or Perimeter), not PolyForm Noncommercial (which would make every company user pay) — exact text to be confirmed.
 4. **Neither `requirements.md` nor the sandbox data is public.** Instead, reqochet's own *public* requirements (what
    the tool does, as a user sees it) become a reqochet project folder — `requirements/` in reqochet's format — that is
    published with every public version: realistic fictional-free sample data and a living specification at once.

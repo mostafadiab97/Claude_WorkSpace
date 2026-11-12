@@ -115,9 +115,12 @@ function createWindow(services: ReturnType<typeof createServices>): void {
 
 void app.whenReady().then(async () => {
   if (!firstInstance) return
-  // the app asks for no web permission (camera, microphone, notifications…): every request is refused (SEC-WP3-10)
-  session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false))
-  session.defaultSession.setPermissionCheckHandler(() => false)
+  // the app needs one web permission — writing text to the clipboard (the "Copy report" buttons); every other
+  // request (camera, microphone, notifications…) is refused (SEC-WP3-10). Refusing all of them broke Copy report
+  // in 0.21.3 (the owner's report, 12 Nov).
+  const allowed = (permission: string): boolean => permission === 'clipboard-sanitized-write'
+  session.defaultSession.setPermissionRequestHandler((_wc, permission, callback) => callback(allowed(permission)))
+  session.defaultSession.setPermissionCheckHandler((_wc, permission) => allowed(permission))
   const paths = resolvePaths()
   // 0.16: the first start after the switch from ReqMan copies the user's settings over and removes the old folder —
   // only for the installed app in its normal settings folder (never for tests or a --user-data-dir).

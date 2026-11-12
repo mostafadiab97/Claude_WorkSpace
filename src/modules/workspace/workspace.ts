@@ -285,6 +285,24 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     return { ok: true, info: info(), differing }
   }
 
+  /**
+   * Deletes a document: its folder and every item in it (the owner, 0.21.3 test 3 — there was no way to remove a
+   * document but by hand). Links from other documents to these items become broken links, listed in Problems.
+   * The deletion is a normal change: Discard in Changes brings it back until it is committed.
+   */
+  const deleteDocument = async (name: string): Promise<{ ok: true; info: RepoInfo; removed: number } | { ok: false; message: string }> => {
+    const s = need()
+    if (name === '' || !documentFolders(s.repo.folder).includes(name)) return { ok: false, message: T.wsMsg.missing(name) }
+    const folder = join(s.repo.folder, name)
+    const removed = (await readdir(folder)).filter((f) => f.endsWith('.md')).length
+    await rm(folder, { recursive: true, force: true, maxRetries: 3 })
+    s.repo = await ctx.openRepo(s.repo.root)
+    s.lastSync = syncInfo(await s.index.sync(s.repo))
+    gitOps.invalidate()
+    log.info(`Deleted document ${name} (${removed} item(s))`)
+    return { ok: true, info: info(), removed }
+  }
+
   const renameDocument = async (from: string, to: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }> => {
     const s = need()
     const n = to.trim()
@@ -612,6 +630,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     createDocument: q(createDocument),
     renameDocument: q(renameDocument),
     mergeDocument: q(mergeDocument),
+    deleteDocument: q(deleteDocument),
     addLink: q(links.addLink),
     removeLink: q(links.removeLink),
     confirmLinks: q(links.confirmLinks),

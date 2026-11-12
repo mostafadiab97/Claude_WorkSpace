@@ -620,6 +620,8 @@ export interface ReqochetApi {
   /** Renames a document folder, or moves the loose files ('') into a new document, in one commit (S-10). */
   renameDocument(from: string, to: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   /** Moves every item of document `from` into `into` (two names for one document — O-6); differing copies stay in `from`. */
+  /** Deletes a document folder and its items (owner, 0.21.3); Discard brings it back until committed. */
+  deleteDocument(name: string): Promise<{ ok: true; info: RepoInfo; removed: number } | { ok: false; message: string }>
   mergeDocument(from: string, into: string): Promise<{ ok: true; info: RepoInfo; differing: string[] } | { ok: false; message: string }>
   /** Values a field already has in this repository, most used first (suggestions, UX-27). */
   getFieldValues(field: string): Promise<string[]>
@@ -816,6 +818,7 @@ export const Channels = {
   createDocument: 'ws:createDocument',
   renameDocument: 'ws:renameDocument',
   mergeDocument: 'ws:mergeDocument',
+  deleteDocument: 'ws:deleteDocument',
   getFieldValues: 'ws:fieldValues',
   saveSchemaFields: 'ws:saveSchemaFields',
   getTypeUsage: 'ws:getTypeUsage',

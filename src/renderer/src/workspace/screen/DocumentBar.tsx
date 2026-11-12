@@ -18,6 +18,7 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [merging, setMerging] = useState<string | null>(null) // the target chosen in "Merge into…" (O-6)
+  const [deleting, setDeleting] = useState(false) // "Delete…" asks once, inline (owner, 0.21.3)
   const [notice, setNotice] = useState<string | null>(null)
   // "Not now" holds for the rest of the session for this project, not only until the bar is drawn again (UX17-15)
   const [later, setLater] = useSessionState(`documents.later.${info.root}`, false)
@@ -62,6 +63,18 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
     props.onInfo(r.info)
     setNotice(r.differing.length > 0 ? T.documents.mergedDiffering(from, r.differing.length) : T.documents.merged(from, into))
     onDocument(r.differing.length > 0 ? from : into)
+  }
+  const remove = async (): Promise<void> => {
+    setBusy(true)
+    setError(null)
+    const name = document
+    const r = await window.reqochet.deleteDocument(name)
+    setBusy(false)
+    setDeleting(false)
+    if (!r.ok) return setError(r.message)
+    props.onInfo(r.info)
+    setNotice(T.documents.deleted(name, r.removed))
+    onDocument(ALL_DOCUMENTS)
   }
   const start = (kind: 'new' | 'rename', from: string, initial: string): void =>
     props.guard(() => {
@@ -121,6 +134,22 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
               {T.documents.renameDocument}
             </button>
           )}
+          {document !== ALL_DOCUMENTS && document !== '' &&
+            (deleting ? (
+              <span className="document-bar__merge" role="group" aria-label={T.documents.deleteGo}>
+                <span>{T.documents.deleteAsk(document, docs.find((d) => d.name === document)?.itemCount ?? 0)}</span>
+                <button type="button" className="btn btn--small btn--danger" disabled={busy} onClick={() => void remove()}>
+                  {T.documents.deleteGo}
+                </button>
+                <button type="button" className="btn btn--small" onClick={() => setDeleting(false)}>
+                  {T.common.cancel}
+                </button>
+              </span>
+            ) : (
+              <button type="button" className="link-btn" onClick={() => props.guard(() => setDeleting(true))}>
+                {T.documents.deleteDocument}
+              </button>
+            ))}
           {document !== ALL_DOCUMENTS && document !== '' && docs.filter((d) => d.name !== '' && d.name !== document).length > 0 &&
             (merging === null ? (
               <button type="button" className="link-btn" title={T.documents.mergeIntoTooltip} onClick={() => props.guard(() => setMerging(docs.find((d) => d.name !== '' && d.name !== document)?.name ?? null))}>

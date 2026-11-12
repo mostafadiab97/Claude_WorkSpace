@@ -166,5 +166,10 @@ await scenario('E2E fixes', async (ctx) => {
   const passed = await win.getByText(/All steps passed/).count()
   if (!passed) console.log(await win.locator('.results').last().textContent())
   check(passed === 1, 'every step of the release self-test passes')
+  // the owner, 0.21.3: "Copy report" did nothing — refusing every web permission also refused writing to the clipboard
+  await win.getByRole('button', { name: 'Copy report' }).click()
+  await win.getByRole('button', { name: 'Copied ✓' }).waitFor({ timeout: 3_000 }).catch(() => undefined)
+  const clip = await t.app.evaluate(({ clipboard }) => clipboard.readText())
+  check(/release self-test/i.test(clip), '"Copy report" puts the self-test report on the clipboard')
   await t.shot('fixes-release-self-test')
 })

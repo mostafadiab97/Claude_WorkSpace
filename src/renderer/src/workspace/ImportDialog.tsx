@@ -293,6 +293,12 @@ export function ImportDialog(props: { schema: Schema; file: ImportFile | null; n
                   ) : (
                     <p className="statusbar__ok">{T.importDialog.noProblems}</p>
                   )}
+                  {data.counts.create + data.counts.update + data.extraLinks === 0 && (
+                    // why the Import button stays off (the owner, 0.21.2 test 3)
+                    <p className="notice" role="status">
+                      {T.importDialog.nothingNew}
+                    </p>
+                  )}
                   <div className="import__preview scroll" role="table" aria-label={T.importDialog.previewLabel}>
                     {data.rows.slice(0, 100).map((r) => (
                       <div key={r.row} className="import__prow" role="row">

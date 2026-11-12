@@ -103,4 +103,16 @@ describe('0.21.2 review 2 fixes', () => {
   it('N-08: masking the home folder never cuts a longer user name', () => {
     expect(maskHome('C:\\Users\\alice\\docs and C:\\Users\\al\\x', 'C:\\Users\\al')).toBe('%USERPROFILE%\\docs and %USERPROFILE%\\x') // alice is masked as another profile, not cut to "ice"
   })
+
+  it('Delete document removes the folder and its items (the owner, 0.21.3 test 3)', async () => {
+    const { ws, root } = await setup()
+    await ws.createDocument('Scratch')
+    const r = await ws.saveItem({ id: 'REQ-DDDDDDD', type: 'system-requirement', title: 'x', fields: {}, text: '', links: [], extra: {}, document: 'Scratch' } as Parameters<WorkspaceService['saveItem']>[0], null)
+    expect(r.ok).toBe(true)
+    const d = await ws.deleteDocument('Scratch')
+    expect(d.ok && d.removed).toBe(1)
+    expect(existsSync(join(root, 'requirements', 'Scratch'))).toBe(false)
+    expect(ws.query({ document: 'Scratch' }).total).toBe(0)
+    expect((await ws.deleteDocument('Scratch')).ok).toBe(false)
+  })
 })

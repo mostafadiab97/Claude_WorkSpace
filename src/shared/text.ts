@@ -1233,6 +1233,7 @@ const en = {
   /** Messages the core sends after item operations. */
   importMsg: {
     empty: 'No title and no text — row skipped.',
+    tooWide: (sheet: string) => `The sheet "${sheet}" spans more than 5 million cells (cells far to the right in many rows) — the file looks damaged and was not read.`,
     tooManyRows: (sheet: string, row: number) =>
       `The sheet "${sheet}" has a cell in row ${row.toLocaleString('en')}, beyond Excel's 1,048,576 rows — the file looks damaged and was not read.`,
     duplicate: (id: string) => `The ID ${id} appears twice in the file — only its first row is imported.`,
@@ -1290,6 +1291,8 @@ const en = {
     parentOtherDocument: (parent: string, document: string) => `${parent} is in the document "${document}": an item and its parent must be in the same document.`,
     parentLoop: (id: string) => `${id} is this item or one of its children; choose another parent.`,
     savedUnreadable: 'The item was saved but could not be read back.',
+    idInTwoFiles: (id: string, count: number) =>
+      `${id} is in ${count} files — changing or deleting it here could hit the wrong file. First use "Give the copy a new ID" in Problems (or remove the copy by hand).`,
     hasChildren: (id: string, count: number) => `${id} has ${count} child item(s). Move or delete them first.`,
     deletedLinksFailed: (id: string, source: string, why: string) => `${id} was deleted, but its links from ${source} could not be removed: ${why}`,
     movingStopped: (id: string) => `${id} could not be read; moving stopped.`,

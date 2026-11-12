@@ -1232,6 +1232,7 @@ const raw: Texts = {
 
   importMsg: {
     empty: 'لا عنوان ولا نص — تُخطّي الصف.',
+    tooWide: (sheet: string) => `الورقة "\u2068${sheet}\u2069" تمتد على أكثر من 5 ملايين خلية (خلايا بعيدة إلى اليمين في صفوف كثيرة) — يبدو الملف تالفًا ولم يُقرأ.`,
     tooManyRows: (sheet: string, row: number) =>
       `في الورقة "\u2068${sheet}\u2069" خلية في الصف ${row.toLocaleString('en')}، بعد حدّ Excel البالغ 1,048,576 صفًا — يبدو الملف تالفًا ولم يُقرأ.`,
     duplicate: (id: string) => `المعرّف ${id} يظهر مرتين في الملف — يُستورَد صفه الأول فقط.`,
@@ -1289,6 +1290,8 @@ const raw: Texts = {
     parentOtherDocument: (parent: string, document: string) => `${parent} في المستند "${document}": يجب أن يكون العنصر وأصله في المستند نفسه.`,
     parentLoop: (id: string) => `${id} هو هذا العنصر أو أحد عناصره الفرعية؛ اختر أصلًا آخر.`,
     savedUnreadable: 'حُفظ العنصر لكن تعذّرت قراءته مرة أخرى.',
+    idInTwoFiles: (id: string, count: number) =>
+      `المعرّف \u2066${id}\u2069 موجود في ${count} ملفات — تعديله أو حذفه هنا قد يصيب الملف الخطأ. استخدم أولًا «إعطاء النسخة معرّفًا جديدًا» في المشكلات (أو أزل النسخة يدويًا).`,
     hasChildren: (id: string, count: number) => `لدى ${id} ${pl(count, 'عنصر فرعي واحد', 'عنصران فرعيان', 'عناصر فرعية', 'عنصرًا فرعيًا')}. انقلها أو احذفها أولًا.`,
     deletedLinksFailed: (id: string, source: string, why: string) => `حُذف ${id}، لكن تعذّرت إزالة روابطه من ${source}: ${why}`,
     movingStopped: (id: string) => `تعذّرت قراءة ${id}؛ توقف النقل.`,

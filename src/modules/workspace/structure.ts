@@ -171,7 +171,8 @@ export function createStructureOps(ctx: WorkspaceContext) {
 
   /** The children of `parent`; at the top level only those of `document` — every document has its own (CR-04). */
   const siblings = (s: Session, parent: string | undefined, document?: string): IndexedItem[] =>
-    s.index.query({ parent: parent ?? null, ...(parent === undefined && document !== undefined ? { document } : {}), sort: { by: 'order' }, limit: 10_000 }).items
+    // every sibling: a flat import can put more than 10,000 items in one group (review 2, A-02)
+    queryAll(s.index, { parent: parent ?? null, ...(parent === undefined && document !== undefined ? { document } : {}), sort: { by: 'order' } })
 
   /** Writes the planned order values (and the new parent of `moved`), conflict-safe, then updates the index. */
   async function apply(s: Session, plan: { id: string; order: string }[], moved?: { ids: ReadonlySet<string>; parent: string | null }): Promise<OpResult> {
@@ -214,7 +215,7 @@ export function createStructureOps(ctx: WorkspaceContext) {
     orderAfter(s: Session, id: string): string {
       const me = s.index.get(id)
       // every sibling, also past the first 200 (CR-24); at the top level those of the same document (CR-04)
-      const siblings = s.index.query({ parent: me?.parent ?? null, ...(me?.parent ? {} : { document: me?.document ?? '' }), sort: { by: 'order', descending: false }, limit: 10_000 }).items
+      const siblings = queryAll(s.index, { parent: me?.parent ?? null, ...(me?.parent ? {} : { document: me?.document ?? '' }), sort: { by: 'order', descending: false } })
       const at = siblings.findIndex((x) => x.id === id)
       const next = siblings.slice(at + 1).find((x) => (x.order ?? '') > (me?.order ?? ''))
       return keyBetween(me?.order ?? null, next?.order ?? null)

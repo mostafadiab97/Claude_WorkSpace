@@ -118,14 +118,22 @@ export async function readXlsx(data: Uint8Array): Promise<{ name: string; rows: 
 
 /** Excel's own limit; a file claiming a cell beyond it is damaged or crafted (W-06: row 50,000,000 ran out of memory). */
 const EXCEL_MAX_ROWS = 1_048_576
+/** Cells (including the empty ones between) a sheet may span when read: far more than any requirements sheet. */
+const MAX_GRID_CELLS = 5_000_000
 
 function sheetRows(ws: Worksheet): string[][] {
   const rows: string[][] = []
-  // only rows that exist in the file (includeEmpty made one object per empty row up to the last one)
+  let width = 0
+  // only rows and cells that exist in the file: includeEmpty made one cell object for every empty cell up to the last
+  // one — a 14 KB file with one cell in column XFD per row ran the app out of memory (W-06, SEC-WP3-01)
   ws.eachRow((row, n) => {
     if (n > EXCEL_MAX_ROWS) throw new Error(T.importMsg.tooManyRows(ws.name, n))
     const cells: string[] = []
-    row.eachCell({ includeEmpty: true }, (cell, c) => {
+    row.eachCell((cell, c) => {
+      // a merged range: ExcelJS repeats the first cell's value in every cell of it — read it once (review 2, QW21-67)
+      if (cell.isMerged && cell.master !== cell) return
+      width += c - cells.length
+      if (width > MAX_GRID_CELLS) throw new Error(T.importMsg.tooWide(ws.name))
       cells[c - 1] = cellText(cell.value).replace(/\r\n/g, '\n')
     })
     for (let i = 0; i < cells.length; i++) cells[i] ??= ''

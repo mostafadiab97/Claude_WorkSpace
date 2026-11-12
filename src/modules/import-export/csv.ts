@@ -32,37 +32,62 @@ export function detectSeparator(text: string): ',' | ';' | '\t' {
 /** The protecting ' an export put before a formula-like value comes off again on import (CR3-06b). */
 const unprotect = (cell: string): string => (cell.startsWith("'") && FORMULA_START.test(cell.slice(1)) ? cell.slice(1) : cell)
 
-/**
- * Does the line after position `from` (a line end) look like a row of its own — at least `columns` cells, and no
- * quote that closes a cell opened on an earlier line? (W-05; CR-02: "- b, c, d",Draft continues a cell)
- */
-function nextLineIsRow(t: string, from: number, separator: string, columns: number): boolean {
-  let i = from
-  if (t[i] === '\r') i++
-  if (t[i] === '\n') i++
-  let count = 1
+/** How many cell separators the rest of the line from `from` holds, outside quoted cells. */
+function separatorsToLineEnd(t: string, from: number, separator: string): number {
+  let count = 0
   let inQuote = false
-  let cellStart = true
-  for (; i < t.length && t[i] !== '\n' && t[i] !== '\r'; i++) {
+  let cellStart = false
+  for (let i = from; i < t.length && (inQuote || (t[i] !== '\n' && t[i] !== '\r')); i++) {
     const ch = t[i]
-    const next = t[i + 1]
     if (inQuote) {
-      if (ch === '"' && next === '"') i++
-      else if (ch === '"' && (next === separator || next === undefined || next === '\n' || next === '\r')) inQuote = false
-      cellStart = false
-    } else if (ch === '"' && cellStart) {
-      inQuote = true
-      cellStart = false
+      if (ch === '"' && t[i + 1] === '"') i++
+      else if (ch === '"') inQuote = false
     } else if (ch === separator) {
       count++
       cellStart = true
-    } else {
-      // a quote ending a cell that did not start with one: the rest of a quoted cell from the line before
-      if (ch === '"' && (next === separator || next === undefined || next === '\n' || next === '\r')) return false
-      cellStart = false
-    }
+      continue
+    } else if (ch === '"' && cellStart) inQuote = true
+    cellStart = false
   }
-  return count >= columns
+  return count
+}
+
+/** How far ahead a quoted cell may run over lines while the reader decides (keeps big files linear). */
+const LOOKAHEAD = 64 * 1024
+
+/**
+ * A quote before a line end, in a row that is still short: does the cell go on to the next line? Only when, further on,
+ * a quote followed by a separator or line end closes it AND the rest of that line completes the row to exactly the
+ * header's column count (the 0.16.3 case: a list line ending in 12" inside a cell that is not the last column).
+ * Otherwise the quote closes the cell and the row is simply short (W-05, N-01, N-02, QW21-1).
+ */
+function cellGoesOn(t: string, quoteAt: number, separator: string, cellsBefore: number, columns: number): boolean {
+  const need = columns - cellsBefore - 1
+  if (need < 0) return false
+  const end = Math.min(t.length, quoteAt + LOOKAHEAD)
+  // read the following lines as rows of their own; a quoted cell that opens on one of them is skipped. The first quote
+  // that closes something without having opened on its own line is the candidate end of our cell.
+  let cellStart = false
+  let inLineQuote = false
+  for (let i = quoteAt + 1; i < end; i++) {
+    const ch = t[i]
+    const next = t[i + 1]
+    if (inLineQuote) {
+      // a quoted cell that opened at a cell start on a later line may itself run over lines ("multi⏎line")
+      if (ch === '"' && next === '"') i++
+      else if (ch === '"') inLineQuote = false
+    } else if (ch === '\n' || ch === '\r' || ch === separator) cellStart = true
+    else if (ch === '"' && cellStart) {
+      inLineQuote = true
+      cellStart = false
+    } else if (ch === '"' && next === '"') {
+      i++
+      cellStart = false
+    } else if (ch === '"' && (next === separator || next === '\n' || next === '\r' || next === undefined)) {
+      return separatorsToLineEnd(t, i + 1, separator) === need
+    } else cellStart = false
+  }
+  return false
 }
 
 /** Reads CSV text (RFC 4180; BOM and CRLF tolerated; comma unless another separator is given). */
@@ -87,7 +112,7 @@ export function parseCsv(text: string, separator = ','): string[][] {
         // — unless the next line has a full row's separators: then this row is simply short (W-05: a short row ending
         // in a quoted cell swallowed every row after it)
         const rowEndsEarly =
-          (next === '\n' || next === '\r') && rows.length > 0 && row.length + 1 < (rows[0]?.length ?? 0) && !nextLineIsRow(t, i + 1, separator, rows[0]?.length ?? 0)
+          (next === '\n' || next === '\r') && rows.length > 0 && row.length + 1 < (rows[0]?.length ?? 0) && cellGoesOn(t, i, separator, row.length, rows[0]?.length ?? 0)
         if ((next === undefined || next === separator || next === '\n' || next === '\r') && !rowEndsEarly) quoted = false
         else cell += ch
       } else cell += ch

@@ -4,7 +4,7 @@ CLAUDE.md is read at the start of every session and again after every context co
 history there cost thousands of tokens each time (the owner asked to save tokens, 8 Nov 2026). **This file is the
 status**: update it with every release (the version table, "Next", the owner's last report, test counts).
 
-## Status (v0.21.1, 11 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.21.2, 12 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -41,7 +41,8 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.21.0 speed at 50,000 items — review W-20…W-23, W-27: Compare reads only the structure of a commit and keeps it, saves keep the numbers, sort by number by place, old version builds without freezing the window, workspace speed test in every build; push in one Git call | Released (v0.21.0) |
 | 0.21.1 screens and Arabic — review UW-01 (Fields warning bug), W-40 toolbar wraps, O-4 settings tooltip, O-5 "No file problems" + gaps tooltip, O-6 double-rename message, W-43 tab arrow keys, W-51 Arabic arrows and ◂, W-50 «نسخة» | Released (v0.21.1) |
 | Documents from the review (11 Nov, no version: nothing the owner tests) — README, user guide §16, TESTING, ARCHITECTURE, ONBOARDING, tools/README, roadmap, reviews index, PITFALLS | Done |
-| **Next** | Owner's 0.21.1 checklist. The review plan is done except Low items (picked up when their area is touched) and the one-click "keep one name" for O-6. Then: the pilot with the team, the Fable trials (UI/UX review, logo variant — before 17 Nov if the Fable reset is to be used), the public release repository questions (`docs/reviews/2026-11-04-public-release-repo.md`), the final touches list (roadmap). |
+| 0.21.2 data and import safety — review 2: an ID in two files can no longer be saved or deleted through the wrong file, CSV short rows, Excel wide/merged sheets, strict fast reader, edited links kept in merges, flat groups over 10,000 | Released (v0.21.2) |
+| **Next** | Owner's 0.21.2 checklist; then review 2's speed (old version first open, sort, Expand all, gap count), screens and Arabic (toolbar groups, tab panels, W-10 core messages in Arabic, Arabic replacements, one-click "keep one name") and documents — `docs/reviews/2026-11-12-project-review-2.md` → A |
 
 The owner's last report (12 Nov 2026): **0.21.1 all 5 steps passed** (self-test 25/25 in 96.0 s; "perfect pass, it is so smooth" for the wrapping toolbar). Before (11 Nov 2026): **0.21.0 steps 1, 3, 4, 5 passed** (self-test 25/25 in 77.6 s — faster than 0.20.1's 90.9 s and 0.20.2's 120.9 s); step 2 passed too: Compare took about 4 s for **10,007 changed items** and under a second for a few — **all 5 passed**. Before: 0.20.2 all 4 steps passed (self-test 25/25, 120.9 s — 30 s slower than 0.20.1; nothing more to mask — O-8). Earlier: 0.20.1 all 5 steps passed; review questions O-1…O-7 answered (25/25, 90.9 s) — nothing open from his tests; theme 1b is done and the pilot can start. Before: 0.20.0 all 5 passed with four points (→ 0.20.1).
 Before: 0.18.0 all 5 passed (24/24). Before: 0.17.2 all 5 passed (23/23). Before: 0.13.1 all 4 steps passed, 21/21 (66.8 s). Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.

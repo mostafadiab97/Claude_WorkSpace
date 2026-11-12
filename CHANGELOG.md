@@ -35,6 +35,23 @@ first, then speed, then screens, Arabic and documents. Each fix below was reprod
   version → Git history with baselines), reports conflicts, keeps shared requirements in both modules and records the
   documents' format (`docs/guides/word-template-prompt.md`).
 
+## 0.21.2 — 12 Nov 2026 — data and import safety (whole-project review 2)
+From `docs/reviews/2026-11-12-project-review-2.md`; each case reproduced in a test first (`tests/review-2-0.21.2.test.ts`,
+QA's `tests/qa-whole-0.21-*.test.ts`, more cases in `tests/review-whole-0.20.test.ts`, `tests/speed-0.21.0.test.ts`).
+- **Same ID in two files** (a copied document): saving or deleting it is refused until "Give the copy a new ID" — the
+  copy's row used to open, save and even **delete the original file** (core B-02).
+- **CSV import** reads short rows correctly in every case found so far: two short rows in a row, and a quoted cell
+  over three lines with commas (N-01, N-02, QW21-1 — my 0.20.2 rule only looked one line ahead; it now looks for
+  where the cell really ends).
+- **Excel import:** a 14 KB file with cells in the last column no longer runs the app out of memory (only existing
+  cells are read; a sheet over 5 million cells is refused as damaged — SEC-WP3-01); a merged range is read once
+  (QW21-67).
+- **Compare's fast reader** takes only headers in reqochet's own plain form (a hand-written `title: Note: the pump`
+  now goes to the full parser, like in the table — B-01, QW21-01).
+- **Merge:** a link one PC removed while the other changed its note is kept with the note, not lost (QW21-43).
+- Moving or adding items in a flat group of more than 10,000 now sees every sibling (A-02); tests for the long Git
+  time limit on merge, restore and undo (A-03).
+
 ## 0.21.1 — 11 Nov 2026 — screens and Arabic (review W-40…W-54, O-4, O-5, O-6)
 **Owner (12 Nov 2026):** all 5 steps passed (self-test 25/25 in 96.0 s; the narrow toolbar: "perfect pass, it is so smooth").
 - **UW-01 (bug)** The Fields window warned "the choices ar are gone…" for every translated field: it read the

@@ -71,7 +71,7 @@ describe('QA-W21 link extras in merges (W-03)', () => {
   })
   // DEFECT QW21-43: one side deletes a link, the other only edits its note: the merge drops the link with no question
   // and the other PC's note edit is lost without a word.
-  it.fails('QW21-43: a link removed by one side while the other side changed only its note: asked, and the note change is not silently lost', () => {
+  it('QW21-43: a link removed by one side while the other side changed only its note: asked, and the note change is not silently lost', () => {
     const base = item([L('REQ-BBBBBBB', { note: 'old' })])
     const r = mergeItems(base, item([]), item([L('REQ-BBBBBBB', { note: 'new' })]), schema)
     const kept = r.item?.links.find((l) => l.target === 'REQ-BBBBBBB')
@@ -246,7 +246,7 @@ describe('QA-W21 CSV and Excel limits (W-05, W-06)', { timeout: 180_000 }, () =>
   })
   // DEFECT QW21-61b (W-05 only half fixed): a short row that ends in a quoted cell is followed by another SHORT row (fewer
   // separators than the header): the closing quote is taken as text and every following row is swallowed into one cell.
-  it.fails('QW21-60b: CSV: two short rows in a row, the first ending in a quoted cell, do not swallow the rows after them', () => {
+  it('QW21-60b: CSV: two short rows in a row, the first ending in a quoted cell, do not swallow the rows after them', () => {
     expect(parseCsv('a,b,c\n1,"x"\n2,"y"\n3,4,5')).toEqual([['a', 'b', 'c'], ['1', 'x'], ['2', 'y'], ['3', '4', '5']])
     expect(parseCsv('a,b,c\n"",""\n4\n5,6,7')).toEqual([['a', 'b', 'c'], ['', ''], ['4'], ['5', '6', '7']])
   })
@@ -308,7 +308,7 @@ describe('QA-W21 CSV and Excel limits (W-05, W-06)', { timeout: 180_000 }, () =>
   // DEFECT QW21-67: ExcelJS copies the first cell's value into every cell of a merged range, so a merged range over many
   // rows multiplies a long text (a 100,000-character cell merged down 20,000 rows is 2 GB: "Invalid string length", and
   // a range down the whole column hangs the app). The reader should read a merged range as its first cell only.
-  it.fails('QW21-67: Excel: a long text in a merged range is read once, not once per merged cell', async () => {
+  it('QW21-67: Excel: a long text in a merged range is read once, not once per merged cell', async () => {
     const wb = new ExcelJS.Workbook()
     const sh = wb.addWorksheet('Items')
     sh.getCell(1, 1).value = 'ID'

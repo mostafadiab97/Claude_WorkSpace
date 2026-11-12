@@ -175,6 +175,14 @@ describe('0.20.2 whole-project review fixes', () => {
     const commas = parseCsv('ID,Text,Status\nA-1,"- a 12"\n- b, c, d",Draft\nA-2,y,Done\n')
     expect(commas[1]).toEqual(['A-1', '- a 12"\n- b, c, d', 'Draft'])
     expect(commas[2]).toEqual(['A-2', 'y', 'Done'])
+    // review 2 (N-01, QW21-1): two short rows in a row, each ending in a quoted cell
+    const shorts = parseCsv('ID,Title,Text,Status\nA-1,"Short"\nA-2,"Second"\nA-3,Third,x,Done\n')
+    expect(shorts.map((r) => r[0])).toEqual(['ID', 'A-1', 'A-2', 'A-3'])
+    expect(shorts[1]).toEqual(['A-1', 'Short'])
+    // review 2 (N-02): a quoted cell over three lines, commas on the middle line
+    const three = parseCsv('ID,Text,Status\nA-1,"- a 12"\n- b, c, d\n- e",Draft\nA-2,y,Done\n')
+    expect(three[1]).toEqual(['A-1', '- a 12"\n- b, c, d\n- e', 'Draft'])
+    expect(three[2]).toEqual(['A-2', 'y', 'Done'])
   })
   it('W-06: an Excel file with a cell in row 50,000,000 is refused quickly instead of running out of memory', async () => {
     const wb = new ExcelJS.Workbook()
@@ -185,6 +193,23 @@ describe('0.20.2 whole-project review fixes', () => {
     const started = Date.now()
     await expect(readXlsx(data)).rejects.toThrow(/row 50,000,000/)
     expect(Date.now() - started).toBeLessThan(5000)
+  })
+
+  it('SEC-WP3-01: an Excel file with one cell in the last column (XFD) of 1,500 rows is refused, not run out of memory', async () => {
+    const wb = new ExcelJS.Workbook()
+    const sheet = wb.addWorksheet('Items')
+    for (let r = 1; r <= 1500; r++) sheet.getCell(r, 16_384).value = 'x'
+    const data = new Uint8Array(await wb.xlsx.writeBuffer())
+    await expect(readXlsx(data)).rejects.toThrow(/5 million cells/)
+    // a normal sheet still reads, gaps between cells included
+    const ok = new ExcelJS.Workbook()
+    const s2 = ok.addWorksheet('Items')
+    s2.getCell(1, 1).value = 'ID'
+    s2.getCell(1, 3).value = 'Title'
+    s2.getCell(2, 1).value = 'A-1'
+    s2.getCell(2, 3).value = 'T'
+    const read = await readXlsx(new Uint8Array(await ok.xlsx.writeBuffer()))
+    expect(JSON.stringify(read)).toContain('"ID","","Title"')
   })
   it('W-33: a problem report shows %USERPROFILE% instead of the Windows user folder', () => {
     const report = buildProblemReport({
@@ -210,9 +235,13 @@ describe('0.20.2 whole-project review fixes', () => {
     const g = createSystemGitAdapter(run)
     await g.commit('/r', 'requirements', 'm')
     await g.switchBranch('/r', 'other')
+    // review 2 (A-03): the other heavy steps get the long limit too
+    await g.merge('/r', 'origin/main', false)
+    await g.restoreFrom('/r', 'HEAD', ['requirements/a.md'])
+    await g.undoLastCommit('/r')
     for (const c of calls) expect(c.args.slice(0, 2)).toEqual(['-c', 'core.quotePath=false'])
-    const longOnes = calls.filter((c) => c.args.includes('add') || c.args.includes('commit') || c.args.includes('switch'))
-    expect(longOnes.length).toBe(3)
+    const longOnes = calls.filter((c) => ['add', 'commit', 'switch', 'merge', 'restore'].some((x) => c.args.includes(x)) || (c.args.includes('reset') && c.args.includes('--soft')))
+    expect(longOnes.length).toBe(6)
     for (const c of longOnes) expect(c.timeoutMs).toBeGreaterThanOrEqual(15 * 60_000)
   })
 

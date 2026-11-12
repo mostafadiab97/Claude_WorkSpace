@@ -48,7 +48,7 @@ describe('QA-W21 fast header reader against the full parser', { timeout: 120_000
   const file = (header: string): string => `---\n${header}\n---\nx\n`
   // DEFECT QW21-01: the fast reader ignores YAML continuation lines (a value wrapped onto an indented line), so it reads
   // a value or accepts a file that the full parser reads differently or refuses. Only hand-edited files.
-  it.fails('QW21-01: never accepts a file the parser refuses, for hand-edited layouts (continued lines, tabs, flow style, keys in quotes, merge keys)', () => {
+  it('QW21-01: never accepts a file the parser refuses, for hand-edited layouts (continued lines, tabs, flow style, keys in quotes, merge keys)', () => {
     const t = 'type: x\ntitle: T'
     const headers = [
       'id: REQ-AAAAAAA\nparent: REQ-BBBBBBB\n  CCC', // plain value continued on the next line

@@ -33,7 +33,10 @@ describe('readStructure (W-20)', () => {
       'id: REQ-AAAAAAA\norder: 007', 'id: REQ-AAAAAAA\norder: -3', 'id: REQ-AAAAAAA\norder: 2.5', 'id: REQ-AAAAAAA\norder: 30',
       'id: REQ-AAAAAAA\norder: a1\norder: a2', 'id: 123', 'id: REQ-AAAAAAA\nparent: 007', 'id: REQ-AAAAAAA\tx',
       'id: REQ-AAAAAAA\t# c', 'id: REQ-AAAAAAA\nparent: REQ-BBBBBBB\u2028', 'id: REQ-AAAAAAA\norder: a1 ',
-      'id: REQ-AAAAAAA\ntitle: again'
+      'id: REQ-AAAAAAA\ntitle: again',
+      // review 2 (B-01): hand edits the full parser refuses or reads differently
+      'id: REQ-AAAAAAA\ntitle: Note: the pump', 'id:REQ-AAAAAAA', 'id: REQ-AAAAAAA\norder:a5', 'id: REQ-AAAAAAA\norder: a1\n  b',
+      'id: REQ-AAAAAAA\nparent: REQ-BBBBBBB\n  CCC', 'id: REQ-AAAAAAA\n  parent: REQ-BBBBBBB', 'id: REQ-AAAAAAA\n"order": a1\norder: a2'
     ]
     for (const h of headers) {
       for (const text of [`---\n${h}\n${base}\n---\nx\n`, `---\n${h}\ntitle: T\n---\nx\n`]) {

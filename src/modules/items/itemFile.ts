@@ -146,34 +146,44 @@ export function serializeItem(item: Item, schema: Pick<Schema, 'fields'>): strin
  */
 export function readStructure(content: string): { id: string; parent?: string; order?: string } | null {
   let i = content.charCodeAt(0) === 0xfeff ? 1 : 0
-  if (!content.startsWith('---', i)) return null
-  i = content.indexOf('\n', i)
-  if (i < 0) return null
+  const first = content.indexOf('\n', i)
+  if (first < 0 || content.slice(i, first).replace(/\r$/, '') !== '---') return null
+  i = first
   const out: { id?: string; parent?: string; order?: string } = {}
   const seen = new Set<string>()
+  let blockOpen = false // the last top-level key had no value: indented lines (a list, a mapping) may follow
   for (;;) {
     const end = content.indexOf('\n', i + 1)
     const line = content.slice(i + 1, end < 0 ? undefined : end).replace(/\r$/, '')
-    if (line.startsWith('---')) break
-    if (end < 0) return null
-    // any top-level key: repeated keys make the full parser refuse the file, so this reader must not accept it (R2)
-    const key = /^([^\s:#][^:]*):(?:[ \t]|$)/.exec(line)?.[1]
-    if (key !== undefined) {
-      if (seen.has(key)) return null
-      seen.add(key)
+    if (line === '---') break
+    if (end < 0 || line === '' || /[\u2028\u2029\t]/.test(line)) return null
+    if (line.startsWith(' ')) {
+      // inside a block: only the plain forms the serializer writes ("  - type: x", "    target: REQ-…", "  - tag")
+      if (!blockOpen || !/^ +(- )?([A-Za-z0-9_-]+: )?[^\s'"[{&*!|>%@`#][^#]*$/.test(line) || /: .*: |:$/.test(line.trim().replace(/^- /, ''))) return null
+      i = end
+      continue
     }
-    const m = /^(id|parent|order):[ \t]*([\s\S]*)$/.exec(line)
-    if (m) {
-      const value = (m[2] as string).trimEnd()
-      // anything not in the plain form reqochet writes: let the full parser decide (R1, R3, R4)
-      if (value === '' || /[#\u2028\u2029]/.test(value) || /^['"[{&*!|>%@`]/.test(value)) return null
-      if (m[1] === 'order') {
+    // every top-level line is "key: value" (or "key:" opening a block) in the plain form reqochet writes; anything
+    // else — a second ": ", a comment, a missing space, an indicator — goes to the full parser (review 2, B-01)
+    const m = /^([A-Za-z0-9_-]+):(?: (.*))?$/.exec(line)
+    if (!m) return null
+    const key = m[1] as string
+    if (seen.has(key)) return null
+    seen.add(key)
+    const value = (m[2] ?? '').trimEnd()
+    blockOpen = value === ''
+    if (!blockOpen && !/^"(?:[^"\\]|\\.)*"$|^'(?:[^']|'')*'$/.test(value)) {
+      if (/^['"[{&*!|>%@`]|: | #|:$/.test(value)) return null
+    }
+    if (key === 'id' || key === 'parent' || key === 'order') {
+      if (blockOpen || /^['"]/.test(value)) return null
+      if (key === 'order') {
         if (isOrderKey(value) && !/^[+-]?[\d.]/.test(value)) out.order = value
         else if (/^(0|[1-9]\d{0,14})$/.test(value)) out.order = keyOfNumber(Number(value))
         else return null
       } else {
         if (!isValidId(value)) return null
-        if (m[1] === 'id') out.id = value
+        if (key === 'id') out.id = value
         else out.parent = value
       }
     }

@@ -221,7 +221,7 @@ describe('QA-W21 non-ASCII document names (W-02)', { timeout: 180_000 }, () => {
       const cmp = await ws.compareVersions('HEAD~1', 'HEAD')
       expect(cmp.entries.filter((e) => e.id === id).length, name).toBeLessThanOrEqual(1)
       expect(JSON.stringify(await ws.itemHistory(id)), name).toMatch(/[Rr]ename/)
-      expect((await ws.getHistory({})).entries?.length ?? (await ws.getHistory({})).items?.length ?? 2, name).toBeGreaterThanOrEqual(2)
+      expect((await ws.getHistory({})).commits.length, name).toBeGreaterThanOrEqual(2)
     }
   })
   it('QW21-22: Arabic document: pull where B added an item and A edited another one (no overlap) is a clean fast merge and both sides see all items', async () => {

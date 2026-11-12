@@ -147,6 +147,14 @@ export function mergeItems(
   const merged = mergeSet(b.links, mine.links, theirs.links, linkKey)
   const byKey = (ls: Link[]): Map<string, Link> => new Map(ls.map((l) => [linkKey(l), l]))
   const [bl, ml, tl] = [byKey(b.links), byKey(mine.links), byKey(theirs.links)]
+  // a link one side removed while the other changed its own keys (a note): the change is kept, not lost without a
+  // word — the link stays and can be removed again (review 2, QW21-43)
+  const extraOf = (l: Link | undefined): string => JSON.stringify(l?.extra ?? {})
+  for (const [k, base] of bl) {
+    if (merged.some((l) => linkKey(l) === k)) continue
+    const changed = [ml.get(k), tl.get(k)].find((l) => l !== undefined && extraOf(l) !== extraOf(base))
+    if (changed) merged.push(changed)
+  }
   item.links = merged.map((l) => {
     const k = linkKey(l)
     const r = pick(bl.get(k)?.confirmed, ml.get(k)?.confirmed, tl.get(k)?.confirmed)

@@ -62,6 +62,9 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
 
     async saveItem(item: Item, revision: string | null): Promise<SaveResult> {
       const s = ctx.need()
+      // one ID in two files (a copied document): the save would go to whichever file the index finds first (B-02)
+      const copies = revision === null ? 0 : s.index.pathsOf(item.id).length
+      if (copies > 1) return { ok: false, reason: 'error', message: T.wsMsg.idInTwoFiles(item.id, copies) }
       const clean: Item = { ...item, title: item.title.trim() }
       if (clean.parent === '') delete clean.parent
       const issues = validateItem(clean, s.repo.schema).filter((i) => i.severity === 'error')
@@ -98,6 +101,9 @@ export function createItemOps(ctx: WorkspaceContext, links: LinkOps, structure: 
 
     async deleteItem(id: string, revision: string, opts?: { removeIncomingLinks?: boolean }): Promise<OpResult> {
       const s = ctx.need()
+      // one ID in two files: deleting the copy's row removed the ORIGINAL file (review 2, B-02)
+      const copies = s.index.pathsOf(id).length
+      if (copies > 1) return { ok: false, message: T.wsMsg.idInTwoFiles(id, copies) }
       const children = s.index.query({ parent: id, limit: 0 }).total
       if (children > 0) return { ok: false, message: T.wsMsg.hasChildren(id, children) }
       try {

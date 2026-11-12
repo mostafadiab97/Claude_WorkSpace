@@ -1,7 +1,17 @@
-# Past manual checklists (v0.0.3 – v0.20.2)
+# Past manual checklists (v0.0.3 – v0.21.0)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.21.0 (speed)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.21.0**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed**, total time back near 0.20.1's (about 90 s, not 120 s). |
+| 2 | Open the sandbox. **Changes → Compare → Choose two versions…**: pick an old commit and the newest. | The list appears in about a second (it took several seconds before). |
+| 3 | Sort the table by **#** (outline number), then click the header again (descending). | Each sort takes well under a second; the order follows the outline numbers. |
+| 4 | Edit an item's text and save it a few times. | Each save is instant; the item keeps its number. |
+| 5 | **Versions** → open an old baseline or commit for the first time. | The message "Opening the old version… The first time…" shows, the window stays usable, and the version opens within a few seconds. |
 
 ## v0.20.2 (data safety)
 

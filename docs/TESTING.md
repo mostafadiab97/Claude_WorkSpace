@@ -67,7 +67,15 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.21.1 (screens and Arabic)
+## Manual test checklist — v0.21.2 (data and import safety)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.21.2**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed.** |
+| 2 | In the sandbox folder, copy one item file (`REQ-….md`) by hand into another document's folder, then click reqochet's window. Select the item and try **Delete**. | Delete is refused with "… is in 2 files … Give the copy a new ID"; the original file is still there. Then **Problems → Give the copy a new ID** fixes it (delete the copy afterwards if you like). |
+| 3 | Import `samples/sample-requirements.xlsx` (or any of your Excel sheets) as before. | Works as before. |
+
+## Previous checklist — v0.21.1 (screens and Arabic)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
@@ -76,16 +84,6 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 | 3 | Hover the status bar's coverage-gaps label; change a field in **Fields** (no rename) and hover **Changes … + settings**. | The gaps tooltip explains "missing links … not an error in the files"; the status bar says "No file problems"; the Changes tooltip explains "+ settings". No "choices ar are gone" warning in Fields. |
 | 4 | In the editor, click the **Details** tab and press → and ←; do the same in Traceability (Coverage / Matrix). | The arrows move between the tabs. |
 | 5 | Switch to **Arabic**. In the table tree press ← on a closed heading, → on an open one; open **Changes → Compare**. | ← opens, → closes; closed headings show ◂; the compare choices say «اختيار نسختين…». |
-
-## Previous checklist — v0.21.0 (speed)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.21.0**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed**, total time back near 0.20.1's (about 90 s, not 120 s). |
-| 2 | Open the sandbox. **Changes → Compare → Choose two versions…**: pick an old commit and the newest. | The list appears in about a second (it took several seconds before). |
-| 3 | Sort the table by **#** (outline number), then click the header again (descending). | Each sort takes well under a second; the order follows the outline numbers. |
-| 4 | Edit an item's text and save it a few times. | Each save is instant; the item keeps its number. |
-| 5 | **Versions** → open an old baseline or commit for the first time. | The message "Opening the old version… The first time…" shows, the window stays usable, and the version opens within a few seconds. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

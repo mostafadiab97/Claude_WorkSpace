@@ -180,4 +180,5 @@ this list and raises every point with the owner** (the `owner-decision-walkthrou
 
 | Since | What | Notes |
 | --- | --- | --- |
+| 12 Nov 2026 (review 2, Q-1…Q-4) | **Public release repository** | Source + docs public, source-available licence (pick the exact text), issues on with a template, and **reqochet's own public requirements as a reqochet project folder** published with every public version (`docs/reviews/2026-11-04-public-release-repo.md` §5) |
 | 8 Nov 2026 (0.19.0 test 5) | **Revisit every diagram** (Archify: `docs/diagrams/archify/*.json` — privacy, architecture, onboarding…) for a better layout | The owner: the privacy diagram passes but "can have a better layout". Also: Arabic labels for the diagram shown in the app (UX19-18), readable at card size (UX19-19), legend words for non-technical readers (UX19-20). |

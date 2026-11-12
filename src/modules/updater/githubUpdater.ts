@@ -165,10 +165,20 @@ export function createGithubUpdater({ enabled, log, holdFile, updateConfigFile }
           log.info(`Going back to ${version} stopped: the user kept editing`)
           return { ok: false, message: '', canceled: true }
         }
+        // silent install over the current version, then start the app again (electron-builder's NSIS options);
+        // updates are paused only once the installer really started (N-05: an antivirus block left them paused)
+        const child = spawn(file, ['/S', '--force-run'], { detached: true, stdio: 'ignore' })
+        const started = await new Promise<boolean>((resolve) => {
+          child.once('spawn', () => resolve(true))
+          child.once('error', (e) => {
+            log.error('The installer could not be started', e)
+            resolve(false)
+          })
+        })
+        if (!started) throw new Error('the installer could not be started')
+        child.unref()
         writeFileSync(holdFile, JSON.stringify({ version, since: new Date().toISOString() }))
-        log.info(`Updates paused at ${version}; starting the installer`)
-        // silent install over the current version, then start the app again (electron-builder's NSIS options)
-        spawn(file, ['/S', '--force-run'], { detached: true, stdio: 'ignore' }).unref()
+        log.info(`Updates paused at ${version}; the installer is running`)
         setTimeout(() => app.quit(), 500)
         return { ok: true }
       } catch (e) {

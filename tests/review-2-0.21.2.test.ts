@@ -11,6 +11,7 @@ import { createFileRepositoryStore } from '../src/modules/repository-store'
 import { cacheFileName, createWorkspace, type WorkspaceService } from '../src/modules/workspace'
 import { parseCsv } from '../src/modules/import-export'
 import { parseItemFile, serializeItem } from '../src/modules/items'
+import { maskHome } from '../src/modules/logger'
 
 const quiet = { info: () => undefined, warn: () => undefined, error: () => undefined }
 
@@ -97,5 +98,9 @@ describe('0.21.2 review 2 fixes', () => {
     const back = serializeItem(r.item, { fields: [] })
     expect(back).toContain('title:\n  - a\n  - b')
     expect(back).toMatch(/order: 1e\+?60/)
+  })
+
+  it('N-08: masking the home folder never cuts a longer user name', () => {
+    expect(maskHome('C:\\Users\\alice\\docs and C:\\Users\\al\\x', 'C:\\Users\\al')).toBe('%USERPROFILE%\\docs and %USERPROFILE%\\x') // alice is masked as another profile, not cut to "ice"
   })
 })

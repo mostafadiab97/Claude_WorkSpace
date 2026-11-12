@@ -30,8 +30,15 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
     if (!naming) return
     setBusy(true)
     setError(null)
-    const r = naming.kind === 'new' ? await window.reqochet.createDocument(name) : await window.reqochet.renameDocument(naming.from, name)
-    setBusy(false)
+    let r: Awaited<ReturnType<typeof window.reqochet.renameDocument>>
+    try {
+      r = naming.kind === 'new' ? await window.reqochet.createDocument(name) : await window.reqochet.renameDocument(naming.from, name)
+    } catch (e) {
+      // a refused call (e.g. a name over 80 characters) must not leave the bar busy for good (CRA-11)
+      r = { ok: false, message: e instanceof Error ? e.message : String(e) }
+    } finally {
+      setBusy(false)
+    }
     if (!r.ok) {
       setError(r.message)
       setNaming(null) // start again from what is there now (the old name may no longer exist)
@@ -84,7 +91,7 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
             void submit()
           }}
         >
-          <input
+          <input maxLength={80}
             className="input"
             autoFocus
             value={name}

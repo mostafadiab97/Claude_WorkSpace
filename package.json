@@ -4,7 +4,7 @@
   "version": "0.21.3",
   "description": "Local, Git-based requirements management tool (proof of concept)",
   "main": "./out/main/index.js",
-  "author": "ReqMan",
+  "author": "reqochet",
   "license": "UNLICENSED",
   "private": true,
   "scripts": {

@@ -644,8 +644,6 @@ export interface ReqochetApi {
   /** Adds a link stored in `source` ("source verifies target"); confirmed against the target as it is now. */
   addLink(source: string, type: string, target: string): Promise<{ ok: true } | { ok: false; message: string }>
   removeLink(source: string, type: string, target: string): Promise<{ ok: true } | { ok: false; message: string }>
-  /** Marks suspect links of `source` as reviewed (all of them, or only the one to `target`). */
-  confirmLinks(source: string, target?: string): Promise<{ ok: true } | { ok: false; message: string }>
   /** Keeps (confirms) or removes each of these links; one file write per source item (O-04). */
   decideLinks(decisions: LinkDecision[]): Promise<{ ok: true; kept: number; unlinked: number } | { ok: false; message: string }>
   /** Takes back one part of an item's uncommitted change: that part becomes as in the last commit (O-05). */
@@ -830,7 +828,6 @@ export const Channels = {
   exportMatrix: 'trace:exportMatrix',
   addLink: 'ws:addLink',
   removeLink: 'ws:removeLink',
-  confirmLinks: 'ws:confirmLinks',
   decideLinks: 'ws:decideLinks',
   revertChange: 'ws:revertChange',
   fixFileName: 'ws:fixFileName',

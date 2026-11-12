@@ -178,8 +178,8 @@ export function ItemEditor(props: {
     const onKey = (e: globalThis.KeyboardEvent): void => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
         e.preventDefault()
-        if (dirty) void save()
-      } else if (e.altKey && !e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && !dirty && !isNew && !focusUsesArrows() && workspaceHasKeyboard(rootRef.current)) {
+        if (dirty && !props.readOnly) void save()
+      } else if (e.altKey && !e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && !props.readOnly && !dirty && !isNew && !focusUsesArrows() && workspaceHasKeyboard(rootRef.current)) {
         // Alt+↑ / Alt+↓ moves the open item among its siblings (UX-25)
         e.preventDefault()
         if (!form) return
@@ -192,7 +192,7 @@ export function ItemEditor(props: {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [dirty, save, isNew, form, load, onMoved])
+  }, [dirty, save, isNew, form, load, onMoved, props.readOnly])
 
   if (target.kind === 'item' && details === null && form === null) {
     return (

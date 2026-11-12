@@ -267,9 +267,9 @@ export function registerIpc(services: Services, paths: Paths): void {
       const r = v.matrixRequest(req)
       return saveExport(e, `traceability-matrix-${today()}`, 'xlsx', () => ws.exportMatrix(r))
     },
-    addLink: (_e, source, type, target) => ws.addLink(v.str(source, 'source'), v.str(type, 'link type'), v.str(target, 'target')),
-    removeLink: (_e, source, type, target) => ws.removeLink(v.str(source, 'source'), v.str(type, 'link type'), v.str(target, 'target')),
-    confirmLinks: (_e, source, target) => ws.confirmLinks(v.str(source, 'source'), v.optStr(target, 'target')),
+    // real items are checked as IDs (CRA-19); removeLink's target may be a broken link's text, so there it stays a string
+    addLink: (_e, source, type, target) => ws.addLink(v.id(source), v.str(type, 'link type', 64), v.id(target)),
+    removeLink: (_e, source, type, target) => ws.removeLink(v.id(source), v.str(type, 'link type', 64), v.str(target, 'target', 200)),
     decideLinks: (_e, decisions) => ws.decideLinks(v.linkDecisions(decisions)),
     revertChange: (_e, id, part) => ws.revertChange(v.id(id), v.revertPart(part)),
     fixFileName: (_e, id) => ws.fixFileName(v.id(id)),

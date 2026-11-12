@@ -332,7 +332,8 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
   }
 
   return (
-    <div className="modal" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    // a press on the backdrop does not close it: the edits would be gone without a question (CRA-14)
+    <div className="modal" role="presentation">
       <div className="modal__panel" role="dialog" aria-modal="true" aria-label={T.fields.label}>
         <header className="modal__header">
           <div>

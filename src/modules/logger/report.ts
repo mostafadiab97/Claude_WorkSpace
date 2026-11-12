@@ -16,7 +16,8 @@ export function maskHome(text: string, home?: string): string {
   if (home && home.length > 3) {
     // the same folder written with \ or /, any letter case (Windows paths are not case-sensitive)
     const pattern = home.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\\|\//g, '[\\\\/]')
-    out = out.replace(new RegExp(pattern, 'gi'), '%USERPROFILE%')
+    // ends at a separator or the end: home C:\Users\al must not cut C:\Users\alice (N-08)
+    out = out.replace(new RegExp(`${pattern}(?=[\\\\/\\s"'<>|]|$)`, 'gim'), '%USERPROFILE%')
   }
   // any other C:\Users\<name> (another profile, a path written differently)
   // (a profile name may hold spaces: mask up to the next separator — CR-10)

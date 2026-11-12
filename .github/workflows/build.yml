@@ -17,6 +17,8 @@ permissions:
 jobs:
   windows:
     runs-on: windows-latest
+    # a stuck e2e run must not hold the runner for GitHub's 6 hours (CR3-19)
+    timeout-minutes: 90
     permissions:
       contents: write
     steps:

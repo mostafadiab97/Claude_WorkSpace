@@ -17,7 +17,9 @@ const PAGE = 25
 const MAX_CARDS = 150
 
 type Kind = CompareEntry['kind']
-const KIND_LABEL: Record<Kind, string> = T.compare.kinds
+// read when drawing: the language switch replaces the texts in place (CRA-08)
+const kindLabel = (k: Kind): string => (T.compare.kinds as Record<Kind, string>)[k]
+const KINDS: Kind[] = ['added', 'modified', 'moved', 'deleted']
 const KIND_LETTER: Record<Kind, string> = { added: 'A', modified: 'M', moved: 'P', deleted: 'D' }
 
 const when = (iso: string): string => {
@@ -327,9 +329,9 @@ export function ChangesView(props: {
           )}
           <div className="compare__chips" role="group" aria-label={T.compare.show}>
             {/* UX-17: only the kinds that occur (no "Added 0") */}
-            {(Object.keys(KIND_LABEL) as Kind[]).filter((k) => counts[k] > 0).map((k) => (
+            {KINDS.filter((k) => counts[k] > 0).map((k) => (
               <button key={k} type="button" className={kinds.has(k) ? `chip chip--${k} chip--on` : `chip chip--${k}`} aria-pressed={kinds.has(k)} disabled={counts[k] === 0} onClick={() => toggleKind(k)}>
-                {KIND_LABEL[k]} {counts[k]}
+                {kindLabel(k)} {counts[k]}
               </button>
             ))}
             <span className="chip chip--static">{T.compare.linksChip(linksAdded, linksRemoved)}</span>
@@ -431,7 +433,7 @@ export function ChangesView(props: {
                         title={e.summary}
                         onClick={() => goTo(e.id)}
                       >
-                        <span className={`changes__kind changes__kind--${e.kind === 'modified' ? 'modified' : e.kind === 'moved' ? 'renamed' : e.kind}`} title={KIND_LABEL[e.kind]}>
+                        <span className={`changes__kind changes__kind--${e.kind === 'modified' ? 'modified' : e.kind === 'moved' ? 'renamed' : e.kind}`} title={kindLabel(e.kind)}>
                           {KIND_LETTER[e.kind]}
                         </span>
                         <span className="compare__number">{numberLabel(e)}</span>
@@ -492,7 +494,7 @@ export function ChangesView(props: {
                   {visible.slice(range.from, range.to).map((e) => (
                     <section key={e.id} className="compare__card" data-id={e.id} aria-label={T.compare.detailLabel(e.id)}>
                       <header className="changes-view__detail-head compare__card-head">
-                        <span className={`changes__kind changes__kind--${e.kind === 'modified' ? 'modified' : e.kind === 'moved' ? 'renamed' : e.kind}`} title={KIND_LABEL[e.kind]}>
+                        <span className={`changes__kind changes__kind--${e.kind === 'modified' ? 'modified' : e.kind === 'moved' ? 'renamed' : e.kind}`} title={kindLabel(e.kind)}>
                           {KIND_LETTER[e.kind]}
                         </span>
                         <span className="compare__number">{numberLabel(e)}</span>

@@ -342,7 +342,7 @@ export function writeReqif(schema: Schema, items: ReqifItem[], title: string, no
     w('</CHILDREN></SPEC-HIERARCHY>')
     open.pop()
   }
-  const base = items.length ? Math.min(...items.map((x) => x.depth)) : 0
+  const base = items.reduce((m, x) => Math.min(m, x.depth), items.length ? Number.POSITIVE_INFINITY : 0) // no spread over every item (CRA-17)
   items.forEach((x, i) => {
     const depth = Math.min(x.depth - base, (open.length ? (open[open.length - 1] as number) + 1 : 0))
     while (open.length && (open[open.length - 1] as number) >= depth) close()

@@ -11,6 +11,8 @@ import type { IndexCache, IndexedItem, ItemQuery, LinkRef, QueryResult, SyncStat
 
 /** Bump when the table layout changes; an old cache file is then rebuilt automatically. */
 const FORMAT_VERSION = '5'
+/** Rows per transaction when the index is built from scratch (PW21-02). */
+const SYNC_CHUNK = 500
 
 /** A text used inside LIKE: its wildcards and the escape character itself stand for themselves (QA-WP-02). */
 /** White space as JavaScript's trim() sees it (the common kinds): the filter and the editor agree on "empty" (CR-20). */
@@ -279,7 +281,15 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
    */
   const signature = (repo: RequirementsRepo): string => createHash('sha1').update(`${FORMAT_VERSION}|${repo.root}`).digest('hex')
 
-  async function doSync(repo: RequirementsRepo, forceFull: boolean): Promise<SyncStats> {
+  // one sync at a time: a chunked fresh build pauses between chunks, and another sync must not write in between
+  let syncChain: Promise<unknown> = Promise.resolve()
+  const doSync = (repo: RequirementsRepo, forceFull: boolean): Promise<SyncStats> => {
+    const run = syncChain.then(() => syncOnce(repo, forceFull))
+    syncChain = run.catch(() => undefined)
+    return run
+  }
+
+  async function syncOnce(repo: RequirementsRepo, forceFull: boolean): Promise<SyncStats> {
     const started = performance.now()
     useSchema(repo)
     const sig = signature(repo)
@@ -297,19 +307,19 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     const removed = full ? [] : [...known.keys()].filter((p) => !diskPaths.has(p))
 
     // Read changed files first (async, a few at a time), then apply everything in one transaction.
-    const parsed = await mapLimit(changed, 64, async (f) => ({ f, r: await repo.readItemFile(f.path, { allKeysAsFields: true }) }))
+    // …in slices with a real pause between them: files read from memory (an old version) resolve at once, and the
+    // workers kept the process busy without a break for 1.8 s at 10,000 items (PW21-02)
+    const parsed: { f: (typeof changed)[number]; r: Awaited<ReturnType<RequirementsRepo['readItemFile']>> }[] = []
+    for (let k = 0; k < changed.length; k += SYNC_CHUNK) {
+      parsed.push(...(await mapLimit(changed.slice(k, k + SYNC_CHUNK), 64, async (f) => ({ f, r: await repo.readItemFile(f.path, { allKeysAsFields: true }) }))))
+      if (k + SYNC_CHUNK < changed.length) await new Promise((r) => setImmediate(r))
+    }
 
     let added = 0
     let updated = 0
     let unreadable = 0
-    transaction(() => {
-      touched.clear()
-      if (full) clearAll()
-      for (const p of removed) {
-        removePath(p)
-        stmt.deleteFile.run(p)
-      }
-      for (const { f, r } of parsed) {
+    const apply = (rows: typeof parsed): void => {
+      for (const { f, r } of rows) {
         const existed = known.has(f.path)
         removePath(f.path)
         if (r.ok) insertItem(f.path, r.item)
@@ -318,11 +328,38 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         if (existed) updated++
         else added++
       }
-      if (full) stmt.setTopAll.run()
-      else if (touched.size > 0) stmt.setTopFor.run(JSON.stringify([...touched]))
-      touched.clear()
-      stmt.setMeta.run('signature', sig)
-    })
+    }
+    if (full && parsed.length > SYNC_CHUNK) {
+      // a fresh build (first open on this PC, an old version shown the first time): in chunks with a pause between
+      // them, so the window keeps answering — one transaction of 50,000 inserts held the main process 6 s (PW21-02).
+      // The signature is written last: an interrupted build is redone from scratch next time.
+      transaction(() => {
+        touched.clear()
+        clearAll()
+      })
+      for (let k = 0; k < parsed.length; k += SYNC_CHUNK) {
+        transaction(() => apply(parsed.slice(k, k + SYNC_CHUNK)))
+        await new Promise((r) => setImmediate(r))
+      }
+      transaction(() => {
+        stmt.setTopAll.run()
+        touched.clear()
+        stmt.setMeta.run('signature', sig)
+      })
+    } else
+      transaction(() => {
+        touched.clear()
+        if (full) clearAll()
+        for (const p of removed) {
+          removePath(p)
+          stmt.deleteFile.run(p)
+        }
+        apply(parsed)
+        if (full) stmt.setTopAll.run()
+        else if (touched.size > 0) stmt.setTopFor.run(JSON.stringify([...touched]))
+        touched.clear()
+        stmt.setMeta.run('signature', sig)
+      })
     return {
       files: onDisk.length,
       added,
@@ -338,6 +375,7 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
     sync: (repo) => doSync(repo, false),
 
     async syncPaths(repo, paths) {
+      await syncChain // after a running sync (its chunks must not be interleaved)
       useSchema(repo)
       const unique = [...new Set(paths)]
       const results = await mapLimit(unique, 16, async (path) => {

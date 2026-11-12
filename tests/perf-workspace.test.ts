@@ -21,9 +21,9 @@ const quiet = { info: () => undefined, warn: () => undefined, error: () => undef
 
 /** Generous limits (slow CI disks); the targets are about 1 s at 50,000 items. */
 const LIMITS = {
-  1_000: { compareMs: 3_000, saveMs: 1_000, sortMs: 500, versionMs: 5_000 },
-  10_000: { compareMs: 3_000, saveMs: 500, sortMs: 500, versionMs: 8_000 },
-  50_000: { compareMs: 6_000, saveMs: 1_500, sortMs: 1_500, versionMs: 25_000 }
+  1_000: { compareMs: 3_000, saveMs: 1_000, sortMs: 500, versionMs: 5_000, pauseMs: 1_500 },
+  10_000: { compareMs: 3_000, saveMs: 500, sortMs: 500, versionMs: 8_000, pauseMs: 1_500 },
+  50_000: { compareMs: 6_000, saveMs: 1_500, sortMs: 1_500, versionMs: 25_000, pauseMs: 2_000 }
 } as const
 
 const time = async <T>(f: () => Promise<T> | T): Promise<[T, number]> => {
@@ -77,15 +77,26 @@ describe('workspace speed', () => {
         expect(cmp.entries.length).toBe(1)
         expect(cmp.entries[0]?.numberAfter).toBeTruthy()
         const [, sortMs] = await time(() => ws.query({ sort: { by: 'number' }, limit: 100 }))
+        // the longest time the process could not answer anything while the old version was built (PW21-02)
+        let last = performance.now()
+        let longestPause = 0
+        const ticker = setInterval(() => {
+          const now = performance.now()
+          longestPause = Math.max(longestPause, now - last)
+          last = now
+        }, 20)
         const [v, versionMs] = await time(() => ws.openVersion(first))
+        clearInterval(ticker)
+        longestPause = Math.round(longestPause)
         expect(v.ok).toBe(true)
         await ws.closeVersion()
-        console.log(`[perf-ws] ${count} items — compare 1 change ${compareMs} ms, save ${saveMs} ms (median of 5), sort by number ${sortMs} ms, old version first open ${versionMs} ms`)
+        console.log(`[perf-ws] ${count} items — compare 1 change ${compareMs} ms, save ${saveMs} ms (median of 5), sort by number ${sortMs} ms, old version first open ${versionMs} ms (longest pause ${longestPause} ms)`)
         const L = LIMITS[count]
         expect(compareMs).toBeLessThan(L.compareMs)
         expect(saveMs).toBeLessThan(L.saveMs)
         expect(sortMs).toBeLessThan(L.sortMs)
         expect(versionMs).toBeLessThan(L.versionMs)
+        expect(longestPause).toBeLessThan(L.pauseMs)
         await ws.close?.()
       } finally {
         await rm(base, { recursive: true, force: true }).catch(() => undefined)

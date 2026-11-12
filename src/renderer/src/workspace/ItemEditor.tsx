@@ -96,7 +96,8 @@ export function ItemEditor(props: {
   const textPreview = form !== null && base !== null && !editingText && form.text.trim() !== '' && form.text === base.text
   // formatted once per text, not on every keystroke in another field (code review CR-09)
   const previewText = textPreview ? form.text : ''
-  const previewHtml = useMemo(() => (previewText ? renderItemText(previewText) : ''), [previewText])
+  // the same cap as the table (SEC-WP3-24): a huge text is shown plain past it instead of freezing the editor
+  const previewHtml = useMemo(() => (previewText ? renderItemText(previewText, 200_000) : ''), [previewText])
   const dirtyRef = useRef(dirty)
   useEffect(() => {
     dirtyRef.current = dirty

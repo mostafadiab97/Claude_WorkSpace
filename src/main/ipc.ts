@@ -220,7 +220,8 @@ export function registerIpc(services: Services, paths: Paths): void {
       }),
     showInFolder: (_e, path) => {
       const p = v.optStr(path, 'path')
-      if (p) shell.showItemInFolder(p)
+      // only a local absolute path: a UNC path would make Explorer contact that server (SEC-WP3-06)
+      if (p && /^[A-Za-z]:[\\/]/.test(p) && !p.includes('\0')) shell.showItemInFolder(p)
     },
 
     // ---------- workspace
@@ -386,7 +387,15 @@ export function registerIpc(services: Services, paths: Paths): void {
   }
 
   for (const [name, handler] of Object.entries(handlers) as [InvokeMethod, Handlers[InvokeMethod]][]) {
-    ipcMain.handle(Channels[name], handler)
+    // only our own window's page may call (SEC-WP3-09): a frame from anywhere else is refused
+    ipcMain.handle(Channels[name], (e, ...args) => {
+      // (a real event always has the property — null when the frame is gone; only unit-test fakes leave it out)
+      if (e.senderFrame !== undefined) {
+        const url = e.senderFrame?.url ?? ''
+        if (!e.senderFrame || e.senderFrame.parent || !(url.startsWith('file://') || (!app.isPackaged && url.startsWith('http://localhost')))) throw new Error('Refused: unknown caller')
+      }
+      return (handler as (e: Electron.IpcMainInvokeEvent, ...a: unknown[]) => unknown)(e, ...args)
+    })
   }
 
   ipcMain.on(Channels.reportUiError, (_e, message: unknown) => {

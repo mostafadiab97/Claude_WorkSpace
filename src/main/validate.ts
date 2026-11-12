@@ -31,7 +31,10 @@ export function id(v: unknown, what = 'ID'): string {
 /** An absolute path to a file with one of the allowed extensions (a file dropped on the import window). */
 export function importPath(v: unknown, extensions: readonly string[]): string {
   const p = str(v, 'file path')
-  const absolute = /^[A-Za-z]:[\\/]/.test(p) || p.startsWith('/') || (p.startsWith('\\\\') && !/^\\\\[.?]\\/.test(p))
+  // device paths are refused however the slashes are written (\\.\pipe, //./pipe, //?/C: — SEC-WP3-05)
+  const back = p.replace(/\//g, '\\')
+  const absolute = /^[A-Za-z]:\\/.test(back) || p.startsWith('/') || (back.startsWith('\\\\') && !/^\\\\[.?]\\/.test(back))
+  if (/^\\\\[.?]\\/.test(back)) return bad('file')
   const ext = p.slice(p.lastIndexOf('.') + 1).toLowerCase()
   if (!absolute || p.includes('\0') || !extensions.includes(ext)) return bad('file')
   return p

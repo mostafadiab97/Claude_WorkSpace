@@ -17,6 +17,7 @@ describe('CSV', () => {
     expect(csvCell(' padded')).toBe('" padded"')
     expect(csvCell('=SUM(A1)')).toBe("'=SUM(A1)")
     expect(csvCell('- a list item')).toBe('- a list item') // Markdown bullets stay as they are
+    expect(csvCell('-1+2')).toBe("'-1+2") // but a minus that starts a formula is protected (SEC-WP3-19)
   })
 
   it('writes UTF-8 with BOM and CRLF, and reads its own output back', () => {

@@ -2,7 +2,7 @@
 // paths it could misuse: it gets a token for a file it picked in the dialog, and the contents stay here.
 import { randomBytes } from 'node:crypto'
 import { constants as fsConstants } from 'node:fs'
-import { copyFile, readFile } from 'node:fs/promises'
+import { copyFile, readFile, stat } from 'node:fs/promises'
 import { basename, extname } from 'node:path'
 import type { ImportFile } from '../shared/api'
 import JSZip from 'jszip'
@@ -27,7 +27,11 @@ function decodeText(data: Uint8Array): string {
   }
 }
 
+/** Import files and an unpacked .reqif entry are refused above this size (SEC-WP3-07: a zip bomb). */
+const MAX_IMPORT_MB = 200
+
 export async function loadImportFile(path: string): Promise<LoadedFile> {
+  if ((await stat(path)).size > MAX_IMPORT_MB * 1_000_000) throw new Error(T.importMsg.fileTooBig(MAX_IMPORT_MB))
   const data = new Uint8Array(await readFile(path))
   const ext = extname(path).toLowerCase()
   if (ext === '.reqif' || ext === '.reqifz') {
@@ -37,7 +41,9 @@ export async function loadImportFile(path: string): Promise<LoadedFile> {
       const zip = await JSZip.loadAsync(data)
       const entry = Object.values(zip.files).find((f) => !f.dir && f.name.toLowerCase().endsWith('.reqif'))
       if (!entry) throw new Error(T.importMsg.reqifzEmpty)
-      xml = await entry.async('string')
+      const bytes = await entry.async('uint8array')
+      if (bytes.length > MAX_IMPORT_MB * 1_000_000) throw new Error(T.importMsg.fileTooBig(MAX_IMPORT_MB))
+      xml = decodeText(bytes)
     } else xml = decodeText(data)
     return { path, name: basename(path), kind: 'reqif', separator: ',', sheets: readReqif(xml) }
   }

@@ -1268,6 +1268,7 @@ const raw: Texts = {
     noSource: 'لم يُستورَد هذا المستودع من ملف على هذا الجهاز.',
     sourceMissing: (path: string) => `الملف ${path} لم يعد موجودًا.`,
     reqifzEmpty: 'أرشيف .reqifz لا يحتوي على ملف .reqif.',
+    fileTooBig: (mb: number) => `الملف أكبر من ${mb} ميغابايت — أكبر بكثير من ملف متطلبات؛ لم يُقرأ.`,
     notReqif: 'هذا ليس ملف ReqIF (لا يحتوي على REQ-IF-CONTENT).',
     reqifNoUpdate: 'لا يمكن تحديث ملف ReqIF في مكانه: صدّر ملف ReqIF جديدًا بدلًا من ذلك (تصدير ← ReqIF).',
     csvOnlyCopy: 'ملف CSV بلا تنسيق يُحفظ: يُكتب من جديد بالكامل.',

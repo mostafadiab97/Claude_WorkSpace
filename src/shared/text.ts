@@ -1266,6 +1266,7 @@ const en = {
     noSource: 'This repository was not imported from a file on this PC.',
     sourceMissing: (path: string) => `The file ${path} is not there any more.`,
     reqifzEmpty: 'The .reqifz archive holds no .reqif file.',
+    fileTooBig: (mb: number) => `The file is larger than ${mb} MB — far more than a requirements file; it was not read.`,
     notReqif: 'This is not a ReqIF file (it has no REQ-IF-CONTENT).',
     reqifNoUpdate: 'A ReqIF file cannot be updated in place: export a new ReqIF file instead (Export → ReqIF).',
     csvOnlyCopy: 'A CSV file has no formatting to keep: it is written again completely.',

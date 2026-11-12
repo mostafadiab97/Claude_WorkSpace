@@ -55,9 +55,10 @@ const GIT_ENV = (): NodeJS.ProcessEnv => ({ ...process.env, GIT_TERMINAL_PROMPT:
 /**
  * Settings every Git call gets: paths printed as they are, not quoted with octal escapes (W-02: an Arabic document
  * name made merge-tree and log print "requirements/\331\205…", so pulls and history missed those files), and on
- * Windows paths over 260 characters (W-12: a deep project folder + a long document name made commit fail).
+ * Windows paths over 260 characters (W-12: a deep project folder + a long document name made commit fail). No file
+ * monitor program from a received repository's settings is ever started (SEC-WP3-16).
  */
-export const GIT_CONFIG_ARGS: readonly string[] = ['-c', 'core.quotePath=false', ...(process.platform === 'win32' ? ['-c', 'core.longpaths=true'] : [])]
+export const GIT_CONFIG_ARGS: readonly string[] = ['-c', 'core.quotePath=false', '-c', 'core.fsmonitor=false', ...(process.platform === 'win32' ? ['-c', 'core.longpaths=true'] : [])]
 
 /**
  * Reads many files of one commit through a single `git cat-file --batch` process (one process instead of one

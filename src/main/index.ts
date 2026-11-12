@@ -1,5 +1,5 @@
 // Core (main) process entry: creates the window, wires services, registers the UI API.
-import { app, BrowserWindow, dialog, nativeTheme, shell } from 'electron'
+import { app, BrowserWindow, dialog, nativeTheme, session, shell } from 'electron'
 import { join } from 'node:path'
 import { createServices, type Paths } from './composition'
 import { registerIpc } from './ipc'
@@ -105,7 +105,8 @@ function createWindow(services: ReturnType<typeof createServices>): void {
     services.log.error(`UI failed to load: ${description} (${code})`)
   })
 
-  if (process.env['ELECTRON_RENDERER_URL']) {
+  // the dev server only in development: an installed app always loads its own files (SEC-WP3-08)
+  if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
     void win.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
     void win.loadFile(join(__dirname, '../renderer/index.html'))
@@ -114,6 +115,9 @@ function createWindow(services: ReturnType<typeof createServices>): void {
 
 void app.whenReady().then(async () => {
   if (!firstInstance) return
+  // the app asks for no web permission (camera, microphone, notifications…): every request is refused (SEC-WP3-10)
+  session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false))
+  session.defaultSession.setPermissionCheckHandler(() => false)
   const paths = resolvePaths()
   // 0.16: the first start after the switch from ReqMan copies the user's settings over and removes the old folder —
   // only for the installed app in its normal settings folder (never for tests or a --user-data-dir).

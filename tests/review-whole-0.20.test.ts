@@ -239,7 +239,7 @@ describe('0.20.2 whole-project review fixes', () => {
     await g.merge('/r', 'origin/main', false)
     await g.restoreFrom('/r', 'HEAD', ['requirements/a.md'])
     await g.undoLastCommit('/r')
-    for (const c of calls) expect(c.args.slice(0, 2)).toEqual(['-c', 'core.quotePath=false'])
+    for (const c of calls) expect(c.args.slice(0, 4)).toEqual(['-c', 'core.quotePath=false', '-c', 'core.fsmonitor=false'])
     const longOnes = calls.filter((c) => ['add', 'commit', 'switch', 'merge', 'restore'].some((x) => c.args.includes(x)) || (c.args.includes('reset') && c.args.includes('--soft')))
     expect(longOnes.length).toBe(6)
     for (const c of longOnes) expect(c.timeoutMs).toBeGreaterThanOrEqual(15 * 60_000)

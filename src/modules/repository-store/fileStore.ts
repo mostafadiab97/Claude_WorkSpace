@@ -42,7 +42,9 @@ export const isSafeFileId = (id: string): boolean =>
   ![...id].some((c) => c.charCodeAt(0) < 32) &&
   !id.includes('..') &&
   !id.startsWith('.') &&
-  id.trim() === id
+  id.trim() === id &&
+  // Windows device names are not files, even with an extension (NUL, CON, COM1… — SEC-WP3-20)
+  !/^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\.|$)/i.test(id)
 
 const META_DIR = '.reqochet'
 /** ReqMan's name for it: still read, until the user takes the rename (one commit). */

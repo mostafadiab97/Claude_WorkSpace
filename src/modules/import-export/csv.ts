@@ -1,5 +1,5 @@
 /** A field Excel would run as a formula when opening a CSV ("=cmd|…"). Text starting like that gets a leading '. */
-const FORMULA_START = /^[=+@\t\r]/
+const FORMULA_START = /^[=+@\t\r]|^-(?! )/ // "-1+2" too (SEC-WP3-19); a Markdown bullet "- item" stays as it is
 
 /**
  * One CSV cell, as Excel (comma separator) reads it: quoted when it contains a comma, a quote, a line break or

@@ -21,8 +21,8 @@ const quiet = { info: () => undefined, warn: () => undefined, error: () => undef
 
 /** Generous limits (slow CI disks); the targets are about 1 s at 50,000 items. */
 const LIMITS = {
-  1_000: { compareMs: 3_000, saveMs: 1_000, sortMs: 500, versionMs: 5_000, pauseMs: 1_500 },
-  10_000: { compareMs: 3_000, saveMs: 500, sortMs: 500, versionMs: 8_000, pauseMs: 1_500 },
+  1_000: { compareMs: 3_000, saveMs: 1_000, sortMs: 500, versionMs: 5_000, pauseMs: 3_000 },
+  10_000: { compareMs: 3_000, saveMs: 500, sortMs: 500, versionMs: 8_000, pauseMs: 3_000 }, // pause 1.7 s on the Windows runner (0.21.3), 0.3 s on Linux
   50_000: { compareMs: 6_000, saveMs: 1_500, sortMs: 1_500, versionMs: 25_000, pauseMs: 2_000 }
 } as const
 

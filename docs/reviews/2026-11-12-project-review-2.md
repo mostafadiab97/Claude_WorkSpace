@@ -63,7 +63,29 @@ questions (`2026-11-04-public-release-repo.md` §5) — asked in E. Postponed wo
 | Q-3 | `requirements.md` and the sandbox test data public? | Sandbox yes, plan no — **C 12 Nov: neither; instead reqochet's own public requirements as a reqochet project folder, published with every public version** |
 | Q-4 | Issues on the public repository | On, with a template — **C 12 Nov: as recommended** |
 
+## F. Outcome so far (12 Nov 2026, evening)
+
+**Fixed and released / pushed** (details in CHANGELOG 0.21.2, 0.21.3 and the commits "Review 2 Lows …"):
+- All Medium/High: core B-01, B-02; app N-01, N-02, N-03 (W-10); security SEC-WP3-01; QA QW21-01, -1, -43, -67;
+  performance PW21-02 (old-version pause 1.9 → 0.3 s); UI B-01, B-03 (one Tab stop; tabpanels not yet), B-08;
+  Arabic B1, B3, B4; docs N-01…N-06; the owner's O-6 ("Merge into…").
+- Lows: core A-02, A-03, A-04, A-12, A-20, A-21, A-22, A-23, A-24, A-26, A-27, B-03, B-04, B-05, B-07; app N-05, N-08,
+  N-10, N-12, N-13, CRA-08, CRA-10, CRA-11, CRA-14, CRA-17, CRA-18, CRA-19, CR3-19, CR3-26; security SEC-WP3-05,
+  -06, -07, -08, -09, -10, -16, -19, -20, -24; UI UW-15, UW-16, UW-17, UW-18, B-10; Arabic B2, B5 (most), B6, B7,
+  B8, B10, B11, B12, B13; docs N-07, N-08, N-09, N-11, N-14.
+
+**Still open — next round** (each named in its helper report):
+- UI: UW-04 count units (items vs files), UW-07 matrix header titles, UW-08 read-only form look, UW-09 Changes opens
+  with the schema paragraph, UW-10 link vs button styles, UW-11 Arabic table column order, UW-13 parent control,
+  UW-14 document picker in Traceability, UW-19, UW-20 (`role="alert"` for notes), B-04, B-05, B-07, B-09, B-11,
+  tabpanel ids (B-03 rest).
+- Speed (50k "should", O-3): PW-03 gap count on every change, PW-05 Expand all 27 MB, PW-08 big exports in memory,
+  PW21-01 sort by number 1.7 s.
+- Core / app / security Lows not listed above (mostly hardening of hand-edited or crafted files, and messages);
+  Arabic B9, AR-09, AR-13; docs N-15, N-16.
+
 ## Discussion log
 
 - 12 Nov 2026 — review 2 run (8 helpers, without Fable); reports merged; questions Q-1…Q-4 asked; building 0.21.2.
 - 12 Nov 2026 — Q-1 source + docs; Q-2 source-available; Q-3 neither public — reqochet's own public requirements as a published reqochet project instead; Q-4 issues on with a template. Recorded in `2026-11-04-public-release-repo.md` §5.
+- 12 Nov 2026 (evening) — 0.21.2 released; 0.21.3 release restarted by hand after a speed-limit fix; Lows batches pushed; outcome in F.

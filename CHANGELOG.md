@@ -3,6 +3,20 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.21.4 — 12 Nov 2026 — the owner's 0.21.3 report
+- **Copy report** (self-test, diagnostics) works again — 0.21.3 refused every web permission, writing to the clipboard
+  too; clipboard writing is now the one permission allowed (e2e checks the clipboard).
+- **Import into a new document:** the rows show at once — the import told the index the wrong file locations for a
+  document other than the default one (test). When every row already exists (same ID), the wizard now says why
+  Import stays off and how to import the rows as new items.
+- **Delete document** (the owner, 0.21.3 test 3): "Delete…" next to the document picker, with an inline question
+  that names the number of items; links from other documents become broken links; Discard brings back what was
+  committed.
+- Word AI prompt: takes an INPUT FOLDER and an OUTPUT FOLDER path; the output folder becomes the reqochet project.
+
+**Owner (12 Nov 2026), 0.21.2 and 0.21.3:** all steps passed (self-test 25/25); points above found in 0.21.2 test 3,
+0.21.3 test 3 and the self-test page.
+
 ## 0.21.3 — 12 Nov 2026 — speed, screens, Arabic and "Merge into…" (whole-project review 2)
 - **Old version, first open:** the app no longer locks up while it reads the version — the longest pause went from
   1.9 s to 0.3 s at 10,000 items (the index now reads and stores a fresh build in small slices with real pauses;

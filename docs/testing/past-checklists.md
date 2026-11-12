@@ -1,7 +1,15 @@
-# Past manual checklists (v0.0.3 – v0.21.1)
+# Past manual checklists (v0.0.3 – v0.21.2)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.21.2 (data and import safety)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.21.2**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed.** |
+| 2 | In the sandbox folder, copy one item file (`REQ-….md`) by hand into another document's folder, then click reqochet's window. Select the item and try **Delete**. | Delete is refused with "… is in 2 files … Give the copy a new ID"; the original file is still there. Then **Problems → Give the copy a new ID** fixes it (delete the copy afterwards if you like). |
+| 3 | Import `samples/sample-requirements.xlsx` (or any of your Excel sheets) as before. | Works as before. |
 
 ## v0.21.1 (screens and Arabic)
 

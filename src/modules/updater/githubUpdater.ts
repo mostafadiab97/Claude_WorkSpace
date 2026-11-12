@@ -8,6 +8,7 @@ import { parse as parseYaml } from 'yaml'
 import type { UpdateStatus } from '../../shared/api'
 import type { UpdateService } from './index'
 import { newerRelease, parseReleases, revertTargets, type ReleaseInfo } from './versions'
+import { T } from '../../shared/text'
 
 interface Deps {
   /** Only an installed build can update itself; in development the updater is inert. */
@@ -63,16 +64,16 @@ export function createGithubUpdater({ enabled, log, holdFile, updateConfigFile }
       if (!triedApi) {
         triedApi = true
         void viaApi().then(
-          (ok) => ok || set({ state: 'error', message: 'Could not check for updates (offline or GitHub unreachable).' }),
+          (ok) => ok || set({ state: 'error', message: T.coreMsg.updateCheckFailed }),
           (e2) => {
             log.warn(`Update check through the API failed too: ${String(e2)}`)
-            set({ state: 'error', message: 'Could not check for updates (offline or GitHub unreachable).' })
+            set({ state: 'error', message: T.coreMsg.updateCheckFailed })
           }
         )
         return
       }
       // Offline is normal for reqochet; report it gently.
-      set({ state: 'error', message: 'Could not check for updates (offline or GitHub unreachable).' })
+      set({ state: 'error', message: T.coreMsg.updateCheckFailed })
     })
   }
 
@@ -151,10 +152,10 @@ export function createGithubUpdater({ enabled, log, holdFile, updateConfigFile }
     current: () => status,
     listEarlier,
     async installEarlier(version, closeWindow) {
-      if (!enabled) return { ok: false, message: 'Only the installed Windows app can change its version.' }
+      if (!enabled) return { ok: false, message: T.coreMsg.onlyInstalled }
       try {
         const target = (releases.length ? revertTargets(releases, app.getVersion()) : await listEarlier()).find((r) => r.version === version)
-        if (!target) return { ok: false, message: `Version ${version} is not one you can go back to.` }
+        if (!target) return { ok: false, message: T.coreMsg.notAVersion(version) }
         log.info(`Going back to version ${version}: downloading ${target.installerUrl}`)
         const res = await net.fetch(target.installerUrl)
         if (!res.ok) throw new Error(`download failed (${res.status})`)

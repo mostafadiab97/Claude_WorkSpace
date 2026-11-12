@@ -157,7 +157,7 @@ describe('QA filterSummary', () => {
     const s = filterSummary(schema, { search: 'باب', types: 'sys', linkFilter: 'suspect', fieldFilters: { status: 'Draft' } })
     expect(s).toContain('«باب»')
     expect(s).toContain('متطلب نظام')
-    expect(s).toContain('الحالة = مسودة')
+    expect(s.replace(/[\u2066-\u2069\u200f]/g, '')).toContain('الحالة = مسودة') // values are isolated since 0.22 (Arabic B4)
     expect(s).not.toMatch(/Type|Status|Draft/)
     expect(s).not.toContain(', ') // Latin comma in an Arabic sentence
   })

@@ -59,4 +59,30 @@ describe('0.21.2 review 2 fixes', () => {
     expect(parseCsv(many).length).toBe(100_001)
     expect(Date.now() - t).toBeLessThan(5_000)
   })
+
+  it('O-6: Merge into… moves a document into the other one; identical copies go, differing ones stay', async () => {
+    const { ws, root } = await setup()
+    await ws.createDocument('Brakes')
+    await ws.createDocument('Brake System')
+    const mk = async (id: string, title: string): Promise<void> => {
+      const r = await ws.saveItem({ id, type: 'system-requirement', title, fields: {}, text: '', links: [], extra: {}, document: 'Brakes' } as Parameters<WorkspaceService['saveItem']>[0], null)
+      expect(r.ok, r.ok ? '' : r.message).toBe(true)
+    }
+    await mk('REQ-AAAAAAA', 'same')
+    await mk('REQ-BBBBBBB', 'edited later')
+    await mk('REQ-CCCCCCC', 'only here')
+    // the other PC's name: copies of two items, one of them edited
+    for (const id of ['REQ-AAAAAAA', 'REQ-BBBBBBB']) await copyFile(join(root, 'requirements', 'Brakes', `${id}.md`), join(root, 'requirements', 'Brake System', `${id}.md`))
+    const { writeFile, readFile } = await import('node:fs/promises')
+    const f = join(root, 'requirements', 'Brake System', 'REQ-BBBBBBB.md')
+    await writeFile(f, (await readFile(f, 'utf8')).replace('edited later', 'edited on PC B'))
+    await ws.refresh(true)
+    const r = await ws.mergeDocument('Brakes', 'Brake System')
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.differing).toEqual(['REQ-BBBBBBB'])
+    expect(existsSync(join(root, 'requirements', 'Brakes', 'REQ-AAAAAAA.md'))).toBe(false) // identical: removed
+    expect(existsSync(join(root, 'requirements', 'Brakes', 'REQ-BBBBBBB.md'))).toBe(true) // differs: stays
+    expect(existsSync(join(root, 'requirements', 'Brake System', 'REQ-CCCCCCC.md'))).toBe(true) // moved
+  })
 })

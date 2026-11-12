@@ -16,8 +16,15 @@ await scenario('E2E journey', async (ctx) => {
   // IDs no longer show the type (all are REQ-…, 0.9.0): find an item file by the type inside it
   const fileOfType = (dir, type) => readdirSync(dir).find((f) => f.endsWith('.md') && readFileSync(join(dir, f), 'utf8').includes(`\ntype: ${type}\n`))
   console.log('Step 1 — open the repository and create the requirements folder')
+  // what a new user sees first: the start screen with an empty recent list (review 2, UI B-08), light and dark
+  await win.getByRole('button', { name: 'Open repository…' }).waitFor()
+  await shot('00-start-screen-light')
+  await win.emulateMedia({ colorScheme: 'dark' })
+  await shot('00-start-screen-dark')
+  await win.emulateMedia({ colorScheme: 'light' })
   await win.getByRole('button', { name: 'Open repository…' }).click()
   await win.getByText('No requirements folder yet').waitFor()
+  await shot('00-no-requirements-folder')
   check(await win.getByText('This folder is not a Git repository').count() === 0, 'recognised as a Git repository')
   await win.getByRole('button', { name: 'Create requirements folder' }).click()
   await win.locator('.first-run').waitFor()
@@ -146,7 +153,8 @@ await scenario('E2E journey', async (ctx) => {
   // drag it back out to the top level: drop on the empty space below the rows
   const area = await win.locator('.table__scroll').boundingBox()
   await rowOf(stkId).dragTo(win.locator('.table__scroll'), { targetPosition: { x: 300, y: area.height - 12 } })
-  await win.waitForTimeout(600)
+  // wait for the move itself, not a fixed time (failed on the Windows runner after 600 ms — 0.21.2)
+  for (let k = 0; k < 50 && /^parent:/m.test(fileOf('Comfortable temperature')); k++) await win.waitForTimeout(100)
   check(!/^parent:/m.test(fileOf('Comfortable temperature')), 'drop below the rows: back to the top level')
   // drop on the upper edge of a row: placed before it
   const target = await rowOf(infoId).boundingBox()

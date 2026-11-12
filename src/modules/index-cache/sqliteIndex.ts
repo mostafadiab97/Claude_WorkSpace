@@ -414,16 +414,16 @@ export function createSqliteIndexCache(dbFile: string): IndexCache {
         .prepare('SELECT i.id, i.parent FROM items i WHERE i.parent IS NOT NULL AND i.parent <> i.id AND NOT EXISTS (SELECT 1 FROM items p WHERE p.id = i.parent) ORDER BY i.id')
         .all() as { id: string; parent: string }[]
       for (const r of orphans) {
-        issues.push({ itemId: r.id, path: 'parent', message: `Parent ${r.parent} does not exist.`, severity: 'error' })
+        issues.push({ itemId: r.id, path: 'parent', message: T.coreMsg.parentMissing(r.parent as string), severity: 'error' })
       }
       const misnamed = db
         .prepare("SELECT id, path FROM items WHERE path <> id || '.md' AND substr(path, -length(id) - 4) <> '/' || id || '.md' ORDER BY id")
         .all() as { id: string; path: string }[]
       for (const r of misnamed) {
-        issues.push({ itemId: r.id, path: 'file-name', message: `The file ${r.path} holds ${r.id}; it should be named ${r.id}.md.`, severity: 'warning', fix: 'file-name' })
+        issues.push({ itemId: r.id, path: 'file-name', message: T.coreMsg.fileNameWrong(r.path, r.id), severity: 'warning', fix: 'file-name' })
       }
       for (const r of db.prepare('SELECT path FROM files WHERE ok = 0 ORDER BY path').all() as { path: string }[]) {
-        issues.push({ itemId: r.path, path: 'file', message: 'This file could not be read.', severity: 'error' })
+        issues.push({ itemId: r.path, path: 'file', message: T.coreMsg.fileUnreadable, severity: 'error' })
       }
       return issues
     },

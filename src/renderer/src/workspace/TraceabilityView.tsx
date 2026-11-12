@@ -4,7 +4,8 @@ import type { ItemQuery, Schema } from '../../../shared/domain'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
 import { linkName, ruleText, typeName, typeLabel } from '../lib/schema'
-import { closedMark, onTabListKeyDown } from '../lib/keys'
+import { closedMark, onTabListKeyDown, rovingTabs } from '../lib/keys'
+import { isRtlDocument } from '../lib/language'
 
 /** Above this many columns the matrix is shown as a list (T-07); the Excel file always has the grid. */
 const GRID_COLUMNS = 300
@@ -34,7 +35,7 @@ export function TraceabilityView(props: {
     <section className="trace" aria-label={T.trace.title}>
       <div className="compare__head">
         <h2 className="compare__title">{T.trace.title}</h2>
-        <div className="tabs trace__tabs" role="tablist" aria-label={T.trace.tabs} onKeyDown={onTabListKeyDown}>
+        <div className="tabs trace__tabs" role="tablist" aria-label={T.trace.tabs} onKeyDown={onTabListKeyDown} ref={rovingTabs}>
           <button type="button" role="tab" aria-selected={tab === 'coverage'} className={tab === 'coverage' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('coverage')}>
             {T.trace.coverageTab}
           </button>
@@ -336,7 +337,7 @@ function MatrixTab(props: { schema: Schema; query: Omit<ItemQuery, 'limit' | 'of
                           const words = links?.map((x) => `${T.trace.matrixCell(r.id, relation(x.type, x.dir), c.id)}${x.suspect ? ` (${T.trace.matrixSuspect})` : ''}`).join(T.trace.listJoin)
                           return (
                             <td key={c.id} className={links ? (suspect ? 'matrix__cell matrix__cell--suspect' : 'matrix__cell matrix__cell--on') : 'matrix__cell'} title={words} aria-label={words}>
-                              {links ? (suspect ? '⚠' : out && into ? '↔' : out ? '→' : '←') : ''}
+                              {links ? (suspect ? '⚠' : out && into ? '↔' : out !== isRtlDocument() ? '→' : '←') : ''}
                             </td>
                           )
                         })}

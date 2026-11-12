@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { Baseline, GitResult, HistoryPage } from '../../../shared/api'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
-import { onTabListKeyDown } from '../lib/keys'
+import { onTabListKeyDown, rovingTabs } from '../lib/keys'
 
 const when = (iso: string): string => iso.slice(0, 16).replace('T', ' ')
 
@@ -142,7 +142,7 @@ export function HistoryDialog(props: { onClose: () => void; onCompare: (ref: str
             ✕
           </button>
         </header>
-        <div className="history__tabs" role="tablist" onKeyDown={onTabListKeyDown}>
+        <div className="history__tabs" role="tablist" onKeyDown={onTabListKeyDown} ref={rovingTabs}>
           {(['baselines', 'history'] as const).map((t) => (
             <button
               key={t}

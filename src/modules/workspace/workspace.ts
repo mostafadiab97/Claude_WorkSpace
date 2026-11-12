@@ -4,7 +4,7 @@
 // Every operation that writes files, changes the index or runs Git goes through one queue (review D-03).
 import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
-import { access, mkdir, rename, rm, rmdir, writeFile } from 'node:fs/promises'
+import { access, mkdir, readdir, readFile, rename, rm, rmdir, writeFile } from 'node:fs/promises'
 import { basename, join, relative, resolve } from 'node:path'
 import type { CreateBaselineRequest, FolderCheck, GitResult, GitState, MatrixRequest, ImportSettings, MergeAnswers, MergePlan, ImportSource, IndexedItem, QueryResult, RepoInfo } from '../../shared/api'
 import type { GitAdapter } from '../git-adapter'
@@ -256,6 +256,35 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
    * Renames a document folder — or moves the loose item files (document '') into a new document — in one Git commit,
    * so Git keeps every item's history (S-10: a project made before 0.17 names its "items" folder this way).
    */
+  /**
+   * One name for two folders with the same items (the owner's O-6, 10 Nov 2026: two PCs renamed the same document
+   * differently). Every item file of `from` moves into `into`; a file whose ID is already there is removed when both
+   * are byte for byte the same, and left in `from` when they differ (nothing is lost — the user compares those).
+   */
+  const mergeDocument = async (from: string, into: string): Promise<{ ok: true; info: RepoInfo; differing: string[] } | { ok: false; message: string }> => {
+    const s = need()
+    const docs = documentFolders(s.repo.folder)
+    if (from === into || !docs.includes(from) || !docs.includes(into)) return { ok: false, message: T.wsMsg.missing(docs.includes(from) ? into : from) }
+    const differing: string[] = []
+    const a = join(s.repo.folder, from)
+    const b = join(s.repo.folder, into)
+    for (const name of (await readdir(a)).filter((f) => f.endsWith('.md'))) {
+      const src = join(a, name)
+      const dst = join(b, name)
+      if (await exists(dst)) {
+        const [x, y] = await Promise.all([readFile(src), readFile(dst)])
+        if (x.equals(y)) await rm(src)
+        else differing.push(name.replace(/\.md$/, ''))
+      } else await rename(src, dst)
+    }
+    if ((await readdir(a)).length === 0) await rmdir(a).catch(() => undefined)
+    s.repo = await ctx.openRepo(s.repo.root)
+    s.lastSync = syncInfo(await s.index.sync(s.repo))
+    gitOps.invalidate()
+    log.info(`Merged document ${from} into ${into}${differing.length ? `; ${differing.length} differing item(s) left in ${from}` : ''}`)
+    return { ok: true, info: info(), differing }
+  }
+
   const renameDocument = async (from: string, to: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }> => {
     const s = need()
     const n = to.trim()
@@ -574,6 +603,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     renameProjectFolder: q(renameProjectFolder),
     createDocument: q(createDocument),
     renameDocument: q(renameDocument),
+    mergeDocument: q(mergeDocument),
     addLink: q(links.addLink),
     removeLink: q(links.removeLink),
     confirmLinks: q(links.confirmLinks),

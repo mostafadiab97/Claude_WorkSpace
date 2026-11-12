@@ -306,6 +306,12 @@ const en = {
     loose: '(loose files)',
     newDocument: 'New document…',
     renameDocument: 'Rename…',
+    mergeInto: 'Merge into…',
+    mergeIntoTooltip: 'Two names for one document (two PCs renamed it differently): move its items into the other document. Copies that differ stay here for you to compare.',
+    mergeTarget: 'Merge into document',
+    mergeGo: 'Merge',
+    merged: (from: string, into: string) => `"${from}" was merged into "${into}". Commit to share it.`,
+    mergedDiffering: (from: string, count: number) => `${count} item(s) differ from their copy and stay in "${from}" — compare them (Changes), keep the right text, then delete them here.`,
     newName: 'Name of the new document',
     renameName: (name: string) => `New name for ${name}`,
     placeholder: 'e.g. System requirements',
@@ -977,7 +983,7 @@ const en = {
     noProblems: 'No file problems',
     schemaProblem: (path: string, message: string) => `schema.yaml ${path}: ${message}`,
     renewCopyId: 'Give the copy a new ID',
-    whichCopy: (id: string, files: string) => `Nothing tells which file is the copy of ${id} (${files}). Rename or delete the copy by hand, or keep it out of Git until then. If two PCs renamed the same document differently, keep one name: compare the two folders (Changes), copy over any edit you want to keep, then delete the other folder and commit.`,
+    whichCopy: (id: string, files: string) => `Nothing tells which file is the copy of ${id} (${files}). Rename or delete the copy by hand, or keep it out of Git until then. If two PCs renamed the same document differently, keep one name: pick the other document and use **Merge into…** next to the document picker — identical copies are removed, differing ones stay for you to compare.`,
     renewedCopy: (oldId: string, newId: string) => `The copy of ${oldId} is now ${newId}.`,
     renewCopyIdTooltip: (id: string) => `The file copied last (or not yet committed) gets a new ID and file name; the original ${id} stays as it is`,
     fixFileName: 'Fix file name',
@@ -1267,6 +1273,21 @@ const en = {
     hasRemote: 'This repository already has a remote ("origin").'
   },
 
+  coreMsg: {
+    parentMissing: (parent: string) => `Parent ${parent} does not exist.`,
+    fileNameWrong: (path: string, id: string) => `The file ${path} holds ${id}; it should be named ${id}.md.`,
+    fileUnreadable: 'This file could not be read.',
+    readFailed: (why: string) => `Could not read the file: ${why}`,
+    notPlainFile: 'Not a plain file (a link or a folder): not read.',
+    fileTooLarge: (mb: number) => `The file is larger than ${mb} MB: not read.`,
+    noRequirementsFolder: (root: string, missing: string) => `No requirements folder in ${root} (missing ${missing}).`,
+    unknownType: (type: string) => `Unknown item type "${type}".`,
+    alreadyHasFolder: 'This repository already has a requirements folder.',
+    updateCheckFailed: 'Could not check for updates (offline or GitHub unreachable).',
+    onlyInstalled: 'Only the installed Windows app can change its version.',
+    notAVersion: (version: string) => `Version ${version} is not one you can go back to.`,
+    position: 'Position'
+  },
   wsMsg: {
     changedMeanwhile: 'The file changed while reqochet was working on it; nothing was changed. Try again.',
     folderRenameDirty: 'The project folder has changes that are not committed yet (requirements/.reqman). Commit or discard them first, then update the project — the rename commit holds only the rename.',

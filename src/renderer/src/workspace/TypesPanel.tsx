@@ -4,7 +4,7 @@ import type { ItemTypeDef, LinkTypeDef } from '../../../shared/domain'
 import { RulesPanel } from './RulesPanel'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
-import { onTabListKeyDown } from '../lib/keys'
+import { onTabListKeyDown, rovingTabs } from '../lib/keys'
 
 /** A type id from a name: "System Requirement" → "system-requirement" (lower-case letters, digits, dashes). */
 const idFrom = (name: string): string =>
@@ -121,7 +121,7 @@ export function TypesDialog({ info, onSaved, onClose, tab: firstTab = 'items' }:
             ✕
           </button>
         </header>
-        <div className="tabs types__tabs" role="tablist" aria-label={T.typesDialog.title} onKeyDown={onTabListKeyDown}>
+        <div className="tabs types__tabs" role="tablist" aria-label={T.typesDialog.title} onKeyDown={onTabListKeyDown} ref={rovingTabs}>
           <button type="button" role="tab" aria-selected={tab === 'types'} className={tab === 'types' ? 'tabs__tab tabs__tab--active' : 'tabs__tab'} onClick={() => setTab('types')}>
             {T.typesDialog.typesTab}
           </button>

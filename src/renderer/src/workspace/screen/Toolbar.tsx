@@ -120,7 +120,8 @@ export function Toolbar({ searchRef, newRef, ...props }: {
       )}
       <span className="toolbar__spacer" />
       {!props.readOnly && (
-        <>
+        // where + what stay together when the toolbar wraps (review 2, UI B-01)
+        <span className="toolbar__group">
       <select
         className="select-btn select-btn--fit"
         value={props.hasSelection ? props.newWhere : 'end'}
@@ -141,7 +142,7 @@ export function Toolbar({ searchRef, newRef, ...props }: {
           </option>
         ))}
       </select>
-        </>
+        </span>
       )}
     </div>
   )

@@ -266,7 +266,7 @@ export function createCompare(git: GitAdapter) {
             if (pos) {
               pos.before = nb
               pos.after = na
-            } else if (e.kind === 'moved') e.diff.rows.push({ key: 'order', label: 'Position', before: nb, after: na })
+            } else if (e.kind === 'moved') e.diff.rows.push({ key: 'order', label: T.coreMsg.position, before: nb, after: na })
             if (e.kind === 'moved') e.summary = `${nb} → ${na}`
           }
         }

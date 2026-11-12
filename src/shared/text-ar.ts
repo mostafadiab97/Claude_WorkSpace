@@ -4,6 +4,9 @@
 // Numbers are written with Western digits (as in the data); plurals follow Arabic number agreement (pl()).
 import type { Texts } from './text'
 
+/** A user value inside an Arabic sentence keeps its own direction (review 2, Arabic B4). */
+const iso = (v: string): string => `\u2068${v}\u2069`
+
 const n = (count: number): string => count.toLocaleString('en')
 
 /** Arabic counted nouns: 1 → "one" form, 2 → dual, 0 and 3–10 → plural, 11+ → singular accusative after the number. */
@@ -47,8 +50,8 @@ const raw: Texts = {
   app: {
     unsavedTitle: 'تغييرات غير محفوظة',
     unsavedMessage: 'لديك تغييرات غير محفوظة.',
-    unsavedDetail: 'إذا أُغلقت النافذة الآن (ومنها لتثبيت تحديث) فستضيع.',
-    unsavedDiscard: 'تجاهل التغييرات والإغلاق',
+    unsavedDetail: 'إذا أُغلقت النافذة الآن (ومنه إغلاقها لتثبيت تحديث) فستضيع هذه التغييرات.',
+    unsavedDiscard: 'إهمال التغييرات والإغلاق',
     unsavedKeep: 'متابعة التحرير',
     closeRepository: 'إغلاق المستودع',
     settings: 'الإعدادات والتشخيص',
@@ -63,7 +66,7 @@ const raw: Texts = {
     quickStart: 'اقرأ البداية السريعة (15 دقيقة)',
     fromFile: 'مشروع جديد من ملف…',
     fromFileTooltip: 'ابدأ من ملف Excel أو CSV: ينشئ reqochet المجلد ومستودع Git ويستورد الملف',
-    headline: 'متطلبات بإصدارات، مثل الكود تمامًا.',
+    headline: 'متطلبات بنسخ محفوظة، مثل الكود تمامًا.',
     intro: (brand: string) => `يحوّل ${brand} مجلدًا داخل مستودع Git الخاص بمشروعك إلى قاعدة بيانات متطلبات منظّمة وقابلة للربط — بلا خادم وبلا حسابات.`,
     open: 'فتح مستودع…',
     noGit: 'برنامج Git غير مثبّت؛ يمكنك تعديل المتطلبات، لكن لا يمكنك مشاركتها بعد.',
@@ -102,7 +105,7 @@ const raw: Texts = {
     privacy: {
       diagramShortAlt: 'رسم لما يقرؤه reqochet وما يحتفظ به وما يرسله',
       enlarge: 'عرض الرسم بالحجم الكامل',
-      diagramAlt: 'رسم: reqochet على حاسوبك يقرأ مجلد المشروع ويكتب فيه، ويحتفظ بالفهرس والإعدادات والسجلّ في مجلده، ويقرأ ويكتب الملفات التي تختارها فقط، ويشغّل Git؛ يقرأ Git اسمك وبريدك من إعداداته ويطلب تسجيل دخولك من مدير بيانات الاعتماد ويسحب ويدفع إلى مستودعك على GitHub؛ ويسأل reqochet إصدارات GitHub عن التحديثات؛ لا يوجد خادم تتبّع.',
+      diagramAlt: 'رسم: reqochet على جهازك يقرأ مجلد المشروع ويكتب فيه، ويحتفظ بالفهرس والإعدادات والسجلّ في مجلده، ويقرأ ويكتب الملفات التي تختارها فقط، ويشغّل Git؛ يقرأ Git اسمك وبريدك من إعداداته ويطلب تسجيل دخولك من مدير بيانات الاعتماد ويسحب ويدفع إلى مستودعك على GitHub؛ ويسأل reqochet إصدارات GitHub عن التحديثات؛ لا يوجد خادم تتبّع.',
       intro: 'ما يراه reqochet وما يحتفظ به وما يرسله، وما يُسمح له بتغييره. لا حسابات ولا تتبّع ولا خدمة سحابية: تبقى متطلباتك في ملفاتك ومستودعات Git الخاصة بك.',
       sections: [
         {
@@ -114,16 +117,16 @@ const raw: Texts = {
           ]
         },
         {
-          title: 'ما يحتفظ به على هذا الحاسوب',
+          title: 'ما يحتفظ به على هذا الجهاز',
           points: [
             'فهرس بحث لعناصرك (العناوين والنصوص والحقول) لتُفتح 10,000 عنصر بسرعة: \u2066%APPDATA%\\reqochet-dev\\cache\u2069. هو نسخة فقط ويمكن حذفه في أي وقت.',
-            'إعداداتك والسمة وقائمة المشاريع المفتوحة مؤخرًا (مسارات مجلداتها) وما اخترته في الاستيراد: \u2066%APPDATA%\\reqochet-dev\u2069.',
+            'إعداداتك والمظهر وقائمة المشاريع المفتوحة مؤخرًا (مسارات مجلداتها) وما اخترته في الاستيراد: \u2066%APPDATA%\\reqochet-dev\u2069.',
             'سجلّ بما فعله التطبيق (الإجراءات وأسماء الملفات ومعرّفات العناصر ورسائل Git): \u2066%APPDATA%\\reqochet-dev\\logs\u2069. لا يطلب reqochet كلمة مرور أو رمزًا ولا يحتفظ بهما أبدًا؛ وإذا كُتب تسجيل دخول داخل عنوان خادم (\u2066https://name:token@…\u2069) يُستبدل ذلك الجزء بـ *** قبل أن يصل العنوان إلى السجلّ أو تقرير مشكلة.',
             'اختيارات صغيرة للنافذة (الأعمدة، والمستند الذي كنت تنظر إليه) في التخزين الخاص بالنافذة.'
           ]
         },
         {
-          title: 'ما يغادر هذا الحاسوب',
+          title: 'ما يغادر هذا الجهاز',
           points: [
             'السحب والدفع يرسلان متطلباتك ويستقبلانها من المستودعات البعيدة للمشروع (مثل GitHub) بتسجيل دخول Git نفسه. لا يرى reqochet كلمة مرورك أو رمزك أبدًا.',
             'التحقق من التحديثات يسأل GitHub عن أحدث إصدار من reqochet-dev وينزّله. يرى GitHub عنوان IP والإصدار، كما في أي تنزيل.',
@@ -141,7 +144,7 @@ const raw: Texts = {
         {
           title: 'من المفيد أن تعرف',
           points: [
-            'يحتفظ الفهرس والسجلّ بنص المتطلبات على هذا الحاسوب دون تشفير. للمشاريع السرية استخدم تشفير القرص في Windows ‏(BitLocker) — وقد تكون شركتك تفعل ذلك بالفعل.',
+            'يحتفظ الفهرس والسجلّ بنص المتطلبات على هذا الجهاز دون تشفير. للمشاريع السرية استخدم تشفير القرص في Windows ‏(BitLocker) — وقد تكون شركتك تفعل ذلك بالفعل.',
             'يحتفظ Git بكل نسخة مودعة: حذف عنصر يزيله من النسخة الحالية لا من السجلّ. كل من لديه وصول إلى المستودع يرى ذلك كله.',
             'برنامج التثبيت غير موقَّع بعد بشهادة شركة، لذلك قد يسألك Windows هل تثق به.'
           ]
@@ -198,9 +201,9 @@ const raw: Texts = {
     },
     diag: {
       title: 'التشخيص',
-      logFile: 'ملف السجلّ',
+      logFile: 'سجلّ التشغيل',
       yourTheme: 'مظهرك',
-      openLog: 'فتح مجلد السجلّ',
+      openLog: 'فتح مجلد سجلّ التشغيل',
       editTheme: 'تعديل مظهري…',
       checkUpdates: 'البحث عن تحديثات',
       copy: 'نسخ معلومات التشخيص'
@@ -254,12 +257,12 @@ const raw: Texts = {
   },
 
   validate: {
-    sameIdFiles: (count: number, id: string) => `${pl(count, 'ملف واحد', 'ملفان', 'ملفات', 'ملفًا')} بالمعرّف \u2066${id}\u2069 — غالبًا ملف نُسخ يدويًا، أو المستند نفسه أُعيدت تسميته بأسماء مختلفة على حاسوبين (فيحوي المجلدان العناصر نفسها).`,
+    sameIdFiles: (count: number, id: string) => `${pl(count, 'ملف واحد', 'ملفان', 'ملفات', 'ملفًا')} بالمعرّف \u2066${id}\u2069 — غالبًا ملف نُسخ يدويًا، أو المستند نفسه أُعيدت تسميته بأسماء مختلفة على جهازين (فيحوي المجلدان العناصر نفسها).`,
     idFormat: (id: string) => `"${id}" ليس بصيغة معرّفات reqochet (مثل REQ-K7Q3XMB).`,
     unknownType: (t: string) => `نوع عنصر غير معروف "${t}".`,
     emptyTitle: 'العنوان فارغ.',
     required: (field: string) => `غير مكتمل: ${field} مطلوب لهذا النوع من العناصر.`,
-    notAllowed: (v: string, field: string, allowed: string) => `"${v}" ليست قيمة مسموحًا بها في ${field} (المسموح: ${allowed}).`,
+    notAllowed: (v: string, field: string, allowed: string) => `"${iso(v)}" ليست قيمة مسموحًا بها في ${iso(field)} (المسموح: ${iso(allowed)}).`,
     mustNumber: (field: string) => `يجب أن يكون ${field} رقمًا.`,
     mustDate: (field: string) => `يجب أن يكون ${field} تاريخًا بالصيغة YYYY-MM-DD.`,
     mustList: (field: string) => `يجب أن يكون ${field} قائمة.`,
@@ -311,6 +314,12 @@ const raw: Texts = {
     loose: '(ملفات منفردة)',
     newDocument: 'مستند جديد…',
     renameDocument: 'إعادة تسمية…',
+    mergeInto: 'دمج في…',
+    mergeIntoTooltip: 'اسمان لمستند واحد (أعاد جهازان تسميته بأسماء مختلفة): انقل عناصره إلى المستند الآخر. النسخ المختلفة تبقى هنا لتقارنها.',
+    mergeTarget: 'الدمج في المستند',
+    mergeGo: 'دمج',
+    merged: (from: string, into: string) => `دُمج «\u2068${from}\u2069» في «\u2068${into}\u2069». أودِع لمشاركته.`,
+    mergedDiffering: (from: string, count: number) => `${pl(count, 'عنصر واحد يختلف', 'عنصران يختلفان', 'عناصر تختلف', 'عنصرًا يختلف')} عن نسخته ويبقى في «\u2068${from}\u2069» — قارنها (التغييرات)، وأبقِ النص الصحيح، ثم احذفها هنا.`,
     newName: 'اسم المستند الجديد',
     renameName: (name: string) => `اسم جديد لـ ${name}`,
     placeholder: 'مثلًا: متطلبات النظام',
@@ -510,7 +519,7 @@ const raw: Texts = {
     unlink: 'فكّ الربط',
     confirmTooltip: 'تمت المراجعة — الرابط ما زال صحيحًا',
     unlinkTooltip: 'الرابط لم يعد صحيحًا — أزله',
-    removeLabel: (relation: string, id: string) => `إزالة الرابط ${relation} ${id}`,
+    removeLabel: (relation: string, id: string) => `إزالة الرابط ${iso(relation)} ${iso(id)}`,
     removeInTooltip: (id: string) => `إزالة (يغيّر ${id}، حيث يُخزَّن هذا الرابط)`,
     removeTooltip: 'إزالة الرابط'
   },
@@ -609,7 +618,7 @@ const raw: Texts = {
     moveDownTooltip: 'تحريك لأسفل بين العناصر المجاورة (Alt+↓)',
     addChild: 'إضافة عنصر فرعي',
     addChildOption: '+ عنصر فرعي…',
-    notAllowed: (value: string) => `${value} (غير مسموح)`,
+    notAllowed: (value: string) => `${iso(value)} (غير مسموح)`,
     listPlaceholder: 'مفصولة، بفواصل'
   },
 
@@ -748,7 +757,7 @@ const raw: Texts = {
     deleteAnyway: 'الحذف على أي حال',
     noMatch: 'لا يطابق أي فرع.',
     askLabel: 'تغييرات غير مودعة',
-    ask: (count: number, b: string) => `لديك ${changes(count)} غير مودَع. ماذا يحدث ${count === 1 ? 'له' : 'لها'} عند التبديل إلى "${b}"؟`,
+    ask: (count: number, b: string) => `لديك تغييرات غير مودَعة (${n(count)}). ماذا يحدث لها عند التبديل إلى "${iso(b)}"؟`,
     commitFirst: 'أودِعه أولًا',
     take: (count: number, b = '') => `${count === 1 ? 'انقله' : 'انقلها'} إلى ${b || 'الفرع الآخر'}`,
     takeTooltip: 'ممكن عندما يحتوي الفرع الآخر على النسخة نفسها من هذه العناصر؛ وإلا يعرض reqochet العناصر المانعة',
@@ -767,7 +776,7 @@ const raw: Texts = {
     yours: 'نسختك (هذا الفرع)',
     theirs: 'نسختهم (القادمة بالسحب)',
     empty: '(فارغ)',
-    sideLabel: (action: string, value: string) => `${action}: ${value}`,
+    sideLabel: (action: string, value: string) => `${action}: ${iso(value)}`,
     keepYours: 'إبقاء نسختك',
     takeTheirs: 'أخذ نسختهم',
     edit: 'كتابتها بنفسي',
@@ -803,7 +812,7 @@ const raw: Texts = {
     yourEmail: 'بريدك الإلكتروني',
     message: 'رسالة الإيداع',
     messagePlaceholder: 'ما الذي تغيّر ولماذا، مثلًا «تشديد دقة الحرارة بعد مراجعة العميل»',
-    as: (name: string, email: string) => `باسم ${name} <${email}>`,
+    as: (name: string, email: string) => `باسم \u2068${name}\u2069 \u2066<${email}>\u2069`,
     committing: 'جارٍ الإيداع…',
     commit: (count: number) => `إيداع ${changes(count)}`,
     undoAsk: (message: string) => `التراجع عن «${message}»؟ تبقى تغييراته كتغييرات غير مودعة.`,
@@ -873,7 +882,7 @@ const raw: Texts = {
     rangeFrom: 'من',
     rangeTo: 'إلى',
     show: 'عرض هذه الأنواع من التغيير فقط',
-    linksChip: (added: number, removed: number) => `الروابط +${added} −${removed}`,
+    linksChip: (added: number, removed: number) => `الروابط \u2066+${added} −${removed}\u2069`,
     schemaChanged: 'تغيّر المخطط',
     filter: 'تصفية بالمعرّف أو العنوان…',
     filterLabel: 'تصفية التغييرات',
@@ -978,9 +987,9 @@ const raw: Texts = {
     severityWarning: 'تحذير',
     problemCount: (count: number, open: boolean) => `${problems(count)} ${open ? '▾' : '◂'}`,
     noProblems: 'لا مشكلات في الملفات',
-    schemaProblem: (path: string, message: string) => `schema.yaml ${path}: ${message}`,
+    schemaProblem: (path: string, message: string) => `schema.yaml ${iso(path)}: ${iso(message)}`,
     renewCopyId: 'إعطاء النسخة معرّفًا جديدًا',
-    whichCopy: (id: string, files: string) => `لا شيء يوضح أي ملف هو نسخة \u2066${id}\u2069 (\u2066${files}\u2069). أعد تسمية النسخة أو احذفها يدويًا، أو أبقها خارج Git حتى ذلك الحين. إذا أعاد حاسوبان تسمية المستند نفسه بأسماء مختلفة، فأبقِ اسمًا واحدًا: قارن المجلدين (التغييرات)، وانقل أي تعديل تريد الإبقاء عليه، ثم احذف المجلد الآخر وأودِع.`,
+    whichCopy: (id: string, files: string) => `لا شيء يوضح أي ملف هو نسخة \u2066${id}\u2069 (\u2066${files}\u2069). أعد تسمية النسخة أو احذفها يدويًا، أو أبقها خارج Git حتى ذلك الحين. إذا أعاد جهازان تسمية المستند نفسه بأسماء مختلفة، فأبقِ اسمًا واحدًا: اختر المستند الآخر واستخدم «دمج في…» بجوار منتقي المستندات — تُزال النسخ المتطابقة، وتبقى المختلفة لتقارنها.`,
     renewedCopy: (oldId: string, newId: string) => `أصبحت النسخة المكررة من \u2066${oldId}\u2069 الآن \u2066${newId}\u2069.`,
     renewCopyIdTooltip: (id: string) => `يحصل الملف المنسوخ أخيرًا (أو غير المودع بعد) على معرّف واسم ملف جديدين؛ ويبقى الأصل \u2066${id}\u2069 كما هو`,
     fixFileName: 'إصلاح اسم الملف',
@@ -988,7 +997,7 @@ const raw: Texts = {
     fixFailed: (why: string) => `تعذّر إصلاح اسم الملف: ${why}`,
     of: (shown: number, all: number) => `${n(shown)} من ${items(all)}`,
     searchFor: (text: string) => `«${text}»`,
-    filterIs: (name: string, value: string) => `${name} = ${value}`,
+    filterIs: (name: string, value: string) => `${iso(name)} = ${iso(value)}`,
     filteredBy: (what: string) => `مُصفّى: ${what}`,
     clearFiltersStatus: 'إظهار كل العناصر مجددًا',
     filterSep: '، ',
@@ -1015,7 +1024,7 @@ const raw: Texts = {
     orJoin: (names: string[]) => (names.length < 2 ? (names[0] ?? '') : `${names.slice(0, -1).join('، ')} أو ${names[names.length - 1]}`),
     listJoin: '، ',
     matrixNoLink: 'لا رابط',
-    matrixLegend: '→ عنصر الصف يرتبط به · ← هو يرتبط بعنصر الصف · ↔ كلاهما · ⚠ رابط مشكوك فيه · ● (كهرماني) صف بلا أي رابط. مرّر المؤشر فوق العلامة لمعرفة نوع الرابط.',
+    matrixLegend: '← عنصر الصف يرتبط به · → هو يرتبط بعنصر الصف · ↔ كلاهما · ⚠ رابط مشكوك فيه · ● (كهرماني) صف بلا أي رابط. مرّر المؤشر فوق العلامة لمعرفة نوع الرابط.',
     listSep: ': ',
     statusGaps: (count: number) => pl(count, 'ثغرة تغطية واحدة', 'ثغرتا تغطية', 'ثغرات تغطية', 'ثغرة تغطية'),
     noItems: 'لا توجد عناصر من هذا النوع هنا بعد.',
@@ -1117,7 +1126,7 @@ const raw: Texts = {
     atCommit: (commit: string) => `عند الإيداع \u2066${commit}\u2069`,
     atLatest: 'عند آخر إيداع في هذا الفرع',
     pending: 'لم يُدفع بعد',
-    pendingTooltip: 'أُنشئ على هذا الحاسوب؛ ينتقل إلى GitHub مع الدفع التالي',
+    pendingTooltip: 'أُنشئ على هذا الجهاز؛ ينتقل إلى GitHub مع الدفع التالي',
     by: (who: string, when: string) => `\u2068${who}\u2069، \u2066${when}\u2069`,
     compare: 'المقارنة بالحالي',
     open: 'فتح للقراءة فقط',
@@ -1128,7 +1137,7 @@ const raw: Texts = {
     search: 'ابحث بمعرّف الإيداع أو بكلمات من الرسالة',
     more: 'عرض إيداعات أقدم',
     noCommits: 'لا توجد إيداعات مطابقة.',
-    uncommittedAsk: (count: number) => `لديك ${changes(count)} لم تُودَع بعد. أتودعها أولًا لتكون جزءًا من خط الأساس — أم تنشئ خط الأساس دونها؟`,
+    uncommittedAsk: (count: number) => `لديك تغييرات لم تُودَع بعد (${n(count)}). أتودعها أولًا لتكون جزءًا من خط الأساس — أم تنشئ خط الأساس دونها؟`,
     commitFirst: 'الإيداع أولًا ثم إنشاء خط الأساس',
     commitMessageLabel: 'رسالة الإيداع',
     without: 'خط أساس دونها',
@@ -1144,7 +1153,7 @@ const raw: Texts = {
     branchFor: (what: string) => `فرع جديد عند \u2066${what}\u2069`,
     nameRule: 'حروف وأرقام ونقاط وشرطات وشرطات سفلية؛ دون مسافات أو شرطات مائلة.',
     refused: 'الاسم مأخوذ على GitHub',
-    refusedTooltip: 'لدى GitHub خط أساس بهذا الاسم من شخص آخر — يبقى هذا على هذا الحاسوب. أنشئه من جديد باسم آخر.',
+    refusedTooltip: 'لدى GitHub خط أساس بهذا الاسم من شخص آخر — يبقى هذا على هذا الجهاز. أنشئه من جديد باسم آخر.',
     searchButton: 'بحث',
   },
 
@@ -1179,9 +1188,9 @@ const raw: Texts = {
     notCommittedYet: 'لا شيء للدفع. تغييراتك لم تُودَع بعد — أودِعها أولًا.',
     remoteHasAll: 'لا شيء للدفع — الخادم البعيد لديه كل شيء.',
     undoBaseline: (names: string) => `يحدد خط الأساس \u2068${names}\u2069 هذا الإيداع، فلا يمكن التراجع عنه. عدّل العناصر وأودِع من جديد بدلًا من ذلك.`,
-    baselinesRefused: (names: string) => ` لدى GitHub خط أساس باسم \u2068${names}\u2069 بالفعل (أنشأه شخص آخر) — يبقى على هذا الحاسوب فقط؛ أنشئه من جديد باسم آخر.`,
+    baselinesRefused: (names: string) => ` لدى GitHub خط أساس باسم \u2068${names}\u2069 بالفعل (أنشأه شخص آخر) — يبقى على هذا الجهاز فقط؛ أنشئه من جديد باسم آخر.`,
     baselinesPushed: (count: number) => ` ودُفع ${pl(count, 'خط أساس واحد', 'خطا أساس', 'خطوط أساس', 'خط أساس')} أيضًا.`,
-    pushed: (uncommitted: number) => `تم الدفع${uncommitted > 0 ? ` (لم يُضمَّن ${changes(uncommitted)} غير مودَع)` : ''}.`,
+    pushed: (uncommitted: number) => `تم الدفع${uncommitted > 0 ? ` (التغييرات غير المودَعة، وعددها ${n(uncommitted)}، لم تُضمَّن)` : ''}.`,
     nothingToDiscard: 'لا شيء للإهمال.',
     discarded: (count: number) => `أُهمِل ${changes(count)}.`,
     cannotUndo: 'آخر إيداع موجود بالفعل على الخادم البعيد (أو هو أول إيداع)، لذا لا يمكن التراجع عنه هنا.',
@@ -1208,7 +1217,7 @@ const raw: Texts = {
     fileTheirs: 'نسختهم',
     outside: (files: string) => `توقف السحب — لم يتغير شيء. ملفات خارج مجلد المتطلبات تغيّرت على الطرفين (${files}). ادمجها بـ Git خارج reqochet أولًا.`,
     unanswered: 'احسم كل جزء معلَّم أولًا.',
-    invalidAnswer: (item: string, problems: string) => `${item}: لا يمكن حفظ القيمة المكتوبة — ${problems} صحّحها ثم أكمل من جديد.`,
+    invalidAnswer: (item: string, problems: string) => `${iso(item)}: لا يمكن حفظ القيمة المكتوبة — ${problems} صحّحها ثم أكمل من جديد.`,
     moved: 'تغيّر شيء في هذه الأثناء (إيداع أو سحب آخر). اسحب مرة أخرى.',
     pulled: (count: number, combined: number, decided: number) =>
       `${count > 0 ? `تم السحب: تغيّر ${items(count)}` : 'تم السحب. لم يتغير أي عنصر'}${combined > 0 ? `، دُمج ${n(combined)} تلقائيًا` : ''}${decided > 0 ? `، وحسمتَ ${n(decided)}` : ''}.`,
@@ -1223,7 +1232,7 @@ const raw: Texts = {
     switched: (name: string) => `تم التبديل إلى "${name}".`,
     blocking: 'هذه العناصر مختلفة في الفرع الآخر، لذا لا يمكن نقل تغييراتك غير المودعة. أودِعها أو أهملها أولًا.',
     broughtIn: (source: string, count: number, combined: number, decided: number) =>
-      `سُحب من ${source} ${count === 1 ? 'عنصر واحد متغيّر' : count === 2 ? 'عنصران متغيّران' : `${items(count)} متغيّرة`} إلى مجلد عملك${combined > 0 ? ` (دُمج ${n(combined)} تلقائيًا)` : ''}${decided > 0 ? `، وحسمتَ ${n(decided)}` : ''} — لم يُودَع شيء. راجعها في "التغييرات": أبقِ أو تراجع أو أهمِل، ثم أودِع.`,
+      `سُحب من ${iso(source)} ${count === 1 ? 'عنصر واحد متغيّر' : count === 2 ? 'عنصران متغيّران' : `${items(count)} ${count > 10 ? 'متغيّرًا' : 'متغيّرة'}`} إلى مجلد عملك${combined > 0 ? ` (دُمج ${n(combined)} تلقائيًا)` : ''}${decided > 0 ? `، وحسمتَ ${n(decided)}` : ''} — لم يُودَع شيء. راجعها في "التغييرات": أبقِ أو تراجع أو أهمِل، ثم أودِع.`,
     deleteCurrent: 'لا يمكن حذف الفرع الحالي. بدّل إلى فرع آخر أولًا.',
     unmerged: (name: string) => `في "${name}" إيداعات لا توجد في أي فرع آخر. حذفه يضيّعها (ما لم تكن على GitHub).`,
     branchDeleted: (name: string) => `حُذف الفرع "${name}" من هذا الجهاز.`,
@@ -1266,6 +1275,21 @@ const raw: Texts = {
     hasRemote: 'لهذا المستودع خادم بعيد بالفعل ("origin").'
   },
 
+  coreMsg: {
+    parentMissing: (parent: string) => `العنصر الأب \u2066${parent}\u2069 غير موجود.`,
+    fileNameWrong: (path: string, id: string) => `الملف \u2066${path}\u2069 يحوي \u2066${id}\u2069؛ يجب أن يكون اسمه \u2066${id}.md\u2069.`,
+    fileUnreadable: 'تعذّرت قراءة هذا الملف.',
+    readFailed: (why: string) => `تعذّرت قراءة الملف: \u2068${why}\u2069`,
+    notPlainFile: 'ليس ملفًا عاديًا (رابط أو مجلد): لم يُقرأ.',
+    fileTooLarge: (mb: number) => `الملف أكبر من ${mb} ميغابايت: لم يُقرأ.`,
+    noRequirementsFolder: (root: string, missing: string) => `لا يوجد مجلد متطلبات في \u2066${root}\u2069 (ينقص \u2066${missing}\u2069).`,
+    unknownType: (type: string) => `نوع عنصر غير معروف «\u2068${type}\u2069».`,
+    alreadyHasFolder: 'في هذا المستودع مجلد متطلبات بالفعل.',
+    updateCheckFailed: 'تعذّر البحث عن تحديثات (لا اتصال أو تعذّر الوصول إلى GitHub).',
+    onlyInstalled: 'لا يغيّر نسخته إلا تطبيق Windows المثبَّت.',
+    notAVersion: (version: string) => `الإصدار \u2066${version}\u2069 ليس إصدارًا يمكن الرجوع إليه.`,
+    position: 'الموضع'
+  },
   wsMsg: {
     changedMeanwhile: 'تغيّر الملف أثناء عمل reqochet عليه؛ لم يتغير شيء. حاول مرة أخرى.',
     folderRenameDirty: 'في مجلد المشروع تغييرات لم تُودَع بعد (requirements/.reqman). أودِعها أو تجاهلها أولًا، ثم حدّث المشروع — إيداع إعادة التسمية يحمل إعادة التسمية فقط.',

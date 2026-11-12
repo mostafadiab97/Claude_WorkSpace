@@ -2647,6 +2647,13 @@ code {
   row-gap: var(--rm-space-xs);
 }
 
+.toolbar__group {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: var(--rm-space-sm);
+  align-items: center;
+}
+
 .toolbar__search {
   min-width: 120px;
 }

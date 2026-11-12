@@ -17,6 +17,8 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
   const [name, setName] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [merging, setMerging] = useState<string | null>(null) // the target chosen in "Merge into…" (O-6)
+  const [notice, setNotice] = useState<string | null>(null)
   // "Not now" holds for the rest of the session for this project, not only until the bar is drawn again (UX17-15)
   const [later, setLater] = useSessionState(`documents.later.${info.root}`, false)
   const docs = info.documents
@@ -41,6 +43,18 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
     props.onInfo(r.info)
     onDocument(name.trim())
     setNaming(null)
+  }
+  const merge = async (into: string): Promise<void> => {
+    setBusy(true)
+    setError(null)
+    const from = document
+    const r = await window.reqochet.mergeDocument(from, into)
+    setBusy(false)
+    setMerging(null)
+    if (!r.ok) return setError(r.message)
+    props.onInfo(r.info)
+    setNotice(r.differing.length > 0 ? T.documents.mergedDiffering(from, r.differing.length) : T.documents.merged(from, into))
+    onDocument(r.differing.length > 0 ? from : into)
   }
   const start = (kind: 'new' | 'rename', from: string, initial: string): void =>
     props.guard(() => {
@@ -100,7 +114,36 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
               {T.documents.renameDocument}
             </button>
           )}
+          {document !== ALL_DOCUMENTS && document !== '' && docs.filter((d) => d.name !== '' && d.name !== document).length > 0 &&
+            (merging === null ? (
+              <button type="button" className="link-btn" title={T.documents.mergeIntoTooltip} onClick={() => props.guard(() => setMerging(docs.find((d) => d.name !== '' && d.name !== document)?.name ?? null))}>
+                {T.documents.mergeInto}
+              </button>
+            ) : (
+              <span className="document-bar__merge">
+                <select className="select-btn select-btn--fit" aria-label={T.documents.mergeTarget} value={merging} onChange={(e) => setMerging(e.target.value)}>
+                  {docs
+                    .filter((d) => d.name !== '' && d.name !== document)
+                    .map((d) => (
+                      <option key={d.name} value={d.name}>
+                        {d.name}
+                      </option>
+                    ))}
+                </select>
+                <button type="button" className="btn btn--small btn--primary" disabled={busy} onClick={() => void merge(merging)}>
+                  {T.documents.mergeGo}
+                </button>
+                <button type="button" className="btn btn--small" onClick={() => setMerging(null)}>
+                  {T.common.cancel}
+                </button>
+              </span>
+            ))}
         </>
+      )}
+      {notice && (
+        <span className="notice notice--ok document-bar__error" role="status">
+          {notice}
+        </span>
       )}
       {error && (
         <span id="document-bar-error" className="notice notice--error document-bar__error" role="alert">

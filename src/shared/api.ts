@@ -619,6 +619,8 @@ export interface ReqochetApi {
   createDocument(name: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
   /** Renames a document folder, or moves the loose files ('') into a new document, in one commit (S-10). */
   renameDocument(from: string, to: string): Promise<{ ok: true; info: RepoInfo } | { ok: false; message: string }>
+  /** Moves every item of document `from` into `into` (two names for one document — O-6); differing copies stay in `from`. */
+  mergeDocument(from: string, into: string): Promise<{ ok: true; info: RepoInfo; differing: string[] } | { ok: false; message: string }>
   /** Values a field already has in this repository, most used first (suggestions, UX-27). */
   getFieldValues(field: string): Promise<string[]>
   /** Replaces the project's field definitions in schema.yaml and re-opens the repository. */
@@ -815,6 +817,7 @@ export const Channels = {
   renameProjectFolder: 'ws:renameProjectFolder',
   createDocument: 'ws:createDocument',
   renameDocument: 'ws:renameDocument',
+  mergeDocument: 'ws:mergeDocument',
   getFieldValues: 'ws:fieldValues',
   saveSchemaFields: 'ws:saveSchemaFields',
   getTypeUsage: 'ws:getTypeUsage',

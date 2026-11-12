@@ -8,6 +8,7 @@ import { parseSchema, type CoverageRule, type FieldDef } from '../schema'
 import { removeFile, renameFile, writeFileAtomic } from '../safe-files'
 import { checkRepository } from './checks'
 import { ConflictError } from './errors'
+import { T } from '../../shared/text'
 import {
   REQUIREMENTS_FOLDER,
   type FolderState,
@@ -85,7 +86,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
     try {
       schemaText = await readFile(schemaFile, 'utf8')
     } catch {
-      throw new Error(`No requirements folder in ${root} (missing ${REQUIREMENTS_FOLDER}/${META_DIR}/${SCHEMA_FILE}).`)
+      throw new Error(T.coreMsg.noRequirementsFolder(root, `${REQUIREMENTS_FOLDER}/${META_DIR}/${SCHEMA_FILE}`))
     }
     const { schema, problems: schemaProblems } = parseSchema(schemaText)
     const fieldIds = new Set(schema.fields.map((f) => f.id))
@@ -123,7 +124,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
         content = await readFile(join(folder, rel), 'utf8')
       } catch (e) {
         if ((e as NodeJS.ErrnoException).code === 'ENOENT') return null
-        return { ok: false, error: `Could not read the file: ${(e as Error).message}`, revision: '' }
+        return { ok: false, error: T.coreMsg.readFailed((e as Error).message), revision: '' }
       }
       const r = parseItemFile(content, fieldIds)
       return r.ok ? { ok: true, item: r.item, revision: revisionOf(content) } : { ok: false, error: r.error, revision: revisionOf(content) }
@@ -294,11 +295,11 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
       async readItemFile(path, opts) {
         try {
           const info = await lstat(join(folder, path))
-          if (!info.isFile()) return { ok: false, error: 'Not a plain file (a link or a folder): not read.' }
-          if (info.size > MAX_ITEM_FILE_BYTES) return { ok: false, error: `The file is larger than ${MAX_ITEM_FILE_BYTES / 1_000_000} MB: not read.` }
+          if (!info.isFile()) return { ok: false, error: T.coreMsg.notPlainFile }
+          if (info.size > MAX_ITEM_FILE_BYTES) return { ok: false, error: T.coreMsg.fileTooLarge(MAX_ITEM_FILE_BYTES / 1_000_000) }
           return parseItemFile(await readFile(join(folder, path), 'utf8'), opts?.allKeysAsFields ? ALL_KEYS : fieldIds)
         } catch (e) {
-          return { ok: false, error: `Could not read the file: ${(e as Error).message}` }
+          return { ok: false, error: T.coreMsg.readFailed((e as Error).message) }
         }
       },
 
@@ -343,7 +344,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
 
       createItem(typeId, takenIds, init = {}) {
         const type = schema.itemTypes.find((t) => t.id === typeId)
-        if (!type) throw new Error(`Unknown item type "${typeId}".`)
+        if (!type) throw new Error(T.coreMsg.unknownType(typeId))
         const fields: Record<string, FieldValue> = {}
         for (const f of schema.fields) if (f.default !== undefined) fields[f.id] = f.default
         const item: Item = {
@@ -411,7 +412,7 @@ export function createFileRepositoryStore(defaultSchemaFile: string): Repository
     async initialize(root, firstDocument = ITEMS_DIR) {
       const folder = folderOf(root)
       if ((await exists(join(folder, META_DIR, SCHEMA_FILE))) || (await exists(join(folder, LEGACY_META_DIR, SCHEMA_FILE))))
-        throw new Error('This repository already has a requirements folder.')
+        throw new Error(T.coreMsg.alreadyHasFolder)
       await mkdir(join(folder, META_DIR), { recursive: true })
       // a new project starts with one document folder, never loose items (S-10)
       const doc = isDocumentName(firstDocument) ? firstDocument : ITEMS_DIR

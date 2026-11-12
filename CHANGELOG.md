@@ -17,6 +17,12 @@ version it was about, and what it led to.
 - **Core messages in Arabic (W-10):** file problems, updater messages and "Position" in Compare now come from the
   text files in both languages.
 - Not changed: sort by outline number (a lighter query did not help in measurements — kept as it is, 0.2 s at 10k).
+- Also in this release (pushed before the manual release start): the review-2 Low fixes — safe discard check,
+  kept unusual titles and order numbers, refresh after interrupted moves/imports/pulls, caller check on window calls,
+  web permissions refused, device paths and reserved names refused, 200 MB import cap, CSV minus formulas, Settings
+  opens on Appearance, bigger tree toggle, export note closes itself, clearer old-version banner, Arabic counts.
+- Release: the first two runs failed on the new old-version pause limit (1.7 s on the Windows runner, limit now 3 s);
+  the release workflow was started by hand (reported to the owner).
 
 ## 0.21.2 — 12 Nov 2026 — data and import safety (whole-project review 2)
 From `docs/reviews/2026-11-12-project-review-2.md`; each case reproduced in a test first (`tests/review-2-0.21.2.test.ts`,

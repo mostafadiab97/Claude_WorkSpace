@@ -1,7 +1,17 @@
-# Past manual checklists (v0.0.3 – v0.21.0)
+# Past manual checklists (v0.0.3 – v0.21.1)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.21.1 (screens and Arabic)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.21.1**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed.** |
+| 2 | Open the sandbox, click an item so the editor opens, and make the window narrower. | The toolbar wraps to a second row; **+ New item** stays fully visible. |
+| 3 | Hover the status bar's coverage-gaps label; change a field in **Fields** (no rename) and hover **Changes … + settings**. | The gaps tooltip explains "missing links … not an error in the files"; the status bar says "No file problems"; the Changes tooltip explains "+ settings". No "choices ar are gone" warning in Fields. |
+| 4 | In the editor, click the **Details** tab and press → and ←; do the same in Traceability (Coverage / Matrix). | The arrows move between the tabs. |
+| 5 | Switch to **Arabic**. In the table tree press ← on a closed heading, → on an open one; open **Changes → Compare**. | ← opens, → closes; closed headings show ◂; the compare choices say «اختيار نسختين…». |
 
 ## v0.21.0 (speed)
 

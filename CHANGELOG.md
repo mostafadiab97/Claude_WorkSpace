@@ -3,6 +3,21 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.21.3 — 12 Nov 2026 — speed, screens, Arabic and "Merge into…" (whole-project review 2)
+- **Old version, first open:** the app no longer locks up while it reads the version — the longest pause went from
+  1.9 s to 0.3 s at 10,000 items (the index now reads and stores a fresh build in small slices with real pauses;
+  syncs run one at a time; PW21-02). The speed test now measures that pause.
+- **"Merge into…"** next to the document picker (the owner's O-6, 10 Nov): moves the items of one document into
+  another — identical copies are removed, copies that differ stay for comparing, nothing is lost. For the case "two
+  PCs renamed the same document differently"; the Problems message now points to it.
+- **Screens:** "+ New item" and its "At the end" choice stay together when the toolbar wraps (UI B-01); every row of
+  tabs is one Tab stop, the arrows move inside it (B-03); the start screen is in the e2e screenshots (B-08).
+- **Arabic:** user values keep their direction in ~10 messages (B4), number agreement (B1, B2), the e-mail brackets
+  (B3), «جهاز» everywhere, «سجلّ التشغيل» for the log file, «إهمال» for discard, matrix arrows mirrored (B7).
+- **Core messages in Arabic (W-10):** file problems, updater messages and "Position" in Compare now come from the
+  text files in both languages.
+- Not changed: sort by outline number (a lighter query did not help in measurements — kept as it is, 0.2 s at 10k).
+
 ## 0.21.2 — 12 Nov 2026 — data and import safety (whole-project review 2)
 From `docs/reviews/2026-11-12-project-review-2.md`; each case reproduced in a test first (`tests/review-2-0.21.2.test.ts`,
 QA's `tests/qa-whole-0.21-*.test.ts`, more cases in `tests/review-whole-0.20.test.ts`, `tests/speed-0.21.0.test.ts`).

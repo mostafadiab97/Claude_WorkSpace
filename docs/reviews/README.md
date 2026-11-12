@@ -8,6 +8,7 @@ recorded in `docs/design/decisions.md` and `docs/design/roadmap.md` (source of t
 
 | Date | File | What it is | State |
 | --- | --- | --- | --- |
+| 12 Nov 2026 | `2026-11-12-project-review-2.md` | Whole-project review 2 on 0.21.1 (8 helpers): every open point of the earlier reports re-checked + new findings; plan 0.21.2 data/import → 0.21.3 speed → 0.21.4 screens/Arabic → documents | **Open** — Q-1…Q-4 (public repository) |
 | 10 Nov 2026 | `2026-11-10-project-review.md` | Whole-project review before the first release, eight helpers on 0.20.1: 6 High / 44 Medium / 86 Low; plan 0.20.2 data safety → 0.21.0 speed → screens, Arabic, docs | **Decided** — O-1…O-8 answered; built in 0.20.2, 0.21.0, 0.21.1; documents in 0.21.2 |
 | 8 Nov 2026 | `2026-11-08-1b-traceability.md` | Theme 1b open details T-01…T-08 (where the views live, starter rules, matrix size…) | **Done** — answered 8 Nov, built in 0.20.0 |
 | 5 Nov 2026 | `2026-11-05-project-review.md` | Whole-project review by seven helpers: 6 High / 41 Medium / 101 Low; plan 0.16.3 → 0.16.4 → 1a | **Done** — answered and built in 0.16.3–0.18.0 (move to `done/` with the next tidy-up) |

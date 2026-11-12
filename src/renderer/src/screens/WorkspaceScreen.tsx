@@ -126,6 +126,12 @@ export function WorkspaceScreen({
   // the import wizard; a new project from a file opens it straight away (and commits the import)
   const [importing, setImporting] = useState<{ file: ImportFile | null; newProject: boolean } | null>(importFile ? { file: importFile, newProject: true } : null)
   const [exported, setExported] = useState<{ path: string; count: number } | null>(null)
+  // the "Exported …" note closes by itself like the other success notes (UI B-10)
+  useEffect(() => {
+    if (!exported) return
+    const t = setTimeout(() => setExported(null), 12_000)
+    return () => clearTimeout(t)
+  }, [exported])
   const [imported, setImported] = useState<(ImportResult & { ok: true }) | null>(null)
   const [target, setTarget] = useState<EditorTarget | null>(null)
   // An action waiting for "Save and continue / Discard / Keep editing" (switching item, closing, pushing)

@@ -4,7 +4,7 @@
 > product owner, **R** = recommendation, **I** = inference, **F/K** = evidence (see `analysis.md` → Sources).
 
 **What this is:** how the prototype was built (M0–M6), where every requirement stands, the release plan with every
-version so far and the confirmed plan frame for the next ones. The current version and next step: `CLAUDE.md` →
+version so far and the confirmed plan frame for the next ones. The current version and next step: `docs/STATUS.md`.
 "Status" and `CHANGELOG.md`.
 
 ## Prototype implementation plan

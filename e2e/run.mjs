@@ -2,9 +2,9 @@
 // profile, and prints one summary. A failing scenario does not stop the others (review T-01).
 //   npm run build && npm run test:e2e [-- name ...]     (e.g. npm run test:e2e -- fixes)
 import { spawn } from 'node:child_process'
-import { readdirSync } from 'node:fs'
+import { readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
-import { root } from './harness.mjs'
+import { outDir, root } from './harness.mjs'
 
 const dir = join(root, 'e2e', 'scenarios')
 const wanted = process.argv.slice(2)
@@ -12,6 +12,8 @@ const all = readdirSync(dir)
   .filter((f) => f.endsWith('.e2e.mjs'))
   .filter((f) => wanted.length === 0 || wanted.some((w) => f.startsWith(w)))
 const PARALLEL = Number(process.env.E2E_PARALLEL ?? 2)
+// a full run starts with no screenshots of earlier runs, so a review never looks at stale pictures (UW-16)
+if (wanted.length === 0) for (const f of readdirSync(outDir)) if (f.endsWith('.png')) rmSync(join(outDir, f), { force: true })
 
 // Electron downloads its program on first use. Do that once, here: two scenarios starting at the same moment
 // would both try to unpack it, and Windows refuses the second (the file is in use).

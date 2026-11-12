@@ -85,6 +85,8 @@ On the start screen:
 ### 1.6 Share: commit and push
 
 1. Click **Changes** in the top bar: every requirement you changed is listed, field by field, old and new side by side.
+   When it says **+ settings**, the project settings changed too (item types, fields, link types, coverage rules in
+   `schema.yaml`); they are committed together with the requirements.
 2. Write a commit message on the right ("Add door lock requirements") and click **Commit**.
 3. Click **Push**: your colleagues get the change with **Pull**. (Or use **▾ → Commit and push** next to Commit.)
 

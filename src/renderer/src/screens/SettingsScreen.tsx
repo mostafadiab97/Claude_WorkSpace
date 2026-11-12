@@ -33,7 +33,7 @@ export function SettingsScreen(props: {
   startGuidePage?: string
 }) {
   const lang = useLanguage()
-  const [view, setView] = useState<View>(props.startGuidePage !== undefined ? { kind: 'guide', page: props.startGuidePage } : { kind: 'settings', page: 'env' })
+  const [view, setView] = useState<View>(props.startGuidePage !== undefined ? { kind: 'guide', page: props.startGuidePage } : { kind: 'settings', page: 'appearance' }) // the first thing a new user looks for (UW-15)
   const main = useRef<HTMLDivElement>(null)
   // the guide's topics fold under "User guide" (the owner on 0.14.4 step 2); open while a guide page is shown
   const [guideOpen, setGuideOpen] = useState(false)

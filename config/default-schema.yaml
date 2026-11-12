@@ -54,7 +54,7 @@ linkTypes:
   - { id: implements, name: implements,    reverseName: implemented by, labels: { ar: ينفّذ }, reverseLabels: { ar: منفَّذ بـ } }
   - { id: verifies,   name: verifies,      reverseName: verified by, labels: { ar: يتحقّق من }, reverseLabels: { ar: متحقَّق منه بـ } }
   - { id: mitigates,  name: mitigates,     reverseName: mitigated by, labels: { ar: يخفّف }, reverseLabels: { ar: مخفَّف بـ } }
-  - { id: relates-to, name: relates to,    reverseName: related to, labels: { ar: مرتبط بـ }, reverseLabels: { ar: مرتبط بـ } }
+  - { id: relates-to, name: relates to,    reverseName: related to, labels: { ar: يرتبط بـ }, reverseLabels: { ar: مرتبط بـ } }
 
 # Coverage rules (theme 1b): what a complete project looks like. reqochet only warns — an item that breaks a rule is
 # a "coverage gap" (Traceability → Coverage, the table, Problems). Incoming = other items link to this one.

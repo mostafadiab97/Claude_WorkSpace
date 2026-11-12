@@ -272,3 +272,13 @@ vertical text limits its width, not its height. Rotate the text inside the cell,
   `syncPaths` waits for a running sync. A new write path into the index must go through the same chain.
 - **Same ID in two files:** saving and deleting are refused (`T.wsMsg.idInTwoFiles`) until "Give the copy a new ID" —
   never by-pass it with a write by ID only.
+
+## Windows release runner timings (0.21.1–0.21.3)
+
+- The Windows runner is several times slower than the Linux container for many small files: the 50,000-item
+  workspace speed test took over 15 min there (now `PERF_WS50=1` only), the 3,000-file rename test needed more than
+  120 s (now 300 s), and the old-version pause is 1.7 s there against 0.3 s on Linux (limit 3 s). Set speed limits
+  from a Windows CI number, not from the container.
+- A release that fails after the version bump needs `node tools/ci.mjs release` (a manual start) once fixed; the owner
+  is told about every manual start (CLAUDE.md, report every GitHub change).
+

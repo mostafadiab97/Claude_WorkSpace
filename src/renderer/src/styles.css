@@ -864,7 +864,7 @@ code {
 
 .tree__toggle {
   font: inherit;
-  width: 20px;
+  width: 24px; /* a 24 px target, as for every other control (UW-18) */
   height: 24px;
   flex-shrink: 0;
   border: 0;

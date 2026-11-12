@@ -84,10 +84,16 @@ match "the tool files with the documentation".
   use `name: reqochet`, `productName: reqochet`, appId `com.reqochet.app` (this repository: `reqochet-dev` everywhere),
   otherwise the two tools would install into the same folder.
 
-## 5. Open questions for the owner (later)
+## 5. Questions for the owner — decided 12 Nov 2026
 
-1. Source + docs public (as proposed), or installers only?
+1. **Source + docs public** (as proposed in §2): app source, tests, user guide and engineering docs; planning,
+   reviews and AI files stay in this repository.
 2. ~~Update feed~~ — decided: each tool updates from its own repository (4a).
-3. Licence (open source / source-available / all rights reserved)?
-4. `requirements.md` public? The sandbox test data public?
-5. Issues on the public repository: on or off?
+3. **Licence: source-available** (free for internal / non-commercial use, commercial use needs a licence — the exact
+   licence text, e.g. Business Source License or PolyForm, is chosen when the public repository is made).
+4. **Neither `requirements.md` nor the sandbox data is public.** Instead, reqochet's own *public* requirements (what
+   the tool does, as a user sees it) become a reqochet project folder — `requirements/` in reqochet's format — that is
+   published with every public version: realistic fictional-free sample data and a living specification at once.
+5. **Issues on, with a template** (asks for the app's problem report).
+
+(Original questions, 4 Nov: source public or installers only; licence; requirements and sandbox public; issues.)

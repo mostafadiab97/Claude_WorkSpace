@@ -1,6 +1,6 @@
 # Project review 2 — 12 Nov 2026 (after v0.21.1)
 
-**Status: findings merged; owner questions asked (section E); fixes in progress.**
+**Status: findings merged; owner questions answered 12 Nov (section E); fixes in progress.**
 
 Second whole-project review, on the owner's request after the free weekly reset (12 Nov 2026): eight helpers on the
 frozen commit `a8244a2` (pack `agents/whole-project-0.21-pack.md`), each with two jobs — (A) every point of its earlier
@@ -58,11 +58,12 @@ questions (`2026-11-04-public-release-repo.md` §5) — asked in E. Postponed wo
 
 | ID | Question | Recommendation |
 | --- | --- | --- |
-| Q-1 | Public repository: source code and documents public (as the 4 Nov proposal), or installers only? | Source + user and engineering docs public |
-| Q-2 | Licence | (see the question round) |
-| Q-3 | `requirements.md` and the sandbox test data public? | Requirements no (product planning), sandbox yes (fictional, useful for testers) |
-| Q-4 | Issues on the public repository | On, with a template |
+| Q-1 | Public repository: source code and documents public (as the 4 Nov proposal), or installers only? | Source + user and engineering docs public — **C 12 Nov: as recommended** |
+| Q-2 | Licence | All rights reserved — **C 12 Nov: source-available** |
+| Q-3 | `requirements.md` and the sandbox test data public? | Sandbox yes, plan no — **C 12 Nov: neither; instead reqochet's own public requirements as a reqochet project folder, published with every public version** |
+| Q-4 | Issues on the public repository | On, with a template — **C 12 Nov: as recommended** |
 
 ## Discussion log
 
 - 12 Nov 2026 — review 2 run (8 helpers, without Fable); reports merged; questions Q-1…Q-4 asked; building 0.21.2.
+- 12 Nov 2026 — Q-1 source + docs; Q-2 source-available; Q-3 neither public — reqochet's own public requirements as a published reqochet project instead; Q-4 issues on with a template. Recorded in `2026-11-04-public-release-repo.md` §5.

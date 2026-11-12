@@ -39,9 +39,12 @@ accounts — who may read or change requirements is decided by your GitHub repos
 ### 1.1 What you need
 
 - A Windows 10 or 11 PC. No administrator rights are needed.
-- **Git for Windows** (free): <https://git-scm.com/download/win>. reqochet works without Git, but cannot share,
-  branch or keep history.
-- A GitHub repository for your project, cloned to your PC (or an empty one — see 1.3).
+- **Git for Windows** (free): <https://git-scm.com/download/win>. Without Git reqochet still edits requirements, but
+  cannot commit, share, branch or keep history — the start screen says so.
+- Your project's Git repository on your PC: your team's GitHub repository, cloned (GitHub Desktop, or
+  `git clone <address>` in a terminal). To start from nothing, use **New project from a file…** (1.3) — it creates the
+  folder and the Git repository for you. A plain folder that is not a Git repository opens too, with a warning, but
+  without history or sharing.
 
 ### 1.2 Install
 
@@ -491,7 +494,8 @@ Press **Ctrl+/** in the main window to open this page. Buttons show their shortc
 | **Ctrl+N** | New item: opens the list of types. |
 | **Alt+↑ / Alt+↓** | Move the open item up or down among its siblings (after saving). |
 | **↑ / ↓** (in the table) | Previous / next row; the editor follows. |
-| **→ / ←** (in the table) | Open a level / close it, or go to the parent. |
+| **→ / ←** (in the table) | Open a level / close it, or go to the parent (in Arabic the other way round: ← opens, → closes). |
+| **→ / ←, Home / End** (on a row of tabs) | Next / previous tab, first / last tab — editor, Changes, Traceability, item types, Versions. |
 | **Menu key / Shift+F10 / Delete** (in the table) | The row's menu: open, export, delete. |
 | **Enter** (in the table) | Into the open item's fields. |
 | **Ctrl+click / Shift+click** | Choose several rows (to move or export them together). |

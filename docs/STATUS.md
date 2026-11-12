@@ -52,18 +52,18 @@ sandbox, `Claude_SandBox` and `Claude_SandBox_B`, still on his PC) — self-test
 points on the branch panel went into 0.12.1. He has no DOORS/Jama to try ReqIF: exports are validated against the
 official schema in `tests/reqif.test.ts` (`tests/fixtures/reqif-schema/`, xmllint-wasm).
 
-Automated tests: 617 unit tests (with a coverage floor) + 14 e2e scenarios (`trace-0.20`, `rows-0.19`, `history-0.18`, `journey`, `fixes`, `excel`, `branches`,
+Automated tests: 734 unit tests (0.21.2) (with a coverage floor) + 14 e2e scenarios (`trace-0.20`, `rows-0.19`, `history-0.18`, `journey`, `fixes`, `excel`, `branches`,
 `language`, `health`, `qa-0.15.0-polish`, `qa-0.16.0-rename`, `fixes-0.16.3`, `fixes-0.16.4`, `structure-0.17`) + the 25-step in-app release self-test + the CI acceptance run on the installed app; what each covers and every speed measurement: `docs/TESTING.md` → "Automated
 checks in detail".
 
-## Where we are right now (10 Nov 2026) — read this first
+## Where we are right now (12 Nov 2026) — read this first
 
-- **Built and accepted by the owner:** everything up to **0.20.1** (theme 1 traceability is complete: documents,
-  types window, baselines, old versions in the table, coverage, impact, matrix). The CTO approved a pilot with a
-  complete team (3 Nov); the name is **reqochet** (0.16.0; this repository builds reqochet-dev).
-- **Whole-project review before the first release (10 Nov):** `docs/reviews/2026-11-10-project-review.md` —
-  136 findings (6 High), all owner questions answered (O-1…O-7). Order: **0.20.2 data safety** → **0.21.0 speed**
-  (10k items a must, 50k a should) → screens, Arabic and documents → later items when their area is touched.
+- **Built and accepted by the owner:** everything up to **0.21.1** (theme 1 traceability complete; the first
+  whole-project review's fixes 0.20.2 data safety, 0.21.0 speed, 0.21.1 screens and Arabic, plus its documents).
+  The CTO approved a pilot with a complete team (3 Nov); the name is **reqochet** (this repository builds reqochet-dev).
+- **Whole-project review 2 (12 Nov):** `docs/reviews/2026-11-12-project-review-2.md` — every open point of all
+  earlier helper reports re-checked plus new findings; the public-repository questions decided (Q-1…Q-4). Being fixed
+  in order: **0.21.2 data and import safety** → speed → screens and Arabic → documents (status in the version table).
 - **Release plan and themes:** `docs/design/roadmap.md` (theme 2 daily comfort, 3a rich text, 3b documents out,
   4 review on GitHub, 5 engineering traceability, 6 later/commercial); decisions in `docs/design/decisions.md`;
   the planning discussion (P-xx) in `docs/reviews/2026-11-01-planning-discussion.md`.

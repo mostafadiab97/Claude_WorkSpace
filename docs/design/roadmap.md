@@ -162,7 +162,8 @@ X-02).
 | **0.20.2** | Whole-project review: data safety (`docs/reviews/2026-11-10-project-review.md`) | Copied children, Arabic document names in Git, link extras in merges, old-version export, CSV/Excel import limits, Compare rename pairing, Git time limits, close before installers, explicit push, CI install without scripts, Electron 45.2.3, `%USERPROFILE%` in reports |
 | **0.21.0** | Speed at 50k (O-3: 10k must, 50k should) | Compare of two commits 10.5 → 1.1 s, save 6 ms, sort by number 0.7 s, old version without freezing, workspace speed test in CI |
 | **0.21.1** | Screens and Arabic (review) | Toolbar wraps, Fields warning bug, settings and gaps tooltips, double-rename message, tab arrow keys, Arabic arrows and «نسخة» |
-| *0.21.2 (next)* | *Documents (review W-60…W-63)* | *README, user guide §16, architecture and onboarding details* |
+| — | Documents from review 1 (11 Nov, no version) | README, user guide §16, architecture and onboarding details |
+| **0.21.2** | Review 2: data and import safety | Same ID in two files, CSV short rows, Excel wide/merged sheets, strict fast reader, edited links kept in merges |
 | **Release plan (C, 2 Nov 2026)** | — | 0.14 rename + health → 0.15 1a structure → 0.16 1b traceability views (pilot can start) → 0.17 daily comfort → 0.18 rich text → 0.19 documents out → 0.20 review basics → 0.21 pull requests in the app → 0.22 verification → 0.23 sharing + help → 0.24 AI → later commercial; a stabilisation patch after every theme; details in `docs/reviews/2026-11-01-planning-discussion.md` |
 | *Proposal A (R)* | *New name + traceability* | *Proposed 31 Oct 2026; order to be settled in the planning discussion (the owner, 31 Oct):* the rename (`docs/reviews/done/2026-10-31-rename-impact.md`) once the name is chosen; traceability matrix and coverage; item and link types in the GUI; saved views; bulk edit |
 | *Proposal B (R)* | *Documents out* | Word and PDF export, HTML publishing, Markdown preview |

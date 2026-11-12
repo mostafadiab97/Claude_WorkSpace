@@ -3,38 +3,6 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
-## 0.20.2 — 10 Nov 2026 — data safety (whole-project review before the first release)
-The owner's decisions on the review (`docs/reviews/2026-11-10-project-review.md`, O-1…O-7, 10 Nov 2026): data safety
-first, then speed, then screens, Arabic and documents. Each fix below was reproduced in a test first
-(`tests/review-whole-0.20.test.ts`, QA's `tests/qa-whole-0.20-journeys.test.ts`).
-- **W-01** "Give the copy a new ID" on a copied heading could rewrite the **original** child instead of the copy's
-  child (when the copy's document sorts after the original's). The save now writes the exact file it read.
-- **W-02** Documents with Arabic (or any non-English) names: Git printed their paths in an escaped form, so a pull where
-  both PCs edited the same item stopped with "conflict outside the requirements folder", and history missed entries.
-  Every Git call now asks for plain paths.
-- **W-03** A pull that merged changes from both PCs dropped extra keys on links (a note, another tool's key).
-- **W-04** Exporting while an old version is shown wrote invisible control characters into the title (the ReqIF file
-  was not valid); control characters are also left out of all ReqIF text.
-- **W-05** CSV import: a short row ending in a quoted cell swallowed every row after it.
-- **W-06** A crafted 17 KB Excel file (one cell in row 50,000,000) closed the app on Import; it is now refused at once.
-- **W-07** Compare showed "B became C" when one item was deleted and a different one added; now one deletion + one
-  addition.
-- **W-08** Commit, pull, branch switch and undo now get the long time limit (15 min) like the other bulk Git steps —
-  the owner hit the 30-second limit on 8 Nov with a virus scanner.
-- **W-09** Restart to update and Go back to version X now close the window the normal way first, so unsaved edits get
-  the usual question (takes effect for the update after this one).
-- **W-11** Push names exactly what it sends (this branch to its upstream), so personal Git settings can never push
-  other branches or force a push. **W-12** Windows: long paths allowed for Git.
-- **W-31** CI: libraries are installed without running their install scripts (the release token is never near
-  library code); a release is made only from main. **W-32** Electron 45.0.0 → 45.2.3 (security fixes).
-- **W-33** Problem reports show `%USERPROFILE%` instead of the Windows user folder (O-7).
-- Code reviewer on the patch (`docs/reviews/agents/0.20.2-code-reviewer.md`, 16 findings, all handled): Push refuses a branch that follows an upstream of another name (CR-01) and uses a push remote when set; the CSV fix no longer ends a multi-line cell early (CR-02); the app quits by itself if no installer takes over (CR-03); link notes changed on both PCs become a merge question; the unsaved-changes question is in Arabic too.
-- Owner's answers recorded: O-2 the `gh api` permission stays, every GitHub change is reported (CLAUDE.md); O-3 10k
-  items a must, 50k a should; O-4 keep "Changes + settings" with a tooltip; O-5 coverage gaps as their own chip; O-6
-  clearer message when two PCs rename the same document. The Word AI prompt now reads a whole folder (one file per
-  version → Git history with baselines), reports conflicts, keeps shared requirements in both modules and records the
-  documents' format (`docs/guides/word-template-prompt.md`).
-
 ## 0.21.2 — 12 Nov 2026 — data and import safety (whole-project review 2)
 From `docs/reviews/2026-11-12-project-review-2.md`; each case reproduced in a test first (`tests/review-2-0.21.2.test.ts`,
 QA's `tests/qa-whole-0.21-*.test.ts`, more cases in `tests/review-whole-0.20.test.ts`, `tests/speed-0.21.0.test.ts`).
@@ -106,11 +74,43 @@ helped); sort by number almost instant; saves instant; old version opens with th
 Compare of an old commit with the newest on the sandbox: **about 4 s** (expected about 1 s — the measurement had one
 changed item). The owner's comparison had **10,007 changed items**; with few differences it took under a second — **all 5 steps passed**.
 
+## 0.20.2 — 10 Nov 2026 — data safety (whole-project review before the first release)
 **Owner (10 Nov 2026, evening), 0.20.2:** all 4 steps passed (self-test 25/25 in 120.9 s, 0.20.1 took 90.9 s;
 Arabic-named document committed, pushed, history shown; Compare showed one Deleted and one Added; the problem report
 shows `%USERPROFILE%`). Found in the attached report: the opened project's path (a folder on drive D: named after the
 owner) and the update download addresses (the GitHub account) still show personal names — `%USERPROFILE%` only covers
 the Windows user folder. **Owner's choice (O-8): leave both** — the account is the release repository's owner (public, the same in every copy), and folder paths are useful.
+
+The owner's decisions on the review (`docs/reviews/2026-11-10-project-review.md`, O-1…O-7, 10 Nov 2026): data safety
+first, then speed, then screens, Arabic and documents. Each fix below was reproduced in a test first
+(`tests/review-whole-0.20.test.ts`, QA's `tests/qa-whole-0.20-journeys.test.ts`).
+- **W-01** "Give the copy a new ID" on a copied heading could rewrite the **original** child instead of the copy's
+  child (when the copy's document sorts after the original's). The save now writes the exact file it read.
+- **W-02** Documents with Arabic (or any non-English) names: Git printed their paths in an escaped form, so a pull where
+  both PCs edited the same item stopped with "conflict outside the requirements folder", and history missed entries.
+  Every Git call now asks for plain paths.
+- **W-03** A pull that merged changes from both PCs dropped extra keys on links (a note, another tool's key).
+- **W-04** Exporting while an old version is shown wrote invisible control characters into the title (the ReqIF file
+  was not valid); control characters are also left out of all ReqIF text.
+- **W-05** CSV import: a short row ending in a quoted cell swallowed every row after it.
+- **W-06** A crafted 17 KB Excel file (one cell in row 50,000,000) closed the app on Import; it is now refused at once.
+- **W-07** Compare showed "B became C" when one item was deleted and a different one added; now one deletion + one
+  addition.
+- **W-08** Commit, pull, branch switch and undo now get the long time limit (15 min) like the other bulk Git steps —
+  the owner hit the 30-second limit on 8 Nov with a virus scanner.
+- **W-09** Restart to update and Go back to version X now close the window the normal way first, so unsaved edits get
+  the usual question (takes effect for the update after this one).
+- **W-11** Push names exactly what it sends (this branch to its upstream), so personal Git settings can never push
+  other branches or force a push. **W-12** Windows: long paths allowed for Git.
+- **W-31** CI: libraries are installed without running their install scripts (the release token is never near
+  library code); a release is made only from main. **W-32** Electron 45.0.0 → 45.2.3 (security fixes).
+- **W-33** Problem reports show `%USERPROFILE%` instead of the Windows user folder (O-7).
+- Code reviewer on the patch (`docs/reviews/agents/0.20.2-code-reviewer.md`, 16 findings, all handled): Push refuses a branch that follows an upstream of another name (CR-01) and uses a push remote when set; the CSV fix no longer ends a multi-line cell early (CR-02); the app quits by itself if no installer takes over (CR-03); link notes changed on both PCs become a merge question; the unsaved-changes question is in Arabic too.
+- Owner's answers recorded: O-2 the `gh api` permission stays, every GitHub change is reported (CLAUDE.md); O-3 10k
+  items a must, 50k a should; O-4 keep "Changes + settings" with a tooltip; O-5 coverage gaps as their own chip; O-6
+  clearer message when two PCs rename the same document. The Word AI prompt now reads a whole folder (one file per
+  version → Git history with baselines), reports conflicts, keeps shared requirements in both modules and records the
+  documents' format (`docs/guides/word-template-prompt.md`).
 
 ## 0.20.1 — 10 Nov 2026 — the owner's points on 0.20.0
 - **Owner (10 Nov 2026), 0.20.1:** all 5 steps passed (self-test 25/25, 90.9 s).

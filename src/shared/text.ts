@@ -1099,7 +1099,7 @@ const en = {
     readOnly: 'An old version is shown: nothing can be changed. Choose Back to now first.',
     notInVersion: 'This file is not in that version.',
     tooLarge: 'The file is larger than 5 MB: not read.',
-    banner: (label: string) => `Viewing ${label}`,
+    banner: (label: string) => `Old version: ${label} — Pull, Push and editing come back with Back to now`,
     readOnlyTag: 'read-only',
     back: 'Back to now',
     opening: 'Opening the old version… The first time, every requirement of that version is read — a few seconds in a big project; opening it again before reqochet closes is quick.',

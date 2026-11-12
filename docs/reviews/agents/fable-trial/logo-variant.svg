@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  reqochet logo variant proposal: "free-form qo with a keyline" (review trial, 12 Nov 2026).
+  A proposal only. Original geometry (circles and straight lines), no third-party marks, no font.
+  Three symbols:
+    rq-mark        regular cut, 32-unit grid, use at 32 px and larger (Windows icon, unknown background)
+    rq-mark-small  small cut, 16-unit grid, use at 16 to 24 px (counters and dots sit on whole pixels at 16 px)
+    rq-mark-dark   colourway for the app's own dark surfaces (white letters, no keyline, the lighter dot pair)
+  The rest of the file is a preview sheet: left on a light taskbar grey, right on a dark taskbar grey.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 360" width="720" height="360" role="img" aria-label="reqochet logo variant: the letters q and o drawn free-form with a white keyline, shown on light and on dark">
+  <defs>
+    <!-- regular cut: rings 13 units wide (stroke 2.5), counter 8, dot 4.2, white keyline 1.5 -->
+    <symbol id="rq-mark" viewBox="0 0 32 32">
+      <g fill="#ffffff" stroke="none">
+        <circle cx="8" cy="13" r="8"/>
+        <circle cx="24" cy="13" r="8"/>
+      </g>
+      <line x1="13.25" y1="13" x2="13.25" y2="23.5" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round"/>
+      <g fill="#ffffff" stroke="#1b1f27" stroke-width="2.5">
+        <circle cx="8" cy="13" r="5.25"/>
+        <circle cx="24" cy="13" r="5.25"/>
+      </g>
+      <line x1="13.25" y1="13" x2="13.25" y2="23.5" stroke="#1b1f27" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="8" cy="13" r="2.1" fill="#D7262B"/>
+      <circle cx="24" cy="13" r="2.1" fill="#1F9D48"/>
+    </symbol>
+
+    <!-- small cut: rings 7 px wide (stroke 1.5), counter 4 px, dot 2 px, keyline 0.5 px, all at 16 px -->
+    <symbol id="rq-mark-small" viewBox="0 0 16 16">
+      <g fill="#ffffff" stroke="none">
+        <circle cx="4" cy="7" r="4"/>
+        <circle cx="12" cy="7" r="4"/>
+      </g>
+      <line x1="6.75" y1="7" x2="6.75" y2="12.25" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+      <g fill="#ffffff" stroke="#1b1f27" stroke-width="1.5">
+        <circle cx="4" cy="7" r="2.75"/>
+        <circle cx="12" cy="7" r="2.75"/>
+      </g>
+      <line x1="6.75" y1="7" x2="6.75" y2="12.25" stroke="#1b1f27" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="4" cy="7" r="1" fill="#D7262B"/>
+      <circle cx="12" cy="7" r="1" fill="#1F9D48"/>
+    </symbol>
+
+    <!-- inside the app on dark surfaces: white letters, open counters, the existing lighter dot pair -->
+    <symbol id="rq-mark-dark" viewBox="0 0 32 32">
+      <g fill="none" stroke="#ffffff" stroke-width="2.5">
+        <circle cx="8" cy="13" r="5.25"/>
+        <circle cx="24" cy="13" r="5.25"/>
+      </g>
+      <line x1="13.25" y1="13" x2="13.25" y2="23.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="8" cy="13" r="2.1" fill="#FF5C61"/>
+      <circle cx="24" cy="13" r="2.1" fill="#3CD873"/>
+    </symbol>
+  </defs>
+
+  <!-- light side (a light Windows taskbar is about #f3f3f3) -->
+  <rect x="0" y="0" width="360" height="360" fill="#f3f3f3"/>
+  <use href="#rq-mark" x="24" y="16" width="208" height="208"/>
+  <use href="#rq-mark" x="24" y="268" width="48" height="48"/>
+  <use href="#rq-mark" x="96" y="276" width="32" height="32"/>
+  <use href="#rq-mark-small" x="152" y="280" width="24" height="24"/>
+  <use href="#rq-mark-small" x="200" y="284" width="16" height="16"/>
+  <g font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#5d6676">
+    <text x="24" y="340">48</text>
+    <text x="96" y="340">32</text>
+    <text x="152" y="340">24 small</text>
+    <text x="200" y="340" dx="24">16 small</text>
+  </g>
+
+  <!-- dark side (a dark Windows taskbar is about #202020) -->
+  <rect x="360" y="0" width="360" height="360" fill="#202020"/>
+  <use href="#rq-mark" x="384" y="16" width="208" height="208"/>
+  <use href="#rq-mark" x="384" y="268" width="48" height="48"/>
+  <use href="#rq-mark" x="456" y="276" width="32" height="32"/>
+  <use href="#rq-mark-small" x="512" y="280" width="24" height="24"/>
+  <use href="#rq-mark-small" x="560" y="284" width="16" height="16"/>
+  <!-- the in-app dark colourway, for comparison -->
+  <use href="#rq-mark-dark" x="616" y="244" width="80" height="80"/>
+  <g font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9aa3b2">
+    <text x="384" y="340">48</text>
+    <text x="456" y="340">32</text>
+    <text x="512" y="340">24 small</text>
+    <text x="560" y="340" dx="24">16 small</text>
+    <text x="616" y="340">in-app, dark</text>
+  </g>
+</svg>

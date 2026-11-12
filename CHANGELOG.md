@@ -36,6 +36,7 @@ first, then speed, then screens, Arabic and documents. Each fix below was reprod
   documents' format (`docs/guides/word-template-prompt.md`).
 
 ## 0.21.1 — 11 Nov 2026 — screens and Arabic (review W-40…W-54, O-4, O-5, O-6)
+**Owner (12 Nov 2026):** all 5 steps passed (self-test 25/25 in 96.0 s; the narrow toolbar: "perfect pass, it is so smooth").
 - **UW-01 (bug)** The Fields window warned "the choices ar are gone…" for every translated field: it read the
   language code as a choice name. It now names the real choices that lost their translation.
 - **W-40 / UW-02** The table toolbar wraps to a second row when the editor makes the table narrow, so "+ New item" is

@@ -70,3 +70,6 @@ website-lines.md).
   videos and the website still serve as a quick tour of the tool.
 - Fable decisions: F-1 yes, but the end card cycles Light / Dark / Ember; F-2 yes; F-3 no music, but a narrator and
   sound effects; F-4–F-6 yes.
+- Audit questions (13 Nov evening): O-1 only "daily comfort" (bulk edit, duplicate, saved views, templates) before the
+  team release, the rest after their feedback; O-2 Word export with today's plain text first, rich text later; O-4 a
+  drawn commit history after the team release — ask Fable for a visual idea.

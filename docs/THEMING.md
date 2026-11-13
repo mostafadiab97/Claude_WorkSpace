@@ -33,6 +33,10 @@ text sizes while the window is in Arabic), `controlHeight` / `controlHeightSmall
 lists), `shadowPopover` / `shadowDialog` (offset and blur of the shadows; their colour is mixed from `text`), and the
 spacing step `xxl` (the scale is now 4, 8, 12, 16, 24, 32).
 
+Ember's headings (13 Nov 2026): `fontFamilyHeadingEmber` names the typeface of titles and headings while the Ember look
+is on — Source Serif 4 (SIL OFL 1.1, bundled in `src/renderer/src/assets/fonts/source-serif-4`), then the interface
+font, which also draws Arabic headings. Body text and controls keep `fontFamily`.
+
 You only need to include the values you change; everything else falls back to the built-in defaults.
 Invalid values are ignored and listed as warnings on the start screen, so a typo can never break the app.
 

@@ -282,7 +282,7 @@ export function ItemEditor(props: {
       <fieldset className="editor__body editor__fieldset" disabled={props.readOnly === true}>
         <label className="field">
           <span className="field__label">{T.editor.title}</span>
-          <input className="input" dir="auto" value={form.title} autoFocus={isNew} onChange={(e) => set({ title: e.target.value })} placeholder={T.editor.titlePlaceholder} />
+          <input className="input editor__title" dir="auto" value={form.title} autoFocus={isNew} onChange={(e) => set({ title: e.target.value })} placeholder={T.editor.titlePlaceholder} />
         </label>
 
         <div className="field-grid">

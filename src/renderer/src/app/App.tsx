@@ -96,7 +96,7 @@ export function App() {
   }
 
   // the loading animation while the app starts (before the theme is known: the Windows colour mode decides)
-  if (!theme) return <div className="splash"><BrandLoading mode={resolveMode(mode) === 'light' ? 'light' : 'dark'} width={320} label={T.common.loading} /></div>
+  if (!theme) return <div className="splash"><BrandLoading mode={resolveMode(mode)} language={lang} width={320} label={T.common.loading} /></div>
   const brand = theme.config.brand.name || T.brand.name
 
   return (
@@ -113,7 +113,7 @@ export function App() {
           ) : (
             <>
               <BrandFace mode={effective} state={active && working ? 'thinking' : 'still'} size={28} />
-              <BrandName mode={effective} width={112} />
+              <BrandName mode={effective} language={lang} width={112} />
               {/* the development tool (reqochet-dev) wears a small mark, so the owner always knows which one is open */}
               {appInfo?.name.endsWith('-dev') && <span className="brand__edition">{T.brand.dev}</span>}
             </>

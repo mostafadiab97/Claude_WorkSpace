@@ -102,3 +102,22 @@ describe('QA activity counter (top-bar face "thinking")', () => {
     expect(useActivity()).toBe(false)
   })
 })
+
+describe('Ember set and Arabic name (owner, 13 Nov 2026)', () => {
+  it('Ember uses its own drawings: name, tile (small cut below 32 px) and eyes', () => {
+    expect(file(BrandName({ mode: 'ember', width: 200 }))).toBe('reqochet-logo-on-ember.svg')
+    expect(file(BrandFace({ mode: 'ember', state: 'still', size: 28 }))).toBe('reqochet-icon-ember-small.svg')
+    expect(file(BrandFace({ mode: 'ember', state: 'still', size: 64 }))).toBe('reqochet-icon-ember.svg')
+    expect(file(BrandFace({ mode: 'ember', state: 'idle', size: 64 }))).toBe('reqochet-eyes-idle-ember.svg')
+    expect(file(BrandFace({ mode: 'ember', state: 'thinking', size: 28 }))).toBe('reqochet-eyes-thinking-ember-small.svg')
+    expect(file(BrandBusy({ mode: 'ember' }))).toBe('reqochet-loading-icon-ember.svg')
+  })
+
+  it('Arabic shows the Arabic name in every colour mode, at the same letter height; the tile stays the same', () => {
+    for (const mode of ['light', 'dark', 'ember'] as const) {
+      expect(file(BrandName({ mode, width: 200, language: 'ar' }))).toBe(`reqochet-logo-ar-on-${mode}.svg`)
+      expect(file(BrandName({ mode, width: 200, language: 'en' }))).toBe(`reqochet-logo-on-${mode}.svg`)
+    }
+    expect((BrandName({ mode: 'light', width: 200, language: 'ar' }) as El).props.width).toBe(154)
+  })
+})

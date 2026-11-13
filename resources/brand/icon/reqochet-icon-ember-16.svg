@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" role="img" aria-label="reqochet">
+<!-- 16 px cut, drawn on the pixel grid (12 Nov 2026): the dots are whole pixels, the outline is one whole pixel. Used only by tools/brand-icons.mjs for the Windows icon files. -->
+<rect width="16" height="16" rx="3.5" fill="#2a231d"/><rect class="ring" x="0.5" y="0.5" width="15" height="15" rx="3.0" fill="none" stroke="#ff8a3d" stroke-width="1"/>
+<g fill="none" stroke="#f3ebe2" stroke-width="1.5"><circle cx="4" cy="7" r="2.25"/><path d="M6.25 7V13"/><circle cx="12" cy="7" r="2.25"/></g>
+<circle cx="4" cy="7" r="1" fill="#FF5C61"/>
+<circle cx="12" cy="7" r="1" fill="#3CD873"/>
+</svg>

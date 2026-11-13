@@ -3,9 +3,15 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
-## 0.22.0 — 13 Nov 2026 — visual polish
+## 0.22.0 — 13 Nov 2026 — visual polish and Ember
+- **Ember** (the owner, 13 Nov) — a third colour mode: warm dark colours, orange buttons and edges, a soft orange glow
+  on the one thing that is "on" (primary button, focused field, active view, notes). Colours and glow rules by Fable;
+  every text at least 5.5:1 contrast. A user theme.json can change it under `modes.ember`.
+- **Colour switch with icons** — sun (Light), moon (Dark), flame (Ember), screen (System, as Windows); the name shows
+  on hover. **Language switch En / ع.** (The owner, 13 Nov: "the way websites do it".)
 Built by Fable (a second Claude model, strong at visuals) from its visual review; the owner approved the screenshots
-(13 Nov: "looks great, lets apply it").
+(13 Nov: "looks great, lets apply it"). The first 0.22.0 release run stopped on two flaky tests (a search word
+that matched a random ID, a CSV time limit) — fixed; Ember joined the same version.
 - **One icon set** — drawn icons (Lucide, ISC licence) instead of typed characters for settings, close, expand / collapse
   all, branch, tree arrows, sort, move up / down, undo, warning, delete, drag handle; Filters, Columns and Back have an
   icon next to their word. Arrows follow the reading direction in Arabic.

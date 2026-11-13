@@ -166,7 +166,7 @@ X-02).
 | **0.21.2** | Review 2: data and import safety | Same ID in two files, CSV short rows, Excel wide/merged sheets, strict fast reader, edited links kept in merges |
 | **0.21.3** | Review 2: speed and Lows | Old version opens without blocking, review Lows, Merge into… |
 | **0.21.4** | The owner's 0.21.3 report | Copy report, import into a new document, nothing-to-import message, Delete document |
-| **0.22.0** | Visual polish (Fable, owner-approved) | One icon set, clearer edges, table on white, two-group top bar, one work bar, Changes title bars, calmer notes, sharper small icons |
+| **0.22.0** | Visual polish (Fable, owner-approved) and Ember | Ember colour mode, icon colour switch, En / ع; one icon set, clearer edges, table on white, two-group top bar, one work bar, Changes title bars, calmer notes, sharper small icons |
 | **Release plan (C, 2 Nov 2026)** | — | 0.14 rename + health → 0.15 1a structure → 0.16 1b traceability views (pilot can start) → 0.17 daily comfort → 0.18 rich text → 0.19 documents out → 0.20 review basics → 0.21 pull requests in the app → 0.22 verification → 0.23 sharing + help → 0.24 AI → later commercial; a stabilisation patch after every theme; details in `docs/reviews/2026-11-01-planning-discussion.md` |
 | *Proposal A (R)* | *New name + traceability* | *Proposed 31 Oct 2026; order to be settled in the planning discussion (the owner, 31 Oct):* the rename (`docs/reviews/done/2026-10-31-rename-impact.md`) once the name is chosen; traceability matrix and coverage; item and link types in the GUI; saved views; bulk edit |
 | *Proposal B (R)* | *Documents out* | Word and PDF export, HTML publishing, Markdown preview |

@@ -67,14 +67,14 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.22.0 (visual polish)
+## Manual test checklist — v0.22.0 (visual polish and Ember)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
 | 1 | Let reqochet-dev update to **0.22.0** and run the release self-test. | All steps passed. |
-| 2 | Open the sandbox in Light, then Dark (Settings → Appearance), and look at the table, the toolbar and the editor. | Drawn icons, clear button edges, the table on white; nothing cut off or overlapping. |
-| 3 | Change an item and open **Changes**; then Pull or Push. | Each item's title sits on a shaded bar; the floating note is calm (soft tint, thin edge, an icon). |
-| 4 | Switch to Arabic and look at the same screens. | Arrows point the right way; texts readable. |
+| 2 | On the start screen, try the new switches: **En / ع** and the four icons (sun, moon, flame, screen); hover each. | Each icon shows its name; the window changes at once. |
+| 3 | Choose the **flame (Ember)**, open the sandbox, change an item, open **Changes**, then Pull or Push. | Warm dark colours, orange buttons with a soft glow; titles on shaded bars; a calm floating note; everything readable. |
+| 4 | Switch to Arabic (still Ember) and look at the same screens. | Arrows point the right way; the selected row's orange edge is on the right. |
 | 5 | Settings → Environment → **Go back to an earlier version…** (don't install). | The Versions list opens below; Cancel closes it. |
 
 ## Previous checklist — v0.21.4 (the owner's 0.21.3 report)

@@ -24,7 +24,7 @@ Edit your file, save, and restart reqochet. No rebuild needed.
 | `typography` | `fontFamily`, `fontSizeBase`, `fontWeightStrong` | `--rm-font-family`, `--rm-font-size-base` |
 | `shape` | `buttonRadius`, `radiusLarge`, `borderWidth` | `--rm-shape-button-radius` |
 | `spacing` | `xs` … `xxl` (0.22.0: `lg` 16, `xl` 24, `xxl` 32 px; a user theme that sets `lg`/`xl` keeps its own values) | `--rm-space-md` |
-| `modes.light` / `modes.dark` | `background`, `surface`, `text`, `primary`, `danger`, `rowHover`, `selection`, `scrollbarThumb`, `scrollbarThumbHover`, `diffOldBg` / `diffNewBg` / `diffOldMark` / `diffNewMark` (the Changes view's red and green), `gap` (the coverage-gap dot, 0.20.1) … | `--rm-color-primary` (for the active mode) |
+| `modes.light` / `modes.dark` / `modes.ember` (0.22.0: the warm dark mode; same keys as dark) | `background`, `surface`, `text`, `primary`, `danger`, `rowHover`, `selection`, `scrollbarThumb`, `scrollbarThumbHover`, `diffOldBg` / `diffNewBg` / `diffOldMark` / `diffNewMark` (the Changes view's red and green), `gap` (the coverage-gap dot, 0.20.1) … | `--rm-color-primary` (for the active mode) |
 
 Added by the visual polish (12 Nov 2026): `borderStrong` (the edge of buttons and fields — `border` is for dividing
 lines only), `successBg` / `warningBg` / `dangerBg` / `infoBg` (backgrounds of notes and bars), `fontSizeMedium` (16 px:

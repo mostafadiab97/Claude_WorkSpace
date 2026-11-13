@@ -4724,7 +4724,7 @@ select:not([multiple]) {
   color: var(--rm-color-danger);
 }
 
-/* 0.23.0 (the owner, 13 Nov): the colour-mode and language pickers as pill switches with icons, like websites —
+/* 0.22.0 (the owner, 13 Nov): the colour-mode and language pickers as pill switches with icons, like websites —
    a rounded track, the chosen option a raised round thumb */
 .switch {
   display: inline-flex;
@@ -4779,24 +4779,45 @@ select:not([multiple]) {
   }
 }
 
-/* 0.23.0 Ember (the owner, 13 Nov): warm dark colours come from modes.ember; on top, orange edges and a soft glow on
-   what is active or focused. Only theme tokens. */
-:root[data-theme='ember'] .btn--primary,
+/* Ember (the owner, 13 Nov; values and glow recipe by Fable, ember-proposal.md): warm dark colours from modes.ember;
+   on top, a soft orange glow only on the one thing that is "on" — primary button, focused field, active view, the
+   chosen switch option, floating notes. Never on cards at rest, rows, danger buttons, diff or status colours. */
+:root[data-theme='ember'] .btn--primary {
+  box-shadow: 0 0 12px color-mix(in srgb, var(--rm-color-primary) 28%, transparent);
+}
+
+:root[data-theme='ember'] .btn--primary:hover:not(:disabled) {
+  box-shadow: 0 0 18px color-mix(in srgb, var(--rm-color-primary) 45%, transparent);
+}
+
+:root[data-theme='ember'] .btn--active,
 :root[data-theme='ember'] .switch__item--active {
-  box-shadow: 0 0 0 var(--rm-shape-border-width) var(--rm-color-primary), 0 0 14px color-mix(in srgb, var(--rm-color-primary) 40%, transparent);
+  box-shadow: 0 0 0 var(--rm-shape-border-width) var(--rm-color-primary), 0 0 16px color-mix(in srgb, var(--rm-color-primary) 35%, transparent);
 }
 
 :root[data-theme='ember'] .input:focus,
 :root[data-theme='ember'] select:focus,
 :root[data-theme='ember'] textarea:focus {
-  box-shadow: 0 0 0 var(--rm-shape-border-width) var(--rm-color-focus), 0 0 12px color-mix(in srgb, var(--rm-color-focus) 35%, transparent);
+  box-shadow: 0 0 0 var(--rm-shape-border-width) var(--rm-color-focus), 0 0 0 4px color-mix(in srgb, var(--rm-color-focus) 22%, transparent), 0 0 14px color-mix(in srgb, var(--rm-color-primary) 30%, transparent);
 }
 
-:root[data-theme='ember'] .card,
+:root[data-theme='ember'] .table__row--selected {
+  box-shadow: inset calc(var(--rm-shape-border-width) * 3) 0 0 var(--rm-color-primary);
+}
+
+:root[dir='rtl'][data-theme='ember'] .table__row--selected {
+  box-shadow: inset calc(var(--rm-shape-border-width) * -3) 0 0 var(--rm-color-primary);
+}
+
 :root[data-theme='ember'] .modal__panel {
-  border-color: color-mix(in srgb, var(--rm-color-primary) 35%, var(--rm-color-border));
+  border-color: color-mix(in srgb, var(--rm-color-primary) 40%, var(--rm-color-border));
 }
 
 :root[data-theme='ember'] .gitbar__float > * {
-  box-shadow: 0 0 20px color-mix(in srgb, var(--rm-color-primary) 22%, transparent), var(--rm-shape-shadow-popover) color-mix(in srgb, var(--rm-color-background) 60%, transparent);
+  box-shadow: 0 0 0 var(--rm-shape-border-width) color-mix(in srgb, var(--rm-color-primary) 55%, transparent), 0 0 12px color-mix(in srgb, var(--rm-color-primary) 18%, transparent), var(--rm-shape-shadow-popover) color-mix(in srgb, var(--rm-color-background) 60%, transparent);
+}
+
+:root[data-theme='ember'] .btn--danger,
+:root[data-theme='ember'] .btn:disabled {
+  box-shadow: none;
 }

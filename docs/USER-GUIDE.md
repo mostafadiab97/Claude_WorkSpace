@@ -338,7 +338,7 @@ gets a fresh ID, its copied children follow it, and its parent is dropped when t
 
 ## 13. Settings
 
-Open with **⚙** (top right). The left panel switches between pages: **Appearance** (language, light/dark), **Environment and versions**, **Report a problem and
+Open with **⚙** (top right). The left panel switches between pages: **Appearance** (language En / ع; colours: sun = Light, moon = Dark, flame = Ember, screen = as Windows), **Environment and versions**, **Report a problem and
 diagnostics**, **Features**, **Self-tests**, **Privacy and access**, and this **User guide** (one page per section). **← Back** at the top of the
 panel returns to your repository.
 
@@ -354,7 +354,7 @@ panel returns to your repository.
 | **Privacy and access** | What reqochet reads, keeps on your PC (and where), sends (only Git pull/push and the update check — no tracking), what it may change, and what to keep in mind for confidential projects, with a diagram of who reads or sends what (`docs/diagrams/privacy.html`). |
 
 **Language:** English / العربية in ⚙ → Appearance (and on the start screen) — the whole window turns right-to-left in Arabic; your data stays as
-written. **Colours:** Light / Dark / System; a company can change colours, fonts and logo in a theme file
+written. **Colours:** Light / Dark / Ember (warm dark with orange) / System; a company can change colours, fonts and logo in a theme file
 (`docs/THEMING.md`).
 
 ---

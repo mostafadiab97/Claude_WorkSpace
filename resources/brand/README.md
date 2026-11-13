@@ -1,7 +1,7 @@
 # reqochet brand package — instructions for the AI assistant placing it in the app
 
 You are integrating the final reqochet logo, icon and motion into the reqochet desktop app
-(Windows; English + Arabic right-to-left; light + dark mode). Everything here is final.
+(Windows; English + Arabic right-to-left; light, dark and Ember mode). Everything here is final.
 **Do not redraw, retype, recolour, re-space or regenerate any of these files.** Copy them in and reference them.
 
 Open `brand-sheet.png` (or `brand-sheet.html`) first to see what everything looks like.
@@ -16,7 +16,9 @@ brand-tokens.json         colours, sizes, file map
 logo/
   reqochet-logo-on-light.svg      name, ink #1b1f27 letters, transparent bg
   reqochet-logo-on-dark.svg       name, white letters, transparent bg
-  reqochet-logo-on-*-2000.png     same, 2000 px wide PNG
+  reqochet-logo-on-ember.svg      name for the Ember look: r e c h e t in Ember orange, the q and o warm white (13 Nov 2026)
+  reqochet-logo-ar-on-{light|dark|ember}.svg   the Arabic name «ريكوشيه» (13 Nov 2026) — shown while the window is in Arabic
+  reqochet-logo-*-2000.png        same, 2000 px wide PNG
 icon/
   reqochet.ico                    Windows app icon, dark tile (16,20,24,32,40,48,64,256) — taskbar on a dark Windows
   reqochet-light.ico              same, white tile with a grey outline (#9aa3b2) ← DEFAULT (.exe, Start menu, desktop; owner 8 Nov 2026)
@@ -29,12 +31,17 @@ icon/
                                   the 16 and 20 px cuts drawn on the pixel grid (owner, 12 Nov 2026: keep the tile, repair the
                                   small sizes) — whole-pixel dots, a one-pixel outline that is lighter on the dark tile and
                                   darker on the white one; only for the Windows icon files (tools/brand-icons.mjs)
+  reqochet-icon-ember(-small|-16|-20).svg   the Ember tile (#2a231d, Ember-orange outline, warm-white q and o) — in the
+                                  app while the Ember look is on; no Windows icon files are made from it
   png/reqochet-icon[-light]-{16…512}.png
 motion/
   reqochet-loading-on-light.svg   splash/loading: name with the two dots bouncing (1.4 s loop)
   reqochet-loading-on-dark.svg
   reqochet-loading-icon.svg       small busy indicator (icon with bouncing dots)
   reqochet-eyes-{idle|thinking}[-light|-small|-inline].svg   assistant avatar
+  reqochet-eyes-{idle|thinking}-ember[-small].svg, reqochet-loading-on-ember.svg, reqochet-loading-icon-ember.svg
+                                  the Ember versions of the same animations
+  reqochet-loading-ar-on-{light|dark|ember}.svg   the loading animation with the Arabic name
   reqochet-assistant-icon.html    copy-paste CSS + inline SVG with data-state switching
 ```
 
@@ -55,8 +62,10 @@ automatically when the OS "show animations" setting is off (`prefers-reduced-mot
 Theme switching: pick the `on-light` / `on-dark` (or `-light` tile) file from the app's current mode
 (the app theme has `modes.light` / `modes.dark`). Do not use CSS filters to invert the logo.
 
-RTL (Arabic): **never mirror** the logo, icon or animations. The name stays in Latin letters.
-Only its position follows the layout (e.g. title-bar icon moves to the right side).
+RTL (Arabic): **never mirror** the logo, icon or animations. While the window is in Arabic the name is the Arabic
+wordmark «ريكوشيه» (`logo/reqochet-logo-ar-on-*.svg`, loading: `motion/reqochet-loading-ar-on-*.svg`; the owner,
+13 Nov 2026); the tile icon and its eyes are the same in every language. Only positions follow the layout (e.g. the
+title-bar icon moves to the right side).
 
 ## 3. How to embed (pick the one that matches the app's UI stack — check the repo first)
 
@@ -103,7 +112,8 @@ Transform origin = bottom centre of the dot.
 ## 5. Rules (do not break)
 
 - Use only these files. Never set the name in a font, never draw your own version.
-- Never change the dot colours, swap them, or remove them. Never recolour the letters (only ink `#1b1f27` or white).
+- Never change the dot colours, swap them, or remove them. Never recolour the letters (only ink `#1b1f27` or white;
+  the Ember set below is the one exception and is made by a script, never by hand).
 - Keep clear space around the name equal to the height of the letter "o". Minimum name width 100 px.
 - Below 32 px use the `-small` icon cut. Never stretch or rotate anything.
 - Don't place the name on mid-tone or busy backgrounds (e.g. the primary blue `#2f5bd3`); use the app's
@@ -134,3 +144,27 @@ Transform origin = bottom centre of the dot.
 - **Outline (owner, 4 Nov 2026 — 0.16.2):** every dark-tile drawing has a thin `#7a8499` outline inside the tile edge
   (`<rect class="ring">`; 32 units on the large cut, 92 on the small cut ≈ 1 px at 16 px) so the icon shows on dark
   wallpapers. After changing an icon drawing, run `node tools/brand-icons.mjs` to remake the PNG and `.ico` files.
+
+## The Ember set and the Arabic name (owner, 13 Nov 2026)
+
+**Ember set** — used when the window's colour mode is Ember (background `#14100d`). Same shapes as the dark-tile
+drawings and the name logo, colours only; made by `node tools/brand-ember.mjs` from the existing files (run it again
+after changing one of them). Values in `brand-tokens.json` → `ember`.
+
+| Drawing | Colours |
+|---|---|
+| Name (`logo/reqochet-logo-on-ember.svg`, `motion/reqochet-loading-on-ember.svg`) | r e c h e t Ember orange `#ff8a3d`; the q and o warm white `#f3ebe2`; dots `#FF5C61` / `#3CD873` (the lighter red and green of the dark tile) |
+| Tile (`icon/reqochet-icon-ember*.svg`, `motion/reqochet-eyes-*-ember*.svg`, `motion/reqochet-loading-icon-ember.svg`) | tile `#2a231d` (Ember's raised surface), outline Ember orange, q and o warm white, eyes `#FF5C61` / `#3CD873` |
+
+The eyes stay what they are everywhere — a red and a green dot in a light ring; the orange goes around them (the other
+letters, the tile's outline), never into the q, the o or the dots.
+
+**Arabic name «ريكوشيه»** (proposal 4) — `logo/reqochet-logo-ar-on-{light|dark|ember}.svg` (+ 2000 px PNGs). Set in
+Baloo Bhaijaan 2 (SIL OFL 1.1; a round, single-stroke Arabic typeface) as outlines, with the same 44-unit round outline
+as the English letters and the same stroke thickness. The و is the q and the final ه is the o of the English logo,
+unchanged, with their red and green dots; the baseline runs into the q's stem and the o's foot. Drawn in the units of
+the English logo: at 0.7704 × the English width its letters are exactly as tall. Made by
+`python3 tools/brand-wordmark-ar.py <BalooBhaijaan2[wght].ttf>` (the font file is not kept here), then
+`node tools/brand-ember.mjs` for the PNGs. The rules of section 5 apply to it as to the English name.
+
+In the app: `src/renderer/src/components/Brand.tsx` picks the file by colour mode (light / dark / Ember) and language.

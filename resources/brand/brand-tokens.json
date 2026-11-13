@@ -16,7 +16,18 @@
     "aspectRatio": 4.3215,
     "files": {
       "onLight": "logo/reqochet-logo-on-light.svg",
-      "onDark": "logo/reqochet-logo-on-dark.svg"
+      "onDark": "logo/reqochet-logo-on-dark.svg",
+      "onEmber": "logo/reqochet-logo-on-ember.svg",
+      "arabicOnLight": "logo/reqochet-logo-ar-on-light.svg",
+      "arabicOnDark": "logo/reqochet-logo-ar-on-dark.svg",
+      "arabicOnEmber": "logo/reqochet-logo-ar-on-ember.svg"
+    },
+    "arabic": {
+      "word": "ريكوشيه",
+      "typeface": "Baloo Bhaijaan 2 (SIL OFL 1.1), weight 400, with the 44-unit round outline of the English letters",
+      "aspectRatio": 3.3525,
+      "widthOfEnglish": 0.7704,
+      "madeBy": "tools/brand-wordmark-ar.py"
     }
   },
   "icon": {
@@ -38,7 +49,12 @@
       "files": [
         "motion/reqochet-loading-on-light.svg",
         "motion/reqochet-loading-on-dark.svg",
-        "motion/reqochet-loading-icon.svg"
+        "motion/reqochet-loading-icon.svg",
+        "motion/reqochet-loading-on-ember.svg",
+        "motion/reqochet-loading-icon-ember.svg",
+        "motion/reqochet-loading-ar-on-light.svg",
+        "motion/reqochet-loading-ar-on-dark.svg",
+        "motion/reqochet-loading-ar-on-ember.svg"
       ]
     },
     "assistantEyes": {
@@ -54,5 +70,26 @@
       "component": "motion/reqochet-assistant-icon.html"
     },
     "respectsReducedMotion": true
+  },
+  "ember": {
+    "note": "The Ember set (owner, 13 Nov 2026): same shapes, recoloured by tools/brand-ember.mjs; used when the window's colour mode is Ember",
+    "background": "#14100d",
+    "orange": "#ff8a3d",
+    "warmWhite": "#f3ebe2",
+    "tile": "#2a231d",
+    "requirementRed": "#FF5C61",
+    "verificationGreen": "#3CD873",
+    "files": {
+      "logo": "logo/reqochet-logo-on-ember.svg",
+      "logoArabic": "logo/reqochet-logo-ar-on-ember.svg",
+      "svg": "icon/reqochet-icon-ember.svg",
+      "svgSmall": "icon/reqochet-icon-ember-small.svg",
+      "svg16": "icon/reqochet-icon-ember-16.svg",
+      "svg20": "icon/reqochet-icon-ember-20.svg",
+      "eyes": "motion/reqochet-eyes-{idle|thinking}-ember[-small].svg",
+      "loading": "motion/reqochet-loading-on-ember.svg",
+      "loadingIcon": "motion/reqochet-loading-icon-ember.svg",
+      "loadingArabic": "motion/reqochet-loading-ar-on-ember.svg"
+    }
   }
 }

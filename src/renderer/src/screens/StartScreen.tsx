@@ -3,6 +3,7 @@ import { beginActivity, useActivity, useWindowActive } from '../lib/activity'
 import { useEffect, useState } from 'react'
 import type { FolderCheck, GitInfo, RecentRepository, RepoInfo, ImportFile } from '../../../shared/api'
 import { errorMessage } from '../lib/hooks'
+import { useLanguage } from '../lib/language'
 import { T } from '../../../shared/text'
 import { Icon } from '../components/icons'
 
@@ -21,11 +22,12 @@ export function StartScreen({
   git: GitInfo | null
   onOpened: (info: RepoInfo, importFile?: ImportFile) => void
   onQuickStart: () => void
-  /** Light or dark as shown now (picks the brand files). */
+  /** Light, dark or Ember as shown now (picks the brand files). */
   mode: Mode
   /** False when a company theme brings its own logo. */
   showBrand: boolean
 }) {
+  const language = useLanguage()
   const [recent, setRecent] = useState<RecentRepository[]>([])
   const [pending, setPending] = useState<Pending>({ kind: 'idle' })
 
@@ -91,7 +93,7 @@ export function StartScreen({
           {showBrand && !busy && (
             <div className="hero__brand">
               <BrandFace mode={mode} state={!active ? 'still' : working ? 'thinking' : 'idle'} size={recent.length > 0 ? 64 : 88} />
-              <BrandName mode={mode} width={recent.length > 0 ? 200 : 264} />
+              <BrandName mode={mode} language={language} width={recent.length > 0 ? 200 : 264} />
             </div>
           )}
           <h1>{T.start.headline}</h1>
@@ -115,7 +117,7 @@ export function StartScreen({
         {pending.kind === 'busy' &&
           (showBrand ? (
             <div className="start-opening">
-              <BrandLoading mode={mode} width={260} label={pending.label} />
+              <BrandLoading mode={mode} language={language} width={260} label={pending.label} />
             </div>
           ) : (
             <p className="notice">{pending.label}</p>

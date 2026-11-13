@@ -6,6 +6,7 @@
   "typography": {
     "fontFamily": "'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif",
     "fontFamilyMono": "'Cascadia Mono', Consolas, monospace",
+    "fontFamilyHeadingEmber": "'Source Serif 4', 'Segoe UI Variable', 'Segoe UI', system-ui, serif",
     "fontSizeBase": "14px",
     "fontSizeSmall": "12px",
     "fontSizeBaseArabic": "15px",

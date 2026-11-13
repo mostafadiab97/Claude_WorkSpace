@@ -44,8 +44,8 @@ export function saveMode(mode: ThemeMode): void {
   }
 }
 
-/** Light or dark as shown now — follows Windows while the mode is System; Ember counts as dark (to pick the brand files). */
-export function useEffectiveMode(mode: ThemeMode): 'light' | 'dark' {
+/** The colour set shown now — follows Windows while the mode is System (to pick the brand files: light, dark or Ember). */
+export function useEffectiveMode(mode: ThemeMode): Shown {
   const [system, setSystem] = useState<'light' | 'dark'>(() => (resolveMode('system') === 'dark' ? 'dark' : 'light'))
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
@@ -53,5 +53,5 @@ export function useEffectiveMode(mode: ThemeMode): 'light' | 'dark' {
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
   }, [])
-  return mode === 'system' ? system : mode === 'ember' ? 'dark' : mode
+  return mode === 'system' ? system : mode
 }

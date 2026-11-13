@@ -1,14 +1,15 @@
-// The window's language (0.13.0, the owner's request 31 Oct 2026): English or Arabic, switched like light/dark.
+// The window's language (0.13.0, the owner's request 31 Oct 2026; German, French, Spanish 0.22.0), switched like light/dark.
 // setLanguage() swaps the texts of T in place; the document direction flips for Arabic (right to left); the choice
 // is remembered on this PC (local storage) and sent to the core, whose messages (Git, saving…) follow too.
 import { createContext, useContext } from 'react'
-import { isRtl, setLanguage, type Language } from '../../../shared/text'
+import { isLanguage, isRtl, setLanguage, type Language } from '../../../shared/text'
 
 const STORAGE_KEY = 'reqman.language'
 
 export function loadSavedLanguage(): Language {
   try {
-    return localStorage.getItem(STORAGE_KEY) === 'ar' ? 'ar' : 'en'
+    const v = localStorage.getItem(STORAGE_KEY)
+    return isLanguage(v) ? v : 'en'
   } catch {
     return 'en'
   }

@@ -293,7 +293,7 @@ export function registerIpc(services: Services, paths: Paths): void {
     createBranchAt: (_e, name, commit) => ws.createBranchAt(v.str(name, 'branch name', 250), v.commitRef(commit)),
     switchBranch: (_e, name, changes) => ws.switchBranch(v.str(name, 'branch', 300), v.oneOf(changes, ['take', 'discard'] as const, 'choice')),
     branchRange: (_e, name) => ws.branchRange(v.str(name, 'branch', 300)),
-    setLanguage: async (_e, lang) => setLanguage(v.oneOf(lang, ['en', 'ar'] as const, 'language')),
+    setLanguage: async (_e, lang) => setLanguage(v.oneOf(lang, ['en', 'de', 'fr', 'es', 'ar'] as const, 'language')),
     deleteBranch: (_e, name, force) => ws.deleteBranch(v.str(name, 'branch', 300), force === true),
     push: () => ws.push(),
     discardChanges: (_e, paths) => ws.discardChanges(v.strings(paths, 'files')),

@@ -42,7 +42,7 @@ export const de: Texts = {
     workspaceArea: 'dem Arbeitsbereich',
     settingsArea: 'den Einstellungen',
     theme: { label: 'Farbschema', light: 'Hell', dark: 'Dunkel', ember: 'Ember', system: 'System (wie Windows)' },
-    language: { label: 'Sprache', en: 'English', ar: 'العربية', enShort: 'En', arShort: 'ع', blocked: 'Speichern oder verwerfen Sie Ihre Bearbeitung, bevor Sie die Sprache wechseln.' }
+    language: { label: 'Sprache', blocked: 'Speichern oder verwerfen Sie Ihre Bearbeitung, bevor Sie die Sprache wechseln.' }
   },
 
   start: {

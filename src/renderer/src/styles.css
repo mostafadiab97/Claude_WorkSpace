@@ -4821,3 +4821,11 @@ select:not([multiple]) {
 :root[data-theme='ember'] .btn:disabled {
   box-shadow: none;
 }
+
+/* 0.22.0: the language drop-down beside the colour switch */
+.lang-picker {
+  inline-size: auto;
+  min-inline-size: 0;
+  block-size: var(--rm-shape-control-height-small);
+  padding-block: 0;
+}

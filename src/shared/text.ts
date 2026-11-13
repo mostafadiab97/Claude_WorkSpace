@@ -1,6 +1,6 @@
 // ALL TEXTS SHOWN TO THE USER, in one place (review S-06, the owner's decision 27 Oct 2026).
 // Change a label or message here and it changes everywhere. Translations are copies of this object with the same
-// keys: Arabic in text-ar.ts (0.13.0) — the compiler refuses a translation with a missing or extra key.
+// keys: Arabic in text-ar.ts (0.13.0), German, French, Spanish in text-de/-fr/-es.ts (0.22.0) — the compiler refuses a translation with a missing or extra key.
 // Texts with values are small functions: T.table.showMore(12).
 //
 // T is ONE object whose contents are swapped in place by setLanguage(), so code that keeps a reference to a part of
@@ -13,6 +13,9 @@
 // Used by the window (renderer) and by the core for messages it sends to the window (Git, saving…).
 
 import { ar } from './text-ar'
+import { de } from './text-de'
+import { es } from './text-es'
+import { fr } from './text-fr'
 
 const n = (count: number): string => count.toLocaleString('en')
 const s = (count: number, one = '', many = 's'): string => (count === 1 ? one : many)
@@ -51,7 +54,7 @@ const en = {
     workspaceArea: 'the workspace',
     settingsArea: 'settings',
     theme: { label: 'Colour theme', light: 'Light', dark: 'Dark', ember: 'Ember', system: 'System (as Windows)' },
-    language: { label: 'Language', en: 'English', ar: 'العربية', enShort: 'En', arShort: 'ع', blocked: 'Save or discard your edit before switching the language.' }
+    language: { label: 'Language', blocked: 'Save or discard your edit before switching the language.' }
   },
 
   start: {
@@ -1338,7 +1341,19 @@ const en = {
 
 /** The shape every translation must have (all keys of the English texts). */
 export type Texts = typeof en
-export type Language = 'en' | 'ar'
+export type Language = 'en' | 'de' | 'fr' | 'es' | 'ar'
+/**
+ * The languages of the window, each named in its own language (the same in every language, so a constant is fine).
+ * 0.22.0 (the owner, 13 Nov 2026): German, French and Spanish join English and Arabic; Chinese and Hindi are step 2.
+ */
+export const LANGUAGES: readonly { code: Language; name: string }[] = [
+  { code: 'en', name: 'English' },
+  { code: 'de', name: 'Deutsch' },
+  { code: 'fr', name: 'Français' },
+  { code: 'es', name: 'Español' },
+  { code: 'ar', name: 'العربية' }
+]
+export const isLanguage = (v: unknown): v is Language => LANGUAGES.some((l) => l.code === v)
 
 /** Deep copy that keeps functions (the texts with values). */
 function copy<V>(v: V): V {
@@ -1364,7 +1379,8 @@ let current: Language = 'en'
 /** Switches every text to `lang` (renderer and core each call it for their own copy). */
 export function setLanguage(lang: Language): void {
   current = lang
-  assign(T as unknown as Record<string, unknown>, (lang === 'ar' ? ar : en) as unknown as Record<string, unknown>)
+  const texts: Record<Language, Texts> = { en, de, fr, es, ar }
+  assign(T as unknown as Record<string, unknown>, texts[lang] as unknown as Record<string, unknown>)
 }
 export const getLanguage = (): Language => current
 /** Right-to-left languages flip the window. */

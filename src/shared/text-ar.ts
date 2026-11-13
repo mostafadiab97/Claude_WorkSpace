@@ -59,7 +59,7 @@ const raw: Texts = {
     workspaceArea: 'مساحة العمل',
     settingsArea: 'الإعدادات',
     theme: { label: 'نمط الألوان', light: 'فاتح', dark: 'داكن', ember: 'جمر', system: 'حسب النظام (كما في Windows)' },
-    language: { label: 'اللغة', en: 'English', ar: 'العربية', enShort: 'En', arShort: 'ع', blocked: 'احفظ تعديلك أو تراجع عنه قبل تغيير اللغة.' }
+    language: { label: 'اللغة', blocked: 'احفظ تعديلك أو تراجع عنه قبل تغيير اللغة.' }
   },
 
   start: {

@@ -40,7 +40,7 @@ export const es: Texts = {
     workspaceArea: 'el área de trabajo',
     settingsArea: 'la configuración',
     theme: { label: 'Tema de color', light: 'Claro', dark: 'Oscuro', ember: 'Brasa', system: 'Sistema (como Windows)' },
-    language: { label: 'Idioma', en: 'English', ar: 'العربية', enShort: 'En', arShort: 'ع', blocked: 'Guarde o descarte su edición antes de cambiar el idioma.' }
+    language: { label: 'Idioma', blocked: 'Guarde o descarte su edición antes de cambiar el idioma.' }
   },
 
   start: {

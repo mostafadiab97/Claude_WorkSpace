@@ -694,7 +694,7 @@ export interface ReqochetApi {
    */
   switchBranch(name: string, changes: 'take' | 'discard'): Promise<GitResult>
   /** The window's language (0.13.0): core messages follow it. */
-  setLanguage(lang: 'en' | 'ar'): Promise<void>
+  setLanguage(lang: 'en' | 'de' | 'fr' | 'es' | 'ar'): Promise<void>
   /** Deletes a branch on this PC (never the current one, never on the remote). `force` also when it has unmerged commits. */
   deleteBranch(name: string, force: boolean): Promise<GitResult>
   /** What a branch would bring into the current one, like a pull request: common ancestor → that branch. */

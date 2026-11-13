@@ -67,14 +67,14 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.22.0 (visual polish and Ember)
+## Manual test checklist — v0.22.0 (new look, Ember, five languages)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
 | 1 | Let reqochet-dev update to **0.22.0** and run the release self-test. | All steps passed. |
-| 2 | On the start screen, try the new switches: **En / ع** and the four icons (sun, moon, flame, screen); hover each. | Each icon shows its name; the window changes at once. |
-| 3 | Choose the **flame (Ember)**, open the sandbox, change an item, open **Changes**, then Pull or Push. | Warm dark colours, orange buttons with a soft glow; titles on shaded bars; a calm floating note; everything readable. |
-| 4 | Switch to Arabic (still Ember) and look at the same screens. | Arrows point the right way; the selected row's orange edge is on the right. |
+| 2 | On the start screen, pick each language in the new drop-down, then each colour icon (sun, moon, flame, screen). | Texts change at once; in Arabic the name «ريكوشيه» shows; the flame gives Ember with the orange logo. |
+| 3 | In **Ember**, open the sandbox, change an item, open **Changes**, then Pull or Push. | Warm dark colours, serif headings, orange buttons with a soft glow, titles on shaded bars, a calm note. |
+| 4 | Import your Excel file twice into the same document. | The second time: a yellow warning explains why nothing is imported; no "No problems found". |
 | 5 | Settings → Environment → **Go back to an earlier version…** (don't install). | The Versions list opens below; Cancel closes it. |
 
 ## Previous checklist — v0.21.4 (the owner's 0.21.3 report)

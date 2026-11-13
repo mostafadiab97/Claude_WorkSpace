@@ -3,7 +3,16 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
-## 0.22.0 — 13 Nov 2026 — visual polish and Ember
+## 0.22.0 — 13 Nov 2026 — visual polish, Ember, five languages
+- **Five window languages** (the owner, 13 Nov): English, Deutsch, Français, Español, العربية — a drop-down, each
+  language named in itself. Each translation is one file (`src/shared/text-de.ts` …) a native speaker can review
+  alone, with a word list in `docs/guides/glossary-<lang>.md`. Chinese and Hindi are step 2.
+- **Arabic name «ريكوشيه»** in the top bar and on the start screen when the window is in Arabic (Baloo Bhaijaan 2,
+  OFL; its و is the English q and its ه the English o). The square icon stays the same in every language.
+- **Ember logo set** (orange name, Ember tile and eyes) and **serif headings** in Ember (Source Serif 4, OFL —
+  Anthropic's own fonts are not free to ship).
+- Import: when every row already exists, a **yellow warning** says why nothing is imported, instead of "No problems
+  found" (the owner, 0.21.4 test 3).
 - **Ember** (the owner, 13 Nov) — a third colour mode: warm dark colours, orange buttons and edges, a soft orange glow
   on the one thing that is "on" (primary button, focused field, active view, notes). Colours and glow rules by Fable;
   every text at least 5.5:1 contrast. A user theme.json can change it under `modes.ember`.
@@ -28,6 +37,8 @@ that matched a random ID, a CSV time limit) — fixed; Ember joined the same ver
   CSS sizes that pointed at no token, retry after a failed versions list, reduced motion respected.
 
 ## 0.21.4 — 12 Nov 2026 — the owner's 0.21.3 report
+**Owner (13 Nov 2026):** self-test 25/25 (81.1 s), Copy report works again; tests 2 and 4 passed; test 3 passed, but
+"No problems found" stood above the nothing-to-import message — now a warning (0.22.0).
 - **Copy report** (self-test, diagnostics) works again — 0.21.3 refused every web permission, writing to the clipboard
   too; clipboard writing is now the one permission allowed (e2e checks the clipboard).
 - **Import into a new document:** the rows show at once — the import told the index the wrong file locations for a

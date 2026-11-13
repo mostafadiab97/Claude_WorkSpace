@@ -4,12 +4,12 @@ Nothing here is published anywhere; the owner posts what he chooses. The scripts
 
 | File | What | Size |
 | --- | --- | --- |
-| `reqochet-45s.mp4` | "The file and the window", 48 s, 1920×1080, 30 fps, H.264, captions burnt in, no sound | see below |
-| `reqochet-45s-square.mp4` | the same film laid out for 1080×1080 (LinkedIn feed) | |
-| `reqochet-45s-poster.png` | still at 10.9 s (the file next to the window) — cover picture, also the picture for post 2 | |
-| `sting/reqochet-sting-{light,dark,ember}.mp4` | the 6-second logo sting on each background, 1920×1080 | |
-| `sting/reqochet-sting-{light,dark,ember}.webm` | the same with a **transparent** background (VP9 with alpha) — to lay over other video | |
-| `sting/reqochet-sting-{light,dark,ember}.svg` | the same as a self-contained animated SVG (plays once, ends on the logo; stands still on the logo when the system asks for reduced motion) | |
+| `reqochet-45s.mp4` | "The file and the window", 48 s, 1920×1080, 30 fps, H.264, captions burnt in, no sound | 2.5 MB |
+| `reqochet-45s-square.mp4` | the same film laid out for 1080×1080 (LinkedIn feed) | 2.0 MB |
+| `reqochet-45s-poster.png` | still at 10.9 s (the file next to the window) — cover picture, also the picture for post 2 | 0.2 MB |
+| `sting/reqochet-sting-{light,dark,ember}.mp4` | the 6-second logo sting on each background, 1920×1080 | about 0.1 MB each |
+| `sting/reqochet-sting-{light,dark,ember}.webm` | the same with a **transparent** background (VP9 with alpha) — to lay over other video | under 0.2 MB each |
+| `sting/reqochet-sting-{light,dark,ember}.svg` | the same as a self-contained animated SVG (plays once, ends on the logo; stands still on the logo when the system asks for reduced motion) | 18 KB each |
 
 ## How it is made
 

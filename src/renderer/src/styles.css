@@ -647,6 +647,12 @@ code {
   outline: none;
 }
 
+/* 0.22.0 (UI review UX-22-04): keyboard focus on the table is visible */
+.table:focus-visible {
+  outline: var(--rm-shape-border-width) solid var(--rm-color-focus);
+  outline-offset: calc(var(--rm-shape-border-width) * -2);
+}
+
 .table__scroll {
   overflow: auto;
 }
@@ -705,10 +711,13 @@ code {
   border-inline-end: var(--rm-shape-border-width) solid var(--rm-color-border);
 }
 
+.table__resize:focus-visible {
+  outline: calc(var(--rm-shape-border-width) * 2) solid var(--rm-color-focus);
+}
+
 .table__resize:hover,
 .table__resize:focus-visible,
 .table__resize--active {
-  outline: none;
   border-inline-end-width: calc(var(--rm-shape-border-width) * 3);
   border-inline-end-color: var(--rm-color-primary);
 }
@@ -2504,7 +2513,7 @@ code {
 
 .merge__item {
   border: var(--rm-shape-border-width) solid var(--rm-color-border);
-  border-radius: var(--rm-shape-radius);
+  border-radius: var(--rm-shape-radius-small);
   padding: var(--rm-space-sm) var(--rm-space-md);
 }
 
@@ -2545,7 +2554,7 @@ code {
   cursor: pointer;
   background: var(--rm-color-surface);
   border: var(--rm-shape-border-width) solid var(--rm-color-border);
-  border-radius: var(--rm-shape-radius);
+  border-radius: var(--rm-shape-radius-small);
   padding: var(--rm-space-xs) var(--rm-space-sm);
   min-width: 0;
 }
@@ -2801,7 +2810,7 @@ code {
 }
 .badge {
   border: 1px solid var(--rm-color-border);
-  border-radius: var(--rm-shape-radius);
+  border-radius: var(--rm-shape-radius-small);
   padding-inline: var(--rm-space-xs);
   color: var(--rm-color-text-muted);
 }
@@ -2813,7 +2822,7 @@ code {
 /* 0.14.1: Settings → Versions (go back to an earlier version) */
 .versions {
   border: 1px solid var(--rm-color-border);
-  border-radius: var(--rm-shape-radius);
+  border-radius: var(--rm-shape-radius-small);
   padding: var(--rm-space-sm) var(--rm-space-md);
   display: grid;
   gap: var(--rm-space-xs);
@@ -2876,7 +2885,7 @@ code {
   text-align: start;
   background: none;
   border: none;
-  border-radius: var(--rm-shape-radius);
+  border-radius: var(--rm-shape-radius-small);
   padding: var(--rm-space-xs) var(--rm-space-sm);
   color: var(--rm-color-text);
   font: inherit;
@@ -2916,7 +2925,7 @@ code {
   overflow-x: auto;
   padding: var(--rm-space-sm);
   border: 1px solid var(--rm-color-border);
-  border-radius: var(--rm-shape-radius);
+  border-radius: var(--rm-shape-radius-small);
 }
 .guide__body h1 {
   font-size: var(--rm-font-size-title);
@@ -3724,7 +3733,7 @@ html {
 
 /* Settings → Privacy and access (the owner, 8 Nov 2026) */
 .privacy__title {
-  font-size: var(--rm-font-size-md);
+  font-size: var(--rm-font-size-medium);
   margin-block: var(--rm-space-lg) var(--rm-space-xs);
 }
 .privacy__list {
@@ -3963,7 +3972,7 @@ html {
   flex-direction: column;
   gap: var(--rm-space-sm);
   border: var(--rm-shape-border-width) solid var(--rm-color-border);
-  border-radius: var(--rm-shape-radius);
+  border-radius: var(--rm-shape-radius-small);
   padding: var(--rm-space-sm) var(--rm-space-md) var(--rm-space-md);
   scroll-margin-top: var(--rm-space-xs);
 }
@@ -4123,7 +4132,7 @@ html {
 }
 .trace__rule {
   border: var(--rm-shape-border-width) solid var(--rm-color-border);
-  border-radius: var(--rm-shape-radius);
+  border-radius: var(--rm-shape-radius-small);
   padding: var(--rm-space-sm) var(--rm-space-md);
   display: flex;
   flex-direction: column;
@@ -4261,7 +4270,7 @@ html {
 }
 .rules__row {
   border: var(--rm-shape-border-width) solid var(--rm-color-border);
-  border-radius: var(--rm-shape-radius);
+  border-radius: var(--rm-shape-radius-small);
   padding: var(--rm-space-sm);
 }
 .rules__text {
@@ -4707,4 +4716,9 @@ select:not([multiple]) {
 .rules__row {
   background: var(--rm-color-surface);
   border-radius: var(--rm-shape-radius-medium);
+}
+
+/* 0.22.0 (UI review UX-22-03): "Delete…" in the document bar shows that it removes something */
+.link-btn--danger {
+  color: var(--rm-color-danger);
 }

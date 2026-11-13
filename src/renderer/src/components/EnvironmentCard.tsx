@@ -12,7 +12,8 @@ export function EnvironmentCard(props: {
   const { theme, git, update, appInfo } = props
   // scroll to the Versions card on the same page and open its list of earlier versions
   const openVersions = (): void => {
-    document.getElementById('versions-card')?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    document.getElementById('versions-card')?.scrollIntoView({ block: 'start', behavior: calm ? 'auto' : 'smooth' })
     document.getElementById('versions-go-back')?.click()
   }
   const brand = theme.config.brand.name

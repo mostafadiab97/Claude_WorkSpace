@@ -146,7 +146,7 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
                 </button>
               </span>
             ) : (
-              <button type="button" className="link-btn" onClick={() => props.guard(() => setDeleting(true))}>
+              <button type="button" className="link-btn link-btn--danger" onClick={() => props.guard(() => setDeleting(true))}>
                 {T.documents.deleteDocument}
               </button>
             ))}

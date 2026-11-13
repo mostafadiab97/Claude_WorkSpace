@@ -697,6 +697,7 @@ export function WorkspaceScreen({
             <button
               type="button"
               className={problems.some((p) => p.severity === 'error') ? 'link-btn statusbar__problems' : 'link-btn statusbar__problems statusbar__problems--warn'}
+              aria-expanded={showProblems}
               onClick={() => setShowProblems((s) => !s)}
             >
               {T.workspace.problemCount(problems.length)} <Chevron open={showProblems} size={12} />

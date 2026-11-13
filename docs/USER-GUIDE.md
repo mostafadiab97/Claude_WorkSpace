@@ -49,7 +49,8 @@ accounts — who may read or change requirements is decided by your GitHub repos
 ### 1.2 Install
 
 1. Open the reqochet **releases page** — your team lead gives you the link; in an installed reqochet it is under
-   **⚙ → Environment and versions → Releases page**.
+   **⚙ → Environment and versions → Releases** (the address is shown there; the button next to it, *Go back to an
+   earlier version…*, installs an older version from inside reqochet — §13).
 2. Under the newest version → **Assets**, download `reqochet-Setup-<version>.exe` (`reqochet-dev-Setup-<version>.exe` for the development tool) (or the `.zip` if your browser blocks
    `.exe` files — extract it, then run the `.exe`).
 3. Run it. Windows may say *"Windows protected your PC"* because the installer is not yet code-signed: click
@@ -126,8 +127,8 @@ with a message; **Push** shares them.
 | Area | What is there |
 | --- | --- |
 | **Top bar** | Repository name and ✕ (close), branch button ⎇, **Pull**, **Push**, **Changes**, **Versions**, **Traceability** (with the number of commits to get or send), ⚙ Settings. Language and colours: **Settings → Appearance** (and on the start screen). |
-| **Toolbar** | Search box, ⊞ expand all, ⊟ collapse all, **Filters**, **Columns**, **Show text**, **Import…**, **Export…**, **+ New item**. |
-| **Table** | One row per item, in document order; ▸ opens a branch of the tree; numbers in the title show how many children. With **Show text** on (the default), the main column reads like a document: a heading shows its title in bold, any other item its title in bold and its whole text below, and each row is as tall as it needs to be. **Show text** off: one line per item, and the **Text** column shows the start of the text. |
+| **Toolbar** | Search box, expand all and collapse all (the two arrow buttons), **Filters**, **Columns**, **Show text**, **Import…**, **Export…**, **+ New item**. |
+| **Table** | One row per item, in document order; the small arrow before a title opens a branch of the tree; numbers in the title show how many children. With **Show text** on (the default), the main column reads like a document: a heading shows its title in bold, any other item its title in bold and its whole text below, and each row is as tall as it needs to be. **Show text** off: one line per item, and the **Text** column shows the start of the text. |
 | **Editor (right)** | Details (title, type, fields, parent, text, links) and **History**; Save, ↑ ↓ (move), + Child…, Delete. The text is shown formatted; click it to edit. Drag the left edge to make the editor wider. |
 | **Status bar** | Number of items, problems found (click to see them, grouped by kind), how many rows are chosen, what the table is filtered by (✕ clears it), the time of your last pull. |
 | **Floating messages** | Results of Git actions under the top bar: green frame = done, red = problem, blue = nothing to do. Success messages close by themselves. A question (e.g. "pull first?") opens under the buttons; Esc closes it. |

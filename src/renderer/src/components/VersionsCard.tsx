@@ -47,7 +47,7 @@ export function VersionsCard({ appInfo, update }: { appInfo: AppInfo | null; upd
           </button>
         </div>
       )}
-      {list.state === 'closed' && (
+      {(list.state === 'closed' || list.state === 'failed') && (
         <div className="actions">
           <button type="button" className="btn" id="versions-go-back" onClick={() => void open()}>
             {tx.goBack}

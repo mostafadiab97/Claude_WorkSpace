@@ -4,6 +4,8 @@ Each version was installed and tried by the owner (product owner) on Windows 11;
 version it was about, and what it led to.
 
 ## 0.22.0 — 13 Nov 2026 — visual polish, Ember, five languages
+**Owner (13 Nov 2026):** self-test 25/25 (92.8 s); tests 2–5 passed; test 5: two buttons for one thing looked odd →
+the Environment row goes, Versions gets a "Releases page on GitHub" button that says it opens the browser (next version).
 - **Five window languages** (the owner, 13 Nov): English, Deutsch, Français, Español, العربية — a drop-down, each
   language named in itself. Each translation is one file (`src/shared/text-de.ts` …) a native speaker can review
   alone, with a word list in `docs/guides/glossary-<lang>.md`. Chinese and Hindi are step 2.

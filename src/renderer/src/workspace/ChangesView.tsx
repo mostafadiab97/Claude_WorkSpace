@@ -8,7 +8,8 @@ import { describeSchema, numberLabel, WORKING, type Preset } from './compareRang
 import { CommitTools } from './GitPanels'
 import type { ChangesState } from './screen/useChanges'
 import { T } from '../../../shared/text'
-import { closedMark, onTabListKeyDown, rovingTabs } from '../lib/keys'
+import { onTabListKeyDown, rovingTabs } from '../lib/keys'
+import { Chevron } from '../components/icons'
 
 const SHOW = 400
 /** Changes rendered at a time in the continuous list (D-19c). */
@@ -467,7 +468,7 @@ export function ChangesView(props: {
                           L
                         </span>
                         <span className="compare__name">
-                          {showReviewed ? '▾' : closedMark()} {T.compare.reviewedOnly(data.reviewedOnly.length)}
+                          <Chevron open={showReviewed} /> {T.compare.reviewedOnly(data.reviewedOnly.length)}
                         </span>
                       </button>
                       {showReviewed && (

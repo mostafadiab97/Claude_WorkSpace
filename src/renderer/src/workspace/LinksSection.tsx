@@ -5,6 +5,7 @@ import type { Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { ItemSearch } from './ItemSearch'
 import { T } from '../../../shared/text'
+import { Icon } from '../components/icons'
 
 type Direction = 'out' | 'in'
 interface Entry {
@@ -120,7 +121,7 @@ export function LinksSection(props: {
             </span>
           ) : (
             <button type="button" className="btn btn--small btn--warn" disabled={locked} onClick={() => setChecking(true)}>
-              <span aria-hidden="true">⚠ </span>
+              <Icon name="warning" size={14} />
               {T.links.checkSuspects(suspects.length)}
             </button>
           ))}
@@ -175,7 +176,7 @@ export function LinksSection(props: {
                 {e.link.suspect && (
                   <span className="links__suspect">
                     <span title={e.dir === 'out' ? T.links.suspectOutTooltip(e.link.id) : T.links.suspectInTooltip(e.link.id)}>
-                      ⚠ {e.dir === 'out' ? T.links.changed : T.links.thisChanged}
+                      <Icon name="warning" size={14} /> {e.dir === 'out' ? T.links.changed : T.links.thisChanged}
                     </span>
                     <button type="button" className="btn btn--small" disabled={locked} onClick={() => decide(e, true)} title={T.links.confirmTooltip}>
                       {T.links.keep}
@@ -194,7 +195,7 @@ export function LinksSection(props: {
                 title={e.dir === 'in' ? T.links.removeInTooltip(e.link.id) : T.links.removeTooltip}
                 onClick={() => remove(e)}
               >
-                ✕
+                <Icon name="close" />
               </button>
             </li>
           )

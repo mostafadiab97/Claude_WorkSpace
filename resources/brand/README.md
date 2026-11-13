@@ -25,6 +25,10 @@ icon/
   reqochet-icon-light(-small).svg white tile versions — used inside the app, no outline
   reqochet-icon-light-outlined(-small).svg  white tile with a grey outline (#9aa3b2, class ring) — only for the Windows
                                   icon files (desktop, Start menu, taskbar), made by tools/brand-icons.mjs
+  reqochet-icon-16.svg, -20.svg, reqochet-icon-light-outlined-16.svg, -20.svg
+                                  the 16 and 20 px cuts drawn on the pixel grid (owner, 12 Nov 2026: keep the tile, repair the
+                                  small sizes) — whole-pixel dots, a one-pixel outline that is lighter on the dark tile and
+                                  darker on the white one; only for the Windows icon files (tools/brand-icons.mjs)
   png/reqochet-icon[-light]-{16…512}.png
 motion/
   reqochet-loading-on-light.svg   splash/loading: name with the two dots bouncing (1.4 s loop)

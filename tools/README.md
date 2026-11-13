@@ -15,7 +15,7 @@ Scripts for developing and releasing reqochet. Each file's header explains its o
 | `convert-sandbox-0.9.mts` | **Done once (v0.9.0):** converted the sandbox to `REQ-` IDs, order keys, no typed numbers | record only |
 | `check-privacy.mjs` | Fails the build when a tracked file contains the owner's name, account or e-mail (runs in both workflows) | `node tools/check-privacy.mjs` |
 | `review-pack.mjs` | Writes the review pack a helper starts from (changed files, areas, rules, screenshots) | `node tools/review-pack.mjs [base] [label]`, `--all` for the whole project |
-| `brand-icons.mjs` | Remakes `resources/brand/icon/png/*.png` and the two `.ico` files from the icon drawings (Playwright's Chromium + Python Pillow) | `node tools/brand-icons.mjs` |
+| `brand-icons.mjs` | Remakes `resources/brand/icon/png/*.png` and the two `.ico` files from the icon drawings (Playwright's Chromium + Python Pillow); a size with a drawing of its own (`reqochet-icon-16.svg`, `-20.svg`) uses that one | `node tools/brand-icons.mjs` |
 | `perf-qa-trace.mjs` | traceability timings on a big repository (coverage, gaps filter, impact, matrix, Excel export, rules save): `node --import tsx tools/perf-qa-trace.mjs <repo>`; `SKIP_EXPORT=1` skips the exports (0.20.0 performance review). | see the file header |
 | `perf-qa-whole.mjs` | Whole-project speed measurements through the built app (edits and commits: pass a throw-away copy) | `npm run build && xvfb-run -a node tools/perf-qa-whole.mjs <repo>` |
 | `perf-qa-block.mjs` | Does a big Compare block other window calls? | `npm run build && xvfb-run -a node tools/perf-qa-block.mjs <repo>` |

@@ -4,6 +4,7 @@ import type { CoverageRule } from '../../../shared/domain'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
 import { linkLabel, ruleText, typeLabel } from '../lib/schema'
+import { Icon } from '../components/icons'
 
 type Draft = CoverageRule & { key: number }
 let nextKey = 1
@@ -147,7 +148,7 @@ export function RulesPanel(props: { info: RepoInfo; onSaved: (i: RepoInfo) => vo
                   </select>
                 </label>
                 <button type="button" className="icon-btn" aria-label={T.trace.ruleRemove(ruleText(schema, r))} title={T.trace.ruleRemove(ruleText(schema, r))} onClick={() => change(rules.filter((x) => x.key !== r.key))}>
-                  ✕
+                  <Icon name="close" />
                 </button>
               </div>
             </li>

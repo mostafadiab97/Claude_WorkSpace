@@ -8,7 +8,8 @@ import { clampWidth, columnTemplate, columnsFor, linkTitle, tableMinWidth, type 
 import { useRowDrag } from './table/drag'
 import { useFlatRows, useTreeRows, type Row } from './table/rows'
 import { isRtlDocument, useLanguage } from '../lib/language'
-import { arrowDirection, closedMark } from '../lib/keys'
+import { arrowDirection } from '../lib/keys'
+import { Icon, Chevron } from '../components/icons'
 
 export { columnOrder, defaultOrder, moveColumn, optionalColumns, orderColumns, shownColumnKeys, columnsFor, withWidth, linkSummary, type Column, type ColumnPrefs } from './table/columns'
 export type { Row } from './table/rows'
@@ -311,7 +312,7 @@ export function ItemTable(props: {
                 title={`${c.key === 'links' ? `${T.table.linksLegend}\n` : ''}${isTree ? T.table.sortTreeTooltip(c.label) : T.table.sortTooltip(c.label)}`}
               >
                 {c.label}
-                {sortBy === c.key && <span aria-hidden="true">{desc ? ' ▾' : ' ▴'}</span>}
+                {sortBy === c.key && <Icon name={desc ? 'chevronDown' : 'chevronUp'} size={12} className="icon--sort" />}
               </button>
               {onResize && (
                 <span
@@ -361,7 +362,7 @@ export function ItemTable(props: {
                   <div key={v.key} role="row" aria-level={1} data-index={v.index} ref={full ? virtualizer.measureElement : undefined} className="table__row table__row--group" style={style}>
                     <span role="gridcell" className="table__td table__td--group">
                       <button type="button" className="table__group-toggle" aria-expanded={row.open} onClick={() => tree.setGroupOpen(row.name, !row.open)} title={row.open ? T.table.groupClose(row.name || T.documents.loose) : T.table.groupOpen(row.name || T.documents.loose)}>
-                        <span aria-hidden="true">{row.open ? '▾' : closedMark()}</span> <strong>{row.name || T.documents.loose}</strong> <span className="muted-inline">{T.table.groupCount(row.count)}</span>
+                        <Chevron open={row.open} /> <strong>{row.name || T.documents.loose}</strong> <span className="muted-inline">{T.table.groupCount(row.count)}</span>
                       </button>
                     </span>
                   </div>
@@ -432,7 +433,7 @@ export function ItemTable(props: {
                                   tree.setOpen(item.id, !open)
                                 }}
                               >
-                                {open ? '▾' : closedMark()}
+                                <Chevron open={open} />
                               </button>
                             ) : (
                               <span className="tree__toggle tree__toggle--leaf" aria-hidden="true" />

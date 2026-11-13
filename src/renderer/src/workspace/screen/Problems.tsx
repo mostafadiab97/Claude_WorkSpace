@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { T } from '../../../../shared/text'
 import { errorMessage } from '../../lib/hooks'
 import { groupProblems, type Problem } from './problemList'
+import { Icon } from '../../components/icons'
 export { problemsOf, type Problem } from './problemList'
 
 /**
@@ -70,7 +71,7 @@ export function ProblemList({
       <header className="problems__head">
         <strong>{T.workspace.problemsTitle(problems.length)}</strong>
         <button type="button" className="icon-btn icon-btn--small" aria-label={T.common.close} title={T.common.close} onClick={onClose}>
-          ✕
+          <Icon name="close" />
         </button>
       </header>
       <div className="problems__body scroll">
@@ -90,7 +91,7 @@ export function ProblemList({
                 {g.problems.map((p) => (
                   <li key={p.key} className={`problems__row problems__row--${p.severity}`}>
                     <span className="problems__mark" aria-label={p.severity === 'error' ? T.workspace.severityError : T.workspace.severityWarning}>
-                      {p.severity === 'error' ? '✕' : '⚠'}
+                      <Icon name={p.severity === 'error' ? 'close' : 'warning'} size={14} />
                     </span>
                     {p.id ? (
                       <button type="button" className="link-btn problems__id" onClick={() => p.id && onOpen(p.id)}>
@@ -123,7 +124,7 @@ export function ProblemList({
             </summary>
             <p className="problems__row problems__row--warning">
               <span className="problems__mark" role="img" aria-label={T.workspace.severityWarning}>
-                ⚠
+                <Icon name="warning" />
               </span>
               <span className="problems__msg">{T.trace.problemsCount(gapCount)}</span>
               {onShowGaps && (

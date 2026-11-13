@@ -12,6 +12,7 @@ import { ParentPicker } from './ParentPicker'
 import { SuspectLinksDialog } from './SuspectLinksDialog'
 import { T } from '../../../shared/text'
 import { onTabListKeyDown, rovingTabs } from '../lib/keys'
+import { Icon } from '../components/icons'
 
 /** askDelete: opened from the row menu's Delete — the editor shows its delete question at once (UX-W03). */
 export type EditorTarget = { kind: 'item'; id: string; askDelete?: boolean; /** Open on this tab (Changes → Impact, T-06). */ tab?: 'impact' } | { kind: 'draft'; item: Item }
@@ -250,7 +251,7 @@ export function ItemEditor(props: {
           </div>
         </div>
         <button type="button" className="icon-btn" aria-label={T.common.close} title={T.common.close} onClick={props.onClose}>
-          ✕
+          <Icon name="close" />
         </button>
       </header>
 
@@ -438,8 +439,8 @@ export function ItemEditor(props: {
             </div>
             {!isNew && (
               <div className="actions">
-                <button type="button" className="icon-btn" title={T.editor.moveUpTooltip} aria-label={T.editor.moveUp} disabled={dirty} onClick={() => void move('up')}>↑</button>
-                <button type="button" className="icon-btn" title={T.editor.moveDownTooltip} aria-label={T.editor.moveDown} disabled={dirty} onClick={() => void move('down')}>↓</button>
+                <button type="button" className="icon-btn" title={T.editor.moveUpTooltip} aria-label={T.editor.moveUp} disabled={dirty} onClick={() => void move('up')}><Icon name="arrowUp" size={14} /></button>
+                <button type="button" className="icon-btn" title={T.editor.moveDownTooltip} aria-label={T.editor.moveDown} disabled={dirty} onClick={() => void move('down')}><Icon name="arrowDown" size={14} /></button>
                 <select
                   className="select-btn"
                   value=""

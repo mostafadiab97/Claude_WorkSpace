@@ -6,6 +6,7 @@ import { BranchMenu } from './BranchMenu'
 import { BrandBusy } from '../components/Brand'
 import { useFeature } from '../lib/features'
 import { T } from '../../../shared/text'
+import { Icon } from '../components/icons'
 
 /** Last Git action's outcome, shown under the Git bar until dismissed. */
 export interface GitNotice {
@@ -139,7 +140,9 @@ export function GitBar(props: {
             setBranches((v) => !v)
           }}
         >
-          <span aria-hidden="true">⎇</span> {state.detached ? T.git.noBranch : (state.branch ?? '—')} <span aria-hidden="true">▾</span>
+          <Icon name="branch" size={14} />
+          <span className="gitbar__branch-name">{state.detached ? T.git.noBranch : (state.branch ?? '—')}</span>
+          <Icon name="chevronDown" size={12} />
         </button>
         {/* the owner's order (10 Nov 2026, 0.20.0 test 5): Pull, Push, Changes, Versions, Traceability */}
         {state.hasRemote && (
@@ -164,26 +167,6 @@ export function GitBar(props: {
         </button>
           </>
         )}
-        <button type="button" className={props.changesOpen ? 'btn btn--active' : 'btn'} aria-pressed={props.changesOpen} onClick={() => {
-            onDismiss()
-            props.onToggleChanges()
-          }} title={otherFiles ? `${T.git.changesTooltip}\n${T.git.settingsTooltip}` : T.git.changesTooltip}>
-          {T.git.changes(changedItems, otherFiles)}
-        </button>
-        <button type="button" className="btn" disabled={busy !== null} title={T.baselines.buttonTooltip} onClick={() => {
-            onDismiss()
-            props.onOpenHistory()
-          }}>
-          {T.baselines.button}
-        </button>
-        {props.onToggleTrace && (
-          <button type="button" className={props.traceOpen ? 'btn btn--active' : 'btn'} aria-pressed={props.traceOpen === true} title={T.trace.buttonTooltip} onClick={() => {
-              onDismiss()
-              props.onToggleTrace?.()
-            }}>
-            {T.trace.button}
-          </button>
-        )}
         {/* UX-13: the counts live on Pull and Push; only "not pushed yet" stays here */}
         {state.hasRemote && !state.upstream && (
           <span className="gitbar__sync" title={T.git.syncTooltip}>
@@ -194,6 +177,28 @@ export function GitBar(props: {
         {!state.hasRemote && publishing === null && (
           <button type="button" className="btn btn--small" disabled={busy !== null} onClick={() => setPublishing('')} title={`${T.git.noRemote}\n${T.git.publishTooltip}`}>
             {T.git.publish}
+          </button>
+        )}
+        {/* two groups (visual review V-02): Git actions and their state first, then the three views as quiet buttons */}
+        <span className="gitbar__divider" aria-hidden="true" />
+        <button type="button" className={props.changesOpen ? 'btn btn--view btn--active' : 'btn btn--view'} aria-pressed={props.changesOpen} onClick={() => {
+            onDismiss()
+            props.onToggleChanges()
+          }} title={otherFiles ? `${T.git.changesTooltip}\n${T.git.settingsTooltip}` : T.git.changesTooltip}>
+          {T.git.changes(changedItems, otherFiles)}
+        </button>
+        <button type="button" className="btn btn--view" disabled={busy !== null} title={T.baselines.buttonTooltip} onClick={() => {
+            onDismiss()
+            props.onOpenHistory()
+          }}>
+          {T.baselines.button}
+        </button>
+        {props.onToggleTrace && (
+          <button type="button" className={props.traceOpen ? 'btn btn--view btn--active' : 'btn btn--view'} aria-pressed={props.traceOpen === true} title={T.trace.buttonTooltip} onClick={() => {
+              onDismiss()
+              props.onToggleTrace?.()
+            }}>
+            {T.trace.button}
           </button>
         )}
         {state.warning && <span className="statusbar__warn" title={state.warning}>{T.git.oldGit}</span>}
@@ -222,7 +227,7 @@ export function GitBar(props: {
             {T.git.publishRun}
           </button>
           <button type="button" className="icon-btn icon-btn--small" aria-label={T.common.cancel} onClick={() => setPublishing(null)}>
-            ✕
+            <Icon name="close" />
           </button>
         </form>
       )}
@@ -237,7 +242,7 @@ export function GitBar(props: {
               {T.git.pushWithoutPull}
             </button>
             <button type="button" className="icon-btn icon-btn--small" aria-label={T.common.cancel} onClick={() => props.onPushOffer('cancel')}>
-              ✕
+              <Icon name="close" />
             </button>
           </span>
         </div>
@@ -266,7 +271,7 @@ export function GitBar(props: {
             )}
           </div>
           <button type="button" className="icon-btn icon-btn--small" aria-label={T.common.dismiss} onClick={props.onDismiss}>
-            ✕
+            <Icon name="close" />
           </button>
         </div>
       )}
@@ -392,7 +397,7 @@ export function CommitTools(props: { state: GitState; blockedReason: string | nu
                     disabled={locked || !message.trim()}
                     onClick={() => setMenu((m) => !m)}
                   >
-                    ▾
+                    <Icon name="chevronDown" size={14} />
                   </button>
                 )}
                 {menu && props.onPush && message.trim() !== '' && !locked && (

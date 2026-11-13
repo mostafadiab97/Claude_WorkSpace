@@ -1,8 +1,9 @@
 // Renders the Windows icon files (PNG sizes + .ico) from the dark-tile icon drawings in resources/brand/icon.
 // Run after changing reqochet-icon(-small).svg: node tools/brand-icons.mjs  (needs Python with Pillow for the .ico).
-// Small cut at or below 24 px (brand-tokens.json icon.smallCutAtOrBelowPx).
+// Small cut at or below 24 px (brand-tokens.json icon.smallCutAtOrBelowPx). A size with a drawing of its own
+// (reqochet-icon-16.svg, -20.svg: drawn on the pixel grid, 12 Nov 2026) uses that drawing instead.
 import { createRequire } from 'node:module'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 
 const dir = 'resources/brand/icon'
@@ -20,7 +21,8 @@ const page = await browser.newPage({ deviceScaleFactor: 1 })
 // taskbar only (the owner, 8 Nov 2026); inside the app the light tile has no outline
 for (const [variant, prefix] of [['', 'reqochet-icon'], ['-light-outlined', 'reqochet-icon-light']]) {
   for (const size of sizes) {
-    const svg = readFileSync(`${dir}/reqochet-icon${variant}${size <= 24 ? '-small' : ''}.svg`, 'utf8')
+    const own = `${dir}/reqochet-icon${variant}-${size}.svg`
+    const svg = readFileSync(existsSync(own) ? own : `${dir}/reqochet-icon${variant}${size <= 24 ? '-small' : ''}.svg`, 'utf8')
     await page.setViewportSize({ width: size, height: size })
     await page.setContent(`<html><body style="margin:0;background:transparent"><img width="${size}" height="${size}" src="data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}"></body></html>`)
     await page.locator('img').evaluate((i) => i.decode())

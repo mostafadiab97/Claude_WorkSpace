@@ -3,6 +3,7 @@ import type { ExportFormat, ExportItemsRequest, ExportResult, ImportSource } fro
 import type { ItemQuery } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
 import { T } from '../../../shared/text'
+import { Icon } from '../components/icons'
 
 /**
  * Export the requirements to a file: an Excel workbook, CSV, or Markdown for AI tools and documents. All items,
@@ -93,7 +94,7 @@ export function ExportDialog(props: {
             <p className="muted">{T.exportDialog.intro}</p>
           </div>
           <button type="button" className="icon-btn" aria-label={T.common.close} onClick={props.onClose}>
-            ✕
+            <Icon name="close" />
           </button>
         </header>
         <div className="modal__body">

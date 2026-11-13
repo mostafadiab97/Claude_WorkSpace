@@ -4,8 +4,9 @@ import type { ItemQuery, Schema } from '../../../shared/domain'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
 import { linkName, ruleText, typeName, typeLabel } from '../lib/schema'
-import { closedMark, onTabListKeyDown, rovingTabs } from '../lib/keys'
+import { onTabListKeyDown, rovingTabs } from '../lib/keys'
 import { isRtlDocument } from '../lib/language'
+import { Chevron } from '../components/icons'
 
 /** Above this many columns the matrix is shown as a list (T-07); the Excel file always has the grid. */
 const GRID_COLUMNS = 300
@@ -132,7 +133,7 @@ function CoverageTab(props: { schema: Schema; document: string | undefined; data
               ) : (
                 <>
                   <button type="button" className="link-btn" aria-expanded={shown} onClick={() => setOpen((s) => (s.has(rule.id) ? new Set([...s].filter((x) => x !== rule.id)) : new Set(s).add(rule.id)))}>
-                    {shown ? '▾' : closedMark()} {T.trace.gaps(gapCount)}
+                    <Chevron open={shown} /> {T.trace.gaps(gapCount)}
                   </button>
                   <button type="button" className="link-btn" onClick={() => props.onShowGaps(rule.type)}>
                     {T.trace.showInTable}

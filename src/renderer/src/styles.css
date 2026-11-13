@@ -4740,7 +4740,15 @@ select:not([multiple]) {
 
 /* 0.22.0 (UI review UX-22-03): "Delete…" in the document bar shows that it removes something */
 .link-btn--danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   color: var(--rm-color-danger);
+}
+
+.link-btn--danger > svg {
+  inline-size: 0.95em;
+  block-size: 0.95em;
 }
 
 /* 0.22.0 (the owner, 13 Nov): the colour-mode and language pickers as pill switches with icons, like websites —
@@ -4845,8 +4853,10 @@ select:not([multiple]) {
 .lang-picker {
   inline-size: auto;
   min-inline-size: 0;
-  block-size: var(--rm-shape-control-height-small);
+  block-size: calc(var(--rm-shape-control-height-small) + 6px);
   padding-block: 0;
+  border-radius: 999px;
+  padding-inline-start: var(--rm-space-md);
 }
 
 /* 0.22.0 (the owner, 0.21.4 test 3): "nothing to import" is a warning — yellow note with an icon */

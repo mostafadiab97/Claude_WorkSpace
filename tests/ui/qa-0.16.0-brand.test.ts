@@ -118,6 +118,6 @@ describe('Ember set and Arabic name (owner, 13 Nov 2026)', () => {
       expect(file(BrandName({ mode, width: 200, language: 'ar' }))).toBe(`reqochet-logo-ar-on-${mode}.svg`)
       expect(file(BrandName({ mode, width: 200, language: 'en' }))).toBe(`reqochet-logo-on-${mode}.svg`)
     }
-    expect((BrandName({ mode: 'light', width: 200, language: 'ar' }) as El).props.width).toBe(154)
+    expect((BrandName({ mode: 'light', width: 200, language: 'ar' }) as El).props.width).toBe(177) // 0.22.0 UX-23-04: 15 % larger than letter-height-equal (154)
   })
 })

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { RepoInfo } from '../../../../shared/api'
+import { Icon } from '../../components/icons'
 import { T } from '../../../../shared/text'
 import { useSessionState } from '../../lib/sessionState'
 
@@ -147,7 +148,8 @@ export function DocumentBar(props: { info: RepoInfo; document: string; onDocumen
               </span>
             ) : (
               <button type="button" className="link-btn link-btn--danger" onClick={() => props.guard(() => setDeleting(true))}>
-                {T.documents.deleteDocument}
+                <Icon name="trash" />
+            {T.documents.deleteDocument}
               </button>
             ))}
           {document !== ALL_DOCUMENTS && document !== '' && docs.filter((d) => d.name !== '' && d.name !== document).length > 0 &&

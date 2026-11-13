@@ -1,6 +1,6 @@
 # reqochet — User Guide
 
-Matches reqochet-dev 0.21 · November 2026 · *reqochet was called ReqMan until version 0.15. The development tool is named reqochet-dev; the release tool is reqochet — they work the same.*
+Matches reqochet-dev 0.22 · November 2026 · *reqochet was called ReqMan until version 0.15. The development tool is named reqochet-dev; the release tool is reqochet — they work the same.*
 
 reqochet is a Windows desktop application for writing, structuring and tracing requirements. Every requirement is a
 small text file in your project's own Git repository, so requirements get the same history, branches, reviews and
@@ -338,7 +338,7 @@ gets a fresh ID, its copied children follow it, and its parent is dropped when t
 
 ## 13. Settings
 
-Open with **⚙** (top right). The left panel switches between pages: **Appearance** (language En / ع; colours: sun = Light, moon = Dark, flame = Ember, screen = as Windows), **Environment and versions**, **Report a problem and
+Open with **⚙** (top right). The left panel switches between pages: **Appearance** (language: a drop-down with English, Deutsch, Français, Español, العربية; colours: sun = Light, moon = Dark, flame = Ember, screen = as Windows), **Environment and versions**, **Report a problem and
 diagnostics**, **Features**, **Self-tests**, **Privacy and access**, and this **User guide** (one page per section). **← Back** at the top of the
 panel returns to your repository.
 

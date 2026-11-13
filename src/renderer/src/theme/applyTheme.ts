@@ -8,7 +8,7 @@ import type { ThemeConfig } from '../../../shared/api'
 import { tokensToCssVars } from './tokens'
 
 export type ThemeMode = 'system' | 'light' | 'dark' | 'ember'
-/** The colour set shown: Ember is a dark mode of its own (0.23.0). */
+/** The colour set shown: Ember is a dark mode of its own (0.22.0). */
 export type Shown = 'light' | 'dark' | 'ember'
 const STORAGE_KEY = 'reqman.themeMode'
 

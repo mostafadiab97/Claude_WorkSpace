@@ -99,7 +99,7 @@ export const DEFAULT_THEME: ThemeConfig = {
       dangerBg: '#3a1d20',
       infoBg: '#1d2946'
     },
-    // 0.23.0 Ember (the owner, 13 Nov): a warm dark mode with orange accents and a soft glow; same keys as dark
+    // 0.22.0 Ember (the owner, 13 Nov): a warm dark mode with orange accents and a soft glow; same keys as dark
     ember: {
       background: '#14100d',
       surface: '#1d1814',

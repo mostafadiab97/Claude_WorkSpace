@@ -43,7 +43,8 @@ export type FaceState = 'idle' | 'thinking' | 'still'
 
 // The Arabic name is drawn in the same units as the English one and is shorter: at this share of the English width
 // its letters are exactly as tall (resources/brand/brand-tokens.json → logo.arabic.widthOfEnglish).
-const ARABIC_WIDTH = 0.7704
+// 0.22.0 (UI review UX-23-04): shown 15 % larger than letter-height-equal, so it holds its own in the top bar
+const ARABIC_WIDTH = 0.7704 * 1.15
 // Arabic has its own name; every other language (English, German, French, Spanish) shows the Latin name
 type Script = 'latin' | 'arabic'
 const scriptOf = (lang: Language): Script => (lang === 'ar' ? 'arabic' : 'latin')
@@ -91,6 +92,9 @@ export function BrandLoading({ mode, width, label, language = 'en' }: { mode: Mo
 }
 
 /** The small busy icon (the icon with its dots bouncing) for long waits inside a panel. */
-export function BrandBusy({ size = 24, mode = 'light' }: { size?: number; mode?: Mode }) {
-  return <img className="brand-busy" src={mode === 'ember' ? loadingIconEmber : loadingIcon} alt="" width={size} height={size} />
+export function BrandBusy({ size = 24, mode }: { size?: number; mode?: Mode }) {
+  // without a mode (the Git bar): Ember when the window shows Ember right now (code review 0.22.0b C2)
+  const shown = typeof document === 'undefined' ? 'light' : document.documentElement.dataset['theme']
+  const ember = (mode ?? (shown === 'ember' ? 'ember' : 'light')) === 'ember'
+  return <img className="brand-busy" src={ember ? loadingIconEmber : loadingIcon} alt="" width={size} height={size} />
 }

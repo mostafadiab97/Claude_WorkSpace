@@ -21,7 +21,7 @@ The prototype is built in seven milestones, each ending with a Windows build you
 | M5 Compare | Pick two commits/branches/tags; per-item and per-link difference view | Journey step 6 works |
 | M6 Export and hardening | CSV export; end-to-end tests of the whole journey; bug fixes from your trials | The full 8-step journey passes on two Windows PCs; success measures met |
 
-**Progress:** M0–M6 complete (v0.7.0); M7 exchange (0.11.0) and M8 branches with per-requirement merge (0.12.0); theme 1 traceability complete (documents, types, baselines, old versions, coverage, impact, matrix — 0.17.0–0.20.1); the whole-project review's fixes 0.20.2 (data safety), 0.21.0 (speed), 0.21.1 (screens, Arabic). Every version: the "Release plan" table below; the current state and next step: `docs/STATUS.md`.
+**Progress:** M0–M6 complete (v0.7.0); M7 exchange (0.11.0) and M8 branches with per-requirement merge (0.12.0); theme 1 traceability complete (documents, types, baselines, old versions, coverage, impact, matrix — 0.17.0–0.20.1); the whole-project review's fixes 0.20.2 (data safety), 0.21.0 (speed), 0.21.1 (screens, Arabic); review 2 0.21.2–0.21.4; visual polish 0.22.0. Every version: the "Release plan" table below; the current state and next step: `docs/STATUS.md`.
 
 **How we work:** I write the code, tests and architecture notes in a Git repository; after each milestone you install the build, try it and comment here or in chat. Specs and decisions stay in this document and the repo, so work continues across sessions.
 
@@ -164,6 +164,9 @@ X-02).
 | **0.21.1** | Screens and Arabic (review) | Toolbar wraps, Fields warning bug, settings and gaps tooltips, double-rename message, tab arrow keys, Arabic arrows and «نسخة» |
 | — | Documents from review 1 (11 Nov, no version) | README, user guide §16, architecture and onboarding details |
 | **0.21.2** | Review 2: data and import safety | Same ID in two files, CSV short rows, Excel wide/merged sheets, strict fast reader, edited links kept in merges |
+| **0.21.3** | Review 2: speed and Lows | Old version opens without blocking, review Lows, Merge into… |
+| **0.21.4** | The owner's 0.21.3 report | Copy report, import into a new document, nothing-to-import message, Delete document |
+| **0.22.0** | Visual polish (Fable, owner-approved) | One icon set, clearer edges, table on white, two-group top bar, one work bar, Changes title bars, calmer notes, sharper small icons |
 | **Release plan (C, 2 Nov 2026)** | — | 0.14 rename + health → 0.15 1a structure → 0.16 1b traceability views (pilot can start) → 0.17 daily comfort → 0.18 rich text → 0.19 documents out → 0.20 review basics → 0.21 pull requests in the app → 0.22 verification → 0.23 sharing + help → 0.24 AI → later commercial; a stabilisation patch after every theme; details in `docs/reviews/2026-11-01-planning-discussion.md` |
 | *Proposal A (R)* | *New name + traceability* | *Proposed 31 Oct 2026; order to be settled in the planning discussion (the owner, 31 Oct):* the rename (`docs/reviews/done/2026-10-31-rename-impact.md`) once the name is chosen; traceability matrix and coverage; item and link types in the GUI; saved views; bulk edit |
 | *Proposal B (R)* | *Documents out* | Word and PDF export, HTML publishing, Markdown preview |

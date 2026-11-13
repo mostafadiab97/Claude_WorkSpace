@@ -67,7 +67,17 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.21.4 (the owner's 0.21.3 report)
+## Manual test checklist — v0.22.0 (visual polish)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.22.0** and run the release self-test. | All steps passed. |
+| 2 | Open the sandbox in Light, then Dark (Settings → Appearance), and look at the table, the toolbar and the editor. | Drawn icons, clear button edges, the table on white; nothing cut off or overlapping. |
+| 3 | Change an item and open **Changes**; then Pull or Push. | Each item's title sits on a shaded bar; the floating note is calm (soft tint, thin edge, an icon). |
+| 4 | Switch to Arabic and look at the same screens. | Arrows point the right way; texts readable. |
+| 5 | Settings → Environment → **Go back to an earlier version…** (don't install). | The Versions list opens below; Cancel closes it. |
+
+## Previous checklist — v0.21.4 (the owner's 0.21.3 report)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
@@ -75,16 +85,6 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 | 2 | Make a new empty document and import your Excel file into it. | The rows appear at once, without switching windows. |
 | 3 | Import the same file again into another document. | The check step says "Nothing to import: every row matches an item that is already in this project…"; Import stays off. |
 | 4 | Pick the document from step 2 and click **Delete…** → **Delete document**. | The question names the number of items; afterwards the document is gone (Discard in Changes would bring back what was committed). |
-
-## Previous checklist — v0.21.3 (speed, screens, Arabic, Merge into…)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.21.3**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed.** |
-| 2 | In the sandbox, **Versions** → open an old commit you have not opened before; while it loads, move the window or hover a button. | The window keeps reacting while the message "Opening the old version…" shows. |
-| 3 | Make two documents (e.g. *Merge A* and *Merge B*), add an item to *Merge A*, copy its file by hand into *Merge B*'s folder, then pick *Merge A* and click **Merge into…** → *Merge B* → **Merge**. | "*Merge A* was merged into *Merge B*"; the item is once in *Merge B*, *Merge A* is gone. (Delete *Merge B* afterwards if you like.) |
-| 4 | Open an item, click its **Details** tab, press **Tab** and **Shift+Tab**. | Tab jumps from the tab row to the next control in one step; the arrows still move between tabs. |
-| 5 | Switch to **Arabic**: open **Traceability → Matrix**. | Arrows in the cells point the Arabic way (← for "the row links to it"), matching the legend. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

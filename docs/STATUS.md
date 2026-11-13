@@ -4,7 +4,7 @@ CLAUDE.md is read at the start of every session and again after every context co
 history there cost thousands of tokens each time (the owner asked to save tokens, 8 Nov 2026). **This file is the
 status**: update it with every release (the version table, "Next", the owner's last report, test counts).
 
-## Status (v0.21.4, 12 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.22.0, 13 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -44,7 +44,8 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.21.2 data and import safety — review 2: an ID in two files can no longer be saved or deleted through the wrong file, CSV short rows, Excel wide/merged sheets, strict fast reader, edited links kept in merges, flat groups over 10,000 | Released (v0.21.2) |
 | 0.21.3 speed, screens, Arabic, Merge into… — review 2: old version without lock-ups (pause 1.9 → 0.3 s), Merge into… (O-6), toolbar group, one Tab stop per tab row, start-screen shots, Arabic isolation and wording, W-10 core messages | Released (v0.21.3) |
 | 0.21.4 the owner's 0.21.3 report — Copy report, import into a new document, nothing-to-import message, Delete document | Released (v0.21.4) |
-| **Next** | Owner's 0.21.4 checklist; Fable's visual polish (branch `fable-visual-polish`) — screenshots to the owner before anything is merged; licence text to confirm (no-compete: PolyForm Shield / Perimeter); remaining review-2 items (review report §F) |
+| 0.22.0 visual polish (Fable, owner-approved 13 Nov) + review fixes | Released (v0.22.0) |
+| **Next** | Owner's 0.22.0 checklist; **0.23.0 Ember theme** (the owner, 13 Nov: a warm-orange dark theme; theme picker as a sun / moon / ember toggle; language picker "En" / "ع"); Arabic wordmark proposal 2 and website proposal (branch `fable-visual-polish`, `website/`) for the owner; licence to confirm (PolyForm Shield / Perimeter); review-2 leftovers (§F) |
 
 The owner's last report (12 Nov 2026, night): **0.21.2 and 0.21.3 all steps passed**; Copy report broken, import refresh, Delete document missing — fixed in 0.21.4. Before: 12 Nov 2026): **0.21.1 all 5 steps passed** (self-test 25/25 in 96.0 s; "perfect pass, it is so smooth" for the wrapping toolbar). Before (11 Nov 2026): **0.21.0 steps 1, 3, 4, 5 passed** (self-test 25/25 in 77.6 s — faster than 0.20.1's 90.9 s and 0.20.2's 120.9 s); step 2 passed too: Compare took about 4 s for **10,007 changed items** and under a second for a few — **all 5 passed**. Before: 0.20.2 all 4 steps passed (self-test 25/25, 120.9 s — 30 s slower than 0.20.1; nothing more to mask — O-8). Earlier: 0.20.1 all 5 steps passed; review questions O-1…O-7 answered (25/25, 90.9 s) — nothing open from his tests; theme 1b is done and the pilot can start. Before: 0.20.0 all 5 passed with four points (→ 0.20.1).
 Before: 0.18.0 all 5 passed (24/24). Before: 0.17.2 all 5 passed (23/23). Before: 0.13.1 all 4 steps passed, 21/21 (66.8 s). Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.

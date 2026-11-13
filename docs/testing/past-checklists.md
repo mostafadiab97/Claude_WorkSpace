@@ -1,7 +1,17 @@
-# Past manual checklists (v0.0.3 – v0.21.2)
+# Past manual checklists (v0.0.3 – v0.21.3)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.21.3 (speed, screens, Arabic, Merge into…)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.21.3**, then **⚙ → Self-tests → Run release self-test**. | **All 25 steps passed.** |
+| 2 | In the sandbox, **Versions** → open an old commit you have not opened before; while it loads, move the window or hover a button. | The window keeps reacting while the message "Opening the old version…" shows. |
+| 3 | Make two documents (e.g. *Merge A* and *Merge B*), add an item to *Merge A*, copy its file by hand into *Merge B*'s folder, then pick *Merge A* and click **Merge into…** → *Merge B* → **Merge**. | "*Merge A* was merged into *Merge B*"; the item is once in *Merge B*, *Merge A* is gone. (Delete *Merge B* afterwards if you like.) |
+| 4 | Open an item, click its **Details** tab, press **Tab** and **Shift+Tab**. | Tab jumps from the tab row to the next control in one step; the arrows still move between tabs. |
+| 5 | Switch to **Arabic**: open **Traceability → Matrix**. | Arrows in the cells point the Arabic way (← for "the row links to it"), matching the legend. |
 
 ## v0.21.2 (data and import safety)
 

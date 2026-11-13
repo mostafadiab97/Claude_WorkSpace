@@ -3,6 +3,24 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.22.0 — 13 Nov 2026 — visual polish
+Built by Fable (a second Claude model, strong at visuals) from its visual review; the owner approved the screenshots
+(13 Nov: "looks great, lets apply it").
+- **One icon set** — drawn icons (Lucide, ISC licence) instead of typed characters for settings, close, expand / collapse
+  all, branch, tree arrows, sort, move up / down, undo, warning, delete, drag handle; Filters, Columns and Back have an
+  icon next to their word. Arrows follow the reading direction in Arabic.
+- **Clearer edges** — buttons, fields and lists have a stronger edge; disabled controls have a look of their own.
+- **Table on white, top bar in two groups** (Pull / Push · Changes / Versions / Traceability, the open one filled).
+- **One work bar** — the document picker and the toolbar share one line that wraps as one.
+- **Changes view** — each requirement starts with its title on a shaded bar (GitHub style, the owner's 0.21.3 point 1).
+- **Calmer floating notes** (the owner, 13 Nov) — a soft tint of their meaning, a thin edge, an icon, text at the start.
+- **Settings → Environment** — "Go back to an earlier version…" opens the Versions list (the owner, 13 Nov); the GitHub
+  releases address is shown as text.
+- Sizes: one control height, larger dialog titles, slightly tighter spacing, a slightly larger Arabic text size.
+- Sharper app icon at 16 and 20 px (taskbar, title bar); the logo's eyes move only while reqochet works.
+- Review helpers (code, UI/UX, QA): keyboard focus visible on the table and column edges, "Delete…" in red, two
+  CSS sizes that pointed at no token, retry after a failed versions list, reduced motion respected.
+
 ## 0.21.4 — 12 Nov 2026 — the owner's 0.21.3 report
 - **Copy report** (self-test, diagnostics) works again — 0.21.3 refused every web permission, writing to the clipboard
   too; clipboard writing is now the one permission allowed (e2e checks the clipboard).

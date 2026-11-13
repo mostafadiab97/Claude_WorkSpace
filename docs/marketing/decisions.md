@@ -73,3 +73,15 @@ website-lines.md).
 - Audit questions (13 Nov evening): O-1 only "daily comfort" (bulk edit, duplicate, saved views, templates) before the
   team release, the rest after their feedback; O-2 Word export with today's plain text first, rich text later; O-4 a
   drawn commit history after the team release — ask Fable for a visual idea.
+
+## Answers (the owner, 13 Nov 2026, night)
+
+- Daily comfort details: **B-1 a** writing help in the same version; **B-2 a** saved views personal and shared;
+  **B-3 a** references to outside things after the team release.
+- **The public repository holds 1.0, and that is what the team gets** — the dev repository is not shared with them.
+  So the public repository (group F) comes *before* the team release.
+- Toolbar (Fable's review): **T-1 a** document actions in the document button's menu; **T-2 a** one outline button with
+  a two-line menu; **T-3 a** New item = small panel (type + place) then the editor; **T-4** Import, Export and Show
+  text may go into menus. Built in 0.23.0.
+- Film: end card **Ember → Dark → Light**; sounds perfect; **male voice**; shown words fine; no own voice.
+- Drawn history: Fable's idea approved; after 1.0 (first step first).

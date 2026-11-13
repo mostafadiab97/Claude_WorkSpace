@@ -282,3 +282,10 @@ vertical text limits its width, not its height. Rotate the text inside the cell,
 - A release that fails after the version bump needs `node tools/ci.mjs release` (a manual start) once fixed; the owner
   is told about every manual start (CLAUDE.md, report every GitHub change).
 
+
+## Tests with random IDs and time limits (0.22.0 release)
+
+- **Search text in a test can match a random ID.** Item IDs are random Crockford letters; a search word like `b` matched
+  `REQ-B1PDSCG` once in CI. Use search words containing I, L, O or U (never in an ID), e.g. `bu`.
+- **Time limits:** the Windows runner is 2–3× slower than the container. A limit that guards against a quadratic
+  slowdown should be far above the normal time (15 s for a 100k-row CSV that takes 2 s here), not just above it.

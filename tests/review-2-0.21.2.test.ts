@@ -59,7 +59,8 @@ describe('0.21.2 review 2 fixes', () => {
     const many = 'a,b,c,d\n' + '1,"x"\n'.repeat(100_000)
     const t = Date.now()
     expect(parseCsv(many).length).toBe(100_001)
-    expect(Date.now() - t).toBeLessThan(5_000)
+    // a quadratic reader takes minutes here; the Windows runner needed 5.4 s for the linear one (0.22.0 release)
+    expect(Date.now() - t).toBeLessThan(15_000)
   })
 
   it('O-6: Merge into… moves a document into the other one; identical copies go, differing ones stay', async () => {

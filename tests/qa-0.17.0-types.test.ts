@@ -193,7 +193,7 @@ describe('QA: required fields and the incomplete filter', () => {
     await ws.createDocument('B')
     await requireOn(ws, root, 'system-requirement', ['priority'])
     const a1 = await add(ws, 'alpha no prio', { document: 'A' })
-    const b1 = await add(ws, 'alpha b no prio', { document: 'B', fields: { status: 'Draft' } })
+    const b1 = await add(ws, 'alpha bu no prio', { document: 'B', fields: { status: 'Draft' } }) // 'bu': U is never in an ID (Crockford), so the search can't match a random ID (flaky on CI, 0.22.0)
     await add(ws, 'alpha prio', { document: 'A', fields: { priority: 'High' } })
     const q = (x: object): string[] => ws.query({ incomplete: true, ...x }).items.map((i) => i.id).sort()
     // fails about 1 run in 5 under full-suite load only (0.19.0/0.19.1): say what the index holds when it does
@@ -204,7 +204,7 @@ describe('QA: required fields and the incomplete filter', () => {
     expectQ({ document: 'A' }, [a1])
     expectQ({ document: 'B' }, [b1])
     expectQ({ document: 'A', types: ['risk'] }, [])
-    expectQ({ types: ['system-requirement'], text: 'alpha b' }, [b1])
+    expectQ({ types: ['system-requirement'], text: 'alpha bu' }, [b1])
     expectQ({ fields: { status: ['Draft'] }, document: 'B' }, [b1])
     expectQ({ fields: { status: ['Approved'] } }, [])
     expectQ({ links: 'none', document: 'A' }, [a1])

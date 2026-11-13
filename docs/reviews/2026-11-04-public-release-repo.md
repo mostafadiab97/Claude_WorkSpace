@@ -98,3 +98,19 @@ match "the tool files with the documentation".
 5. **Issues on, with a template** (asks for the app's problem report).
 
 (Original questions, 4 Nov: source public or installers only; licence; requirements and sandbox public; issues.)
+
+## 6. Licence — reopened 13 Nov 2026 (owner: "I think I misunderstood you last time")
+
+Discussion log:
+- 13 Nov 2026 — reopened; walkthrough L-1 (who should pay?) asked. Website decisions the same day: keep the headline
+  and the Ember line; keep the FAQ line "the installer is not signed yet"; say **Windows 11 only** for now.
+
+Points:
+- **L-1** Who should pay for reqochet: nobody / only someone who sells their own version / companies that use it?
+- **L-2** Which licence text follows from L-1 (open source MIT/Apache · PolyForm Shield · PolyForm Noncommercial or a
+  paid commercial licence · Business Source Licence).
+
+## 7. Other operating systems — asked 13 Nov 2026
+
+Windows 10 and Linux: what it takes is written in the reply of 13 Nov (testing for Windows 10; Linux builds, paths,
+case-sensitive files, auto-update for AppImage, a Linux CI job). Not planned yet — the owner decides after the licence.

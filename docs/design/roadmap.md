@@ -167,7 +167,7 @@ X-02).
 | **0.21.3** | Review 2: speed and Lows | Old version opens without blocking, review Lows, Merge into… |
 | **0.21.4** | The owner's 0.21.3 report | Copy report, import into a new document, nothing-to-import message, Delete document |
 | **0.22.0** | Visual polish (Fable, owner-approved), Ember, five languages | Ember colour mode with its own logo and serif headings, icon colour switch, English/German/French/Spanish/Arabic, Arabic name; one icon set, clearer edges, table on white, two-group top bar, one work bar, Changes title bars, calmer notes, sharper small icons |
-| **0.23.0** (planned) | Windows 10 (the owner, 13 Nov) | Checked by Claude only (no Windows 10 PC): code and libraries, Windows Server runner, self-test row |
+| **0.23.0** (planned) | Windows 10 (the owner, 13 Nov) | Checked by Claude only (no Windows 10 PC): code and libraries, Windows Server runner, self-test row; Git host neutral texts + `docs/guides/git-hosts.md` (D-7) |
 | **0.24.0** (planned) | Linux | AppImage + .deb, Linux CI job, paths, case-sensitive files |
 | **0.25.0** (planned) | Theme editor | Settings → Appearance: every theme value, live preview, reset, contrast warning |
 | **later** (planned) | Word export, then **1.0 — first public version** (D-1) | Chinese and Hindi after |

@@ -52,8 +52,13 @@ website-lines.md).
 - **D-3 A** — factual `HOW-IT-WAS-BUILT.md` + README line; one behind-the-scenes post about three weeks after launch.
 - **D-4 A** — launch unsigned with clear warnings and SHA-256 checksums; buy a code-signing certificate if reqochet gets
   a good number of users.
-- **D-5** — LinkedIn now (the owner's only active account); other channels to be discussed when needed.
+- **D-5** — LinkedIn now; Hacker News / Reddit (free sign-up, no personal social account) decided closer to launch; no Facebook.
 - **D-6 A** — GitHub Discussions off at first; issues only.
-- **D-7** — asked to explain (other Git hosts); open.
-- Name story ("Why reqochet?"): the first wording felt too detailed — a shorter one proposed.
+- **D-7** — the owner: others may add their Git host themselves; keep the Git work in one easy-to-find module, or make
+  it configurable. Fact: all Git work is already one module (`src/modules/git-adapter`, one public entry) and
+  "Publish to GitHub…" just adds the address and pushes — any host's address works; only the texts say GitHub.
+  Plan (0.23.0): neutral texts ("Publish to a Git host…", examples for GitHub / GitLab / Azure DevOps / Bitbucket) and an
+  engineering note `docs/guides/git-hosts.md` (where Git is called, how to add host-specific help). Website: "tested
+  with GitHub" until another host is tested.
+- Name story: **no explanation for now** (the owner).
 - Release plan approved: 0.23.0 Windows 10 · 0.24.0 Linux · 0.25.0 theme editor · then Word export · then 1.0.

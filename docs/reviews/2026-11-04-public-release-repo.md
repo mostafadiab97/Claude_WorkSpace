@@ -105,6 +105,11 @@ Discussion log:
 - 13 Nov 2026 — reopened; walkthrough L-1 (who should pay?) asked. Website decisions the same day: keep the headline
   and the Ember line; keep the FAQ line "the installer is not signed yet"; say **Windows 11 only** for now.
 
+- 13 Nov 2026 — **L-1 decided: B** — only someone who builds and sells their own version pays; companies and teams use
+  it free (the owner: "these tools are largely used by companies and big distributed teams; C would make it paid for
+  almost all users"). **L-2 follows: PolyForm Shield 1.0.0** (C). Windows 10 support planned next, then Linux — both
+  tested by Claude only (the owner has neither). A `marketing` helper is added for the first public launch.
+
 Points:
 - **L-1** Who should pay for reqochet: nobody / only someone who sells their own version / companies that use it?
 - **L-2** Which licence text follows from L-1 (open source MIT/Apache · PolyForm Shield · PolyForm Noncommercial or a

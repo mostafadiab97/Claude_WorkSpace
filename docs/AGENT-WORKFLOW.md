@@ -85,7 +85,8 @@ the frozen commit like the UI/UX reviewer, may draw proposals in its own scratch
   code), `qa-tester`, `ui-ux-reviewer` (also accessibility; also the brand when both changed), `brand-reviewer`,
   `security-reviewer`, `arabic-reviewer` (with `docs/guides/arabic-glossary.md`), `performance-tester`.
   **Builders (not reviewers):** `web-designer` (owner, 13 Nov 2026 — Fable; builds the product website in `website/`,
-  in its own worktree, screenshots to the owner before anything is pushed); `docs-reviewer` checks the documents. Each file holds
+  in its own worktree, screenshots to the owner before anything is pushed); `marketing` (owner, 13 Nov 2026 — positioning,
+  launch plan, posts, video concepts, website lines in `docs/marketing/`; never publishes); `docs-reviewer` checks the documents. Each file holds
   the helper's brief, its tools and its model: the code and security reviewers on the strongest model, the others on
   a smaller, cheaper one.
 - **Review pack:** `tools/review-pack.mjs` lists the changed files by area, the rules that apply and the screenshots,

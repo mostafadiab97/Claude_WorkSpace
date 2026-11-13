@@ -454,13 +454,13 @@ Excel, ReqIF (schema-validated), CSV and Markdown, all or filtered, in document 
 **Structure** — several documents (specifications) in one repository, each with its own tree and numbers; item and
 link types edited in the window; required fields per item type with an Incomplete filter.
 
-**Usability** — English and Arabic (full right-to-left), light / dark / system themes, company theme file.
+**Usability** — English, German, French, Spanish and Arabic (full right-to-left), Light / Dark / Ember / System colours, company theme file.
 
 **Reliability** — atomic, validated, conflict-checked writes; nothing ever force-pushed; built-in release self-test and
 data self-test; feature switches per PC and per team; problem reports; going back to an earlier version with updates
 paused; automatic updates.
 
-**Platform and data** — Windows 10/11 desktop, per-user install; offline first; no server, no database, no accounts;
+**Platform and data** — Windows 11 desktop (Windows 10 support planned next, then Linux), per-user install; offline first; no server, no database, no accounts;
 plain Markdown files in your own Git repository; tested with 10,000 and 50,000 requirements (compare, save, sort and
 search stay around a second or less at 50,000).
 
@@ -513,7 +513,7 @@ repository, and reqochet is the window that understands them. What you know maps
 
 | In DOORS / Jama | In reqochet | Where |
 | --- | --- | --- |
-| Module / project, document | The repository's requirements (several documents per repository are coming next, one folder each) | Start screen → Open |
+| Module / project, document | The repository's requirements (several documents per repository, one folder each — since 0.17) | Start screen → Open |
 | Object / item | Item: a heading, a requirement, a test … | the table and the editor |
 | Object number (1.2.3) | Outline number, calculated from the tree, never stored | column **No.** |
 | Attribute | Field (Status, Priority, Safety level …) | ⚙ → Fields; Settings for the team |

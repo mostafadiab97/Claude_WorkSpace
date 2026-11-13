@@ -4,6 +4,7 @@ import type { Schema } from '../../../shared/domain'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
 import { linkName, typeName } from '../lib/schema'
+import { Icon } from '../components/icons'
 
 /**
  * The Impact tab of the editor (theme 1b — the owner's decision T-06): everything that depends on the item, all levels
@@ -54,7 +55,7 @@ export function ImpactView(props: { schema: Schema; itemId: string; reloadToken:
                 <span className="impact__via">{n.via === 'child' ? T.trace.impactChild : linkName(props.schema, n.via)}</span>
                 {n.suspect && (
                   <span className="impact__suspect" role="img" aria-label={T.trace.impactSuspect} title={T.trace.impactSuspect}>
-                    ⚠
+                    <Icon name="warning" />
                   </span>
                 )}
                 <button type="button" className="link-btn" onClick={() => props.onOpen(n.id)}>

@@ -75,7 +75,7 @@ await scenario('E2E trace-0.20', async (ctx) => {
   const shown = await win.locator('.table__row[data-id]').evaluateAll((rs) => rs.map((r) => r.getAttribute('data-id')))
   check(JSON.stringify(shown) === JSON.stringify(['REQ-SYSB001']), `the table shows only the gap (${shown.join(', ')})`)
   // owner on 0.20.0 test 3: back to Traceability from the gaps
-  await win.getByRole('button', { name: '← Back to Traceability' }).click()
+  await win.getByRole('button', { name: 'Back to Traceability' }).click()
   await view.locator('.trace__rule').first().waitFor()
   check(true, 'Back to Traceability opens the view again')
   await view.getByRole('button', { name: 'Close traceability' }).click()

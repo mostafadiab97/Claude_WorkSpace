@@ -78,7 +78,7 @@ const en = {
   },
 
   settings: {
-    back: '← Back',
+    back: 'Back',
     title: 'Settings & diagnostics',
     env: {
       title: 'Environment',
@@ -91,8 +91,7 @@ const en = {
       themeWarnings: (count: number) => ` — ${count} warning(s)`,
       updates: 'Updates',
       app: 'App',
-      releases: 'Releases',
-      releasesPage: 'Releases page (all versions, installers)'
+      releases: 'Releases'
     },
     privacy: {
       diagramShortAlt: 'Diagram of what reqochet reads, keeps and sends',
@@ -620,7 +619,7 @@ const en = {
   },
 
   columnsMenu: {
-    button: (shown: number | null, all: number) => `Columns${shown !== null ? ` (${shown}/${all})` : ''} ▾`,
+    button: (shown: number | null, all: number) => `Columns${shown !== null ? ` (${shown}/${all})` : ''}`,
     label: 'Columns',
     hint: 'Shown in the table in this order. Drag a row here, or a column header in the table, to move a column; drag a column edge to change its width.',
     alwaysFirst: 'always shown first',
@@ -984,7 +983,7 @@ const en = {
     fixAll: (count: number) => `Fix all ${count}`,
     severityError: 'Error',
     severityWarning: 'Warning',
-    problemCount: (count: number, open: boolean) => `${count} problem${s(count)} ${open ? '▾' : '▸'}`,
+    problemCount: (count: number) => `${count} problem${s(count)}`,
     noProblems: 'No file problems',
     schemaProblem: (path: string, message: string) => `schema.yaml ${path}: ${message}`,
     renewCopyId: 'Give the copy a new ID',
@@ -1018,7 +1017,7 @@ const en = {
   /** Messages the core sends after Git actions (shown in the Git bar and the Changes panel). */
   /** Baselines and the history list (1a part 2 — S-06, S-08, S-09). */
   trace: {
-    backToTrace: '← Back to Traceability',
+    backToTrace: 'Back to Traceability',
     notShown: (count: number) => `${n(count)} more not shown.`,
     linkedItems: 'Linked items',
     starterAll: 'The starter rules are already in the list.',

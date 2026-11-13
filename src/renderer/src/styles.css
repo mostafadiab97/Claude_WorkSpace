@@ -760,7 +760,7 @@ code {
   background: var(--rm-color-surface);
   border: var(--rm-shape-border-width) solid var(--rm-color-border);
   border-radius: var(--rm-shape-radius-medium);
-  box-shadow: 0 6px 24px color-mix(in srgb, var(--rm-color-text) 18%, transparent);
+  box-shadow: var(--rm-shape-shadow-popover) color-mix(in srgb, var(--rm-color-text) 18%, transparent);
 }
 
 .row-menu__item {
@@ -2390,7 +2390,7 @@ code {
   background: var(--rm-color-surface);
   border: var(--rm-shape-border-width) solid var(--rm-color-border);
   border-radius: var(--rm-shape-radius-medium);
-  box-shadow: 0 6px 24px color-mix(in srgb, var(--rm-color-text) 18%, transparent);
+  box-shadow: var(--rm-shape-shadow-popover) color-mix(in srgb, var(--rm-color-text) 18%, transparent);
   font-size: var(--rm-font-size-small);
 }
 
@@ -2636,7 +2636,7 @@ code {
 .gitbar__ask > * {
   border: var(--rm-shape-border-width) solid var(--rm-color-border);
   border-radius: var(--rm-shape-radius-medium);
-  box-shadow: 0 6px 24px color-mix(in srgb, var(--rm-color-text) 18%, transparent);
+  box-shadow: var(--rm-shape-shadow-popover) color-mix(in srgb, var(--rm-color-text) 18%, transparent);
 }
 
 /* compact toolbar: one row while it fits; filters in a pop-up. It wraps to a second row when the editor makes the
@@ -2674,7 +2674,7 @@ code {
   background: var(--rm-color-surface);
   border: var(--rm-shape-border-width) solid var(--rm-color-border);
   border-radius: var(--rm-shape-radius-medium);
-  box-shadow: 0 6px 24px color-mix(in srgb, var(--rm-color-text) 18%, transparent);
+  box-shadow: var(--rm-shape-shadow-popover) color-mix(in srgb, var(--rm-color-text) 18%, transparent);
 }
 
 .filters__panel .input {
@@ -2718,33 +2718,45 @@ code {
   direction: ltr;
 }
 
-/* 0.13.1 (the owner on 0.13.0 step 2): the floating Git note must be noticed — tinted with its meaning (green = done,
-   red = problem, blue = question), a coloured frame and glow, and the text centred in both languages */
+/* 0.22.0 (the owner, 13 Nov — Fable review V-20): the calmer floating note — a tint of its meaning (green = done,
+   red = problem, blue = question), a 1 px edge in that colour, the neutral pop-up shadow, an icon, text at the start.
+   (0.13.1–0.21: a 2 px frame, a ring and a coloured glow on grey.) */
 .gitbar__float > .gitbar__notice {
-  /* 0.14.1 (the owner, 3 Nov): the theme's own colour again, one shade apart from the page — mixing the surface with the
-     text colour makes it darker in Light and lighter in Dark; the coloured frame and glow carry the meaning */
-  background: color-mix(in srgb, var(--rm-color-surface) 90%, var(--rm-color-text));
-  border: 2px solid var(--rm-color-success);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rm-color-success) 25%, transparent), 0 8px 28px color-mix(in srgb, var(--rm-color-success) 30%, transparent);
+  background: var(--rm-color-success-bg);
+  border: 1px solid var(--rm-color-success);
+  box-shadow: var(--rm-shape-shadow-popover) color-mix(in srgb, var(--rm-color-text) 18%, transparent);
   font-size: var(--rm-font-size-base);
-  align-items: center;
+  align-items: flex-start;
 }
 
 .gitbar__float > .gitbar__notice--error {
+  background: var(--rm-color-danger-bg);
   border-color: var(--rm-color-danger);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rm-color-danger) 25%, transparent), 0 8px 28px color-mix(in srgb, var(--rm-color-danger) 30%, transparent);
 }
 
 .gitbar__float > .gitbar__notice--info,
 .gitbar__float > .gitbar__offer,
 .gitbar__float > .gitbar__publish {
-  background: color-mix(in srgb, var(--rm-color-surface) 90%, var(--rm-color-text));
+  background: var(--rm-color-info-bg);
   border-color: var(--rm-color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rm-color-primary) 22%, transparent), 0 8px 28px color-mix(in srgb, var(--rm-color-primary) 25%, transparent);
+}
+
+.gitbar__notice-icon {
+  flex: none;
+  margin-block-start: 2px;
+  color: var(--rm-color-success);
+}
+
+.gitbar__notice--error .gitbar__notice-icon {
+  color: var(--rm-color-danger);
+}
+
+.gitbar__notice--info .gitbar__notice-icon {
+  color: var(--rm-color-primary);
 }
 
 .gitbar__float .gitbar__notice-text {
-  text-align: center;
+  text-align: start;
 }
 
 .gitbar__float .gitbar__items {
@@ -3316,7 +3328,7 @@ code {
   background: var(--rm-color-surface);
   border: var(--rm-shape-border-width) solid var(--rm-color-border);
   border-radius: var(--rm-shape-radius-medium);
-  box-shadow: 0 6px 24px color-mix(in srgb, var(--rm-color-text) 18%, transparent);
+  box-shadow: var(--rm-shape-shadow-popover) color-mix(in srgb, var(--rm-color-text) 18%, transparent);
 }
 
 .split__item {
@@ -4332,4 +4344,367 @@ html {
 /* owner on 0.20.0 test 3: back to the Traceability view from its gaps in the table */
 .table-mode__back {
   margin-inline-end: var(--rm-space-sm);
+}
+
+
+/* ---------- visual polish (visual review of 0.21.3, docs/reviews/agents/fable-trial-visual-review.md) ----------
+   One icon set, clear edges for controls, the table on white, the top bar in two groups, one work bar, type and
+   size tokens. Every value is a theme token. */
+
+/* V-31: the icon set (components/icons.tsx) — line drawings in the text colour of their place */
+.icon {
+  flex: none;
+  display: inline-block;
+  vertical-align: -0.15em;
+}
+/* icons that point along the reading direction are mirrored in the right-to-left window */
+[dir='rtl'] .icon--dir {
+  transform: scaleX(-1);
+}
+.icon--sort {
+  margin-inline-start: var(--rm-space-xs);
+}
+
+/* V-12 / V-13: a control has an edge that can be seen (3:1) — white fill, strong border; hover = one shade down */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rm-space-xs);
+  min-block-size: var(--rm-shape-control-height);
+  background: var(--rm-color-surface);
+  border-color: var(--rm-color-border-strong);
+}
+.btn:hover:not(:disabled) {
+  background: var(--rm-color-surface-alt);
+  border-color: var(--rm-color-text-muted);
+}
+.btn--small {
+  min-block-size: var(--rm-shape-control-height-small);
+}
+.btn--primary,
+.btn--primary:hover:not(:disabled) {
+  border-color: transparent;
+}
+.btn--primary {
+  background: var(--rm-color-primary);
+}
+.btn--primary:hover:not(:disabled) {
+  background: var(--rm-color-primary-hover);
+}
+.btn--danger,
+.btn--danger:hover:not(:disabled) {
+  background: var(--rm-color-danger);
+  border-color: transparent;
+}
+.btn--danger-outline {
+  border-color: var(--rm-color-danger);
+}
+.btn--warn,
+.btn--clear-filters {
+  border-color: var(--rm-color-warning);
+}
+.btn--accent {
+  border-color: var(--rm-color-primary);
+}
+.btn--active,
+.btn--active:hover:not(:disabled) {
+  background: var(--rm-color-selection);
+  border-color: var(--rm-color-primary);
+  color: var(--rm-color-primary);
+}
+/* disabled is a look of its own, not a faded copy: flat fill, muted words, a quiet edge */
+.btn:disabled,
+.btn--primary:disabled,
+.select-btn:disabled {
+  opacity: 1;
+  background: var(--rm-color-surface-alt);
+  border-color: var(--rm-color-border);
+  color: var(--rm-color-text-muted);
+  font-weight: var(--rm-font-weight-normal);
+}
+.icon-btn {
+  min-inline-size: var(--rm-shape-control-height);
+  block-size: var(--rm-shape-control-height);
+}
+.icon-btn--small {
+  min-inline-size: var(--rm-shape-control-height-small);
+  block-size: var(--rm-shape-control-height-small);
+}
+.editor__footer .icon-btn {
+  border-color: var(--rm-color-border-strong);
+}
+.settings-nav__back {
+  inline-size: calc(100% - 2 * var(--rm-space-sm));
+  justify-content: flex-start;
+}
+
+/* fields, lists and tick boxes */
+.input,
+.select-btn,
+.select select {
+  border-color: var(--rm-color-border-strong);
+  border-radius: var(--rm-shape-button-radius);
+  min-block-size: var(--rm-shape-control-height);
+}
+.input:focus {
+  border-color: var(--rm-color-focus);
+}
+.input[readonly],
+.input:disabled {
+  border-color: var(--rm-color-border);
+}
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--rm-color-primary);
+}
+/* V-32 / V-33: one look and one arrow for every drop-down list — the arrow is drawn in the list's own text colour */
+select:not([multiple]) {
+  appearance: none;
+  padding-inline-end: var(--rm-space-xl);
+  background-image:
+    linear-gradient(to top right, transparent 40%, currentColor 40% 60%, transparent 60%),
+    linear-gradient(to top left, transparent 40%, currentColor 40% 60%, transparent 60%);
+  background-repeat: no-repeat;
+  background-size: 5px 5px;
+  background-position:
+    right 13px top 50%,
+    right 8px top 50%;
+}
+/* background positions have no logical form: the arrow moves to the other end by hand in Arabic */
+[dir='rtl'] select:not([multiple]) {
+  background-position:
+    left 8px top 50%,
+    left 13px top 50%;
+}
+.select-btn {
+  background-color: var(--rm-color-surface);
+}
+.select-btn--primary {
+  background-color: var(--rm-color-primary);
+  border-color: transparent;
+}
+.select-btn:disabled {
+  background-color: var(--rm-color-surface-alt);
+}
+.document-bar--compact .select-btn {
+  min-block-size: var(--rm-shape-control-height-small);
+}
+/* V-29: the switch's items share the button corner, one step inside the shell */
+.segmented {
+  border-color: var(--rm-color-border-strong);
+}
+.segmented__item {
+  border-radius: var(--rm-shape-button-radius);
+}
+
+/* V-01: the requirements are the brightest area — rows on the panel white, the header one shade down */
+.table__scroll {
+  background: var(--rm-color-surface);
+}
+.table__td--id {
+  background: var(--rm-color-surface);
+}
+.table__row--chosen .table__td--id {
+  background: var(--rm-color-selection);
+}
+/* V-24: a requirement title is medium; only headings are bold, so a chapter stands out */
+.table__main-title {
+  font-weight: var(--rm-font-weight-medium);
+}
+/* V-25: digits of equal width where numbers sit under each other or change in place */
+.table__td--tree,
+.table__count,
+.statusbar,
+.filters__count,
+.editor__number,
+.compare__number {
+  font-variant-numeric: tabular-nums;
+}
+
+/* V-02: the top bar in two groups — Git actions with their state, a divider, then the views as quiet buttons */
+.gitbar .btn {
+  min-block-size: var(--rm-shape-control-height-small);
+}
+.gitbar__divider {
+  flex: none;
+  inline-size: var(--rm-shape-border-width);
+  block-size: var(--rm-space-lg);
+  margin-inline: var(--rm-space-xs);
+  background: var(--rm-color-border-strong);
+}
+.btn--view {
+  background: transparent;
+  border-color: transparent;
+}
+.btn--view:hover:not(:disabled) {
+  background: var(--rm-color-surface-alt);
+  border-color: transparent;
+}
+.btn--view:disabled {
+  background: transparent;
+  border-color: transparent;
+}
+.btn--view.btn--active,
+.btn--view.btn--active:hover:not(:disabled) {
+  background: var(--rm-color-selection);
+  border-color: transparent;
+  color: var(--rm-color-primary);
+  font-weight: var(--rm-font-weight-strong);
+}
+.gitbar__branch {
+  display: inline-flex;
+}
+.gitbar__branch-name {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* V-21 / V-43: the typewriter font is for IDs, hashes and paths — the sync state is a sentence */
+.gitbar__sync {
+  font-family: inherit;
+  font-size: var(--rm-font-size-small);
+}
+.editor__id {
+  font-weight: var(--rm-font-weight-normal);
+}
+
+/* V-05: one work bar — the document picker, its actions and the toolbar flow as one line of controls and wrap as
+   one (before: a document row plus one or two toolbar rows). "+ New item" still stays with its position list when
+   the bar wraps (0.21.1), pushed to the end by the spacer */
+.workbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rm-space-xs) var(--rm-space-sm);
+  padding: var(--rm-space-xs) var(--rm-space-md);
+  background: var(--rm-color-surface);
+  border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
+}
+.workbar > .document-bar,
+.workbar > .toolbar {
+  display: contents;
+}
+/* a naming form or a merge choice in the document bar takes a row of its own, like its messages */
+.workbar .document-bar__form,
+.workbar .document-bar__merge {
+  flex-basis: 100%;
+}
+.workbar .document-bar__merge {
+  display: flex;
+  align-items: center;
+  gap: var(--rm-space-xs);
+}
+.workbar .document-bar__label {
+  font-size: var(--rm-font-size-small);
+}
+.workbar .document-bar .link-btn {
+  font-size: var(--rm-font-size-small);
+}
+
+/* V-09 / V-30: the top layer casts the deepest shadow; header and footer breathe evenly */
+.modal__panel {
+  box-shadow: var(--rm-shape-shadow-dialog) color-mix(in srgb, var(--rm-color-text) 24%, transparent);
+}
+.modal__header,
+.modal__footer {
+  padding-block: var(--rm-space-lg);
+}
+.popover__panel {
+  box-shadow: var(--rm-shape-shadow-popover) color-mix(in srgb, var(--rm-color-text) 18%, transparent);
+}
+
+/* V-22: one 18 px title per screen — dialog, card and panel titles take the 16 px step */
+.modal__title,
+.first-run__title,
+.editor__heading,
+.guide__body h3 {
+  font-size: var(--rm-font-size-medium);
+}
+/* V-07: the editor leaves more of the window to the table */
+.editor {
+  width: var(--rm-editor-width, clamp(360px, 28vw, 480px));
+}
+
+/* The Changes view (owner, 12 Nov 2026): each requirement starts with a bar on its own shade, like the file-name
+   bar of a pull request — a normal-size title, the difference right under it */
+.compare__card {
+  padding: 0 0 var(--rm-space-md);
+  border-radius: var(--rm-shape-radius-medium);
+  background: var(--rm-color-surface);
+}
+.compare__card > :not(.compare__card-head) {
+  margin-inline: var(--rm-space-md);
+}
+.compare__card-head {
+  top: 0;
+  padding: var(--rm-space-xs) var(--rm-space-md);
+  background: var(--rm-color-surface-alt);
+  border-bottom: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-start-start-radius: var(--rm-shape-radius-medium);
+  border-start-end-radius: var(--rm-shape-radius-medium);
+}
+.compare__detail-title {
+  font-size: var(--rm-font-size-base);
+  font-weight: var(--rm-font-weight-strong);
+}
+/* V-19: removed words in running text are marked by colour and the red line — no strike-through on top */
+.diff__text .diff__mark--old {
+  text-decoration: none;
+}
+
+/* V-18: one background per meaning (done, warning, problem, question) for notes and bars */
+.notice--ok {
+  background: var(--rm-color-success-bg);
+}
+.notice--warn {
+  background: var(--rm-color-warning-bg);
+}
+.notice--error {
+  background: var(--rm-color-danger-bg);
+}
+.version-bar {
+  background: var(--rm-color-warning-bg);
+}
+.folder-notice--ask,
+.document-notice {
+  background: var(--rm-color-info-bg);
+}
+
+/* V-17 / V-34: an unfinished coverage bar is amber (the gap colour), not the brown of warning text; link marks
+   in the matrix are plain marks — green said "passed", amber stays for suspect links */
+.trace__bar-fill--warning {
+  background: var(--rm-color-gap);
+}
+.matrix__cell--on {
+  color: var(--rm-color-text);
+}
+.matrix th,
+.matrix td {
+  background: var(--rm-color-surface);
+}
+
+/* V-04: the start screen's content sits lower, nearer the middle of the window */
+.hero {
+  margin-block-start: 8vh;
+}
+
+/* V-41 / V-42: Arabic letters are smaller in their body than Latin ones at the same size — one step up, more
+   line height, and table headers by colour instead of weight */
+[dir='rtl'] body {
+  --rm-font-size-base: var(--rm-font-size-base-arabic);
+  --rm-font-size-small: var(--rm-font-size-small-arabic);
+  font-size: var(--rm-font-size-base);
+  line-height: 1.6;
+}
+[dir='rtl'] .table__th {
+  font-weight: var(--rm-font-weight-normal);
+  color: var(--rm-color-text);
+}
+
+/* cards of the Traceability view sit on the panel white, with the medium corner (their old radius token did not exist) */
+.trace__rule,
+.rules__row {
+  background: var(--rm-color-surface);
+  border-radius: var(--rm-shape-radius-medium);
 }

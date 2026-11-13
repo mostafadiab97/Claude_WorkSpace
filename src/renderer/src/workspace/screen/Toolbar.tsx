@@ -6,6 +6,7 @@ import { ColumnsMenu } from '../FieldsPanel'
 import type { ColumnPrefs } from '../ItemTable'
 import type { Filters, LinkFilter } from './useFilters'
 import { useFeature } from '../../lib/features'
+import { Icon } from '../../components/icons'
 
 /** Search, filters, columns, export, expand/collapse and "New item" above the table. */
 export function Toolbar({ searchRef, newRef, ...props }: {
@@ -46,10 +47,10 @@ export function Toolbar({ searchRef, newRef, ...props }: {
       {!f.filtered && (
         <>
           <button type="button" className="icon-btn" disabled={props.expanding} onClick={props.onExpandAll} aria-label={tw.expandAll} title={props.expanding ? tw.expanding : tw.expandAllTooltip}>
-            ⊞
+            <Icon name="expandAll" />
           </button>
           <button type="button" className="icon-btn" onClick={props.onCollapseAll} aria-label={tw.collapseAll} title={tw.collapseAllTooltip}>
-            ⊟
+            <Icon name="collapseAll" />
           </button>
         </>
       )}
@@ -170,6 +171,7 @@ function FilterMenu({ active, children }: { active: number; children: ReactNode 
   return (
     <div className="filters" ref={box}>
       <button type="button" className={open ? 'btn btn--active' : 'btn'} aria-expanded={open} onClick={() => setOpen((v) => !v)} title={T.workspace.filtersTooltip}>
+        <Icon name="filter" size={14} />
         {T.workspace.filters}
         {active > 0 && <span className="filters__count">{active}</span>}
       </button>

@@ -5,6 +5,7 @@ import { errorMessage } from '../lib/hooks'
 import { T } from '../../../shared/text'
 import { withActivity } from '../lib/activity'
 import { fieldLabel, linkLabel, typeLabel } from '../lib/schema'
+import { Icon } from '../components/icons'
 
 type Step = 'file' | 'columns' | 'check'
 
@@ -104,7 +105,7 @@ export function ImportDialog(props: { schema: Schema; file: ImportFile | null; n
             <p className="muted">{props.newProject ? T.importDialog.introNew : T.importDialog.intro}</p>
           </div>
           <button type="button" className="icon-btn" aria-label={T.common.close} onClick={props.onClose}>
-            ✕
+            <Icon name="close" />
           </button>
         </header>
         <ol className="import__steps" aria-label={T.importDialog.steps}>

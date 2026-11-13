@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import type { FolderCheck, GitInfo, RecentRepository, RepoInfo, ImportFile } from '../../../shared/api'
 import { errorMessage } from '../lib/hooks'
 import { T } from '../../../shared/text'
+import { Icon } from '../components/icons'
 
 type Pending = { kind: 'idle' } | { kind: 'busy'; label: string } | { kind: 'confirm-init'; check: FolderCheck } | { kind: 'error'; message: string }
 
@@ -157,7 +158,7 @@ export function StartScreen({
                     <span className="recent__path">{r.root}</span>
                   </button>
                   <button type="button" className="icon-btn" aria-label={T.start.forget(r.name)} title={T.start.forgetTooltip} onClick={() => void forget(r.root)}>
-                    ✕
+                    <Icon name="close" />
                   </button>
                 </li>
               ))}

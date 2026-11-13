@@ -14,6 +14,7 @@ import { StartScreen } from '../screens/StartScreen'
 import { SettingsScreen } from '../screens/SettingsScreen'
 import { WorkspaceScreen } from '../screens/WorkspaceScreen'
 import { T } from '../../../shared/text'
+import { Icon } from '../components/icons'
 
 /** One loop of the brand's loading animation (brand-tokens.json motion.loading.loopSeconds). */
 const SPLASH_MIN_MS = 1400
@@ -111,7 +112,7 @@ export function App() {
             </>
           ) : (
             <>
-              <BrandFace mode={effective} state={!active ? 'still' : working ? 'thinking' : 'idle'} size={28} />
+              <BrandFace mode={effective} state={active && working ? 'thinking' : 'still'} size={28} />
               <BrandName mode={effective} width={112} />
               {/* the development tool (reqochet-dev) wears a small mark, so the owner always knows which one is open */}
               {appInfo?.name.endsWith('-dev') && <span className="brand__edition">{T.brand.dev}</span>}
@@ -122,7 +123,7 @@ export function App() {
               <span className="topbar__sep" aria-hidden="true">/</span>
               <span className="topbar__repo" title={repo.root}>{repo.name}</span>
               <button type="button" className="icon-btn icon-btn--small" aria-label={T.app.closeRepository} title={T.app.closeRepository} disabled={gitBusy} onClick={close}>
-                ✕
+                <Icon name="close" />
               </button>
             </>
           )}
@@ -143,7 +144,7 @@ export function App() {
             title={T.app.settingsTooltip}
             onClick={() => setShowSettings((s) => !s)}
           >
-            ⚙
+            <Icon name="settings" size={18} />
           </button>
         </div>
       </header>

@@ -25,6 +25,7 @@ import { workspaceHasKeyboard } from '../lib/shortcuts'
 import { useChanges } from '../workspace/screen/useChanges'
 import { WORKING } from '../workspace/compareRange'
 import { useGit } from '../workspace/screen/useGit'
+import { Chevron, Icon } from '../components/icons'
 
 /**
  * The open repository: the item table (document hierarchy, or a flat list while searching/filtering)
@@ -500,6 +501,8 @@ export function WorkspaceScreen({
         )}
         {/* The table stays mounted while the Changes view is open, so its opened levels and scroll position survive. */}
         <div className={(showChanges && git.state?.available) || showTrace ? 'is-hidden' : 'workspace__items'}>
+          {/* one bar: the document picker and the toolbar share a row while both fit (visual review V-05) */}
+          <div className="workbar">
           <DocumentBar info={info} document={document} onDocument={setDocument} onInfo={onInfo} guard={guarded} readOnly={viewing !== undefined} />
           <Toolbar
             searchRef={searchRef}
@@ -528,6 +531,7 @@ export function WorkspaceScreen({
             hasSelection={target?.kind === 'item'}
             readOnly={viewing !== undefined}
           />
+          </div>
 
           {/* 0.16: a project still under ReqMan's folder name — offer the rename as one commit (owner, 31 Oct / 4 Nov) */}
           {folderDone && (
@@ -577,6 +581,7 @@ export function WorkspaceScreen({
                     setShowTrace(true)
                   }}
                 >
+                  <Icon name="arrowBack" size={14} />
                   {T.trace.backToTrace}
                 </button>
               )}
@@ -694,7 +699,7 @@ export function WorkspaceScreen({
               className={problems.some((p) => p.severity === 'error') ? 'link-btn statusbar__problems' : 'link-btn statusbar__problems statusbar__problems--warn'}
               onClick={() => setShowProblems((s) => !s)}
             >
-              {T.workspace.problemCount(problems.length, showProblems)}
+              {T.workspace.problemCount(problems.length)} <Chevron open={showProblems} size={12} />
             </button>
           ) : (
             <span className="statusbar__ok">{T.workspace.noProblems}</span>
@@ -717,11 +722,11 @@ export function WorkspaceScreen({
             <span className="statusbar__hint statusbar__filter" title={filters.summary}>
               {T.workspace.filteredBy(filters.summary)}{' '}
               <button type="button" className="link-btn" onClick={filters.clear} aria-label={T.workspace.clearFiltersStatus} title={T.workspace.clearFiltersStatus}>
-                ✕
+                <Icon name="close" />
               </button>
             </span>
           ) : (
-            info.itemCount > 1 && !showChanges && !viewing && showDragTip() && <span className="statusbar__hint">{T.workspace.dragHint}</span>
+            info.itemCount > 1 && !showChanges && !showTrace && !viewing && showDragTip() && <span className="statusbar__hint">{T.workspace.dragHint}</span>
           )}
           {!info.isGitRepository && <span className="statusbar__warn">{T.workspace.notGit}</span>}
           {refreshError && <span className="statusbar__warn">{T.workspace.refreshFailed(refreshError)}</span>}

@@ -5,6 +5,7 @@ import { RulesPanel } from './RulesPanel'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
 import { onTabListKeyDown, rovingTabs } from '../lib/keys'
+import { Icon } from '../components/icons'
 
 /** A type id from a name: "System Requirement" → "system-requirement" (lower-case letters, digits, dashes). */
 const idFrom = (name: string): string =>
@@ -118,7 +119,7 @@ export function TypesDialog({ info, onSaved, onClose, tab: firstTab = 'items' }:
             <p className="muted">{T.typesDialog.intro}</p>
           </div>
           <button type="button" className="icon-btn" aria-label={T.common.close} onClick={tryClose}>
-            ✕
+            <Icon name="close" />
           </button>
         </header>
         <div className="tabs types__tabs" role="tablist" aria-label={T.typesDialog.title} onKeyDown={onTabListKeyDown} ref={rovingTabs}>

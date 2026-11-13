@@ -33,7 +33,7 @@ export function VersionsCard({ appInfo, update }: { appInfo: AppInfo | null; upd
   }
 
   return (
-    <section className="card" aria-labelledby="versions-title">
+    <section className="card" id="versions-card" aria-labelledby="versions-title">
       <h2 id="versions-title">{tx.title}</h2>
       <p className="hint hint--flush">
         {appInfo ? `${tx.current(appInfo.version)} ` : ''}
@@ -49,7 +49,7 @@ export function VersionsCard({ appInfo, update }: { appInfo: AppInfo | null; upd
       )}
       {list.state === 'closed' && (
         <div className="actions">
-          <button type="button" className="btn" onClick={() => void open()}>
+          <button type="button" className="btn" id="versions-go-back" onClick={() => void open()}>
             {tx.goBack}
           </button>
         </div>

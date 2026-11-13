@@ -3,6 +3,7 @@ import type { Baseline, GitResult, HistoryPage } from '../../../shared/api'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
 import { onTabListKeyDown, rovingTabs } from '../lib/keys'
+import { Icon } from '../components/icons'
 
 const when = (iso: string): string => iso.slice(0, 16).replace('T', ' ')
 
@@ -139,7 +140,7 @@ export function HistoryDialog(props: { onClose: () => void; onCompare: (ref: str
         <header className="modal__header">
           <h2 className="modal__title">{T.baselines.title}</h2>
           <button type="button" className="icon-btn" aria-label={T.common.close} onClick={props.onClose}>
-            ✕
+            <Icon name="close" />
           </button>
         </header>
         <div className="history__tabs" role="tablist" onKeyDown={onTabListKeyDown} ref={rovingTabs}>

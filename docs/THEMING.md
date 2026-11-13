@@ -26,6 +26,13 @@ Edit your file, save, and restart reqochet. No rebuild needed.
 | `spacing` | `xs` … `xl` | `--rm-space-md` |
 | `modes.light` / `modes.dark` | `background`, `surface`, `text`, `primary`, `danger`, `rowHover`, `selection`, `scrollbarThumb`, `scrollbarThumbHover`, `diffOldBg` / `diffNewBg` / `diffOldMark` / `diffNewMark` (the Changes view's red and green), `gap` (the coverage-gap dot, 0.20.1) … | `--rm-color-primary` (for the active mode) |
 
+Added by the visual polish (12 Nov 2026): `borderStrong` (the edge of buttons and fields — `border` is for dividing
+lines only), `successBg` / `warningBg` / `dangerBg` / `infoBg` (backgrounds of notes and bars), `fontSizeMedium` (16 px:
+dialog and panel titles), `fontWeightMedium` (requirement titles), `fontSizeBaseArabic` / `fontSizeSmallArabic` (the
+text sizes while the window is in Arabic), `controlHeight` / `controlHeightSmall` (the height of buttons, fields and
+lists), `shadowPopover` / `shadowDialog` (offset and blur of the shadows; their colour is mixed from `text`), and the
+spacing step `xxl` (the scale is now 4, 8, 12, 16, 24, 32).
+
 You only need to include the values you change; everything else falls back to the built-in defaults.
 Invalid values are ignored and listed as warnings on the start screen, so a typo can never break the app.
 

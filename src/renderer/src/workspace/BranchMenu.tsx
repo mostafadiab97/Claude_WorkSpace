@@ -3,6 +3,7 @@ import type { BranchInfo, GitState } from '../../../shared/api'
 import { errorMessage } from '../lib/hooks'
 import { branchGroups } from './mergeAnswers'
 import { T } from '../../../shared/text'
+import { Icon } from '../components/icons'
 
 /** What a click on a branch name does: switch to it (default), or pick it for "Pull from" / "Compare with". */
 type Mode = 'switch' | 'pull' | 'compare'
@@ -100,7 +101,7 @@ export function BranchMenu(props: {
               </button>
               {b.kind === 'branch' && mode === 'switch' && (
                 <button type="button" className="branches__delete" aria-label={T.branches.deleteLabel(b.name)} title={T.branches.deleteLabel(b.name)} disabled={locked} onClick={() => setDeleting({ name: b.name, unmerged: false, busy: false })}>
-                  <span aria-hidden="true">🗑 </span>
+                  <Icon name="trash" size={14} />
                   {T.branches.delete}
                 </button>
               )}
@@ -179,7 +180,7 @@ export function BranchMenu(props: {
         </button>
         <span className="toolbar__spacer" />
         <button type="button" className="icon-btn icon-btn--small" aria-label={T.common.close} onClick={props.onClose}>
-          ✕
+          <Icon name="close" />
         </button>
       </div>
       <p className="branches__hint" role="status">

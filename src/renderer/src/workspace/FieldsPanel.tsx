@@ -5,6 +5,7 @@ import { errorMessage } from '../lib/hooks'
 import { staleTranslations } from '../lib/schema'
 import { columnOrder, optionalColumns, orderColumns, type ColumnPrefs } from './ItemTable'
 import { T } from '../../../shared/text'
+import { Icon } from '../components/icons'
 
 // ---------------------------------------------------------------- show / hide columns
 
@@ -99,7 +100,9 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
   return (
     <div className="popover" ref={ref}>
       <button type="button" className={open ? 'btn btn--active' : 'btn'} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        <Icon name="columns" size={14} />
         {T.columnsMenu.button(shown < cols.length ? shown + 2 : null, cols.length + 2)}
+        <Icon name="chevronDown" size={12} />
       </button>
       {open && (
         <div className="popover__panel" role="dialog" aria-label={T.columnsMenu.label}>
@@ -151,7 +154,7 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
                 }}
               >
                 <span className="drag-handle" aria-hidden="true" title={T.columnsMenu.dragHint}>
-                  ⋮⋮
+                  <Icon name="grip" size={14} />
                 </span>
                 <label className="check">
                   <input type="checkbox" checked={c.fixed === true || !hidden.has(c.key)} disabled={c.fixed || (c.key === 'text' && prefs.oneLine !== true)} onChange={() => toggle(c.key)} />
@@ -159,8 +162,8 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
                   {c.key === 'text' && prefs.oneLine !== true ? <span className="muted-inline">{T.columnsMenu.textInMain}</span> : c.builtIn && <span className="muted-inline">{T.columnsMenu.builtIn}</span>}
                 </label>
                 <span className="actions">
-                  <button type="button" className="icon-btn icon-btn--small" aria-label={T.columnsMenu.up(c.label)} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
-                  <button type="button" className="icon-btn icon-btn--small" aria-label={T.columnsMenu.down(c.label)} disabled={i === movable.length - 1} onClick={() => move(i, 1)}>↓</button>
+                  <button type="button" className="icon-btn icon-btn--small" aria-label={T.columnsMenu.up(c.label)} disabled={i === 0} onClick={() => move(i, -1)}><Icon name="arrowUp" size={14} /></button>
+                  <button type="button" className="icon-btn icon-btn--small" aria-label={T.columnsMenu.down(c.label)} disabled={i === movable.length - 1} onClick={() => move(i, 1)}><Icon name="arrowDown" size={14} /></button>
                 </span>
               </li>
             ))}
@@ -345,7 +348,7 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
             </p>
           </div>
           <button type="button" className="icon-btn" aria-label={T.common.close} onClick={onClose}>
-            ✕
+            <Icon name="close" />
           </button>
         </header>
 
@@ -407,12 +410,12 @@ export function FieldsDialog({ info, onSaved, onClose }: { info: RepoInfo; onSav
                     )}
                   </span>
                   <span className="actions">
-                    <button type="button" className="icon-btn" aria-label={T.fields.up(r.name)} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
-                    <button type="button" className="icon-btn" aria-label={T.fields.down(r.name)} disabled={i === rows.length - 1} onClick={() => move(i, 1)}>↓</button>
+                    <button type="button" className="icon-btn" aria-label={T.fields.up(r.name)} disabled={i === 0} onClick={() => move(i, -1)}><Icon name="arrowUp" size={14} /></button>
+                    <button type="button" className="icon-btn" aria-label={T.fields.down(r.name)} disabled={i === rows.length - 1} onClick={() => move(i, 1)}><Icon name="arrowDown" size={14} /></button>
                     <button type="button" className="icon-btn" aria-label={T.fields.remove(r.name)} title={T.fields.removeTooltip} onClick={() => {
                       setCheck(null)
                       setRows((rs) => rs.filter((x) => x.key !== r.key))
-                    }}>✕</button>
+                    }}><Icon name="close" /></button>
                   </span>
                 </div>
               )

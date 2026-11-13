@@ -1,6 +1,6 @@
-// 0.21.1 (review W-51, UW-06): arrow keys and the closed triangle follow the reading direction.
+// 0.21.1 (review W-51, UW-06): arrow keys follow the reading direction (the closed mark is an icon mirrored by CSS since the visual polish).
 import { afterEach, describe, expect, it } from 'vitest'
-import { arrowDirection, closedMark } from '../../src/renderer/src/lib/keys'
+import { arrowDirection } from '../../src/renderer/src/lib/keys'
 
 const setDir = (dir: string): void => {
   ;(globalThis as { document?: unknown }).document = { documentElement: { dir } }
@@ -15,12 +15,10 @@ describe('reading-direction keys', () => {
     expect(arrowDirection('ArrowRight')).toBe('forward')
     expect(arrowDirection('ArrowLeft')).toBe('back')
     expect(arrowDirection('ArrowDown')).toBeNull()
-    expect(closedMark()).toBe('▸')
   })
-  it('right-to-left (Arabic): ← forward, → back, and the triangle points left', () => {
+  it('right-to-left (Arabic): ← forward, → back', () => {
     setDir('rtl')
     expect(arrowDirection('ArrowLeft')).toBe('forward')
     expect(arrowDirection('ArrowRight')).toBe('back')
-    expect(closedMark()).toBe('◂')
   })
 })

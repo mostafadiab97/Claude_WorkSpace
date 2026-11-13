@@ -86,7 +86,7 @@ const raw: Texts = {
   },
 
   settings: {
-    back: 'رجوع →',
+    back: 'رجوع',
     title: 'الإعدادات والتشخيص',
     env: {
       title: 'البيئة',
@@ -99,8 +99,7 @@ const raw: Texts = {
       themeWarnings: (count: number) => ` — ${pl(count, 'تحذير واحد', 'تحذيران', 'تحذيرات', 'تحذيرًا')}`,
       updates: 'التحديثات',
       app: 'التطبيق',
-      releases: 'الإصدارات',
-      releasesPage: 'صفحة الإصدارات (كل الإصدارات وملفات التثبيت)'
+      releases: 'الإصدارات'
     },
     privacy: {
       diagramShortAlt: 'رسم لما يقرؤه reqochet وما يحتفظ به وما يرسله',
@@ -628,7 +627,7 @@ const raw: Texts = {
   },
 
   columnsMenu: {
-    button: (shown: number | null, all: number) => `الأعمدة${shown !== null ? ` (${shown}/${all})` : ''} ▾`,
+    button: (shown: number | null, all: number) => `الأعمدة${shown !== null ? ` (${shown}/${all})` : ''}`,
     label: 'الأعمدة',
     hint: 'تظهر في الجدول بهذا الترتيب. اسحب صفًا هنا، أو رأس عمود في الجدول، لنقل العمود؛ واسحب حافة العمود لتغيير عرضه.',
     alwaysFirst: 'يظهر أولًا دائمًا',
@@ -990,7 +989,7 @@ const raw: Texts = {
     fixAll: (count: number) => `إصلاح الكل (${n(count)})`,
     severityError: 'خطأ',
     severityWarning: 'تحذير',
-    problemCount: (count: number, open: boolean) => `${problems(count)} ${open ? '▾' : '◂'}`,
+    problemCount: (count: number) => `${problems(count)}`,
     noProblems: 'لا مشكلات في الملفات',
     schemaProblem: (path: string, message: string) => `schema.yaml ${iso(path)}: ${iso(message)}`,
     renewCopyId: 'إعطاء النسخة معرّفًا جديدًا',
@@ -1022,7 +1021,7 @@ const raw: Texts = {
   },
 
   trace: {
-    backToTrace: 'العودة إلى التتبّع →',
+    backToTrace: 'العودة إلى التتبّع',
     notShown: (count: number) => `${n(count)} غير معروضة.`,
     linkedItems: 'العناصر المرتبطة',
     starterAll: 'القواعد الأولية موجودة في القائمة بالفعل.',

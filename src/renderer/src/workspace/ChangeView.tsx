@@ -4,6 +4,7 @@ import type { ItemDiff, Link, Schema } from '../../../shared/domain'
 import { textRows, wordDiff, type Segment, type TextRow } from '../lib/textDiff'
 import { linkName } from '../lib/schema'
 import { T } from '../../../shared/text'
+import { Icon } from '../components/icons'
 
 /**
  * What one change did to one item, GitHub style (the owner's decision O-05): three blocks — Fields, Text, Links —
@@ -27,7 +28,7 @@ export function ChangeView(props: {
   const arrow = (label: string, part: RevertPart) =>
     canRevert ? (
       <button type="button" className="icon-btn icon-btn--small diff__revert" aria-label={T.change.revert(label)} title={locked ?? T.change.revertTooltip(label)} disabled={locked !== null} onClick={() => onRevert?.(part)}>
-        ↶
+        <Icon name="undo" size={14} />
       </button>
     ) : null
 

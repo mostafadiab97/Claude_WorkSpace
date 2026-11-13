@@ -1,0 +1,123 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Commit graph idea</title>
+<style>
+@font-face{font-family:Inter;font-weight:400;src:url(../../../marketing/video/src/fonts/Inter-Regular.otf)}
+@font-face{font-family:Inter;font-weight:500;src:url(../../../marketing/video/src/fonts/Inter-Medium.otf)}
+@font-face{font-family:Inter;font-weight:600;src:url(../../../marketing/video/src/fonts/Inter-SemiBold.otf)}
+@font-face{font-family:Mono;src:url(../../../marketing/video/src/fonts/DejaVuSansMono.ttf)}
+*{box-sizing:border-box}
+body{margin:0;width:1280px;font:14px Inter,sans-serif;background:var(--bg);color:var(--text)}
+.light{--bg:L_background;--surface:L_surface;--alt:L_surfaceAlt;--text:L_text;--muted:L_textMuted;--border:L_border;--strong:L_borderStrong;--primary:L_primary;--ptext:L_primaryText;--danger:L_danger;--sel:L_selection;--ok:L_success;--gap:L_gap;--warn:L_warning;--warnBg:L_warningBg;--okBg:L_successBg;--infoBg:L_infoBg;--oldBg:L_diffOldBg;--newBg:L_diffNewBg;--hover:L_rowHover}
+.ember{--bg:E_background;--surface:E_surface;--alt:E_surfaceAlt;--text:E_text;--muted:E_textMuted;--border:E_border;--strong:E_borderStrong;--primary:E_primary;--ptext:E_primaryText;--danger:E_danger;--sel:E_selection;--ok:E_success;--gap:E_gap;--warn:E_warning;--warnBg:E_warningBg;--okBg:E_successBg;--infoBg:E_infoBg;--oldBg:E_diffOldBg;--newBg:E_diffNewBg;--hover:E_rowHover}
+.top{display:flex;align-items:center;gap:10px;height:40px;padding:0 14px;border-bottom:1px solid var(--border);background:var(--surface)}
+.top .logo{font-weight:600;font-size:17px}.top .dev{font-size:11px;color:var(--muted);letter-spacing:.08em}.top .sp{flex:1}
+.btn{height:24px;border:1px solid var(--strong);border-radius:6px;padding:0 9px;display:inline-flex;align-items:center;gap:5px;font-size:12px;background:var(--surface);white-space:nowrap}
+.btn.big{height:32px;font-size:14px;padding:0 12px}.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--ptext);font-weight:600}
+.tab{font-size:12px;padding:4px 10px;border-radius:6px}.tab.on{background:var(--sel);color:var(--primary);font-weight:600}
+.head{display:flex;align-items:center;gap:14px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border)}
+.head h2{margin:0;font-size:18px}.head .sp{flex:1}
+.seg{display:inline-flex;border:1px solid var(--strong);border-radius:6px;overflow:hidden;font-size:12px}.seg span{padding:4px 10px}.seg .on{background:var(--sel);color:var(--primary);font-weight:600}
+.chipf{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--primary);background:var(--sel);border-radius:999px;padding:3px 10px;font-size:12px}
+.main{display:grid;grid-template-columns:1fr 400px;height:640px}
+.list{position:relative;background:var(--surface);overflow:hidden}
+.list svg{position:absolute;left:0;top:0;z-index:1}
+.row{position:absolute;left:0;right:0;height:52px;display:flex;align-items:center;gap:10px;padding-inline:0 14px;border-bottom:1px solid var(--border)}
+.row.sel{background:var(--sel);box-shadow:inset 3px 0 var(--primary)}
+.row.base{background:var(--infoBg)}
+.row .t{flex:1;min-width:0}.row .t b{font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t small,.row .who small{color:var(--muted);font-size:12px;white-space:nowrap}
+.row .who{text-align:end;white-space:nowrap;font-size:12px}
+.av{width:22px;height:22px;border-radius:50%;background:var(--alt);border:1px solid var(--strong);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex:none}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:600;white-space:nowrap;border:1px solid var(--strong);color:var(--muted);vertical-align:middle}
+.pill.flag{background:var(--primary);border-color:var(--primary);color:var(--ptext)}
+.pill.br1{border-color:var(--ok);color:var(--ok)}.pill.br2{border-color:var(--gap);color:var(--warn)}.pill.br0{border-color:var(--primary);color:var(--primary)}
+.pill.warn{background:var(--warnBg);border-color:var(--gap);color:var(--warn)}
+.skip{position:absolute;left:0;right:0;height:26px;display:flex;align-items:center;color:var(--muted);font-size:12px;border-bottom:1px solid var(--border);background:var(--hover)}
+.pullmark{position:absolute;z-index:2;font-size:11px;color:var(--muted);border-left:3px dotted var(--strong)}
+.side{border-inline-start:1px solid var(--border);background:var(--surface);padding:14px 16px;font-size:13px;overflow:hidden}
+.side h3{margin:0 0 2px;font-size:16px}.side .meta{color:var(--muted);font-size:12px;margin-bottom:12px}
+.side h4{margin:14px 0 6px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.item{border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:8px}
+.item .id{font-family:Mono,monospace;font-size:11px;color:var(--muted)}
+.fl{display:grid;grid-template-columns:80px 1fr;gap:2px 8px;margin-top:5px;font-size:12px}.fl span:nth-child(odd){color:var(--muted)}
+.old{background:var(--oldBg);text-decoration:line-through;border-radius:3px;padding:0 3px}.new{background:var(--newBg);border-radius:3px;padding:0 3px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.legend{display:flex;gap:18px;align-items:center;padding:8px 14px;font-size:12px;color:var(--muted);border-top:1px solid var(--border);background:var(--surface)}
+.legend i{display:inline-block;vertical-align:middle;margin-inline-end:5px}
+.mono{font-family:Mono,monospace;font-size:11px}
+</style>
+<body>
+<script>
+const q=new URLSearchParams(location.search), mode=q.get('mode')||'light', one=q.get('view')==='one'
+document.body.className=mode
+const X=[34,62,90], H=52, GW=112
+const C=['var(--primary)','var(--ok)','var(--gap)']
+// lane, kind (c commit, m merge, w working), title, sub, who, when, extras
+const rows=[
+ {l:0,k:'w',t:'Your changes, not committed yet',s:'2 requirements edited',who:'',when:''},
+ {l:0,k:'c',t:'Door lock: lock within 1 s',s:'1 requirement changed',who:'Alice',when:'today 14:21',np:1,head:'main',touch:['Text','within <span class="old">2 s</span> <span class="new">1 s</span> after the vehicle starts moving']},
+ {l:2,k:'c',t:'Supplier feedback on child lock',s:'2 requirements changed',who:'Dana',when:'today 09:40',head:'supplier-feedback'},
+ {l:0,k:'m',from:1,t:'Change request 12 merged into main',s:'4 requirements changed · combined field by field, nothing to decide',who:'Alice',when:'yesterday 16:05'},
+ {l:1,k:'c',t:'Child lock: speed limit added',s:'1 changed · 1 added · 1 link added',who:'Bob',when:'yesterday 11:30',sel:1,head:'change-request-12'},
+ {l:0,k:'c',t:'Tests for window lift',s:'3 requirements added',who:'Carol',when:'Tue 10:02',touch:['Link','<span class="new">verified by REQ-RHE5XZX Verify door lock</span>']},
+ {l:1,k:'c',t:'Change request 12: new stakeholder need',s:'1 added · 2 changed',who:'Bob',when:'Mon 15:47'},
+ {l:0,k:'c',t:'12 system requirements approved',s:'12 requirements changed',who:'Alice',when:'Mon 09:12',base:'SRS-1.0',bnote:'for the design review',touch:['Status','<span class="old">Draft</span> <span class="new">Approved</span>']},
+ {l:0,k:'c',t:'Import from Excel',s:'38 requirements added',who:'Carol',when:'6 Nov',touch:['Created','imported from Excel, row 14']},
+ {l:0,k:'c',t:'First structure',s:'6 headings added',who:'Alice',when:'4 Nov',base:'Concept-0.5',bnote:'sent to the customer'},
+]
+const forks=[{lane:1,from:7,tip:4,into:3},{lane:2,from:5,tip:2}]
+let shown=rows.map((r,i)=>({...r,i})), y=[], yy=0
+if(one) shown=shown.filter(r=>r.touch||r.base)
+// rows with gaps between them ("n versions without changes to it")
+const items=[]
+shown.forEach((r,n)=>{ if(one&&n>0){const gap=r.i-shown[n-1].i-1; if(gap>0){items.push({skip:gap,y:yy});yy+=26}} r.y=yy;items.push(r);yy+=H })
+const cy=r=>r.y+H/2
+let svg='', html=''
+const line=(x1,y1,x2,y2,c,dash)=>`<path d="M${x1} ${y1} ${x1===x2?`L${x2} ${y2}`:`C${x1} ${(y1+y2)/2} ${x2} ${(y1+y2)/2} ${x2} ${y2}`}" fill="none" stroke="${c}" stroke-width="2.5" ${dash?'stroke-dasharray="3 5"':''}/>`
+const first=items.find(r=>!r.skip), last=items[items.length-1]
+if(!one){
+ svg+=line(X[0],cy(rows[0])+0,X[0],cy(rows[1]),C[0],1)+line(X[0],cy(shown[1]),X[0],cy(last),C[0])
+ for(const f of forks){const a=shown[f.from],tip=shown[f.tip]
+  svg+=line(X[0],cy(a),X[f.lane],cy(a)-H*.8,C[f.lane])+line(X[f.lane],cy(a)-H*.8,X[f.lane],cy(tip),C[f.lane])
+  if(f.into!=null)svg+=line(X[f.lane],cy(tip),X[0],cy(shown[f.into]),C[f.lane])
+  else svg+=line(X[f.lane],cy(tip),X[f.lane],cy(tip)-22,C[f.lane],1)}
+}else svg+=line(X[0],cy(first),X[0],cy(last),C[0])
+for(const r of items){
+ if(r.skip){html+=`<div class="skip" style="top:${r.y}px;padding-inline-start:${GW}px">${r.skip} version${r.skip>1?'s':''} without a change to this requirement</div>`;svg+=`<rect x="${X[0]-4}" y="${r.y+4}" width="8" height="18" fill="var(--hover)"/><path d="M${X[0]} ${r.y+5}v16" stroke="${C[0]}" stroke-width="2.5" stroke-dasharray="2 4"/>`;continue}
+ const x=X[one?0:r.l], c=C[one?0:r.l], yc=cy(r)
+ if(r.base) svg+=`<path d="M${x-9} ${yc}L${x} ${yc-9}L${x+9} ${yc}L${x} ${yc+9}z" fill="${c}" stroke="var(--surface)" stroke-width="2"/>`
+ else if(r.k==='m') svg+=`<circle cx="${x}" cy="${yc}" r="7.5" fill="var(--surface)" stroke="${c}" stroke-width="2.5"/><circle cx="${x}" cy="${yc}" r="3" fill="${C[r.from]}"/>`
+ else if(r.k==='w') svg+=`<circle cx="${x}" cy="${yc}" r="6" fill="var(--surface)" stroke="${c}" stroke-width="2" stroke-dasharray="3 3"/>`
+ else svg+=`<circle cx="${x}" cy="${yc}" r="6" fill="${r.np?'var(--surface)':c}" stroke="${c}" stroke-width="2.5"/>`
+ const pills=(r.base?`<span class="pill flag">◆ Baseline ${r.base}</span> `:'')+(r.head&&!one?`<span class="pill br${r.l}">${r.head}</span> `:'')+(r.np?`<span class="pill warn">not pushed yet</span> `:'')
+ const sub=one?(r.touch?`<small><b style="display:inline;color:var(--text);font-weight:600">${r.touch[0]}:</b> ${r.touch[1]}</small>`:`<small>in this baseline: Approved, “within 2 s” — unchanged since ${r.base==='Concept-0.5'?'—':'6 Nov'}</small>`):`<small>${r.s}${r.base?' · '+r.bnote:''}</small>`
+ const title=one&&!r.touch?`Baseline ${r.base} — not in it yet`:r.t
+ const sub2=one&&!r.touch?`<small>the requirement was created after this baseline</small>`:sub
+ html+=`<div class="row ${r.sel&&!one||one&&r.i===1?'sel':''} ${r.base?'base':''}" style="top:${r.y}px;padding-inline-start:${GW}px"><div class="t"><b>${pills}${title}</b>${sub2}</div>${r.who?`<div class="who">${r.when}<br><small>${r.who}</small></div><span class="av">${r.who[0]}</span>`:''}</div>`
+}
+// "pulled" bracket: the versions that arrived with the last pull
+let pull=''
+if(!one){const a=shown[5],b=shown[2];pull=`<div class="pullmark" style="left:${GW-12}px;top:${b.y+6}px;height:${a.y+H-b.y-12}px"></div>`}
+const side=one?`<h3>Door lock</h3><div class="meta"><span class="mono">REQ-K7Q3XMB</span> · System Requirement · 4 changes by 2 people since 6 Nov</div>
+ <h4>As it was after “Door lock: lock within 1 s”</h4>
+ <div class="item"><div class="fl"><span>Status</span><span>Approved</span><span>Text</span><span>The door shall lock automatically within <span class="old">2 s</span> <span class="new">1 s</span> after the vehicle starts moving.</span><span>Links</span><span>refines REQ-4NAPSHQ · verified by REQ-RHE5XZX <span class="pill warn">suspect since this change</span></span></div></div>
+ <h4>Who changed what</h4>
+ <div class="fl"><span>Text</span><span>Alice, today · Carol (import), 6 Nov</span><span>Status</span><span>Alice, Mon — approved for SRS-1.0</span><span>Links</span><span>Carol, Tue</span></div>
+ <h4>Against the baselines</h4>
+ <div class="fl"><span>SRS-1.0</span><span><span class="pill warn">changed since</span> text</span><span>Concept-0.5</span><span>not in it</span></div>
+ <div class="acts"><span class="btn big">Open this version read-only</span><span class="btn big">Compare with now</span></div>`
+ :`<h3>Child lock: speed limit added</h3><div class="meta">Bob · yesterday 11:30 · on change-request-12 · <span class="mono">3f9c2ab</span> · pushed</div>
+ <h4>What changed — 3 requirements</h4>
+ <div class="item"><b>1.3 Child lock</b> <span class="id">REQ-P5D0HJN</span><div class="fl"><span>Text</span><span>The rear doors shall not open from inside <span class="new">above 6 km/h</span> when the child lock is on.</span><span>Status</span><span><span class="old">Draft</span> <span class="new">In review</span></span></div></div>
+ <div class="item"><b>2.4 Verify child lock at speed</b> <span class="id">REQ-W8N1TQD</span> <span class="pill br1">added</span><div class="fl"><span>Type</span><span>Test Case</span><span>Link</span><span><span class="new">verifies REQ-P5D0HJN</span></span></div></div>
+ <div class="item"><b>1 Safe locking</b> <span class="id">REQ-4NAPSHQ</span><div class="fl"><span>Priority</span><span><span class="old">—</span> <span class="new">High</span></span></div></div>
+ <h4>Where it went</h4><div>Merged into main yesterday 16:05 by Alice. Not in a baseline yet — the last one, SRS-1.0, is 5 versions older.</div>
+ <div class="acts"><span class="btn big">Open this version read-only</span><span class="btn big">Compare with now</span><span class="btn big primary">New baseline here…</span></div>`
+document.body.innerHTML+=`<div class="top"><span class="logo">reqochet</span><span class="dev">DEV</span><span style="color:var(--muted)">/</span><b>door-controller</b>
+ <span class="btn">main ▾</span><span class="btn">Pull</span><span class="btn">Push (1)</span><span class="tab">Changes</span><span class="tab on">Versions</span><span class="tab">Traceability</span><span class="sp"></span></div>
+<div class="head"><h2>Versions</h2><span class="seg"><span class="on">Graph</span><span>Baselines</span><span>List</span></span>
+ ${one?`<span class="chipf">Only versions that changed <b>REQ-K7Q3XMB Door lock</b> ✕</span>`:`<span class="btn">All branches ▾</span><span class="btn">Everyone ▾</span><span class="btn">Requirement or document… ▾</span>`}<span class="sp"></span><span class="btn big">Close versions</span></div>
+<div class="main"><div class="list"><svg width="${GW}" height="640">${svg}</svg>${html}${pull}</div><div class="side">${side}</div></div>
+<div class="legend"><span><i style="width:11px;height:11px;border-radius:50%;background:var(--primary)"></i>a saved version (commit)</span><span><i style="width:11px;height:11px;border-radius:50%;border:2.5px solid var(--primary)"></i>not pushed yet</span><span><i style="width:10px;height:10px;transform:rotate(45deg);background:var(--primary)"></i>&nbsp;baseline</span><span><i style="width:11px;height:11px;border-radius:50%;border:2.5px solid var(--primary);box-shadow:inset 0 0 0 2px var(--surface),inset 0 0 0 6px var(--ok)"></i>merge</span>${one?'':'<span><i style="height:14px;border-inline-start:2px dotted var(--strong)"></i>arrived with your last pull (Tue 10:05, from Bob, Carol and Dana)</span>'}<span style="margin-inline-start:auto">Mock-up of an idea — not built</span></div>`
+</script>

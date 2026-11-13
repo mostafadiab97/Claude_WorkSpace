@@ -7,12 +7,15 @@ if (q.get('format') === 'square') document.documentElement.dataset.format = 'squ
 window.DURATION = 48
 
 async function start() {
-  // the end card is the launch sting: put its SVG into the page so it runs on the film's clock
-  const holder = document.getElementById('endlogo')
-  try {
-    holder.innerHTML = await (await fetch(holder.dataset.src)).text()
-  } catch {
-    holder.innerHTML = '<img src="../../../../resources/brand/logo/reqochet-logo-on-ember.svg" style="position:absolute;left:24%;width:52%;top:39.3%">'
+  // the end card is the launch sting in the three modes, stacked: put the SVGs into the page so they run on the
+  // film's clock; each gets its own prefix so their styles do not mix
+  for (const holder of document.querySelectorAll('.endlogo')) {
+    const mode = holder.className.match(/el-(\w+)/)[1]
+    try {
+      holder.innerHTML = (await (await fetch(holder.dataset.src)).text()).replace(/\bst\b/g, `st${mode}`)
+    } catch {
+      holder.innerHTML = `<img src="../../../../resources/brand/logo/reqochet-logo-on-${mode}.svg" style="position:absolute;left:24%;width:52%;top:39.3%">`
+    }
   }
   await document.fonts.ready
   await Promise.all([...document.images].map((i) => i.decode().catch(() => {})))

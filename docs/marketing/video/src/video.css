@@ -173,13 +173,25 @@ svg.links{position:absolute;inset:0;width:1920px;height:1080px;overflow:visible}
 .modes{color:var(--text);animation:capcolor 2.1s linear both,out .3s linear forwards;animation-delay:35.6s,calc(var(--t0) + 3.7s)}
 .langs{color:var(--emberText)}
 
-/* ---- scene F: the end card ---- */
-.end{color:var(--emberText)}
-.end .glow{position:absolute;inset:0;background:radial-gradient(ellipse 55% 50% at 50% 42%,rgba(255,138,61,.14),transparent 70%)}
-#endlogo{position:absolute;left:0;top:-110px;width:1920px;height:1080px}
-#endlogo svg{width:100%;height:100%}
+/* ---- scene F: the end card. It opens on Light, turns Dark at 45.0 s and Ember at 45.8 s (each blend .3 s) ----
+   One clock for everything that changes colour: 5.8 s from 42.2 s, so 48.3 % = 45.0 s, 53.4 % = 45.3 s,
+   62.1 % = 45.8 s, 67.2 % = 46.1 s. To move a switch, change these four numbers everywhere below. */
+#endbg{position:absolute;inset:0;opacity:0;animation:endbg 5.8s linear both;animation-delay:42.2s}
+@keyframes endbg{0%{opacity:0;background:#ffffff}7%,48.3%{opacity:1;background:#ffffff}53.4%,62.1%{opacity:1;background:#121519}67.2%,100%{opacity:1;background:#14100d}}
+.scene.last.end{animation:swOn .5s linear both,endText 5.8s linear both;animation-delay:var(--t0),42.2s}
+@keyframes endText{0%,48.3%{color:#1b1f27}53.4%,62.1%{color:#e7eaf0}67.2%,100%{color:#f3ebe2}}
+.end .glow{position:absolute;inset:0;opacity:0;animation:endGlow 5.8s linear both;animation-delay:42.2s}
+@keyframes endGlow{0%,48.3%{opacity:0;background:radial-gradient(ellipse 55% 50% at 50% 42%,rgba(124,156,255,.10),transparent 70%)}53.4%,62.1%{opacity:1;background:radial-gradient(ellipse 55% 50% at 50% 42%,rgba(124,156,255,.10),transparent 70%)}67.2%,100%{opacity:1;background:radial-gradient(ellipse 55% 50% at 50% 42%,rgba(255,138,61,.14),transparent 70%)}}
+.endlogo{position:absolute;left:0;top:-110px;width:1920px;height:1080px;animation:5.8s linear both;animation-delay:42.2s}
+.endlogo svg{width:100%;height:100%}
+.el-light{animation-name:elLight}.el-dark{animation-name:elDark}.el-ember{animation-name:elEmber}
+@keyframes elLight{0%,48.3%{opacity:1}53.4%,100%{opacity:0}}
+@keyframes elDark{0%,48.3%{opacity:0}53.4%,62.1%{opacity:1}67.2%,100%{opacity:0}}
+@keyframes elEmber{0%,62.1%{opacity:0}67.2%,100%{opacity:1}}
 .end h1{position:absolute;left:0;right:0;top:600px;margin:0;text-align:center;font:500 50px 'Source Serif 4',serif;letter-spacing:-.005em}
-.end p{position:absolute;left:0;right:0;top:700px;margin:0;text-align:center;font-size:32px;color:var(--emberMuted)}
-.end p b{color:var(--emberOrange);font-weight:600}
+.end p{position:absolute;left:0;right:0;top:700px;margin:0;text-align:center;font-size:32px;animation:in .5s cubic-bezier(.2,.7,.2,1) both,endMuted 5.8s linear both;animation-delay:calc(var(--t0) + var(--d,0s)),42.2s}
+@keyframes endMuted{0%,48.3%{color:#566070}53.4%,62.1%{color:#a3acba}67.2%,100%{color:#b8aa9a}}
+.end p b{font-weight:600;animation:endAccent 5.8s linear both;animation-delay:42.2s}
+@keyframes endAccent{0%,48.3%{color:#2f5bd3}53.4%,62.1%{color:#7c9cff}67.2%,100%{color:#ff8a3d}}
 .end p i{font-style:normal;margin:0 14px;color:#8c7865}
 .fld .v .who{left:auto;right:12px;top:12px}

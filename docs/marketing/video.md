@@ -2,8 +2,8 @@
 
 | | What | State | Files |
 | --- | --- | --- | --- |
-| **A** | "The file and the window" — 48 s, drawn and animated, captions burnt in, no sound | **Made** | `video/reqochet-45s.mp4` (1920×1080), `video/reqochet-45s-square.mp4` (1080×1080, LinkedIn feed), `video/reqochet-45s-poster.png` |
-| **Sting** | The logo arriving — 6 s, on light, dark and Ember | **Made** | `video/sting/` (MP4, WebM with transparency, animated SVG) |
+| **A** | "The file and the window" — 48 s, drawn and animated, captions burnt in, a narrator and sound effects (round 2) | **Made** | `video/reqochet-45s.mp4` (1920×1080), `video/reqochet-45s-square.mp4` (1080×1080, LinkedIn feed), `video/reqochet-45s-poster.png` |
+| **Sting** | The logo arriving — 6 s, on light, dark and Ember, with its own sound | **Made** | `video/sting/` (MP4 with sound, silent WebM with transparency, animated SVG, the sound alone) |
 | **B** | "A day with reqochet" — about 2 minutes, recorded from the real app | Plan | — |
 
 How A and the sting were made, and how to render them again: `video/README.md`.
@@ -33,7 +33,7 @@ as a table row, being changed, being merged and being checked — one story inst
 | 6 | 23.7–30.5 s | Alice and Bob, one Git repository between them. Alice sets Status, Bob sets Priority; push, pull; Bob's copy shows both: "Combined field by field. Nothing to decide." | **Commit, push and pull — from the window. Different fields are combined. Only real clashes ask.** |
 | 7 | 30.7–34.7 s | Coverage: two rules, one bar stops at 97 %, the gap is named | **See what is covered — and what is not.** |
 | 8 | 35–42 s | Real screenshots: Light → Dark → Ember (the whole film changes colour with them), then the five language names, ending on العربية and the mirrored window | **Light, Dark — and Ember, for long evenings. Five languages. One reads right to left.** |
-| 9 | 42–48 s | End card on Ember: the logo arrives (the sting), then the tagline | **Requirements as plain files in your own Git repository.** Offline · No server · No accounts · Free for teams and companies |
+| 9 | 42–48 s | End card: the logo arrives on **Light** (the sting), the tagline comes in; as the eyes look left the card turns **Dark** (45.0 s), as they look right **Ember** (45.8 s), and it rests on Ember | **Requirements as plain files in your own Git repository.** Offline · No server · No accounts · Free for teams and companies |
 
 **What changed against the first concept, and why**
 - **Suspect links replace "drag a requirement, numbers renumber".** Renumbering is neat but every tool does it;
@@ -43,13 +43,48 @@ as a table row, being changed, being merged and being checked — one story inst
   45-second film must show it.
 - **One example all the way through** instead of a new screen per scene.
 - **No platform, no price detail, no link on the end card** — those change; the post carries them.
-- **No music.** Nothing was available whose licence could be checked from here, and LinkedIn plays muted anyway. If
-  the owner wants sound: a calm track from a library that allows commercial use without attribution, licence text
-  saved next to the video, added with `ffmpeg -i reqochet-45s.mp4 -i track.mp3 -map 0:v -map 1:a -c:v copy -shortest out.mp4`.
+- **No music; a narrator and sound effects instead** (the owner's answer to F-3) — see "Sound" below.
+- **The end card shows all three looks** (the owner's answer to F-1): Light while the logo arrives, then Dark, then
+  Ember, each change a calm 0.3 s blend. It ends on Ember because the order Light → Dark → Ember is the one the film
+  has just taught (scene 8) and Ember is the look only reqochet has; Light still gets the longest time (2.6 s).
 - **Square (1080×1080) instead of 1080×1350** for the feed: it is the same film laid out again (larger captions under
   the picture), not a crop, and it also fits groups and comments.
 
-**Cuts that can be made from A without rendering again** (`ffmpeg -ss <start> -t <length> -i … -c:v libx264 -preset veryfast -pix_fmt yuv420p`):
+### Sound (round 2, 13 Nov 2026)
+
+**Effects** — all calculated by `video/src/sound.mjs` from sine waves and filtered noise; nothing recorded, nothing
+downloaded, so they are the project's own: a tick when a line or a row appears, a pop when something lights up, a
+click for each button press (Keep, Push, Pull), a soft low double note when a link turns suspect or a gap shows, a
+small two-note bell when a link is confirmed or fields are combined, moving air between scenes, and in the sting a
+round bounce per letter the dots touch (the notes climb) and two bell notes when they land. They sit about 15 dB
+under the voice.
+
+**Narrator** — Kokoro (an offline speech program; code MIT, voice model Apache 2.0 — both allow commercial use),
+voice "af_heart", American English. Checked by machine, not by ear: a speech recogniser wrote the film's sound back
+as text and got every line right except two small words. **The owner should listen once** — a computer voice can
+stress a word oddly without any measurement showing it. If he prefers his own voice: read the lines below, one file
+per line (`video/src/narration/01.flac` … or `.wav`), run `sound.mjs` and `render.mjs --sound-only`.
+Without the narrator: `render.mjs --sound-only --no-voice`.
+
+The captions stay on screen (LinkedIn plays muted); the voice says nearly the same words, a little more spoken.
+104 words; times are when each line starts (`video/src/narration.json`).
+
+| Starts | Narrator |
+| --- | --- |
+| 0.5 s | This is a requirement. |
+| 4.0 s | A plain text file, in your own Git repository. |
+| 7.8 s | reqochet is the window onto those files. *(said like "ricochet")* |
+| 11.5 s | One row per file. The numbering is worked out for you. |
+| 15.5 s | Change what a requirement says, |
+| 18.9 s | and every link to it turns suspect, until someone has reviewed it. |
+| 23.9 s | Commit, push and pull, right from the window. |
+| 27.3 s | Different fields are combined. Only real clashes ask you. |
+| 31.0 s | See at a glance what is covered, and what is not yet. |
+| 35.1 s | Light, dark, and Ember, for long evenings. |
+| 38.9 s | Five languages. One of them reads right to left. |
+| 43.3 s | reqochet. Requirements as plain files. Free for teams and companies. *(the name is spoken as the dots land)* |
+
+**Cuts that can be made from A without rendering again** (`ffmpeg -ss <start> -t <length> -i … -c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac`):
 suspect links 15.0–23.5 s (post 2 or a comment) · merge 23.6–30.5 s · looks and languages 34.9–42.1 s (post 3).
 
 **Before posting at 1.0:** watch it once against the released app — colours, the words on the buttons, the five

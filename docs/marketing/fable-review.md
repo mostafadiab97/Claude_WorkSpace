@@ -76,6 +76,12 @@ post itself. All texts are now written for the launch day, with every fact that 
 | F-5 | The sting hops along the letters — a small visual nod to the name, with no words. Fine with "no explanation of the name for now"? | **Yes** — it explains nothing, it only moves. If not, the same script can let the letters simply rise in. |
 | F-6 | First-month targets: 150 downloads, 40 stars, 2 teams? | **Yes, as a baseline to compare against**, not a promise. |
 
+**Answers so far (the owner, 13 Nov 2026)**
+- F-1: "ok, but make the closing animation in our normal light/dark modes, or flicker between the 3 of them" — done
+  in round 2: the end card opens on Light, turns Dark, then Ember (`video.md`, scene 9).
+- F-3: "no music, but we can add a narrator instead of the text only, and sound effects (bouncing, popping, clicking,
+  etc.)" — done in round 2: own sound effects and an offline narrator, captions kept (`video.md` → Sound).
+
 ## Checked facts
 
 - File format, key order and the example file: user guide §15. The film's file leaves out the optional keys

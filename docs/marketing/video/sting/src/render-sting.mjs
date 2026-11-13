@@ -1,7 +1,10 @@
 // Renders the sting SVGs to MP4 (on the theme's background) and WebM with transparency.
 // Usage: node render-sting.mjs [light|dark|ember ...] [--still 1.2]   (needs playwright and ffmpeg)
-import { spawn } from 'node:child_process'
-import { renameSync, writeFileSync } from 'node:fs'
+//        node render-sting.mjs --sound-only   keep the pictures, only put the sound in again
+// The MP4s get the sound of ../../src/audio/sting.wav (made by `node ../../src/sound.mjs`); the same sound is saved
+// next to them as reqochet-sting-sound.m4a. The transparent WebMs stay silent: they are laid over other video.
+import { spawn, spawnSync } from 'node:child_process'
+import { existsSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
@@ -22,6 +25,24 @@ function ffmpeg(ffArgs) {
   const p = spawn('ffmpeg', ['-loglevel', 'error', '-y', ...ffArgs], { stdio: ['pipe', 'inherit', 'inherit'] })
   const done = new Promise((res, rej) => p.on('exit', (code) => (code === 0 ? res() : rej(new Error('ffmpeg ' + code)))))
   return { stdin: p.stdin, done }
+}
+
+const wav = join(here, '../../src/audio/sting.wav')
+function addSound(pictures, target) {
+  if (!existsSync(wav)) spawnSync(process.execPath, [join(here, '../../src/sound.mjs')], { stdio: 'inherit' })
+  const tmp = target.replace(/\.mp4$/, '.snd.mp4')
+  const r = spawnSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', pictures, '-i', wav, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', tmp], { stdio: 'inherit' })
+  if (r.status !== 0) throw new Error('ffmpeg could not add the sound')
+  if (pictures !== target) rmSync(pictures)
+  renameSync(tmp, target)
+  spawnSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', wav, '-c:a', 'aac', '-b:a', '128k', join(out, 'reqochet-sting-sound.m4a')], { stdio: 'inherit' })
+}
+if (args.includes('--sound-only')) {
+  for (const theme of todo) {
+    addSound(join(out, `reqochet-sting-${theme}.mp4`), join(out, `reqochet-sting-${theme}.mp4`))
+    console.log('sound added to', `reqochet-sting-${theme}.mp4`)
+  }
+  process.exit(0)
 }
 
 const browser = await chromium.launch()
@@ -53,7 +74,8 @@ for (const theme of todo) {
     }
     enc.stdin.end()
     await enc.done
-    renameSync(tmp, tmp.replace('.tmp.', '.'))
+    if (transparent) renameSync(tmp, tmp.replace('.tmp.', '.'))
+    else addSound(tmp, tmp.replace('.tmp.', '.'))
     console.log('rendered', tmp.replace('.tmp.', '.'))
     await page.close()
   }

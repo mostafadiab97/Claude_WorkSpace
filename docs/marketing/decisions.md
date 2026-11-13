@@ -44,3 +44,16 @@ Recommended option first. Each one is small; answer with the letter.
 **Fixes to make before launch regardless (not decisions):** user guide §16 (Windows 10/11 → 11, two languages → five,
 add Ember) and §19 ("several documents… coming next" — built in 0.17); website licence lines (see
 website-lines.md).
+
+## Answers (the owner, 13 Nov 2026)
+
+- **D-1 B** — call the first public version **1.0**; not released until **Word export and Windows 10** are done.
+- **D-2 B** — launch as soon as the public repository and the sample project are ready (and D-1's conditions are met).
+- **D-3 A** — factual `HOW-IT-WAS-BUILT.md` + README line; one behind-the-scenes post about three weeks after launch.
+- **D-4 A** — launch unsigned with clear warnings and SHA-256 checksums; buy a code-signing certificate if reqochet gets
+  a good number of users.
+- **D-5** — LinkedIn now (the owner's only active account); other channels to be discussed when needed.
+- **D-6 A** — GitHub Discussions off at first; issues only.
+- **D-7** — asked to explain (other Git hosts); open.
+- Name story ("Why reqochet?"): the first wording felt too detailed — a shorter one proposed.
+- Release plan approved: 0.23.0 Windows 10 · 0.24.0 Linux · 0.25.0 theme editor · then Word export · then 1.0.

@@ -167,7 +167,10 @@ X-02).
 | **0.21.3** | Review 2: speed and Lows | Old version opens without blocking, review Lows, Merge into… |
 | **0.21.4** | The owner's 0.21.3 report | Copy report, import into a new document, nothing-to-import message, Delete document |
 | **0.22.0** | Visual polish (Fable, owner-approved), Ember, five languages | Ember colour mode with its own logo and serif headings, icon colour switch, English/German/French/Spanish/Arabic, Arabic name; one icon set, clearer edges, table on white, two-group top bar, one work bar, Changes title bars, calmer notes, sharper small icons |
-| **0.23.0** (planned) | Theme editor (the owner, 13 Nov) | Settings → Appearance: every value of the theme file, live preview, reset per value and all, contrast warning; writes only the user's theme file. Then languages step 2 (Chinese, Hindi) |
+| **0.23.0** (planned) | Windows 10 (the owner, 13 Nov) | Checked by Claude only (no Windows 10 PC): code and libraries, Windows Server runner, self-test row |
+| **0.24.0** (planned) | Linux | AppImage + .deb, Linux CI job, paths, case-sensitive files |
+| **0.25.0** (planned) | Theme editor | Settings → Appearance: every theme value, live preview, reset, contrast warning |
+| **later** (planned) | Word export, then **1.0 — first public version** (D-1) | Chinese and Hindi after |
 | **Release plan (C, 2 Nov 2026)** | — | 0.14 rename + health → 0.15 1a structure → 0.16 1b traceability views (pilot can start) → 0.17 daily comfort → 0.18 rich text → 0.19 documents out → 0.20 review basics → 0.21 pull requests in the app → 0.22 verification → 0.23 sharing + help → 0.24 AI → later commercial; a stabilisation patch after every theme; details in `docs/reviews/2026-11-01-planning-discussion.md` |
 | *Proposal A (R)* | *New name + traceability* | *Proposed 31 Oct 2026; order to be settled in the planning discussion (the owner, 31 Oct):* the rename (`docs/reviews/done/2026-10-31-rename-impact.md`) once the name is chosen; traceability matrix and coverage; item and link types in the GUI; saved views; bulk edit |
 | *Proposal B (R)* | *Documents out* | Word and PDF export, HTML publishing, Markdown preview |

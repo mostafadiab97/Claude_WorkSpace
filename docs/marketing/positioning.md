@@ -1,16 +1,40 @@
-# reqochet — positioning (draft, 13 Nov 2026)
+# reqochet — positioning (draft, 13 Nov 2026; sharpened in the Fable review — see `fable-review.md`)
 
 Sources: README, user guide (§16 specification, §19 DOORS/Jama), CHANGELOG 0.22.0, product definition
 (`docs/design/requirements.md`), 5-tool study (`docs/design/analysis.md`), public-repository review (licence, sample
 project). **F** = fact from those files, **I** = inference, **R** = recommendation.
 
-## One-line promise (R)
+## The message at three lengths (R)
 
-> **Requirements management without a server: every requirement is a plain file in your own Git repository, and
-> reqochet is the window that understands them.**
+| Length | Text | Where |
+| --- | --- | --- |
+| **Tagline** (9 words) | **Requirements as plain files in your own Git repository.** | Website footer, social cards, video end card, repository description |
+| **Promise** (one breath) | **Requirements management without a server. Every requirement is a plain file in your own Git repository; reqochet is the window onto them.** | First two lines of the launch post, README, release note |
+| **Description** (about 35 words) | reqochet is a free desktop app for requirements engineering. It reads a folder of plain Markdown files as numbered documents with links, coverage and a traceability matrix, and does the Git work per requirement, not per line. Offline. No server, no accounts. | "About" texts, group posts, article pitches |
 
-Shorter (posts, social cards): **"Requirements as plain files in your own Git repository."** (already the website
-footer — keep it as the tagline).
+Why this order: the first four words name the category people search for ("requirements management"), the next two
+name the difference ("without a server"). "The window onto them" is the website headline, so post, video and website
+say the same sentence. (Earlier wording — "the window that understands them" — said the same with a weaker verb.)
+
+**The one thing to be remembered for (R):** *Git at the level of a requirement.* Plain files in Git are not new
+(docs-as-code tools have them) and a requirements table is not new (every platform has one). What nobody else in
+either group offers is the middle: a pull that combines two people's work **field by field** and asks only about
+real clashes, shown in a window a non-programmer can use. When there is room for one proof only, use this one.
+
+## What is true on launch day (check before anything is posted)
+
+The owner decided (13 Nov) that the first public version is **1.0**, released after **Word export** and
+**Windows 10** support. The texts in this folder are written for that day, so three facts differ from today's 0.22:
+
+| Fact | Today (0.22) | At 1.0 (planned — verify in CHANGELOG first) | Wording until verified |
+| --- | --- | --- | --- |
+| Windows | 11 only | 10 and 11 | `[Windows versions]` |
+| Linux | no | yes, if 0.24.0 shipped as planned | `[and Linux]` |
+| Word export | no | yes (the condition for 1.0) | `[Word export]` |
+
+Anything in `[square brackets]` in posts.md, website-lines.md and the release note is such a fact: **replace it from
+the CHANGELOG on the day, or delete the sentence.** The video names no platform and no export format, so it stays
+true either way.
 
 ## Who it is for
 
@@ -50,9 +74,10 @@ CSV / ReqIF import with a check step before anything is written.
 - **Not a server or cloud service**, and not a permission system: access is whatever your Git host allows.
 - **Not (yet) a compliance tool**: no e-signatures, no approval workflow, no audit trail beyond Git history. Don't
   claim ISO 26262 / IEC 62304 / 21 CFR Part 11 support.
-- **No Word, PDF or HTML export yet** (planned). No rich text with images and tables yet (planned).
+- **No PDF or HTML export yet** (planned); Word export only once it has shipped (it is the condition for 1.0 — until
+  then it is "planned" too). No rich text with images and tables yet (planned).
 - **No pull requests, comments or approvals inside the app yet** (planned); today those happen on the Git host.
-- **Windows 11 only for now**; Windows 10 next, then Linux. No macOS planned.
+- **Windows 11 only today**; Windows 10 and Linux are on the release plan before 1.0. No macOS planned.
 - **Not open source** in the OSI sense: PolyForm Shield is *source-available* — free to use for everyone, including
   companies; only building and selling a competing product is not allowed. Never write "open source".
 
@@ -71,3 +96,11 @@ user guide's "Coming from DOORS or Jama?" page is factual migration help and fin
 
 Plain, calm, exact. Short sentences. Show the file, then the window. No "revolutionary", "seamless",
 "AI-powered". Every adjective needs a fact next to it.
+
+Three habits that keep it sharp (R):
+- **Lead with the reader's situation, not the feature**: "Two people changed the same requirement" before "field-level merge".
+- **One number per text, with its source**: "tested with 50,000 requirements" (user guide §16) — never two numbers in a row.
+- **Say "free for everyone, companies included" and "source-available"** in the same place. "Free" alone raises the
+  question "open source?"; answering it at once stops the correction in the comments.
+
+The name is not explained anywhere for now (the owner, 13 Nov).

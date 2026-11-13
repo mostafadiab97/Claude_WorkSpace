@@ -4,16 +4,21 @@ For `website/index.html` (read-only for marketing; the web designer applies what
 The owner decided on 13 Nov to **keep the headline and the Ember line** — so those stay; the changes below are around
 them. Each row: current → proposed → why.
 
+**Launch-day facts (Fable review):** the public launch is 1.0, after Word export and Windows 10 (the owner, 13 Nov).
+Lines below that depend on it are marked **[1.0]** — the web designer applies them with the release, not before.
+
 ## Must change before launch (facts moved on)
 
 | Where | Current | Proposed | Why |
 | --- | --- | --- | --- |
-| Hero note under the buttons | Free to try. Windows 11, no administrator rights needed. | **Free for everyone, companies included. Windows 11, no administrator rights.** | The licence is decided (PolyForm Shield). "Free to try" sounds like a trial that ends. |
+| Hero note under the buttons | Free to try. Windows 11, no administrator rights needed. | **Free for everyone, companies included. Windows 11, no administrator rights.** — **[1.0]** "Windows 10 and 11" | The licence is decided (PolyForm Shield). "Free to try" sounds like a trial that ends. |
 | Download section title | Free to try. | **Free to use. At work too.** | Same reason; answers the first question a company reader has. |
 | FAQ "What does it cost?" | reqochet is free to try. The licence terms are being settled… | **Nothing. reqochet is free for everyone, including companies and teams of any size. The source is public under the PolyForm Shield licence: you may use it, change it for yourself and read every line. The one thing not allowed is building and selling a competing product from it.** | Decided licence, in plain words. |
 | Footer | Source-available licence (to be confirmed) | **Source-available · PolyForm Shield 1.0.0 · Source on GitHub** (links) | Decided; links build trust. |
 | Download list | — | add: **Source, user guide and a sample project to open: on GitHub.** | The sample project is the best "try it" path. |
-| Download list | — | add: **Windows 10 support comes next, then Linux.** | Many company PCs are still on Windows 10; tell them it is coming instead of losing them silently. |
+| Download list | — | until 1.0: **Windows 10 support comes next, then Linux.** — **[1.0]** remove the line; the list names the systems that are released | Many company PCs are still on Windows 10; tell them it is coming instead of losing them silently. |
+| Download list, unsigned installer | (check what is there) | **The installer is not code-signed yet. If Windows shows "Windows protected your PC", choose More info → Run anyway. To be sure the file is ours, compare its SHA-256 checksum with the one in the release notes.** | D-4: unsigned with clear warnings. The same three sentences in FAQ, README and release note, so nobody reads two versions. |
+| FAQ on Word export **[1.0]** | (says it is planned) | rewrite as a feature once it is released; move "PDF and HTML export" to the not-yet list | A FAQ that says "planned" about a shipped feature costs trust the other way round. |
 
 ## Recommended improvements
 
@@ -24,13 +29,13 @@ them. Each row: current → proposed → why.
 | Git section sub-line | …nobody needs to learn a Git command. | keep, add: **Nothing is ever force-pushed.** | The single most reassuring fact for someone afraid of losing work. |
 | Traceability title | See what is covered, and what a change will touch. | keep | Clear and benefit-led. |
 | Import section title | It gets along with Excel, and with the tools you are leaving. | **Bring what you have: Excel, CSV and ReqIF.** (alt: keep current) | Current line is charming but vague on first read; the alternative states the formats. Owner's taste call. |
-| New small section before Download (optional) | — | Title **What it does not do yet** · body: **Word, PDF and HTML export, approvals and signatures, and comments inside the app are planned. Today these happen in your Git host and in Excel.** | Honest limits stop disappointed downloads and earn engineers' trust; the FAQ already has the Word part. |
+| New small section before Download (recommended, not optional) | — | Title **What it does not do yet** · body: **Approvals and signatures, comments inside the app, and PDF and HTML export are not built yet. Today these happen on your Git host.** (until 1.0, "Word" is in this list too) | Honest limits stop disappointed downloads and earn engineers' trust; the FAQ already has the Word part. |
 | New proof line in Files section | — | **Tested with 50,000 requirements.** | A fact (user guide §16) that answers "will it scale?". |
 | `<meta name="description">` | reqochet is a Windows desktop app for requirements. Every requirement is a plain Markdown file in your own Git repository. Offline, no server, no accounts. | **reqochet: requirements management without a server. Every requirement is a plain Markdown file in your own Git repository — with traceability, coverage and requirement-level Git. Free for teams. Windows 11.** | Puts the search terms people type ("requirements management", "traceability") into the search snippet. |
 | `<title>` | reqochet — requirements as plain files in your own Git repository | **reqochet — requirements management in your own Git repository** | Same idea; leads with the category people search for. |
 | Questions title | Questions people ask first | keep | Good. |
 | FAQ, new | — | **Q: Is it open source?** A: **It is source-available: the code is public and free to use, but the licence (PolyForm Shield) does not allow selling a competing product built from it. That is the only difference that matters for most users.** | Will be asked on day one; better to answer than to be "corrected". |
-| FAQ, new | — | **Q: Does it work with GitLab or Azure DevOps?** A: [owner/Claude to confirm before publishing — today the guide and tests use GitHub; plain push and pull use your installed Git] | Will be asked; answer only after it is tested (decision D-7). |
+| FAQ, new | — | **Q: Does it work with GitLab, Azure DevOps or Bitbucket?** A: **reqochet uses the Git that is installed on your PC, so it pushes to and pulls from any address Git can reach. It is tested with GitHub; other hosts are expected to work but are not tested by us yet.** | Will be asked on day one. This wording is true today (D-7: all Git work goes through the installed Git; only GitHub is tested) and claims nothing untested. Add each host by name once the self-test has run against it. |
 
 ## Section title set (for a quick scan of the whole page)
 
@@ -42,6 +47,6 @@ them. Each row: current → proposed → why.
 6. Bring what you have: Excel, CSV and ReqIF. *(proposed)*
 7. For long evenings, there is Ember. *(kept — owner decision)*
 8. Five languages, and one of them reads right to left. *(kept)*
-9. What it does not do yet. *(proposed, optional)*
+9. What it does not do yet. *(proposed — recommended)*
 10. Free to use. At work too. *(proposed)*
 11. Questions people ask first. *(kept)*

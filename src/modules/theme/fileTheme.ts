@@ -93,7 +93,7 @@ export function createFileThemeService(configDir: string, resourceDir: string, u
         _help:
           'Add only the values you want to change; everything else comes from the app theme. ' +
           `All available keys and their current values: ${shippedFile}. Save, then restart reqochet.`,
-        modes: { light: {}, dark: {} }
+        modes: { light: {}, dark: {}, ember: {} }
       }
       try {
         await writeFile(userFile, JSON.stringify(starter, null, 2) + '\n', { flag: 'wx' /* never overwrite */ })

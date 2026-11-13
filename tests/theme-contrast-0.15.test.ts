@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
-const theme = JSON.parse(readFileSync('config/theme.json', 'utf8')) as { modes: Record<'light' | 'dark', Record<string, string>> }
+const theme = JSON.parse(readFileSync('config/theme.json', 'utf8')) as { modes: Record<'light' | 'dark' | 'ember', Record<string, string>> }
 
 const luminance = (hex: string): number => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)) as [number, number, number]
@@ -15,7 +15,7 @@ const contrast = (a: string, b: string): number => {
 }
 
 describe('theme contrast (UX-05)', () => {
-  for (const mode of ['light', 'dark'] as const) {
+  for (const mode of ['light', 'dark', 'ember'] as const) {
     const m = theme.modes[mode]
     for (const fg of ['text', 'textMuted', 'primary', 'success', 'warning', 'danger']) {
       for (const bg of ['background', 'surface']) {

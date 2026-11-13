@@ -7,10 +7,12 @@ import { useEffect, useState } from 'react'
 import type { ThemeConfig } from '../../../shared/api'
 import { tokensToCssVars } from './tokens'
 
-export type ThemeMode = 'system' | 'light' | 'dark'
+export type ThemeMode = 'system' | 'light' | 'dark' | 'ember'
+/** The colour set shown: Ember is a dark mode of its own (0.23.0). */
+export type Shown = 'light' | 'dark' | 'ember'
 const STORAGE_KEY = 'reqman.themeMode'
 
-export function resolveMode(mode: ThemeMode): 'light' | 'dark' {
+export function resolveMode(mode: ThemeMode): Shown {
   if (mode !== 'system') return mode
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
@@ -22,13 +24,13 @@ export function applyTheme(config: ThemeConfig, mode: ThemeMode): void {
     root.style.setProperty(name, value)
   }
   root.dataset['theme'] = effective
-  root.style.colorScheme = effective
+  root.style.colorScheme = effective === 'light' ? 'light' : 'dark'
 }
 
 export function loadSavedMode(): ThemeMode {
   try {
     const v = localStorage.getItem(STORAGE_KEY)
-    return v === 'light' || v === 'dark' || v === 'system' ? v : 'system'
+    return v === 'light' || v === 'dark' || v === 'ember' || v === 'system' ? v : 'system'
   } catch {
     return 'system'
   }
@@ -42,14 +44,14 @@ export function saveMode(mode: ThemeMode): void {
   }
 }
 
-/** Light or dark as shown now — follows Windows while the mode is System (to pick the brand files). */
+/** Light or dark as shown now — follows Windows while the mode is System; Ember counts as dark (to pick the brand files). */
 export function useEffectiveMode(mode: ThemeMode): 'light' | 'dark' {
-  const [system, setSystem] = useState(() => resolveMode('system'))
+  const [system, setSystem] = useState<'light' | 'dark'>(() => (resolveMode('system') === 'dark' ? 'dark' : 'light'))
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
     const onChange = (): void => setSystem(mq.matches ? 'dark' : 'light')
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
   }, [])
-  return mode === 'system' ? system : mode
+  return mode === 'system' ? system : mode === 'ember' ? 'dark' : mode
 }

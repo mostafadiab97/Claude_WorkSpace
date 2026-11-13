@@ -6,7 +6,7 @@ import type { ThemeConfig } from '../../../shared/api'
 
 const kebab = (s: string): string => s.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)
 
-export function tokensToCssVars(config: ThemeConfig, effective: 'light' | 'dark'): Record<string, string> {
+export function tokensToCssVars(config: ThemeConfig, effective: 'light' | 'dark' | 'ember'): Record<string, string> {
   const vars: Record<string, string> = {}
   const add = (prefix: string, group: Record<string, string>): void => {
     for (const [k, v] of Object.entries(group)) vars[`--rm-${prefix}-${kebab(k)}`] = v

@@ -30,7 +30,7 @@ export interface ThemeConfig {
   typography: Record<string, string>
   shape: Record<string, string>
   spacing: Record<string, string>
-  modes: { light: Record<string, string>; dark: Record<string, string> }
+  modes: { light: Record<string, string>; dark: Record<string, string>; ember: Record<string, string> }
 }
 
 export interface LoadedTheme {

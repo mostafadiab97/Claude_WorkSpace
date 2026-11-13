@@ -50,8 +50,8 @@ const en = {
     settingsTooltip: 'Settings & diagnostics',
     workspaceArea: 'the workspace',
     settingsArea: 'settings',
-    theme: { label: 'Colour theme', light: 'Light', dark: 'Dark', system: 'System' },
-    language: { label: 'Language', en: 'English', ar: 'العربية', blocked: 'Save or discard your edit before switching the language.' }
+    theme: { label: 'Colour theme', light: 'Light', dark: 'Dark', ember: 'Ember', system: 'System (as Windows)' },
+    language: { label: 'Language', en: 'English', ar: 'العربية', enShort: 'En', arShort: 'ع', blocked: 'Save or discard your edit before switching the language.' }
   },
 
   start: {

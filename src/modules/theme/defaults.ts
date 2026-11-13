@@ -97,6 +97,36 @@ export const DEFAULT_THEME: ThemeConfig = {
       warningBg: '#3a2c12',
       dangerBg: '#3a1d20',
       infoBg: '#1d2946'
+    },
+    // 0.23.0 Ember (the owner, 13 Nov): a warm dark mode with orange accents and a soft glow; same keys as dark
+    ember: {
+      background: '#141210',
+      surface: '#1c1916',
+      surfaceAlt: '#26211d',
+      text: '#f2ebe4',
+      textMuted: '#b3a89d',
+      border: '#3a322b',
+      borderStrong: '#6e6052',
+      primary: '#e8743b',
+      primaryHover: '#f08a55',
+      primaryText: '#1a0f08',
+      success: '#5cc98a',
+      warning: '#e8b04a',
+      gap: '#e8b04a',
+      danger: '#f07067',
+      focus: '#f0925f',
+      rowHover: '#2a241f',
+      selection: '#3d2a1d',
+      scrollbarThumb: '#4a4038',
+      scrollbarThumbHover: '#6e6052',
+      diffOldBg: '#3d1f1c',
+      diffNewBg: '#1d3326',
+      diffOldMark: '#7a3530',
+      diffNewMark: '#2f6a45',
+      successBg: '#1a2e22',
+      warningBg: '#33281a',
+      dangerBg: '#3a1e1b',
+      infoBg: '#33241a'
     }
   }
 }
@@ -142,6 +172,7 @@ export function validateTheme(
   if (modes) {
     mergeGroup(theme.modes.light, modes.light, 'modes.light')
     mergeGroup(theme.modes.dark, modes.dark, 'modes.dark')
+    mergeGroup(theme.modes.ember, modes.ember, 'modes.ember')
   }
   return { theme, warnings }
 }

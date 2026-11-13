@@ -58,8 +58,8 @@ const raw: Texts = {
     settingsTooltip: 'الإعدادات والتشخيص',
     workspaceArea: 'مساحة العمل',
     settingsArea: 'الإعدادات',
-    theme: { label: 'نمط الألوان', light: 'فاتح', dark: 'داكن', system: 'حسب النظام' },
-    language: { label: 'اللغة', en: 'English', ar: 'العربية', blocked: 'احفظ تعديلك أو تراجع عنه قبل تغيير اللغة.' }
+    theme: { label: 'نمط الألوان', light: 'فاتح', dark: 'داكن', ember: 'جمر', system: 'حسب النظام (كما في Windows)' },
+    language: { label: 'اللغة', en: 'English', ar: 'العربية', enShort: 'En', arShort: 'ع', blocked: 'احفظ تعديلك أو تراجع عنه قبل تغيير اللغة.' }
   },
 
   start: {

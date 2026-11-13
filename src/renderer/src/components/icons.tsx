@@ -127,7 +127,23 @@ const SHAPES = {
       <path d="M15 3v18" />
     </>
   ),
-  check: <path d="M20 6 9 17l-5-5" />
+  check: <path d="M20 6 9 17l-5-5" />,
+  // 0.23.0: the colour-mode switch (sun = Light, moon = Dark, flame = Ember, monitor = System)
+  sun: (
+    <>
+      <circle cx={12} cy={12} r={4} />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+    </>
+  ),
+  moon: <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />,
+  flame: <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />,
+  monitor: (
+    <>
+      <rect width={20} height={14} x={2} y={3} rx={2} />
+      {line(8, 21, 16, 21)}
+      {line(12, 17, 12, 21)}
+    </>
+  )
 } as const
 
 export type IconName = keyof typeof SHAPES

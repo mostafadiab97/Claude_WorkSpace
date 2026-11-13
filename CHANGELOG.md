@@ -154,7 +154,7 @@ shows `%USERPROFILE%`). Found in the attached report: the opened project's path 
 owner) and the update download addresses (the GitHub account) still show personal names — `%USERPROFILE%` only covers
 the Windows user folder. **Owner's choice (O-8): leave both** — the account is the release repository's owner (public, the same in every copy), and folder paths are useful.
 
-The owner's decisions on the review (`docs/reviews/2026-11-10-project-review.md`, O-1…O-7, 10 Nov 2026): data safety
+The owner's decisions on the review (`docs/reviews/done/2026-11-10-project-review.md`, O-1…O-7, 10 Nov 2026): data safety
 first, then speed, then screens, Arabic and documents. Each fix below was reproduced in a test first
 (`tests/review-whole-0.20.test.ts`, QA's `tests/qa-whole-0.20-journeys.test.ts`).
 - **W-01** "Give the copy a new ID" on a copied heading could rewrite the **original** child instead of the copy's
@@ -202,7 +202,7 @@ first, then speed, then screens, Arabic and documents. Each fix below was reprod
 
 ## 0.20.0 — 9 Nov 2026 — theme 1b: traceability views
 - **Owner (8 Nov 2026):** 1b next (the pilot can start after it); decisions T-01…T-08, all as recommended
-  (`docs/reviews/2026-11-08-1b-traceability.md`); helper reviews as before (all six).
+  (`docs/reviews/done/2026-11-08-1b-traceability.md`); helper reviews as before (all six).
 - **Coverage rules** in `schema.yaml` (`rules:` — shared through Git): a starter set in new projects, offered once to
   older ones; edited in the new **Rules** tab of the item-types window; warnings only, with a level stored for a later
   CI check. Obsolete items are counted on neither end; links count across documents.
@@ -375,7 +375,7 @@ first, then speed, then screens, Arabic and documents. Each fix below was reprod
   text editor ends the quoted cell — read a quote inside a quoted cell as its end only when a separator, line end or
   file end follows (no character rule needed), and warn when a cell still looks cut.
 - **Whole-project review (5 Nov 2026):** seven helper agents read the whole project one area at a time — 6 High, 41
-  Medium, 101 Low findings (`docs/reviews/2026-11-05-project-review.md`); the owner confirmed the plan 0.16.3 → 0.16.4
+  Medium, 101 Low findings (`docs/reviews/done/2026-11-05-project-review.md`); the owner confirmed the plan 0.16.3 → 0.16.4
   → 1a and answered the product questions. QA turned the findings into tests that failed; they now pass.
 - **Never lose or split data:** a requirement brought back from a branch a second time is one requirement — only the
   differing parts are asked (CR1-01; replaces giving your copy a new ID); hand-written header content is kept on save

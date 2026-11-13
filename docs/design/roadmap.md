@@ -159,7 +159,7 @@ X-02).
 | **0.19.1** | Fix from the owner's 0.19.0 test | No empty space between rows after Show text off |
 | **0.20.0** | Theme 1b traceability views | Coverage rules (starter set, Rules tab), Traceability view with Coverage and Matrix (Excel export), Impact tab, coverage-gap mark, Problems group and filter — decisions 8 Nov 2026; the pilot can start after it |
 | **0.20.1** | The owner's points on 0.20.0 | Visible gap dot, Back to Traceability, sticky short matrix header, top bar order, Excel formula-like cells as text |
-| **0.20.2** | Whole-project review: data safety (`docs/reviews/2026-11-10-project-review.md`) | Copied children, Arabic document names in Git, link extras in merges, old-version export, CSV/Excel import limits, Compare rename pairing, Git time limits, close before installers, explicit push, CI install without scripts, Electron 45.2.3, `%USERPROFILE%` in reports |
+| **0.20.2** | Whole-project review: data safety (`docs/reviews/done/2026-11-10-project-review.md`) | Copied children, Arabic document names in Git, link extras in merges, old-version export, CSV/Excel import limits, Compare rename pairing, Git time limits, close before installers, explicit push, CI install without scripts, Electron 45.2.3, `%USERPROFILE%` in reports |
 | **0.21.0** | Speed at 50k (O-3: 10k must, 50k should) | Compare of two commits 10.5 → 1.1 s, save 6 ms, sort by number 0.7 s, old version without freezing, workspace speed test in CI |
 | **0.21.1** | Screens and Arabic (review) | Toolbar wraps, Fields warning bug, settings and gaps tooltips, double-rename message, tab arrow keys, Arabic arrows and «نسخة» |
 | — | Documents from review 1 (11 Nov, no version) | README, user guide §16, architecture and onboarding details |
@@ -167,10 +167,12 @@ X-02).
 | **0.21.3** | Review 2: speed and Lows | Old version opens without blocking, review Lows, Merge into… |
 | **0.21.4** | The owner's 0.21.3 report | Copy report, import into a new document, nothing-to-import message, Delete document |
 | **0.22.0** | Visual polish (Fable, owner-approved), Ember, five languages | Ember colour mode with its own logo and serif headings, icon colour switch, English/German/French/Spanish/Arabic, Arabic name; one icon set, clearer edges, table on white, two-group top bar, one work bar, Changes title bars, calmer notes, sharper small icons |
-| **0.23.0** (planned) | Windows 10 (the owner, 13 Nov) | Checked by Claude only (no Windows 10 PC): code and libraries, Windows Server runner, self-test row; Git host neutral texts + `docs/guides/git-hosts.md` (D-7) |
-| **0.24.0** (planned) | Linux | AppImage + .deb, Linux CI job, paths, case-sensitive files |
-| **0.25.0** (planned) | Theme editor | Settings → Appearance: every theme value, live preview, reset, contrast warning |
-| **later** (planned) | Word export, then **1.0 — first public version** (D-1) | Chinese and Hindi after |
+| **0.23.0** (proposed) | Bars above the table, small fixes | Toolbar / document bar redesign (the owner's ideas + Fable's review), Versions: GitHub releases button (0.22.0 test 5), Git host neutral texts (D-7) |
+| **0.24.0** (proposed) | Theme editor | Settings → Appearance: every theme value, live preview, reset, contrast warning |
+| **0.25.0** (proposed) | Word and PDF export | From the Word format profile (`docs/guides/word-template-prompt.md` part B); order with rich text: O-2 |
+| **0.26.0** (proposed) | Open review points | Review-2 leftovers and the audit `docs/reviews/2026-11-13-open-items.md` |
+| **then** | **Internal release to the owner's team** (the owner, 13 Nov) | Pilot; feedback → next version |
+| **after** | **1.0 — first public version** | Windows 10, Linux, Chinese and Hindi postponed until after the internal release (the owner, 13 Nov) |
 | **Release plan (C, 2 Nov 2026)** | — | 0.14 rename + health → 0.15 1a structure → 0.16 1b traceability views (pilot can start) → 0.17 daily comfort → 0.18 rich text → 0.19 documents out → 0.20 review basics → 0.21 pull requests in the app → 0.22 verification → 0.23 sharing + help → 0.24 AI → later commercial; a stabilisation patch after every theme; details in `docs/reviews/2026-11-01-planning-discussion.md` |
 | *Proposal A (R)* | *New name + traceability* | *Proposed 31 Oct 2026; order to be settled in the planning discussion (the owner, 31 Oct):* the rename (`docs/reviews/done/2026-10-31-rename-impact.md`) once the name is chosen; traceability matrix and coverage; item and link types in the GUI; saved views; bulk edit |
 | *Proposal B (R)* | *Documents out* | Word and PDF export, HTML publishing, Markdown preview |

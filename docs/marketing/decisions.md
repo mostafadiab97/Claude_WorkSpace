@@ -62,3 +62,11 @@ website-lines.md).
   with GitHub" until another host is tested.
 - Name story: **no explanation for now** (the owner).
 - Release plan approved: 0.23.0 Windows 10 · 0.24.0 Linux · 0.25.0 theme editor · then Word export · then 1.0.
+
+## Changes (the owner, 13 Nov 2026, evening)
+
+- Plan changed: **first an internal release to the owner's team**, then the following version goes public.
+  **Windows 10 and Linux postponed**; Word/PDF export, the theme editor and the open review points come first. The
+  videos and the website still serve as a quick tour of the tool.
+- Fable decisions: F-1 yes, but the end card cycles Light / Dark / Ember; F-2 yes; F-3 no music, but a narrator and
+  sound effects; F-4–F-6 yes.

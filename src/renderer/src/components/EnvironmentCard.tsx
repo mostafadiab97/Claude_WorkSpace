@@ -10,12 +10,6 @@ export function EnvironmentCard(props: {
   appInfo: AppInfo | null
 }) {
   const { theme, git, update, appInfo } = props
-  // scroll to the Versions card on the same page and open its list of earlier versions
-  const openVersions = (): void => {
-    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    document.getElementById('versions-card')?.scrollIntoView({ block: 'start', behavior: calm ? 'auto' : 'smooth' })
-    document.getElementById('versions-go-back')?.click()
-  }
   const brand = theme.config.brand.name
   return (
     <section className="card" aria-labelledby="env-title">
@@ -49,16 +43,6 @@ export function EnvironmentCard(props: {
       <StatusRow label={T.settings.env.app} tone="neutral">
         {appInfo ? `${brand} ${appInfo.version} · Electron ${appInfo.electronVersion} · ${appInfo.platform}` : '…'}
       </StatusRow>
-      {appInfo?.releasesPage && (
-        <StatusRow label={T.settings.env.releases} tone="neutral">
-          {/* 0.22.0 (the owner, 13 Nov): going back happens inside reqochet — this opens the Versions list below;
-              the releases page address stays as plain text for reference */}
-          <button type="button" className="btn btn--small" onClick={openVersions}>
-            {T.settings.versions.goBack}
-          </button>{' '}
-          <span className="muted-inline">{appInfo.releasesPage}</span>
-        </StatusRow>
-      )}
       {theme.warnings.length > 0 && (
         <ul className="warnings">
           {theme.warnings.map((w) => (

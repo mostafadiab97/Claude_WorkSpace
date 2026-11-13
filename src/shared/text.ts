@@ -94,7 +94,6 @@ const en = {
       themeWarnings: (count: number) => ` — ${count} warning(s)`,
       updates: 'Updates',
       app: 'App',
-      releases: 'Releases'
     },
     privacy: {
       diagramShortAlt: 'Diagram of what reqochet reads, keeps and sends',
@@ -164,6 +163,8 @@ const en = {
       current: (v: string) => `This is version ${v}.`,
       intro: 'If a new version causes trouble, go back to an earlier one. reqochet downloads it, installs it over this one and opens again; automatic updates then pause until you resume them. Your repositories are not touched.',
       goBack: 'Go back to an earlier version…',
+      releasesPage: 'Releases page on GitHub',
+      releasesHint: 'Opens the GitHub page in your web browser',
       loading: 'Looking for earlier versions…',
       none: 'There is no earlier version to go back to yet (going back works from version 0.14.1 on).',
       listFailed: 'Could not read the list of versions (offline or GitHub unreachable).',

@@ -1,4 +1,4 @@
-// 0.20.2 — data-safety fixes from the whole-project review (docs/reviews/2026-11-10-project-review.md, W-nn).
+// 0.20.2 — data-safety fixes from the whole-project review (docs/reviews/done/2026-11-10-project-review.md, W-nn).
 import { execFileSync } from 'node:child_process'
 import { copyFile, mkdtemp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'

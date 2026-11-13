@@ -82,7 +82,6 @@ export const de: Texts = {
       themeWarnings: (count: number) => ` — ${count} Warnung(en)`,
       updates: 'Updates',
       app: 'App',
-      releases: 'Releases'
     },
     privacy: {
       diagramShortAlt: 'Diagramm: was reqochet liest, speichert und sendet',
@@ -152,6 +151,8 @@ export const de: Texts = {
       current: (v: string) => `Dies ist Version ${v}.`,
       intro: 'Wenn eine neue Version Probleme macht, gehen Sie zu einer früheren zurück. reqochet lädt sie herunter, installiert sie über diese und öffnet sich erneut; automatische Updates pausieren dann, bis Sie sie fortsetzen. Ihre Repositorys werden nicht angetastet.',
       goBack: 'Zu einer früheren Version zurückgehen…',
+      releasesPage: 'Release-Seite auf GitHub',
+      releasesHint: 'Öffnet die GitHub-Seite in Ihrem Webbrowser',
       loading: 'Frühere Versionen werden gesucht…',
       none: 'Es gibt noch keine frühere Version, zu der Sie zurückgehen könnten (das Zurückgehen funktioniert ab Version 0.14.1).',
       listFailed: 'Die Versionsliste konnte nicht gelesen werden (offline oder GitHub nicht erreichbar).',

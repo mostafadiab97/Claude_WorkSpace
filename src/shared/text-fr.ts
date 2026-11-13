@@ -81,7 +81,6 @@ export const fr: Texts = {
       themeWarnings: (count: number) => `\u00A0: ${count} avertissement(s)`,
       updates: 'Mises à jour',
       app: 'Application',
-      releases: 'Versions publiées'
     },
     privacy: {
       diagramShortAlt: 'Schéma de ce que reqochet lit, conserve et envoie',
@@ -151,6 +150,8 @@ export const fr: Texts = {
       current: (v: string) => `Vous utilisez la version ${v}.`,
       intro: 'Si une nouvelle version pose problème, revenez à une version antérieure. reqochet la télécharge, l’installe par-dessus celle-ci et se rouvre\u00A0; les mises à jour automatiques sont alors suspendues jusqu’à ce que vous les repreniez. Vos dépôts ne sont pas modifiés.',
       goBack: 'Revenir à une version antérieure…',
+      releasesPage: 'Page des versions sur GitHub',
+      releasesHint: 'Ouvre la page GitHub dans votre navigateur web',
       loading: 'Recherche des versions antérieures…',
       none: 'Il n’existe pas encore de version antérieure vers laquelle revenir (le retour en arrière fonctionne à partir de la version 0.14.1).',
       listFailed: 'Impossible de lire la liste des versions (hors ligne ou GitHub inaccessible).',

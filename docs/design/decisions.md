@@ -317,7 +317,7 @@ when the owner says so per round; security on Opus; other helpers on Sonnet. Det
   next to Close changes.
 - Privacy diagram: a dark version and a tighter layout.
 
-## Traceability views — theme 1b (the owner, 8 Nov 2026; details in `docs/reviews/2026-11-08-1b-traceability.md`)
+## Traceability views — theme 1b (the owner, 8 Nov 2026; details in `docs/reviews/done/2026-11-08-1b-traceability.md`)
 
 - **Place (T-01):** a **Traceability** button in the top bar opens a full-width view (like Changes) with **Coverage** and
   **Matrix** tabs; the **impact chain** is an **Impact** tab in the item editor.

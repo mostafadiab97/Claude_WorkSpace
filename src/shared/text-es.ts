@@ -80,7 +80,6 @@ export const es: Texts = {
       themeWarnings: (count: number) => ` — ${count} ${count === 1 ? 'advertencia' : 'advertencias'}`,
       updates: 'Actualizaciones',
       app: 'Aplicación',
-      releases: 'Versiones publicadas'
     },
     privacy: {
       diagramShortAlt: 'Diagrama de lo que reqochet lee, guarda y envía',
@@ -150,6 +149,8 @@ export const es: Texts = {
       current: (v: string) => `Esta es la versión ${v}.`,
       intro: 'Si una versión nueva da problemas, vuelva a una anterior. reqochet la descarga, la instala sobre esta y se abre de nuevo; las actualizaciones automáticas quedan en pausa hasta que las reanude. Sus repositorios no se tocan.',
       goBack: 'Volver a una versión anterior…',
+      releasesPage: 'Página de versiones en GitHub',
+      releasesHint: 'Abre la página de GitHub en su navegador web',
       loading: 'Buscando versiones anteriores…',
       none: 'Todavía no hay ninguna versión anterior a la que volver (volver atrás funciona desde la versión 0.14.1).',
       listFailed: 'No se pudo leer la lista de versiones (sin conexión o GitHub no disponible).',

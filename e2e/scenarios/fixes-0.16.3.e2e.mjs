@@ -1,4 +1,4 @@
-// 0.16.3 — screen fixes from the whole-project review (docs/reviews/2026-11-05-project-review.md):
+// 0.16.3 — screen fixes from the whole-project review (docs/reviews/done/2026-11-05-project-review.md):
 // CR2-01 the ✕ beside the project name asks about unsaved edits; CR2-05 a list field counts while typing (Ctrl+S).
 import { mkdirSync, copyFileSync, writeFileSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'

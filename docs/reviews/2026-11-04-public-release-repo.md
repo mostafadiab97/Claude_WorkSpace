@@ -1,6 +1,6 @@
 # A public release repository — how files would move (analysis, 4 Nov 2026)
 
-**Status: open point for discussion; nothing is decided.** The owner, 4 Nov 2026: a new repository will hold the
+**Status: decided 12–13 Nov 2026 (§5, §6: source + docs public, PolyForm Shield, own requirements as the sample, issues on); building not started.** The owner, 4 Nov 2026: a new repository will hold the
 released, public tool; this repository stays the development repository for now. Only the files that matter to a
 user go there, plus a description of the tool and of how it was built — from publicly documented features of other
 tools, not by reverse engineering. This file answers "how would files move, the first time and at every release, and

@@ -4829,3 +4829,17 @@ select:not([multiple]) {
   block-size: var(--rm-shape-control-height-small);
   padding-block: 0;
 }
+
+/* 0.22.0 (the owner, 0.21.4 test 3): "nothing to import" is a warning — yellow note with an icon */
+.import__nothing {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rm-space-sm);
+  border: var(--rm-shape-border-width) solid var(--rm-color-warning);
+}
+
+.import__nothing > svg {
+  flex: none;
+  margin-block-start: 2px;
+  color: var(--rm-color-warning);
+}

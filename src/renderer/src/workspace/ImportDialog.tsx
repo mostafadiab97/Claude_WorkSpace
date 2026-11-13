@@ -56,6 +56,8 @@ export function ImportDialog(props: { schema: Schema; file: ImportFile | null; n
   }, [key, step])
 
   const data = preview?.key === key ? preview.data : null
+  // every row already exists: nothing would be imported (a warning, not "no problems" — the owner, 0.21.4 test 3)
+  const nothingToImport = data !== null && data.counts.create + data.counts.update + data.extraLinks === 0
   // the guessed mapping, until the user changes a column
   const shownMapping = mapping ?? data?.mapping ?? null
 
@@ -291,13 +293,15 @@ export function ImportDialog(props: { schema: Schema; file: ImportFile | null; n
                         ))}
                       </ul>
                     </section>
-                  ) : (
+                  ) : nothingToImport ? null : (
                     <p className="statusbar__ok">{T.importDialog.noProblems}</p>
                   )}
-                  {data.counts.create + data.counts.update + data.extraLinks === 0 && (
-                    // why the Import button stays off (the owner, 0.21.2 test 3)
-                    <p className="notice" role="status">
-                      {T.importDialog.nothingNew}
+                  {nothingToImport && (
+                    // why the Import button stays off (the owner, 0.21.2 test 3); a warning, not "no problems"
+                    // (the owner, 0.21.4 test 3)
+                    <p className="notice notice--warn import__nothing" role="alert">
+                      <Icon name="warning" />
+                      <span>{T.importDialog.nothingNew}</span>
                     </p>
                   )}
                   <div className="import__preview scroll" role="table" aria-label={T.importDialog.previewLabel}>
@@ -348,7 +352,7 @@ export function ImportDialog(props: { schema: Schema; file: ImportFile | null; n
               </button>
             )}
             {step === 'check' && (
-              <button type="button" className="btn btn--primary" disabled={busy || !data || !hasContent || data.counts.create + data.counts.update + data.extraLinks === 0} onClick={() => void run()}>
+              <button type="button" className="btn btn--primary" disabled={busy || !data || !hasContent || nothingToImport} onClick={() => void run()}>
                 {busy ? T.importDialog.importing : props.newProject ? T.importDialog.importCommit(data?.counts.create ?? 0) : T.importDialog.importRun((data?.counts.create ?? 0) + (data?.counts.update ?? 0))}
               </button>
             )}

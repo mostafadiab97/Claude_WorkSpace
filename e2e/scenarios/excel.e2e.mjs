@@ -112,6 +112,12 @@ await scenario('E2E excel', async (ctx) => {
   await again.getByRole('button', { name: 'Next' }).click()
   await again.locator('.import__counts', { hasText: '59 unchanged' }).waitFor()
   check(true, 'every row matches its item (the file and ReqMan agree)')
+  // the owner, 0.21.4 test 3: a warning, not "No problems found"
+  await again.getByRole('button', { name: 'Next' }).click()
+  await again.locator('.import__nothing').waitFor()
+  check(await again.locator('.import__nothing', { hasText: 'Nothing to import' }).isVisible(), 'a yellow warning says why nothing is imported')
+  check((await again.getByText('No problems found').count()) === 0, '"No problems found" is not shown when nothing would be imported')
+  await t.shot('excel-3-nothing-new')
   await again.getByRole('button', { name: 'Cancel' }).click()
 
   console.log('ReqIF: export everything, import it again')

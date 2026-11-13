@@ -78,9 +78,12 @@ post itself. All texts are now written for the launch day, with every fact that 
 
 **Answers so far (the owner, 13 Nov 2026)**
 - F-1: "ok, but make the closing animation in our normal light/dark modes, or flicker between the 3 of them" — done
-  in round 2: the end card opens on Light, turns Dark, then Ember (`video.md`, scene 9).
+  in round 2 (Light → Dark → Ember); after watching he chose the order **Ember → Dark → Light**, resting on Light —
+  done in round 3 (`video.md`, scene 9).
 - F-3: "no music, but we can add a narrator instead of the text only, and sound effects (bouncing, popping, clicking,
   etc.)" — done in round 2: own sound effects and an offline narrator, captions kept (`video.md` → Sound).
+- After listening (13 Nov 2026): "sounds are perfect, the voice quality is perfect, shown words are fine" — and a
+  male voice instead: done in round 3 (Kokoro `am_michael`, same licence).
 
 ## Checked facts
 

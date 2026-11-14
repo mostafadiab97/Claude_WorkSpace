@@ -11,7 +11,7 @@ await scenario('E2E theme editor', async (ctx) => {
   const cssVar = (name) => win.evaluate((n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), name)
 
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
-  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Appearance and theme' }).click()
+  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Appearance' }).click()
   const editor = win.getByRole('region', { name: 'Theme editor' })
   await editor.waitFor()
   check((await editor.getByRole('tab').count()) === 4, 'four groups: Colours, Fonts, Sizes and shapes, Spacing')
@@ -44,12 +44,12 @@ await scenario('E2E theme editor', async (ctx) => {
   await editor.getByRole('tab', { name: 'Fonts' }).click()
   await editor.getByLabel('font size base', { exact: true }).fill('20px')
   check((await cssVar('--rm-font-size-base')) === '20px', 'a font size shows at once')
-  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Environment, versions and features' }).click()
+  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Environment' }).click()
   check((await cssVar('--rm-font-size-base')) !== '20px', 'leaving the editor without saving shows the saved theme again')
   check((await cssVar('--rm-color-primary')) === '#aa00aa', '…with the saved colour')
 
   console.log('Reset everything')
-  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Appearance and theme' }).click()
+  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Appearance' }).click()
   await editor.getByRole('button', { name: 'Reset everything to the app theme' }).click()
   await editor.getByRole('button', { name: 'Save my theme' }).click()
   await editor.getByText('Saved — your theme is in use.').waitFor()

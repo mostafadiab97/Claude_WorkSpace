@@ -67,23 +67,20 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.24.1 (Settings pages, Features)
+## Manual test checklist — v0.24.2 (short page names)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.24.1** and run the release self-test (now on **Problems, diagnostics and self-tests**). | All steps passed. |
+| 1 | Let reqochet-dev update to **0.24.2** and run the release self-test (Settings → **Diagnostics**). | All steps passed. |
+| 2 | Look at the Settings list, also in another language. | Environment · Appearance · Diagnostics · Privacy and access. |
+
+## Previous checklist — v0.24.1 (Settings pages, Features)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.24.1** and run the release self-test (now on **Diagnostics**). | All steps passed. |
 | 2 | Open Settings and look at the four pages. | Environment + Versions + Features together; Appearance with the theme editor under the switches; problems with diagnostics and self-tests. |
 | 3 | Features: turn **Traceability** off, then **Versions and baselines** off; look at the top bar; turn both on again. | Their buttons (and the coverage-gap counter) disappear and come back. |
-
-## Previous checklist — v0.24.0 (theme editor)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.24.0** and run the release self-test. | All steps passed. |
-| 2 | Settings → **Theme editor** → Colours, choose your current mode, change **primary** with the colour picker. | Buttons and highlights change at once; the row says "changed". |
-| 3 | Make **text muted** very pale (e.g. #eeeeee). | A warning says it is hard to read; **Reset** on that row puts it back. |
-| 4 | **Save my theme**, then Settings → Diagnostics → **Edit my theme…** and look at the file. | Only your changed values are in it. |
-| 5 | Change a font size, go to another Settings page without saving; then **Reset everything to the app theme** and Save. | Leaving shows the saved theme again; after the reset everything looks as before. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

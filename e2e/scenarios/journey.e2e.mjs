@@ -588,7 +588,7 @@ await scenario('E2E journey', async (ctx) => {
   console.log('Look — dark mode (Settings → Appearance), wide window, settings page scrollbar')
   check((await win.getByRole('radio', { name: 'Dark' }).count()) === 0, 'no colour switch in the top bar while a repository is open (UX-13)')
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
-  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Appearance and theme' }).click()
+  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Appearance' }).click()
   await win.getByRole('radiogroup', { name: 'Colour theme' }).getByRole('radio', { name: 'Dark' }).click()
   await win.getByRole('button', { name: 'Back', exact: true }).click()
   await shot('07-dark')

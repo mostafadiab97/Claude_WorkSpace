@@ -4,7 +4,7 @@ CLAUDE.md is read at the start of every session and again after every context co
 history there cost thousands of tokens each time (the owner asked to save tokens, 8 Nov 2026). **This file is the
 status**: update it with every release (the version table, "Next", the owner's last report, test counts).
 
-## Status (v0.24.1, 14 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.24.2, 14 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -49,6 +49,7 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.23.1 rename / new document / merge / delete in a small panel under the document button (the owner, 0.23.0 test 2) | Released (v0.23.1) |
 | 0.24.0 theme editor (every theme value, live preview, reset, contrast warning, save only the changes) | Released (v0.24.0) |
 | 0.24.1 four Settings pages, Versions and Traceability switches, docs (no ReqMan left in live places) | Released (v0.24.1) |
+| 0.24.2 short Settings page names: Environment, Appearance, Diagnostics (the owner) | Released (v0.24.2) |
 | **Next** | 0.24.0 passed (owner, 14 Nov); owner's 0.24.1 checklist; 0.25.0 Word and PDF export → 0.26.0 open review points → 0.27.0 daily comfort → public repository (F-1..F-7) → team release as 1.0 |
 
 The owner's last report (12 Nov 2026, night): **0.21.2 and 0.21.3 all steps passed**; Copy report broken, import refresh, Delete document missing — fixed in 0.21.4. Before: 12 Nov 2026): **0.21.1 all 5 steps passed** (self-test 25/25 in 96.0 s; "perfect pass, it is so smooth" for the wrapping toolbar). Before (11 Nov 2026): **0.21.0 steps 1, 3, 4, 5 passed** (self-test 25/25 in 77.6 s — faster than 0.20.1's 90.9 s and 0.20.2's 120.9 s); step 2 passed too: Compare took about 4 s for **10,007 changed items** and under a second for a few — **all 5 passed**. Before: 0.20.2 all 4 steps passed (self-test 25/25, 120.9 s — 30 s slower than 0.20.1; nothing more to mask — O-8). Earlier: 0.20.1 all 5 steps passed; review questions O-1…O-7 answered (25/25, 90.9 s) — nothing open from his tests; theme 1b is done and the pilot can start. Before: 0.20.0 all 5 passed with four points (→ 0.20.1).

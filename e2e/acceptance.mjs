@@ -156,7 +156,7 @@ async function step2SelfTest() {
   const { app, win } = await launchInstalled()
   try {
     await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
-    await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Problems, diagnostics and self-tests' }).click()
+    await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Diagnostics' }).click()
     await win.getByRole('button', { name: 'Run release self-test' }).click()
     await win.getByText(/All steps passed|steps failed/).waitFor({ timeout: 300_000 })
     const summary = (await win.getByText(/All steps passed|steps failed/).first().textContent())?.trim()

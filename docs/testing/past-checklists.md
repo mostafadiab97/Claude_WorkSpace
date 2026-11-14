@@ -1,7 +1,17 @@
-# Past manual checklists (v0.0.3 – v0.23.1)
+# Past manual checklists (v0.0.3 – v0.24.0)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.24.0 (theme editor)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.24.0** and run the release self-test. | All steps passed. |
+| 2 | Settings → **Theme editor** → Colours, choose your current mode, change **primary** with the colour picker. | Buttons and highlights change at once; the row says "changed". |
+| 3 | Make **text muted** very pale (e.g. #eeeeee). | A warning says it is hard to read; **Reset** on that row puts it back. |
+| 4 | **Save my theme**, then Settings → Diagnostics → **Edit my theme…** and look at the file. | Only your changed values are in it. |
+| 5 | Change a font size, go to another Settings page without saving; then **Reset everything to the app theme** and Save. | Leaving shows the saved theme again; after the reset everything looks as before. |
 
 ## v0.23.1 (rename box)
 

@@ -22,7 +22,7 @@ await scenario('E2E language', async (ctx) => {
   console.log('Switch to Arabic (Settings → Appearance, UX-13: not in the top bar while a repository is open)')
   check((await win.getByRole('combobox', { name: 'Language' }).count()) === 0, 'no language switch in the top bar while a repository is open')
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
-  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Appearance and theme' }).click()
+  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Appearance' }).click()
   await win.getByRole('combobox', { name: 'Language' }).selectOption('ar')
   await win.locator('.settings-nav__back').click()
   check((await win.evaluate(() => document.documentElement.dir)) === 'rtl', 'the window flips to right-to-left')

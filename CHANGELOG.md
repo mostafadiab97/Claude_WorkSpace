@@ -3,6 +3,10 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.24.2 — 14 Nov 2026 — short Settings page names
+- The owner (14 Nov): the four Settings pages are **Environment**, **Appearance**, **Diagnostics** and **Privacy and
+  access** (all five languages).
+
 ## 0.24.1 — 14 Nov 2026 — fewer Settings pages, Features complete, docs
 The owner's 0.24.0 report.
 - **Settings has four pages** (the owner): **Environment, versions and features** · **Appearance and theme** (the

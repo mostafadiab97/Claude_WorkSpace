@@ -132,6 +132,11 @@ export const fr: Texts = {
       ]
     },
     themeEditor: {
+      changedOutside: 'Votre fichier de thème a été modifié en dehors de reqochet depuis l’ouverture de cette page — rien n’a été enregistré. Rouvrez la page pour voir les nouvelles valeurs.',
+      fileBroken: 'Votre fichier de thème contient une erreur (JSON non valide) — rien n’a été enregistré, votre fichier reste tel quel. Corrigez-le avec «\u00A0Modifier mon thème…\u00A0» ou déplacez-le.',
+      loadFailed: 'Le thème n’a pas pu être lu.',
+      sampleId: 'REQ-7F3K2QA',
+      groups: { surfaces: 'Fonds et bordures', text: 'Texte', accents: 'Boutons, liens et focus', status: 'États et avertissements', table: 'Tableau et sélection', changes: 'Vue des modifications', other: 'Autres' },
       intro: 'Modifiez n’importe quelle couleur, police ou taille — toute la fenêtre l’affiche aussitôt. Enregistrer n’écrit que vos changements dans votre fichier de thème\u00A0; tout le reste suit toujours le thème de l’application (et ses mises à jour).',
       colours: 'Couleurs',
       fonts: 'Polices',

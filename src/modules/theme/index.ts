@@ -17,8 +17,9 @@ export interface ThemeService {
    * Writes the user's own values (only what differs from the app theme), checked like any theme layer; other keys of
    * the user's file (brand, notes) are kept. Atomic write. Returns the theme as now loaded.
    */
-  saveUser(user: ThemeOverrides): Promise<LoadedTheme>
+  saveUser(user: ThemeOverrides, expectedRevision: string): Promise<LoadedTheme>
 }
 
 export { createFileThemeService }
+export { ThemeFileError } from './fileTheme'
 export { DEFAULT_THEME, validateTheme } from './defaults'

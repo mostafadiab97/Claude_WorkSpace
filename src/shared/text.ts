@@ -146,6 +146,11 @@ const en = {
     },
     // 0.24.0 the theme editor (the owner, 13 Nov): every value of the theme file, live preview, reset
     themeEditor: {
+      changedOutside: 'Your theme file was changed outside reqochet since this page opened — nothing was saved. Open the page again to see the new values.',
+      fileBroken: 'Your theme file has a mistake (it is not valid JSON) — nothing was saved, so your file stays as it is. Fix it with Edit my theme… or move it away.',
+      loadFailed: 'The theme could not be read.',
+      sampleId: 'REQ-7F3K2QA',
+      groups: { surfaces: 'Backgrounds and edges', text: 'Text', accents: 'Buttons, links and focus', status: 'Status and warnings', table: 'Table and selection', changes: 'Changes view', other: 'Other' },
       intro: 'Change any colour, font or size — the whole window shows it at once. Save writes only your changes to your theme file; everything else keeps following the app theme (and its updates).',
       colours: 'Colours',
       fonts: 'Fonts',

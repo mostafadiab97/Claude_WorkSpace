@@ -12,6 +12,10 @@ The owner's request (13 Nov): "a theme editor in the tool itself … all customi
 - **Contrast warning** when text or edges get hard to read in the chosen colours (the same pairs as the contrast test).
 - **Save my theme** writes only what differs from the app theme to your theme.json; other keys (brand, notes) are kept;
   the values are checked and the file is written atomically. Invalid values are marked and never saved.
+- Review helpers (code, UI/UX, QA): colours under headings (backgrounds, text, buttons, status, table, Changes view);
+  the readability warning above the list; an invalid value says so under the field. **Never overwrites** a theme file
+  with a typo, or one changed outside reqochet since the page opened (it says so instead); saves run one at a time;
+  values that could load files (`url(…)`, `@import`) are refused; a mode switch keeps the preview.
 
 ## 0.23.1 — 14 Nov 2026 — the rename box in a small panel
 **Owner (14 Nov 2026):** self-test 25/25 (87.4 s); test 2 passed.

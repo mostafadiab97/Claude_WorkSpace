@@ -1,4 +1,5 @@
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { basename, extname, join } from 'node:path'
 import type { LoadedTheme, ThemeLayers, ThemeOverrides, ThemeConfig } from '../../shared/api'
 import type { ThemeService } from './index'
@@ -53,7 +54,43 @@ export function createFileThemeService(configDir: string, resourceDir: string, u
     return ''
   }
 
-  return {
+  let saving: Promise<unknown> = Promise.resolve()
+  const saveNow = async (user: ThemeOverrides, expectedRevision: string): Promise<LoadedTheme> => {
+    await mkdir(userDir, { recursive: true })
+    // never write over a file that changed since the editor read it (NFR-05; code review 0.24.0 C3)
+    if ((await revisionOf(userFile)) !== expectedRevision) throw new ThemeFileError('changed')
+    const old = await readJson(userFile)
+    // a hand-edited file with a mistake is never overwritten (code review 0.24.0 C1)
+    if (!old.ok && old.error !== 'ENOENT') throw new ThemeFileError('broken')
+    if (old.ok && (typeof old.value !== 'object' || old.value === null || Array.isArray(old.value))) throw new ThemeFileError('broken')
+    // keep what the editor does not edit (brand, notes like _help, modes it does not know); replace the token groups
+    const keep = old.ok ? { ...(old.value as Record<string, unknown>) } : {}
+    const oldModes = keep['modes']
+    for (const g of ['typography', 'shape', 'spacing', 'modes']) delete keep[g]
+    const clean = pickOverrides(user)
+    // nothing that loads files or ends the declaration (QA 0.24.0 Q2) — the window input check refuses it too
+    const all = [clean.typography, clean.shape, clean.spacing, clean.modes?.light, clean.modes?.dark, clean.modes?.ember].flatMap((g) => Object.values(g ?? {}))
+    if (all.some((x) => /url\s*\(|@import|[;{}<>]|\\/i.test(x))) throw new Error('A theme value may not contain url(…), @import or ; { } < > \\.')
+    const otherModes: Record<string, unknown> = {}
+    if (typeof oldModes === 'object' && oldModes !== null && !Array.isArray(oldModes))
+      for (const [k, v] of Object.entries(oldModes)) if (k !== 'light' && k !== 'dark' && k !== 'ember') otherModes[k] = v
+    const next: Record<string, unknown> = { ...keep, ...clean }
+    if (Object.keys(otherModes).length > 0) next['modes'] = { ...otherModes, ...(clean.modes ?? {}) }
+    // check it like a theme layer would be: a value the app would ignore is refused, not written
+    const { warnings } = validateTheme({ ...next, modes: clean.modes }, DEFAULT_THEME)
+    if (warnings.length > 0) throw new Error(warnings.join(' '))
+    const tmp = `${userFile}.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`
+    try {
+      await writeFile(tmp, JSON.stringify(next, null, 2) + '\n')
+      await rename(tmp, userFile)
+    } catch (e) {
+      await rm(tmp, { force: true }).catch(() => undefined)
+      throw e
+    }
+    return service.load()
+  }
+
+  const service: ThemeService = {
     userThemeFile: userFile,
 
     async load(): Promise<LoadedTheme> {
@@ -89,24 +126,14 @@ export function createFileThemeService(configDir: string, resourceDir: string, u
       const shipped = await readJson(shippedFile)
       const base = shipped.ok ? validateTheme(shipped.value, DEFAULT_THEME).theme : DEFAULT_THEME
       const user = await readJson(userFile)
-      return { base, user: user.ok ? pickOverrides(user.value) : {} }
+      return { base, user: user.ok ? pickOverrides(user.value) : {}, revision: await revisionOf(userFile) }
     },
 
-    async saveUser(user: ThemeOverrides): Promise<LoadedTheme> {
-      await mkdir(userDir, { recursive: true })
-      const old = await readJson(userFile)
-      // keep what the editor does not edit (brand, notes like _help); replace the four token groups
-      const keep = old.ok && typeof old.value === 'object' && old.value !== null && !Array.isArray(old.value) ? { ...(old.value as Record<string, unknown>) } : {}
-      for (const g of ['typography', 'shape', 'spacing', 'modes']) delete keep[g]
-      const clean = pickOverrides(user)
-      const next = { ...keep, ...clean }
-      // check it like a theme layer would be: a value the app would ignore is refused, not written
-      const { warnings } = validateTheme(next, DEFAULT_THEME)
-      if (warnings.length > 0) throw new Error(warnings.join(' '))
-      const tmp = `${userFile}.${process.pid}.tmp`
-      await writeFile(tmp, JSON.stringify(next, null, 2) + '\n')
-      await rename(tmp, userFile)
-      return this.load()
+    saveUser(user: ThemeOverrides, expectedRevision: string): Promise<LoadedTheme> {
+      // one save at a time (code review 0.24.0 C3, QA Q1)
+      const run = saving.then(() => saveNow(user, expectedRevision))
+      saving = run.catch(() => undefined)
+      return run
     },
 
     async ensureUserThemeFile(): Promise<string> {
@@ -127,6 +154,7 @@ export function createFileThemeService(configDir: string, resourceDir: string, u
       return userFile
     }
   }
+  return service
 }
 
 /** Only the four token groups, only non-empty string values, only known modes (the editor's view of a user file). */
@@ -154,4 +182,20 @@ function pickOverrides(value: unknown): ThemeOverrides {
     if (Object.keys(m).length > 0) out.modes = m
   }
   return out
+}
+
+/** The file's revision for the conflict check: a hash of its bytes, or "none" when it does not exist. */
+async function revisionOf(file: string): Promise<string> {
+  try {
+    return createHash('sha1').update(await readFile(file)).digest('hex')
+  } catch {
+    return 'none'
+  }
+}
+
+/** Why a theme save was refused: the file changed since it was read, or it has a mistake the user must fix first. */
+export class ThemeFileError extends Error {
+  constructor(readonly reason: 'changed' | 'broken') {
+    super(reason === 'changed' ? 'THEME_FILE_CHANGED' : 'THEME_FILE_BROKEN')
+  }
 }

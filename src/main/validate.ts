@@ -373,6 +373,8 @@ export function themeOverrides(v: unknown): ThemeOverrides {
     for (const k of keys) {
       if (!/^[A-Za-z][A-Za-z0-9]{0,63}$/.test(k)) throw new Error(`${what}: bad key`)
       out[k] = str(o[k], `${what}.${k}`, 200)
+      // a theme value is a colour, size or font list — nothing that loads files or ends the declaration (QA 0.24.0 Q2)
+      if (/url\s*\(|@import|[;{}<>]|\\/i.test(out[k] ?? '')) throw new Error(`${what}.${k}: not allowed`)
     }
     return out
   }

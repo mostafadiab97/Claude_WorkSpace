@@ -133,6 +133,11 @@ export const de: Texts = {
       ]
     },
     themeEditor: {
+      changedOutside: 'Ihre Theme-Datei wurde seit dem Öffnen dieser Seite außerhalb von reqochet geändert — nichts wurde gespeichert. Öffnen Sie die Seite erneut, um die neuen Werte zu sehen.',
+      fileBroken: 'Ihre Theme-Datei enthält einen Fehler (kein gültiges JSON) — nichts wurde gespeichert, Ihre Datei bleibt unverändert. Beheben Sie ihn mit „Mein Theme bearbeiten…“ oder verschieben Sie die Datei.',
+      loadFailed: 'Das Theme konnte nicht gelesen werden.',
+      sampleId: 'REQ-7F3K2QA',
+      groups: { surfaces: 'Hintergründe und Ränder', text: 'Text', accents: 'Schaltflächen, Links und Fokus', status: 'Status und Warnungen', table: 'Tabelle und Auswahl', changes: 'Änderungsansicht', other: 'Sonstiges' },
       intro: 'Ändern Sie jede Farbe, Schrift oder Größe — das ganze Fenster zeigt es sofort. Speichern schreibt nur Ihre Änderungen in Ihre Theme-Datei; alles andere folgt weiter dem App-Theme (und seinen Updates).',
       colours: 'Farben',
       fonts: 'Schriften',

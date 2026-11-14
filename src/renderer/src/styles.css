@@ -5297,3 +5297,21 @@ select:not([multiple]) {
   background: var(--rm-color-surface);
   border-block-start: var(--rm-shape-border-width) solid var(--rm-color-border);
 }
+
+.theme-editor__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-xs);
+}
+
+.theme-editor__heading {
+  margin: var(--rm-space-sm) 0 0;
+  font-size: var(--rm-font-size-base);
+  color: var(--rm-color-text-muted);
+}
+
+.theme-row__invalid {
+  grid-column: 1 / -1;
+  font-size: var(--rm-font-size-small);
+  color: var(--rm-color-danger);
+}

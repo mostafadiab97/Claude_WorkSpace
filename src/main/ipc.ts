@@ -163,8 +163,8 @@ export function registerIpc(services: Services, paths: Paths): void {
       }
     },
     getThemeLayers: () => services.theme.layers(),
-    saveUserTheme: async (_e, user) => {
-      const theme = await services.theme.saveUser(v.themeOverrides(user))
+    saveUserTheme: async (_e, user, revision) => {
+      const theme = await services.theme.saveUser(v.themeOverrides(user), v.str(revision, 'revision', 64))
       log.info(`Theme editor: your theme saved (${themeFile})`)
       return theme
     },

@@ -10,6 +10,16 @@ type Mode = 'light' | 'dark' | 'ember'
 /** "textMuted" → "text muted": the theme file's own key, readable (the names are the same in every language). */
 const keyName = (k: string): string => k.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase()
 
+/** Colour keys under readable headings (UI review 0.24.0 U1); a key not listed goes under "Other". */
+const COLOUR_GROUPS: [keyof typeof T.settings.themeEditor.groups, string[]][] = [
+  ['surfaces', ['background', 'surface', 'surfaceAlt', 'border', 'borderStrong']],
+  ['text', ['text', 'textMuted']],
+  ['accents', ['primary', 'primaryHover', 'primaryText', 'focus']],
+  ['status', ['success', 'warning', 'danger', 'gap', 'successBg', 'warningBg', 'dangerBg', 'infoBg']],
+  ['table', ['rowHover', 'selection', 'scrollbarThumb', 'scrollbarThumbHover']],
+  ['changes', ['diffOldBg', 'diffNewBg', 'diffOldMark', 'diffNewMark']]
+]
+
 /** Text pairs that must stay readable (front, back, needed ratio) — the same pairs the contrast test checks. */
 const PAIRS: [string, string, number][] = [
   ['text', 'background', 4.5],
@@ -40,6 +50,8 @@ function merged(base: ThemeConfig, user: ThemeOverrides): ThemeConfig {
 /** Is this a value the window can use? (colours checked by the browser itself, sizes by CSS). */
 function valid(group: Group, value: string): boolean {
   if (value.trim() === '') return false
+  // nothing that loads files or ends the declaration (QA 0.24.0 Q2; the core refuses it too)
+  if (/url\s*\(|@import|[;{}<>]|\\/i.test(value)) return false
   if (group === 'colours') return CSS.supports('color', value)
   if (group === 'typography') return true
   return CSS.supports('width', value) || CSS.supports('box-shadow', value) || /^\d+(\.\d+)?$/.test(value)
@@ -61,11 +73,15 @@ export function ThemeEditor(props: { onPreview: (config: ThemeConfig | null) => 
   const [busy, setBusy] = useState(false)
   const { onPreview } = props
 
+  const [loadFailed, setLoadFailed] = useState(false)
   useEffect(() => {
-    void window.reqochet.getThemeLayers().then((l) => {
-      setLayers(l)
-      setUser(l.user)
-    })
+    window.reqochet.getThemeLayers().then(
+      (l) => {
+        setLayers(l)
+        setUser(l.user)
+      },
+      () => setLoadFailed(true) // code review 0.24.0 C7: not "Loading…" forever
+    )
     // leaving the editor shows the saved theme again
     return () => onPreview(null)
   }, [onPreview])
@@ -75,6 +91,7 @@ export function ThemeEditor(props: { onPreview: (config: ThemeConfig | null) => 
     if (shown) onPreview(shown)
   }, [shown, onPreview])
 
+  if (loadFailed) return <p className="notice notice--error">{tx.loadFailed}</p>
   if (!layers || !shown) return <p className="muted">{T.common.loading}</p>
 
   const saved = JSON.stringify(layers.user)
@@ -100,12 +117,16 @@ export function ThemeEditor(props: { onPreview: (config: ThemeConfig | null) => 
   const save = async (): Promise<void> => {
     setBusy(true)
     try {
-      const loaded = await window.reqochet.saveUserTheme(cleanForSave(user, layers.base))
-      setLayers({ base: layers.base, user })
+      const loaded = await window.reqochet.saveUserTheme(cleanForSave(user, layers.base), layers.revision)
+      // what the file now holds becomes "saved" (code review 0.24.0 C4)
+      const fresh = await window.reqochet.getThemeLayers()
+      setLayers(fresh)
+      setUser(fresh.user)
       props.onSaved(loaded)
       setNote({ ok: true, text: tx.saved })
     } catch (e) {
-      setNote({ ok: false, text: tx.saveFailed(e instanceof Error ? e.message : String(e)) })
+      const m = e instanceof Error ? e.message : String(e)
+      setNote({ ok: false, text: m.includes('THEME_FILE_CHANGED') ? tx.changedOutside : m.includes('THEME_FILE_BROKEN') ? tx.fileBroken : tx.saveFailed(m) })
     } finally {
       setBusy(false)
     }
@@ -134,6 +155,14 @@ export function ThemeEditor(props: { onPreview: (config: ThemeConfig | null) => 
         })
       : []
 
+  const sections: [string, string[]][] =
+    group === 'colours'
+      ? [
+          ...COLOUR_GROUPS.map(([g, list]) => [tx.groups[g], list.filter((k) => keys.includes(k))] as [string, string[]]),
+          [tx.groups.other, keys.filter((k) => !COLOUR_GROUPS.some(([, list]) => list.includes(k)))] as [string, string[]]
+        ].filter(([, list]) => list.length > 0)
+      : [['', keys]]
+
   return (
     <section className="card theme-editor" aria-label={T.settings.nav.theme}>
       <p className="hint hint--flush">{tx.intro}</p>
@@ -156,8 +185,17 @@ export function ThemeEditor(props: { onPreview: (config: ThemeConfig | null) => 
             ))}
           </div>
         )}
-        <div className="theme-editor__grid">
-          {keys.map((k) => {
+        {/* the contrast warning above the list, where it is seen (UI review 0.24.0 U2) */}
+        {group === 'colours' && (
+          <p className={problems.length > 0 ? 'notice notice--warn' : 'hint'} role={problems.length > 0 ? 'alert' : undefined}>
+            {problems.length > 0 ? problems.join(' · ') : tx.contrastOk}
+          </p>
+        )}
+        {sections.map(([title, list]) => (
+          <div key={title || 'all'} className="theme-editor__section">
+            {title && <h3 className="theme-editor__heading">{title}</h3>}
+            <div className="theme-editor__grid">
+              {list.map((k) => {
             const mine = userOf(k)
             const value = mine ?? baseOf(k)
             const ok = valid(group, value)
@@ -176,22 +214,20 @@ export function ThemeEditor(props: { onPreview: (config: ThemeConfig | null) => 
                   value={value}
                   spellCheck={false}
                   aria-invalid={ok ? undefined : true}
-                  title={ok ? undefined : tx.invalid}
+                  aria-describedby={ok ? undefined : `theme-${group}-${k}-error`}
                   onChange={(e) => set(k, e.target.value)}
                   dir="ltr"
                 />
+                {!ok && <span className="theme-row__invalid" id={`theme-${group}-${k}-error`}>{tx.invalid}</span>}
                 <button type="button" className="btn btn--small" disabled={mine === undefined} title={tx.resetTooltip(baseOf(k))} onClick={() => set(k, undefined)}>
                   {tx.reset}
                 </button>
               </div>
             )
           })}
-        </div>
-        {group === 'colours' && (
-          <p className={problems.length > 0 ? 'notice notice--warn' : 'hint'} role={problems.length > 0 ? 'alert' : undefined}>
-            {problems.length > 0 ? problems.join(' · ') : tx.contrastOk}
-          </p>
-        )}
+            </div>
+          </div>
+        ))}
         <div className="theme-editor__sample" aria-hidden="true">
           <strong>{tx.sample}</strong>
           <span className="theme-editor__sample-text">{tx.sampleText}</span>
@@ -202,7 +238,7 @@ export function ThemeEditor(props: { onPreview: (config: ThemeConfig | null) => 
             <button type="button" className="btn" tabIndex={-1}>
               {T.common.cancel}
             </button>
-            <input className="input" tabIndex={-1} readOnly value="REQ-7F3K2QA" aria-hidden="true" />
+            <input className="input" tabIndex={-1} readOnly value={tx.sampleId} aria-hidden="true" />
           </span>
         </div>
       </div>

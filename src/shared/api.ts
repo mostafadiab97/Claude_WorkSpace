@@ -45,6 +45,8 @@ export interface ThemeOverrides {
 export interface ThemeLayers {
   base: ThemeConfig
   user: ThemeOverrides
+  /** The user's file as read (conflict check on save). */
+  revision: string
 }
 
 export interface LoadedTheme {
@@ -585,7 +587,7 @@ export interface ReqochetApi {
   /** 0.24.0 theme editor: the app theme and the user's own values. */
   getThemeLayers(): Promise<ThemeLayers>
   /** 0.24.0 theme editor: writes the user's own values (checked; atomic); returns the theme as now loaded. */
-  saveUserTheme(user: ThemeOverrides): Promise<LoadedTheme>
+  saveUserTheme(user: ThemeOverrides, revision: string): Promise<LoadedTheme>
   getUpdateStatus(): Promise<UpdateStatus>
   checkForUpdates(): Promise<void>
   /** Restarts ReqMan to install a downloaded update. */

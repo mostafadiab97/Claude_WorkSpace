@@ -58,7 +58,10 @@ export function App() {
     themeRef.current = theme
     modeRef.current = mode
   })
+  // the theme being edited survives a mode switch (code review 0.24.0 C6)
+  const previewRef = useRef<ThemeConfig | null>(null)
   const previewTheme = useCallback((config: ThemeConfig | null) => {
+    previewRef.current = config
     const saved = themeRef.current
     if (config) applyTheme(config, modeRef.current)
     else if (saved) applyTheme(saved.config, modeRef.current)
@@ -67,10 +70,10 @@ export function App() {
   // Re-apply tokens when the theme loads, the mode changes, or (in System mode) Windows switches light/dark.
   useEffect(() => {
     if (!theme) return
-    applyTheme(theme.config, mode)
+    applyTheme(previewRef.current ?? theme.config, mode)
     if (mode !== 'system') return
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const onChange = (): void => applyTheme(theme.config, 'system')
+    const onChange = (): void => applyTheme(previewRef.current ?? theme.config, 'system')
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
   }, [theme, mode])

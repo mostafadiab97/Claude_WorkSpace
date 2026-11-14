@@ -131,6 +131,11 @@ export const es: Texts = {
       ]
     },
     themeEditor: {
+      changedOutside: 'Su archivo de tema se modificó fuera de reqochet desde que se abrió esta página: no se guardó nada. Vuelva a abrir la página para ver los nuevos valores.',
+      fileBroken: 'Su archivo de tema tiene un error (no es JSON válido): no se guardó nada y su archivo queda como está. Corríjalo con «Editar mi tema…» o muévalo.',
+      loadFailed: 'No se pudo leer el tema.',
+      sampleId: 'REQ-7F3K2QA',
+      groups: { surfaces: 'Fondos y bordes', text: 'Texto', accents: 'Botones, enlaces y foco', status: 'Estados y avisos', table: 'Tabla y selección', changes: 'Vista de cambios', other: 'Otros' },
       intro: 'Cambie cualquier color, fuente o tamaño: toda la ventana lo muestra al instante. Guardar escribe solo sus cambios en su archivo de tema; todo lo demás sigue al tema de la aplicación (y a sus actualizaciones).',
       colours: 'Colores',
       fonts: 'Fuentes',

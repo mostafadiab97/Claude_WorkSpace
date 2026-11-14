@@ -33,6 +33,20 @@ export interface ThemeConfig {
   modes: { light: Record<string, string>; dark: Record<string, string>; ember: Record<string, string> }
 }
 
+/** 0.24.0 theme editor: the user's own values only (what differs from the app theme), group by group. */
+export interface ThemeOverrides {
+  typography?: Record<string, string>
+  shape?: Record<string, string>
+  spacing?: Record<string, string>
+  modes?: { light?: Record<string, string>; dark?: Record<string, string>; ember?: Record<string, string> }
+}
+
+/** What the theme editor needs: the app theme without the user's values (for "Reset") and the user's values. */
+export interface ThemeLayers {
+  base: ThemeConfig
+  user: ThemeOverrides
+}
+
 export interface LoadedTheme {
   config: ThemeConfig
   /** Logo as a data: URL, ready for an <img src>. */
@@ -568,6 +582,10 @@ export interface ReqochetApi {
   openLogFolder(): Promise<void>
   /** Creates the user's theme.json if needed, then shows it in Windows Explorer. */
   openThemeFolder(): Promise<void>
+  /** 0.24.0 theme editor: the app theme and the user's own values. */
+  getThemeLayers(): Promise<ThemeLayers>
+  /** 0.24.0 theme editor: writes the user's own values (checked; atomic); returns the theme as now loaded. */
+  saveUserTheme(user: ThemeOverrides): Promise<LoadedTheme>
   getUpdateStatus(): Promise<UpdateStatus>
   checkForUpdates(): Promise<void>
   /** Restarts ReqMan to install a downloaded update. */
@@ -785,6 +803,8 @@ export const Channels = {
   getTheme: 'theme:get',
   openLogFolder: 'diag:openLogFolder',
   openThemeFolder: 'diag:openThemeFolder',
+  getThemeLayers: 'theme:layers',
+  saveUserTheme: 'theme:saveUser',
   reportUiError: 'diag:reportUiError',
   getDiagnostics: 'diag:get',
   saveProblemReport: 'diag:saveProblemReport',

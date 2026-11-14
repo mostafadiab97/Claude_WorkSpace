@@ -130,7 +130,30 @@ export const es: Texts = {
         }
       ]
     },
+    themeEditor: {
+      intro: 'Cambie cualquier color, fuente o tamaño: toda la ventana lo muestra al instante. Guardar escribe solo sus cambios en su archivo de tema; todo lo demás sigue al tema de la aplicación (y a sus actualizaciones).',
+      colours: 'Colores',
+      fonts: 'Fuentes',
+      shape: 'Tamaños y formas',
+      spacing: 'Espaciado',
+      mode: 'Colores para',
+      changed: 'cambiado',
+      reset: 'Restablecer',
+      resetTooltip: (value: string) => `Volver al valor de la aplicación (${value})`,
+      resetAll: 'Restablecer todo al tema de la aplicación',
+      save: 'Guardar mi tema',
+      saved: 'Guardado: su tema está en uso.',
+      discard: 'Descartar cambios',
+      unsaved: (count: number) => `${count} cambio(s) sin guardar: ya se muestran; Guardar los conserva.`,
+      contrast: (front: string, back: string, ratio: string, need: string) => `${front} sobre ${back}: contraste ${ratio}:1 (desde ${need}:1 se lee bien)`,
+      contrastOk: 'Todos los textos se leen bien con estos colores.',
+      invalid: 'Valor no válido: se usa el valor de la aplicación.',
+      sample: 'Ejemplo',
+      sampleText: 'El sistema deberá bloquear todas las puertas por encima de 15 km/h.',
+      saveFailed: (message: string) => `No guardado: ${message}`
+    },
     nav: {
+      theme: 'Editor de tema',
       appearance: 'Apariencia',
       appearanceIntro: 'Idioma de la ventana y colores. Su elección se recuerda en este PC.',
       label: 'Configuración y ayuda',

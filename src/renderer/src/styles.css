@@ -5177,3 +5177,123 @@ select:not([multiple]) {
 .document-bar__pop .document-bar__error {
   margin: 0;
 }
+
+/* 0.24.0 the theme editor (Settings → Theme editor) */
+.theme-editor__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-md);
+  padding-block: var(--rm-space-md);
+}
+
+.theme-editor__modes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rm-space-md);
+}
+
+.theme-editor__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--rm-space-xs) var(--rm-space-lg);
+}
+
+.theme-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) auto minmax(110px, 1.2fr) auto;
+  align-items: center;
+  gap: var(--rm-space-sm);
+  padding: var(--rm-space-xs) var(--rm-space-sm);
+  border-radius: var(--rm-shape-radius-small);
+}
+
+.theme-row--changed {
+  background: color-mix(in srgb, var(--rm-color-primary) 8%, transparent);
+}
+
+.theme-row__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.theme-row__changed {
+  margin-inline-start: var(--rm-space-sm);
+  font-size: var(--rm-font-size-small);
+  color: var(--rm-color-primary);
+}
+
+.theme-row__swatch {
+  inline-size: 32px;
+  block-size: 28px;
+  padding: 0;
+  border: var(--rm-shape-border-width) solid var(--rm-color-border-strong);
+  border-radius: var(--rm-shape-radius-small);
+  background: none;
+  cursor: pointer;
+}
+
+.theme-row:not(:has(.theme-row__swatch)) .theme-row__value {
+  grid-column: 2 / 4;
+}
+
+.theme-row__value {
+  font-family: var(--rm-font-family-mono);
+  font-size: var(--rm-font-size-small);
+}
+
+.theme-row__value[aria-invalid='true'] {
+  border-color: var(--rm-color-danger);
+}
+
+.theme-editor__sample {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-sm);
+  padding: var(--rm-space-md);
+  border: var(--rm-shape-border-width) dashed var(--rm-color-border-strong);
+  border-radius: var(--rm-shape-radius-medium);
+  background: var(--rm-color-background);
+}
+
+.btn--danger-outline {
+  color: var(--rm-color-danger);
+}
+
+.theme-editor .tabs {
+  display: flex;
+  gap: var(--rm-space-xs);
+  border-block-end: var(--rm-shape-border-width) solid var(--rm-color-border);
+}
+
+.theme-editor .tab {
+  background: none;
+  border: 0;
+  border-block-end: 2px solid transparent;
+  padding: var(--rm-space-sm) var(--rm-space-md);
+  color: var(--rm-color-text-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.theme-editor .tab--active {
+  color: var(--rm-color-text);
+  border-block-end-color: var(--rm-color-primary);
+  font-weight: var(--rm-font-weight-strong);
+}
+
+.theme-editor .tab:focus-visible {
+  outline: calc(var(--rm-shape-border-width) * 2) solid var(--rm-color-focus);
+  outline-offset: -2px;
+}
+
+/* Save / Discard / Reset stay in reach while scrolling the long list */
+.theme-editor > .actions {
+  position: sticky;
+  inset-block-end: 0;
+  z-index: 2;
+  padding-block: var(--rm-space-sm);
+  background: var(--rm-color-surface);
+  border-block-start: var(--rm-shape-border-width) solid var(--rm-color-border);
+}

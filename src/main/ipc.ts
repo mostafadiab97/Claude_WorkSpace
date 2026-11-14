@@ -162,6 +162,12 @@ export function registerIpc(services: Services, paths: Paths): void {
         log.error('Could not create your theme.json', e)
       }
     },
+    getThemeLayers: () => services.theme.layers(),
+    saveUserTheme: async (_e, user) => {
+      const theme = await services.theme.saveUser(v.themeOverrides(user))
+      log.info(`Theme editor: your theme saved (${themeFile})`)
+      return theme
+    },
     getUpdateStatus: () => services.updater.current(),
     checkForUpdates: () => services.updater.checkNow(),
     listEarlierVersions: async () => {

@@ -3,6 +3,16 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.24.0 — 14 Nov 2026 — the theme editor
+The owner's request (13 Nov): "a theme editor in the tool itself … all customizable elements of the theme file".
+- **Settings → Theme editor** — every value of the theme file in four tabs: **Colours** (for Light, Dark or Ember, with a
+  colour picker and the value), **Fonts**, **Sizes and shapes**, **Spacing**. Names are the theme file's own keys.
+- **Live preview** — each change shows in the whole window at once; leaving without saving shows the saved theme again.
+- **Reset** per value (back to the app value), **Discard changes**, **Reset everything to the app theme**.
+- **Contrast warning** when text or edges get hard to read in the chosen colours (the same pairs as the contrast test).
+- **Save my theme** writes only what differs from the app theme to your theme.json; other keys (brand, notes) are kept;
+  the values are checked and the file is written atomically. Invalid values are marked and never saved.
+
 ## 0.23.1 — 14 Nov 2026 — the rename box in a small panel
 **Owner (14 Nov 2026):** self-test 25/25 (87.4 s); test 2 passed.
 - **Rename / New document / Merge into / Delete** open in a small panel under the document button (like the New item

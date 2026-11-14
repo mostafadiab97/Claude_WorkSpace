@@ -2,7 +2,7 @@ import { BrandFace, BrandLoading, BrandName } from '../components/Brand'
 import { useActivity, useWindowActive } from '../lib/activity'
 import { QUICK_START_PAGE, SHORTCUTS_PAGE } from '../../../shared/guide'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { AppInfo, GitInfo, LoadedTheme, RepoInfo, UpdateStatus, ImportFile } from '../../../shared/api'
+import type { AppInfo, GitInfo, LoadedTheme, RepoInfo, ThemeConfig, UpdateStatus, ImportFile } from '../../../shared/api'
 import { applyTheme, loadSavedMode, resolveMode, saveMode, useEffectiveMode, type ThemeMode } from '../theme/applyTheme'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import { ThemeToggle } from '../components/ThemeToggle'
@@ -49,6 +49,19 @@ export function App() {
     void window.reqochet.getGitInfo().then(setGit)
     void window.reqochet.getUpdateStatus().then(setUpdate)
     return window.reqochet.onUpdateStatus(setUpdate)
+  }, [])
+
+  // 0.24.0 theme editor: a theme shown while editing (null = the saved one again); stable so the editor's effects run once
+  const themeRef = useRef(theme)
+  const modeRef = useRef(mode)
+  useEffect(() => {
+    themeRef.current = theme
+    modeRef.current = mode
+  })
+  const previewTheme = useCallback((config: ThemeConfig | null) => {
+    const saved = themeRef.current
+    if (config) applyTheme(config, modeRef.current)
+    else if (saved) applyTheme(saved.config, modeRef.current)
   }, [])
 
   // Re-apply tokens when the theme loads, the mode changes, or (in System mode) Windows switches light/dark.
@@ -178,6 +191,9 @@ export function App() {
           <ErrorBoundary area={T.app.settingsArea}>
             <SettingsScreen
               theme={theme}
+              onThemePreview={previewTheme}
+              onThemeSaved={setTheme}
+              shownMode={resolveMode(mode)}
               git={git}
               update={update}
               appInfo={appInfo}

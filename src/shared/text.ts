@@ -144,7 +144,31 @@ const en = {
         }
       ]
     },
+    // 0.24.0 the theme editor (the owner, 13 Nov): every value of the theme file, live preview, reset
+    themeEditor: {
+      intro: 'Change any colour, font or size — the whole window shows it at once. Save writes only your changes to your theme file; everything else keeps following the app theme (and its updates).',
+      colours: 'Colours',
+      fonts: 'Fonts',
+      shape: 'Sizes and shapes',
+      spacing: 'Spacing',
+      mode: 'Colours for',
+      changed: 'changed',
+      reset: 'Reset',
+      resetTooltip: (value: string) => `Back to the app value (${value})`,
+      resetAll: 'Reset everything to the app theme',
+      save: 'Save my theme',
+      saved: 'Saved — your theme is in use.',
+      discard: 'Discard changes',
+      unsaved: (count: number) => `${count} unsaved change(s) — shown already; Save keeps them.`,
+      contrast: (front: string, back: string, ratio: string, need: string) => `${front} on ${back}: contrast ${ratio}:1 (at least ${need}:1 is easy to read)`,
+      contrastOk: 'All text is easy to read in these colours.',
+      invalid: 'Not a valid value — the app value is used.',
+      sample: 'Sample',
+      sampleText: 'The system shall lock all doors above 15 km/h.',
+      saveFailed: (message: string) => `Not saved: ${message}`
+    },
     nav: {
+      theme: 'Theme editor',
       appearance: 'Appearance',
       appearanceIntro: 'Language of the window and colours. Your choice is remembered on this PC.',
       label: 'Settings and help',

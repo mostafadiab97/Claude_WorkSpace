@@ -1,7 +1,17 @@
-# Past manual checklists (v0.0.3 – v0.22.0)
+# Past manual checklists (v0.0.3 – v0.23.0)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.23.0 (the bar above the table)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.23.0** and run the release self-test. | All steps passed. |
+| 2 | Open the sandbox. Click the **document button** (name + count + arrow), switch documents, then try **Rename** (or F2) and Esc. | The menu lists the documents and the actions; Delete is red and last. |
+| 3 | Select a row, click **+ New item**, choose a type and **Inside the selected item**, Create. | The editor opens with the new item as a child of the selected one. |
+| 4 | Try the **outline** button, **Filters**, **View** (Rows: one line per item) and **More** (Import… / Export…). | The line that would do nothing is greyed out; everything else works as before. |
+| 5 | Make the window narrow with the editor open; then press Tab once and use ← →. | The bar stays one row; Tab lands on the bar once and the arrows move along it. |
 
 ## v0.22.0 (new look, Ember, five languages)
 

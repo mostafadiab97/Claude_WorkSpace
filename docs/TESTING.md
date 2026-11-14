@@ -67,22 +67,22 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.23.1 (rename box)
+## Manual test checklist — v0.24.0 (theme editor)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.24.0** and run the release self-test. | All steps passed. |
+| 2 | Settings → **Theme editor** → Colours, choose your current mode, change **primary** with the colour picker. | Buttons and highlights change at once; the row says "changed". |
+| 3 | Make **text muted** very pale (e.g. #eeeeee). | A warning says it is hard to read; **Reset** on that row puts it back. |
+| 4 | **Save my theme**, then Settings → Diagnostics → **Edit my theme…** and look at the file. | Only your changed values are in it. |
+| 5 | Change a font size, go to another Settings page without saving; then **Reset everything to the app theme** and Save. | Leaving shows the saved theme again; after the reset everything looks as before. |
+
+## Previous checklist — v0.23.1 (rename box)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
 | 1 | Let reqochet-dev update to **0.23.1** and run the release self-test. | All steps passed. |
 | 2 | Document button → **Rename** (or F2), then Esc; then **New document…**, then Cancel. | Each opens a small panel under the document name; the bar above the table does not move. |
-
-## Previous checklist — v0.23.0 (the bar above the table)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.23.0** and run the release self-test. | All steps passed. |
-| 2 | Open the sandbox. Click the **document button** (name + count + arrow), switch documents, then try **Rename** (or F2) and Esc. | The menu lists the documents and the actions; Delete is red and last. |
-| 3 | Select a row, click **+ New item**, choose a type and **Inside the selected item**, Create. | The editor opens with the new item as a child of the selected one. |
-| 4 | Try the **outline** button, **Filters**, **View** (Rows: one line per item) and **More** (Import… / Export…). | The line that would do nothing is greyed out; everything else works as before. |
-| 5 | Make the window narrow with the editor open; then press Tab once and use ← →. | The bar stays one row; Tab lands on the bar once and the arrows move along it. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

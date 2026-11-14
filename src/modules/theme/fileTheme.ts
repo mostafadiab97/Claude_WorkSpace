@@ -1,6 +1,6 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { basename, extname, join } from 'node:path'
-import type { LoadedTheme, ThemeConfig } from '../../shared/api'
+import type { LoadedTheme, ThemeLayers, ThemeOverrides, ThemeConfig } from '../../shared/api'
 import type { ThemeService } from './index'
 import { DEFAULT_THEME, validateTheme } from './defaults'
 
@@ -85,6 +85,30 @@ export function createFileThemeService(configDir: string, resourceDir: string, u
       return { config: theme, logoDataUrl, source, warnings }
     },
 
+    async layers(): Promise<ThemeLayers> {
+      const shipped = await readJson(shippedFile)
+      const base = shipped.ok ? validateTheme(shipped.value, DEFAULT_THEME).theme : DEFAULT_THEME
+      const user = await readJson(userFile)
+      return { base, user: user.ok ? pickOverrides(user.value) : {} }
+    },
+
+    async saveUser(user: ThemeOverrides): Promise<LoadedTheme> {
+      await mkdir(userDir, { recursive: true })
+      const old = await readJson(userFile)
+      // keep what the editor does not edit (brand, notes like _help); replace the four token groups
+      const keep = old.ok && typeof old.value === 'object' && old.value !== null && !Array.isArray(old.value) ? { ...(old.value as Record<string, unknown>) } : {}
+      for (const g of ['typography', 'shape', 'spacing', 'modes']) delete keep[g]
+      const clean = pickOverrides(user)
+      const next = { ...keep, ...clean }
+      // check it like a theme layer would be: a value the app would ignore is refused, not written
+      const { warnings } = validateTheme(next, DEFAULT_THEME)
+      if (warnings.length > 0) throw new Error(warnings.join(' '))
+      const tmp = `${userFile}.${process.pid}.tmp`
+      await writeFile(tmp, JSON.stringify(next, null, 2) + '\n')
+      await rename(tmp, userFile)
+      return this.load()
+    },
+
     async ensureUserThemeFile(): Promise<string> {
       await mkdir(userDir, { recursive: true })
       // The user's file holds ONLY their changes, so improvements to the app theme in later updates
@@ -103,4 +127,31 @@ export function createFileThemeService(configDir: string, resourceDir: string, u
       return userFile
     }
   }
+}
+
+/** Only the four token groups, only non-empty string values, only known modes (the editor's view of a user file). */
+function pickOverrides(value: unknown): ThemeOverrides {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return {}
+  const src = value as Record<string, unknown>
+  const strings = (v: unknown): Record<string, string> | undefined => {
+    if (typeof v !== 'object' || v === null || Array.isArray(v)) return undefined
+    const out: Record<string, string> = {}
+    for (const [k, x] of Object.entries(v)) if (typeof x === 'string' && x.trim() !== '') out[k] = x
+    return Object.keys(out).length > 0 ? out : undefined
+  }
+  const out: ThemeOverrides = {}
+  for (const g of ['typography', 'shape', 'spacing'] as const) {
+    const v = strings(src[g])
+    if (v) out[g] = v
+  }
+  const modes = src.modes as Record<string, unknown> | undefined
+  if (modes && typeof modes === 'object') {
+    const m: NonNullable<ThemeOverrides['modes']> = {}
+    for (const k of ['light', 'dark', 'ember'] as const) {
+      const v = strings(modes[k])
+      if (v) m[k] = v
+    }
+    if (Object.keys(m).length > 0) out.modes = m
+  }
+  return out
 }

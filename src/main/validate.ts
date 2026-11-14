@@ -1,7 +1,7 @@
 // Input checks for every call that arrives from the window (review X-01). The window is ReqMan's own code, so
 // this is about robustness: a wrong value is refused with a clear message instead of reaching a file write.
 // Each function either returns a clean value of the expected type or throws.
-import type { CoverageRule, CreateBaselineRequest, ExportItemsRequest, FieldDef, ImportSettings, ImportTarget, Item, ItemQuery, ItemTypeDef, LinkTypeDef, Link, LinkDecision, MatrixRequest, MergeAnswers, MergeChoice, MergePlan, RevertPart, SortKey } from '../shared/api'
+import type { CoverageRule, CreateBaselineRequest, ExportItemsRequest, FieldDef, ImportSettings, ImportTarget, Item, ItemQuery, ItemTypeDef, LinkTypeDef, Link, LinkDecision, MatrixRequest, MergeAnswers, MergeChoice, MergePlan, RevertPart, SortKey, ThemeOverrides } from '../shared/api'
 
 const MAX = 4096
 /** Order keys (see modules/items/orderKey.ts): base-62 digits, at most 200 characters. */
@@ -357,4 +357,37 @@ export function historyRequest(v: unknown): { search?: string; skip?: number } {
     ...(r.search !== undefined && r.search !== '' ? { search: text(r.search, 'search', 200) } : {}),
     ...(r.skip !== undefined ? { skip: num(r.skip, 'skip', 0, 10_000_000) } : {})
   }
+}
+
+/** 0.24.0 theme editor: { typography?, shape?, spacing?, modes?: { light?, dark?, ember? } } of short strings only. */
+export function themeOverrides(v: unknown): ThemeOverrides {
+  const obj = (x: unknown, what: string): Record<string, unknown> => {
+    if (typeof x !== 'object' || x === null || Array.isArray(x)) throw new Error(`${what} must be an object`)
+    return x as Record<string, unknown>
+  }
+  const group = (x: unknown, what: string): Record<string, string> => {
+    const o = obj(x, what)
+    const keys = Object.keys(o)
+    if (keys.length > 200) throw new Error(`${what}: too many values`)
+    const out: Record<string, string> = {}
+    for (const k of keys) {
+      if (!/^[A-Za-z][A-Za-z0-9]{0,63}$/.test(k)) throw new Error(`${what}: bad key`)
+      out[k] = str(o[k], `${what}.${k}`, 200)
+    }
+    return out
+  }
+  const src = obj(v, 'theme')
+  const out: ThemeOverrides = {}
+  for (const k of Object.keys(src)) {
+    if (k === 'typography' || k === 'shape' || k === 'spacing') out[k] = group(src[k], k)
+    else if (k === 'modes') {
+      const m = obj(src[k], 'modes')
+      out.modes = {}
+      for (const mode of Object.keys(m)) {
+        if (mode !== 'light' && mode !== 'dark' && mode !== 'ember') throw new Error('modes: unknown mode')
+        out.modes[mode] = group(m[mode], `modes.${mode}`)
+      }
+    } else throw new Error(`theme: unknown group ${k}`)
+  }
+  return out
 }

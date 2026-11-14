@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { AppInfo, GitInfo, LoadedTheme, UpdateStatus } from '../../../shared/api'
+import type { AppInfo, GitInfo, LoadedTheme, ThemeConfig, UpdateStatus } from '../../../shared/api'
 import { DiagnosticsCard } from '../components/DiagnosticsCard'
+import { ThemeEditor } from '../components/ThemeEditor'
 import { EnvironmentCard } from '../components/EnvironmentCard'
 import { FeaturesCard } from '../components/FeaturesCard'
 import { ProblemReportCard } from '../components/ProblemReportCard'
@@ -14,7 +15,7 @@ import privacyDiagram from '../../../../docs/images/privacy.png'
 import privacyDiagramDark from '../../../../docs/images/privacy-dark.png'
 import { Icon, Chevron } from '../components/icons'
 
-type SettingsPage = 'env' | 'appearance' | 'report' | 'features' | 'tests' | 'privacy'
+type SettingsPage = 'env' | 'appearance' | 'theme' | 'report' | 'features' | 'tests' | 'privacy'
 type View = { kind: 'settings'; page: SettingsPage } | { kind: 'guide'; page: string; anchor?: string }
 
 /**
@@ -22,6 +23,10 @@ type View = { kind: 'settings'; page: SettingsPage } | { kind: 'guide'; page: st
  * switches between pages — related settings grouped on one page, and the user guide one section per page.
  */
 export function SettingsScreen(props: {
+  /** 0.24.0 theme editor: shows a theme in the whole window (null = the saved one again) and takes the saved one. */
+  onThemePreview: (config: ThemeConfig | null) => void
+  onThemeSaved: (theme: LoadedTheme) => void
+  shownMode: 'light' | 'dark' | 'ember'
   theme: LoadedTheme
   git: GitInfo | null
   update: UpdateStatus | null
@@ -60,6 +65,7 @@ export function SettingsScreen(props: {
   const settingsPages: { id: SettingsPage; label: string }[] = [
     { id: 'env', label: nav.env },
     { id: 'appearance', label: nav.appearance },
+    { id: 'theme', label: nav.theme },
     { id: 'report', label: nav.report },
     { id: 'features', label: nav.features },
     { id: 'tests', label: nav.tests },
@@ -131,6 +137,7 @@ export function SettingsScreen(props: {
               <div className="actions actions--wrap appearance">{props.appearance}</div>
             </section>
           )}
+          {view.kind === 'settings' && view.page === 'theme' && <ThemeEditor onPreview={props.onThemePreview} onSaved={props.onThemeSaved} startMode={props.shownMode} />}
           {view.kind === 'settings' && view.page === 'report' && (
             <>
               <ProblemReportCard />

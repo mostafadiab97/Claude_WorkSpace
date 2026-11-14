@@ -149,7 +149,30 @@ const raw: Texts = {
         }
       ]
     },
+    themeEditor: {
+      intro: 'غيّر أي لون أو خط أو مقاس — تعرضه النافذة كلها فورًا. الحفظ يكتب تغييراتك فقط في ملف نمطك؛ وكل ما عداها يبقى تابعًا لنمط التطبيق (وتحديثاته).',
+      colours: 'الألوان',
+      fonts: 'الخطوط',
+      shape: 'المقاسات والأشكال',
+      spacing: 'المسافات',
+      mode: 'ألوان',
+      changed: 'مُغيَّر',
+      reset: 'استعادة',
+      resetTooltip: (value: string) => `العودة إلى قيمة التطبيق (${value})`,
+      resetAll: 'استعادة كل شيء إلى نمط التطبيق',
+      save: 'حفظ نمطي',
+      saved: 'تم الحفظ — نمطك مستخدم الآن.',
+      discard: 'تجاهل التغييرات',
+      unsaved: (count: number) => `${count} تغيير غير محفوظ — ظاهر الآن؛ الحفظ يُبقيه.`,
+      contrast: (front: string, back: string, ratio: string, need: string) => `${front} على ${back}: تباين ${ratio}:1 (من ${need}:1 تسهل القراءة)`,
+      contrastOk: 'كل النصوص سهلة القراءة بهذه الألوان.',
+      invalid: 'قيمة غير صالحة — تُستخدم قيمة التطبيق.',
+      sample: 'مثال',
+      sampleText: 'يجب أن يقفل النظام جميع الأبواب عند تجاوز 15 كم/س.',
+      saveFailed: (message: string) => `لم يُحفظ: ${message}`
+    },
     nav: {
+      theme: 'محرّر النمط',
       appearance: 'المظهر',
       appearanceIntro: 'لغة النافذة والألوان. يُحفظ اختيارك على هذا الجهاز.',
       label: 'الإعدادات والمساعدة',

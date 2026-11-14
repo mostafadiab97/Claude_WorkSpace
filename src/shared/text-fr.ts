@@ -131,7 +131,30 @@ export const fr: Texts = {
         }
       ]
     },
+    themeEditor: {
+      intro: 'Modifiez n’importe quelle couleur, police ou taille — toute la fenêtre l’affiche aussitôt. Enregistrer n’écrit que vos changements dans votre fichier de thème\u00A0; tout le reste suit toujours le thème de l’application (et ses mises à jour).',
+      colours: 'Couleurs',
+      fonts: 'Polices',
+      shape: 'Tailles et formes',
+      spacing: 'Espacements',
+      mode: 'Couleurs pour',
+      changed: 'modifié',
+      reset: 'Rétablir',
+      resetTooltip: (value: string) => `Revenir à la valeur de l’application (${value})`,
+      resetAll: 'Tout rétablir selon le thème de l’application',
+      save: 'Enregistrer mon thème',
+      saved: 'Enregistré — votre thème est utilisé.',
+      discard: 'Annuler les changements',
+      unsaved: (count: number) => `${count} changement(s) non enregistré(s) — déjà affichés\u00A0; Enregistrer les conserve.`,
+      contrast: (front: string, back: string, ratio: string, need: string) => `${front} sur ${back}\u00A0: contraste ${ratio}:1 (au moins ${need}:1 se lit facilement)`,
+      contrastOk: 'Tous les textes se lisent facilement dans ces couleurs.',
+      invalid: 'Valeur non valide — la valeur de l’application est utilisée.',
+      sample: 'Exemple',
+      sampleText: 'Le système doit verrouiller toutes les portes au-delà de 15 km/h.',
+      saveFailed: (message: string) => `Non enregistré\u00A0: ${message}`
+    },
     nav: {
+      theme: 'Éditeur de thème',
       appearance: 'Apparence',
       appearanceIntro: 'Langue de la fenêtre et couleurs. Votre choix est mémorisé sur ce PC.',
       label: 'Paramètres et aide',

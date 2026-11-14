@@ -3,6 +3,13 @@
 All visual styling comes from **one file: `config/theme.json`**. UI components never contain colours,
 fonts or radii — they reference named tokens, so restyling or rebranding is a one-file change.
 
+## The theme editor (0.24.0)
+
+Settings → **Theme editor** edits the same file without typing JSON: every key below, colours per mode, live preview,
+Reset per value, a contrast warning, and **Save my theme**, which writes only the values that differ from the app theme
+(other keys of your file — `brand`, notes — are kept; the core checks the values and writes atomically). Editing the
+file by hand still works; the editor shows what is in it.
+
 ## Where the file is
 
 Themes are layered: **built-in defaults ← the app's theme ← your theme**.

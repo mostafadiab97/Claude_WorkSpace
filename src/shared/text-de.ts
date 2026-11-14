@@ -132,7 +132,30 @@ export const de: Texts = {
         }
       ]
     },
+    themeEditor: {
+      intro: 'Ändern Sie jede Farbe, Schrift oder Größe — das ganze Fenster zeigt es sofort. Speichern schreibt nur Ihre Änderungen in Ihre Theme-Datei; alles andere folgt weiter dem App-Theme (und seinen Updates).',
+      colours: 'Farben',
+      fonts: 'Schriften',
+      shape: 'Größen und Formen',
+      spacing: 'Abstände',
+      mode: 'Farben für',
+      changed: 'geändert',
+      reset: 'Zurücksetzen',
+      resetTooltip: (value: string) => `Zurück zum App-Wert (${value})`,
+      resetAll: 'Alles auf das App-Theme zurücksetzen',
+      save: 'Mein Theme speichern',
+      saved: 'Gespeichert — Ihr Theme ist aktiv.',
+      discard: 'Änderungen verwerfen',
+      unsaved: (count: number) => `${count} ungespeicherte Änderung(en) — bereits sichtbar; Speichern behält sie.`,
+      contrast: (front: string, back: string, ratio: string, need: string) => `${front} auf ${back}: Kontrast ${ratio}:1 (ab ${need}:1 gut lesbar)`,
+      contrastOk: 'Alle Texte sind in diesen Farben gut lesbar.',
+      invalid: 'Kein gültiger Wert — der App-Wert wird verwendet.',
+      sample: 'Beispiel',
+      sampleText: 'Das System muss ab 15 km/h alle Türen verriegeln.',
+      saveFailed: (message: string) => `Nicht gespeichert: ${message}`
+    },
     nav: {
+      theme: 'Theme-Editor',
       appearance: 'Darstellung',
       appearanceIntro: 'Sprache des Fensters und Farben. Ihre Auswahl wird auf diesem PC gespeichert.',
       label: 'Einstellungen und Hilfe',

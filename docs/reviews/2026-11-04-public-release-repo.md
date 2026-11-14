@@ -119,3 +119,16 @@ Points:
 
 Windows 10 and Linux: what it takes is written in the reply of 13 Nov (testing for Windows 10; Linux builds, paths,
 case-sensitive files, auto-update for AppImage, a Linux CI job). Not planned yet — the owner decides after the licence.
+
+## 8. Building the public repository — decided 14 Nov 2026
+
+- **F-1 a** — public but not announced; the owner's team installs 1.0 from it and auto-updates; the public announcement
+  comes with the following version.
+- **F-2** — allow-list as proposed (source, tests, user and engineering docs, tools, public README, LICENSE,
+  HOW-IT-WAS-BUILT.md; not docs/reviews, marketing, helper reports, STATUS, owner reports, sandbox, `.claude/`,
+  `CLAUDE.md`). The owner reviews the files himself first and decides about `CLAUDE.md` (publish, or a public version).
+- **F-3 a** — at the public 1.0 the development tool also becomes 1.0; one number from then on.
+- **F-4** — `<owner>/reqochet`; the owner creates the empty repository.
+- **F-5** — the owner creates the repository and the access key (Claude guides) and looks through the first copy.
+- **F-6** — GitHub's private vulnerability reporting, no e-mail in the files.
+- **F-7** — Claude writes reqochet's own public requirements as the sample project, from `requirements.md`.

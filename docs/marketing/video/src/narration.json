@@ -1,6 +1,6 @@
 {
   "about": "Narration for the 48 s film. 'at' and 'until' are seconds on the film's clock: the line starts at 'at' and must be over by 'until'. 'text' is what is said; 'say' (optional) is the same line spelt for the speech program (reqochet is said like the word ricochet). Recording your own voice: read 'text', save one file per line as narration/<id>.flac (or .wav), then run sound.mjs.",
-  "voice": { "program": "kokoro-onnx 0.6.1", "model": "Kokoro-82M v1.0", "name": "af_heart", "language": "en-us", "speed": 1.0 },
+  "voice": { "program": "kokoro-onnx 0.6.1", "model": "Kokoro-82M v1.0", "name": "am_michael", "language": "en-us", "speed": 1.06 },
   "lines": [
     { "id": "01", "at": 0.5, "until": 3.7, "text": "This is a requirement." },
     { "id": "02", "at": 4.0, "until": 7.4, "text": "A plain text file, in your own Git repository." },
@@ -9,10 +9,10 @@
     { "id": "05", "at": 15.5, "until": 18.4, "text": "Change what a requirement says," },
     { "id": "06", "at": 18.9, "until": 23.4, "text": "and every link to it turns suspect, until someone has reviewed it." },
     { "id": "07", "at": 23.9, "until": 27.1, "text": "Commit, push and pull, right from the window." },
-    { "id": "08", "at": 27.3, "until": 30.6, "text": "Different fields are combined. Only real clashes ask you." },
+    { "id": "08", "at": 27.15, "until": 30.8, "text": "Different fields are combined. Only real clashes ask you." },
     { "id": "09", "at": 31.0, "until": 34.7, "text": "See at a glance what is covered, and what is not yet." },
     { "id": "10", "at": 35.1, "until": 38.6, "text": "Light, dark, and Ember, for long evenings." },
-    { "id": "11", "at": 38.9, "until": 42.1, "text": "Five languages. One of them reads right to left." },
-    { "id": "12", "at": 43.3, "until": 47.75, "text": "reqochet. Requirements as plain files. Free for teams and companies.", "say": "Ricochet. Requirements as plain files. Free for teams and companies." }
+    { "id": "11", "at": 38.85, "until": 42.15, "text": "Five languages. One of them reads right to left." },
+    { "id": "12", "at": 43.25, "until": 47.8, "text": "reqochet. Requirements as plain files. Free for teams and companies.", "say": "Ricochet. Requirements as plain files. Free for teams and companies." }
   ]
 }

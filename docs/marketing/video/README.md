@@ -4,7 +4,7 @@ Nothing here is published anywhere; the owner posts what he chooses. The scripts
 
 | File | What | Size |
 | --- | --- | --- |
-| `reqochet-45s.mp4` | "The file and the window", 48 s, 1920×1080, 30 fps, H.264, captions burnt in, **narrator and sound effects** (AAC 128 kbit/s stereo) | 3.3 MB |
+| `reqochet-45s.mp4` | "The file and the window", 48 s, 1920×1080, 30 fps, H.264, captions burnt in, **narrator and sound effects** (AAC 128 kbit/s stereo) | 3.4 MB |
 | `reqochet-45s-square.mp4` | the same film laid out for 1080×1080 (LinkedIn feed) | 2.8 MB |
 | `reqochet-45s-poster.png` | still at 10.9 s (the file next to the window) — cover picture, also the picture for post 2 | 0.2 MB |
 | `sting/reqochet-sting-{light,dark,ember}.mp4` | the 6-second logo sting on each background, 1920×1080, **with its sound** | about 0.2 MB each |
@@ -12,8 +12,9 @@ Nothing here is published anywhere; the owner posts what he chooses. The scripts
 | `sting/reqochet-sting-{light,dark,ember}.webm` | the same with a **transparent** background (VP9 with alpha), silent — to lay over other video | under 0.2 MB each |
 | `sting/reqochet-sting-{light,dark,ember}.svg` | the same as a self-contained animated SVG (plays once, ends on the logo; stands still on the logo when the system asks for reduced motion) | 18 KB each |
 
-Round 2 (13 Nov 2026, the owner's answers): the end card now goes Light → Dark → Ember; the film has a narrator and
-sound effects instead of music; the stings have sound.
+Round 2 (13 Nov 2026, the owner's answers): the end card shows the three looks; the film has a narrator and
+sound effects instead of music; the stings have sound. Round 3 (the owner listened: sounds, voice quality and words
+fine): a **male** narrator (`am_michael`) and the end card in the order **Ember → Dark → Light**, resting on Light.
 
 ## How it is made
 
@@ -55,7 +56,7 @@ Needs Node, ffmpeg on the PATH, and Playwright with its Chromium (`playwright`, 
 clock; `--t0` is a scene's start and `--d` an element's delay after it), look at a still, render.
 **To change the sting:** the hop points and times are the two lists `RED` and `GREEN` at the top of `build-sting.mjs`.
 After a change to the sting, render the film again too — its end card is the three stings laid over each other
-(Light until 45.0 s, Dark until 45.8 s, then Ember; the four numbers are explained in `video.css`, "scene F"), and
+(Ember until 45.0 s, Dark until 45.8 s, then Light; the four numbers are explained in `video.css`, "scene F"), and
 move the bounce times in `sound.mjs` (`sting()`) with it.
 
 ## Sound
@@ -72,13 +73,17 @@ move the bounce times in `sound.mjs` (`sting()`) with it.
 - **The owner's own voice instead:** record each line of `narration.json` as `narration/01.wav`, `02.wav` … (a
   `.wav` next to a `.flac` — delete the `.flac`), run `sound.mjs` — it warns when a line is longer than its place —
   then `render.mjs --sound-only`.
-- **Levels** (measured with ffmpeg on the finished MP4s): loudness −16 LUFS, highest peak −2.4 dB. The voice is on
-  average 15 dB above the effects while it speaks (−26.6 dB against −41.3 dB before the common gain); the effects
+- **Levels** (measured with ffmpeg on the finished MP4s): loudness −16.4 LUFS, highest peak −2.4 dB. The voice is on
+  average 15 dB above the effects while it speaks (−26.3 dB against −41.4 dB before the common gain); the effects
   are loudest where nobody speaks over them for long — the logo's bounces and bells (peak about −6 dB). `render.mjs`
   measures the mix, adds one fixed gain for the whole film and holds the peaks with a limiter.
-- **Not heard by a person yet.** The check was done by machine: a speech recogniser (Whisper tiny, offline) wrote
-  the finished film's sound back as text; all twelve lines came back, with "onto" and "plain" misheard by that
-  small recogniser. Whether the voice is pleasant and the effects are not too playful is for the owner's ears.
+- **Voice choice (round 3):** eight male American voices of the model were spoken and written back by a speech
+  recogniser (Whisper tiny, offline); `am_michael` kept the sentence pauses best, and it is among the male voices the model's authors rate highest
+  (their voice list could not be opened from the build session — from memory, so check it if it matters). If the
+  owner wants to compare: `am_adam` and `am_puck` fit every line at their own pace. It speaks more slowly than the
+  first voice, so it runs at 1.06 × (`narration.json`), and three lines start a little earlier.
+- **Heard by the owner:** round 2 (effects and the female voice). The male voice of round 3 was checked by machine
+  only: all twelve lines came back from the recogniser, with "to it turns" and "plain" misheard by it.
 
 ## What is real and what is drawn
 
@@ -102,6 +107,6 @@ move the bounce times in `sound.mjs` (`sting()`) with it.
 | Folder and branch pictograms | drawn for this film in the style of the app's icon set | the project's own |
 | Sound effects | calculated by `src/sound.mjs` | the project's own |
 | Narrator's voice: speech program | kokoro-onnx 0.6.1 (`pip`), used as a tool, not shipped | MIT |
-| Narrator's voice: voice model | Kokoro-82M v1.0, voice `af_heart`, files `kokoro-v1.0.onnx` and `voices-v1.0.bin` from the kokoro-onnx GitHub releases (sha256 `7d5df8ec…36a6c5`, `bca610b8…fbf7d`) | Apache 2.0 — the model's own page: "Apache-licensed weights … can be deployed anywhere from production environments to personal projects" (read on GitHub, 13 Nov 2026: `hexgrad/kokoro` LICENSE and README, `thewh1teagle/kokoro-onnx` README "kokoro model: Apache 2.0") |
+| Narrator's voice: voice model | Kokoro-82M v1.0, voice `am_michael` (round 2 used `af_heart`; every voice is part of the same model file, same licence), files `kokoro-v1.0.onnx` and `voices-v1.0.bin` from the kokoro-onnx GitHub releases (sha256 `7d5df8ec…36a6c5`, `bca610b8…fbf7d`) | Apache 2.0 — the model's own page: "Apache-licensed weights … can be deployed anywhere from production environments to personal projects" (read on GitHub, 13 Nov 2026: `hexgrad/kokoro` LICENSE and README, `thewh1teagle/kokoro-onnx` README "kokoro model: Apache 2.0") |
 | (inside the speech program) espeak-ng turns letters into sounds | bundled with kokoro-onnx, used as a tool | GPL 3 — a tool's licence does not pass to what it produces; nothing of it is in the film or the repository |
 | Music | none (the owner, 13 Nov 2026) | — |

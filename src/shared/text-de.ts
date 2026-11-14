@@ -961,6 +961,10 @@ export const de: Texts = {
   },
 
   docExport: {
+    pdfTimeout: 'Das Erstellen der PDF hat zu lange gedauert. Exportieren Sie weniger Elemente oder nach Word bzw. als Webseite.',
+    templateTooBig: (mb: number) => `Die Word-Vorlage ist zu groß oder beschädigt (mehr als ${mb} MB, oder sie entpackt sich zu weit mehr).`,
+    found: (count: string) => `${count} Elemente gefunden`,
+    nothingFound: 'Nichts gefunden',
     templateMissing: (name: string) => `Die Word-Vorlage „${name}“ liegt nicht mehr in requirements/.reqochet/templates.`,
     contents: 'Inhalt',
     tocHint: 'Word füllt das Inhaltsverzeichnis beim Öffnen aus (oder Rechtsklick → Feld aktualisieren).',

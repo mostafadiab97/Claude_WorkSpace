@@ -8,13 +8,15 @@ AI model read **all Word documents in a folder** and produce:
    versions as **Git history with a baseline per version**, so reqochet's Versions, Compare and History screens show
    how each module changed from version to version.
 2. **A format profile and a company template** — how the documents look (page, styles, numbering, title page,
-   header/footer, how a requirement is laid out), for the Word export of theme 3b (decision P-18, 2 Nov 2026).
+   header/footer, how a requirement is laid out), for the Word export (decision P-18, 2 Nov 2026; built in 0.25.0).
 
 **Status:**
 - Part 1 works with the current reqochet (0.20).
-- The Word export (part 2) is planned for theme 3b and not built yet. The template placeholders below are the
-  planned names, so a template made now may need small renames when theme 3b is built; the format profile stays
-  useful as it is. This guide is updated then.
+- The Word export is built (0.25.0). reqochet reads templates from `requirements/.reqochet/templates/<name>.docx` and
+  fills the placeholders `{{document.name}}`, `{{document.number}}`, `{{baseline}}`, `{{commit}}`, `{{date}}`,
+  `{{author}}` (anywhere, also headers and footers) and `{{toc}}`, `{{items}}`, `{{trace.table}}`, `{{revision.history}}`
+  (each alone in its paragraph). Items use Heading 1–6, Normal and, when present, RM Requirement Text, RM Attribute
+  Table and RM Trace Table. When Heading 1 has Word's own numbering, reqochet leaves its outline numbers out.
 - Images and attachments come with theme 3a; until then images are kept only as files beside the project (see the
   prompt).
 
@@ -263,7 +265,7 @@ versions, items per module in the newest version, and the Questions list.
    under "Conflicts". Decide each one with the authors, fix the text, and remove the tag.
 6. **Shared requirements:** the copies carry `shared-from:` and a "relates to" link to the original. When one of
    them changes, change the other in the same commit.
-7. **Format:** keep the `format/` folder. When the Word export is built (theme 3b), save the template as
+7. **Format:** keep the `format/` folder. Save the template as
    `requirements/.reqochet/templates/<name>.docx` in the project, commit and push; `word-format.json` is used to check
    that an export looks like the originals.
 
@@ -276,4 +278,4 @@ versions, items per module in the newest version, and the Questions list.
   (review 2026-11-10, CRC-09). Unquoted numeric enum values block saving (CRC-07) — hence the quoting rule.
 - Baselines are annotated tags `refs/tags/baseline/<name>` (`git-adapter`), so tags made by the AI appear in
   Versions.
-- When theme 3b fixes the placeholder names or the template path, update step 10 and "After the AI has answered".
+- The placeholder names and the template path above are the ones reqochet uses since 0.25.0.

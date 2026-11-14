@@ -960,6 +960,10 @@ export const fr: Texts = {
   },
 
   docExport: {
+    pdfTimeout: 'La création du PDF a pris trop de temps. Exportez moins d’éléments, ou en Word ou en page web.',
+    templateTooBig: (mb: number) => `Le modèle Word est trop gros ou abîmé (plus de ${mb}\u00A0Mo, ou il se décompresse en beaucoup plus).`,
+    found: (count: string) => `${count} éléments trouvés`,
+    nothingFound: 'Aucun résultat',
     templateMissing: (name: string) => `Le modèle Word « ${name} » n’est plus dans requirements/.reqochet/templates.`,
     contents: 'Sommaire',
     tocHint: 'Word remplit la table des matières à l’ouverture (ou clic droit → Mettre à jour le champ).',

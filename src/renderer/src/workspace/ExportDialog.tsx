@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ExportFormat, ExportItemsRequest, ExportResult, ImportSource } from '../../../shared/api'
 import type { ItemQuery } from '../../../shared/domain'
-import { errorMessage } from '../lib/hooks'
+import { errorMessage, useModalKeys } from '../lib/hooks'
 import { T } from '../../../shared/text'
 import { Icon } from '../components/icons'
 
@@ -44,7 +44,7 @@ export function ExportDialog(props: {
   const isDoc = format === 'docx' || format === 'pdf' || format === 'html'
   const [title, setTitle] = useState(props.documentName ?? '')
   const [traceTable, setTraceTable] = useState(false)
-  const [templates, setTemplates] = useState<string[]>([])
+  const [templates, setTemplates] = useState<string[] | null>(null) // null while the list loads (C11)
   const [template, setTemplate] = useState('')
   useEffect(() => {
     if (format !== 'docx') return
@@ -58,6 +58,8 @@ export function ExportDialog(props: {
       live = false
     }
   }, [format])
+  const panel = useRef<HTMLDivElement>(null)
+  useModalKeys(panel, props.onClose)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -110,11 +112,15 @@ export function ExportDialog(props: {
 
   return (
     <div className="modal" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && props.onClose()}>
-      <div className="modal__panel modal__panel--narrow" role="dialog" aria-modal="true" aria-label={T.exportDialog.title}>
+      <div ref={panel} tabIndex={-1} className="modal__panel modal__panel--narrow" role="dialog" aria-modal="true" aria-labelledby="export-title" aria-describedby="export-intro">
         <header className="modal__header">
           <div>
-            <h2 className="modal__title">{T.exportDialog.title}</h2>
-            <p className="muted">{T.exportDialog.intro}</p>
+            <h2 className="modal__title" id="export-title">
+              {T.exportDialog.title}
+            </h2>
+            <p className="muted" id="export-intro">
+              {T.exportDialog.intro}
+            </p>
           </div>
           <button type="button" className="icon-btn" aria-label={T.common.close} onClick={props.onClose}>
             <Icon name="close" />
@@ -204,14 +210,17 @@ export function ExportDialog(props: {
               {format === 'docx' && (
                 <label className="field">
                   <span className="field__label">{T.exportDialog.template}</span>
-                  <select className="input" value={template} onChange={(e) => setTemplate(e.target.value)} title={T.exportDialog.templateHint}>
-                    {templates.map((t) => (
+                  <select className="input" value={template} onChange={(e) => setTemplate(e.target.value)} aria-describedby="export-template-hint">
+                    {(templates ?? []).map((t) => (
                       <option key={t} value={t}>
                         {t}
                       </option>
                     ))}
                     <option value="">{T.exportDialog.templateBuiltIn}</option>
                   </select>
+                  <span className="muted-inline" id="export-template-hint">
+                    {T.exportDialog.templateHint}
+                  </span>
                 </label>
               )}
             </fieldset>
@@ -233,7 +242,7 @@ export function ExportDialog(props: {
           {error && <p className="notice notice--error" role="alert">{error}</p>}
         </div>
         <footer className="modal__footer actions">
-          <button type="button" className="btn btn--primary" disabled={busy} onClick={() => void run()}>
+          <button type="button" className="btn btn--primary" disabled={busy || (format === 'docx' && templates === null)} onClick={() => void run()}>
             {busy ? T.exportDialog.running : T.exportDialog.run}
           </button>
           <button type="button" className="btn" onClick={props.onClose}>

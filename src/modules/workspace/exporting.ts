@@ -1,5 +1,5 @@
 // Export (M6): builds the file content for the table or a comparison; the main process asks where to save it.
-import { readdir, readFile } from 'node:fs/promises'
+import { lstat, readdir, readFile } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import { T } from '../../shared/text'
 import type { ExportFormat, ExportItemsRequest } from '../../shared/api'
@@ -31,9 +31,10 @@ export function createExportOps(ctx: WorkspaceContext, structure: StructureOps, 
       name: request.title?.trim() || basename(root),
       baseline: baselines.find((b) => b.commit === head)?.name ?? '',
       commit: (head ?? '').slice(0, 8),
-      date: new Date().toISOString().slice(0, 10),
+      date: localDate(),
       author,
-      items: rows,
+      // chosen items or a search result start at heading 1, however deep they sit (code review 0.25.0 C5)
+      items: shallowest(rows),
       columns: columns as ExportColumn[],
       trace,
       revisions: [...baselines].sort((a, b) => b.date.localeCompare(a.date)).map((b) => ({ name: b.name, date: b.date.slice(0, 10), commit: b.commit.slice(0, 8) }))
@@ -41,13 +42,15 @@ export function createExportOps(ctx: WorkspaceContext, structure: StructureOps, 
   }
   /** The chosen Word template from requirements/.reqochet/templates; no name = the built-in layout (the dialog picks the first template by default). */
   const readTemplate = async (s: Session, name?: string): Promise<Uint8Array | undefined> => {
-    const dir = join(s.repo.folder, '.reqochet', 'templates')
+    if (!name) return undefined
+    const dir = join(s.repo.folder, s.repo.metaDir, 'templates')
     const list = await readdir(dir).catch(() => [] as string[])
     const docx = list.filter((f) => f.toLowerCase().endsWith('.docx') && !f.startsWith('~$'))
-    if (!name) return undefined
     const pick = docx.find((f) => f.slice(0, -5) === name)
     if (!pick) throw new Error(T.docExport.templateMissing(name))
-    return pick ? new Uint8Array(await readFile(join(dir, pick))) : undefined
+    // a committed symbolic link must not read a file from elsewhere on the PC (security review 0.25.0 S-04)
+    if (!(await lstat(join(dir, pick))).isFile()) throw new Error(T.docExport.templateMissing(name))
+    return new Uint8Array(await readFile(join(dir, pick)))
   }
 
   return {
@@ -115,7 +118,7 @@ export function createExportOps(ctx: WorkspaceContext, structure: StructureOps, 
     /** The Word templates of the project (requirements/.reqochet/templates/*.docx), names without ".docx". */
     async wordTemplates(): Promise<string[]> {
       const s = ctx.need()
-      const dir = join(s.repo.folder, '.reqochet', 'templates')
+      const dir = join(s.repo.folder, s.repo.metaDir, 'templates')
       try {
         return (await readdir(dir)).filter((f) => f.toLowerCase().endsWith('.docx') && !f.startsWith('~$')).map((f) => f.slice(0, -5)).sort()
       } catch {
@@ -146,4 +149,16 @@ export function chosenRows(order: ExportItem[], chosen: ReadonlySet<string>, bel
     if (take) out.push(r)
   }
   return out
+}
+
+/** Today's date on this PC (not the UTC date: between midnight and 2 a.m. in Europe that is yesterday — C13). */
+function localDate(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+/** The items with depths counted from the shallowest one. */
+function shallowest(rows: ExportItem[]): ExportItem[] {
+  const top = Math.min(...rows.map((r) => r.depth))
+  return top > 0 && Number.isFinite(top) ? rows.map((r) => ({ ...r, depth: r.depth - top })) : rows
 }

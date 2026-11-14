@@ -959,6 +959,10 @@ export const es: Texts = {
   },
 
   docExport: {
+    pdfTimeout: 'Crear el PDF tardó demasiado. Exporte menos elementos, o a Word o como página web.',
+    templateTooBig: (mb: number) => `La plantilla de Word es demasiado grande o está dañada (más de ${mb} MB, o se descomprime en mucho más).`,
+    found: (count: string) => `${count} elementos encontrados`,
+    nothingFound: 'No se encontró nada',
     templateMissing: (name: string) => `La plantilla de Word «${name}» ya no está en requirements/.reqochet/templates.`,
     contents: 'Contenido',
     tocHint: 'Word completa el índice al abrir el documento (o clic derecho → Actualizar campo).',

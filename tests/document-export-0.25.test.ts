@@ -54,10 +54,18 @@ describe('0.25.0 fillPart', () => {
     expect(out).toContain('PAGE')
     expect(out).toContain('>Spec · </w:t>')
   })
-  it('joins a placeholder Word split over several runs, keeping the first run’s formatting', () => {
-    const xml = '<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r w:rsidR="1"><w:rPr><w:b/></w:rPr><w:t>{{docu</w:t></w:r><w:r><w:t>ment.name}} &amp; more</w:t></w:r></w:p>'
+  it('a placeholder Word split over several runs goes into the first run; the other runs stay (code review C2, QA Q3)', () => {
+    const xml = '<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r w:rsidR="1"><w:rPr><w:b/></w:rPr><w:t>{{docu</w:t></w:r><w:r><w:t>ment.name}} &amp; more</w:t></w:r><w:r><w:fldChar w:fldCharType="begin"/></w:r></w:p>'
     const out = fillPart(xml, {}, { 'document.name': 'Spec' })
-    expect(out).toBe('<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">Spec &amp; more</w:t></w:r></w:p>')
+    expect(out).toBe('<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r w:rsidR="1"><w:rPr><w:b/></w:rPr><w:t>Spec</w:t></w:r><w:r><w:t xml:space="preserve"> &amp; more</w:t></w:r><w:r><w:fldChar w:fldCharType="begin"/></w:r></w:p>')
+  })
+  it('a placeholder in a text box inside a paragraph is filled and the XML stays whole (code review C1)', () => {
+    const xml = '<w:p><w:r><w:drawing><w:txbxContent><w:p><w:r><w:t>{{docu</w:t></w:r><w:r><w:t>ment.name}}</w:t></w:r></w:p></w:txbxContent></w:drawing></w:r></w:p><w:p><w:r><w:t>after</w:t></w:r></w:p>'
+    const out = fillPart(xml, {}, { 'document.name': 'Spec' })
+    expect(out).toContain('>Spec</w:t>')
+    expect(out.split('<w:p>').length).toBe(xml.split('<w:p>').length)
+    expect(out.split('</w:p>').length).toBe(xml.split('</w:p>').length)
+    expect(out).toContain('<w:t>after</w:t>')
   })
   it('leaves unknown placeholders alone', () => {
     const xml = '<w:p><w:r><w:t>{{unknown}}</w:t></w:r></w:p>'
@@ -131,5 +139,27 @@ describe('0.25.0 document export', () => {
     const html = r.content as string
     expect(html).toContain('<!doctype html>')
     expect(html).not.toMatch(/<script/i) // printed without scripts
+  })
+})
+
+describe('0.25.0 checks around the export', () => {
+  it('the window call accepts the new formats and options; a template name is never a path', async () => {
+    const { exportRequest } = await import('../src/main/validate')
+    expect(exportRequest({ scope: 'all', columns: ['id'], format: 'docx', title: 'Spec', traceTable: true, template: 'SRS..v2' })).toMatchObject({ format: 'docx', title: 'Spec', traceTable: true, template: 'SRS..v2' })
+    for (const bad of ['../x', 'a/b', 'a\\b', '..']) expect(() => exportRequest({ scope: 'all', columns: ['id'], format: 'docx', template: bad })).toThrow()
+    expect(() => exportRequest({ scope: 'all', columns: ['id'], format: 'docx', title: 'x'.repeat(201) })).toThrow()
+  })
+  it('a hostile template does not freeze the app (linear scans) and loses links to outside files', async () => {
+    const { itemsToDocx } = await import('../src/modules/import-export')
+    const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
+    const zip = new JSZip()
+    zip.file('word/document.xml', `<w:document ${W}><w:body>${'<w:p>'.repeat(200_000)}</w:body></w:document>`)
+    zip.file('word/styles.xml', `<w:styles ${W}>${'<w:style w:styleId="a">'.repeat(100_000)}</w:styles>`)
+    zip.file('word/_rels/settings.xml.rels', '<Relationships><Relationship Id="r1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/attachedTemplate" Target="file:///C:/secret/Normal.dotm" TargetMode="External"/></Relationships>')
+    const t0 = Date.now()
+    const out = await itemsToDocx({ schema: { itemTypes: [], linkTypes: [], fields: [] } as never, name: 'n', baseline: '', commit: '', date: '', author: '', items: [], columns: [], trace: [], revisions: [] }, await zip.generateAsync({ type: 'uint8array' }))
+    expect(Date.now() - t0).toBeLessThan(3000)
+    const rels = (await (await JSZip.loadAsync(out)).file('word/_rels/settings.xml.rels')?.async('string')) ?? ''
+    expect(rels).not.toContain('secret')
   })
 })

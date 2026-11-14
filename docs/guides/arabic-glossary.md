@@ -45,3 +45,15 @@ the Arabic reviewer proposes additions or corrections, the builder updates this 
 | defect (item type) | خلل | AR-12 |
 | import / export | استيراد / تصدير | |
 | reqochet, Git, GitHub, Excel, ReqIF, Markdown | stay in Latin letters | with a right-to-left mark before the sentence when it starts with them |
+
+## Document export (0.25.0)
+
+| English | Arabic | Note |
+| --- | --- | --- |
+| template (Word) | قالب | |
+| traceability table | جدول تتبّع | |
+| contents (of a document) | المحتويات / جدول المحتويات | |
+| working copy | نسخة العمل | |
+| revision history | سجل المراجعات | not السجلّ (that is the Git history) |
+| title page | صفحة العنوان | |
+| heading (Word style) | عنوان قسم | عنوان alone is an item's title |

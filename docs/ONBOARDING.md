@@ -58,7 +58,7 @@ The architecture picture in section 1 shows these parts and how calls travel bet
 | **repository-store** | Reads and writes the files in `requirements/` — atomic, revision-checked | `fileStore.ts` | workspace |
 | **index-cache** | A local SQLite copy of all items for fast search, filters, counts, suspect links and problems; re-reads only changed files | `sqliteIndex.ts` | workspace |
 | **git-adapter** | Runs the installed `git` (argument arrays, no shell, timeouts) and parses its output | `systemGit.ts` | workspace |
-| **import-export** | Pure functions: items or a comparison → CSV, Markdown, Excel, ReqIF; Excel/CSV/ReqIF files → rows → an import plan (column mapping guessed, preview, update by ID) | `csv.ts`, `items.ts`, `compare.ts`, `xlsx.ts`, `reqif.ts`, `importPlan.ts` | workspace, main |
+| **import-export** | Pure functions: items or a comparison → CSV, Markdown, Excel, ReqIF, Word, web page (PDF from it); Excel/CSV/ReqIF files → rows → an import plan (column mapping guessed, preview, update by ID) | `csv.ts`, `items.ts`, `document.ts`, `compare.ts`, `xlsx.ts`, `reqif.ts`, `importPlan.ts` | workspace, main |
 | **items** | The domain core: item file format, IDs, validation, content fingerprint, order keys, field-level diff, field-level 3-way merge | `itemFile.ts`, `ids.ts`, `validate.ts`, `diff.ts`, `orderKey.ts`, `merge.ts` | store, index, workspace |
 | **schema** | Reads `schema.yaml` (item types, fields, link types, coverage rules) and reports problems | `parse.ts` | store, items |
 | **logger / theme / updater** | Log file with rotation · layered theme file · automatic updates from GitHub Releases | one implementation each | main |

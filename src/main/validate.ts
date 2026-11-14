@@ -320,7 +320,7 @@ export function exportRequest(v: unknown): ExportItemsRequest {
   if (v.template !== undefined) {
     const t = str(v.template, 'template', 120)
     // a name inside the templates folder, never a path (it is joined to the folder by the core)
-    if (/[\\/]|\.\./.test(t)) return bad('template')
+    if (/[\\/]/.test(t) || t === '.' || t === '..') return bad('template') // "SRS..v2" is a fine name (QA Q10)
     r.template = t
   }
   if (scope === 'chosen') {

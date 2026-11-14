@@ -511,15 +511,15 @@ const raw: Texts = {
     running: 'جارٍ التصدير…',
     done: (count: number, path: string) => `صُدِّر ${items(count)} إلى ${path}`,
     showInFolder: 'إظهار في المجلد',
-    docx: 'مستند Word ‏(.docx) — عناوين حسب التسلسل الهرمي وجدول محتويات؛ يستخدم قالبكم إن كان للمشروع قالب',
-    pdf: 'PDF — المستند نفسه، جاهز للطباعة أو الإرسال',
+    docx: 'مستند Word ‏(.docx) — عناوين أقسام حسب التسلسل الهرمي وجدول محتويات؛ يستخدم قالب المشروع إن وُجد',
+    pdf: '\u200FPDF — المستند نفسه، جاهز للطباعة أو الإرسال',
     html: 'صفحة ويب ‏(.html) — ملف واحد فيه روابط بين العناصر ومربع بحث',
     documentOptions: 'المستند',
     docTitle: 'اسم المستند (في صفحة العنوان)',
     traceTable: 'إضافة جدول تتبّع (كل روابط هذه العناصر)',
     template: 'قالب Word',
     templateBuiltIn: 'التنسيق المدمج',
-    templateHint: 'القوالب ملفات ‎.docx في requirements/.reqochet/templates — راجع دليل المستخدم',
+    templateHint: 'القوالب ملفات \u2066.docx\u2069 في \u2066requirements/.reqochet/templates\u2069 — راجع دليل المستخدم',
     buttonTooltip: 'الحفظ بصيغة Word أو PDF أو صفحة ويب أو Excel أو ReqIF أو CSV أو Markdown'
   },
 
@@ -976,7 +976,11 @@ const raw: Texts = {
   },
 
   docExport: {
-    templateMissing: (name: string) => `قالب Word ‏«${name}» لم يعد موجودًا في requirements/.reqochet/templates.`,
+    pdfTimeout: 'استغرق إنشاء ملف PDF وقتًا طويلًا. صدّر عناصر أقل، أو صدّر إلى Word أو صفحة ويب.',
+    templateTooBig: (mb: number) => `قالب Word كبير جدًا أو تالف (أكثر من ${mb} ميغابايت، أو يتمدد عند فكّه إلى أكثر من ذلك بكثير).`,
+    found: (count: string) => `عدد العناصر المطابقة: ${count}`,
+    nothingFound: 'لم يُعثر على شيء',
+    templateMissing: (name: string) => `قالب Word \u200F«${name}» لم يعد موجودًا في \u2066requirements/.reqochet/templates\u2069.`,
     contents: 'المحتويات',
     tocHint: 'يملأ Word جدول المحتويات عند فتح المستند (أو انقر بزر الفأرة الأيمن ← تحديث الحقل).',
     workingCopy: 'نسخة العمل',

@@ -976,6 +976,10 @@ const en = {
 
   // 0.25.0 Word, PDF and HTML documents (P-17…P-19, P-39): the words inside an exported document
   docExport: {
+    pdfTimeout: 'Making the PDF took too long. Export fewer items, or export to Word or a web page.',
+    templateTooBig: (mb: number) => `The Word template is too big or broken (more than ${mb} MB, or it unpacks to far more).`,
+    found: (count: string) => `${count} items found`,
+    nothingFound: 'Nothing found',
     templateMissing: (name: string) => `The Word template "${name}" is no longer in requirements/.reqochet/templates.`,
     contents: 'Contents',
     tocHint: 'Word fills in the table of contents when the document opens (or right-click → Update field).',

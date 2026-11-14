@@ -458,7 +458,7 @@ export interface ExportItemsRequest {
   title?: string
   /** Word / PDF / HTML: the traceability table at the end. */
   traceTable?: boolean
-  /** Word: the template's name in requirements/.reqochet/templates/ (default: the only one there, or the built-in one). */
+  /** Word: the template's name in requirements/.reqochet/templates/ (no name = the built-in layout; the dialog preselects the first template). */
   template?: string
 }
 

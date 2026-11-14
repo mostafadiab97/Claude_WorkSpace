@@ -17,6 +17,10 @@ version it was about, and what it led to.
 - **Title bar** (the owner, 0.24.3 test 2): the app's colour mode now also sets the window's title bar — Light gives a
   light bar with the dark tile, Dark and Ember a dark bar with the white tile, "as Windows" follows Windows. Windows
   shows the same icon on the taskbar (it allows only one).
+- **Export dialog keys**: focus starts inside, Tab stays inside, Esc closes it (the other dialogs follow in 0.26.0).
+- Helper reviews (code, security, screens, Arabic, QA) — 60 findings; all High/Medium fixed: Word placeholders in text
+  boxes and split over runs keep the file valid and its page numbers, hostile templates cannot freeze the app, Arabic
+  Word documents run right to left. Reports: `docs/reviews/agents/0.25.0-*.md`.
 
  — window icon follows the app; Diagnostics order
 **Owner (14 Nov 2026):** 0.24.1, 0.24.2 and 0.24.3 all passed (self-tests 25/25, 67–70 s). 0.24.3 test 2: the wish was a

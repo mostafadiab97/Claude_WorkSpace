@@ -79,7 +79,10 @@ export function registerIpc(services: Services, paths: Paths): void {
       return { ok: false, message }
     }
   }
-  const today = (): string => new Date().toISOString().slice(0, 10)
+  const today = (): string => {
+    const d = new Date() // the date on this PC, not UTC
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
 
   // ---------- import (M7): the chosen files stay here; the window refers to them by token
   const importFiles = createImportFiles()
@@ -166,8 +169,13 @@ export function registerIpc(services: Services, paths: Paths): void {
       }
     },
     setWindowIcon: async (e, mode) => {
+      const m = v.oneOf(mode, ['system', 'light', 'dark', 'ember'] as const, 'mode')
       const win = BrowserWindow.fromWebContents(e.sender)
-      if (win && !win.isDestroyed()) applyWindowMode(win, v.oneOf(mode, ['system', 'light', 'dark', 'ember'] as const, 'mode'))
+      try {
+        if (win && !win.isDestroyed()) applyWindowMode(win, m)
+      } catch (err) {
+        log.warn(`Could not set the window icon: ${(err as Error).message}`) // a missing icon file must not break the colour switch
+      }
     },
     wordTemplates: () => ws.wordTemplates(),
     getThemeLayers: () => services.theme.layers(),
@@ -393,10 +401,13 @@ export function registerIpc(services: Services, paths: Paths): void {
     // ---------- export
     exportItems: (e, request) => {
       const req = v.exportRequest(request)
-      return saveExport(e, `requirements-${today()}`, req.format, () => ws.exportItems(req))
+      // Word / PDF / web page: the document name the user typed suggests the file name (C12)
+      // eslint-disable-next-line no-control-regex -- characters Windows forbids in file names
+      const named = req.title && ['docx', 'pdf', 'html'].includes(req.format) ? req.title.replace(/[<>:"/\\|?*\u0000-\u001F]/g, '').replace(/[. ]+$/, '').trim() : ''
+      return saveExport(e, named || `requirements-${today()}`, req.format, () => ws.exportItems(req))
     },
     exportCompare: (e, from, to, format) => {
-      const f = v.oneOf(format, ['csv', 'markdown', 'xlsx', 'reqif'], 'export format')
+      const f = v.oneOf(format, ['csv', 'markdown', 'xlsx'], 'export format') // a comparison has no ReqIF form (C20)
       return saveExport(e, `requirement-changes-${today()}`, f, () => ws.exportCompare(v.str(from, 'from'), v.str(to, 'to'), f))
     }
   }

@@ -145,8 +145,8 @@ await scenario('E2E excel', async (ctx) => {
   // the Status change above is uncommitted; commit it first so the push has everything
   gitIn(project, 'commit', '-qam', 'Remote control is obsolete')
   const gitbar = win.getByRole('region', { name: 'Git' })
-  await gitbar.getByRole('button', { name: 'Publish to GitHub…' }).click()
-  await gitbar.getByLabel('Address of the GitHub repository').fill(pathToFileURL(remote).href)
+  await gitbar.getByRole('button', { name: 'Publish to a Git host…' }).click()
+  await gitbar.getByLabel('Address of the empty repository').fill(pathToFileURL(remote).href)
   await gitbar.getByRole('button', { name: 'Publish', exact: true }).click()
   await gitbar.locator('.gitbar__notice', { hasText: 'Pushed' }).waitFor({ timeout: 30_000 })
   check(gitIn(remote, 'log', '--format=%s', 'main').trim().split('\n').length === 2, 'the remote has both commits')

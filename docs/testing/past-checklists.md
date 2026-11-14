@@ -1,7 +1,16 @@
-# Past manual checklists (v0.0.3 – v0.21.3)
+# Past manual checklists (v0.0.3 – v0.21.4)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.21.4 (the owner's 0.21.3 report)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.21.4**, run the release self-test, then click **Copy report** and paste it somewhere. | All 25 steps passed; the pasted text is the report. |
+| 2 | Make a new empty document and import your Excel file into it. | The rows appear at once, without switching windows. |
+| 3 | Import the same file again into another document. | The check step says "Nothing to import: every row matches an item that is already in this project…"; Import stays off. |
+| 4 | Pick the document from step 2 and click **Delete…** → **Delete document**. | The question names the number of items; afterwards the document is gone (Discard in Changes would bring back what was committed). |
 
 ## v0.21.3 (speed, screens, Arabic, Merge into…)
 

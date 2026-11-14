@@ -67,7 +67,17 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.22.0 (new look, Ember, five languages)
+## Manual test checklist — v0.23.0 (the bar above the table)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.23.0** and run the release self-test. | All steps passed. |
+| 2 | Open the sandbox. Click the **document button** (name + count + arrow), switch documents, then try **Rename** (or F2) and Esc. | The menu lists the documents and the actions; Delete is red and last. |
+| 3 | Select a row, click **+ New item**, choose a type and **Inside the selected item**, Create. | The editor opens with the new item as a child of the selected one. |
+| 4 | Try the **outline** button, **Filters**, **View** (Rows: one line per item) and **More** (Import… / Export…). | The line that would do nothing is greyed out; everything else works as before. |
+| 5 | Make the window narrow with the editor open; then press Tab once and use ← →. | The bar stays one row; Tab lands on the bar once and the arrows move along it. |
+
+## Previous checklist — v0.22.0 (new look, Ember, five languages)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
@@ -76,15 +86,6 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 | 3 | In **Ember**, open the sandbox, change an item, open **Changes**, then Pull or Push. | Warm dark colours, serif headings, orange buttons with a soft glow, titles on shaded bars, a calm note. |
 | 4 | Import your Excel file twice into the same document. | The second time: a yellow warning explains why nothing is imported; no "No problems found". |
 | 5 | Settings → Environment → **Go back to an earlier version…** (don't install). | The Versions list opens below; Cancel closes it. |
-
-## Previous checklist — v0.21.4 (the owner's 0.21.3 report)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.21.4**, run the release self-test, then click **Copy report** and paste it somewhere. | All 25 steps passed; the pasted text is the report. |
-| 2 | Make a new empty document and import your Excel file into it. | The rows appear at once, without switching windows. |
-| 3 | Import the same file again into another document. | The check step says "Nothing to import: every row matches an item that is already in this project…"; Import stays off. |
-| 4 | Pick the document from step 2 and click **Delete…** → **Delete document**. | The question names the number of items; afterwards the document is gone (Discard in Changes would bring back what was committed). |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

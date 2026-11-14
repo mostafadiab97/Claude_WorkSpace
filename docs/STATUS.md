@@ -4,7 +4,7 @@ CLAUDE.md is read at the start of every session and again after every context co
 history there cost thousands of tokens each time (the owner asked to save tokens, 8 Nov 2026). **This file is the
 status**: update it with every release (the version table, "Next", the owner's last report, test counts).
 
-## Status (v0.22.0, 13 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
+## Status (v0.23.0, 14 Nov 2026) — prototype complete; Changes view; Excel + ReqIF; branches; health tools + acceptance run
 
 Every version, what it brought and what the owner reported: `CHANGELOG.md`; the full list of milestones and the
 plan: `docs/design/roadmap.md`. Latest:
@@ -45,7 +45,8 @@ plan: `docs/design/roadmap.md`. Latest:
 | 0.21.3 speed, screens, Arabic, Merge into… — review 2: old version without lock-ups (pause 1.9 → 0.3 s), Merge into… (O-6), toolbar group, one Tab stop per tab row, start-screen shots, Arabic isolation and wording, W-10 core messages | Released (v0.21.3) |
 | 0.21.4 the owner's 0.21.3 report — Copy report, import into a new document, nothing-to-import message, Delete document | Released (v0.21.4) |
 | 0.22.0 visual polish (Fable, owner-approved 13 Nov) + review fixes + Ember (logo set, serif headings), icon colour switch, five languages, Arabic name, import warning | Released (v0.22.0) |
-| **Next** | 0.22.0 passed (owner, 13 Nov); plan: 0.23.0 bars above the table → 0.24.0 theme editor → 0.25.0 Word/PDF export → 0.26.0 open review points → internal team release → 1.0 public; website redesign by the `web-designer` helper (branch `website-design`); then the **theme editor** (the owner, 13 Nov: Settings → Appearance, every theme value, live preview, reset); languages step 2 (Chinese, Hindi); review-2 leftovers (§F) |
+| 0.23.0 the bar above the table (document button, outline / Filters / View / More, New item panel), Versions button, Git host texts | Released (v0.23.0) |
+| **Next** | Owner's 0.23.0 checklist; 0.24.0 theme editor → 0.25.0 Word/PDF export → 0.26.0 open review points (incl. the top bar at narrow widths) → 0.27.0 daily comfort → public repository (F-1..F-7) → team release as 1.0 |
 
 The owner's last report (12 Nov 2026, night): **0.21.2 and 0.21.3 all steps passed**; Copy report broken, import refresh, Delete document missing — fixed in 0.21.4. Before: 12 Nov 2026): **0.21.1 all 5 steps passed** (self-test 25/25 in 96.0 s; "perfect pass, it is so smooth" for the wrapping toolbar). Before (11 Nov 2026): **0.21.0 steps 1, 3, 4, 5 passed** (self-test 25/25 in 77.6 s — faster than 0.20.1's 90.9 s and 0.20.2's 120.9 s); step 2 passed too: Compare took about 4 s for **10,007 changed items** and under a second for a few — **all 5 passed**. Before: 0.20.2 all 4 steps passed (self-test 25/25, 120.9 s — 30 s slower than 0.20.1; nothing more to mask — O-8). Earlier: 0.20.1 all 5 steps passed; review questions O-1…O-7 answered (25/25, 90.9 s) — nothing open from his tests; theme 1b is done and the pilot can start. Before: 0.20.0 all 5 passed with four points (→ 0.20.1).
 Before: 0.18.0 all 5 passed (24/24). Before: 0.17.2 all 5 passed (23/23). Before: 0.13.1 all 4 steps passed, 21/21 (66.8 s). Before: 0.13.0 all 5 passed, 21/21 (63.6 s); three small points → 0.13.1.

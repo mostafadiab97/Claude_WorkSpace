@@ -3,6 +3,24 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.23.0 — 14 Nov 2026 — the bar above the table
+The owner's ideas (13 Nov) with Fable's review (`docs/reviews/agents/fable-toolbar-review.md`); answers T-1..T-4 a.
+- **Document button** — the name, the number of items and an arrow, no "Document" label. Its menu lists the documents
+  (a tick on the open one), then **New document…**, **Rename "…"** (also **F2** on the button), **Merge "…" into…**
+  and **Delete "…"** (red, last). The questions and the rename box work as before.
+- **One outline button** — a menu with Expand all and Collapse all; the line that would do nothing is greyed out
+  (fully open / fully closed / while a filter is on). Keys: **Ctrl+Shift+↓ / ↑**.
+- **Filters** is an icon with its count (**Ctrl+Shift+F**); **View** holds the rows choice (title and text / one line)
+  and the columns, Edit fields… and Edit types…; **More (⋯)** holds Import… and Export….
+- **+ New item** opens a small panel: the type (the last one used is chosen) and the place (below / inside / at the
+  end), then **Create** — the editor opens as before. **Ctrl+N** opens it, Enter creates. The word goes when narrow.
+- **One Tab stop** for the whole bar; ← → move along it (the other way round in Arabic). Icons show their name and key.
+- One row even with the editor open on a 900 px window (two to four rows before).
+- Settings → Versions: **Releases page on GitHub** button that says it opens the browser; the Environment row is gone
+  (the owner, 0.22.0 test 5).
+- **Publish to a Git host…** instead of "Publish to GitHub…" — any host's address works (decision D-7);
+  `docs/guides/git-hosts.md` explains where reqochet calls Git and how to add help for a host.
+
 ## 0.22.0 — 13 Nov 2026 — visual polish, Ember, five languages
 **Owner (13 Nov 2026):** self-test 25/25 (92.8 s); tests 2–5 passed; test 5: two buttons for one thing looked odd →
 the Environment row goes, Versions gets a "Releases page on GitHub" button that says it opens the browser (next version).

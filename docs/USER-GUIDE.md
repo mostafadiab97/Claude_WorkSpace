@@ -127,8 +127,8 @@ with a message; **Push** shares them.
 | Area | What is there |
 | --- | --- |
 | **Top bar** | Repository name and ✕ (close), branch button ⎇, **Pull**, **Push**, **Changes**, **Versions**, **Traceability** (with the number of commits to get or send), ⚙ Settings. Language and colours: **Settings → Appearance** (and on the start screen). |
-| **Toolbar** | Search box, expand all and collapse all (the two arrow buttons), **Filters**, **Columns**, **Show text**, **Import…**, **Export…**, **+ New item**. |
-| **Table** | One row per item, in document order; the small arrow before a title opens a branch of the tree; numbers in the title show how many children. With **Show text** on (the default), the main column reads like a document: a heading shows its title in bold, any other item its title in bold and its whole text below, and each row is as tall as it needs to be. **Show text** off: one line per item, and the **Text** column shows the start of the text. |
+| **Bar above the table** (0.23) | The **document button** (name, number of items, arrow — its menu lists the documents and holds New document, Rename, Merge into and Delete), the search box, the **outline** button (Expand all / Collapse all), **Filters** (funnel, with a count), **View** (rows with text or one line, the columns, Edit fields…, Edit types…), **More** (⋯: Import…, Export…) and **+ New item**. Hover or focus any icon to see its name and shortcut. The whole bar is one Tab stop: ← → move along it. |
+| **Table** | One row per item, in document order; the small arrow before a title opens a branch of the tree; numbers in the title show how many children. With **View → Rows: title and text** (the default), the main column reads like a document: a heading shows its title in bold, any other item its title in bold and its whole text below, and each row is as tall as it needs to be. **Rows: one line per item**: one line per item, and the **Text** column shows the start of the text. |
 | **Editor (right)** | Details (title, type, fields, parent, text, links) and **History**; Save, ↑ ↓ (move), + Child…, Delete. The text is shown formatted; click it to edit. Drag the left edge to make the editor wider. |
 | **Status bar** | Number of items, problems found (click to see them, grouped by kind), how many rows are chosen, what the table is filtered by (✕ clears it), the time of your last pull. |
 | **Floating messages** | Results of Git actions under the top bar: green frame = done, red = problem, blue = nothing to do. Success messages close by themselves. A question (e.g. "pull first?") opens under the buttons; Esc closes it. |
@@ -137,8 +137,8 @@ with a message; **Push** shares them.
 
 ## 4. Writing and structuring requirements
 
-- **Create:** **+ New item** adds the new item **below the selected item**, at its level. The list beside it
-  (**Insert position**) chooses instead **Inside the selected item** (as a child) or **At the end**; with nothing
+- **Create:** **+ New item** opens a small panel: choose the **type** and the **place** — **Below the selected item**
+  (the default, at its level), **Inside the selected item** (as a child) or **At the end** — then **Create**; with nothing
   selected it goes at the end. **+ Child…** in the editor, or the row menu (right-click, Menu key or Shift+F10),
   adds under the selected item.
 - **Edit:** select a row, change anything in the editor, **Save**. Leaving an item with unsaved changes asks first.
@@ -159,7 +159,7 @@ with a message; **Push** shares them.
 - **Filters** (button shows how many are active): type, status, priority and other choice fields, and **Links** (items
   without links, items with suspect links, **Incomplete** items). While a filter is on, an orange **Clear filters**
   button next to Filters shows all items again.
-- **Columns:** show and hide columns in the **Columns** menu; move a column by dragging its header in the table (or its
+- **Columns:** show and hide columns in the **View** menu; move a column by dragging its header in the table (or its
   row in the menu); drag a column edge to change its width. No. and Title always come first. Remembered on your PC.
 - **All documents:** each document is a group with its name and item count; click the group to fold or unfold it.
 
@@ -182,7 +182,7 @@ with a message; **Push** shares them.
 - **Coverage rules** say what a complete project looks like, e.g. *every System Requirement is verified by at least 1
   Test Case*. They are stored in `requirements/.reqochet/schema.yaml` and shared through Git, so the whole team sees the
   same gaps. New projects start with a starter set; an older project is asked once (**Add the rules** / **No rules**).
-  Change them in **Traceability → Edit rules…** (or Columns → Edit item types… → **Rules**): item type, direction
+  Change them in **Traceability → Edit rules…** (or View → Edit item types… → **Rules**): item type, direction
   (*other items link to it* / *it links to other items*), link type, from which type, *at least* how many, and a level.
   reqochet only **warns** — nothing is ever blocked; the level *error* is for a planned automatic check on GitHub.
   Items with status *Obsolete* are not counted, on either end; links count across documents.
@@ -202,10 +202,10 @@ with a message; **Push** shares them.
 
 ## 7. Fields and item types
 
-- **Columns → Edit fields…** opens the team's fields: add a field (text, choice with options, list), rename it,
+- **View → Edit fields…** opens the team's fields: add a field (text, choice with options, list), rename it,
   reorder, set a default, remove it. Saving changes `requirements/.reqochet/schema.yaml`, which travels to the whole team
   with the next push. Removing a field never deletes values already in the files.
-- **Columns → Edit types…** opens the item types and link types: add a type, rename it, change its short name
+- **View → Edit types…** opens the item types and link types: add a type, rename it, change its short name
   (shown in the table) and whether it is a **heading** (not counted as a requirement). A type can be removed only when
   nothing uses it — the window shows how many items or links do.
 - **Required fields** (per item type, in the same window): an item of that type without them is still saved, but
@@ -494,7 +494,12 @@ Press **Ctrl+/** in the main window to open this page. Buttons show their shortc
 | --- | --- |
 | **Ctrl+S** | Save the open item. |
 | **Ctrl+F** | Go to the search box. |
-| **Ctrl+N** | New item: opens the list of types. |
+| **Ctrl+N** | New item: opens the panel (type and place); Enter creates. |
+| **Ctrl+Shift+N** | New document. |
+| **Ctrl+Shift+F** | Open the filters. |
+| **Ctrl+Shift+↓ / Ctrl+Shift+↑** | Expand all / collapse all. |
+| **F2** (on the document button) | Rename the document. |
+| **Tab, then ← → / Home / End** (bar above the table) | The bar is one Tab stop; the arrows move between its controls (in Arabic the other way round). |
 | **Alt+↑ / Alt+↓** | Move the open item up or down among its siblings (after saving). |
 | **↑ / ↓** (in the table) | Previous / next row; the editor follows. |
 | **→ / ←** (in the table) | Open a level / close it, or go to the parent (in Arabic the other way round: ← opens, → closes). |
@@ -522,7 +527,7 @@ repository, and reqochet is the window that understands them. What you know maps
 | Suspect link | Suspect link: the linked item changed after the link was checked — **⚠ suspect** in the Links column | editor → Links: keep or unlink |
 | Baseline | A named baseline (Git tag `baseline/<name>`) | Versions → Baselines, Compare |
 | Change proposal / review | A branch, compared like a pull request, then pulled in | the branch button → Compare with… |
-| View | Filters, search and the columns you choose | toolbar: Filters, Columns |
+| View | Filters, search and the columns you choose | bar above the table: Filters, View |
 | History | History of an item; Compare between any two versions | editor → History; Changes |
 | Exchange with a supplier | ReqIF (the OMG standard) and Excel, both ways | toolbar: Import, Export |
 | Licence, server, accounts | None: access = your Git host's permissions | — |

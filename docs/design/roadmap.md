@@ -167,12 +167,14 @@ X-02).
 | **0.21.3** | Review 2: speed and Lows | Old version opens without blocking, review Lows, Merge into… |
 | **0.21.4** | The owner's 0.21.3 report | Copy report, import into a new document, nothing-to-import message, Delete document |
 | **0.22.0** | Visual polish (Fable, owner-approved), Ember, five languages | Ember colour mode with its own logo and serif headings, icon colour switch, English/German/French/Spanish/Arabic, Arabic name; one icon set, clearer edges, table on white, two-group top bar, one work bar, Changes title bars, calmer notes, sharper small icons |
-| **0.23.0** (proposed) | Bars above the table, small fixes | Toolbar / document bar redesign (the owner's ideas + Fable's review), Versions: GitHub releases button (0.22.0 test 5), Git host neutral texts (D-7) |
+| **0.23.0** | Bars above the table, small fixes (released 14 Nov) | Toolbar / document bar redesign (the owner's ideas + Fable's review), Versions: GitHub releases button (0.22.0 test 5), Git host neutral texts (D-7) |
 | **0.24.0** (proposed) | Theme editor | Settings → Appearance: every theme value, live preview, reset, contrast warning |
 | **0.25.0** (proposed) | Word and PDF export | From the Word format profile (`docs/guides/word-template-prompt.md` part B); order with rich text: O-2 |
 | **0.26.0** (proposed) | Open review points | Review-2 leftovers and the audit `docs/reviews/2026-11-13-open-items.md` |
-| **then** | **Internal release to the owner's team** (the owner, 13 Nov) | Pilot; feedback → next version |
-| **after** | **1.0 — first public version** | Windows 10, Linux, Chinese and Hindi postponed until after the internal release (the owner, 13 Nov) |
+| **0.27.0** (proposed) | Daily comfort (theme 2) | Change many items at once, duplicate, saved views (personal + shared), templates, writing help, restore one item's old version (B-1 a, B-2 a) |
+| **then** | Public repository (F-1..F-7) | Publish script, LICENSE (PolyForm Shield), public README, HOW-IT-WAS-BUILT, sample project, issue template, `reqochet` build |
+| **1.0** | **Team release from the public repository** (the owner, 13–14 Nov) | Public but not announced; the following version is announced |
+| **after** | Postponed | Windows 10, Linux, Chinese and Hindi, outside references (B-3), rich text, review on GitHub, verification, drawn history |
 | **Release plan (C, 2 Nov 2026)** | — | 0.14 rename + health → 0.15 1a structure → 0.16 1b traceability views (pilot can start) → 0.17 daily comfort → 0.18 rich text → 0.19 documents out → 0.20 review basics → 0.21 pull requests in the app → 0.22 verification → 0.23 sharing + help → 0.24 AI → later commercial; a stabilisation patch after every theme; details in `docs/reviews/2026-11-01-planning-discussion.md` |
 | *Proposal A (R)* | *New name + traceability* | *Proposed 31 Oct 2026; order to be settled in the planning discussion (the owner, 31 Oct):* the rename (`docs/reviews/done/2026-10-31-rename-impact.md`) once the name is chosen; traceability matrix and coverage; item and link types in the GUI; saved views; bulk edit |
 | *Proposal B (R)* | *Documents out* | Word and PDF export, HTML publishing, Markdown preview |

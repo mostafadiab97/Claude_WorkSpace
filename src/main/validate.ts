@@ -312,7 +312,16 @@ export function exportRequest(v: unknown): ExportItemsRequest {
   const r: ExportItemsRequest = {
     scope,
     columns: strings(v.columns, 'export columns', 500),
-    format: oneOf(v.format, ['csv', 'markdown', 'xlsx', 'reqif'], 'export format')
+    format: oneOf(v.format, ['csv', 'markdown', 'xlsx', 'reqif', 'docx', 'pdf', 'html'], 'export format')
+  }
+  // 0.25.0 Word / PDF / HTML
+  if (v.title !== undefined) r.title = str(v.title, 'document name', 200)
+  if (v.traceTable === true) r.traceTable = true
+  if (v.template !== undefined) {
+    const t = str(v.template, 'template', 120)
+    // a name inside the templates folder, never a path (it is joined to the folder by the core)
+    if (/[\\/]|\.\./.test(t)) return bad('template')
+    r.template = t
   }
   if (scope === 'chosen') {
     r.ids = strings(v.ids, 'chosen items')

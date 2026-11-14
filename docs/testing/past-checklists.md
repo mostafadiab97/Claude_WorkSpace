@@ -3,6 +3,13 @@
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
 
+## Manual test checklist — v0.24.2 (short page names)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.24.2** and run the release self-test (Settings → **Diagnostics**). | All steps passed. |
+| 2 | Look at the Settings list, also in another language. | Environment · Appearance · Diagnostics · Privacy and access. |
+
 ## v0.24.1 (Settings pages, Features)
 
 | # | Do this | Expected result |

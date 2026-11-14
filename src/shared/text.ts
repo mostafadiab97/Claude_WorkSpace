@@ -508,7 +508,16 @@ const en = {
     running: 'Exporting…',
     done: (count: number, path: string) => `Exported ${n(count)} items to ${path}`,
     showInFolder: 'Show in folder',
-    buttonTooltip: 'Save as CSV (Excel) or Markdown'
+    docx: 'Word document (.docx) — headings from the hierarchy, a contents table; uses your template if the project has one',
+    pdf: 'PDF — the same document, ready to print or send',
+    html: 'Web page (.html) — one file with links between items and a search box',
+    documentOptions: 'Document',
+    docTitle: 'Document name (on the title page)',
+    traceTable: 'Add a traceability table (all links of these items)',
+    template: 'Word template',
+    templateBuiltIn: 'Built-in layout',
+    templateHint: 'Templates are .docx files in requirements/.reqochet/templates — see the user guide',
+    buttonTooltip: 'Save as Word, PDF, web page, Excel, ReqIF, CSV or Markdown'
   },
 
   search: {
@@ -965,6 +974,28 @@ const en = {
     linksReviewed: 'Link review only (a link was kept or confirmed)'
   },
 
+  // 0.25.0 Word, PDF and HTML documents (P-17…P-19, P-39): the words inside an exported document
+  docExport: {
+    templateMissing: (name: string) => `The Word template "${name}" is no longer in requirements/.reqochet/templates.`,
+    contents: 'Contents',
+    tocHint: 'Word fills in the table of contents when the document opens (or right-click → Update field).',
+    workingCopy: 'working copy',
+    baseline: 'Baseline',
+    commit: 'Commit',
+    date: 'Date',
+    author: 'Author',
+    revisionHistory: 'Revision history',
+    trace: 'Traceability',
+    item: 'Item',
+    link: 'Link',
+    target: 'Target',
+    suspect: 'Suspect',
+    yes: 'yes',
+    noTitle: '(no title)',
+    search: 'Search this document',
+    pageOf: (page: string, pages: string) => `Page ${page} of ${pages}`,
+    madeWith: (date: string) => `Exported ${date} from reqochet`
+  },
   workspace: {
     // 0.23.0 the bar above the table (the owner, 13 Nov; Fable's review T-2..T-4)
     toolbarLabel: 'Items toolbar',

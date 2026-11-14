@@ -150,6 +150,8 @@ export interface WorkspaceService {
   /** The cells "Update the Excel file" changes in that file (given as its current rows) and the rows it adds. */
   sourceUpdate(sheet: string[][]): Promise<{ edits: CellEdit[]; append: string[][]; sheet: string; changedItems: number; added: number }>
   exportItems(request: ExportItemsRequest): Promise<{ content: string | Uint8Array; count: number }>
+  /** 0.25.0: the Word templates of the open project (names without .docx). */
+  wordTemplates(): Promise<string[]>
   exportCompare(from: string, to: string, format: ExportFormat): Promise<{ content: string | Uint8Array; count: number }>
 }
 

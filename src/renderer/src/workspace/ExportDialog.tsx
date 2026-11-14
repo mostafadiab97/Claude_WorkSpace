@@ -20,6 +20,8 @@ export function ExportDialog(props: {
   query: Omit<ItemQuery, 'limit' | 'offset'>
   /** Items chosen in the table (Ctrl/Shift+click) or the right-clicked item; opens with scope "chosen". */
   chosen?: string[]
+  /** 0.25.0: the name the Word / PDF / web page document starts with (the document shown; empty = the folder name). */
+  documentName?: string
   onDone: (r: ExportResult & { ok: true }) => void
   onClose: () => void
 }) {
@@ -38,6 +40,24 @@ export function ExportDialog(props: {
   const [hierarchy, setHierarchy] = useState(true)
   const [text, setText] = useState(true)
   const [links, setLinks] = useState(true)
+  // 0.25.0 Word / PDF / web page
+  const isDoc = format === 'docx' || format === 'pdf' || format === 'html'
+  const [title, setTitle] = useState(props.documentName ?? '')
+  const [traceTable, setTraceTable] = useState(false)
+  const [templates, setTemplates] = useState<string[]>([])
+  const [template, setTemplate] = useState('')
+  useEffect(() => {
+    if (format !== 'docx') return
+    let live = true
+    void window.reqochet.wordTemplates().then((list) => {
+      if (!live) return
+      setTemplates(list)
+      setTemplate((t) => (t && list.includes(t) ? t : (list[0] ?? '')))
+    })
+    return () => {
+      live = false
+    }
+  }, [format])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -59,7 +79,10 @@ export function ExportDialog(props: {
         columns: columns(),
         format,
         ...(scope === 'filtered' ? { query: props.query } : {}),
-        ...(scope === 'chosen' ? { ids: chosen, includeBelow: below } : {})
+        ...(scope === 'chosen' ? { ids: chosen, includeBelow: below } : {}),
+        ...(isDoc && title.trim() ? { title: title.trim() } : {}),
+        ...(isDoc && traceTable ? { traceTable: true } : {}),
+        ...(format === 'docx' && template ? { template } : {})
       }
       const r = await window.reqochet.exportItems(request)
       if (r.ok) props.onDone(r)
@@ -139,6 +162,18 @@ export function ExportDialog(props: {
           <fieldset className="choice">
             <legend className="field__label">{T.exportDialog.format}</legend>
             <label className="check">
+              <input type="radio" name="format" checked={format === 'docx'} onChange={() => setFormat('docx')} />
+              {T.exportDialog.docx}
+            </label>
+            <label className="check">
+              <input type="radio" name="format" checked={format === 'pdf'} onChange={() => setFormat('pdf')} />
+              {T.exportDialog.pdf}
+            </label>
+            <label className="check">
+              <input type="radio" name="format" checked={format === 'html'} onChange={() => setFormat('html')} />
+              {T.exportDialog.html}
+            </label>
+            <label className="check">
               <input type="radio" name="format" checked={format === 'xlsx'} onChange={() => setFormat('xlsx')} />
               {T.exportDialog.xlsx}
             </label>
@@ -155,6 +190,32 @@ export function ExportDialog(props: {
               {T.exportDialog.markdown}
             </label>
           </fieldset>
+          {isDoc && (
+            <fieldset className="choice">
+              <legend className="field__label">{T.exportDialog.documentOptions}</legend>
+              <label className="field">
+                <span className="field__label">{T.exportDialog.docTitle}</span>
+                <input className="input" value={title} maxLength={200} onChange={(e) => setTitle(e.target.value)} />
+              </label>
+              <label className="check">
+                <input type="checkbox" checked={traceTable} onChange={(e) => setTraceTable(e.target.checked)} />
+                {T.exportDialog.traceTable}
+              </label>
+              {format === 'docx' && (
+                <label className="field">
+                  <span className="field__label">{T.exportDialog.template}</span>
+                  <select className="input" value={template} onChange={(e) => setTemplate(e.target.value)} title={T.exportDialog.templateHint}>
+                    {templates.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                    <option value="">{T.exportDialog.templateBuiltIn}</option>
+                  </select>
+                </label>
+              )}
+            </fieldset>
+          )}
           {source && source.kind !== 'reqif' && (
             <fieldset className="choice export__source">
               <legend className="field__label">{T.exportDialog.sourceTitle}</legend>

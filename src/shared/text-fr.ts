@@ -493,7 +493,16 @@ export const fr: Texts = {
     running: 'Export en cours…',
     done: (count: number, path: string) => `${n(count)} élément${s(count)} exporté${s(count)} vers ${path}`,
     showInFolder: 'Afficher dans le dossier',
-    buttonTooltip: 'Enregistrer en CSV (Excel) ou en Markdown'
+    docx: 'Document Word (.docx) — titres selon la hiérarchie, une table des matières ; utilise votre modèle si le projet en a un',
+    pdf: 'PDF — le même document, prêt à imprimer ou à envoyer',
+    html: 'Page web (.html) — un seul fichier avec des liens entre les éléments et un champ de recherche',
+    documentOptions: 'Document',
+    docTitle: 'Nom du document (sur la page de titre)',
+    traceTable: 'Ajouter une table de traçabilité (tous les liens de ces éléments)',
+    template: 'Modèle Word',
+    templateBuiltIn: 'Mise en page intégrée',
+    templateHint: 'Les modèles sont des fichiers .docx dans requirements/.reqochet/templates — voir le guide d’utilisation',
+    buttonTooltip: 'Enregistrer en Word, PDF, page web, Excel, ReqIF, CSV ou Markdown'
   },
 
   search: {
@@ -950,6 +959,27 @@ export const fr: Texts = {
     linksReviewed: 'Revue de liens uniquement (un lien a été conservé ou confirmé)'
   },
 
+  docExport: {
+    templateMissing: (name: string) => `Le modèle Word « ${name} » n’est plus dans requirements/.reqochet/templates.`,
+    contents: 'Sommaire',
+    tocHint: 'Word remplit la table des matières à l’ouverture (ou clic droit → Mettre à jour le champ).',
+    workingCopy: 'copie de travail',
+    baseline: 'Référence',
+    commit: 'Commit',
+    date: 'Date',
+    author: 'Auteur',
+    revisionHistory: 'Historique des révisions',
+    trace: 'Traçabilité',
+    item: 'Élément',
+    link: 'Lien',
+    target: 'Cible',
+    suspect: 'Suspect',
+    yes: 'oui',
+    noTitle: '(sans titre)',
+    search: 'Rechercher dans ce document',
+    pageOf: (page: string, pages: string) => `Page ${page} sur ${pages}`,
+    madeWith: (date: string) => `Exporté le ${date} depuis reqochet`
+  },
   workspace: {
     toolbarLabel: 'Barre d’outils des éléments',
     outline: 'Tout développer ou réduire',

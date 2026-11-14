@@ -1,7 +1,8 @@
 // Exposes the core services to the UI over IPC: one handler per call in src/shared/api.ts (review S-02).
 // `handlers` must name every invoke call of ReqochetApi with the matching result type — the compiler reports a
 // missing or wrong one. Every input is checked by src/main/validate.ts before it reaches a module (X-01).
-import { windowIcon } from './windowIcon'
+import { applyWindowMode } from './windowIcon'
+import { htmlToPdf } from './pdf'
 import { app, BrowserWindow, dialog, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
 import { readFileSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
@@ -63,11 +64,12 @@ export function registerIpc(services: Services, paths: Paths): void {
       const { content, count } = await build()
       const win = BrowserWindow.fromWebContents(e.sender)
       const ext = format === 'markdown' ? 'md' : format
-      const filter = { markdown: { name: 'Markdown', extensions: ['md'] }, csv: { name: 'CSV (Excel)', extensions: ['csv'] }, xlsx: { name: 'Excel workbook', extensions: ['xlsx'] }, reqif: { name: 'ReqIF', extensions: ['reqif'] } }[format]
+      const filter = { markdown: { name: 'Markdown', extensions: ['md'] }, csv: { name: 'CSV (Excel)', extensions: ['csv'] }, xlsx: { name: 'Excel workbook', extensions: ['xlsx'] }, reqif: { name: 'ReqIF', extensions: ['reqif'] }, docx: { name: 'Word', extensions: ['docx'] }, pdf: { name: 'PDF', extensions: ['pdf'] }, html: { name: 'HTML', extensions: ['html'] } }[format]
       const opts = { title: T.wsMsg.exportTitle, defaultPath: join(await lastFolder(), `${name}.${ext}`), filters: [filter] }
       const r = win ? await dialog.showSaveDialog(win, opts) : await dialog.showSaveDialog(opts)
       if (r.canceled || !r.filePath) return { ok: false, canceled: true }
-      await writeFileAtomic(r.filePath, content)
+      // PDF (0.25.0): the core made print HTML; a hidden window prints it
+      await writeFileAtomic(r.filePath, format === 'pdf' && typeof content === 'string' ? await htmlToPdf(content) : content)
       await writeFileAtomic(exportSettings, JSON.stringify({ folder: dirname(r.filePath) }), { mkdir: true }).catch(() => {})
       log.info(`Exported ${count} entries to ${r.filePath}`)
       return { ok: true, path: r.filePath, count }
@@ -165,8 +167,9 @@ export function registerIpc(services: Services, paths: Paths): void {
     },
     setWindowIcon: async (e, mode) => {
       const win = BrowserWindow.fromWebContents(e.sender)
-      if (win && !win.isDestroyed()) win.setIcon(windowIcon(v.oneOf(mode, ['light', 'dark', 'ember'] as const, 'mode')))
+      if (win && !win.isDestroyed()) applyWindowMode(win, v.oneOf(mode, ['system', 'light', 'dark', 'ember'] as const, 'mode'))
     },
+    wordTemplates: () => ws.wordTemplates(),
     getThemeLayers: () => services.theme.layers(),
     saveUserTheme: async (_e, user, revision) => {
       const theme = await services.theme.saveUser(v.themeOverrides(user), v.str(revision, 'revision', 64))

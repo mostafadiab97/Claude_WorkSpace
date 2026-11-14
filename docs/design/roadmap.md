@@ -169,7 +169,7 @@ X-02).
 | **0.22.0** | Visual polish (Fable, owner-approved), Ember, five languages | Ember colour mode with its own logo and serif headings, icon colour switch, English/German/French/Spanish/Arabic, Arabic name; one icon set, clearer edges, table on white, two-group top bar, one work bar, Changes title bars, calmer notes, sharper small icons |
 | **0.23.0** | Bars above the table, small fixes (released 14 Nov) | Toolbar / document bar redesign (the owner's ideas + Fable's review), Versions: GitHub releases button (0.22.0 test 5), Git host neutral texts (D-7) |
 | **0.24.0** | Theme editor (released 14 Nov) | Settings → Appearance: every theme value, live preview, reset, contrast warning |
-| **0.25.0** (proposed) | Word and PDF export | From the Word format profile (`docs/guides/word-template-prompt.md` part B); order with rich text: O-2 |
+| **0.25.0** (released) | Word, PDF and web page export | Templates in `requirements/.reqochet/templates` with placeholders (P-17…P-19), built-in layout, trace table; plain text first (O-2). Also: title bar follows the app mode |
 | **0.26.0** (proposed) | Open review points | Review-2 leftovers and the audit `docs/reviews/2026-11-13-open-items.md` |
 | **0.27.0** (proposed) | Daily comfort (theme 2) | Change many items at once, duplicate, saved views (personal + shared), templates, writing help, restore one item's old version (B-1 a, B-2 a) |
 | **then** | Public repository (F-1..F-7) | Publish script, LICENSE (PolyForm Shield), public README, HOW-IT-WAS-BUILT, sample project, issue template, `reqochet` build |

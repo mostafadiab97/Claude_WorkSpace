@@ -18,14 +18,14 @@ export type ExportColumn = string
 
 const show = (v: FieldValue | undefined): string => (v === undefined ? '' : Array.isArray(v) ? v.join(', ') : String(v))
 
-function header(schema: Schema, key: ExportColumn): string | null {
+export function header(schema: Schema, key: ExportColumn): string | null {
   const fixed: Record<string, string> = { id: 'ID', number: 'No.', title: 'Title', type: 'Type', parent: 'Parent', level: 'Level', text: 'Text', links: 'Links', linkedFrom: 'Linked from' }
   if (fixed[key]) return fixed[key]
   if (key.startsWith('field:')) return schema.fields.find((f) => f.id === key.slice(6))?.name ?? key.slice(6)
   return null
 }
 
-function cell(schema: Schema, e: ExportItem, key: ExportColumn): string {
+export function cell(schema: Schema, e: ExportItem, key: ExportColumn): string {
   const typeName = (id: string): string => schema.itemTypes.find((t) => t.id === id)?.name ?? id
   const link = (type: string, reverse: boolean): string => {
     const t = schema.linkTypes.find((l) => l.id === type)

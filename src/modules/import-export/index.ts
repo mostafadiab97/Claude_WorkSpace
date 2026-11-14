@@ -8,4 +8,5 @@ export { cellText, readXlsx, updateXlsx, writeXlsx, type CellEdit, type SheetDat
 export { guessHeaderRow, guessMapping, outlineOf, planImport, type ExistingItems, type ImportPlan, type ImportPlanInput, type PlannedItem } from './importPlan'
 export { markdownToXhtml, readReqif, REQIF_COLUMNS, writeReqif, type ReqifItem } from './reqif'
 export { itemsToCsv, itemsToMarkdown, itemsToSheet, itemsToTable, type ExportColumn, type ExportItem } from './items'
+export { itemsToDocx, itemsToHtml, fillPart, type DocumentData, type TraceRow } from './document'
 export { compareToCsv, compareToMarkdown, compareToSheet } from './compare'

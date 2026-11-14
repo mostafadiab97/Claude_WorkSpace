@@ -320,12 +320,33 @@ columns of the table plus hierarchy, full text and links if ticked. Formats:
 
 | Format | For |
 | --- | --- |
+| Word (.docx) | a document to review, sign or send — title page, contents, one heading per item (numbered by the hierarchy), its fields in a small table, its text; optionally a traceability table |
+| PDF | the same document, ready to print (A4, page numbers) |
+| Web page (.html) | one file that opens in any browser — contents, links between items, a search box; nothing is loaded from the internet |
 | Excel (.xlsx) | people; rows grouped by the hierarchy, titles indented |
 | ReqIF (.reqif) | DOORS, Jama, Polarion and other RM tools — hierarchy, all fields, links (validated against the official ReqIF schema) |
 | CSV | any tool; opens in Excel (comma-separated, UTF-8) |
 | Markdown | one readable document, e.g. to give to an AI tool |
 
-Coming (theme 3b): Word from your company's own template, PDF, and one self-contained HTML file.
+For Word, PDF and web page you can set the **document name** (the title page; the document shown is the default) and
+add a **traceability table** (every link of the exported items, with suspect links marked). The title page also shows
+the baseline the export was made at ("working copy" when it is not a baseline), the commit, the date and your Git name.
+
+**Your company's Word template.** Put a `.docx` file in `requirements/.reqochet/templates/` (commit it, so the whole
+team has it) and choose it under **Word template**. reqochet keeps everything in it — cover page, logo, headers,
+footers, page layout — and fills these placeholders, typed as plain text in the template:
+
+| Placeholder | Becomes |
+| --- | --- |
+| `{{document.name}}` · `{{baseline}}` · `{{commit}}` · `{{date}}` · `{{author}}` | the values above, wherever they are (also in headers and footers) |
+| `{{toc}}` | the table of contents (Word fills it when the file opens) |
+| `{{items}}` | the requirements |
+| `{{trace.table}}` | the traceability table (when ticked) |
+| `{{revision.history}}` | the list of baselines |
+
+The last four must be alone in their paragraph. The items use the template's styles **Heading 1–6**, **Normal** and,
+when the template defines them, **RM Requirement Text**, **RM Attribute Table** and **RM Trace Table** — change these
+styles in Word to change the look. Without a template, the built-in plain layout is used.
 
 ---
 

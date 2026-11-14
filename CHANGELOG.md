@@ -3,7 +3,24 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
-## 0.24.3 — 14 Nov 2026 — window icon follows the app; Diagnostics order
+## 0.25.0 — 14 Nov 2026 — Word, PDF and web page export; a title bar icon that stands out
+- **Export → Word document (.docx)**: title page (document name, baseline, commit, date, author), a contents table
+  Word fills when the file opens, one numbered heading per item (levels 1–6 from the hierarchy) with its fields in a
+  small table and its text, an optional **traceability table** (suspect links marked) and "Page x of y" in the footer.
+- **Your company's template** (P-17…P-19): a `.docx` in `requirements/.reqochet/templates/` keeps its own cover,
+  headers, footers and styles; reqochet fills `{{document.name}}`, `{{baseline}}`, `{{commit}}`, `{{date}}`,
+  `{{author}}` (also in headers and footers), `{{toc}}`, `{{items}}`, `{{trace.table}}`, `{{revision.history}}`, and
+  uses the template's own Heading 1–6 / RM styles (found by name, so a German Word's "Überschrift 1" works too).
+- **Export → PDF**: the same document printed by reqochet (A4, page numbers) — no Word needed.
+- **Export → Web page (.html)**: one file for any browser — contents, IDs that jump to the item, a search box; nothing
+  loaded from the internet.
+- **Title bar** (the owner, 0.24.3 test 2): the app's colour mode now also sets the window's title bar — Light gives a
+  light bar with the dark tile, Dark and Ember a dark bar with the white tile, "as Windows" follows Windows. Windows
+  shows the same icon on the taskbar (it allows only one).
+
+ — window icon follows the app; Diagnostics order
+**Owner (14 Nov 2026):** 0.24.1, 0.24.2 and 0.24.3 all passed (self-tests 25/25, 67–70 s). 0.24.3 test 2: the wish was a
+*visible* icon — white tile on a dark title bar, black tile on a light one — fixed in 0.25.0.
 - **The window and taskbar icon** show the same tile as the logo in reqochet's top bar for the colour mode chosen in
   the app — Light → dark tile, Dark → white tile, Ember → the Ember tile (the owner, 14 Nov: replaces the 8 Nov rule
   "follow the Windows taskbar colour"; Windows uses one icon for the title bar and the taskbar). The .exe, Start menu

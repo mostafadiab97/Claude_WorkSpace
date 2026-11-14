@@ -437,7 +437,8 @@ export interface CompareResult {
 
 // ---------- Export (M6)
 
-export type ExportFormat = 'csv' | 'markdown' | 'xlsx' | 'reqif'
+/** 0.25.0: Word, PDF and one HTML file join (P-17 … P-19, P-39). */
+export type ExportFormat = 'csv' | 'markdown' | 'xlsx' | 'reqif' | 'docx' | 'pdf' | 'html'
 
 export interface ExportItemsRequest {
   /**
@@ -453,6 +454,12 @@ export interface ExportItemsRequest {
   /** Column keys in order: id, title, type, parent, level, text, links, linkedFrom, field:<id>. */
   columns: string[]
   format: ExportFormat
+  /** Word / PDF / HTML (0.25.0): the document's name on the title page (default: the project folder's name). */
+  title?: string
+  /** Word / PDF / HTML: the traceability table at the end. */
+  traceTable?: boolean
+  /** Word: the template's name in requirements/.reqochet/templates/ (default: the only one there, or the built-in one). */
+  template?: string
 }
 
 // ---------- Excel / CSV import (M7)
@@ -584,8 +591,10 @@ export interface ReqochetApi {
   openLogFolder(): Promise<void>
   /** Creates the user's theme.json if needed, then shows it in Windows Explorer. */
   openThemeFolder(): Promise<void>
-  /** The window and taskbar icon follow the colour mode shown in the app (the owner, 14 Nov 2026). */
-  setWindowIcon(mode: 'light' | 'dark' | 'ember'): Promise<void>
+  /** 0.25.0: the Word templates of the open project (requirements/.reqochet/templates/*.docx), names without .docx. */
+  wordTemplates(): Promise<string[]>
+  /** 0.25.0: the title bar follows the app's colour mode and the icon stands out on it (white tile on dark, dark tile on light). */
+  setWindowIcon(mode: 'system' | 'light' | 'dark' | 'ember'): Promise<void>
   /** 0.24.0 theme editor: the app theme and the user's own values. */
   getThemeLayers(): Promise<ThemeLayers>
   /** 0.24.0 theme editor: writes the user's own values (checked; atomic); returns the theme as now loaded. */
@@ -807,6 +816,7 @@ export const Channels = {
   getTheme: 'theme:get',
   openLogFolder: 'diag:openLogFolder',
   openThemeFolder: 'diag:openThemeFolder',
+  wordTemplates: 'export:wordTemplates',
   setWindowIcon: 'app:setWindowIcon',
   getThemeLayers: 'theme:layers',
   saveUserTheme: 'theme:saveUser',

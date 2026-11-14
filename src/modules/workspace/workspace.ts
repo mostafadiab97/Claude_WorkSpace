@@ -713,6 +713,7 @@ export function createWorkspace(deps: WorkspaceDeps): WorkspaceService {
     compareOptions: () => compare.options(need()),
     compareVersions: (from, to) => compare.compare(need(), from, to),
     exportItems: viewExporting.exportItems,
+    wordTemplates: exporting.wordTemplates,
     exportCompare: exporting.exportCompare
   }
 }

@@ -511,7 +511,16 @@ const raw: Texts = {
     running: 'جارٍ التصدير…',
     done: (count: number, path: string) => `صُدِّر ${items(count)} إلى ${path}`,
     showInFolder: 'إظهار في المجلد',
-    buttonTooltip: 'الحفظ بصيغة Excel أو ReqIF أو CSV أو Markdown'
+    docx: 'مستند Word ‏(.docx) — عناوين حسب التسلسل الهرمي وجدول محتويات؛ يستخدم قالبكم إن كان للمشروع قالب',
+    pdf: 'PDF — المستند نفسه، جاهز للطباعة أو الإرسال',
+    html: 'صفحة ويب ‏(.html) — ملف واحد فيه روابط بين العناصر ومربع بحث',
+    documentOptions: 'المستند',
+    docTitle: 'اسم المستند (في صفحة العنوان)',
+    traceTable: 'إضافة جدول تتبّع (كل روابط هذه العناصر)',
+    template: 'قالب Word',
+    templateBuiltIn: 'التنسيق المدمج',
+    templateHint: 'القوالب ملفات ‎.docx في requirements/.reqochet/templates — راجع دليل المستخدم',
+    buttonTooltip: 'الحفظ بصيغة Word أو PDF أو صفحة ويب أو Excel أو ReqIF أو CSV أو Markdown'
   },
 
   search: {
@@ -966,6 +975,27 @@ const raw: Texts = {
     linksReviewed: 'مراجعة روابط فقط (أُبقي رابط أو أُكِّد)'
   },
 
+  docExport: {
+    templateMissing: (name: string) => `قالب Word ‏«${name}» لم يعد موجودًا في requirements/.reqochet/templates.`,
+    contents: 'المحتويات',
+    tocHint: 'يملأ Word جدول المحتويات عند فتح المستند (أو انقر بزر الفأرة الأيمن ← تحديث الحقل).',
+    workingCopy: 'نسخة العمل',
+    baseline: 'خط الأساس',
+    commit: 'الإيداع',
+    date: 'التاريخ',
+    author: 'المؤلف',
+    revisionHistory: 'سجل المراجعات',
+    trace: 'التتبّع',
+    item: 'العنصر',
+    link: 'الرابط',
+    target: 'الهدف',
+    suspect: 'مشكوك فيه',
+    yes: 'نعم',
+    noTitle: '(بلا عنوان)',
+    search: 'البحث في هذا المستند',
+    pageOf: (page: string, pages: string) => `صفحة ${page} من ${pages}`,
+    madeWith: (date: string) => `صُدِّر في ${date} من reqochet`
+  },
   workspace: {
     toolbarLabel: 'شريط أدوات العناصر',
     outline: 'توسيع الكل أو طيّه',

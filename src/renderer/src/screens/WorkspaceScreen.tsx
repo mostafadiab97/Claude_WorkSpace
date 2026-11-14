@@ -846,6 +846,7 @@ export function WorkspaceScreen({
         <ExportDialog
           {...(exportOpen.chosen ? { chosen: exportOpen.chosen } : {})}
           shownColumns={shownColumnKeys(schema, columnPrefs)}
+          documentName={document === ALL_DOCUMENTS ? '' : document}
           filtered={filtered}
           filteredCount={total}
           totalCount={info.itemCount}

@@ -49,8 +49,8 @@ function createWindow(services: ReturnType<typeof createServices>): void {
     minHeight: 560,
     show: false,
     title: PRODUCT,
-    // the window icon follows the app's colour mode (setWindowIcon from the window, the owner 14 Nov 2026); the .exe,
-    // Start menu and desktop shortcut carry the light tile (they cannot change by themselves)
+    // the title bar follows the app's colour mode and the icon stands out on it (setWindowIcon from the window, 0.25.0);
+    // the .exe, Start menu and desktop shortcut carry the light tile (they cannot change by themselves)
     icon: windowIcon(),
     autoHideMenuBar: true,
     webPreferences: {

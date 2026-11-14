@@ -492,7 +492,16 @@ export const es: Texts = {
     running: 'Exportando…',
     done: (count: number, path: string) => `${n(count)} elementos exportados a ${path}`,
     showInFolder: 'Mostrar en la carpeta',
-    buttonTooltip: 'Guardar como CSV (Excel) o Markdown'
+    docx: 'Documento de Word (.docx) — títulos según la jerarquía, un índice; usa su plantilla si el proyecto tiene una',
+    pdf: 'PDF — el mismo documento, listo para imprimir o enviar',
+    html: 'Página web (.html) — un solo archivo con enlaces entre elementos y un cuadro de búsqueda',
+    documentOptions: 'Documento',
+    docTitle: 'Nombre del documento (en la portada)',
+    traceTable: 'Añadir una tabla de trazabilidad (todos los vínculos de estos elementos)',
+    template: 'Plantilla de Word',
+    templateBuiltIn: 'Diseño integrado',
+    templateHint: 'Las plantillas son archivos .docx en requirements/.reqochet/templates — vea la guía del usuario',
+    buttonTooltip: 'Guardar como Word, PDF, página web, Excel, ReqIF, CSV o Markdown'
   },
 
   search: {
@@ -949,6 +958,27 @@ export const es: Texts = {
     linksReviewed: 'Solo revisión de vínculos (se conservó o confirmó un vínculo)'
   },
 
+  docExport: {
+    templateMissing: (name: string) => `La plantilla de Word «${name}» ya no está en requirements/.reqochet/templates.`,
+    contents: 'Contenido',
+    tocHint: 'Word completa el índice al abrir el documento (o clic derecho → Actualizar campo).',
+    workingCopy: 'copia de trabajo',
+    baseline: 'Línea base',
+    commit: 'Commit',
+    date: 'Fecha',
+    author: 'Autor',
+    revisionHistory: 'Historial de revisiones',
+    trace: 'Trazabilidad',
+    item: 'Elemento',
+    link: 'Vínculo',
+    target: 'Destino',
+    suspect: 'Sospechoso',
+    yes: 'sí',
+    noTitle: '(sin título)',
+    search: 'Buscar en este documento',
+    pageOf: (page: string, pages: string) => `Página ${page} de ${pages}`,
+    madeWith: (date: string) => `Exportado el ${date} desde reqochet`
+  },
   workspace: {
     toolbarLabel: 'Barra de herramientas de elementos',
     outline: 'Expandir o contraer todo',

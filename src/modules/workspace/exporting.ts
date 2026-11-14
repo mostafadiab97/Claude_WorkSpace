@@ -1,12 +1,55 @@
 // Export (M6): builds the file content for the table or a comparison; the main process asks where to save it.
-import { basename } from 'node:path'
+import { readdir, readFile } from 'node:fs/promises'
+import { basename, join } from 'node:path'
+import { T } from '../../shared/text'
 import type { ExportFormat, ExportItemsRequest } from '../../shared/api'
-import { compareToCsv, compareToMarkdown, compareToSheet, itemsToCsv, itemsToMarkdown, itemsToSheet, writeReqif, writeXlsx, type ExportItem } from '../import-export'
+import { compareToCsv, compareToMarkdown, compareToSheet, itemsToCsv, itemsToDocx, itemsToHtml, itemsToMarkdown, itemsToSheet, writeReqif, writeXlsx, type DocumentData, type ExportColumn, type ExportItem, type TraceRow } from '../import-export'
 import { queryAll, withRequired, type WorkspaceContext } from './context'
 import type { createCompare } from './compare'
 import { depthOf, type StructureOps } from './structure'
 
 export function createExportOps(ctx: WorkspaceContext, structure: StructureOps, compare: ReturnType<typeof createCompare>) {
+  type Session = ReturnType<WorkspaceContext['need']>
+  /** What a Word / PDF / HTML document needs besides the items: name, commit, baseline, author, links, revisions. */
+  const documentData = async (s: Session, rows: ExportItem[], columns: string[], request: ExportItemsRequest): Promise<DocumentData> => {
+    const [realRoot, , viewCommit] = s.repo.root.split('\u0000')
+    const root = realRoot ?? s.repo.root
+    const head = viewCommit ?? (await ctx.git.head(root).catch(() => ''))
+    const baselines = await ctx.git.baselines(root).catch(() => [])
+    const author = (await ctx.git.identity(root).catch(() => ({ name: null }))).name ?? ''
+    const trace: TraceRow[] = []
+    if (request.traceTable) {
+      for (const r of rows)
+        for (const l of r.item.links) {
+          const fp = s.index.fingerprint(l.target)
+          const name = s.repo.schema.linkTypes.find((t) => t.id === l.type)?.name ?? l.type
+          trace.push({ source: r.item.id, sourceTitle: r.item.title, type: name, target: l.target, targetTitle: s.index.get(l.target)?.title ?? '', suspect: l.confirmed !== undefined && fp !== undefined && l.confirmed !== fp })
+        }
+    }
+    return {
+      schema: s.repo.schema,
+      name: request.title?.trim() || basename(root),
+      baseline: baselines.find((b) => b.commit === head)?.name ?? '',
+      commit: (head ?? '').slice(0, 8),
+      date: new Date().toISOString().slice(0, 10),
+      author,
+      items: rows,
+      columns: columns as ExportColumn[],
+      trace,
+      revisions: [...baselines].sort((a, b) => b.date.localeCompare(a.date)).map((b) => ({ name: b.name, date: b.date.slice(0, 10), commit: b.commit.slice(0, 8) }))
+    }
+  }
+  /** The chosen Word template from requirements/.reqochet/templates; no name = the built-in layout (the dialog picks the first template by default). */
+  const readTemplate = async (s: Session, name?: string): Promise<Uint8Array | undefined> => {
+    const dir = join(s.repo.folder, '.reqochet', 'templates')
+    const list = await readdir(dir).catch(() => [] as string[])
+    const docx = list.filter((f) => f.toLowerCase().endsWith('.docx') && !f.startsWith('~$'))
+    if (!name) return undefined
+    const pick = docx.find((f) => f.slice(0, -5) === name)
+    if (!pick) throw new Error(T.docExport.templateMissing(name))
+    return pick ? new Uint8Array(await readFile(join(dir, pick))) : undefined
+  }
+
   return {
     async exportItems(request: ExportItemsRequest): Promise<{ content: string | Uint8Array; count: number }> {
       const s = ctx.need()
@@ -39,6 +82,12 @@ export function createExportOps(ctx: WorkspaceContext, structure: StructureOps, 
       }
       // an old version's session root is an internal key "<root>\0version\0<commit>": the name is the real folder's (W-04)
       const title = `${basename(s.repo.root.split('\u0000')[0] ?? s.repo.root)} — requirements`
+      if (request.format === 'docx' || request.format === 'html' || request.format === 'pdf') {
+        const data = await documentData(s, rows, columns, request)
+        if (request.format === 'docx') return { content: await itemsToDocx(data, await readTemplate(s, request.template)), count: rows.length }
+        // PDF: the main process prints this HTML (print layout: no search box, no menu)
+        return { content: itemsToHtml(data, request.format === 'pdf'), count: rows.length }
+      }
       if (request.format === 'reqif') {
         // objects that came from ReqIF keep their identifier, so the other tool recognises them
         const sourceIds = new Map<string, string>()
@@ -61,6 +110,17 @@ export function createExportOps(ctx: WorkspaceContext, structure: StructureOps, 
             ? await writeXlsx([itemsToSheet(s.repo.schema, rows, columns)])
             : itemsToCsv(s.repo.schema, rows, columns)
       return { content, count: rows.length }
+    },
+
+    /** The Word templates of the project (requirements/.reqochet/templates/*.docx), names without ".docx". */
+    async wordTemplates(): Promise<string[]> {
+      const s = ctx.need()
+      const dir = join(s.repo.folder, '.reqochet', 'templates')
+      try {
+        return (await readdir(dir)).filter((f) => f.toLowerCase().endsWith('.docx') && !f.startsWith('~$')).map((f) => f.slice(0, -5)).sort()
+      } catch {
+        return []
+      }
     },
 
     async exportCompare(from: string, to: string, format: ExportFormat): Promise<{ content: string | Uint8Array; count: number }> {

@@ -494,7 +494,16 @@ export const de: Texts = {
     running: 'Wird exportiert…',
     done: (count: number, path: string) => `${pl(count, 'Element', 'Elemente')} nach ${path} exportiert`,
     showInFolder: 'Im Ordner anzeigen',
-    buttonTooltip: 'Als CSV (Excel) oder Markdown speichern'
+    docx: 'Word-Dokument (.docx) — Überschriften aus der Hierarchie, ein Inhaltsverzeichnis; nutzt Ihre Vorlage, wenn das Projekt eine hat',
+    pdf: 'PDF — dasselbe Dokument, fertig zum Drucken oder Versenden',
+    html: 'Webseite (.html) — eine Datei mit Verweisen zwischen den Elementen und einem Suchfeld',
+    documentOptions: 'Dokument',
+    docTitle: 'Name des Dokuments (auf der Titelseite)',
+    traceTable: 'Eine Rückverfolgbarkeitstabelle anfügen (alle Links dieser Elemente)',
+    template: 'Word-Vorlage',
+    templateBuiltIn: 'Eingebautes Layout',
+    templateHint: 'Vorlagen sind .docx-Dateien in requirements/.reqochet/templates — siehe Benutzerhandbuch',
+    buttonTooltip: 'Als Word, PDF, Webseite, Excel, ReqIF, CSV oder Markdown speichern'
   },
 
   search: {
@@ -951,6 +960,27 @@ export const de: Texts = {
     linksReviewed: 'Nur Verknüpfungsprüfung (eine Verknüpfung wurde beibehalten oder bestätigt)'
   },
 
+  docExport: {
+    templateMissing: (name: string) => `Die Word-Vorlage „${name}“ liegt nicht mehr in requirements/.reqochet/templates.`,
+    contents: 'Inhalt',
+    tocHint: 'Word füllt das Inhaltsverzeichnis beim Öffnen aus (oder Rechtsklick → Feld aktualisieren).',
+    workingCopy: 'Arbeitskopie',
+    baseline: 'Baseline',
+    commit: 'Commit',
+    date: 'Datum',
+    author: 'Autor',
+    revisionHistory: 'Änderungshistorie',
+    trace: 'Rückverfolgbarkeit',
+    item: 'Element',
+    link: 'Verknüpfung',
+    target: 'Ziel',
+    suspect: 'Verdächtig',
+    yes: 'ja',
+    noTitle: '(ohne Titel)',
+    search: 'Dieses Dokument durchsuchen',
+    pageOf: (page: string, pages: string) => `Seite ${page} von ${pages}`,
+    madeWith: (date: string) => `Exportiert am ${date} aus reqochet`
+  },
   workspace: {
     toolbarLabel: 'Werkzeugleiste der Elemente',
     outline: 'Alle auf- oder zuklappen',

@@ -67,19 +67,22 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.24.3 (window icon, Diagnostics order)
+## Manual test checklist — v0.25.0 (Word, PDF and web page export; title bar icon)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.25.0** and run the release self-test (Settings → **Diagnostics**). | All steps passed. |
+| 2 | Switch the colours: sun, moon, flame, screen; look at the window's title bar. | Light: a light title bar with the dark tile. Dark and Ember: a dark title bar with the white tile. Screen: the title bar follows Windows, the icon stands out on it. (The taskbar shows the same icon — Windows allows only one.) |
+| 3 | Open a real project → **More → Export…** → **Word document**; set a document name, tick the traceability table → **Export…**; open the file in Word (answer **Yes** if Word asks to update fields). | Title page with your name for it, baseline, date and author; a filled contents table; one numbered heading per item with its fields and text; the traceability table at the end; "Page x of y" in the footer. |
+| 4 | Export the same items as **PDF**, then as **Web page**; open both. | The PDF looks like the Word document (A4, page numbers). The web page opens in the browser: contents, clickable IDs, the search box filters the items. |
+| 5 | Optional: copy a company .docx into `requirements\.reqochet\templates`, type `{{document.name}}` on its cover and `{{items}}` alone on a line; export to Word with that template. | The company layout is kept; the placeholders are filled. |
+
+## Previous checklist — v0.24.3 (window icon, Diagnostics order)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
 | 1 | Let reqochet-dev update to **0.24.3**; Settings → **Diagnostics** shows the self-tests first — run the release self-test. | All steps passed. |
 | 2 | Switch the colours: sun, moon, flame; look at the window's title bar and the taskbar. | The icon is the same tile as the logo next to "reqochet DEV": dark tile in Light, white in Dark, orange-edged in Ember. |
-
-## Previous checklist — v0.24.2 (short page names)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.24.2** and run the release self-test (Settings → **Diagnostics**). | All steps passed. |
-| 2 | Look at the Settings list, also in another language. | Environment · Appearance · Diagnostics · Privacy and access. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

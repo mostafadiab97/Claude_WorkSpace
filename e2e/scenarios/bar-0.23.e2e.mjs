@@ -50,9 +50,17 @@ await scenario('E2E bar', async (ctx) => {
   check((await win.getByRole('menuitem', { name: /^Merge "Software" into/ }).count()) === 1, 'with two documents, Merge into is offered')
   await win.keyboard.press('Escape')
   check(await documentButton(win).evaluate((e) => e === document.activeElement), 'Esc gives the focus back to the document button')
+  const barHeight = async () => (await win.locator('.workbar').boundingBox())?.height ?? 0
+  const before = await barHeight()
   await documentButton(win).focus()
   await win.keyboard.press('F2')
   check((await win.getByLabel(/New name for Software/).count()) === 1, 'F2 on the document button starts the rename')
+  // the owner, 0.23.0 test 2: the rename box opened inside the bar and pushed every other button aside
+  check(Math.abs((await barHeight()) - before) < 2, `renaming opens a small panel under the name; the bar keeps its size (${before} px)`)
+  const box = await win.getByLabel(/New name for Software/).boundingBox()
+  const btn = await documentButton(win).boundingBox()
+  check(!!box && !!btn && box.y > btn.y + btn.height - 2, 'the rename box sits under the document button')
+  await t.shot('bar-6-rename-panel')
   await win.keyboard.press('Escape')
 
   console.log('One Tab stop; ← → move along the bar')

@@ -5134,3 +5134,46 @@ select:not([multiple]) {
 .workbar .icon-btn {
   color: var(--rm-color-text);
 }
+
+/* the owner, 0.23.0 test 2: rename / new document / merge / delete open in a small panel under the document button
+   (like the New item panel) instead of growing inside the bar */
+.doc-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.document-bar__pop {
+  position: absolute;
+  inset-block-start: calc(100% + var(--rm-space-xs));
+  inset-inline-start: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-sm);
+  inline-size: min(420px, calc(100vw - 2 * var(--rm-space-lg)));
+  padding: var(--rm-space-md);
+  background: var(--rm-color-surface);
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius-medium);
+  box-shadow: var(--rm-shape-shadow-popover) color-mix(in srgb, var(--rm-color-text) 18%, transparent);
+}
+
+.document-bar__pop .document-bar__form,
+.document-bar__pop .document-bar__merge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rm-space-sm);
+}
+
+.document-bar__pop .document-bar__form .input {
+  flex: 1 1 100%;
+}
+
+.document-bar__pop .muted-inline {
+  flex-basis: 100%;
+}
+
+.document-bar__pop .document-bar__error {
+  margin: 0;
+}

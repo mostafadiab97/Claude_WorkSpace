@@ -109,6 +109,7 @@ export function DocumentBar({ newRef, ...props }: {
     <div className={docs.length <= 1 && !naming && !error && (later || !(legacy || loose)) ? 'document-bar document-bar--compact' : 'document-bar'}>
       {/* T-1 a (the owner, 13 Nov; Fable's review): one document button — name, item count, arrow; its menu lists the
           documents, then New, Rename, Merge into…, Delete (red, last). F2 renames, Ctrl+Shift+N makes a new one. */}
+      <div className="doc-anchor">
       <MenuButton
         label={T.documents.button(current === ALL_DOCUMENTS ? T.documents.all(info.itemCount) : label(current), countOf(current))}
         title={T.documents.pickerTooltip}
@@ -140,6 +141,17 @@ export function DocumentBar({ newRef, ...props }: {
         <span className="doc-btn__count">{T.documents.countShort(countOf(current))}</span>
         <Icon name="chevronDown" size={12} />
       </MenuButton>
+      {/* the owner, 0.23.0 test 2: name box, questions and notes open in a small panel under the document button,
+          like the New item panel — the bar keeps its size */}
+      {(naming || deleting || merging !== null || notice || error) && (
+      <div className="document-bar__pop" onKeyDown={(e) => {
+        if (e.key !== 'Escape') return
+        e.stopPropagation()
+        setNaming(null)
+        setDeleting(false)
+        setMerging(null)
+        setError(null)
+      }}>
       {naming ? (
         <form
           className="document-bar__form"
@@ -213,6 +225,9 @@ export function DocumentBar({ newRef, ...props }: {
           {error}
         </span>
       )}
+      </div>
+      )}
+      </div>
       {!naming && !later && !props.readOnly && (legacy || loose) && (
         <div className="notice table-notice folder-notice document-notice" role="status">
           <span className="folder-notice__text">{legacy ? T.documents.legacy : T.documents.looseAsk(loose?.itemCount ?? 0)}</span>

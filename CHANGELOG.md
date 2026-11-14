@@ -3,7 +3,14 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.23.1 — 14 Nov 2026 — the rename box in a small panel
+- **Rename / New document / Merge into / Delete** open in a small panel under the document button (like the New item
+  panel) instead of growing inside the bar and pushing every other button aside (the owner, 0.23.0 test 2). Esc
+  closes it. e2e: the bar keeps its size while renaming.
+
 ## 0.23.0 — 14 Nov 2026 — the bar above the table
+**Owner (14 Nov 2026):** self-test 25/25 (74.3 s); tests 3–5 passed; test 2 passed, but the rename box took over half
+the bar → 0.23.1.
 The owner's ideas (13 Nov) with Fable's review (`docs/reviews/agents/fable-toolbar-review.md`); answers T-1..T-4 a.
 - **Document button** — the name, the number of items and an arrow, no "Document" label. Its menu lists the documents
   (a tick on the open one), then **New document…**, **Rename "…"** (also **F2** on the button), **Merge "…" into…**

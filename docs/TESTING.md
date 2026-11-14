@@ -67,7 +67,14 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.23.0 (the bar above the table)
+## Manual test checklist — v0.23.1 (rename box)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.23.1** and run the release self-test. | All steps passed. |
+| 2 | Document button → **Rename** (or F2), then Esc; then **New document…**, then Cancel. | Each opens a small panel under the document name; the bar above the table does not move. |
+
+## Previous checklist — v0.23.0 (the bar above the table)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
@@ -76,16 +83,6 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 | 3 | Select a row, click **+ New item**, choose a type and **Inside the selected item**, Create. | The editor opens with the new item as a child of the selected one. |
 | 4 | Try the **outline** button, **Filters**, **View** (Rows: one line per item) and **More** (Import… / Export…). | The line that would do nothing is greyed out; everything else works as before. |
 | 5 | Make the window narrow with the editor open; then press Tab once and use ← →. | The bar stays one row; Tab lands on the bar once and the arrows move along it. |
-
-## Previous checklist — v0.22.0 (new look, Ember, five languages)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.22.0** and run the release self-test. | All steps passed. |
-| 2 | On the start screen, pick each language in the new drop-down, then each colour icon (sun, moon, flame, screen). | Texts change at once; in Arabic the name «ريكوشيه» shows; the flame gives Ember with the orange logo. |
-| 3 | In **Ember**, open the sandbox, change an item, open **Changes**, then Pull or Push. | Warm dark colours, serif headings, orange buttons with a soft glow, titles on shaded bars, a calm note. |
-| 4 | Import your Excel file twice into the same document. | The second time: a yellow warning explains why nothing is imported; no "No problems found". |
-| 5 | Settings → Environment → **Go back to an earlier version…** (don't install). | The Versions list opens below; Cancel closes it. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

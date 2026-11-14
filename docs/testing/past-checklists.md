@@ -1,7 +1,15 @@
-# Past manual checklists (v0.0.3 – v0.24.0)
+# Past manual checklists (v0.0.3 – v0.24.1)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.24.1 (Settings pages, Features)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.24.1** and run the release self-test (now on **Diagnostics**). | All steps passed. |
+| 2 | Open Settings and look at the four pages. | Environment + Versions + Features together; Appearance with the theme editor under the switches; problems with diagnostics and self-tests. |
+| 3 | Features: turn **Traceability** off, then **Versions and baselines** off; look at the top bar; turn both on again. | Their buttons (and the coverage-gap counter) disappear and come back. |
 
 ## v0.24.0 (theme editor)
 

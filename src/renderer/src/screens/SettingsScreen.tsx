@@ -140,11 +140,11 @@ export function SettingsScreen(props: {
           {view.kind === 'settings' && view.page === 'appearance' && <ThemeEditor onPreview={props.onThemePreview} onSaved={props.onThemeSaved} startMode={props.shownMode} />}
           {view.kind === 'settings' && view.page === 'report' && (
             <>
-              <ProblemReportCard />
-              <DiagnosticsCard appInfo={props.appInfo} />
-              {/* the owner, 14 Nov 2026: Self-tests join Report a problem and diagnostics */}
+              {/* the owner, 14 Nov 2026: the self-tests first, then Report a problem and Diagnostics */}
               <ReleaseSelfTestCard />
               <SelfTestCard />
+              <ProblemReportCard />
+              <DiagnosticsCard appInfo={props.appInfo} />
             </>
           )}
           {view.kind === 'settings' && view.page === 'privacy' && (

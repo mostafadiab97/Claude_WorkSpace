@@ -67,6 +67,12 @@ export function App() {
     else if (saved) applyTheme(saved.config, modeRef.current)
   }, [])
 
+  // the window and taskbar icon show the same tile as the top bar's logo for the shown mode (the owner, 14 Nov 2026)
+  const shownMode = useEffectiveMode(mode)
+  useEffect(() => {
+    void window.reqochet.setWindowIcon(mode === 'ember' ? 'ember' : shownMode)
+  }, [mode, shownMode])
+
   // Re-apply tokens when the theme loads, the mode changes, or (in System mode) Windows switches light/dark.
   useEffect(() => {
     if (!theme) return

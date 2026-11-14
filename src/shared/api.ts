@@ -584,6 +584,8 @@ export interface ReqochetApi {
   openLogFolder(): Promise<void>
   /** Creates the user's theme.json if needed, then shows it in Windows Explorer. */
   openThemeFolder(): Promise<void>
+  /** The window and taskbar icon follow the colour mode shown in the app (the owner, 14 Nov 2026). */
+  setWindowIcon(mode: 'light' | 'dark' | 'ember'): Promise<void>
   /** 0.24.0 theme editor: the app theme and the user's own values. */
   getThemeLayers(): Promise<ThemeLayers>
   /** 0.24.0 theme editor: writes the user's own values (checked; atomic); returns the theme as now loaded. */
@@ -805,6 +807,7 @@ export const Channels = {
   getTheme: 'theme:get',
   openLogFolder: 'diag:openLogFolder',
   openThemeFolder: 'diag:openThemeFolder',
+  setWindowIcon: 'app:setWindowIcon',
   getThemeLayers: 'theme:layers',
   saveUserTheme: 'theme:saveUser',
   reportUiError: 'diag:reportUiError',

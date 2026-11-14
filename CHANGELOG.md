@@ -3,6 +3,13 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.24.3 — 14 Nov 2026 — window icon follows the app; Diagnostics order
+- **The window and taskbar icon** show the same tile as the logo in reqochet's top bar for the colour mode chosen in
+  the app — Light → dark tile, Dark → white tile, Ember → the Ember tile (the owner, 14 Nov: replaces the 8 Nov rule
+  "follow the Windows taskbar colour"; Windows uses one icon for the title bar and the taskbar). The .exe, Start menu
+  and desktop shortcut keep the light tile.
+- **Settings → Diagnostics**: the self-tests first, then Report a problem and Diagnostics (the owner).
+
 ## 0.24.2 — 14 Nov 2026 — short Settings page names
 - The owner (14 Nov): the four Settings pages are **Environment**, **Appearance**, **Diagnostics** and **Privacy and
   access** (all five languages).

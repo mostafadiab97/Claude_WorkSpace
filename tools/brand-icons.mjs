@@ -19,7 +19,8 @@ try {
 const page = await browser.newPage({ deviceScaleFactor: 1 })
 // the light Windows icon is drawn from the outlined variant: the grey outline is for the desktop, Start menu and
 // taskbar only (the owner, 8 Nov 2026); inside the app the light tile has no outline
-for (const [variant, prefix] of [['', 'reqochet-icon'], ['-light-outlined', 'reqochet-icon-light']]) {
+// 0.24.3: the Ember tile too — the window icon follows the colour mode chosen in the app (the owner, 14 Nov 2026)
+for (const [variant, prefix] of [['', 'reqochet-icon'], ['-light-outlined', 'reqochet-icon-light'], ['-ember', 'reqochet-icon-ember']]) {
   for (const size of sizes) {
     const own = `${dir}/reqochet-icon${variant}-${size}.svg`
     const svg = readFileSync(existsSync(own) ? own : `${dir}/reqochet-icon${variant}${size <= 24 ? '-small' : ''}.svg`, 'utf8')

@@ -1,6 +1,7 @@
 // Exposes the core services to the UI over IPC: one handler per call in src/shared/api.ts (review S-02).
 // `handlers` must name every invoke call of ReqochetApi with the matching result type — the compiler reports a
 // missing or wrong one. Every input is checked by src/main/validate.ts before it reaches a module (X-01).
+import { windowIcon } from './windowIcon'
 import { app, BrowserWindow, dialog, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
 import { readFileSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
@@ -161,6 +162,10 @@ export function registerIpc(services: Services, paths: Paths): void {
       } catch (e) {
         log.error('Could not create your theme.json', e)
       }
+    },
+    setWindowIcon: async (e, mode) => {
+      const win = BrowserWindow.fromWebContents(e.sender)
+      if (win && !win.isDestroyed()) win.setIcon(windowIcon(v.oneOf(mode, ['light', 'dark', 'ember'] as const, 'mode')))
     },
     getThemeLayers: () => services.theme.layers(),
     saveUserTheme: async (_e, user, revision) => {

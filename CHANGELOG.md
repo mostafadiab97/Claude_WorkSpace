@@ -4,6 +4,7 @@ Each version was installed and tried by the owner (product owner) on Windows 11;
 version it was about, and what it led to.
 
 ## 0.25.1 — 14 Nov 2026 — the owner's 0.25.0 report: big Word files open, tables, short contents
+**Owner (14 Nov 2026, 0.25.1):** all 4 steps passed (self-test 25/25, 93 s); the 10,000-item Word file opens (slowly).
 **Owner (14 Nov 2026):** self-test 25/25 (79 s); test 2 passed (the title bar following reqochet's colours: "keep it
 for now"); test 3: the Word export of the 10,000-item document did not open in Word; test 4: Markdown tables in texts
 showed as text, and the big document had a 100-page contents list; test 5 (company template): later, no template yet.

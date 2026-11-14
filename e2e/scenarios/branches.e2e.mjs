@@ -1,6 +1,6 @@
 // 0.12.0 (M8) in the window: the branch panel — create a branch, switch back, compare a branch like a pull request,
 // pull it into main, and the question about uncommitted changes when switching.
-import { editText, gitIn, gitRepo, launch, scenario } from '../harness.mjs'
+import { editText, gitIn, gitRepo, launch, scenario, newItem } from '../harness.mjs'
 
 await scenario('E2E branches', async (ctx) => {
   const { repo } = gitRepo('branches')
@@ -11,7 +11,7 @@ await scenario('E2E branches', async (ctx) => {
   await win.getByRole('button', { name: 'Open repository…' }).click()
   await win.getByRole('button', { name: 'Create requirements folder' }).click()
   await win.locator('.first-run').waitFor()
-  await win.getByLabel('New item').selectOption('system-requirement')
+  await newItem(win, 'system-requirement')
   await win.getByPlaceholder('Short name of the requirement').fill('Door lock')
   await editText(win, 'The door shall lock automatically.')
   await win.getByRole('button', { name: 'Save', exact: true }).click()

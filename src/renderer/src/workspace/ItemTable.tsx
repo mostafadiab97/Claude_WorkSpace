@@ -25,6 +25,8 @@ const INDENT = 14
 export interface TreeControls {
   expandAll: () => Promise<void>
   collapseAll: () => void
+  /** Fully open, fully closed or mixed (0.23.0: the outline menu greys out what would do nothing). */
+  outline: () => 'open' | 'closed' | 'mixed'
 }
 
 /**
@@ -178,7 +180,7 @@ export function ItemTable(props: {
   useEffect(() => ensureTree(first, last), [first, last, ensureTree])
 
   useEffect(() => {
-    if (controlsRef) controlsRef.current = { expandAll: tree.expandAll, collapseAll: tree.collapseAll }
+    if (controlsRef) controlsRef.current = { expandAll: tree.expandAll, collapseAll: tree.collapseAll, outline: tree.outline }
   })
 
   // Tree: when an item is selected from elsewhere (problem list, a link, a new item, leaving search),

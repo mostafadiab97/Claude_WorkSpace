@@ -5,7 +5,7 @@ import { copyFileSync, existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import ExcelJS from 'exceljs'
-import { gitIn, launch, root, scenario, temp } from '../harness.mjs'
+import { gitIn, launch, root, scenario, temp, more, outline } from '../harness.mjs'
 
 const readSheet = async (file) => {
   const wb = new ExcelJS.Workbook()
@@ -54,7 +54,7 @@ await scenario('E2E excel', async (ctx) => {
   })
   check((await win.locator('.table-notice--ok').textContent()).includes('Committed'), 'the import is the first commit')
   check(gitIn(project, 'log', '--format=%s').trim() === 'Imported from customer-requirements.xlsx', 'commit message names the file')
-  await win.getByRole('button', { name: 'Expand all' }).click()
+  await outline(win, 'Expand all')
   await win.locator('.table__row[aria-level="2"]').first().waitFor()
   check((await win.locator('.table__row[aria-level="2"]').count()) > 0, 'the "Parent" column became the hierarchy')
 
@@ -96,7 +96,7 @@ await scenario('E2E excel', async (ctx) => {
   await win.getByRole('button', { name: 'Save', exact: true }).click()
   await win.getByRole('button', { name: 'Saved ✓' }).waitFor()
   while ((await win.locator('.table-notice--ok').count()) > 0) await win.locator('.table-notice--ok').first().getByRole('button', { name: 'Dismiss' }).click()
-  await win.getByRole('button', { name: 'Export…' }).click()
+  await more(win, 'Export…')
   await exp.getByRole('button', { name: 'Update customer-requirements.xlsx' }).click()
   await win.locator('.table-notice--ok', { hasText: 'customer-requirements.xlsx' }).waitFor()
   const updated = await readSheet(source)
@@ -105,7 +105,7 @@ await scenario('E2E excel', async (ctx) => {
 
   console.log('Import the same file again: nothing to do')
   await t.openFiles(source)
-  await win.getByRole('button', { name: 'Import…' }).click()
+  await more(win, 'Import…')
   const again = win.getByRole('dialog', { name: 'Import from Excel, CSV or ReqIF' })
   await again.getByRole('button', { name: 'Choose a file…' }).click()
   await again.locator('.import__file').waitFor()
@@ -123,14 +123,14 @@ await scenario('E2E excel', async (ctx) => {
   console.log('ReqIF: export everything, import it again')
   const reqifFile = join(work, 'thermostat.reqif')
   await t.saveAs(reqifFile)
-  await win.getByRole('button', { name: 'Export…' }).click()
+  await more(win, 'Export…')
   await exp.getByRole('radio', { name: /^ReqIF/ }).check()
   await exp.getByRole('button', { name: 'Export…' }).click()
   await win.locator('.table-notice--ok', { hasText: 'thermostat.reqif' }).waitFor()
   const xml = readFileSync(reqifFile, 'utf8')
   check((xml.match(/<SPEC-OBJECT /g) ?? []).length === 59 && xml.includes('<SPEC-RELATION ') && xml.includes('<SPEC-HIERARCHY '), 'the ReqIF file has 59 objects, relations and the hierarchy')
   await t.openFiles(reqifFile)
-  await win.getByRole('button', { name: 'Import…' }).click()
+  await more(win, 'Import…')
   const fromReqif = win.getByRole('dialog', { name: 'Import from Excel, CSV or ReqIF' })
   await fromReqif.getByRole('button', { name: 'Choose a file…' }).click()
   await fromReqif.locator('.import__file', { hasText: 'thermostat.reqif' }).waitFor()

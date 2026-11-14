@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { FieldCheck, RepoInfo } from '../../../shared/api'
 import type { FieldDef, FieldType, Schema } from '../../../shared/domain'
 import { errorMessage } from '../lib/hooks'
@@ -39,7 +39,17 @@ export function useColumnPrefs(root: string): [ColumnPrefs, (next: ColumnPrefs) 
 }
 
 /** "Columns" button: tick the columns to show, ↑/↓ to reorder; "Edit fields…" opens the field definitions. */
-export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes }: { schema: Schema; prefs: ColumnPrefs; onChange: (p: ColumnPrefs) => void; onEditFields: () => void; onEditTypes?: () => void }) {
+export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes, viewButton, top }: {
+  schema: Schema
+  prefs: ColumnPrefs
+  onChange: (p: ColumnPrefs) => void
+  onEditFields: () => void
+  onEditTypes?: () => void
+  /** 0.23.0: the toolbar's "View" icon (columns and how rows look, one pop-up) instead of the "Columns" button. */
+  viewButton?: { label: string; title: string }
+  /** Shown at the top of the pop-up (the toolbar puts the "Rows:" choice there). */
+  top?: ReactNode
+}) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -99,13 +109,20 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
 
   return (
     <div className="popover" ref={ref}>
-      <button type="button" className={open ? 'btn btn--active' : 'btn'} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-        <Icon name="columns" size={14} />
-        {T.columnsMenu.button(shown < cols.length ? shown + 2 : null, cols.length + 2)}
-        <Icon name="chevronDown" size={12} />
-      </button>
+      {viewButton ? (
+        <button type="button" className={open ? 'icon-btn is-open' : 'icon-btn'} aria-expanded={open} aria-haspopup="dialog" aria-label={viewButton.label} title={viewButton.title} data-toolbar-item="" onClick={() => setOpen((o) => !o)}>
+          <Icon name="columns" />
+        </button>
+      ) : (
+        <button type="button" className={open ? 'btn btn--active' : 'btn'} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+          <Icon name="columns" size={14} />
+          {T.columnsMenu.button(shown < cols.length ? shown + 2 : null, cols.length + 2)}
+          <Icon name="chevronDown" size={12} />
+        </button>
+      )}
       {open && (
-        <div className="popover__panel" role="dialog" aria-label={T.columnsMenu.label}>
+        <div className="popover__panel" role="dialog" aria-label={viewButton?.label ?? T.columnsMenu.label}>
+          {top}
           <p className="popover__hint">{T.columnsMenu.hint}</p>
           <p className="sr-only" aria-live="polite">
             {moved}

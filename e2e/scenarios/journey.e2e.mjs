@@ -4,7 +4,7 @@
 //   npm run build && npm run test:e2e            (screenshots go to e2e/out/)
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { editText, gitIn, gitRepo, launch, scenario, temp } from '../harness.mjs'
+import { editText, gitIn, gitRepo, launch, scenario, temp, more, outline, toggleText, newItem } from '../harness.mjs'
 
 await scenario('E2E journey', async (ctx) => {
   const { repo, remote } = gitRepo('journey')
@@ -34,7 +34,7 @@ await scenario('E2E journey', async (ctx) => {
   // 0.13.0: the filters live in a pop-up behind the "Filters" button (one toolbar row)
   const filters = async () => {
     const panel = win.getByRole('group', { name: 'Filters', exact: true })
-    if (!(await panel.isVisible())) await win.getByRole('button', { name: /^Filters/ }).click()
+    if (!(await panel.isVisible())) await win.getByRole('button', { name: /^Filters/ }).click() // an icon now; its name stays "Filters" (0.23.0)
     return panel
   }
   console.log('Step 2 — create a hierarchy')
@@ -48,7 +48,7 @@ await scenario('E2E journey', async (ctx) => {
       if (await ask.isVisible()) await ask.getByRole('button', { name: 'Decide later' }).click()
     }
   }
-  await win.getByLabel('New item').selectOption('stakeholder-need')
+  await newItem(win, 'stakeholder-need')
   await win.getByPlaceholder('Short name of the requirement').fill('Comfortable temperature')
   await editText(win, 'Users want the room to stay at the chosen temperature.')
   await save()
@@ -76,8 +76,7 @@ await scenario('E2E journey', async (ctx) => {
     await save()
   }
   // 0.16.4: a new item goes below the selected one by default; this test case belongs at the end of the document
-  await win.getByLabel('Insert position').selectOption('end')
-  await win.getByLabel('New item').selectOption('test-case')
+  await newItem(win, 'test-case', 'end')
   await win.getByPlaceholder('Short name of the requirement').fill('Verify accuracy at 20 °C')
   await save()
 
@@ -113,7 +112,7 @@ await scenario('E2E journey', async (ctx) => {
 
   console.log('Test 6 — choose a top-level parent; move whole sub-groups')
   // a chapter heading at the top level
-  await win.getByLabel('New item').selectOption('information')
+  await newItem(win, 'information')
   await win.getByPlaceholder('Short name of the requirement').fill('Chapter 1 — Heating')
   await save()
   const infoId = (await win.locator('.editor__id').textContent()).trim()
@@ -164,10 +163,10 @@ await scenario('E2E journey', async (ctx) => {
   check(target !== null && top[0] === 'Comfortable temperature' && top[1] === 'Chapter 1 — Heating', 'drop on the upper edge: placed before that row')
 
   console.log('Step 3 — filter the table and open an item')
-  await win.getByRole('button', { name: 'Expand all' }).click()
+  await outline(win, 'Expand all')
   await win.waitForTimeout(400)
   check((await rows().count()) === 5, 'expand all: 5 rows')
-  await win.getByRole('button', { name: 'Collapse all' }).click()
+  await outline(win, 'Collapse all')
   check((await rows().count()) === 2, 'collapse all: only the 2 top-level items')
   await (await filters()).getByLabel('Type filter').selectOption('system-requirement')
   await win.waitForTimeout(300)
@@ -197,8 +196,8 @@ await scenario('E2E journey', async (ctx) => {
   await shot('04-table-and-editor')
 
   console.log('Fields — show/hide columns, add a field')
-  await win.getByRole('button', { name: /^Columns/ }).click()
-  await win.getByRole('dialog', { name: 'Columns' }).getByRole('checkbox', { name: 'Owner' }).uncheck()
+  await win.getByRole('button', { name: 'View', exact: true }).click()
+  await win.getByRole('dialog', { name: 'View' }).getByRole('checkbox', { name: 'Owner' }).uncheck()
   check((await win.getByRole('columnheader', { name: /^Owner/ }).count()) === 0, 'unticking Owner hides the column')
   await win.getByRole('button', { name: 'Edit fields…' }).click()
   await win.getByRole('button', { name: '+ Add field' }).click()
@@ -219,14 +218,14 @@ await scenario('E2E journey', async (ctx) => {
   check((await typeBox.inputValue()) === 'system-requirement', 'the editor shows the item type')
   check(await typeBox.isEnabled(), 'the type can be changed (IDs no longer depend on it, 0.9.0)')
   check(/^1\.\d$/.test((await win.locator('.editor__number').textContent()) ?? ''), 'the editor header shows the outline number')
-  await win.getByRole('button', { name: /^Columns/ }).click()
-  const colMenu = win.getByRole('dialog', { name: 'Columns' })
+  await win.getByRole('button', { name: 'View', exact: true }).click()
+  const colMenu = win.getByRole('dialog', { name: 'View' })
   check((await colMenu.getByRole('checkbox', { name: 'Text' }).count()) === 1 && (await colMenu.getByRole('checkbox', { name: 'Links' }).count()) === 1, 'Columns menu offers Text and Links')
   await win.keyboard.press('Escape')
   // D-19a (0.19.0): the main column shows title and whole text; "Show text" off gives one line and the Text column
   check((await rowOf('Temperature accuracy').locator('.table__main-text', { hasText: 'thermostat shall measure' }).count()) === 1, 'the main column shows the whole text under the title')
   check((await win.getByRole('columnheader', { name: /^Text/ }).count()) === 0, 'no Text column while the main column shows the text')
-  await win.getByRole('button', { name: 'Show text' }).click()
+  await toggleText(win)
   check((await win.getByRole('columnheader', { name: /^Text/ }).count()) === 1 && (await win.getByRole('columnheader', { name: /^Links/ }).count()) === 1, 'one line per item: table has Text and Links columns')
   // owner on 0.19.0 test 2: after Show text off, rows kept their tall measured slots (empty space between rows)
   await win.getByRole('button', { name: `Collapse ${stkId}` }).click()
@@ -239,13 +238,13 @@ await scenario('E2E journey', async (ctx) => {
   check((await rowOf('Temperature accuracy').locator('.table__td').filter({ hasText: 'thermostat shall measure' }).count()) === 1, 'Text column shows the start of the text')
   const headers = () => win.getByRole('columnheader').allTextContents()
   const before = (await headers()).findIndex((h) => h.startsWith('Text'))
-  await win.getByRole('button', { name: /^Columns/ }).click()
+  await win.getByRole('button', { name: 'View', exact: true }).click()
   await win.getByRole('button', { name: 'Move Text column up' }).click()
   await win.getByRole('button', { name: 'Move Text column up' }).click()
   await win.keyboard.press('Escape')
   check((await headers()).findIndex((h) => h.startsWith('Text')) === before - 2, 'Columns menu moves the Text column two places left')
-  await win.getByRole('button', { name: 'Show text' }).click() // back to the main column for the rest
-  await win.getByRole('button', { name: /^Columns/ }).click()
+  await toggleText(win) // back to the main column for the rest
+  await win.getByRole('button', { name: 'View', exact: true }).click()
   await win.getByRole('button', { name: 'Edit fields…' }).click()
   await win.getByRole('button', { name: '+ Add field' }).click()
   const m = await win.locator('.fields-table__row').count()
@@ -346,7 +345,7 @@ await scenario('E2E journey', async (ctx) => {
   const tcPath = join(repo, 'requirements', 'Specification', tcFile)
   writeFileSync(tcPath, readFileSync(tcPath, 'utf8').replace('Verify accuracy at 20 °C', 'Verify accuracy at 25 °C'))
   await win.evaluate(() => window.dispatchEvent(new Event('focus')))
-  await win.getByRole('button', { name: 'Expand all' }).click()
+  await outline(win, 'Expand all')
   await win.getByText('Verify accuracy at 25 °C').first().waitFor({ timeout: 5000 })
   check(true, 'outside edit picked up on refocus')
 
@@ -398,7 +397,7 @@ await scenario('E2E journey', async (ctx) => {
 
   await gitbar.getByRole('button', { name: 'Pull' }).click()
   await gitbar.locator('.gitbar__notice', { hasText: 'Pulled: 1 item changed.' }).waitFor()
-  await win.getByRole('button', { name: 'Expand all' }).click()
+  await outline(win, 'Expand all')
   await rowOf('Verify accuracy at 22 °C').waitFor()
   check(true, "pull brings Bob's change into the table")
 
@@ -560,7 +559,7 @@ await scenario('E2E journey', async (ctx) => {
 
   console.log('M6 — export to CSV (Excel) and Markdown')
   await saveAs('all.csv')
-  await win.getByRole('button', { name: 'Export…' }).click()
+  await more(win, 'Export…')
   const exportDialog = win.getByRole('dialog', { name: 'Export' })
   check(await exportDialog.getByLabel(/^Excel workbook/).isChecked(), 'Excel is the default format (0.11.0)')
   await exportDialog.getByLabel(/^CSV/).check()
@@ -575,7 +574,7 @@ await scenario('E2E journey', async (ctx) => {
   await (await filters()).getByLabel('Type filter').selectOption('system-requirement')
   await win.waitForTimeout(400)
   await saveAs('sys.md')
-  await win.getByRole('button', { name: 'Export…' }).click()
+  await more(win, 'Export…')
   await exportDialog.getByLabel(/^Only the 2 items/).check()
   await exportDialog.getByLabel(/^Markdown/).check()
   await exportDialog.getByRole('button', { name: 'Export…' }).click()

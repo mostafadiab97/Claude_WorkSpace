@@ -188,7 +188,7 @@ async function step3Sandbox() {
       await win.locator('.document-notice').getByRole('button', { name: 'Name the document' }).click()
       await win.getByLabel(/New name for items/).fill('Acceptance Spec')
       await win.getByRole('button', { name: 'Rename', exact: true }).click()
-      await win.locator('#document-picker').filter({ hasText: 'Acceptance Spec' }).waitFor({ timeout: 900_000 })
+      await win.locator('.doc-btn', { hasText: 'Acceptance Spec' }).waitFor({ timeout: 900_000 })
       const left = sg('status', '--porcelain', '--', 'requirements').trim()
       const subject = sg('log', '-1', '--format=%s').trim()
       if (existsSync(join(sandbox, 'requirements', 'items')) || left !== '' || !subject.includes('Acceptance Spec')) {
@@ -217,7 +217,9 @@ async function step4Push() {
     await win.getByRole('button', { name: 'Open repository…' }).click()
     await win.getByRole('button', { name: 'Create requirements folder' }).click()
     await win.locator('.table__empty, .first-run').first().waitFor() // 0.16.4: an empty project shows the first-run card
-    await win.getByLabel('New item').selectOption('system-requirement')
+    await win.locator('.new-item__btn').click()
+    await win.getByRole('dialog', { name: 'New item' }).getByRole('combobox').selectOption('system-requirement')
+    await win.getByRole('dialog', { name: 'New item' }).getByRole('button', { name: 'Create' }).click()
     await win.getByPlaceholder('Short name of the requirement').fill('Acceptance run item')
     await win.getByRole('button', { name: 'Save', exact: true }).click()
     await win.getByRole('button', { name: 'Saved ✓' }).waitFor()

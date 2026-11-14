@@ -2,7 +2,7 @@
 // 0.17.2: a file copied into another document appears and gets a new ID; incomplete items are marked in the table.
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { gitIn, gitRepo, launch, root, scenario } from '../harness.mjs'
+import { gitIn, gitRepo, launch, root, scenario, waitPickDocument } from '../harness.mjs'
 
 const item = (id, title, order) => `---\nid: ${id}\ntype: system-requirement\ntitle: ${title}\norder: ${order}\n---\ntext\n`
 
@@ -52,7 +52,7 @@ await scenario('E2E history-0.18', async (ctx) => {
   await bar.waitFor()
   await win.locator('.table__row', { hasText: 'Heat the room' }).waitFor()
   check((await win.locator('.table__row', { hasText: 'Heat the room fast' }).count()) === 0, 'the table shows the old title')
-  check((await win.getByRole('button', { name: 'Push' }).count()) === 0 && (await win.getByLabel('New item').count()) === 0, 'no Git actions and no new items while an old version is shown')
+  check((await win.getByRole('button', { name: 'Push' }).count()) === 0 && (await win.locator('.new-item__btn').count()) === 0, 'no Git actions and no new items while an old version is shown')
   await win.locator('.table__row', { hasText: 'Heat the room' }).click()
   await win.locator('.editor__id', { hasText: 'REQ-AAAAAAA' }).waitFor()
   check(await win.locator('.editor').getByLabel('Title').isDisabled(), 'the editor shows the old item read-only')
@@ -85,8 +85,7 @@ await scenario('E2E history-0.18', async (ctx) => {
   writeFileSync(join(req, 'Software', '.gitkeep'), '')
   writeFileSync(join(req, 'Software', 'REQ-AAAAAAA.md'), readFileSync(join(req, 'System', 'REQ-AAAAAAA.md'), 'utf8'))
   await win.evaluate(() => window.dispatchEvent(new Event('focus')))
-  await win.locator('#document-picker option', { hasText: 'Software (1)' }).waitFor({ state: 'attached', timeout: 15_000 })
-  await win.locator('#document-picker').selectOption({ label: 'Software (1)' })
+  await waitPickDocument(win, 'Software (1)')
   await win.locator('.table__row', { hasText: 'Heat the room fast' }).waitFor()
   check(true, 'the copy appears in its new document')
   await win.locator('.statusbar').getByRole('button', { name: /problem/ }).click()

@@ -15,7 +15,7 @@ const moduleInternals = {
 }
 
 export default tseslint.config(
-  { ignores: ['out/**', 'dist/**', 'node_modules/**'] },
+  { ignores: ['out/**', 'dist/**', 'node_modules/**', 'docs/**', 'website/**'] }, // docs: video and mock-up render scripts (browser code), not the app
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

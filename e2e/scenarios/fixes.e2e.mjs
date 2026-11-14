@@ -5,7 +5,7 @@
 import { spawn } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { gitIn, gitRepo, launch, root, scenario } from '../harness.mjs'
+import { gitIn, gitRepo, launch, root, scenario, outline, toggleText } from '../harness.mjs'
 
 await scenario('E2E fixes', async (ctx) => {
   const { repo } = gitRepo('fixes')
@@ -62,9 +62,9 @@ await scenario('E2E fixes', async (ctx) => {
 
   console.log('P-04 — Expand all opens every level')
   // one line per item, so all 21 rows fit on the screen to be counted (rows with text are taller, 0.19.0)
-  await win.getByRole('button', { name: 'Show text' }).click()
-  await win.getByRole('button', { name: 'Collapse all' }).click()
-  await win.getByRole('button', { name: 'Expand all' }).click()
+  await toggleText(win)
+  await outline(win, 'Collapse all')
+  await outline(win, 'Expand all')
   await win.locator('.table__row[aria-level="3"]').first().waitFor()
   await win.waitForFunction(() => document.querySelectorAll('.table__row--loading').length === 0)
   check((await win.locator('.table__row[data-id]').count()) === 21, 'all 21 items have a row (3 levels)')

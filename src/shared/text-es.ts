@@ -288,6 +288,13 @@ export const es: Texts = {
     atLeastOne: 'Conserve al menos un tipo de elemento.'
   },
   documents: {
+    button: (name: string, count: number) => `Documento: ${name}, ${count} elemento(s)`,
+    countShort: (count: number) => `${count}`,
+    menuLabel: 'Documentos',
+    renameNamed: (name: string) => `Cambiar nombre de «${name}»…`,
+    mergeNamed: (name: string) => `Fusionar «${name}» con…`,
+    deleteNamed: (name: string) => `Eliminar «${name}»…`,
+    renameHint: 'Cambia el nombre de la carpeta — un commit. Intro cambia el nombre, Esc cancela.',
     label: 'Documento',
     pickerTooltip: 'Los documentos de este repositorio: una carpeta cada uno dentro de requirements/. La tabla muestra un documento o todos.',
     all: (count: number) => `Todos los documentos (${count})`,
@@ -915,6 +922,16 @@ export const es: Texts = {
   },
 
   workspace: {
+    toolbarLabel: 'Barra de herramientas de elementos',
+    outline: 'Expandir o contraer todo',
+    more: 'Más',
+    view: 'Vista',
+    rowsText: 'Filas: título y texto',
+    rowsOneLine: 'Filas: una línea por elemento',
+    newPanel: 'Nuevo elemento',
+    newType: 'Tipo',
+    newPlace: 'Ubicación',
+    keyHint: (label: string, keys: string) => `${label} · ${keys}`,
     editorWidth: 'Arrastre o use ← → para cambiar el ancho del editor (doble clic o Inicio: automático)',
     filters: 'Filtros',
     filtersTooltip: 'Filtrar por tipo, valores de campos y vínculos',

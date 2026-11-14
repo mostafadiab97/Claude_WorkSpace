@@ -1,7 +1,7 @@
 // 0.13.0 in the window: the English / العربية switch (the owner, 31 Oct 2026). The whole window flips to right-to-left,
 // texts from the window and from the core (Git messages) follow, an unsaved edit survives the switch, and the choice
 // is remembered at the next start.
-import { gitIn, gitRepo, launch, scenario, temp } from '../harness.mjs'
+import { gitIn, gitRepo, launch, scenario, temp, newItem } from '../harness.mjs'
 
 await scenario('E2E language', async (ctx) => {
   const { repo } = gitRepo('language')
@@ -12,7 +12,7 @@ await scenario('E2E language', async (ctx) => {
   await win.getByRole('button', { name: 'Open repository…' }).click()
   await win.getByRole('button', { name: 'Create requirements folder' }).click()
   await win.locator('.first-run').waitFor()
-  await win.getByLabel('New item').selectOption('system-requirement')
+  await newItem(win, 'system-requirement')
   await win.getByPlaceholder('Short name of the requirement').fill('Door lock')
   await win.getByRole('button', { name: 'Save', exact: true }).click()
   await win.getByRole('button', { name: 'Saved ✓' }).waitFor()

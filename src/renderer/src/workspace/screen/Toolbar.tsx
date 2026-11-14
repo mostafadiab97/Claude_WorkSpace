@@ -7,12 +7,25 @@ import type { ColumnPrefs } from '../ItemTable'
 import type { Filters, LinkFilter } from './useFilters'
 import { useFeature } from '../../lib/features'
 import { Icon } from '../../components/icons'
+import { MenuButton } from '../../components/MenuButton'
+import { useSessionState } from '../../lib/sessionState'
 
-/** Search, filters, columns, export, expand/collapse and "New item" above the table. */
+/** Keys shown in tooltips (language-neutral; 0.23.0). */
+export const KEYS = { search: 'Ctrl+F', filters: 'Ctrl+Shift+F', expand: 'Ctrl+Shift+↓', collapse: 'Ctrl+Shift+↑', newItem: 'Ctrl+N', newDocument: 'Ctrl+Shift+N', rename: 'F2' }
+
+type Where = 'after' | 'inside' | 'end'
+
+/**
+ * The bar above the table (0.23.0, the owner's ideas of 13 Nov and Fable's review): search · outline (Expand / Collapse
+ * all, the line that would do nothing greyed out) · Filters (icon + count) · View (rows and columns) · More (Import,
+ * Export) · New item (a small panel: type and place, then the editor). The document button sits before it (DocumentBar).
+ */
 export function Toolbar({ searchRef, newRef, ...props }: {
   /** For the keyboard: Ctrl+F focuses the search, Ctrl+N opens "New item" (UX-25). */
   searchRef?: RefObject<HTMLInputElement | null>
-  newRef?: RefObject<HTMLSelectElement | null>
+  newRef?: RefObject<HTMLButtonElement | null>
+  /** Ctrl+Shift+F opens the filters (0.23.0). */
+  filtersRef?: RefObject<HTMLButtonElement | null>
   schema: Schema
   filters: Filters
   prefs: ColumnPrefs
@@ -26,12 +39,14 @@ export function Toolbar({ searchRef, newRef, ...props }: {
   expanding: boolean
   onExpandAll: () => void
   onCollapseAll: () => void
+  /** Fully open, fully closed or mixed — read when the outline menu opens. */
+  outline: () => 'open' | 'closed' | 'mixed'
   onNewItem: (type: string) => void
   /** Where a new item goes (the owner, 5 Nov 2026). */
-  newWhere: 'after' | 'inside' | 'end'
+  newWhere: Where
   /** An old version is shown (D-19b): no new items, no import. */
   readOnly?: boolean
-  onNewWhere: (w: 'after' | 'inside' | 'end') => void
+  onNewWhere: (w: Where) => void
   hasSelection: boolean
 }) {
   const { schema, filters: f } = props
@@ -40,21 +55,25 @@ export function Toolbar({ searchRef, newRef, ...props }: {
   const importOn = useFeature('import')
   const exportOn = useFeature('export')
   const activeCount = (f.types ? 1 : 0) + Object.values(f.fieldFilters).filter(Boolean).length + (f.linkFilter ? 1 : 0)
+  const showMore = (importOn && !props.readOnly) || exportOn
   return (
     <div className="toolbar">
-      <input ref={searchRef} className="input toolbar__search" type="search" placeholder={tw.searchPlaceholder} value={f.text} onChange={(e) => f.setText(e.target.value)} aria-label={tw.search} title={tw.searchTooltip} />
-      {/* UX-28: expand/collapse act on the tree, so they sit by the search */}
-      {!f.filtered && (
-        <>
-          <button type="button" className="icon-btn" disabled={props.expanding} onClick={props.onExpandAll} aria-label={tw.expandAll} title={props.expanding ? tw.expanding : tw.expandAllTooltip}>
-            <Icon name="expandAll" />
-          </button>
-          <button type="button" className="icon-btn" onClick={props.onCollapseAll} aria-label={tw.collapseAll} title={tw.collapseAllTooltip}>
-            <Icon name="collapseAll" />
-          </button>
-        </>
-      )}
-      <FilterMenu active={activeCount}>
+      <input ref={searchRef} className="input toolbar__search" type="search" placeholder={tw.searchPlaceholder} value={f.text} onChange={(e) => f.setText(e.target.value)} aria-label={tw.search} title={tw.keyHint(tw.searchTooltip, KEYS.search)} data-toolbar-item="" />
+      {/* T-2 a: one outline button; while a filter is on the list is flat, so both lines grey out (the bar keeps its shape) */}
+      <MenuButton
+        label={tw.outline}
+        icon="expandAll"
+        disabled={props.expanding}
+        title={props.expanding ? tw.expanding : tw.outline}
+        entries={() => {
+          const state = f.filtered ? 'flat' : props.outline()
+          return [
+            { kind: 'item', label: tw.keyHint(tw.expandAll, KEYS.expand), icon: 'expandAll', disabled: state === 'open' || state === 'flat', onSelect: props.onExpandAll },
+            { kind: 'item', label: tw.keyHint(tw.collapseAll, KEYS.collapse), icon: 'collapseAll', disabled: state === 'closed' || state === 'flat', onSelect: props.onCollapseAll }
+          ]
+        }}
+      />
+      <FilterMenu active={activeCount} buttonRef={props.filtersRef}>
       <select className="input" value={f.types} onChange={(e) => f.setTypes(e.target.value)} aria-label={tw.typeFilter}>
         <option value="">{tw.allTypes}</option>
         {schema.itemTypes.map((t) => (
@@ -94,63 +113,139 @@ export function Toolbar({ searchRef, newRef, ...props }: {
       </select>
       </FilterMenu>
       {f.filtered && (
-        <button type="button" className="btn btn--clear-filters" onClick={f.clear}>
+        <button type="button" className="btn btn--clear-filters" onClick={f.clear} data-toolbar-item="">
           {tw.clearFilters}
         </button>
       )}
-      <ColumnsMenu schema={schema} prefs={props.prefs} onChange={props.onPrefs} onEditFields={props.onEditFields} onEditTypes={props.onEditTypes} />
-      {/* D-19a: title and whole text in the main column, or one line per item */}
-      <button
-        type="button"
-        className={props.prefs.oneLine ? 'btn' : 'btn btn--active'}
-        aria-pressed={props.prefs.oneLine !== true}
-        title={tw.showTextTooltip}
-        onClick={() => props.onPrefs({ ...props.prefs, oneLine: props.prefs.oneLine !== true })}
-      >
-        {tw.showText}
-      </button>
-      {importOn && !props.readOnly && (
-        <button type="button" className="btn" onClick={props.onImport} title={T.importDialog.buttonTooltip}>
-          {T.importDialog.button}
-        </button>
-      )}
-      {exportOn && (
-        <button type="button" className="btn" onClick={props.onExport} disabled={!props.canExport} title={T.exportDialog.buttonTooltip}>
-          {tw.export}
-        </button>
+      {/* T-4: Columns and Show text are one "View" pop-up — both answer "how does the table look" */}
+      <ColumnsMenu
+        schema={schema}
+        prefs={props.prefs}
+        onChange={props.onPrefs}
+        onEditFields={props.onEditFields}
+        onEditTypes={props.onEditTypes}
+        viewButton={{ label: tw.view, title: tw.view }}
+        top={
+          <fieldset className="view-rows">
+            <legend className="sr-only">{tw.showText}</legend>
+            <label className="check" title={tw.showTextTooltip}>
+              <input type="radio" name="view-rows" checked={props.prefs.oneLine !== true} onChange={() => props.onPrefs({ ...props.prefs, oneLine: false })} />
+              {tw.rowsText}
+            </label>
+            <label className="check">
+              <input type="radio" name="view-rows" checked={props.prefs.oneLine === true} onChange={() => props.onPrefs({ ...props.prefs, oneLine: true })} />
+              {tw.rowsOneLine}
+            </label>
+          </fieldset>
+        }
+      />
+      {showMore && (
+        <MenuButton
+          label={tw.more}
+          icon="more"
+          entries={() => [
+            ...(importOn && !props.readOnly ? [{ kind: 'item' as const, label: T.importDialog.button, hint: T.importDialog.buttonTooltip, onSelect: props.onImport }] : []),
+            ...(exportOn ? [{ kind: 'item' as const, label: tw.export, hint: T.exportDialog.buttonTooltip, disabled: !props.canExport, onSelect: props.onExport }] : [])
+          ]}
+        />
       )}
       <span className="toolbar__spacer" />
-      {!props.readOnly && (
-        // where + what stay together when the toolbar wraps (review 2, UI B-01)
-        <span className="toolbar__group">
-      <select
-        className="select-btn select-btn--fit"
-        value={props.hasSelection ? props.newWhere : 'end'}
-        disabled={!props.hasSelection}
-        onChange={(e) => props.onNewWhere(e.target.value as 'after' | 'inside' | 'end')}
-        aria-label={tw.newWhere}
-        title={props.hasSelection ? tw.newWhereTooltip : tw.newWhereNone}
-      >
-        <option value="after">{tw.newAfter}</option>
-        <option value="inside">{tw.newInside}</option>
-        <option value="end">{tw.newEnd}</option>
-      </select>
-      <select ref={newRef} title={tw.newItemTooltip} className="select-btn select-btn--primary select-btn--fit" value="" onChange={(e) => props.onNewItem(e.target.value)} aria-label={tw.newItem}>
-        <option value="">{tw.newItemOption}</option>
-        {schema.itemTypes.map((t) => (
-          <option key={t.id} value={t.id}>
-            {typeLabel(t)}
-          </option>
-        ))}
-      </select>
-        </span>
+      {!props.readOnly && <NewItemButton buttonRef={newRef} schema={schema} where={props.hasSelection ? props.newWhere : 'end'} hasSelection={props.hasSelection} onWhere={props.onNewWhere} onCreate={props.onNewItem} />}
+    </div>
+  )
+}
+
+/**
+ * T-3 a: "New item" opens a small panel — the type (the last one used is chosen) and the place — then the draft opens in
+ * the editor as before (the editor holds title, text and every other field). Enter creates, Esc cancels.
+ */
+function NewItemButton(props: { buttonRef?: RefObject<HTMLButtonElement | null>; schema: Schema; where: Where; hasSelection: boolean; onWhere: (w: Where) => void; onCreate: (type: string) => void }) {
+  const tw = T.workspace
+  const [open, setOpen] = useState(false)
+  const [type, setType] = useSessionState('newItem.type', props.schema.itemTypes[0]?.id ?? '')
+  const box = useRef<HTMLDivElement>(null)
+  const ownRef = useRef<HTMLButtonElement>(null)
+  const btn = props.buttonRef ?? ownRef
+  const types = props.schema.itemTypes
+  const chosen = types.some((t) => t.id === type) ? type : (types[0]?.id ?? '')
+  useEffect(() => {
+    if (!open) return
+    box.current?.querySelector<HTMLSelectElement>('select')?.focus()
+    const onDown = (e: MouseEvent): void => {
+      if (!box.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [open])
+  const close = (): void => {
+    setOpen(false)
+    btn.current?.focus()
+  }
+  const places: { value: Where; label: string; off: boolean }[] = [
+    { value: 'after', label: tw.newAfter, off: !props.hasSelection },
+    { value: 'inside', label: tw.newInside, off: !props.hasSelection },
+    { value: 'end', label: tw.newEnd, off: false }
+  ]
+  return (
+    <div className="menu-btn new-item" ref={box}>
+      <button ref={btn} type="button" className={`btn btn--primary new-item__btn${open ? ' is-open' : ''}`} aria-haspopup="dialog" aria-expanded={open} title={tw.keyHint(tw.newItemTooltip, KEYS.newItem)} data-toolbar-item="" onClick={() => setOpen((o) => !o)}>
+        <Icon name="plus" />
+        <span className="new-item__word">{tw.newItem}</span>
+      </button>
+      {open && (
+        <form
+          className="menu-btn__panel new-item__panel"
+          role="dialog"
+          aria-label={tw.newPanel}
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (!chosen) return
+            setOpen(false)
+            props.onCreate(chosen)
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              e.preventDefault()
+              e.stopPropagation()
+              close()
+            }
+          }}
+        >
+          <label className="new-item__field">
+            <span>{tw.newType}</span>
+            <select className="input" value={chosen} onChange={(e) => setType(e.target.value)}>
+              {types.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {typeLabel(t)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <fieldset className="new-item__places" title={props.hasSelection ? tw.newWhereTooltip : tw.newWhereNone}>
+            <legend>{tw.newPlace}</legend>
+            {places.map((p) => (
+              <label key={p.value} className="check">
+                <input type="radio" name="new-item-place" disabled={p.off} checked={props.where === p.value} onChange={() => props.onWhere(p.value)} />
+                {p.label}
+              </label>
+            ))}
+          </fieldset>
+          <div className="actions">
+            <button type="submit" className="btn btn--primary" disabled={!chosen}>
+              {T.documents.create}
+            </button>
+            <button type="button" className="btn" onClick={close}>
+              {T.common.cancel}
+            </button>
+          </div>
+        </form>
       )}
     </div>
   )
 }
 
 /** The filters in a pop-up (0.13.0: the toolbar fits in one row); the button shows how many are active. */
-function FilterMenu({ active, children }: { active: number; children: ReactNode }) {
+function FilterMenu({ active, children, buttonRef }: { active: number; children: ReactNode; buttonRef?: RefObject<HTMLButtonElement | null> }) {
   const [open, setOpen] = useState(false)
   const box = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -170,9 +265,9 @@ function FilterMenu({ active, children }: { active: number; children: ReactNode 
   }, [open])
   return (
     <div className="filters" ref={box}>
-      <button type="button" className={open ? 'btn btn--active' : 'btn'} aria-expanded={open} onClick={() => setOpen((v) => !v)} title={T.workspace.filtersTooltip}>
-        <Icon name="filter" size={14} />
-        {T.workspace.filters}
+      {/* T-4: an icon with its count; the count is spoken too ("Filters, 2") */}
+      <button ref={buttonRef} type="button" className={open ? 'icon-btn is-open filters__btn' : 'icon-btn filters__btn'} aria-expanded={open} aria-haspopup="dialog" aria-label={active > 0 ? `${T.workspace.filters}, ${active}` : T.workspace.filters} onClick={() => setOpen((v) => !v)} title={T.workspace.keyHint(T.workspace.filtersTooltip, KEYS.filters)} data-toolbar-item="">
+        <Icon name="filter" />
         {active > 0 && <span className="filters__count">{active}</span>}
       </button>
       {open && (

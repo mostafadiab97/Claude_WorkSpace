@@ -302,6 +302,14 @@ const en = {
     atLeastOne: 'Keep at least one item type.'
   },
   documents: {
+    // 0.23.0 the document button and its menu (the owner, 13 Nov; Fable's review T-1)
+    button: (name: string, count: number) => `Document: ${name}, ${count} item(s)`,
+    countShort: (count: number) => `${count}`,
+    menuLabel: 'Documents',
+    renameNamed: (name: string) => `Rename "${name}"…`,
+    mergeNamed: (name: string) => `Merge "${name}" into…`,
+    deleteNamed: (name: string) => `Delete "${name}"…`,
+    renameHint: 'Renames the folder — one commit. Enter renames, Esc cancels.',
     label: 'Document',
     pickerTooltip: 'The documents of this repository — one folder each under requirements/. The table shows one document, or all of them.',
     all: (count: number) => `All documents (${count})`,
@@ -929,6 +937,17 @@ const en = {
   },
 
   workspace: {
+    // 0.23.0 the bar above the table (the owner, 13 Nov; Fable's review T-2..T-4)
+    toolbarLabel: 'Items toolbar',
+    outline: 'Expand or collapse all',
+    more: 'More',
+    view: 'View',
+    rowsText: 'Rows: title and text',
+    rowsOneLine: 'Rows: one line per item',
+    newPanel: 'New item',
+    newType: 'Type',
+    newPlace: 'Place',
+    keyHint: (label: string, keys: string) => `${label} · ${keys}`,
     editorWidth: 'Drag or use ← → to change the editor width (double-click or Home: automatic)',
     filters: 'Filters',
     filtersTooltip: 'Filter by type, field values and links',

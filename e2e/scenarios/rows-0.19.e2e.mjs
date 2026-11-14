@@ -2,7 +2,7 @@
 // measured while the text was shown were kept). 1,500 items with long texts, like the sandbox.
 import { execFileSync } from 'node:child_process'
 import { join } from 'node:path'
-import { gitIn, gitRepo, launch, root, scenario } from '../harness.mjs'
+import { gitIn, gitRepo, launch, root, scenario, outline, toggleText } from '../harness.mjs'
 
 await scenario('E2E rows-0.19', async (ctx) => {
   const { repo } = gitRepo('rows019')
@@ -15,7 +15,7 @@ await scenario('E2E rows-0.19', async (ctx) => {
   await win.locator('.table__row[data-id]').first().waitFor()
   const scroller = win.locator('.table__scroll')
   // text shown (default): open everything and scroll through, so many rows are measured tall
-  await win.getByRole('button', { name: 'Expand all' }).click()
+  await outline(win, 'Expand all')
   await win.waitForTimeout(800)
   for (let i = 0; i < 6; i++) {
     await scroller.evaluate((el, k) => (el.scrollTop = k * 1500), i)
@@ -23,10 +23,10 @@ await scenario('E2E rows-0.19', async (ctx) => {
   }
   await scroller.evaluate((el) => (el.scrollTop = 0))
   // one line per item, then close and open the levels again
-  await win.getByRole('button', { name: 'Show text' }).click()
-  await win.getByRole('button', { name: 'Collapse all' }).click()
+  await toggleText(win)
+  await outline(win, 'Collapse all')
   await win.waitForTimeout(300)
-  await win.getByRole('button', { name: 'Expand all' }).click()
+  await outline(win, 'Expand all')
   await win.waitForTimeout(800)
   for (let i = 0; i < 4; i++) {
     await scroller.evaluate((el, k) => (el.scrollTop = k * 900), i)
@@ -37,7 +37,7 @@ await scenario('E2E rows-0.19', async (ctx) => {
   }
   await t.shot('rows-0.19-one-line')
   // and back: text shown again, rows never overlap
-  await win.getByRole('button', { name: 'Show text' }).click()
+  await toggleText(win)
   await win.waitForTimeout(800)
   for (let i = 0; i < 3; i++) {
     await scroller.evaluate((el, k) => (el.scrollTop = k * 1200), i)

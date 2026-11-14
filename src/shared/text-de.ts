@@ -290,6 +290,13 @@ export const de: Texts = {
     atLeastOne: 'Behalten Sie mindestens einen Elementtyp.'
   },
   documents: {
+    button: (name: string, count: number) => `Dokument: ${name}, ${count} Element(e)`,
+    countShort: (count: number) => `${count}`,
+    menuLabel: 'Dokumente',
+    renameNamed: (name: string) => `„${name}“ umbenennen…`,
+    mergeNamed: (name: string) => `„${name}“ zusammenführen mit…`,
+    deleteNamed: (name: string) => `„${name}“ löschen…`,
+    renameHint: 'Benennt den Ordner um — ein Commit. Eingabe benennt um, Esc bricht ab.',
     label: 'Dokument',
     pickerTooltip: 'Die Dokumente dieses Repositorys — je ein Ordner unter requirements/. Die Tabelle zeigt ein Dokument oder alle.',
     all: (count: number) => `Alle Dokumente (${count})`,
@@ -917,6 +924,16 @@ export const de: Texts = {
   },
 
   workspace: {
+    toolbarLabel: 'Werkzeugleiste der Elemente',
+    outline: 'Alle auf- oder zuklappen',
+    more: 'Mehr',
+    view: 'Ansicht',
+    rowsText: 'Zeilen: Titel und Text',
+    rowsOneLine: 'Zeilen: eine Zeile pro Element',
+    newPanel: 'Neues Element',
+    newType: 'Typ',
+    newPlace: 'Position',
+    keyHint: (label: string, keys: string) => `${label} · ${keys}`,
     editorWidth: 'Ziehen oder ← → verwenden, um die Breite des Editors zu ändern (Doppelklick oder Pos1: automatisch)',
     filters: 'Filter',
     filtersTooltip: 'Nach Typ, Feldwerten und Verknüpfungen filtern',

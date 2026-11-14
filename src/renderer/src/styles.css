@@ -4894,3 +4894,216 @@ select:not([multiple]) {
 :root[data-theme='ember'] .editor__title {
   font-size: var(--rm-font-size-medium);
 }
+
+/* 0.23.0 the bar above the table (the owner, 13 Nov; Fable's review): document button, icon buttons with menus,
+   New item with its small panel. One row while it fits. */
+.menu-btn {
+  position: relative;
+  display: inline-flex;
+}
+
+.menu-btn__panel {
+  position: absolute;
+  inset-block-start: calc(100% + var(--rm-space-xs));
+  inset-inline-start: 0;
+  z-index: 30;
+  min-inline-size: 240px;
+  max-block-size: 60vh;
+  overflow-y: auto;
+  padding: var(--rm-space-xs);
+  display: flex;
+  flex-direction: column;
+  background: var(--rm-color-surface);
+  border: var(--rm-shape-border-width) solid var(--rm-color-border);
+  border-radius: var(--rm-shape-radius-medium);
+  box-shadow: var(--rm-shape-shadow-popover) color-mix(in srgb, var(--rm-color-text) 18%, transparent);
+}
+
+.new-item .menu-btn__panel {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  gap: var(--rm-space-sm);
+  padding: var(--rm-space-md);
+  min-inline-size: 280px;
+}
+
+.menu-btn__item {
+  font: inherit;
+  display: flex;
+  align-items: center;
+  gap: var(--rm-space-sm);
+  text-align: start;
+  padding: var(--rm-space-sm) var(--rm-space-md);
+  border: 0;
+  border-radius: var(--rm-shape-radius-small);
+  background: transparent;
+  color: var(--rm-color-text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.menu-btn__item:hover:not(:disabled),
+.menu-btn__item:focus-visible {
+  outline: none;
+  background: var(--rm-color-row-hover);
+}
+
+.menu-btn__item:disabled {
+  color: var(--rm-color-text-muted);
+  opacity: 0.55;
+  cursor: default;
+}
+
+.menu-btn__item--danger {
+  color: var(--rm-color-danger);
+}
+
+.menu-btn__mark {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 16px;
+  flex: none;
+  color: var(--rm-color-text-muted);
+}
+
+.menu-btn__item.is-checked .menu-btn__mark {
+  color: var(--rm-color-primary);
+}
+
+.menu-btn__sep {
+  block-size: var(--rm-shape-border-width);
+  margin: var(--rm-space-xs) 0;
+  background: var(--rm-color-border);
+}
+
+.menu-btn__label {
+  padding: var(--rm-space-xs) var(--rm-space-md);
+  font-size: var(--rm-font-size-small);
+  color: var(--rm-color-text-muted);
+}
+
+.icon-btn.is-open {
+  background: var(--rm-color-surface-alt);
+  border-color: var(--rm-color-border-strong);
+  color: var(--rm-color-text);
+}
+
+/* the document button: name · item count · arrow — one big target (T-1 a) */
+.doc-btn {
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rm-space-sm);
+  block-size: var(--rm-shape-control-height);
+  max-inline-size: 320px;
+  padding-inline: var(--rm-space-md) var(--rm-space-sm);
+  border: var(--rm-shape-border-width) solid var(--rm-color-border-strong);
+  border-radius: var(--rm-shape-button-radius);
+  background: var(--rm-color-surface);
+  color: var(--rm-color-text);
+  cursor: pointer;
+}
+
+.doc-btn:hover,
+.doc-btn.is-open {
+  background: var(--rm-color-surface-alt);
+}
+
+.doc-btn:focus-visible {
+  outline: calc(var(--rm-shape-border-width) * 2) solid var(--rm-color-focus);
+  outline-offset: 1px;
+}
+
+.doc-btn__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--rm-font-weight-strong);
+}
+
+.doc-btn__count {
+  flex: none;
+  padding-inline: var(--rm-space-sm);
+  border-radius: 999px;
+  background: var(--rm-color-surface-alt);
+  color: var(--rm-color-text-muted);
+  font-size: var(--rm-font-size-small);
+}
+
+.filters__btn {
+  position: relative;
+}
+
+.filters__btn .filters__count {
+  position: absolute;
+  inset-block-start: -4px;
+  inset-inline-end: -4px;
+}
+
+.new-item__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rm-space-xs);
+}
+
+.new-item__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-xs);
+  font-size: var(--rm-font-size-small);
+  color: var(--rm-color-text-muted);
+}
+
+.new-item__places {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-xs);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.new-item__places legend {
+  margin-block-end: var(--rm-space-xs);
+  font-size: var(--rm-font-size-small);
+  color: var(--rm-color-text-muted);
+}
+
+.view-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rm-space-xs);
+  margin: 0 0 var(--rm-space-sm);
+  padding: 0 0 var(--rm-space-sm);
+  border: 0;
+  border-block-end: var(--rm-shape-border-width) solid var(--rm-color-border);
+}
+
+/* small windows: the search narrows first, then "New item" becomes the plus alone */
+@container workbar (max-width: 640px) {
+  .new-item__word {
+    display: none;
+  }
+}
+
+.workbar {
+  container: workbar / inline-size;
+}
+
+/* the search takes the room the others gave back (Fable's review) */
+.workbar .toolbar {
+  flex: 1 1 0;
+  min-inline-size: 0;
+  flex-wrap: nowrap;
+}
+
+.workbar {
+  flex-wrap: nowrap;
+}
+
+.workbar .toolbar__search {
+  flex: 1 1 260px;
+  inline-size: auto;
+  min-inline-size: 90px;
+  max-inline-size: 420px;
+}

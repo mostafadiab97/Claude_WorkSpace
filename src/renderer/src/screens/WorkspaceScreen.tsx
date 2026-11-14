@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type FocusEvent } from 'react'
+import { onToolbarKeyDown, rovingToolbar } from '../lib/keys'
 import type { CompareEntry, ImportFile, ImportResult, RepoInfo, RevertPart } from '../../../shared/api'
 import { T } from '../../../shared/text'
 import { errorMessage } from '../lib/hooks'
@@ -222,7 +223,11 @@ export function WorkspaceScreen({
   // Keyboard shortcuts (UX-25; listed in the user guide, section 18). Ctrl+S and Alt+↑/↓ live in the editor.
   const searchRef = useRef<HTMLInputElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
-  const newRef = useRef<HTMLSelectElement>(null)
+  const newRef = useRef<HTMLButtonElement>(null)
+  const filtersRef = useRef<HTMLButtonElement>(null)
+  const newDocRef = useRef<(() => void) | null>(null)
+  const expandRef = useRef<() => void>(() => {})
+  const collapseRef = useRef<() => void>(() => {})
   const toggleRef = useRef<() => void>(() => {})
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -233,13 +238,21 @@ export function WorkspaceScreen({
         searchRef.current?.focus()
         searchRef.current?.select()
       } else if (k === 'n' && !e.shiftKey) {
+        // opens the New item panel (0.23.0: type and place, then the editor)
         e.preventDefault()
-        newRef.current?.focus()
-        try {
-          newRef.current?.showPicker()
-        } catch {
-          // showPicker needs a user gesture in some cases; the focused list still opens with Alt+↓
-        }
+        newRef.current?.click()
+      } else if (k === 'n' && e.shiftKey && newDocRef.current) {
+        e.preventDefault()
+        newDocRef.current()
+      } else if (k === 'f' && e.shiftKey) {
+        e.preventDefault()
+        filtersRef.current?.click()
+      } else if (e.key === 'ArrowDown' && e.shiftKey) {
+        e.preventDefault()
+        expandRef.current()
+      } else if (e.key === 'ArrowUp' && e.shiftKey) {
+        e.preventDefault()
+        collapseRef.current()
       } else if (k === 'c' && e.shiftKey) {
         e.preventDefault()
         toggleRef.current()
@@ -307,6 +320,21 @@ export function WorkspaceScreen({
     } finally {
       setExpanding(false)
     }
+  }
+
+  useEffect(() => {
+    expandRef.current = () => {
+      if (!expanding && !filters.filtered) void expandAll()
+    }
+    collapseRef.current = () => {
+      if (!filters.filtered) tree.current?.collapseAll()
+    }
+  })
+  // the bar above the table is one Tab stop (0.23.0)
+  const barRef = useRef<HTMLDivElement>(null)
+  useEffect(() => rovingToolbar(barRef.current))
+  const onToolbarFocus = (e: FocusEvent<HTMLDivElement>): void => {
+    if ((e.target as HTMLElement).hasAttribute('data-toolbar-item')) rovingToolbar(e.currentTarget, e.target as HTMLElement)
   }
 
   const selectedId = target?.kind === 'item' ? target.id : null
@@ -502,11 +530,14 @@ export function WorkspaceScreen({
         {/* The table stays mounted while the Changes view is open, so its opened levels and scroll position survive. */}
         <div className={(showChanges && git.state?.available) || showTrace ? 'is-hidden' : 'workspace__items'}>
           {/* one bar: the document picker and the toolbar share a row while both fit (visual review V-05) */}
-          <div className="workbar">
-          <DocumentBar info={info} document={document} onDocument={setDocument} onInfo={onInfo} guard={guarded} readOnly={viewing !== undefined} />
+          {/* one Tab stop for the whole bar; ← → move between its controls (0.23.0, Fable's review) */}
+          <div ref={barRef} className="workbar" role="toolbar" aria-label={T.workspace.toolbarLabel} onKeyDown={onToolbarKeyDown} onFocus={onToolbarFocus}>
+          <DocumentBar info={info} document={document} onDocument={setDocument} onInfo={onInfo} guard={guarded} readOnly={viewing !== undefined} newRef={newDocRef} />
           <Toolbar
             searchRef={searchRef}
             newRef={newRef}
+            filtersRef={filtersRef}
+            outline={() => tree.current?.outline() ?? 'mixed'}
             schema={schema}
             filters={filters}
             prefs={columnPrefs}

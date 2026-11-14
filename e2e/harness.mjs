@@ -135,3 +135,68 @@ export async function editText(win, text, title) {
   if (await preview.isVisible()) await preview.click()
   await win.getByPlaceholder('The system shall…').fill(text)
 }
+
+// ── 0.23.0: the bar above the table is menus now (the owner's ideas, Fable's review). Helpers so scenarios read as before.
+const PLACE = { after: 'Below the selected item', inside: 'Inside the selected item', end: 'At the end' }
+
+/** "New item": open the small panel, choose the type (value or { label }), optionally the place, Create. */
+export async function newItem(win, type, where) {
+  await win.locator('.new-item__btn').click()
+  const panel = win.getByRole('dialog', { name: 'New item' })
+  await panel.getByRole('combobox').selectOption(type)
+  if (where) await panel.getByRole('radio', { name: PLACE[where] }).check()
+  await panel.getByRole('button', { name: 'Create' }).click()
+}
+
+/** Expand all / Collapse all through the outline menu. */
+export async function outline(win, what) {
+  await win.getByRole('button', { name: 'Expand or collapse all' }).click()
+  const line = win.getByRole('menuitem', { name: new RegExp(`^${what}`) })
+  // greyed out = the tree is already like that (fully open / fully closed)
+  if (await line.isDisabled()) return win.keyboard.press('Escape')
+  await line.click()
+}
+
+/** Import… or Export… through the "More" menu. */
+export async function more(win, what) {
+  await win.getByRole('button', { name: 'More', exact: true }).click()
+  await win.getByRole('menuitem', { name: what }).click()
+}
+
+/** Rows with text ↔ one line per item, through the View pop-up (it closes again). */
+export async function toggleText(win) {
+  await win.getByRole('button', { name: 'View', exact: true }).click()
+  const view = win.getByRole('dialog', { name: 'View' })
+  const withText = view.getByRole('radio', { name: 'Rows: title and text' })
+  if (await withText.isChecked()) await view.getByRole('radio', { name: 'Rows: one line per item' }).check()
+  else await withText.check()
+  await win.keyboard.press('Escape')
+}
+
+/** The document button (its accessible name starts with "Document:"). */
+export const documentButton = (win) => win.locator('.doc-btn')
+
+/** Show a document: open the document menu and choose the line that starts with the label (e.g. "Software (1)"). */
+export async function pickDocument(win, label) {
+  await documentButton(win).click()
+  await win.getByRole('menuitemradio', { name: label, exact: true }).click()
+}
+
+/** A document action from its menu: 'New document', 'Rename', 'Merge', 'Delete'. */
+export async function documentAction(win, what) {
+  await documentButton(win).click()
+  await win.getByRole('menu', { name: 'Documents' }).getByRole('menuitem', { name: new RegExp(`^${what}`) }).click()
+}
+
+/** Waits until the document menu lists a line (the list can change after a refresh), then chooses it. */
+export async function waitPickDocument(win, label, timeout = 15_000) {
+  const until = Date.now() + timeout
+  for (;;) {
+    await documentButton(win).click()
+    const line = win.getByRole('menuitemradio', { name: label, exact: true })
+    if ((await line.count()) > 0) return line.click()
+    await win.keyboard.press('Escape')
+    if (Date.now() > until) throw new Error(`document "${label}" never appeared in the menu`)
+    await win.waitForTimeout(300)
+  }
+}

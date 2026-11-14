@@ -307,6 +307,13 @@ const raw: Texts = {
     atLeastOne: 'أبقِ نوع عناصر واحدًا على الأقل.'
   },
   documents: {
+    button: (name: string, count: number) => `المستند: ${name}، ${count} عنصر`,
+    countShort: (count: number) => `${count}`,
+    menuLabel: 'المستندات',
+    renameNamed: (name: string) => `إعادة تسمية «${name}»…`,
+    mergeNamed: (name: string) => `دمج «${name}» في…`,
+    deleteNamed: (name: string) => `حذف «${name}»…`,
+    renameHint: 'يعيد تسمية المجلد — إيداع واحد. Enter لإعادة التسمية، Esc للإلغاء.',
     label: 'المستند',
     pickerTooltip: 'مستندات هذا المستودع — مجلد لكل منها داخل ⁦requirements/⁩. يعرض الجدول مستندًا واحدًا أو كل المستندات.',
     all: (count: number) => `كل المستندات (${n(count)})`,
@@ -932,6 +939,16 @@ const raw: Texts = {
   },
 
   workspace: {
+    toolbarLabel: 'شريط أدوات العناصر',
+    outline: 'توسيع الكل أو طيّه',
+    more: 'المزيد',
+    view: 'العرض',
+    rowsText: 'الصفوف: العنوان والنص',
+    rowsOneLine: 'الصفوف: سطر واحد لكل عنصر',
+    newPanel: 'عنصر جديد',
+    newType: 'النوع',
+    newPlace: 'الموضع',
+    keyHint: (label: string, keys: string) => `${label} · ${keys}`,
     editorWidth: 'اسحب أو استخدم ← → لتغيير عرض المحرّر (نقر مزدوج أو Home: تلقائي)',
     filters: 'التصفية',
     filtersTooltip: 'التصفية حسب النوع وقيم الحقول والروابط',

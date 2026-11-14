@@ -1,6 +1,6 @@
 // 0.22.0 (the owner, 13 Nov 2026): the colour switch with icons (sun / moon / flame / monitor), the Ember mode, and
 // the language drop-down (English, Deutsch, Français, Español, العربية). Screenshots of Ember in English and Arabic for the owner.
-import { gitRepo, launch, scenario, temp } from '../harness.mjs'
+import { gitRepo, launch, scenario, temp, newItem } from '../harness.mjs'
 
 await scenario('E2E ember', async (ctx) => {
   const { repo } = gitRepo('ember')
@@ -39,7 +39,7 @@ await scenario('E2E ember', async (ctx) => {
   await win.getByRole('button', { name: 'Create requirements folder' }).click()
   await win.locator('.first-run').waitFor()
   for (const title of ['Door lock', 'Window lift']) {
-    await win.getByLabel('New item').selectOption('system-requirement')
+    await newItem(win, 'system-requirement')
     await win.getByPlaceholder('Short name of the requirement').fill(title)
     await win.getByRole('button', { name: 'Save', exact: true }).click()
     await win.getByRole('button', { name: 'Saved ✓' }).waitFor()

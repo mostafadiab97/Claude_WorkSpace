@@ -2,7 +2,7 @@
 // drop in the Columns menu (S-11). A project made before 0.17 (requirements/items) is offered a real document name.
 import { copyFileSync, existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { gitIn, gitRepo, launch, root, scenario } from '../harness.mjs'
+import { documentAction, gitIn, gitRepo, launch, pickDocument, root, scenario } from '../harness.mjs'
 
 await scenario('E2E structure-0.17', async (ctx) => {
   const { repo } = gitRepo('struct017')
@@ -25,17 +25,17 @@ await scenario('E2E structure-0.17', async (ctx) => {
   await offer.getByRole('button', { name: 'Name the document' }).click()
   await win.getByLabel(/New name for items/).fill('System')
   await win.getByRole('button', { name: 'Rename', exact: true }).click()
-  await win.locator('#document-picker').filter({ hasText: 'System (1)' }).waitFor({ timeout: 15_000 })
+  await win.locator('.doc-btn__name', { hasText: /^System$/ }).waitFor({ timeout: 15_000 })
   check(existsSync(join(req, 'System', 'REQ-AAAAAAA.md')) && !existsSync(join(req, 'items')), 'the folder is renamed to System')
   check(gitIn(repo, 'log', '-1', '--format=%s').includes('Rename the document items to System'), 'one commit records the rename')
   await t.shot('structure-0.17-documents')
 
   console.log('S-10 — a second document, its own tree and numbers')
-  await win.getByRole('button', { name: 'New document…' }).click()
+  await documentAction(win, 'New document')
   await win.getByLabel('Name of the new document').fill('Software')
   await win.getByRole('button', { name: 'Create', exact: true }).click()
-  await win.locator('#document-picker').filter({ hasText: 'Software (0)' }).waitFor()
-  check((await win.locator('#document-picker').inputValue()) === 'Software', 'the new document is shown')
+  await win.locator('.doc-btn__name', { hasText: /^Software$/ }).waitFor()
+  check((await win.locator('.doc-btn__count').textContent())?.trim() === '0', 'the new document is shown')
   await win.locator('.first-run').getByRole('button', { name: 'Add the first requirement' }).click()
   await win.getByPlaceholder('Short name of the requirement').fill('Software one')
   await win.keyboard.press('Control+s')
@@ -45,7 +45,7 @@ await scenario('E2E structure-0.17', async (ctx) => {
   check((await win.locator('.table__row', { hasText: 'Old one' }).count()) === 0, 'the Software document shows only its own items')
   const num = await win.locator('.table__row', { hasText: 'Software one' }).locator('.table__td--number').textContent()
   check((num ?? '').trim() === '1', `numbers restart in each document (${num})`)
-  await win.locator('#document-picker').selectOption({ label: 'All documents (2)' })
+  await pickDocument(win, 'All documents (2)')
   await win.locator('.table__row', { hasText: 'Old one' }).waitFor()
   await win.locator('.table__row', { hasText: 'Software one' }).waitFor()
   check((await win.locator('.table__row--group').count()) === 2 && (await win.locator('.table__row[data-id]').count()) === 2, 'All documents shows both, one group per document')
@@ -68,7 +68,7 @@ await scenario('E2E structure-0.17', async (ctx) => {
   check(after.indexOf(second) < after.indexOf(first) && after.indexOf(second) > after.indexOf('title'), `a column header dragged left lands before the other (${before.join(',')} → ${after.join(',')})`)
 
   console.log('S-04 / S-05 — types in the window, a required field, the Incomplete filter')
-  await win.getByRole('button', { name: /^Columns/ }).click()
+  await win.getByRole('button', { name: 'View', exact: true }).click()
   await win.getByRole('button', { name: 'Edit types…' }).click()
   const dlg = win.getByRole('dialog', { name: 'Item and link types' })
   await dlg.waitFor()

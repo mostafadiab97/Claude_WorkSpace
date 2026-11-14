@@ -1,7 +1,7 @@
 // 0.16.4 — first run, the row menu from the keyboard, where a new item goes, the Text box cursor, the Changes counter.
 import { mkdirSync, copyFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { gitIn, gitRepo, launch, root, scenario } from '../harness.mjs'
+import { gitIn, gitRepo, launch, root, scenario, newItem } from '../harness.mjs'
 
 await scenario('E2E fixes-0.16.4', async (ctx) => {
   const { repo } = gitRepo('fix0164')
@@ -27,17 +27,15 @@ await scenario('E2E fixes-0.16.4', async (ctx) => {
   await win.locator('.table__row', { hasText: 'Alpha' }).first().waitFor()
 
   console.log('owner 5 Nov — where a new item goes')
-  const newIn = async (name) => {
-    await win.getByLabel('New item').selectOption({ label: 'System Requirement' })
+  const newIn = async (name, where) => {
+    await newItem(win, { label: 'System Requirement' }, where)
     await title.fill(name)
     await win.keyboard.press('Control+s')
     await win.locator('.table__row', { hasText: name }).first().waitFor()
   }
-  await win.getByLabel('Insert position').selectOption('end')
-  await newIn('Charlie')
+  await newIn('Charlie', 'end')
   await win.locator('.table__row', { hasText: 'Alpha' }).first().click()
-  await win.getByLabel('Insert position').selectOption('after')
-  await newIn('Bravo')
+  await newIn('Bravo', 'after')
   const order = await win.locator('.table__row').evaluateAll((rows) => rows.map((r) => r.textContent ?? ''))
   const pos = (x) => order.findIndex((r) => r.includes(x))
   check(pos('Alpha') < pos('Bravo') && pos('Bravo') < pos('Charlie'), `"Below the selected item" puts Bravo between Alpha and Charlie (${order.length} rows)`)

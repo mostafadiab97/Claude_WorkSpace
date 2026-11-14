@@ -41,3 +41,40 @@ export function rovingTabs(list: HTMLElement | null): void {
   sync()
   new MutationObserver(sync).observe(list, { subtree: true, attributes: true, attributeFilter: ['aria-selected'], childList: true })
 }
+
+/** The controls of a toolbar that take part in its arrow keys: marked with data-toolbar-item, enabled and visible. */
+function toolbarItems(bar: HTMLElement): HTMLElement[] {
+  return [...bar.querySelectorAll<HTMLElement>('[data-toolbar-item]')].filter((el) => !(el as HTMLButtonElement).disabled && el.offsetParent !== null)
+}
+
+/**
+ * Keyboard for a toolbar (role="toolbar", 0.23.0 — Fable's review): the bar is one Tab stop; ← → (in the reading
+ * direction), Home and End move between its controls. Inside the search box the arrows move the cursor as usual, and
+ * open menus keep their own keys.
+ */
+export function onToolbarKeyDown(e: KeyboardEvent<HTMLElement>): void {
+  const target = e.target as HTMLElement
+  if (target.closest('[role="menu"], [role="dialog"], form')) return
+  const dir = arrowDirection(e.key)
+  if (!dir && e.key !== 'Home' && e.key !== 'End') return
+  if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return
+  const items = toolbarItems(e.currentTarget)
+  const at = items.indexOf(target)
+  if (at < 0) return
+  const to = dir === 'forward' ? at + 1 : dir === 'back' ? at - 1 : e.key === 'Home' ? 0 : items.length - 1
+  const next = items[(to + items.length) % items.length]
+  if (!next) return
+  e.preventDefault()
+  next.focus()
+}
+
+/** Keeps exactly one control of a toolbar in the Tab order — the one focused last (or the first). */
+export function rovingToolbar(bar: HTMLElement | null, current?: HTMLElement): void {
+  if (!bar) return
+  const items = toolbarItems(bar)
+  const keep = current && items.includes(current) ? current : (items.find((el) => el.tabIndex === 0 && el.dataset['roving'] === 'on') ?? items[0])
+  for (const el of items) {
+    el.tabIndex = el === keep ? 0 : -1
+    el.dataset['roving'] = el === keep ? 'on' : ''
+  }
+}

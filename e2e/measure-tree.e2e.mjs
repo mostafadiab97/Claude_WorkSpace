@@ -43,7 +43,8 @@ try {
   console.log('top-level rows:', await win.locator('.table__row').count())
   // "Expand all" opens every level at once and loads levels as they scroll into view (P-04, 0.8.0)
   await time('expand all (first screen ready)', async () => {
-    await win.getByRole('button', { name: 'Expand all' }).click()
+    await win.getByRole('button', { name: 'Expand or collapse all' }).click()
+    await win.getByRole('menuitem', { name: /^Expand all/ }).click()
     await win.locator('.table__row[aria-level="2"]').first().waitFor()
     await win.waitForFunction(() => document.querySelectorAll('.table__row--loading').length === 0)
   })
@@ -61,7 +62,8 @@ try {
   console.log('rows known after scrolling to the bottom:', Math.round((await win.locator('.table__scroll').evaluate((e) => e.scrollHeight)) / 34))
   await win.screenshot({ path: join(outDir, 'measure-expanded-bottom.png') })
   await time('collapse all', async () => {
-    await win.getByRole('button', { name: 'Collapse all' }).click()
+    await win.getByRole('button', { name: 'Expand or collapse all' }).click()
+    await win.getByRole('menuitem', { name: /^Collapse all/ }).click()
     await win.waitForFunction(() => (document.querySelector('.table__scroll')?.scrollHeight ?? 0) < 5000)
   })
   await time('search "level 10", open it, clear → hierarchy opened down to it', async () => {

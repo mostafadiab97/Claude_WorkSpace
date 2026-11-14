@@ -330,5 +330,7 @@ export function useTreeRows(active: boolean, sort: Sort, dataVersion: number, do
     })
   }
 
-  return { rows, levels, isOpen: (id: string) => isOpen(open, id), setOpen, setGroupOpen, ensure, showMore, expandAll, collapseAll, reveal }
+  // fully open, fully closed or mixed — the outline menu greys out the line that would do nothing (0.23.0)
+  const outline = (): 'open' | 'closed' | 'mixed' => (open.ids.size > 0 ? 'mixed' : open.all ? 'open' : 'closed')
+  return { rows, levels, outline, isOpen: (id: string) => isOpen(open, id), setOpen, setGroupOpen, ensure, showMore, expandAll, collapseAll, reveal }
 }

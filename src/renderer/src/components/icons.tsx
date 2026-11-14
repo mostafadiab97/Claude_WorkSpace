@@ -135,6 +135,17 @@ const SHAPES = {
       <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
     </>
   ),
+  // 0.23.0 the bar above the table: New item, More
+  plus: <path d="M5 12h14M12 5v14" />,
+  more: (
+    <>
+      <circle cx={5} cy={12} r={1} />
+      <circle cx={12} cy={12} r={1} />
+      <circle cx={19} cy={12} r={1} />
+    </>
+  ),
+  pencil: <path d="M21.17 6.81a1 1 0 0 0-3.98-3.98L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5zM15 5l4 4" />,
+  merge: <path d="M8 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM8 6v12M16 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM8 9a9 9 0 0 0 8 9" />,
   // opens in the web browser (0.22.1)
   external: <path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />,
   moon: <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />,

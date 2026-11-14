@@ -289,6 +289,13 @@ export const fr: Texts = {
     atLeastOne: 'Conservez au moins un type d’élément.'
   },
   documents: {
+    button: (name: string, count: number) => `Document\u00A0: ${name}, ${count} élément(s)`,
+    countShort: (count: number) => `${count}`,
+    menuLabel: 'Documents',
+    renameNamed: (name: string) => `Renommer «\u00A0${name}\u00A0»…`,
+    mergeNamed: (name: string) => `Fusionner «\u00A0${name}\u00A0» dans…`,
+    deleteNamed: (name: string) => `Supprimer «\u00A0${name}\u00A0»…`,
+    renameHint: 'Renomme le dossier — un commit. Entrée renomme, Échap annule.',
     label: 'Document',
     pickerTooltip: 'Les documents de ce dépôt\u00A0: un dossier chacun sous requirements/. Le tableau affiche un document, ou tous.',
     all: (count: number) => `Tous les documents (${count})`,
@@ -916,6 +923,16 @@ export const fr: Texts = {
   },
 
   workspace: {
+    toolbarLabel: 'Barre d’outils des éléments',
+    outline: 'Tout développer ou réduire',
+    more: 'Plus',
+    view: 'Affichage',
+    rowsText: 'Lignes\u00A0: titre et texte',
+    rowsOneLine: 'Lignes\u00A0: une ligne par élément',
+    newPanel: 'Nouvel élément',
+    newType: 'Type',
+    newPlace: 'Emplacement',
+    keyHint: (label: string, keys: string) => `${label} · ${keys}`,
     editorWidth: 'Faites glisser ou utilisez ← → pour changer la largeur de l’éditeur (double-clic ou Début\u00A0: automatique)',
     filters: 'Filtres',
     filtersTooltip: 'Filtrer par type, valeurs de champs et liens',

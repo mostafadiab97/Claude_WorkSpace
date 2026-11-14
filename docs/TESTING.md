@@ -67,7 +67,16 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.25.0 (Word, PDF and web page export; title bar icon)
+## Manual test checklist — v0.25.1 (big Word files, tables, short contents)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.25.1** and run the release self-test (Settings → **Diagnostics**). | All steps passed. |
+| 2 | Open the 10,000-item sandbox → **More → Export…** → **Word document** → **Export…**; open it in Word (answer **Yes** to update fields). | Word opens it (it is long — about 3,000 pages, Word may need a minute); the contents list is a few pages long (two heading levels). |
+| 3 | Open the item with the Mode / Limit / Unit table (your screenshot) in the exported Word file and in a **Web page** export. | A real table with a header row in both, no "\| --- \|" lines. |
+| 4 | Export the same 10,000 items as **PDF**. | The contents are a few pages, not 100; tables are tables. |
+
+## Previous checklist — v0.25.0 (Word, PDF and web page export; title bar icon)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
@@ -76,13 +85,6 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 | 3 | Open a real project → **More → Export…** → **Word document**; set a document name, tick the traceability table → **Export…**; open the file in Word (answer **Yes** if Word asks to update fields). | Title page with your name for it, baseline, date and author; a filled contents table; one numbered heading per item with its fields and text; the traceability table at the end; "Page x of y" in the footer. |
 | 4 | Export the same items as **PDF**, then as **Web page**; open both. | The PDF looks like the Word document (A4, page numbers). The web page opens in the browser: contents, clickable IDs, the search box filters the items. |
 | 5 | Optional: copy a company .docx into `requirements\.reqochet\templates`, type `{{document.name}}` on its cover and `{{items}}` alone on a line; export to Word with that template. | The company layout is kept; the placeholders are filled. |
-
-## Previous checklist — v0.24.3 (window icon, Diagnostics order)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.24.3**; Settings → **Diagnostics** shows the self-tests first — run the release self-test. | All steps passed. |
-| 2 | Switch the colours: sun, moon, flame; look at the window's title bar and the taskbar. | The icon is the same tile as the logo next to "reqochet DEV": dark tile in Light, white in Dark, orange-edged in Ember. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

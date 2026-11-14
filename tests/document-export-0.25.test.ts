@@ -163,3 +163,34 @@ describe('0.25.0 checks around the export', () => {
     expect(rels).not.toContain('secret')
   })
 })
+
+describe('0.25.1 the owner’s 0.25.0 report', () => {
+  const mk = (id: string, depth: number, text = ''): never => ({ item: { id, type: 'system-requirement', title: id, text, number: '', links: [], fields: {} }, depth, incoming: [] }) as never
+  const data = (items: never[]): never => ({ schema: { itemTypes: [{ id: 'system-requirement', name: 'Req', requirement: true }], linkTypes: [], fields: [] }, name: 'n', baseline: '', commit: '', date: '', author: '', items, columns: ['id', 'title', 'text'], trace: [], revisions: [] }) as never
+  it('test 3: a text with several lines keeps its line breaks inside runs (Word refused <w:br/> directly in a paragraph)', async () => {
+    const { itemsToDocx } = await import('../src/modules/import-export')
+    const xml = await docxText(await itemsToDocx(data([mk('REQ-0000001', 0, 'first line\nsecond line')])))
+    expect(xml).not.toMatch(/<\/w:r><w:br\/>/)
+    expect(xml).toMatch(/<w:r><w:br\/><w:t xml:space="preserve">second line/)
+  })
+  it('test 4: a Markdown table in a text is a real table in the web page and in Word', async () => {
+    const { itemsToDocx, itemsToHtml } = await import('../src/modules/import-export')
+    const text = 'Limits:\n| Mode | Limit | Unit |\n| --- | --- | --- |\n| Comfort | 23 | °C |\n| Eco | 17 | °C |'
+    const html = itemsToHtml(data([mk('REQ-0000001', 0, text)]))
+    expect(html).toContain('<table class="md"><thead><tr><th scope="col">Mode</th>')
+    expect(html).toContain('<td>Comfort</td><td>23</td><td>°C</td>')
+    expect(html).not.toContain('| --- |')
+    const xml = await docxText(await itemsToDocx(data([mk('REQ-0000001', 0, text)])))
+    expect(xml).not.toContain('| --- |')
+    expect(xml.match(/<w:tbl>/g)?.length).toBe(2) // the text's table and the item's field table
+    expect(xml).toContain('>Comfort</w:t>')
+  })
+  it('test 4: a big document gets a short contents list (fewer levels), in the web page and in Word', async () => {
+    const { itemsToDocx, itemsToHtml } = await import('../src/modules/import-export')
+    const items = [mk('REQ-T000001', 0), ...Array.from({ length: 50 }, (_, i) => mk(`REQ-S${String(i).padStart(6, '0')}`, 1)), ...Array.from({ length: 500 }, (_, i) => mk(`REQ-D${String(i).padStart(6, '0')}`, 2))]
+    const html = itemsToHtml(data(items))
+    expect(html.match(/class="toc\d"/g)?.length).toBe(51) // two levels: 51 lines, not 551
+    expect(await docxText(await itemsToDocx(data(items)))).toContain('TOC \\o "1-2"')
+    expect(itemsToHtml(data(items.slice(0, 100))).match(/class="toc\d"/g)?.length).toBe(100) // small: three levels
+  })
+})

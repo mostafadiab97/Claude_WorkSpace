@@ -1,7 +1,14 @@
-# Past manual checklists (v0.0.3 – v0.24.1)
+# Past manual checklists (v0.0.3 – v0.24.3)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## Manual test checklist — v0.24.3 (window icon, Diagnostics order)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.24.3**; Settings → **Diagnostics** shows the self-tests first — run the release self-test. | All steps passed. |
+| 2 | Switch the colours: sun, moon, flame; look at the window's title bar and the taskbar. | The icon is the same tile as the logo next to "reqochet DEV": dark tile in Light, white in Dark, orange-edged in Ember. |
 
 ## Manual test checklist — v0.24.2 (short page names)
 

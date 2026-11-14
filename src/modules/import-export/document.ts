@@ -51,16 +51,39 @@ const headingText = (d: DocumentData, e: ExportItem, numbered = true): string =>
 // ───────────────────────── HTML (and PDF) ─────────────────────────
 
 const LIST = /^\s*[-*] /
-/** Lines split into runs of list lines and other lines (a list may follow a sentence without a blank line — QA Q9). */
-function groups(lines: string[]): { list: boolean; lines: string[] }[] {
-  const out: { list: boolean; lines: string[] }[] = []
+const TABLE_ROW = /^\s*\|.*\|\s*$/
+type Kind = 'text' | 'list' | 'table'
+/**
+ * Lines split into runs of list lines, table lines and other lines (a list may follow a sentence without a blank line —
+ * QA Q9; Markdown tables "| a | b |" become real tables — the owner, 0.25.0 test 4).
+ */
+function groups(lines: string[]): { kind: Kind; lines: string[] }[] {
+  const out: { kind: Kind; lines: string[] }[] = []
   for (const l of lines) {
-    const list = LIST.test(l)
+    const kind: Kind = LIST.test(l) ? 'list' : TABLE_ROW.test(l) ? 'table' : 'text'
     const last = out[out.length - 1]
-    if (last && last.list === list) last.lines.push(l)
-    else out.push({ list, lines: [l] })
+    if (last && last.kind === kind) last.lines.push(l)
+    else out.push({ kind, lines: [l] })
   }
-  return out
+  // a single "| … |" line is text, not a table
+  return out.map((g) => (g.kind === 'table' && g.lines.length < 2 ? { ...g, kind: 'text' } : g))
+}
+
+/** A Markdown table: its rows of cells, and whether the first row is a header (a "| --- |" line under it). */
+function tableRows(lines: string[]): { rows: string[][]; header: boolean } {
+  const cells = (l: string): string[] => l.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim())
+  const isRule = (l: string): boolean => cells(l).every((c) => /^:?-{3,}:?$/.test(c))
+  const header = lines.length > 1 && isRule(lines[1] ?? '')
+  const rows = lines.filter((l) => !isRule(l)).map(cells)
+  const width = Math.max(...rows.map((r) => r.length))
+  return { rows: rows.map((r) => [...r, ...Array<string>(Math.max(0, width - r.length)).fill('')]), header }
+}
+
+/** How many heading levels the contents list shows: three, or fewer for a big document (the owner, 0.25.0 test 4). */
+const TOC_MAX_LINES = 400
+function tocLevels(d: DocumentData): number {
+  for (const k of [3, 2]) if (d.items.filter((e) => e.depth < k).length <= TOC_MAX_LINES) return k
+  return 1
 }
 
 /** Markdown of an item's text to safe HTML: paragraphs, "- " lists, **bold**; raw HTML is shown as text. */
@@ -72,7 +95,15 @@ function mdToHtml(md: string): string {
     .split(/\n{2,}/)
     .filter((b) => b.trim() !== '')
     .flatMap((b) => groups(b.split('\n')))
-    .map(({ list, lines }) => (list ? `<ul>${lines.map((l) => `<li>${inline(l.replace(LIST, ''))}</li>`).join('')}</ul>` : `<p>${lines.map(inline).join('<br>')}</p>`))
+    .map(({ kind, lines }) => {
+      if (kind === 'list') return `<ul>${lines.map((l) => `<li>${inline(l.replace(LIST, ''))}</li>`).join('')}</ul>`
+      if (kind === 'text') return `<p>${lines.map(inline).join('<br>')}</p>`
+      const { rows, header } = tableRows(lines)
+      const [head, ...rest] = rows
+      const th = header && head ? `<thead><tr>${head.map((c) => `<th scope="col">${inline(c)}</th>`).join('')}</tr></thead>` : ''
+      const tds = (header ? rest : rows).map((r) => `<tr>${r.map((c) => `<td>${inline(c)}</td>`).join('')}</tr>`).join('')
+      return `<table class="md">${th}<tbody>${tds}</tbody></table>`
+    })
     .join('')
 }
 
@@ -85,8 +116,9 @@ export function itemsToHtml(d: DocumentData, print = false): string {
   const t = T.docExport
   const ids = new Set(d.items.map((e) => e.item.id))
   const linkIds = (text: string): string => esc(text).replace(/\b([A-Z][A-Z0-9]*-[0-9A-Z]{4,})\b/g, (m) => (ids.has(m) ? `<a href="#${m}">${m}</a>` : m))
+  const levels = tocLevels(d)
   const toc = d.items
-    .filter((e) => e.depth < 3)
+    .filter((e) => e.depth < levels)
     .map((e) => `<li class="toc${e.depth}"><a href="#${esc(e.item.id)}">${esc(headingText(d, e))}</a></li>`)
     .join('')
   const body = d.items
@@ -119,7 +151,7 @@ a{color:#2f5bd3;text-decoration:underline;text-underline-offset:2px}nav a{text-d
 h2{font-size:22px;margin-top:28px}h3{font-size:18px}h4,h5,h6{font-size:16px}
 .item{break-inside:avoid-page}.text p{margin:6px 0}
 table{border-collapse:collapse;width:100%;margin:8px 0 16px;font-size:13px}th,td{border:1px solid #d5dae2;padding:4px 8px;text-align:start;vertical-align:top}
-.attrs th{width:28%;background:#f2f4f7;font-weight:600}.trace thead th{background:#f2f4f7}
+.md th{background:#f2f4f7;font-weight:600}.attrs th{width:28%;background:#f2f4f7;font-weight:600}.trace thead th{background:#f2f4f7}
 @media print{.break{break-before:page}a{color:inherit}.title{border:0;padding-top:30vh}.title h1{font-size:34px}nav{break-before:page;break-after:page}}
 </style></head><body>
 <header class="title"><h1>${esc(d.name)}</h1><div class="meta"><span>${esc(t.baseline)}: ${esc(d.baseline || t.workingCopy)}</span><span>${esc(t.commit)}: ${esc(d.commit || '—')}</span><span>${esc(t.date)}: ${esc(d.date)}</span>${d.author ? `<span>${esc(t.author)}: ${esc(d.author)}</span>` : ''}</div></header>
@@ -155,7 +187,8 @@ function run(text: string, rPr = ''): string {
   // Word keeps line breaks inside a run as <w:br/>
   return text
     .split('\n')
-    .map((part, i) => `${i > 0 ? '<w:br/>' : ''}<w:r>${rPr}<w:t xml:space="preserve">${xmlEsc(part)}</w:t></w:r>`)
+    // the break belongs inside a run: <w:br/> directly in a paragraph makes Word refuse the file (the owner, 0.25.0 test 3)
+    .map((part, i) => `<w:r>${rPr}${i > 0 ? '<w:br/>' : ''}<w:t xml:space="preserve">${xmlEsc(part)}</w:t></w:r>`)
     .join('')
 }
 /** Arabic: paragraphs and tables run right to left (Arabic review 0.25.0 A-01); the window language decides. */
@@ -165,11 +198,11 @@ const para = (style: string | null, inner: string): string => {
   return `<w:p>${pPr ? `<w:pPr>${pPr}</w:pPr>` : ''}${inner}</w:p>`
 }
 
-function table(ids: StyleIds, styleName: string, rows: string[][], headerRow: boolean): string {
+function table(ids: StyleIds, styleName: string, rows: string[][], headerRow: boolean, boldFirstColumn = !headerRow): string {
   const cols = Math.max(1, ...rows.map((r) => r.length))
   const grid = Array.from({ length: cols }, () => `<w:gridCol w:w="${Math.floor(9000 / cols)}"/>`).join('')
   const trs = rows
-    .map((r, i) => `<w:tr>${i === 0 && headerRow ? '<w:trPr><w:tblHeader/></w:trPr>' : ''}${r.map((c, j) => `<w:tc><w:tcPr><w:tcW w:w="${Math.floor(9000 / cols)}" w:type="dxa"/></w:tcPr>${para(null, run(c, (i === 0 && headerRow) || (!headerRow && j === 0) ? '<w:rPr><w:b/><w:bCs/></w:rPr>' : ''))}</w:tc>`).join('')}</w:tr>`)
+    .map((r, i) => `<w:tr>${i === 0 && headerRow ? '<w:trPr><w:tblHeader/></w:trPr>' : ''}${r.map((c, j) => `<w:tc><w:tcPr><w:tcW w:w="${Math.floor(9000 / cols)}" w:type="dxa"/></w:tcPr>${para(null, run(c, (i === 0 && headerRow) || (boldFirstColumn && j === 0) ? '<w:rPr><w:b/><w:bCs/></w:rPr>' : ''))}</w:tc>`).join('')}</w:tr>`)
     .join('')
   return `<w:tbl><w:tblPr><w:tblStyle w:val="${xmlEsc(ids(styleName))}"/>${rtl() ? '<w:bidiVisual/>' : ''}<w:tblW w:w="5000" w:type="pct"/><w:tblBorders><w:top w:val="single" w:sz="4" w:color="BFC5CF"/><w:left w:val="single" w:sz="4" w:color="BFC5CF"/><w:bottom w:val="single" w:sz="4" w:color="BFC5CF"/><w:right w:val="single" w:sz="4" w:color="BFC5CF"/><w:insideH w:val="single" w:sz="4" w:color="BFC5CF"/><w:insideV w:val="single" w:sz="4" w:color="BFC5CF"/></w:tblBorders></w:tblPr><w:tblGrid>${grid}</w:tblGrid>${trs}</w:tbl>${para(null, '')}`
 }
@@ -185,9 +218,12 @@ function mdToDocx(ids: StyleIds, md: string): string {
     .split(/\n{2,}/)
     .filter((b) => b.trim() !== '')
     .flatMap((b) => groups(b.split('\n')))
-    .flatMap(({ list, lines }) =>
-      list ? lines.map((l) => para(ids('RM Requirement Text'), run(`• ${bold(l.replace(LIST, ''))}`))) : [para(ids('RM Requirement Text'), run(bold(lines.join('\n'))))]
-    )
+    .flatMap(({ kind, lines }) => {
+      if (kind === 'list') return lines.map((l) => para(ids('RM Requirement Text'), run(`• ${bold(l.replace(LIST, ''))}`)))
+      if (kind === 'text') return [para(ids('RM Requirement Text'), run(bold(lines.join('\n'))))]
+      const { rows, header } = tableRows(lines)
+      return [table(ids, 'RM Attribute Table', rows.map((r) => r.map(bold)), header, false)]
+    })
     .join('')
 }
 
@@ -210,7 +246,7 @@ function blocks(d: DocumentData, ids: StyleIds, ownNumbers = true): Record<strin
       return para(ids(`heading ${use}`), run(headingText(d, e, ownNumbers))) + text + (rows.length > 0 ? table(ids, 'RM Attribute Table', rows, false) : '')
     })
     .join('')
-  const toc = `${para(ids('TOC Heading'), run(t.contents))}<w:p>${rtl() ? '<w:pPr><w:bidi/></w:pPr>' : ''}<w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> TOC \\o "1-6" \\h \\z \\u </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r>${run(t.tocHint)}<w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>`
+  const toc = `${para(ids('TOC Heading'), run(t.contents))}<w:p>${rtl() ? '<w:pPr><w:bidi/></w:pPr>' : ''}<w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> TOC \\o "1-${tocLevels(d)}" \\h \\z \\u </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r>${run(t.tocHint)}<w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>`
   const trace = d.trace.length > 0 ? para(ids('heading 1'), run(t.trace)) + table(ids, 'RM Trace Table', [[t.item, t.link, t.target, t.suspect], ...d.trace.map((r) => [`${r.source} ${r.sourceTitle}`, r.type, `${r.target} ${r.targetTitle}`, r.suspect ? t.yes : ''])], true) : ''
   const revisions = d.revisions.length > 0 ? table(ids, 'RM Trace Table', [[t.baseline, t.date, t.commit], ...d.revisions.map((r) => [r.name, r.date, r.commit])], true) : ''
   return { toc, items, 'trace.table': trace, 'revision.history': revisions }
@@ -386,7 +422,7 @@ async function defaultTemplate(): Promise<Uint8Array> {
   const [before, after] = t.pageOf('\u0001', '\u0002').split('\u0001') as [string, string]
   const [middle, end] = after.split('\u0002') as [string, string]
   const field = (code: string): string => `<w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText xml:space="preserve"> ${code} </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>1</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r>`
-  const footerXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr ${W}><w:p><w:pPr>${rtl() ? '<w:bidi/>' : ''}<w:jc w:val="end"/></w:pPr><w:r><w:t xml:space="preserve">{{document.name}} · ${xmlEsc(before)}</w:t></w:r>${field('PAGE')}<w:r><w:t xml:space="preserve">${xmlEsc(middle)}</w:t></w:r>${field('NUMPAGES')}<w:r><w:t xml:space="preserve">${xmlEsc(end)}</w:t></w:r></w:p></w:ftr>`
+  const footerXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr ${W}><w:p><w:pPr>${rtl() ? '<w:bidi/><w:jc w:val="left"/>' : '<w:jc w:val="right"/>'}</w:pPr><w:r><w:t xml:space="preserve">{{document.name}} · ${xmlEsc(before)}</w:t></w:r>${field('PAGE')}<w:r><w:t xml:space="preserve">${xmlEsc(middle)}</w:t></w:r>${field('NUMPAGES')}<w:r><w:t xml:space="preserve">${xmlEsc(end)}</w:t></w:r></w:p></w:ftr>`
   const zip = new JSZip()
   zip.file('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/></Types>')
   zip.file('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>')

@@ -3,6 +3,17 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.25.1 — 14 Nov 2026 — the owner's 0.25.0 report: big Word files open, tables, short contents
+**Owner (14 Nov 2026):** self-test 25/25 (79 s); test 2 passed (the title bar following reqochet's colours: "keep it
+for now"); test 3: the Word export of the 10,000-item document did not open in Word; test 4: Markdown tables in texts
+showed as text, and the big document had a 100-page contents list; test 5 (company template): later, no template yet.
+- **Word files with multi-line texts open again.** Cause: a line break inside a text was written next to the text
+  instead of inside it, which Word's rules do not allow, so Word refused the whole file. Small documents had no
+  multi-line texts, so they opened.
+- **Markdown tables** in a requirement's text (`| Mode | Limit |` lines) are real tables in Word, PDF and the web page.
+- **Contents list sized to the document:** three heading levels, or two (or one) when that would list more than 400
+  lines — the 10,000-item sandbox now has about 270 lines (7 pages) instead of 3,840 (the same in Word's contents).
+
 ## 0.25.0 — 14 Nov 2026 — Word, PDF and web page export; a title bar icon that stands out
 - **Export → Word document (.docx)**: title page (document name, baseline, commit, date, author), a contents table
   Word fills when the file opens, one numbered heading per item (levels 1–6 from the hierarchy) with its fields in a

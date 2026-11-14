@@ -5107,3 +5107,30 @@ select:not([multiple]) {
   min-inline-size: 90px;
   max-inline-size: 420px;
 }
+
+/* 0.23.0 (UI review UX-1): on a narrow window the top bar wraps into a second row instead of overlapping
+   (branch button cut, Versions over the gear, Traceability gone) */
+@media (max-width: 1180px) {
+  .topbar {
+    flex-wrap: wrap;
+    row-gap: var(--rm-space-xs);
+  }
+
+  .topbar__git {
+    min-inline-size: 0;
+  }
+
+  .topbar__repo {
+    max-inline-size: 160px;
+  }
+}
+
+/* UX-4, UX-5: the count reads clearly; the bar's icons are not faint */
+.doc-btn__count {
+  background: color-mix(in srgb, var(--rm-color-border-strong) 30%, var(--rm-color-surface));
+  color: var(--rm-color-text);
+}
+
+.workbar .icon-btn {
+  color: var(--rm-color-text);
+}

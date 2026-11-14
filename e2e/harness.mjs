@@ -146,6 +146,8 @@ export async function newItem(win, type, where) {
   await panel.getByRole('combobox').selectOption(type)
   if (where) await panel.getByRole('radio', { name: PLACE[where] }).check()
   await panel.getByRole('button', { name: 'Create' }).click()
+  // the draft is open when the editor's title is empty (on a slow runner the previous item can still show for a moment)
+  await win.waitForFunction(() => document.querySelector('input[placeholder="Short name of the requirement"]')?.value === '', null, { timeout: 15_000 })
 }
 
 /** Expand all / Collapse all through the outline menu. */

@@ -48,8 +48,8 @@ await scenario('E2E ember', async (ctx) => {
 
   console.log('Ember is remembered and works in Arabic')
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
-  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Appearance' }).click()
-  check((await win.getByRole('radio', { name: 'Ember' }).getAttribute('aria-checked')) === 'true', 'Ember is the chosen option in Settings')
+  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Appearance and theme' }).click()
+  check((await win.getByRole('radiogroup', { name: 'Colour theme' }).getByRole('radio', { name: 'Ember' }).getAttribute('aria-checked')) === 'true', 'Ember is the chosen option in Settings')
   // 13 Nov 2026: Ember's headings are set in the bundled serif; body text keeps the interface font
   check((await win.locator('.page__title').evaluate((e) => getComputedStyle(e).fontFamily)).includes('Source Serif 4'), 'the page title asks for Source Serif 4 in Ember')
   check(await win.evaluate(() => document.fonts.load("600 18px 'Source Serif 4'").then((f) => f.length > 0)), 'Source Serif 4 is bundled and loads')

@@ -67,7 +67,15 @@ so browsers treat the installer as unknown:
 
 After the download, Windows SmartScreen may also warn when you run it: **More info → Run anyway**.
 
-## Manual test checklist — v0.24.0 (theme editor)
+## Manual test checklist — v0.24.1 (Settings pages, Features)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.24.1** and run the release self-test (now on **Problems, diagnostics and self-tests**). | All steps passed. |
+| 2 | Open Settings and look at the four pages. | Environment + Versions + Features together; Appearance with the theme editor under the switches; problems with diagnostics and self-tests. |
+| 3 | Features: turn **Traceability** off, then **Versions and baselines** off; look at the top bar; turn both on again. | Their buttons (and the coverage-gap counter) disappear and come back. |
+
+## Previous checklist — v0.24.0 (theme editor)
 
 | # | Do this | Expected result |
 | --- | --- | --- |
@@ -76,13 +84,6 @@ After the download, Windows SmartScreen may also warn when you run it: **More in
 | 3 | Make **text muted** very pale (e.g. #eeeeee). | A warning says it is hard to read; **Reset** on that row puts it back. |
 | 4 | **Save my theme**, then Settings → Diagnostics → **Edit my theme…** and look at the file. | Only your changed values are in it. |
 | 5 | Change a font size, go to another Settings page without saving; then **Reset everything to the app theme** and Save. | Leaving shows the saved theme again; after the reset everything looks as before. |
-
-## Previous checklist — v0.23.1 (rename box)
-
-| # | Do this | Expected result |
-| --- | --- | --- |
-| 1 | Let reqochet-dev update to **0.23.1** and run the release self-test. | All steps passed. |
-| 2 | Document button → **Rename** (or F2), then Esc; then **New document…**, then Cancel. | Each opens a small panel under the document name; the bar above the table does not move. |
 
 ## Two-PC trial (prototype journey, with a colleague)
 

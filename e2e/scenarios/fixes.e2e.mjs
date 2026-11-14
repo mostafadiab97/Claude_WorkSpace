@@ -154,13 +154,13 @@ await scenario('E2E fixes', async (ctx) => {
 
   console.log('Release self-test')
   await win.getByRole('button', { name: 'Settings and diagnostics' }).click()
-  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Self-tests' }).click()
+  await win.getByRole('navigation', { name: 'Settings and help' }).getByRole('button', { name: 'Problems, diagnostics and self-tests' }).click()
   await win.getByRole('button', { name: 'Run release self-test' }).click()
   // the owner, 0.15.0 step 1: visiting another page while it runs must not lose the test
   const nav = win.getByRole('navigation', { name: 'Settings and help' })
-  await nav.getByRole('button', { name: 'Features' }).click()
+  await nav.getByRole('button', { name: 'Environment, versions and features' }).click()
   await win.waitForTimeout(500)
-  await nav.getByRole('button', { name: 'Self-tests' }).click()
+  await nav.getByRole('button', { name: 'Problems, diagnostics and self-tests' }).click()
   check((await win.getByRole('button', { name: 'Run release self-test' }).count()) === 0 || (await win.getByRole('button', { name: 'Run release self-test' }).isDisabled()), 'after visiting another page the self-test is still running')
   await win.getByText(/All steps passed|steps failed/).waitFor({ timeout: 180_000 })
   const passed = await win.getByText(/All steps passed/).count()

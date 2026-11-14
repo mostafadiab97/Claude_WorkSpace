@@ -160,14 +160,14 @@ export const fr: Texts = {
     },
     nav: {
       theme: 'Éditeur de thème',
-      appearance: 'Apparence',
+      appearance: 'Apparence et thème',
       appearanceIntro: 'Langue de la fenêtre et couleurs. Votre choix est mémorisé sur ce PC.',
       label: 'Paramètres et aide',
       settings: 'Paramètres',
       guide: 'Guide de l’utilisateur',
       guideHome: 'Introduction et sommaire',
-      env: 'Environnement et versions',
-      report: 'Signaler un problème et diagnostics',
+      env: 'Environnement, versions et fonctionnalités',
+      report: 'Problèmes, diagnostics et autotests',
       features: 'Fonctionnalités',
       tests: 'Autotests',
       privacy: 'Confidentialité et accès',
@@ -195,7 +195,7 @@ export const fr: Texts = {
     features: {
       title: 'Fonctionnalités',
       intro: 'Désactivez une fonctionnalité si elle pose problème\u00A0: le reste de reqochet continue de fonctionner. Ce choix est mémorisé sur ce PC. Une équipe peut aussi désactiver une fonctionnalité pour un dépôt (features: dans schema.yaml).',
-      names: { branches: 'Branches (créer, changer, comparer, faire un Pull depuis, supprimer)', import: 'Import depuis Excel et ReqIF', export: 'Export (Excel, ReqIF, CSV, Markdown)' },
+      names: { branches: 'Branches (créer, changer, comparer, faire un Pull depuis, supprimer)', import: 'Import depuis Excel et ReqIF', export: 'Export (Excel, ReqIF, CSV, Markdown)', versions: 'Versions et références (historique, afficher une ancienne version, références)', traceability: 'Traçabilité (règles de couverture, lacunes, matrice, impact)' },
       preview: 'Aperçu',
       teamOff: 'Désactivée pour ce dépôt par l’équipe (schema.yaml)',
       branchesOff: 'Les branches sont désactivées (Paramètres → Fonctionnalités). Modifications, Pull et Push continuent de fonctionner sur la branche actuelle.'

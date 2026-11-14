@@ -18,7 +18,7 @@ No server, no accounts — access is whatever the Git host (e.g. GitHub) allows.
   matrix with Excel export.
 - **Exchange:** Excel / CSV / ReqIF import (wizard) and export, writing changes back into the original Excel file;
   an AI prompt turns a folder of Word specifications into a project (`docs/guides/word-template-prompt.md`).
-- **Around it:** an in-app release self-test, light/dark themes, **English / Arabic** (right-to-left), automatic
+- **Around it:** an in-app release self-test, Light / Dark / Ember themes, **English, German, French, Spanish and Arabic** (right-to-left), automatic
   updates, problem reports without your user name.
 
 ## Try it (Windows 11)
@@ -66,7 +66,9 @@ builds the installer and publishes it as a GitHub Release; installed copies pick
 - `docs/DEVELOPING.md` — setting up a Windows PC for development
 - `docs/ARCHITECTURE.md` — modules, rules, module map
 - `docs/TESTING.md` — manual test checklist, log file location, bug reporting
-- `docs/THEMING.md` — customising colours, fonts, shapes, logo, light/dark
+- `docs/THEMING.md` — customising colours, fonts, shapes, logo, light/dark/Ember, and the theme editor (Settings)
+- `docs/guides/` — Git hosts, glossaries for the German / French / Spanish / Arabic window, Word-template and UI-review prompts
+- `docs/marketing/` — positioning, launch plan, posts, website lines, video
 - `samples/sample-requirements.xlsx` — fictional smart-thermostat requirements (59 items) for testing
 - `tools/README.md` — every script and the working procedures (Claude Code skills in `.claude/skills/`)
 - Test data: GitHub `<owner>/Claude_SandBox` (10,005 fictional items) — clone it next to this repository

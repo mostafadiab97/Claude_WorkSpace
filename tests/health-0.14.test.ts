@@ -16,7 +16,7 @@ describe('feature switches (P-40a)', () => {
     expect(featureOn('export', {}, { export: true, branches: false })).toBe(true)
   })
   it('knows its features', () => {
-    expect(FEATURE_IDS).toEqual(['branches', 'import', 'export'])
+    expect(FEATURE_IDS).toEqual(['branches', 'import', 'export', 'versions', 'traceability'])
     expect(isFeatureId('branches')).toBe(true)
     expect(isFeatureId('teleport')).toBe(false)
   })

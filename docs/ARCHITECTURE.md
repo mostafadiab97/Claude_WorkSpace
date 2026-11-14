@@ -110,7 +110,7 @@ requirements/
 | Planned | Built | Why |
 | --- | --- | --- |
 | `better-sqlite3` for the index | Node's built-in `node:sqlite` (in Electron 45) | No native module to compile for Windows; same SQL and full-text search. Hidden behind `IndexCache`, so swappable in one place |
-| Metadata folder `.reqtool/` | `.reqman/` | Matches the product name |
+| Metadata folder `.reqtool/` | `.reqochet/` (0.16; was `.reqman/`, still read) | Matches the product name |
 | Requirement text in field `description` | Built-in property `text` (the Markdown body) | The body of the file is the text; keeps the header small |
 | Suspect links in the MVP (FR-17) | Built in M3 (v0.4.0) | Cheap once links existed; the format already had `confirmed` |
 | Per-requirement merge in the MVP (FR-13) | M4 (0.5.0–0.11.x): pull stopped on items changed on both sides. **0.12.0 (M8):** field-level 3-way merge, a decision window only for parts changed differently on both sides (`items/merge.ts`, `workspace/merging.ts`) | The owner's decisions 25 Oct (stop safely first) and 29 Oct 2026 (M8-3, M8-7) |

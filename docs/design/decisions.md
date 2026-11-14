@@ -222,7 +222,7 @@ The main trade-off is accepting a larger app download (Electron, roughly 100+ MB
 
 - ~~Pull that finds items changed on both sides stops~~ — replaced in 0.12.0 by per-requirement decisions (M8-7).
 - ~~Branch is shown only~~ — create/switch since 0.12.0.
-- ReqMan commits **only `requirements/`** (`git add --all -- requirements` + `git commit --only -- requirements`).
+- reqochet commits **only `requirements/`** (`git add --all -- requirements` + `git commit --only -- requirements`).
 - Implementation notes: `src/modules/workspace/gitOps.ts` (rules + messages), `src/modules/git-adapter/systemGit.ts`
   (commands). In-memory conflict check = `git merge-tree --write-tree` (Git ≥ 2.38; the owner has 2.47); if it is
   unavailable the merge runs and is aborted on conflicts (safety net). Sign-in only via Git Credential Manager
@@ -231,7 +231,7 @@ The main trade-off is accepting a larger app download (Electron, roughly 100+ MB
 ### M5 decisions (the owner, 25 Oct 2026) — already built
 
 - Default comparison = "since my last pull" = what the last pull brought in (HEAD before → after the newest
-  `pull…`/`merge <remote>/<branch>…` step in the reflog; pulls outside ReqMan count too).
+  `pull…`/`merge <remote>/<branch>…` step in the reflog; pulls outside reqochet count too).
 - ~~ReqMan pulls right before any comparison~~ — **replaced 27 Oct 2026 (O-06): no automatic pulls; ReqMan offers to
   pull before remote-related actions.** Built in 0.10.0 (last-pull view and Push offer "Pull first").
 - Exporting the comparison list → M6.
@@ -245,7 +245,7 @@ The main trade-off is accepting a larger app download (Electron, roughly 100+ MB
 - Next milestones in this order: **M7 Excel export + import**, then **M8 branches + per-requirement conflict
   resolution**.
 - Export lives in `src/modules/import-export` (pure); `workspace.exportItems/exportCompare` build the content;
-  `main/ipc.ts` shows the save dialog (last folder in `%APPDATA%\ReqMan\export-settings.json`). E2E mocks
+  `main/ipc.ts` shows the save dialog (last folder in `%APPDATA%\reqochet-dev\export-settings.json`). E2E mocks
   `dialog.showSaveDialog` (`saveAs()` helper in the journey).
 
 ### M7 notes (0.11.0) — built

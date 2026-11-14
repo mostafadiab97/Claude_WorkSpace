@@ -174,14 +174,14 @@ const en = {
     },
     nav: {
       theme: 'Theme editor',
-      appearance: 'Appearance',
+      appearance: 'Appearance and theme',
       appearanceIntro: 'Language of the window and colours. Your choice is remembered on this PC.',
       label: 'Settings and help',
       settings: 'Settings',
       guide: 'User guide',
       guideHome: 'Introduction and contents',
-      env: 'Environment and versions',
-      report: 'Report a problem and diagnostics',
+      env: 'Environment, versions and features',
+      report: 'Problems, diagnostics and self-tests',
       features: 'Features',
       tests: 'Self-tests',
       privacy: 'Privacy and access',
@@ -209,7 +209,7 @@ const en = {
     features: {
       title: 'Features',
       intro: 'Turn a feature off if it causes trouble — the rest of reqochet keeps working. This choice is remembered on this PC. A team can also turn a feature off for one repository (features: in schema.yaml).',
-      names: { branches: 'Branches (create, switch, compare, pull from, delete)', import: 'Import from Excel and ReqIF', export: 'Export (Excel, ReqIF, CSV, Markdown)' } as Record<string, string>,
+      names: { branches: 'Branches (create, switch, compare, pull from, delete)', import: 'Import from Excel and ReqIF', export: 'Export (Excel, ReqIF, CSV, Markdown)', versions: 'Versions and baselines (history, show an old version, baselines)', traceability: 'Traceability (coverage rules, gaps, matrix, impact)' } as Record<string, string>,
       preview: 'Preview',
       teamOff: 'Turned off for this repository by the team (schema.yaml)',
       branchesOff: 'Branches are turned off (Settings → Features). Changes, Pull and Push keep working on the current branch.'

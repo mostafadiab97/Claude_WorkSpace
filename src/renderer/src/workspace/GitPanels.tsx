@@ -65,6 +65,8 @@ export function GitBar(props: {
   const [publishing, setPublishing] = useState<string | null>(null)
   const [branches, setBranches] = useState(false)
   const branchesOn = useFeature('branches')
+  const versionsOn = useFeature('versions')
+  const traceOn = useFeature('traceability')
   const closeAfter = (p: Promise<boolean>): void => {
     void p.then((ok) => ok && setBranches(false))
   }
@@ -187,13 +189,15 @@ export function GitBar(props: {
           }} title={otherFiles ? `${T.git.changesTooltip}\n${T.git.settingsTooltip}` : T.git.changesTooltip}>
           {T.git.changes(changedItems, otherFiles)}
         </button>
-        <button type="button" className="btn btn--view" disabled={busy !== null} title={T.baselines.buttonTooltip} onClick={() => {
-            onDismiss()
-            props.onOpenHistory()
-          }}>
-          {T.baselines.button}
-        </button>
-        {props.onToggleTrace && (
+        {versionsOn && (
+          <button type="button" className="btn btn--view" disabled={busy !== null} title={T.baselines.buttonTooltip} onClick={() => {
+              onDismiss()
+              props.onOpenHistory()
+            }}>
+            {T.baselines.button}
+          </button>
+        )}
+        {props.onToggleTrace && traceOn && (
           <button type="button" className={props.traceOpen ? 'btn btn--view btn--active' : 'btn btn--view'} aria-pressed={props.traceOpen === true} title={T.trace.buttonTooltip} onClick={() => {
               onDismiss()
               props.onToggleTrace?.()

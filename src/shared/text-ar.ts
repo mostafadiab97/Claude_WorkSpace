@@ -178,14 +178,14 @@ const raw: Texts = {
     },
     nav: {
       theme: 'محرّر النمط',
-      appearance: 'المظهر',
+      appearance: 'المظهر والنمط',
       appearanceIntro: 'لغة النافذة والألوان. يُحفظ اختيارك على هذا الجهاز.',
       label: 'الإعدادات والمساعدة',
       settings: 'الإعدادات',
       guide: 'دليل المستخدم',
       guideHome: 'مقدمة وفهرس',
-      env: 'البيئة والإصدارات',
-      report: 'الإبلاغ عن مشكلة والتشخيص',
+      env: 'البيئة والإصدارات والميزات',
+      report: 'المشكلات والتشخيص والاختبارات الذاتية',
       features: 'الميزات',
       tests: 'الاختبارات الذاتية',
       privacy: 'الخصوصية والصلاحيات',
@@ -213,7 +213,7 @@ const raw: Texts = {
     features: {
       title: 'الميزات',
       intro: 'أوقِف أي ميزة تسبّب مشكلة — يستمر باقي reqochet في العمل. يُحفظ هذا الاختيار على هذا الجهاز. ويمكن للفريق أيضًا إيقاف ميزة لمستودع واحد (features: في schema.yaml).',
-      names: { branches: 'الفروع (إنشاء، تبديل، مقارنة، سحب من، حذف)', import: 'الاستيراد من Excel وReqIF', export: 'التصدير (Excel وReqIF وCSV وMarkdown)' } as Record<string, string>,
+      names: { branches: 'الفروع (إنشاء، تبديل، مقارنة، سحب من، حذف)', import: 'الاستيراد من Excel وReqIF', export: 'التصدير (Excel وReqIF وCSV وMarkdown)', versions: 'النسخ وخطوط الأساس (السجل، عرض نسخة قديمة، خطوط الأساس)', traceability: 'التتبّع (قواعد التغطية، الثغرات، المصفوفة، الأثر)' } as Record<string, string>,
       preview: 'معاينة',
       teamOff: 'أوقفها الفريق لهذا المستودع (schema.yaml)',
       branchesOff: 'الفروع متوقفة (الإعدادات ← الميزات). تبقى التغييرات والسحب والدفع تعمل على الفرع الحالي.'

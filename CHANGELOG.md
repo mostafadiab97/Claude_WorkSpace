@@ -3,7 +3,23 @@
 Each version was installed and tried by the owner (product owner) on Windows 11; his feedback is recorded under the
 version it was about, and what it led to.
 
+## 0.24.1 — 14 Nov 2026 — fewer Settings pages, Features complete, docs
+The owner's 0.24.0 report.
+- **Settings has four pages** (the owner): **Environment, versions and features** · **Appearance and theme** (the
+  language and colour switches with the theme editor under them) · **Problems, diagnostics and self-tests** ·
+  **Privacy and access**, then the user guide.
+- **Features** (the owner: "new features are not added to it"): **Versions and baselines** and **Traceability** can be
+  turned off too — that hides the Versions button, the Traceability button and the coverage-gap counter.
+- The docs helper checked the repository and the in-app guide: the last "ReqMan" left in a live place (the window title
+  before start-up) and in current rules is gone; the guide describes the five languages, Publish to a Git host…, the
+  Releases button and the new Settings pages; the docs map lists the guides and marketing folders. History entries
+  keep the old name on purpose (projects made with ReqMan still open).
+- Theme editor (0.24.0 test 5): leaving the page without saving drops the unsaved changes — kept as designed (Save keeps
+  them; the page says so while there are unsaved changes).
+
 ## 0.24.0 — 14 Nov 2026 — the theme editor
+**Owner (14 Nov 2026):** self-test 25/25 (70.5 s); tests 2–5 passed (test 5: unsaved changes are dropped on leaving —
+by design).
 The owner's request (13 Nov): "a theme editor in the tool itself … all customizable elements of the theme file".
 - **Settings → Theme editor** — every value of the theme file in four tabs: **Colours** (for Light, Dark or Ember, with a
   colour picker and the value), **Fonts**, **Sizes and shapes**, **Spacing**. Names are the theme file's own keys.

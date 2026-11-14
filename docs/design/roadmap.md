@@ -14,7 +14,7 @@ The prototype is built in seven milestones, each ending with a Windows build you
 | Milestone | Delivers | Done when |
 | --- | --- | --- |
 | M0 Foundations | Project skeleton (Electron, TypeScript, React); module folders each with one interface file; lint rule blocking cross-module internals; composition file; theme file with light and dark mode; automated build producing a Windows installer; Git-installed check | You install the empty app on Windows 11 and switch light/dark |
-| M1 Data layer | Default schema template; item file read/write (Markdown + YAML); ID generator; validation; repository store; SQLite index cache; generators for 1k and 50k-item test repos; automatic updates via GitHub Releases (moved from M6); user theme overrides kept in %APPDATA%\\ReqMan so updates never overwrite them | Unit tests pass; a 50k-item repo indexes and filters within target; an installed build updates itself to the next release |
+| M1 Data layer | Default schema template; item file read/write (Markdown + YAML); ID generator; validation; repository store; SQLite index cache; generators for 1k and 50k-item test repos; automatic updates via GitHub Releases (moved from M6); user theme overrides kept in %APPDATA%\\ReqMan (now `%APPDATA%\\reqochet-dev`) so updates never overwrite them | Unit tests pass; a 50k-item repo indexes and filters within target; an installed build updates itself to the next release |
 | M2 Core UI | Open a repo, initialise `requirements/`; item table with filter, sort and search; item editor; hierarchy tree | Journey steps 1–3 work (without links) |
 | M3 Links | Create and remove typed links; item detail with outgoing and incoming links | Journey step 2 complete, including links |
 | M4 Git | Status of changed items; commit, pull, push; per-item history | Journey steps 4, 5 and 7 work between two PCs |
@@ -31,7 +31,7 @@ The prototype is built in seven milestones, each ending with a Windows build you
 - [x] Optionally, an anonymised sample of a current requirements Excel sheet, for realistic test data and later import work
 - [x] A working name for the tool (can change later)
 
-  Working name: **ReqMan**. Sample data: a fictional smart-thermostat requirements sheet (59 items: needs, system/software/hardware requirements, tests, risks, change requests) is in the repo at `samples/sample-requirements.xlsx`.
+  Original working name: ReqMan (now reqochet). Sample data: a fictional smart-thermostat requirements sheet (59 items: needs, system/software/hardware requirements, tests, risks, change requests) is in the repo at `samples/sample-requirements.xlsx`.
 
 ## Roadmap after the prototype (release plan confirmed 28 Oct 2026)
 
@@ -64,7 +64,7 @@ after his test round and the project review (`docs/reviews/done/2026-10-25-proje
 > **Superseded 31 Oct 2026** by the ranked analysis of ten tools in
 > `docs/reviews/done/2026-10-31-feature-gap-analysis.md` (kept below for the record).
 
-| Feature (from "B. Common features") | In ReqMan today | Proposal |
+| Feature (from "B. Common features") | In reqochet today | Proposal |
 | --- | --- | --- |
 | Word and Excel import/export, round trip | CSV + Markdown export | **M7**: Excel export + import (update existing items by ID, read links — C, 25 Oct 2026); Word/PDF export M10 |
 | Baselines | Any commit can be compared | Later (delayed by the owner 29 Oct 2026): tags as named baselines ("Release 1.0") |
@@ -113,9 +113,9 @@ X-02).
 | --- | --- | --- | --- |
 | CSV (opens in Excel) | **Supported** (v0.7.0) | Planned — M7 | Comma, UTF-8; table and Compare lists |
 | Excel (.xlsx) | Planned — M7 | Planned — M7 | Import wizard with column mapping, update by ID, links, numbers → hierarchy; "New project from a file"; "Update the Excel file" writes back into the original file |
-| Markdown (.md) | **Supported** (v0.7.0) | Not planned | Export for AI tools and reports; import only if a need appears (ReqMan's own Markdown would be easy) |
+| Markdown (.md) | **Supported** (v0.7.0) | Not planned | Export for AI tools and reports; import only if a need appears (reqochet's own Markdown would be easy) |
 | ReqIF (.reqif / .reqifz) | Planned — after M7 | Planned — after M7 | The standard exchange format of DOORS, Jama, Polarion, Codebeamer, Visure; two-way exchange; tested with DOORS and Jama |
-| Word (.docx) | Planned — M10 | Later: ReqMan-generated files (round trip); other Word files only by rules (e.g. headings → items) | No general editing of foreign Word files |
+| Word (.docx) | Planned — M10 | Later: reqochet-generated files (round trip); other Word files only by rules (e.g. headings → items) | No general editing of foreign Word files |
 | PDF | Planned — M10 | Not planned | Printable document |
 
 ### Release plan (C, confirmed by the owner 28 Oct 2026)

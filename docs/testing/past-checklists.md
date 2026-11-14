@@ -1,7 +1,14 @@
-# Past manual checklists (v0.0.3 – v0.23.0)
+# Past manual checklists (v0.0.3 – v0.23.1)
 
 > Moved from `docs/TESTING.md` on 1 Nov 2026 (content unchanged). The current checklist and the one before it stay in
 > `TESTING.md`; when a new version comes, move the oldest one there down into this file (newest first).
+
+## v0.23.1 (rename box)
+
+| # | Do this | Expected result |
+| --- | --- | --- |
+| 1 | Let reqochet-dev update to **0.23.1** and run the release self-test. | All steps passed. |
+| 2 | Document button → **Rename** (or F2), then Esc; then **New document…**, then Cancel. | Each opens a small panel under the document name; the bar above the table does not move. |
 
 ## v0.23.0 (the bar above the table)
 

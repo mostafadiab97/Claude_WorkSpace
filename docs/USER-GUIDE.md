@@ -1,6 +1,6 @@
 # reqochet — User Guide
 
-Matches reqochet-dev 0.22 · November 2026 · *reqochet was called ReqMan until version 0.15. The development tool is named reqochet-dev; the release tool is reqochet — they work the same.*
+Matches reqochet-dev 0.25 · November 2026 · *reqochet was called ReqMan until version 0.15. The development tool is named reqochet-dev; the release tool is reqochet — they work the same.*
 
 reqochet is a Windows desktop application for writing, structuring and tracing requirements. Every requirement is a
 small text file in your project's own Git repository, so requirements get the same history, branches, reviews and
@@ -49,7 +49,7 @@ accounts — who may read or change requirements is decided by your GitHub repos
 ### 1.2 Install
 
 1. Open the reqochet **releases page** — your team lead gives you the link; in an installed reqochet it is under
-   **⚙ → Environment and versions → Releases** (the address is shown there; the button next to it, *Go back to an
+   **⚙ → Environment, versions and features → Releases page on GitHub** (opens your browser; the button next to it, *Go back to an
    earlier version…*, installs an older version from inside reqochet — §13).
 2. Under the newest version → **Assets**, download `reqochet-Setup-<version>.exe` (`reqochet-dev-Setup-<version>.exe` for the development tool) (or the `.zip` if your browser blocks
    `.exe` files — extract it, then run the `.exe`).
@@ -91,9 +91,13 @@ On the start screen:
 2. Write a commit message on the right ("Add door lock requirements") and click **Commit**.
 3. Click **Push**: your colleagues get the change with **Pull**. (Or use **▾ → Commit and push** next to Commit.)
 
+A new project with no remote shows **Publish to a Git host…** instead of Pull and Push: create an empty repository on
+GitHub, GitLab, Azure DevOps or Bitbucket (no README), paste its address and click **Publish**. Which hosts work:
+`docs/guides/git-hosts.md`.
+
 ### 1.7 If something goes wrong
 
-**⚙ (Settings) → Report a problem**: describe what happened and click **Save report…**; send the saved file to the
+**⚙ (Settings) → Problems, diagnostics and self-tests → Report a problem**: describe what happened and click **Save report…**; send the saved file to the
 person who supports reqochet in your team. Nothing is sent by itself.
 
 ---
@@ -114,7 +118,7 @@ person who supports reqochet in your team. Nothing is sent by itself.
 | **Link** | A typed relation from one item to another (*verifies*, *refines*…). Stored on the source item only. |
 | **Suspect link** | A link whose target changed meaning (type, title or text) since the link was last confirmed. Someone should check it still holds. |
 | **Uncommitted change** | Saved on your PC, not yet recorded in Git. Only you see it. |
-| **Commit / Push / Pull** | Record your changes in Git / send them to GitHub / get your colleagues' changes. |
+| **Commit / Push / Pull** | Record your changes in Git / send them to your Git host / get your colleagues' changes. |
 | **Branch** | A separate line of work (e.g. a change request) that can later be brought into `main`. |
 
 Saving and committing are different on purpose: **Save** writes the file; **Commit** records a set of saved changes
@@ -126,7 +130,7 @@ with a message; **Push** shares them.
 
 | Area | What is there |
 | --- | --- |
-| **Top bar** | Repository name and ✕ (close), branch button ⎇, **Pull**, **Push**, **Changes**, **Versions**, **Traceability** (with the number of commits to get or send), ⚙ Settings. Language and colours: **Settings → Appearance** (and on the start screen). |
+| **Top bar** | Repository name and ✕ (close), branch button ⎇, **Pull**, **Push**, **Changes**, **Versions**, **Traceability** (with the number of commits to get or send), ⚙ Settings. Language and colours: **Settings → Appearance and theme** (and on the start screen). The Versions and Traceability buttons can be turned off in **Settings → Features**. |
 | **Bar above the table** (0.23) | The **document button** (name, number of items, arrow — its menu lists the documents and holds New document, Rename, Merge into and Delete), the search box, the **outline** button (Expand all / Collapse all), **Filters** (funnel, with a count), **View** (rows with text or one line, the columns, Edit fields…, Edit types…), **More** (⋯: Import…, Export…) and **+ New item**. Hover or focus any icon to see its name and shortcut. The whole bar is one Tab stop: ← → move along it. |
 | **Table** | One row per item, in document order; the small arrow before a title opens a branch of the tree; numbers in the title show how many children. With **View → Rows: title and text** (the default), the main column reads like a document: a heading shows its title in bold, any other item its title in bold and its whole text below, and each row is as tall as it needs to be. **Rows: one line per item**: one line per item, and the **Text** column shows the start of the text. |
 | **Editor (right)** | Details (title, type, fields, parent, text, links) and **History**; Save, ↑ ↓ (move), + Child…, Delete. The text is shown formatted; click it to edit. Drag the left edge to make the editor wider. |
@@ -238,7 +242,7 @@ sit at the top next to **Close changes**.
 
 ### Push
 
-**Push** sends your commits to GitHub. If colleagues pushed first, reqochet offers to pull first.
+**Push** sends your commits to your Git host (GitHub, GitLab, Azure DevOps, Bitbucket — `docs/guides/git-hosts.md`). If colleagues pushed first, reqochet offers to pull first. A project with no remote yet shows **Publish to a Git host…** instead: create an empty repository on your host (no README), paste its address, click **Publish**.
 
 ### Pull — with decisions per requirement
 
@@ -338,8 +342,7 @@ gets a fresh ID, its copied children follow it, and its parent is dropped when t
 
 ## 13. Settings
 
-Open with **⚙** (top right). The left panel switches between pages: **Appearance** (language: a drop-down with English, Deutsch, Français, Español, العربية; colours: sun = Light, moon = Dark, flame = Ember, screen = as Windows), **Environment and versions**, **Report a problem and
-diagnostics**, **Features**, **Self-tests**, **Privacy and access**, and this **User guide** (one page per section). **← Back** at the top of the
+Open with **⚙** (top right). The left panel switches between pages: **Environment, versions and features** (the Environment, Versions and Features cards), **Appearance and theme** (language: a drop-down with English, Deutsch, Français, Español, العربية; colours: sun = Light, moon = Dark, flame = Ember, screen = as Windows; and the theme editor), **Problems, diagnostics and self-tests** (Report a problem, Diagnostics, Release self-test, Data self-test), **Privacy and access**, and this **User guide** (one page per section). **← Back** at the top of the
 panel returns to your repository.
 
 | Card | What it does |
@@ -349,14 +352,14 @@ panel returns to your repository.
 | **Report a problem** | Saves one text file with your description, the diagnostics and the end of the log. |
 | **Theme editor** (0.24) | Every value of the theme file in four tabs — **Colours** (for Light, Dark or Ember), **Fonts**, **Sizes and shapes**, **Spacing**. Each change shows in the whole window at once; a changed value is marked and has **Reset**; a warning appears when text gets hard to read. **Save my theme** writes only your changes to your theme file (everything else keeps following the app theme and its updates); **Discard changes**, **Reset everything to the app theme**. Leaving without saving shows the saved theme again. |
 | **Diagnostics** | Log file and theme file locations, **Open log folder**, **Edit my theme…**, **Copy diagnostics**. |
-| **Features** | Turn off a feature on this PC (Branches, Import, Export) if it causes trouble; the rest keeps working. If the team turned one off for the repository, it says so. |
+| **Features** | Turn off a feature on this PC (Branches, Import, Export, **Versions and baselines**, **Traceability**) if it causes trouble; the rest keeps working. Turning off *Versions and baselines* hides the Versions button; turning off *Traceability* hides the Traceability button and the coverage-gap counter. If the team turned one off for the repository, it says so. |
 | **Release self-test** | Runs the main actions (create, edit, move, link, commit, push, a colleague's change, a pull with decisions, branches, compare, history, export, import) on a practice repository in a temporary folder, then deletes it — about a minute; your data is not touched. |
 | **Data self-test** | Measures speed on this PC with generated requirements in a temporary folder. |
 | **Privacy and access** | What reqochet reads, keeps on your PC (and where), sends (only Git pull/push and the update check — no tracking), what it may change, and what to keep in mind for confidential projects, with a diagram of who reads or sends what (`docs/diagrams/privacy.html`). |
 
-**Language:** English / العربية in ⚙ → Appearance (and on the start screen) — the whole window turns right-to-left in Arabic; your data stays as
+**Language:** a drop-down in ⚙ → Appearance and theme and on the start screen: English, Deutsch, Français, Español, العربية — the window turns right-to-left in Arabic; your data stays as
 written. **Colours:** Light / Dark / Ember (warm dark with orange) / System; a company can change colours, fonts and logo in a theme file
-(`docs/THEMING.md`).
+(`docs/THEMING.md`) or you can in Settings → Appearance and theme → Theme editor.
 
 ---
 
@@ -377,7 +380,7 @@ written. **Colours:** Light / Dark / Ember (warm dark with orange) / System; a c
      branches: false
    ```
 
-7. **Support:** one person collects reports (Settings → Report a problem) and passes them on.
+7. **Support:** one person collects reports (Settings → Problems, diagnostics and self-tests → Report a problem) and passes them on.
 
 ---
 
@@ -475,15 +478,15 @@ code and test results; AI access.
 
 | Question | Answer |
 | --- | --- |
-| Windows or the browser blocks the installer | It is not code-signed yet. Browser: keep the download (Ctrl+J → Keep). Windows: More info → Run anyway. Or use the `.zip`. If nothing works, IT must allow the releases page (⚙ → Environment and versions shows its address). |
-| "Git is not installed" | Install Git for Windows, restart reqochet. Settings → Environment shows the version found. |
+| Windows or the browser blocks the installer | It is not code-signed yet. Browser: keep the download (Ctrl+J → Keep). Windows: More info → Run anyway. Or use the `.zip`. If nothing works, IT must allow the releases page (⚙ → Environment, versions and features shows its address). |
+| "Git is not installed" | Install Git for Windows, restart reqochet. Settings → Environment, versions and features shows the version found. |
 | Push is refused | Someone pushed first: Pull, then Push again. reqochet offers this itself. |
 | A pull asks about fields | You and a colleague changed the same field of the same requirement: choose per field, then **Finish the pull**. |
 | "N problems" in the status bar | Click it — each problem says what is wrong and opens the item; many have a one-click fix. |
-| A new version misbehaves | Settings → Features (turn the feature off) or Settings → Versions (go back). Then Settings → Report a problem. |
-| Where is the log? | `%APPDATA%\reqochet\logs\reqochet.log` (`reqochet-dev` for the development tool) — or Settings → Diagnostics → Open log folder. |
+| A new version misbehaves | Settings → Environment, versions and features (turn the feature off in Features, or go back in Versions). Then Settings → Problems, diagnostics and self-tests → Report a problem. |
+| Where is the log? | `%APPDATA%\reqochet\logs\reqochet.log` (`reqochet-dev` for the development tool) — or Settings → Problems, diagnostics and self-tests → Diagnostics → Open log folder. |
 | Can I edit the files by hand or with a script? | Yes — they are plain text. Keep the header format; reqochet checks everything when it opens and lists what it cannot read. |
-| Does reqochet send data anywhere? | No. It talks only to your Git remote (GitHub) and checks GitHub Releases for updates. |
+| Does reqochet send data anywhere? | No. It talks only to your Git remote (your Git host) and checks GitHub Releases for updates. |
 
 ---
 

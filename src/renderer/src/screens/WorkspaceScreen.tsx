@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FocusEvent } from 'react'
+import { useFeature } from '../lib/features'
 import { onToolbarKeyDown, rovingToolbar } from '../lib/keys'
 import type { CompareEntry, ImportFile, ImportResult, RepoInfo, RevertPart } from '../../../shared/api'
 import { T } from '../../../shared/text'
@@ -112,7 +113,10 @@ export function WorkspaceScreen({
   const [revealNonce, setRevealNonce] = useState(0)
   const [showChanges, setShowChanges] = useState(false)
   // theme 1b (T-01): the Traceability view takes the table's place like Changes
-  const [showTrace, setShowTrace] = useState(false)
+  const [showTraceState, setShowTrace] = useState(false)
+  // Settings → Features can turn Traceability off (0.25): then its view and the gap counter go
+  const traceOn = useFeature('traceability')
+  const showTrace = showTraceState && traceOn
   // the table came from Traceability → Show the gaps: offer the way back (owner, 10 Nov 2026 — 0.20.0 test 3)
   const [fromTrace, setFromTrace] = useState(false)
   const [typesTab, setTypesTab] = useState<'items' | 'links' | 'rules'>('items')
@@ -738,7 +742,7 @@ export function WorkspaceScreen({
             <span className="statusbar__ok">{T.workspace.noProblems}</span>
           )}
           {/* coverage gaps are warnings, counted on their own (a big project can have thousands — T-08) */}
-          {gapCount > 0 && (
+          {traceOn && gapCount > 0 && (
             <button type="button" className="link-btn statusbar__problems statusbar__problems--warn" aria-expanded={showProblems} title={T.trace.statusGapsTooltip} onClick={() => setShowProblems((s) => !s)}>
               {T.trace.statusGaps(gapCount)}
             </button>

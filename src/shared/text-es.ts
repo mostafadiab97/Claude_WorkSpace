@@ -159,14 +159,14 @@ export const es: Texts = {
     },
     nav: {
       theme: 'Editor de tema',
-      appearance: 'Apariencia',
+      appearance: 'Apariencia y tema',
       appearanceIntro: 'Idioma de la ventana y colores. Su elección se recuerda en este PC.',
       label: 'Configuración y ayuda',
       settings: 'Configuración',
       guide: 'Guía del usuario',
       guideHome: 'Introducción e índice',
-      env: 'Entorno y versiones',
-      report: 'Informar de un problema y diagnóstico',
+      env: 'Entorno, versiones y funciones',
+      report: 'Problemas, diagnóstico y autopruebas',
       features: 'Funciones',
       tests: 'Autopruebas',
       privacy: 'Privacidad y acceso',
@@ -194,7 +194,7 @@ export const es: Texts = {
     features: {
       title: 'Funciones',
       intro: 'Desactive una función si da problemas; el resto de reqochet sigue funcionando. Esta elección se recuerda en este PC. Un equipo también puede desactivar una función para un repositorio (features: en schema.yaml).',
-      names: { branches: 'Ramas (crear, cambiar, comparar, extraer de, eliminar)', import: 'Importar desde Excel y ReqIF', export: 'Exportar (Excel, ReqIF, CSV, Markdown)' } as Record<string, string>,
+      names: { branches: 'Ramas (crear, cambiar, comparar, extraer de, eliminar)', import: 'Importar desde Excel y ReqIF', export: 'Exportar (Excel, ReqIF, CSV, Markdown)', versions: 'Versiones y líneas base (historial, mostrar una versión antigua, líneas base)', traceability: 'Trazabilidad (reglas de cobertura, brechas, matriz, impacto)' } as Record<string, string>,
       preview: 'Vista previa',
       teamOff: 'Desactivada para este repositorio por el equipo (schema.yaml)',
       branchesOff: 'Las ramas están desactivadas (Configuración → Funciones). Cambios, Extraer e Insertar siguen funcionando en la rama actual.'

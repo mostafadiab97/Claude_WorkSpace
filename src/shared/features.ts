@@ -4,7 +4,8 @@
 // them without problems; if one shows a defect it can be turned off and work goes on while it is fixed.
 // Changes to the file format are never behind a switch (both old and new files must always be readable).
 
-export const FEATURE_IDS = ['branches', 'import', 'export'] as const
+// 0.25 (the owner, 14 Nov 2026: "new features are not added to it"): Versions (0.18) and Traceability (0.20) joined
+export const FEATURE_IDS = ['branches', 'import', 'export', 'versions', 'traceability'] as const
 export type FeatureId = (typeof FEATURE_IDS)[number]
 
 /** Features still in preview: shown with a "Preview" mark in Settings. */

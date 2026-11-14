@@ -15,7 +15,7 @@ import privacyDiagram from '../../../../docs/images/privacy.png'
 import privacyDiagramDark from '../../../../docs/images/privacy-dark.png'
 import { Icon, Chevron } from '../components/icons'
 
-type SettingsPage = 'env' | 'appearance' | 'theme' | 'report' | 'features' | 'tests' | 'privacy'
+type SettingsPage = 'env' | 'appearance' | 'report' | 'privacy'
 type View = { kind: 'settings'; page: SettingsPage } | { kind: 'guide'; page: string; anchor?: string }
 
 /**
@@ -65,10 +65,7 @@ export function SettingsScreen(props: {
   const settingsPages: { id: SettingsPage; label: string }[] = [
     { id: 'env', label: nav.env },
     { id: 'appearance', label: nav.appearance },
-    { id: 'theme', label: nav.theme },
     { id: 'report', label: nav.report },
-    { id: 'features', label: nav.features },
-    { id: 'tests', label: nav.tests },
     { id: 'privacy', label: nav.privacy }
   ]
   const guidePage = view.kind === 'guide' ? (pages.find((p) => p.id === view.page) ?? pages[0]) : undefined
@@ -129,6 +126,8 @@ export function SettingsScreen(props: {
             <>
               <EnvironmentCard theme={props.theme} git={props.git} update={props.update} appInfo={props.appInfo} />
               <VersionsCard appInfo={props.appInfo} update={props.update} />
+              {/* the owner, 14 Nov 2026: Features joins Environment and versions */}
+              <FeaturesCard />
             </>
           )}
           {view.kind === 'settings' && view.page === 'appearance' && (
@@ -137,14 +136,17 @@ export function SettingsScreen(props: {
               <div className="actions actions--wrap appearance">{props.appearance}</div>
             </section>
           )}
-          {view.kind === 'settings' && view.page === 'theme' && <ThemeEditor onPreview={props.onThemePreview} onSaved={props.onThemeSaved} startMode={props.shownMode} />}
+          {/* the owner, 14 Nov 2026: the theme editor on the Appearance page */}
+          {view.kind === 'settings' && view.page === 'appearance' && <ThemeEditor onPreview={props.onThemePreview} onSaved={props.onThemeSaved} startMode={props.shownMode} />}
           {view.kind === 'settings' && view.page === 'report' && (
             <>
               <ProblemReportCard />
               <DiagnosticsCard appInfo={props.appInfo} />
+              {/* the owner, 14 Nov 2026: Self-tests join Report a problem and diagnostics */}
+              <ReleaseSelfTestCard />
+              <SelfTestCard />
             </>
           )}
-          {view.kind === 'settings' && view.page === 'features' && <FeaturesCard />}
           {view.kind === 'settings' && view.page === 'privacy' && (
             // what the app sees, keeps, sends and may change (the owner, 8 Nov 2026)
             <section className="card privacy" aria-label={nav.privacy}>
@@ -180,12 +182,6 @@ export function SettingsScreen(props: {
                 </div>
               ))}
             </section>
-          )}
-          {view.kind === 'settings' && view.page === 'tests' && (
-            <>
-              <ReleaseSelfTestCard />
-              <SelfTestCard />
-            </>
           )}
           {guidePage && (
             <article key={guidePage.id} className="card guide" aria-label={nav.guide} dir="ltr" lang="en" onClick={onGuideClick}>

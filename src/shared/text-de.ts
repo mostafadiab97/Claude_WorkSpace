@@ -161,14 +161,14 @@ export const de: Texts = {
     },
     nav: {
       theme: 'Theme-Editor',
-      appearance: 'Darstellung',
+      appearance: 'Darstellung und Theme',
       appearanceIntro: 'Sprache des Fensters und Farben. Ihre Auswahl wird auf diesem PC gespeichert.',
       label: 'Einstellungen und Hilfe',
       settings: 'Einstellungen',
       guide: 'Benutzerhandbuch',
       guideHome: 'Einführung und Inhalt',
-      env: 'Umgebung und Versionen',
-      report: 'Problem melden und Diagnose',
+      env: 'Umgebung, Versionen und Funktionen',
+      report: 'Probleme, Diagnose und Selbsttests',
       features: 'Funktionen',
       tests: 'Selbsttests',
       privacy: 'Datenschutz und Zugriff',
@@ -196,7 +196,7 @@ export const de: Texts = {
     features: {
       title: 'Funktionen',
       intro: 'Schalten Sie eine Funktion aus, wenn sie Probleme macht — der Rest von reqochet funktioniert weiter. Diese Auswahl wird auf diesem PC gespeichert. Ein Team kann eine Funktion auch für ein Repository ausschalten (features: in schema.yaml).',
-      names: { branches: 'Branches (erstellen, wechseln, vergleichen, daraus pullen, löschen)', import: 'Import aus Excel und ReqIF', export: 'Export (Excel, ReqIF, CSV, Markdown)' },
+      names: { branches: 'Branches (erstellen, wechseln, vergleichen, daraus pullen, löschen)', import: 'Import aus Excel und ReqIF', export: 'Export (Excel, ReqIF, CSV, Markdown)', versions: 'Versionen und Baselines (Verlauf, alte Version anzeigen, Baselines)', traceability: 'Rückverfolgbarkeit (Abdeckungsregeln, Lücken, Matrix, Auswirkung)' },
       preview: 'Vorschau',
       teamOff: 'Vom Team für dieses Repository ausgeschaltet (schema.yaml)',
       branchesOff: 'Branches sind ausgeschaltet (Einstellungen → Funktionen). Änderungen, Pull und Push funktionieren weiter auf dem aktuellen Branch.'

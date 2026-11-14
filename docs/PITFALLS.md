@@ -289,3 +289,10 @@ vertical text limits its width, not its height. Rotate the text inside the cell,
   `REQ-B1PDSCG` once in CI. Use search words containing I, L, O or U (never in an ID), e.g. `bu`.
 - **Time limits:** the Windows runner is 2–3× slower than the container. A limit that guards against a quadratic
   slowdown should be far above the normal time (15 s for a 100k-row CSV that takes 2 s here), not just above it.
+
+## Speed tests must not run side by side (0.23.0 release)
+
+`test:perf` / `test:perf:all` ran `tests/perf.test.ts` and `tests/perf-workspace.test.ts` **in parallel**: on the
+Windows runner the 50,000-item index build (2.5 min of full CPU and disk) ran while the workspace test timed the
+10,000-item old-version open — its longest pause grew from 1.7 s to 3.8 s and the release failed three times. Both
+scripts now pass `--no-file-parallelism`. A speed limit is only meaningful when nothing else runs.

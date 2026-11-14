@@ -4,6 +4,7 @@ Each version was installed and tried by the owner (product owner) on Windows 11;
 version it was about, and what it led to.
 
 ## 0.23.1 — 14 Nov 2026 — the rename box in a small panel
+**Owner (14 Nov 2026):** self-test 25/25 (87.4 s); test 2 passed.
 - **Rename / New document / Merge into / Delete** open in a small panel under the document button (like the New item
   panel) instead of growing inside the bar and pushing every other button aside (the owner, 0.23.0 test 2). Esc
   closes it. e2e: the bar keeps its size while renaming.

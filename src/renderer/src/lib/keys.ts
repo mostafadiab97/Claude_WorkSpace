@@ -57,7 +57,13 @@ export function onToolbarKeyDown(e: KeyboardEvent<HTMLElement>): void {
   if (target.closest('[role="menu"], [role="dialog"], form')) return
   const dir = arrowDirection(e.key)
   if (!dir && e.key !== 'Home' && e.key !== 'End') return
-  if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return
+  if (target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return
+  if (target instanceof HTMLInputElement) {
+    // the search box: the arrows move the cursor; at its end (or start) they leave it along the bar (C-3)
+    const end = target.selectionStart === target.value.length && target.selectionEnd === target.value.length
+    const start = target.selectionStart === 0 && target.selectionEnd === 0
+    if (!((dir === 'forward' && end) || (dir === 'back' && start))) return
+  }
   const items = toolbarItems(e.currentTarget)
   const at = items.indexOf(target)
   if (at < 0) return

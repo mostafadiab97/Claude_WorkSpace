@@ -20,6 +20,10 @@ The owner's ideas (13 Nov) with Fable's review (`docs/reviews/agents/fable-toolb
   (the owner, 0.22.0 test 5).
 - **Publish to a Git host…** instead of "Publish to GitHub…" — any host's address works (decision D-7);
   `docs/guides/git-hosts.md` explains where reqochet calls Git and how to add help for a host.
+- Review helpers (code, UI/UX, QA): the top bar wraps into a second row on a narrow window instead of overlapping
+  (branch button, Versions, Traceability); Ctrl+Shift+↓/↑ never act while typing; a menu whose lines are all greyed
+  out still closes with Esc; ← → leave the search box at the end / start of its text; Esc in Filters and View returns
+  to the button; clearer count and icons. QA's 42 keyboard tests now run in CI (jsdom added, MIT, tests only).
 
 ## 0.22.0 — 13 Nov 2026 — visual polish, Ember, five languages
 **Owner (13 Nov 2026):** self-test 25/25 (92.8 s); tests 2–5 passed; test 5: two buttons for one thing looked odd →

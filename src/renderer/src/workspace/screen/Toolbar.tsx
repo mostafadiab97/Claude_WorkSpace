@@ -248,13 +248,17 @@ function NewItemButton(props: { buttonRef?: RefObject<HTMLButtonElement | null>;
 function FilterMenu({ active, children, buttonRef }: { active: number; children: ReactNode; buttonRef?: RefObject<HTMLButtonElement | null> }) {
   const [open, setOpen] = useState(false)
   const box = useRef<HTMLDivElement>(null)
+  const ownRef = useRef<HTMLButtonElement>(null)
+  const btnRef = buttonRef ?? ownRef
   useEffect(() => {
     if (!open) return
     const onDown = (e: MouseEvent): void => {
       if (!box.current?.contains(e.target as Node)) setOpen(false)
     }
     const onKey = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key !== 'Escape') return
+      setOpen(false)
+      btnRef.current?.focus() // back on the button, not lost (code review 0.23.0 C-4)
     }
     document.addEventListener('mousedown', onDown)
     window.addEventListener('keydown', onKey)
@@ -262,11 +266,11 @@ function FilterMenu({ active, children, buttonRef }: { active: number; children:
       document.removeEventListener('mousedown', onDown)
       window.removeEventListener('keydown', onKey)
     }
-  }, [open])
+  }, [open, btnRef])
   return (
     <div className="filters" ref={box}>
       {/* T-4: an icon with its count; the count is spoken too ("Filters, 2") */}
-      <button ref={buttonRef} type="button" className={open ? 'icon-btn is-open filters__btn' : 'icon-btn filters__btn'} aria-expanded={open} aria-haspopup="dialog" aria-label={active > 0 ? `${T.workspace.filters}, ${active}` : T.workspace.filters} onClick={() => setOpen((v) => !v)} title={T.workspace.keyHint(T.workspace.filtersTooltip, KEYS.filters)} data-toolbar-item="">
+      <button ref={btnRef} type="button" className={open ? 'icon-btn is-open filters__btn' : 'icon-btn filters__btn'} aria-expanded={open} aria-haspopup="dialog" aria-label={active > 0 ? `${T.workspace.filters}, ${active}` : T.workspace.filters} onClick={() => setOpen((v) => !v)} title={T.workspace.keyHint(T.workspace.filtersTooltip, KEYS.filters)} data-toolbar-item="">
         <Icon name="filter" />
         {active > 0 && <span className="filters__count">{active}</span>}
       </button>

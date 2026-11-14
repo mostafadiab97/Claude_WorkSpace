@@ -35,7 +35,10 @@ export function MenuButton(props: {
 
   useEffect(() => {
     if (!open) return
-    box.current?.querySelector<HTMLButtonElement>('[role^="menuitem"]:not(:disabled)')?.focus()
+    // the first line that can be chosen; with none (all greyed out) the menu itself, so Esc still works (C-2)
+    const first = box.current?.querySelector<HTMLButtonElement>('[role^="menuitem"]:not(:disabled)')
+    if (first) first.focus()
+    else box.current?.querySelector<HTMLElement>('[role="menu"]')?.focus()
     const onDown = (e: MouseEvent): void => {
       if (!box.current?.contains(e.target as Node)) setOpen(false)
     }
@@ -62,8 +65,8 @@ export function MenuButton(props: {
       e.preventDefault()
       e.stopPropagation()
       close(true)
-    } else if (e.key === 'Tab') setOpen(false)
-    else if (e.key.length === 1 && /\S/.test(e.key)) {
+    } else if (e.key === 'Tab') close(true) // back on the button first, then Tab moves on from there (C-5)
+    else if (e.key.length === 1 && /\S/.test(e.key) && !e.ctrlKey && !e.altKey && !e.metaKey) {
       // type-ahead: the next item starting with the letter
       const k = e.key.toLocaleLowerCase()
       const order = [...items.slice(at + 1), ...items.slice(0, at + 1)]
@@ -106,7 +109,7 @@ export function MenuButton(props: {
         {props.children}
       </button>
       {open && (
-        <div className="menu-btn__panel" role="menu" aria-label={props.menuLabel ?? props.label} onKeyDown={onMenuKey}>
+        <div className="menu-btn__panel" role="menu" tabIndex={-1} aria-label={props.menuLabel ?? props.label} onKeyDown={onMenuKey}>
           {entries.map((m, i) =>
             m.kind === 'sep' ? (
               <div key={i} className="menu-btn__sep" role="separator" />

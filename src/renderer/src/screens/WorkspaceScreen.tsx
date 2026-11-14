@@ -22,7 +22,7 @@ import { ALL_DOCUMENTS, DocumentBar } from '../workspace/screen/DocumentBar'
 import { Toolbar } from '../workspace/screen/Toolbar'
 import { useFilters } from '../workspace/screen/useFilters'
 import { middleEllipsis, showDragTip } from '../lib/statusbar'
-import { workspaceHasKeyboard } from '../lib/shortcuts'
+import { workspaceHasKeyboard, focusUsesArrows } from '../lib/shortcuts'
 import { useChanges } from '../workspace/screen/useChanges'
 import { WORKING } from '../workspace/compareRange'
 import { useGit } from '../workspace/screen/useGit'
@@ -247,10 +247,11 @@ export function WorkspaceScreen({
       } else if (k === 'f' && e.shiftKey) {
         e.preventDefault()
         filtersRef.current?.click()
-      } else if (e.key === 'ArrowDown' && e.shiftKey) {
+      } else if (e.key === 'ArrowDown' && e.shiftKey && !focusUsesArrows()) {
+        // not while typing: Ctrl+Shift+arrows select text there (code review 0.23.0 C-1)
         e.preventDefault()
         expandRef.current()
-      } else if (e.key === 'ArrowUp' && e.shiftKey) {
+      } else if (e.key === 'ArrowUp' && e.shiftKey && !focusUsesArrows()) {
         e.preventDefault()
         collapseRef.current()
       } else if (k === 'c' && e.shiftKey) {

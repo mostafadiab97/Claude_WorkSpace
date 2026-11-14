@@ -52,13 +52,16 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const btnRef = useRef<HTMLButtonElement>(null)
   useEffect(() => {
     if (!open) return
     const onDown = (e: MouseEvent): void => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
     const onKey = (e: globalThis.KeyboardEvent): void => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key !== 'Escape') return
+      setOpen(false)
+      btnRef.current?.focus() // back on the button (code review 0.23.0 C-4)
     }
     document.addEventListener('mousedown', onDown)
     document.addEventListener('keydown', onKey)
@@ -110,11 +113,11 @@ export function ColumnsMenu({ schema, prefs, onChange, onEditFields, onEditTypes
   return (
     <div className="popover" ref={ref}>
       {viewButton ? (
-        <button type="button" className={open ? 'icon-btn is-open' : 'icon-btn'} aria-expanded={open} aria-haspopup="dialog" aria-label={viewButton.label} title={viewButton.title} data-toolbar-item="" onClick={() => setOpen((o) => !o)}>
+        <button ref={btnRef} type="button" className={open ? 'icon-btn is-open' : 'icon-btn'} aria-expanded={open} aria-haspopup="dialog" aria-label={viewButton.label} title={viewButton.title} data-toolbar-item="" onClick={() => setOpen((o) => !o)}>
           <Icon name="columns" />
         </button>
       ) : (
-        <button type="button" className={open ? 'btn btn--active' : 'btn'} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        <button ref={btnRef} type="button" className={open ? 'btn btn--active' : 'btn'} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
           <Icon name="columns" size={14} />
           {T.columnsMenu.button(shown < cols.length ? shown + 2 : null, cols.length + 2)}
           <Icon name="chevronDown" size={12} />
